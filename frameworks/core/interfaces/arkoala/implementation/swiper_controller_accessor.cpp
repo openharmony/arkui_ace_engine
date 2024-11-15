@@ -75,9 +75,9 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto aceCallbackOpt = callback ? Converter::OptConvert<Callback_Void>(*callback) : std::nullopt;
-    if (aceCallbackOpt) {
-        auto onFinish = []() -> void {
-            LOGE("Invoking the Arkoala FinishAnimation callbacks not implemented");
+    if (aceCallbackOpt && aceCallbackOpt->call) {
+        auto onFinish = [arkCallback = *aceCallbackOpt]() -> void {
+            (*arkCallback.call)(arkCallback.resource.resourceId);
         };
         peerImpl->SetFinishCallback(onFinish);
     }
