@@ -171,18 +171,6 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(width);
     ScrollModelNG::SetScrollBarWidth(frameNode, width);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-
-    auto effect = Converter::OptConvert<EdgeEffect>(edgeEffect);
-    auto always = Converter::OptConvert<bool>(*options);
-    ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
-}
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const OnScrollFrameBeginCallback* value)
 {
@@ -242,6 +230,18 @@ void InitialOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     OffsetT<CalcDimension> offset = Converter::Convert<OffsetT<CalcDimension>>(*value);
     ScrollModelNG::SetInitialOffset(frameNode, offset);
+}
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+
+    auto effect = Converter::OptConvert<EdgeEffect>(edgeEffect);
+    auto always = Converter::OptConvert<bool>(*options);
+    ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
 }
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
