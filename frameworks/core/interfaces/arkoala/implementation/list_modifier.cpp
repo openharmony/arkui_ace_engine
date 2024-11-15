@@ -51,12 +51,6 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    bool Convert(const Ark_EdgeEffectOptions& src)
-    {
-        return static_cast<bool>(src.alwaysEnabled);
-    }
-
-    template<>
     V2::ItemDivider Convert(const Ark_ListDividerOptions& src)
     {
         auto dst = V2::ItemDivider{}; // this struct is initialized by default

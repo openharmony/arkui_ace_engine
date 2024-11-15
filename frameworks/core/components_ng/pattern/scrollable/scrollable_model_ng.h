@@ -29,8 +29,11 @@ public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     static void SetScrollBarMode(DisplayMode value);
+    static void SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value);
     static void SetScrollBarColor(const std::string& value);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetScrollBarWidth(const std::string& value);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
 
     static void SetOnScroll(OnScrollEvent&& onScroll);
     static void SetOnWillScroll(OnWillScrollEvent&& onScroll);
@@ -63,6 +66,8 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

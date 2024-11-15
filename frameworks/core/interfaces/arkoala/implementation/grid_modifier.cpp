@@ -22,11 +22,6 @@
 #include "core/interfaces/arkoala/implementation/scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
-template<>
-inline void AssignCast(std::optional<bool>& dst, const Ark_EdgeEffectOptions& src)
-{
-    dst = Converter::OptConvert<bool>(src.alwaysEnabled);
-}
 
 template<>
 inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_GridLayoutOptions& src)
@@ -51,16 +46,6 @@ template<>
 inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Ark_GridLayoutOptions& src)
 {
     dst = Converter::OptConvert<std::set<int32_t>>(src.irregularIndexes);
-}
-
-template<>
-inline NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
-{
-    NestedScrollOptions nestedScrollOptions = {
-        .forward = OptConvert<NestedScrollMode>(src.scrollForward).value_or(NestedScrollMode::SELF_ONLY),
-        .backward = OptConvert<NestedScrollMode>(src.scrollBackward).value_or(NestedScrollMode::SELF_ONLY),
-    };
-    return nestedScrollOptions;
 }
 
 template<>

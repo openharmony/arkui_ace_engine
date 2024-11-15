@@ -82,6 +82,19 @@ std::unique_ptr<JsonValue> GetPatternJsonValue(Ark_NodeHandle node)
     return nullptr;
 }
 
+template<>
+std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (jsonVal) {
+        auto result = jsonVal->GetValue(attrKey);
+        if (result->IsObject() || result->IsArray() || result->IsBool() || result->IsNumber()) {
+            return result->ToString();
+        }
+        return jsonVal->GetString(attrKey);
+    }
+    return std::string();
+}
+
 Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type)
 {
     return {

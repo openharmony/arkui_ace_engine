@@ -475,6 +475,12 @@ TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 }
 
 template<>
+bool Convert(const Ark_EdgeEffectOptions& src)
+{
+    return static_cast<bool>(src.alwaysEnabled);
+}
+
+template<>
 ListItemIndex Convert(const Ark_VisibleListContentInfo& src)
 {
     auto itemIndex = ListItemIndex{.index = Convert<int32_t>(src.index)}; // a struct is initialized by default
@@ -487,6 +493,16 @@ ListItemIndex Convert(const Ark_VisibleListContentInfo& src)
         itemIndex.indexInGroup = indexInGroup.value();
     }
     return itemIndex;
+}
+
+template<>
+NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
+{
+    NestedScrollOptions nestedScrollOptions = {
+        .forward = OptConvert<NestedScrollMode>(src.scrollForward).value_or(NestedScrollMode::SELF_ONLY),
+        .backward = OptConvert<NestedScrollMode>(src.scrollBackward).value_or(NestedScrollMode::SELF_ONLY),
+    };
+    return nestedScrollOptions;
 }
 
 template<>

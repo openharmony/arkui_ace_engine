@@ -28,6 +28,17 @@ std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues 
     { "INT_MAX", static_cast<Ark_Axis>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureEnumBarStateValidValues = {
+    { "ARK_BAR_STATE_OFF", ARK_BAR_STATE_OFF, "BarState.Off" },
+    { "ARK_BAR_STATE_AUTO", ARK_BAR_STATE_AUTO, "BarState.Auto" },
+    { "ARK_BAR_STATE_ON", ARK_BAR_STATE_ON, "BarState.On" },
+};
+
+std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvalidValues = {
+    { "-1", static_cast<Ark_BarState>(-1) },
+    { "INT_MAX", static_cast<Ark_BarState>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_ButtonRole, std::string>> testFixtureEnumButtonRoleValidValues = {
     { "ARK_BUTTON_ROLE_NORMAL", ARK_BUTTON_ROLE_NORMAL, "ButtonRole.NORMAL" },
     { "ARK_BUTTON_ROLE_ERROR", ARK_BUTTON_ROLE_ERROR, "ButtonRole.ERROR" },
@@ -146,6 +157,17 @@ std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues = {
     { "-1", static_cast<Ark_DynamicRangeMode>(-1) },
     { "INT_MAX", static_cast<Ark_DynamicRangeMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_EdgeEffect, std::string>> testFixtureEnumEdgeEffectValidValues = {
+    { "ARK_EDGE_EFFECT_SPRING", ARK_EDGE_EFFECT_SPRING, "EdgeEffect.Spring" },
+    { "ARK_EDGE_EFFECT_FADE", ARK_EDGE_EFFECT_FADE, "EdgeEffect.Fade" },
+    { "ARK_EDGE_EFFECT_NONE", ARK_EDGE_EFFECT_NONE, "EdgeEffect.None" },
+};
+
+std::vector<std::tuple<std::string, Ark_EdgeEffect>> testFixtureEnumEdgeEffectInvalidValues = {
+    { "-1", static_cast<Ark_EdgeEffect>(-1) },
+    { "INT_MAX", static_cast<Ark_EdgeEffect>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues = {

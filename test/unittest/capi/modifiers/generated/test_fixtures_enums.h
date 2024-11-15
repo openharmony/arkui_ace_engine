@@ -25,6 +25,8 @@
 namespace OHOS::Ace::NG::Fixtures {
 extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValues;
 extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureEnumBarStateValidValues;
+extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonRole, std::string>> testFixtureEnumButtonRoleValidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonRole>> testFixtureEnumButtonRoleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode, std::string>> testFixtureEnumButtonStyleModeValidValues;
@@ -48,6 +50,8 @@ extern std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureEnumCopy
 extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>>
     testFixtureEnumDynamicRangeModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_DynamicRangeMode>> testFixtureEnumDynamicRangeModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_EdgeEffect, std::string>> testFixtureEnumEdgeEffectValidValues;
+extern std::vector<std::tuple<std::string, Ark_EdgeEffect>> testFixtureEnumEdgeEffectInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_EllipsisMode>> testFixtureEnumEllipsisModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues;

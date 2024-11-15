@@ -145,6 +145,7 @@ const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
 const auto CHECK_TEXT("test_text");
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
 const auto EMPTY_TEXT("");
+const auto ICON_DEFAULT_TEXT("0");
 const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");
 
 // check resource
@@ -459,7 +460,7 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
     auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
     EXPECT_EQ(value, EMPTY_TEXT);
     EXPECT_EQ(placeholder, EMPTY_TEXT);
-    EXPECT_EQ(icon, EMPTY_TEXT);
+    EXPECT_EQ(icon, ICON_DEFAULT_TEXT);
 }
 
 /**
