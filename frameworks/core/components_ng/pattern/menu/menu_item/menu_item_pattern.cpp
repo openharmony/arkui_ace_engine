@@ -297,7 +297,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        auto frameNode = GetSubMenu(customNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -354,7 +354,7 @@ RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
     return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
-RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 {
     CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
