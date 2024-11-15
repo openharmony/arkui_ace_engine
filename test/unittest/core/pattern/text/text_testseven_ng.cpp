@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "gmock/gmock.h"
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
 #include "text_base.h"
 
@@ -405,6 +406,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     imageSourceInfo.src_ = "iamge";
     imageSourceInfo.bundleName_ = "bundleName";
     imageSourceInfo.moduleName_ = "moduleName";
+    imageSourceInfo.pixmap_ = AceType::MakeRefPtr<MockPixelMap>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     MarginProperty marginProperty;
     imageLayoutProperty->UpdateMargin(marginProperty);
@@ -450,6 +452,56 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
         EXPECT_EQ(spanDe->options.image, "iamge");
         EXPECT_EQ(spanDe->options.bundleName, "bundleName");
         EXPECT_EQ(spanDe->options.moduleName, "moduleName");
+    }
+}
+
+/**
+ * @tc.name: CopyTextWithSpanString010
+ * @tc.desc: test sr CopyTextWithSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<FrameNode> frameNode =
+        ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+
+    auto imageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+    ImageSourceInfo imageSourceInfo;
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
+    span0->content = " ";
+    span0->interval.first = 0;
+    span0->interval.second = 1;
+    span0->imageNodeId = 1;
+    auto span1 = span0->GetSameStyleSpanItem();
+    span1->content = " ";
+    span1->interval.first = 0;
+    span1->interval.second = 1;
+
+    std::vector<uint8_t> buff;
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteInt32(buff, 1);
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(span1->spanItemType));
+    span1->EncodeTlv(buff);
+    TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+    TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(buff, " ");
+    TLVUtil::WriteUint8(buff, TLV_END);
+
+    auto spanStringDe = SpanString::DecodeTlv(buff);
+    std::list<RefPtr<NG::SpanItem>> spansDe = spanStringDe->GetSpanItems();
+    EXPECT_EQ(spanStringDe->GetString(), " ");
+    EXPECT_EQ(spanStringDe->spans_.size(), 1);
+    auto it = spansDe.begin();
+    EXPECT_EQ((*it)->content, " ");
+    if ((*it)->spanItemType == SpanItemType::NORMAL) {
+        auto spanDe = AceType::DynamicCast<SpanItem>(*it);
+        EXPECT_EQ(spanDe->interval.first, 0);
+        EXPECT_EQ(spanDe->interval.second, 1);
+        EXPECT_EQ(spanDe->content, " ");
     }
 }
 } // namespace OHOS::Ace::NG
