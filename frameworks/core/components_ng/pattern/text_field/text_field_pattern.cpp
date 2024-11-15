@@ -6782,11 +6782,11 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
 
     if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f), CalcLength(0.0f),
-            CalcLength(0.0f) });
+        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingRight()),
+            CalcLength(theme->getInlinePaddingLeft()), CalcLength(0.0f), CalcLength(0.0f) });
     } else {
-        layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
-            CalcLength(0.0f) });
+        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingLeft()),
+            CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f), CalcLength(0.0f)});
     }
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
