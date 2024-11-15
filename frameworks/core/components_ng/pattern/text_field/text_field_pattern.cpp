@@ -1407,14 +1407,14 @@ void TextFieldPattern::HandleOnUndoAction()
     auto value = operationRecords_.back();
     operationRecords_.pop_back();
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
-    if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
-        redoOperationRecords_.erase(redoOperationRecords_.begin());
-    }
-    redoOperationRecords_.push_back(value);
     if (operationRecords_.empty()) {
         FireEventHubOnChange("");
         return;
     }
+    if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
+        redoOperationRecords_.erase(redoOperationRecords_.begin());
+    }
+    redoOperationRecords_.push_back(value);
     auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
@@ -4986,6 +4986,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     }
     CloseSelectOverlay(true);
     StartTwinkling();
+    UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -5452,7 +5453,6 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
-        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -5520,7 +5520,6 @@ void TextFieldPattern::DeleteForward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
-        UpdateEditingValueToRecord();
         return;
     }
     auto contentLength = static_cast<int32_t>(contentController_->GetWideText().length());
