@@ -43,5 +43,5 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSpanAlt(int64_t pixelMapId);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageComplete completeInfo));
 CJ_EXPORT void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo));
 }
-
+ 
 #endif // OHOS_ACE_FRAMEWORK_CJ_IMAGE_SPAN_FFI_H
