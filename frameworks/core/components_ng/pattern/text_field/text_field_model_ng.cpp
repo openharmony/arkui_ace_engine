@@ -862,9 +862,14 @@ void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const std::opti
     }
 }
 
-void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
+void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
+    const std::optional<TextHeightAdaptivePolicy>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HeightAdaptivePolicy, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HeightAdaptivePolicy, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HeightAdaptivePolicy, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetCanacelIconSrc(

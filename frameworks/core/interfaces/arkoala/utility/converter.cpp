@@ -432,18 +432,6 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
-TextOverflow Convert(const Ark_TextOverflow& src)
-{
-    return static_cast<TextOverflow>(src);
-}
-
-template<>
-TextHeightAdaptivePolicy Convert(const Ark_TextHeightAdaptivePolicy& src)
-{
-    return static_cast<TextHeightAdaptivePolicy>(src);
-}
-
-template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);

@@ -390,8 +390,6 @@ namespace Converter {
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
-    template<> TextOverflow Convert(const Ark_TextOverflow& src);
-    template<> TextHeightAdaptivePolicy Convert(const Ark_TextHeightAdaptivePolicy& src);
     template<> Dimension Convert(const Ark_String& src);
     template<> CalcDimension Convert(const Ark_Length& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
@@ -488,10 +486,12 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src);
     template<> void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src);
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
+    template<> void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src);
     template<> void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
+    template<> void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src);
     template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
     template<> void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src);
     template<> void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src);

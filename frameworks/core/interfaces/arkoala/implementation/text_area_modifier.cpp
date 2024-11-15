@@ -368,7 +368,7 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<TextHeightAdaptivePolicy>(value);
+    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(value);
     TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void MaxLinesImpl(Ark_NativePointer node,

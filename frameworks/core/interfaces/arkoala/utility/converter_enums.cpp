@@ -461,6 +461,19 @@ void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
 }
 
 template<>
+void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
+{
+    switch (src) {
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST:
+            dst = TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST; break;
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST: dst = TextHeightAdaptivePolicy::MAX_LINES_FIRST; break;
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST:
+            dst = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST; break;
+        default: LOGE("Unexpected enum value in Ark_TextHeightAdaptivePolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src)
 {
     switch (src) {
@@ -505,6 +518,18 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
         case ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_TEXT_AREA_TYPE_URL: dst = TextInputType::URL; break;
         default: LOGE("Unexpected enum value in Ark_TextAreaType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
+{
+    switch (src) {
+        case ARK_TEXT_OVERFLOW_NONE: dst = TextOverflow::NONE; break;
+        case ARK_TEXT_OVERFLOW_ELLIPSIS: dst = TextOverflow::ELLIPSIS; break;
+        case ARK_TEXT_OVERFLOW_CLIP: dst = TextOverflow::CLIP; break;
+        case ARK_TEXT_OVERFLOW_MARQUEE: dst = TextOverflow::MARQUEE; break;
+        default: LOGE("Unexpected enum value in Ark_TextOverflow: %{public}d", src);
     }
 }
 
