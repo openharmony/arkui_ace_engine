@@ -621,4 +621,8 @@ const char ARC_LIST_ETS_TAG[] = "ArcList";
 // ArcListItem
 const char ARC_LIST_ITEM_COMPONENT_TAG[] = "ArcListItemComponent";
 const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
+
+// LinearIndicator
+const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
+const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
 } // namespace OHOS::Ace::V2
