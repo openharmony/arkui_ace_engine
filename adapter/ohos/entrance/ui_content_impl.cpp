@@ -375,6 +375,9 @@ public:
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         if (pipeline) {
             ContainerScope scope(instanceId_);
+            auto manager = pipeline->GetSafeAreaManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetRawKeyboardHeight(keyboardRect.Height());
             auto uiExtMgr = pipeline->GetUIExtensionManager();
             if (uiExtMgr) {
                 SetUIExtensionImeShow(keyboardRect, pipeline);
