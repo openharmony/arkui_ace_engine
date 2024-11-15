@@ -321,7 +321,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     }
 
     const int32_t oldStart = info_->startIndex_;
-    info_->Sync(mainSize_, overScroll_);
+    info_->Sync(mainSize_, CanOverScroll());
 
     if (!forward) {
         // measure appearing items when scrolling upwards
@@ -334,7 +334,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
                 // refill from [i] if height doesn't match record
                 info_->ClearCacheAfterIndex(i - 1);
                 Fill(i);
-                info_->Sync(mainSize_, overScroll_);
+                info_->Sync(mainSize_, CanOverScroll());
                 break;
             }
         }
