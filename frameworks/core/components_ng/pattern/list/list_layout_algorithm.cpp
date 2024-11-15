@@ -1983,6 +1983,13 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         backwardCache = backward ? backwardCache : -1;
     }
     res = group->UpdateCachedIndex(outOfView, reCache, forwardCache, backwardCache);
+    if (group->GetTotalItemCount() == 0 && outOfView) {
+        if (groupNode->CheckNeedForceMeasureAndLayout()) {
+            res = {0, 0, 1, 1};
+        } else {
+            res = {1, 1, 1, 1};
+        }
+    }
     ACE_SCOPED_TRACE("GetLayoutGroupCachedCount forward:%d, %d, backward:%d, %d",
         res.forwardCachedCount, res.forwardCacheMax, res.backwardCachedCount, res.backwardCacheMax);
     return res;
