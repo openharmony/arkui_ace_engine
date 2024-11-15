@@ -441,10 +441,11 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    if (canExpandCurrentWindow_) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
         wrapperRect_ = param_.menuWindowRect;
         wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
         dumpInfo_.wrapperRect = wrapperRect_;
+        return;
     }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
     auto pipelineContext = GetCurrentPipelineContext();
@@ -468,7 +469,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (canExpandCurrentWindow_ && isContainerModal) {
+        if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_);
         }
         isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
