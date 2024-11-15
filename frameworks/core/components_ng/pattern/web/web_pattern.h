@@ -1168,6 +1168,8 @@ private:
     bool imageOverlayIsSelected_ = false;
     int32_t densityCallbackId_ = 0;
     bool isLayoutModeChanged_ = false;
+    float touchPointX = 0;
+    float touchPointY = 0;
     bool isDragEnd_ = false;
 
 protected:
