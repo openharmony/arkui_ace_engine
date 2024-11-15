@@ -540,6 +540,19 @@ public:
     }
 
     void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
+    void OnFlushReloadFinish()
+    {
+        auto tasks = std::move(afterReloadAnimationTasks_);
+        for (const auto& task : tasks) {
+            if (task) {
+                task();
+            }
+        }
+    }
+    void AddAfterReloadAnimationTask(std::function<void()>&& task)
+    {
+        afterReloadAnimationTasks_.emplace_back(std::move(task));
+    }
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -1270,6 +1283,7 @@ private:
     static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
+    std::list<std::function<void()>> afterReloadAnimationTasks_;
     
     friend class ScopedLayout;
 };

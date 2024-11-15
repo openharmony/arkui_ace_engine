@@ -3918,26 +3918,33 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
     RecycleManager::Notify(configurationChange);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange,
-        weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-        if (configurationChange.IsNeedUpdate()) {
-            auto rootNode = pipeline->GetRootElement();
-            rootNode->UpdateConfigurationUpdate(configurationChange);
-            auto overlay = weakOverlayManager.Upgrade();
-            if (overlay) {
-                overlay->ReloadBuilderNodeConfig();
+    AnimationUtils::Animate(
+        option,
+        [weak = WeakClaim(this), configurationChange,
+            weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            if (configurationChange.IsNeedUpdate()) {
+                auto rootNode = pipeline->GetRootElement();
+                rootNode->UpdateConfigurationUpdate(configurationChange);
+                auto overlay = weakOverlayManager.Upgrade();
+                if (overlay) {
+                    overlay->ReloadBuilderNodeConfig();
+                }
             }
-        }
-        if (fullUpdate) {
-            CHECK_NULL_VOID(pipeline->stageManager_);
-            pipeline->SetIsReloading(true);
-            pipeline->stageManager_->ReloadStage();
-            pipeline->SetIsReloading(false);
-            pipeline->FlushUITasks();
-        }
-    });
+            if (fullUpdate) {
+                CHECK_NULL_VOID(pipeline->stageManager_);
+                pipeline->SetIsReloading(true);
+                pipeline->stageManager_->ReloadStage();
+                pipeline->SetIsReloading(false);
+                pipeline->FlushUITasks();
+            }
+        },
+        [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->OnFlushReloadFinish();
+        });
     auto stage = stageManager_->GetStageNode();
     CHECK_NULL_VOID(stage);
     auto renderContext = stage->GetRenderContext();
