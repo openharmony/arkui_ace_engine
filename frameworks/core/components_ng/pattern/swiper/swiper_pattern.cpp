@@ -2622,27 +2622,37 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
+bool SwiperPattern::InsideIndicatorRegion(const TouchLocationInfo& locationInfo)
+{
+    if (!HasIndicatorNode()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    CHECK_NULL_RETURN(indicatorNode, false);
+    if (indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        return false;
+    }
+
+    auto geometryNode = indicatorNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto hotRegion = geometryNode->GetFrameRect();
+    auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
+        static_cast<float>(locationInfo.GetLocalLocation().GetY()));
+
+    return hotRegion.IsInRegion(touchPoint);
+}
+
 void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown");
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
-    if (HasIndicatorNode()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
-        CHECK_NULL_VOID(indicatorNode);
-        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
-            auto geometryNode = indicatorNode->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto hotRegion = geometryNode->GetFrameRect();
-            auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
-                static_cast<float>(locationInfo.GetLocalLocation().GetY()));
-            if (hotRegion.IsInRegion(touchPoint)) {
-                return;
-            }
-        }
+    if (InsideIndicatorRegion(locationInfo)) {
+        return;
     }
 
     if (childScrolling_) {
