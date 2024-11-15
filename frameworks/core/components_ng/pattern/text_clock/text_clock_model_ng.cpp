@@ -170,9 +170,13 @@ void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::optional<std::
     }
 }
 
-void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
+void TextClockModelNG::SetHoursWest(FrameNode* frameNode, const std::optional<float>& hoursWest)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest, frameNode);
+    if (hoursWest.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, frameNode);
+    }
 }
 
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)

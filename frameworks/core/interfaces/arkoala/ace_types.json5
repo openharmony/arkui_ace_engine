@@ -2326,7 +2326,6 @@
             "includes":["core/components/text/text_theme.h"],
             "themes": ["TextTheme"],
             "disable": [
-                "setTextClockOptionsTestDefaultValues",
                 "setTextClockOptionsTestValidValues",
                 "setDateTimeOptionsTestValidValues",
                 "setFontSizeTestFontSizeInvalidValues",
@@ -2352,7 +2351,7 @@
                 },
                 {
                     "name": "timeZoneOffset",
-                    "default": "0"
+                    "default": "0.000000"
                 },
                 {
                     "name": "format", 
