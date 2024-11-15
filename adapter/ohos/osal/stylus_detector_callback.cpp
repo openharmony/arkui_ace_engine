@@ -217,14 +217,12 @@ int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
             CHECK_NULL_VOID(textBase);
             auto wtextLength = textBase->GetContentWideTextLength();
             TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture wtextLength:%{public}d", wtextLength);
-            if (StylusDetectorMgr::GetInstance()->sInd_ == static_cast<int32_t>(sInd.position_) &&
-                StylusDetectorMgr::GetInstance()->eInd_ == static_cast<int32_t>(eInd.position_) &&
-                StylusDetectorMgr::GetInstance()->showMenu_ == choiceTextOption.showMenu) {
+            if (!StylusDetectorMgr::GetInstance()->HasSelectChanged(static_cast<int32_t>(sInd.position_),
+                static_cast<int32_t>(eInd.position_), choiceTextOption.showMenu)) {
                 return;
             }
-            StylusDetectorMgr::GetInstance()->sInd_ = static_cast<int32_t>(sInd.position_);
-            StylusDetectorMgr::GetInstance()->eInd_ = static_cast<int32_t>(eInd.position_);
-            StylusDetectorMgr::GetInstance()->showMenu_ = choiceTextOption.showMenu;
+            StylusDetectorMgr::GetInstance()->SetSelectState(static_cast<int32_t>(sInd.position_),
+                static_cast<int32_t>(eInd.position_), choiceTextOption.showMenu);
             auto ret = CalculateIntersectedRegion(sInd, eInd, wtextLength);
             if (std::get<0>(ret) == 0) {
                 auto textInputClient = frameNode->GetPattern<TextInputClient>();
@@ -340,7 +338,7 @@ NG::PositionWithAffinity StylusDetectorCallBack::GetGlyphPositionByGlobalOffset(
     localOffset.SetX(std::clamp(localOffset.GetX(), static_cast<double>(textContentRect.Left()),
         static_cast<double>(textContentRect.Right())));
     // calculate the start and end indexes of the intersecting region.
-    auto layoutInfo = StylusDetectorMgr::GetInstance()->layoutInfo_.Upgrade();
+    auto layoutInfo = StylusDetectorMgr::GetInstance()->GetLayoutInfo().Upgrade();
     CHECK_NULL_RETURN(layoutInfo, finalResult);
     return layoutInfo->GetGlyphPositionAtCoordinate(localOffset.GetX(), localOffset.GetY());
 }
