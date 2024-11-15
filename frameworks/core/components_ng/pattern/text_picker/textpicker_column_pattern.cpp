@@ -1052,8 +1052,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
-        InnerHandleScroll(isDownScroll_, true);
-        HandleScrollStopEventCallback(true);
+        if (InnerHandleScroll(isDownScroll_, true)) {
+            HandleScrollStopEventCallback(true);
+        }
         return;
     }
     animationBreak_ = false;

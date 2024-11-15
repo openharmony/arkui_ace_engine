@@ -886,12 +886,14 @@ bool TextPickerPattern::ParseDirectionKey(
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     switch (code) {
         case KeyCode::KEY_DPAD_UP:
-            textPickerColumnPattern->InnerHandleScroll(0, false);
-            textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            if (textPickerColumnPattern->InnerHandleScroll(0, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
         case KeyCode::KEY_DPAD_DOWN:
-            textPickerColumnPattern->InnerHandleScroll(1, false);
-            textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            if (textPickerColumnPattern->InnerHandleScroll(1, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
 
         case KeyCode::KEY_ENTER:
