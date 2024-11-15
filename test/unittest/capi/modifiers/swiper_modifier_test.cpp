@@ -1292,7 +1292,7 @@ HWTEST_F(SwiperModifierTest, setCurveTestCustom, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnChangeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1512,7 +1512,7 @@ HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationStartImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationStartTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1564,7 +1564,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationStartTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationEndImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1613,7 +1613,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnGestureSwipeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnGestureSwipeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1739,39 +1739,58 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnContentDidScrollImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setOnContentDidScrollTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnContentDidScrollTest, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    struct CheckEvent {
+    struct OnDidScrollParams {
         int32_t nodeId;
         int32_t selectedIndex;
         int32_t index;
         float position;
         float mainAxisLength;
     };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    struct OnDidScrollParams expected {
+        reinterpret_cast<UINode *>(node_)->GetId(),
+        1122,
+        3344,
+        55.66f,
+        77.88f,
+    };
+
+    static std::optional<OnDidScrollParams> checkEvent = std::nullopt;
     EventsTracker::swiperEventReceiver.onContentDidScroll = []
     (Ark_Int32 nodeId, Ark_Number selectedIndex, Ark_Number index, Ark_Number position, Ark_Number mainAxisLength)
     {
         checkEvent = {
             .nodeId = nodeId,
-            .selectedIndex = Converter::Convert<Ark_Int32>(selectedIndex),
-            .index = Converter::Convert<Ark_Int32>(index),
-            .position = Converter::Convert<Ark_Float32>(position),
-            .mainAxisLength = Converter::Convert<Ark_Float32>(mainAxisLength),
+            .selectedIndex = Converter::Convert<int32_t>(selectedIndex),
+            .index = Converter::Convert<int32_t>(index),
+            .position = Converter::Convert<float>(position),
+            .mainAxisLength = Converter::Convert<float>(mainAxisLength),
         };
     };
 
-    ASSERT_NE(modifier_->setOnContentDidScroll, nullptr);
+    EXPECT_NE(modifier_->setOnContentDidScroll, nullptr);
+    EXPECT_FALSE(checkEvent);
 
     modifier_->setOnContentDidScroll(node_, {});
 
-    // for the full confirm it'required to simullate invoking of the private SwiperPattern::FireContentDidScrollEvent
-    // and check the checkEvent's values
+    // check the callback func that was setup
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto onContentDidScroll = pattern->GetOnContentDidScroll();
+    ASSERT_NE(onContentDidScroll, nullptr);
+
+    // simulate the callback invoking from ace_engine
+    (*onContentDidScroll.get())(expected.selectedIndex, expected.index, expected.position, expected.mainAxisLength);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, expected.nodeId);
+    EXPECT_EQ(checkEvent->selectedIndex, expected.selectedIndex);
+    EXPECT_EQ(checkEvent->index, expected.index);
+    EXPECT_EQ(checkEvent->position, expected.position);
+    EXPECT_EQ(checkEvent->mainAxisLength, expected.mainAxisLength);
 }
 /**
  * @tc.name: setIndicatorInteractiveTest

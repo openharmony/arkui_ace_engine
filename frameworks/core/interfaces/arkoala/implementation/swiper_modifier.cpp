@@ -393,7 +393,6 @@ void OnChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](int32_t index) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onChange(frameNode->GetId(), arkIndex);
@@ -420,7 +419,6 @@ void OnAnimationStartImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
@@ -440,7 +438,6 @@ void OnAnimationEndImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_SwiperAnimationEvent arkExtraInfo = {
@@ -459,7 +456,6 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
         Ark_SwiperAnimationEvent arkExtraInfo = {
@@ -513,7 +509,6 @@ void OnContentDidScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         auto arkSelectedIndex = Converter::ArkValue<Ark_Number>(selectedIndex);
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
