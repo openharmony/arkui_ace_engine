@@ -2535,7 +2535,8 @@ bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& 
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents) {
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
+        preStyle.sheetMode == sheetStyle.sheetMode) {
         return false;
     }
     return true;
@@ -2564,7 +2565,7 @@ float SheetPresentationPattern::GetBottomSafeArea()
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
         auto topAreaInWindow = GetTopAreaInWindow();
-        TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "rosen window sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
         return topAreaInWindow;
     } else {
         return safeAreaInsets.top_.Length();
