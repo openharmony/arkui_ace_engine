@@ -242,6 +242,7 @@ private:
     void HandleTextOnAccessibilityFocusCallback();
     void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
+    void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();
     SizeF GetStepPointAccessibilityVirtualNodeSize();
@@ -310,6 +311,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+    bool isTouchUpFlag_ = false;
 
     // tip Parameters
     bool bubbleFlag_ = false;
@@ -323,7 +325,7 @@ private:
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-    int64_t lastAccessibilityValueTime_ = 0;
+    uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
