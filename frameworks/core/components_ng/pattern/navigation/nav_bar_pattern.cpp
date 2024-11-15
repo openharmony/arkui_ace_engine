@@ -195,7 +195,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
         // read navigation "more" button
-        std::string message  = Localization::GetInstance()->GetEntryLetters("navigation.more");
+        std::string message  = theme->GetMoreMessage();
         NavigationTitleUtil::SetAccessibility(menuItemNode, message);
 
         // set navigation titleBar "more" button inspectorId

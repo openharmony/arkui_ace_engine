@@ -163,7 +163,7 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        message = theme->GetMoreMessage();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
             CHECK_NULL_VOID(symbolNode);
