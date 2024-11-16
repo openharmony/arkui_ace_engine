@@ -488,7 +488,8 @@ private:
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
                 "later avoid %{public}s %{public}f %{public}f",
                 lastRotation, keyboardRect.ToString().c_str(), positionY, height);
-            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height, lastRotation);
+            NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
+            textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
         }
         return false;
