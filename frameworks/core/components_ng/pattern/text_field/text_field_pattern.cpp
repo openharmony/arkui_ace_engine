@@ -144,11 +144,14 @@ constexpr Dimension COUNTER_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr Dimension STANDARD_COUNTER_TEXT_MARGIN = 22.0_vp;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr uint32_t ERROR_TEXT_MAXLINE = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
 #endif
@@ -328,10 +331,11 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     auto frameOffset = geometryNode->GetFrameOffset();
     auto frameSize = geometryNode->GetFrameSize();
     bool isShowCount = IsShowCount() && !IsTextArea();
-    bool isShowError = layoutProperty->GetShowErrorTextValue(false) && errorParagraph_;
+    auto errorTextNode = errorTextNode_.Upgrade();
+    bool isShowError = layoutProperty->GetShowErrorTextValue(false) && errorTextNode;
     if (isShowCount && isShowError) {
-        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
-        auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+        auto textWidth = std::max(CalcDecoratorWidth(errorTextNode), frameSize.Width());
+        auto errorHeight = CalcDecoratorHeight(errorTextNode) + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
         auto countHeight = std::max(CalcCounterBoundHeight(),
             COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx());
@@ -346,8 +350,8 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
         textFieldForegroundModifier_->SetBoundsRect(boundsRect);
     } else if (isShowError) {
-        auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
-        auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+        auto textWidth = std::max(CalcDecoratorWidth(errorTextNode), frameSize.Width());
+        auto errorHeight = CalcDecoratorHeight(errorTextNode) + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
         RectF boundsRect(0.0f, 0.0f, textWidth, errorHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
@@ -2909,8 +2913,10 @@ void TextFieldPattern::OnModifyDone()
         HasFocus() && IsNormalInlineState()) {
         lastTextRectY_ = textRect_.GetY();
     }
-    if (!IsDisabled()) {
+    if (!IsDisabled() && IsShowError()) {
         SetShowError();
+    } else {
+        CleanErrorNode();
     }
     // The textRect position can't be changed by only redraw.
     if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation() &&
@@ -4319,6 +4325,19 @@ void TextFieldPattern::CleanCounterNode()
     CHECK_NULL_VOID(counterNode);
     frameNode->RemoveChild(counterNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
+void TextFieldPattern::CleanErrorNode()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto errorTextNode = errorTextNode_.Upgrade();
+    CHECK_NULL_VOID(errorTextNode);
+    auto errorNode = DynamicCast<UINode>(errorTextNode);
+    CHECK_NULL_VOID(errorNode);
+    frameNode->RemoveChild(errorNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    errorTextNode_.Reset();
 }
 
 void TextFieldPattern::UpdateEditingValueToRecord()
@@ -6201,31 +6220,78 @@ void TextFieldPattern::SetShowError()
     UpdateErrorTextMargin();
 }
 
+float TextFieldPattern::CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode)
+{
+    float decoratorWidth = 0.0f;
+    CHECK_NULL_RETURN(decoratorNode, 0.0f);
+    auto textPattern = decoratorNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, 0.0f);
+    auto paragraphs = textPattern->GetParagraphs();
+    for (auto &&info : paragraphs) {
+        if (info.paragraph) {
+            float width = info.paragraph->GetLongestLine();
+            decoratorWidth = std::max(decoratorWidth, width);
+        }
+    }
+    return decoratorWidth;
+}
+
+float TextFieldPattern::CalcDecoratorHeight(const RefPtr<FrameNode>& decoratorNode)
+{
+    CHECK_NULL_RETURN(decoratorNode, 0.0f);
+    auto geometryNode = decoratorNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    return geometryNode->GetFrameRect().Height();
+}
+
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
 {
-    auto isRTL = GetHost()->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    TextStyle errorTextStyle = theme->GetErrorTextStyle();
-    std::string errorText = content;
-    errorTextStyle.SetMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
-    ParagraphStyle paraStyle {
-        .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
-        .align = TextAlign::START,
-        .maxLines = 1,
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .textOverflow = TextOverflow::ELLIPSIS,
-        .fontSize = errorTextStyle.GetFontSize().ConvertToPx()
-    };
-    if (isRTL) {
-        paraStyle.direction = TextDirection::RTL;
+    auto errorTextNode = errorTextNode_.Upgrade();
+    if (!errorTextNode) {
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        errorTextNode_ = textNode;
+        errorTextNode = errorTextNode_.Upgrade();
+        textNode->MountToParent(host);
     }
-    errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(errorParagraph_);
-    errorParagraph_->PushStyle(errorTextStyle);
-    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    errorParagraph_->AddText(StringUtils::Str8ToStr16(errorText));
-    errorParagraph_->Build();
+    if (errorTextNode) {
+        TextStyle errorTextStyle = theme->GetErrorTextStyle();
+        std::string errorText = content;
+        StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
+        auto textColor = errorTextStyle.GetTextColor();
+        auto textNodeLayoutProperty = DynamicCast<TextLayoutProperty>(errorTextNode->GetLayoutProperty());
+        CHECK_NULL_VOID(textNodeLayoutProperty);
+        textNodeLayoutProperty->UpdateContent(errorText);
+        textNodeLayoutProperty->UpdateTextColor(textColor);
+        textNodeLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
+        textNodeLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
+        textNodeLayoutProperty->UpdateMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
+        textNodeLayoutProperty->UpdateTextAlign(TextAlign::START);
+        textNodeLayoutProperty->UpdateMaxLines(ERROR_TEXT_MAXLINE);
+        textNodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textNodeLayoutProperty->UpdateIsAnimationNeeded(false);
+        auto layoutProperty = host->GetLayoutProperty();
+        auto isRTL = false;
+        if (layoutProperty && (isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL)) {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+        }
+
+        auto accessibilityProperty = errorTextNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetAccessibilityLevel("yes");
+        auto parentID = host->GetInspectorIdValue("");
+        errorTextNode->UpdateInspectorId(INSPECTOR_PREFIX + ERRORNODE_PREFIX + parentID);
+        errorTextNode->SetIsCalculateInnerClip(true);
+        errorTextNode->MarkModifyDone();
+        errorTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        auto context = errorTextNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateForegroundColor(errorTextStyle.GetTextColor());
+    }
 }
 
 void TextFieldPattern::UpdateErrorTextMargin()
@@ -6242,20 +6308,25 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto errorText = layoutProperty->GetErrorTextValue("");
     if (IsShowError()) {
         CreateErrorParagraph(errorText);
-        if (errorParagraph_) {
-            errorParagraph_->Layout(std::numeric_limits<double>::infinity());
-            auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() + ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() +
-                                   errorParagraph_->GetHeight();
+        auto errorTextNode = errorTextNode_.Upgrade();
+        if (errorTextNode) {
+            errorTextNode->Measure(LayoutConstraintF());
+            auto geometryNode = errorTextNode->GetGeometryNode();
+            auto errorHeight = geometryNode ? geometryNode->GetFrameRect().Height() : 0.0f;
+            auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+                ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + errorHeight;
+
             if (GetMarginBottom() < errorTextMargin) {
                 errorMargin.bottom = CalcLength(errorTextMargin);
             }
-        }
-        if (paintProperty->HasMarginByUser()) {
-            auto userMargin = paintProperty->GetMarginByUserValue();
-            userMargin.bottom = errorMargin.bottom;
-            layoutProperty->UpdateMargin(userMargin);
-        } else {
-            layoutProperty->UpdateMargin(errorMargin);
+            if (paintProperty->HasMarginByUser()) {
+                auto userMargin = paintProperty->GetMarginByUserValue();
+                userMargin.bottom = GetMarginBottom() < errorTextMargin ?
+                    errorMargin.bottom : userMargin.bottom;
+                layoutProperty->UpdateMargin(userMargin);
+            } else {
+                layoutProperty->UpdateMargin(errorMargin);
+            }
         }
     }
 }
