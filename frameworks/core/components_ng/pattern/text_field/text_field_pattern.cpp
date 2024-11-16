@@ -458,9 +458,6 @@ TextFieldPattern::~TextFieldPattern()
         CloseCustomKeyboard();
     }
     RemoveTextFieldInfo();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
 }
 
 void TextFieldPattern::CheckAndUpdateRecordBeforeOperation()
@@ -612,47 +609,45 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
 {
-    if (IsInPasswordMode() && IsShowPasswordIcon()) {
-        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-        CHECK_NULL_VOID(passwordArea);
-        auto node = passwordArea->GetFrameNode();
-        CHECK_NULL_VOID(node);
-        auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(textAccessibilityProperty);
-        textAccessibilityProperty->SetAccessibilityLevel("yes");
-        textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
-    }
+    CHECK_NULL_VOID(IsShowPasswordIcon());
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    auto node = passwordArea->GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
 }
 
 void TextFieldPattern::SetAccessibilityClearAction()
 {
-    if (IsShowCancelButtonMode()) {
-        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (cleanNodeResponseArea) {
-            auto stackNode = cleanNodeResponseArea->GetFrameNode();
-            CHECK_NULL_VOID(stackNode);
-            auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
-            CHECK_NULL_VOID(textAccessibilityProperty);
-            textAccessibilityProperty->SetAccessibilityLevel("yes");
-            auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
-            auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                              (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
-            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
-        }
-    }
+    CHECK_NULL_VOID(IsShowCancelButtonMode());
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_VOID(cleanNodeResponseArea);
+    auto stackNode = cleanNodeResponseArea->GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+    auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
 }
 
 void TextFieldPattern::SetAccessibilityUnitAction()
 {
-    if (unitNode_ && responseArea_) {
-        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
-        CHECK_NULL_VOID(unitNode);
-        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(unitAccessibilityProperty);
-        unitAccessibilityProperty->SetAccessibilityLevel("yes");
+    if (!unitNode_ || !responseArea_) {
+        return;
     }
+    auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+    CHECK_NULL_VOID(unitNode);
+    auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(unitAccessibilityProperty);
+    unitAccessibilityProperty->SetAccessibilityLevel("yes");
 }
 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
