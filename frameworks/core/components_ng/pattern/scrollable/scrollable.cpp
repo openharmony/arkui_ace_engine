@@ -1217,7 +1217,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         }
         auto context = scroll->context_.Upgrade();
         CHECK_NULL_VOID(context);
-        uint64_t currentVsync = scroll->context_.Upgrade();
+        uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
