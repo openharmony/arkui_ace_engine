@@ -326,13 +326,9 @@ export class SubNavigation extends ViewPU {
             if (DeviceHelper.isPhone()) {
                 return this.secondaryStack.size() > 0 && DeviceHelper.isColumn() ? NavigationMode.Auto : NavigationMode.Stack;
             }
-            else {
-                return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
-            }
+            return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
         }
-        else {
-            return this.needRenderIsFullScreen.isFullScreen ? NavigationMode.Stack : NavigationMode.Auto;
-        }
+        return this.needRenderIsFullScreen.isFullScreen ? NavigationMode.Stack : NavigationMode.Auto;
     }
     aboutToAppear() {
         hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
@@ -1286,12 +1282,18 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         return true;
     }
     checkAndNotifyHomeChange() {
+        if (this.totalStack.length === 0) {
+            return;
+        }
         let c2 = this.totalStack[this.totalStack.length - 1];
         if (c2 === undefined) {
             return;
         }
         if (c2.policy === SplitPolicy.HOME_PAGE && c2.navInfo !== undefined) {
             this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(c2.navInfo.name);
+        }
+        if (this.totalStack.length <= 1) {
+            return;
         }
         let d2 = this.totalStack[this.totalStack.length - 2];
         if (d2 === undefined) {

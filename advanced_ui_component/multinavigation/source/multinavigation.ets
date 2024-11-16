@@ -257,12 +257,10 @@ export struct SubNavigation {
     if (this.needRenderIsFullScreen.isFullScreen == undefined) {
       if (DeviceHelper.isPhone()) {
         return this.secondaryStack.size() > 0 && DeviceHelper.isColumn() ? NavigationMode.Auto : NavigationMode.Stack;
-      } else {
-        return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
       }
-    } else {
-      return this.needRenderIsFullScreen.isFullScreen ? NavigationMode.Stack : NavigationMode.Auto;
+      return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
     }
+    return this.needRenderIsFullScreen.isFullScreen ? NavigationMode.Stack : NavigationMode.Auto;
   }
 
   aboutToAppear(): void {
@@ -1176,12 +1174,18 @@ export class MultiNavPathStack extends NavPathStack {
   }
 
   private checkAndNotifyHomeChange(): void {
+    if (this.totalStack.length === 0) {
+      return;
+    }
     let topPolicyInfo = this.totalStack[this.totalStack.length - 1];
     if (topPolicyInfo === undefined) {
       return;
     }
     if (topPolicyInfo.policy === SplitPolicy.HOME_PAGE && topPolicyInfo.navInfo !== undefined) {
       this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(topPolicyInfo.navInfo.name);
+    }
+    if (this.totalStack.length <= 1) {
+      return;
     }
     let secondPolicyInfo = this.totalStack[this.totalStack.length - 2];
     if (secondPolicyInfo === undefined) {
