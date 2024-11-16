@@ -262,13 +262,13 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest004, TestSize.Level1)
     preNode->contentNode_ = contentNode;
     auto preFrameNode = AceType::DynamicCast<FrameNode>(preNode);
     navigationManager->SetNavNodeInTransition(nullptr, preFrameNode);
-    navigationManager->SetPreNodeHasAnimation(false);
+    navigationManager->SetPreNodeNeverSet(false);
     /**
      * @tc.steps: step3. Update previous navigation render group property
      */
     navigationManager->UpdatePreNavNodeRenderGroupProperty();
-    bool preNodeHasAnimation = navigationManager->preNodeHasAnimation_;
-    ASSERT_EQ(preNodeHasAnimation, true);
+    bool preNodeNeverSet = navigationManager->preNodeNeverSet_;
+    ASSERT_EQ(preNodeNeverSet, false);
 }
 
 /**
@@ -364,6 +364,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
      */
     auto preNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
     auto curNode = AceType::DynamicCast<FrameNode>(navigationNode->GetTopDestination());
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
     navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
 
     auto managerCurNode = navigationManager->curNavNode_;

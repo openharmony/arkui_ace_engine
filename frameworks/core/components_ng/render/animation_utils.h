@@ -83,6 +83,8 @@ public:
     static void AddInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
         const std::function<void()>& callback);
+
+    static void SetNavGroupNodeTransAnimationCallback();
 };
 } // namespace OHOS::Ace
 

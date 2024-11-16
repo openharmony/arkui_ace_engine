@@ -515,7 +515,8 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
         navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
-        navigationManager->SetPreNodeHasAnimation(false);
+        navigationManager->SetPreNodeAnimationCached(false);
+        navigationManager->SetPreNodeNeverSet(true);
     }
     navigationManager->SetNavNodeInTransition(nullptr, nullptr);
     navigationManager->SetIsNavigationOnAnimation(false);
@@ -602,9 +603,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            if (curNavDesNode) {
-                navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
-            }
+            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -846,9 +845,7 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        if (curNode) {
-            navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
-        }
+        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
