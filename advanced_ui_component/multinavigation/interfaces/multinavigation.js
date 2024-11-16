@@ -208,8 +208,7 @@ export class SubNavigation extends ViewPU {
         this.__needRenderLeftClickCount = new SynchedPropertyNesedObjectPU(t9.needRenderLeftClickCount, this, "needRenderLeftClickCount");
         this.__navWidthRangeModifier = new SynchedPropertyNesedObjectPU(t9.navWidthRangeModifier, this, "navWidthRangeModifier");
         this.__needRenderDisplayMode = new SynchedPropertyNesedObjectPU(t9.needRenderDisplayMode, this, "needRenderDisplayMode");
-        this.onNavigationModeChange = (y9) => {
-        };
+        this.onNavigationModeChange = (y9) => { };
         this.setInitiallyProvidedValue(t9);
         this.finalizeConstruction();
     }
@@ -312,8 +311,6 @@ export class SubNavigation extends ViewPU {
         this.navDestination.bind(this)(i9, j9);
     }
     getMode() {
-        hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation getMode isFullScreen=' +
-            this.needRenderIsFullScreen.isFullScreen + ', this.detailStack.size()=' + this.secondaryStack.size());
         this.displayMode = this.needRenderDisplayMode.displayMode;
         if (DeviceHelper.isPhone() && DeviceHelper.isStraightProduct()) {
             return NavigationMode.Stack;
@@ -338,7 +335,7 @@ export class SubNavigation extends ViewPU {
         }
     }
     aboutToAppear() {
-        hilog.info(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
+        hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
     }
     initialRender() {
         this.observeComponentCreation2((a9, b9) => {
@@ -418,7 +415,7 @@ export class MultiNavigation extends ViewPU {
         this.mode = undefined;
         this.onNavigationModeChangeCallback = (x8) => {
         };
-        this.onHomeShowInTop = (w8) => { };
+        this.onHomeShowOnTop = (w8) => { };
         this.__isPortrait = new ObservedPropertySimplePU(false, this, "isPortrait");
         this.setInitiallyProvidedValue(r8);
         this.finalizeConstruction();
@@ -439,8 +436,8 @@ export class MultiNavigation extends ViewPU {
         if (p8.onNavigationModeChangeCallback !== undefined) {
             this.onNavigationModeChangeCallback = p8.onNavigationModeChangeCallback;
         }
-        if (p8.onHomeShowInTop !== undefined) {
-            this.onHomeShowInTop = p8.onHomeShowInTop;
+        if (p8.onHomeShowOnTop !== undefined) {
+            this.onHomeShowOnTop = p8.onHomeShowOnTop;
         }
         if (p8.isPortrait !== undefined) {
             this.isPortrait = p8.isPortrait;
@@ -559,8 +556,8 @@ export class MultiNavigation extends ViewPU {
         this.multiStack.needRenderDisplayMode.displayMode = display.getFoldStatus();
         DeviceListenerManager.getInstance().initListener();
         this.multiStack.registerHomeChangeListener({
-            onHomeShowInTop: (x7) => {
-                this.onHomeShowInTop?.(x7);
+            onHomeShowOnTop: (x7) => {
+                this.onHomeShowOnTop?.(x7);
             },
         });
     }
@@ -604,7 +601,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         this.mPolicyMap = new Map();
         this.navWidthRangeModifier = new NavWidthRangeAttrModifier();
         this.homeWidthPercents = [50, 50];
-        this.keepBottomPage = false;
+        this.keepBottomPageFlag = false;
         this.homeChangeListener = undefined;
         this.placeHolderPolicyInfo = undefined;
         this.isPortrait = false;
@@ -846,7 +843,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         }
         hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop totalSize=' + h5 +
             ', subStackLength' + i5);
-        if (this.keepBottomPage && (h5 === 1 ||
+        if (this.keepBottomPageFlag && (h5 === 1 ||
             (this.placeHolderPolicyInfo !== undefined && h5 === 2 &&
                 this.totalStack[1].policy === SplitPolicy.PlACE_HOLDER_PAGE))) {
             hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop fail for keep bottom');
@@ -1075,13 +1072,13 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         this.checkAndNotifyHomeChange();
     }
     clear(i3) {
-        hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack clear animated = ' + i3 + ', keepBottomPage=' +
-            this.keepBottomPage);
+        hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack clear animated = ' + i3 + ', keepBottomPageFlag=' +
+            this.keepBottomPageFlag);
         if (this.subStackList.length === 0 || this.totalStack.length === 0) {
             hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack clear return size is 0');
             return;
         }
-        if (this.keepBottomPage) {
+        if (this.keepBottomPageFlag) {
             let k3 = this.subStackList.length;
             for (let l3 = 1; l3 < k3; l3++) {
                 this.subStackList[l3].clear(i3);
@@ -1156,7 +1153,6 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         throw new Error('getParent is not support in multi navigation');
     }
     size() {
-        hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack size = ' + this.totalStack.length);
         return this.totalStack.length;
     }
     disableAnimation(w2) {
@@ -1205,8 +1201,8 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         this.homeWidthPercents = [p2, q2];
         this.refreshHomeWidth();
     }
-    setKeepBottomPage(o2) {
-        this.keepBottomPage = o2;
+    keepBottomPage(o2) {
+        this.keepBottomPageFlag = o2;
     }
     registerHomeChangeListener(n2) {
         if (this.homeChangeListener === undefined) {
@@ -1216,7 +1212,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
     unregisterHomeChangeListener() {
         this.homeChangeListener = undefined;
     }
-    setPlaceHolderPage(m2) {
+    setPlaceholderPage(m2) {
         this.placeHolderPolicyInfo = new MultiNavPolicyInfo(SplitPolicy.PlACE_HOLDER_PAGE, m2);
     }
     handleRefreshPlaceHolderIfNeeded() {
@@ -1295,7 +1291,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
             return;
         }
         if (c2.policy === SplitPolicy.HOME_PAGE && c2.navInfo !== undefined) {
-            this.homeChangeListener && this.homeChangeListener.onHomeShowInTop(c2.navInfo.name);
+            this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(c2.navInfo.name);
         }
         let d2 = this.totalStack[this.totalStack.length - 2];
         if (d2 === undefined) {
@@ -1303,7 +1299,7 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
         }
         if (c2.policy === SplitPolicy.PlACE_HOLDER_PAGE &&
             d2.policy === SplitPolicy.HOME_PAGE && d2.navInfo !== undefined) {
-            this.homeChangeListener && this.homeChangeListener.onHomeShowInTop(d2.navInfo.name);
+            this.homeChangeListener && this.homeChangeListener.onHomeShowOnTop(d2.navInfo.name);
         }
     }
     refreshHomeWidth() {

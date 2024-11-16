@@ -243,6 +243,7 @@ export struct SubNavigation {
   }
 
   getMode(): NavigationMode {
+    this.displayMode = this.needRenderDisplayMode.displayMode;
     if (DeviceHelper.isPhone() && DeviceHelper.isStraightProduct()) {
       return NavigationMode.Stack;
     }
