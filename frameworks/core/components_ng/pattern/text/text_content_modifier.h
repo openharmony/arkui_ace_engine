@@ -51,6 +51,7 @@ public:
     void SetTextDecoration(const TextDecoration& value, bool isReset = false);
     void SetTextDecorationColor(const Color& value, bool isReset = false);
     void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetLineHeight(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 
@@ -110,6 +111,7 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
+    void SetDefaultLineHeight(const TextStyle& textStyle);
     float GetTextRacePercent();
     TextDirection GetTextRaceDirection() const;
     TextDirection GetTextRaceDirectionByContent() const;
@@ -123,6 +125,7 @@ private:
     void ModifyTextShadowsInTextStyle(TextStyle& textStyle);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void ModifyBaselineOffsetInTextStyle(TextStyle& textStyle);
+    void ModifyLineHeightInTextStyle(TextStyle& textStyle);
 
     void UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag);
     void UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag);
@@ -132,6 +135,7 @@ private:
     void UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag);
 
     void ChangeParagraphColor(const RefPtr<Paragraph>& paragraph);
     void DrawObscuration(DrawingContext& drawingContext);
@@ -188,6 +192,10 @@ private:
     std::optional<Dimension> baselineOffset_;
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
     float lastBaselineOffsetFloat_ = 0.0f;
+
+    std::optional<Dimension> lineHeight_;
+    RefPtr<AnimatablePropertyFloat> lineHeightFloat_;
+    float lastLineHeight_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
 
