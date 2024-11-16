@@ -1150,10 +1150,11 @@ void SubwindowOhos::HideSubWindowNG()
             Platform::DialogContainer::DestroyContainer(Container::CurrentId());
         }
     } else {
-        HideWindow();
         auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        context->FlushPipelineImmediately();
+        if (context) {
+            context->FlushPipelineImmediately();
+        }
+        HideWindow();
     }
 }
 
