@@ -1217,7 +1217,7 @@ HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
 
     movingphotoPattern->RefreshMovingPhoto();
 
-    EXPECT_TRUE(movingphotoPattern->isRefreshMovingPhoto_);
+    EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
 }
 
 } //namespace OHOS::Ace::NG
