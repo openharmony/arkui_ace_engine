@@ -519,7 +519,8 @@ private:
     void CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
     RectF CalculatePaintRect(int32_t currentFocusIndex,
-        float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth);
+        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    void AdjustFocusBoxOffset(float& centerX, float& centerY);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
