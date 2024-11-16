@@ -322,6 +322,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetOriginOffset(const OffsetF& offset)
     {
         originOffset_ = offset;
@@ -372,6 +377,26 @@ public:
     OffsetF GetPreviewOriginOffset() const
     {
         return previewOriginOffset_;
+    }
+
+    void SetPreviewRect(RectF rect)
+    {
+        previewRect_ = rect;
+    }
+
+    RectF GetPreviewRect() const
+    {
+        return previewRect_;
+    }
+
+    void SetPreviewIdealSize(SizeF size)
+    {
+        previewIdealSize_ = size;
+    }
+
+    SizeF GetPreviewIdealSize() const
+    {
+        return previewIdealSize_;
     }
 
     void SetHasLaid(bool hasLaid)
@@ -580,6 +605,8 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+    RectF previewRect_;
+    SizeF previewIdealSize_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;

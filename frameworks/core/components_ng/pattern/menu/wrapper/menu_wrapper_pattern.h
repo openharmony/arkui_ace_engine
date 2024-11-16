@@ -210,6 +210,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetIsShowHoverImage(bool isShow)
     {
         isShowHoverImage_ = isShow;
@@ -473,6 +478,16 @@ public:
         return isShowFromUser_;
     }
 
+    void SetChildLayoutConstraint(LayoutConstraintF constraint)
+    {
+        childLayoutConstraint_ = constraint;
+    }
+
+    LayoutConstraintF GetChildLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -517,6 +532,7 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
     Placement menuPlacement_ = Placement::NONE;
