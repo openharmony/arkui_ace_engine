@@ -310,12 +310,15 @@ public:
         return rightButtonId_.has_value();
     }
 
-    int32_t GetIndicatorId()
+    int32_t CreateIndicatorId()
     {
-        if (!indicatorId_.has_value()) {
-            indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
+        indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
         return indicatorId_.value();
+    }
+
+    int32_t GetIndicatorId() const
+    {
+        return indicatorId_.has_value() ? indicatorId_.value() : -1;
     }
 
     int32_t GetLeftButtonId()
