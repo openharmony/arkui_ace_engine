@@ -10887,20 +10887,28 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
     // delete or insert space
     auto wtext = GetWideText();
     if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        auto ret = SetCaretOffset(index);
+        if (!ret) {
+            return false;
+        }
         if (wtext[index] == L' ') {
-            DeleteByRange(nullptr, index, index + 1);
+            DeleteForward(1);
         } else if (index > 0 && wtext[index - 1] == L' ') {
-            DeleteByRange(nullptr, index - 1, index);
+            DeleteBackward(1);
         } else {
-            auto ret = SetCaretOffset(index);
-            if (!ret) {
-                return false;
-            }
-            InsertValue(" ");
+            InsertValue(" ", true);
         }
         return true;
     }
     return false;
+}
+
+void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
+{
+    RangeOptions options;
+    options.start = start;
+    options.end = end;
+    DeleteSpans(options);
 }
 
 TextStyle RichEditorPattern::GetDefaultTextStyle()

@@ -152,6 +152,7 @@ adapter/ohos/osal/socperf_client_impl.h @arkuiframework
 adapter/ohos/osal/stylus_detector_default.cpp @arkuievent
 adapter/ohos/osal/stylus_detector_loader.cpp @arkuievent
 adapter/ohos/osal/stylus_detector_mgr.cpp @arkuievent
+adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
@@ -1808,7 +1809,10 @@ frameworks/core/common/router_recover_record.h @arkui_superman
 frameworks/core/common/settings.h @arkuiframework
 frameworks/core/common/sharedata/ @arkuiframework
 frameworks/core/common/storage/ @arkuistatemgmt
-frameworks/core/common/stylus/ @arkuievent
+frameworks/core/common/stylus/stylus_detector_default.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_loader.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_mgr.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_callback.h @huawei_g_five
 frameworks/core/common/task_executor_impl.cpp @arkuiframework
 frameworks/core/common/task_executor_impl.h @arkuiframework
 frameworks/core/common/task_runner_adapter_factory.cpp @arkuiframework

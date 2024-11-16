@@ -8784,17 +8784,43 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     // delete or insert space.
     auto wtext = GetWideText();
     if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        auto ret = SetCaretOffset(index);
+        if (!ret) {
+            return false;
+        }
         if (wtext[index] == L' ') {
-            Delete(index, index + 1);
+            DeleteForward(1);
         } else if (index > 0 && wtext[index - 1] == L' ') {
-            Delete(index - 1, index);
+            DeleteBackward(1);
         } else {
-            SetCaretPosition(index);
-            InsertValue(" ");
+            InsertValue(" ", true);
         }
         return true;
     }
     return false;
+}
+
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+{
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+    GetEmojiSubStringRange(start, end);
+    auto value = contentController_->GetSelectedValue(start, end);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    CheckAndUpdateRecordBeforeOperation();
+    Delete(start, end);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    showCountBorderStyle_ = false;
+    HandleCountStyle();
 }
 
 bool TextFieldPattern::IsShowAIWrite()

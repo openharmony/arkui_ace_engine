@@ -217,6 +217,7 @@ public:
     {
         return false;
     }
+    virtual void DeleteRange(int32_t start, int32_t end) {}
 protected:
     int32_t instanceId_ = -1;
 };
