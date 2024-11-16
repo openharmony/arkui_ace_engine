@@ -2004,13 +2004,13 @@ float ListLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
 }
 
 int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     curIndex = itemPosition_.rbegin()->first + 1;
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     while (cachedCount < cacheCount && curIndex < totalItemCount_) {
-        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, true);
+        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, !show);
         if (!wrapper) {
             predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1 });
             return curIndex - 1;
@@ -2050,13 +2050,13 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
 }
 
 int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList)
+    int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     curIndex = itemPosition_.begin()->first - 1;
     auto currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     while (cachedCount < cacheCount && curIndex >= 0) {
-        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, true);
+        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, !show);
         if (!wrapper) {
             predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount });
             return curIndex + 1;
@@ -2142,10 +2142,11 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
     auto [startIndex, endIndex, cachedForward, cachedBackward] =
         LayoutCachedItemInEdgeGroup(layoutWrapper, cacheCount, predictBuildList);
     if (cachedForward < cacheCount && endIndex < totalItemCount_ - 1) {
-        endIndex = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward, endIndex, predictBuildList);
+        endIndex = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward, endIndex, predictBuildList, show);
     }
     if (cachedBackward < cacheCount && startIndex > 0) {
-        startIndex = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex, predictBuildList);
+        startIndex =
+            LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex, predictBuildList, show);
     }
     int32_t cacheStart = itemPosition_.begin()->first - startIndex;
     int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;

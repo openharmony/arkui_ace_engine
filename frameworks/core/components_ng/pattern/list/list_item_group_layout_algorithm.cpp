@@ -1343,7 +1343,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrap
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex + i < totalItemCount_; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }
@@ -1383,7 +1384,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex - i >= 0; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }
