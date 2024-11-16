@@ -111,8 +111,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
-        auto safeAreaTop = manager->IsAtomicService() ? 0 : safeArea.top_.Length();
-        auto pageCurrentOffset = renderContext->GetPaintRectWithoutTransform().GetY() - safeAreaTop;
+        auto pageCurrentOffset = GetPageCurrentOffset();
         auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
         if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
@@ -590,7 +589,7 @@ float LayoutWrapper::GetPageCurrentOffset()
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_RETURN(stageManager, 0.0f);
-    auto pageNode = stageManager->GetLastPageWithTransition();
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_RETURN(pageNode, 0.0f);
     auto pageRenderContext = pageNode->GetRenderContext();
     CHECK_NULL_RETURN(pageRenderContext, 0.0f);
