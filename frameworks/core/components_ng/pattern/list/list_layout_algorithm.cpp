@@ -1097,7 +1097,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (LessNotEqual(currentEndPos, endMainPos_ - contentEndOffset_) && !itemPosition_.empty()) {
+    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty()) {
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         ReMeasureListItemGroup(layoutWrapper, true);
