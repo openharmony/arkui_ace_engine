@@ -1362,7 +1362,7 @@ HWTEST_F(VideoTestExtraAddNg, Stop001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     ASSERT_NE(videoPattern, nullptr);
-    videoPattern->playerStatus_ = PlayerStatus::PREPARED;
+
     auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
@@ -1478,7 +1478,6 @@ HWTEST_F(VideoTestExtraAddNg, RecoverState001, TestSize.Level1)
     /* Indirectly call the RecoverState function by calling the ExitFullScreen function */
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
 
-    videoPattern->isPrepared_ = true;
     videoPattern->mediaPlayer_ = nullptr;
 
     videoPattern->FullScreen();
