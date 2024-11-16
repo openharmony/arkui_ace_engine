@@ -6024,9 +6024,12 @@ RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
     CHECK_NULL_RETURN(pageNode, nullptr);
     auto jsView = pageNode->GetChildAtIndex(0);
     CHECK_NULL_RETURN(jsView, nullptr);
-    auto rootNode = jsView->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    return rootNode;
+    if (jsView->GetTag() == V2::JS_VIEW_ETS_TAG) {
+        auto rootNode = jsView->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        return rootNode;
+    }
+    return jsView;
 }
 
 std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()

@@ -792,6 +792,14 @@ public:
         isCNode_ = createByCapi;
     }
 
+    virtual RefPtr<UINode> GetCurrentPageRootNode()
+    {
+        return nullptr;
+    }
+
+    virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
+    virtual void RemoveCustomProperty(const std::string& key) {}
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {

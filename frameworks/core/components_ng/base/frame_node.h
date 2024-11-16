@@ -1118,8 +1118,8 @@ public:
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
-    void AddCustomProperty(const std::string& key, const std::string& value);
-    void RemoveCustomProperty(const std::string& key);
+    void AddCustomProperty(const std::string& key, const std::string& value) override;
+    void RemoveCustomProperty(const std::string& key) override;
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1138,7 +1138,7 @@ public:
         return exposeInnerGestureFlag_;
     }
 
-    RefPtr<UINode> GetCurrentPageRootNode();
+    RefPtr<UINode> GetCurrentPageRootNode() override;
 
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
