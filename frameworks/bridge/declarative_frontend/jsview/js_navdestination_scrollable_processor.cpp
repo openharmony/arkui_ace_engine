@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-constexpr int32_t SHOW_TITLEBAR_AND_TOOLBAR_DELAY = 2000;
 constexpr float SCROLL_RATIO = 2.0f;
 
 ScrollerObserver CreateObserver(
