@@ -342,4 +342,199 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanShowShadow001, TestSize.Level1)
     // 11: Asserts that the ShowShadow result is true
     EXPECT_TRUE(show);
 }
+
+/**
+ * @tc.name: HandleExtendAction001
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_SELECT_ALL);
+    EXPECT_FALSE(richEditorPattern->selectMenuInfo_.showCopyAll);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: HandleExtendAction002
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_CUT);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+}
+
+/**
+ * @tc.name: HandleExtendAction003
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_COPY);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+}
+
+/**
+ * @tc.name: HandleExtendAction004
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextCommonEvent event;
+    eventHub->FireOnPaste(event);
+    richEditorPattern->HandleExtendAction(ACTION_PASTE);
+    EXPECT_EQ(richEditorPattern->clipboard_, nullptr);
+}
+
+/**
+ * @tc.name: HandleExtendAction005
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(2);
+    EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent001
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_NE(info.GetAction(), MouseAction::MOVE);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent002
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(info.GetAction(), MouseAction::MOVE);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent003
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent004
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    richEditorPattern->scrollBar_->SetHover(true);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_TRUE(richEditorPattern->scrollBar_->isHover_);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent005
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    richEditorPattern->scrollBar_->SetPressed(true);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_TRUE(richEditorPattern->scrollBar_->isPressed_);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent006
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = nullptr;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
+}
 } // namespace OHOS::Ace::NG
