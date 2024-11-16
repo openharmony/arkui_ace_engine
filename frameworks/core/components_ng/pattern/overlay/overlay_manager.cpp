@@ -1929,7 +1929,8 @@ void OverlayManager::HideAllPopups()
     if (popupMap_.empty()) {
         return;
     }
-    for (const auto& popup : popupMap_) {
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
         auto popupInfo = popup.second;
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
