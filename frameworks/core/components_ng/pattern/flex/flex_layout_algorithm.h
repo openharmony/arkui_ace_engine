@@ -99,6 +99,9 @@ private:
     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
     void UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper);
     void RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper);
+    void CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper);
+    void UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper);
+    int32_t GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper);
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
     void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
@@ -106,8 +109,10 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();
     void SecondMeasureInWeightMode(std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator firstLoopIter);
     void FinalMeasureInWeightMode();
-    void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
+    void MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties);
     void SecondMeasureInGrowOrShrink();
+    void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
+        FlexItemProperties& flexItemProperties);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
@@ -134,6 +139,7 @@ private:
     bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
+    int32_t childrenCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

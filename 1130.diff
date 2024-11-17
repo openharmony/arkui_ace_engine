@@ -1,0 +1,247 @@
+diff --git a/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp b/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp
+index 5d5751fd82a0ddcb71d81a6715e5ca7ca7bba96b..e65f23893bb9afae9e55bab0a0b7f00ce0e1ad10 100644
+--- a/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp
++++ b/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp
+@@ -266,11 +266,13 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
+     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
++    childrenCount_ = 0;
+     for (const auto& child : children) {
+         if (child->IsOutOfLayout()) {
+             outOfLayoutChildren_.emplace_back(child);
+             continue;
+         }
++        childrenCount_++;
+         const auto& childLayoutProperty = child->GetLayoutProperty();
+         const auto& childMagicItemProperty = childLayoutProperty->GetMagicItemProperty();
+         const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+@@ -448,9 +450,71 @@ void FlexLayoutAlgorithm::FinalMeasureInWeightMode()
+     }
+ }
+ 
+-void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProperties)
++int32_t FlexLayoutAlgorithm::GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper)
++{
++    CHECK_NULL_RETURN(layoutWrapper, 0);
++    auto host = layoutWrapper->GetHostNode();
++    CHECK_NULL_RETURN(host, 0);
++    auto pattern = host->GetPattern();
++    CHECK_NULL_RETURN(pattern, 0);
++    int32_t childrenCount = 0;
++    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
++        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
++        CHECK_NULL_RETURN(linearPattern, 0);
++        childrenCount = linearPattern->GetFlexChildrenCount();
++    } else {
++        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
++        CHECK_NULL_RETURN(flexPattern, 0);
++        childrenCount = flexPattern->GetFlexChildrenCount();
++    }
++    return childrenCount;
++}
++
++void FlexLayoutAlgorithm::CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper)
++{
++    CHECK_NULL_VOID(childLayoutWrapper);
++    if (childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width() == 0.0f &&
++        childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() == 0.0f) {
++        auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
++        CHECK_NULL_VOID(childLayoutProperty);
++        const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
++        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
++            auto selfIdealSize = calcConstraint->selfIdealSize;
++            if (selfIdealSize->IsValid() && selfIdealSize->Width().has_value() && selfIdealSize->Height().has_value()) {
++                if (selfIdealSize->Height()->GetDimension().Value() == 0.0
++                    ) {
++                    return;
++                }
++            }
++        }
++        childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
++    }
++}
++
++void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
++    FlexItemProperties& flexItemProperties)
++{
++    if (childList.empty()) {
++        return;
++    }
++    for (auto& child : childList) {
++        allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
++        child.layoutWrapper->SetActive(false);
++        --validSizeCount_;
++        child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
++        const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
++        if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
++            flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
++        }
++        secondaryMeasureList_.pop_back();
++    }
++}
++
++void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties)
+ {
+     bool outOfDisplay = false;
++    CHECK_NULL_VOID(layoutWrapper);
++    bool flexChildrenCountChangeFlag = GetChildrenCountFromPattern(layoutWrapper) != childrenCount_;
+     auto iter = magicNodes_.rbegin();
+     while (iter != magicNodes_.rend()) {
+         auto childList = iter->second;
+@@ -468,6 +532,9 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
+         float crossAxisSize = crossAxisSize_;
+         for (auto& child : childList) {
+             const auto& childLayoutWrapper = child.layoutWrapper;
++            if (flexChildrenCountChangeFlag) {
++                CheckIfMarkDirtyNullifiedNode(childLayoutWrapper);
++            }
+             UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
+             childLayoutWrapper->Measure(child.layoutConstraint);
+             UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
+@@ -485,17 +552,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
+             continue;
+         }
+         outOfDisplay = true;
+-        for (auto& child : childList) {
+-            allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
+-            child.layoutWrapper->SetActive(false);
+-            --validSizeCount_;
+-            child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+-            const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+-            if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
+-                flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
+-            }
+-            secondaryMeasureList_.pop_back();
+-        }
++        PopOutOfDispayMagicNodesInPriorityMode(childList, flexItemProperties);
+         ++iter;
+     }
+ }
+@@ -514,7 +571,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
+         SecondMeasureInWeightMode(firstLoopIter);
+         FinalMeasureInWeightMode();
+     } else if (GreatNotEqual(maxDisplayPriority_, 1) && !isInfiniteLayout_) {
+-        MeasureInPriorityMode(flexItemProperties);
++        MeasureInPriorityMode(containerLayoutWrapper, flexItemProperties);
+     } else {
+         auto magicNodeSize = magicNodes_.size();
+         auto iter = magicNodes_.rbegin();
+@@ -991,6 +1048,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+ 
+     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
+     UpdateMeasureResultToPattern(layoutWrapper);
++    UpdateChildrenCountToPattern(layoutWrapper);
+ }
+ 
+ void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper)
+@@ -1012,6 +1070,24 @@ void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrap
+     }
+ }
+ 
++void FlexLayoutAlgorithm::UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper)
++{
++    CHECK_NULL_VOID(layoutWrapper);
++    auto host = layoutWrapper->GetHostNode();
++    CHECK_NULL_VOID(host);
++    auto pattern = host->GetPattern();
++    CHECK_NULL_VOID(pattern);
++    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
++        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
++        CHECK_NULL_VOID(linearPattern);
++        linearPattern->SetFlexChildrenCount(childrenCount_);
++    } else {
++        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
++        CHECK_NULL_VOID(flexPattern);
++        flexPattern->SetFlexChildrenCount(childrenCount_);
++    }
++}
++
+ void FlexLayoutAlgorithm::RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper)
+ {
+     CHECK_NULL_VOID(layoutWrapper);
+diff --git a/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.h b/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.h
+index 599263be759a515d43984d8339416dece65d35f1..c85279d82588c1c75b3e2bbc8a935e9e9d390113 100644
+--- a/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.h
++++ b/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.h
+@@ -99,6 +99,9 @@ private:
+     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+     void UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper);
+     void RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper);
++    void CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper);
++    void UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper);
++    int32_t GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper);
+     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
+     void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
+     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
+@@ -106,8 +109,10 @@ private:
+     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();
+     void SecondMeasureInWeightMode(std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator firstLoopIter);
+     void FinalMeasureInWeightMode();
+-    void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
++    void MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties);
+     void SecondMeasureInGrowOrShrink();
++    void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
++        FlexItemProperties& flexItemProperties);
+ 
+     OptionalSizeF realSize_;
+     float mainAxisSize_ = 0.0f;
+@@ -134,6 +139,7 @@ private:
+     bool selfAdaptive_ = false;
+     TextDirection textDir_ = TextDirection::LTR;
+     bool childrenHasAlignSelfBaseLine_ = false;
++    int32_t childrenCount_ = 0;
+ 
+     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
+ };
+diff --git a/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h b/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h
+index 1a1623c96259e292e8bdcf15a7d5f406bb8450cb..646f9819f139daa013157772b3cd6f6ae594378b 100644
+--- a/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h
++++ b/frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h
+@@ -181,10 +181,21 @@ public:
+         return measureResult_;
+     }
+ 
++    void SetFlexChildrenCount(int32_t childrenCount)
++    {
++        childrenCount_ = childrenCount;
++    }
++
++    int32_t GetFlexChildrenCount()
++    {
++        return childrenCount_;
++    }
++
+ private:
+     bool isWrap_ = false;
+     bool isDialogStretch_ = false;
+     FlexMeasureResult measureResult_;
++    int32_t childrenCount_ = 0;
+ 
+     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutPattern);
+ };
+diff --git a/frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h b/frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h
+index f9445986cdf12121c7782d851bea88811d0a80ce..3a034a8ab828d31f34a8e39d2868cb95a4a9c83c 100644
+--- a/frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h
++++ b/frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h
+@@ -81,9 +81,20 @@ public:
+         return measureResult_;
+     }
+ 
++    void SetFlexChildrenCount(int32_t childrenCount)
++    {
++        childrenCount_ = childrenCount;
++    }
++
++    int32_t GetFlexChildrenCount()
++    {
++        return childrenCount_;
++    }
++
+ private:
+     bool isVertical_ = false;
+     FlexMeasureResult measureResult_;
++    int32_t childrenCount_ = 0;
+ 
+     ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
+ };

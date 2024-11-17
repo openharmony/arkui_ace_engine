@@ -81,9 +81,20 @@ public:
         return measureResult_;
     }
 
+    void SetFlexChildrenCount(int32_t childrenCount)
+    {
+        childrenCount_ = childrenCount;
+    }
+
+    int32_t GetFlexChildrenCount()
+    {
+        return childrenCount_;
+    }
+
 private:
     bool isVertical_ = false;
     FlexMeasureResult measureResult_;
+    int32_t childrenCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
 };

@@ -266,11 +266,13 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childrenCount_ = 0;
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             outOfLayoutChildren_.emplace_back(child);
             continue;
         }
+        childrenCount_++;
         const auto& childLayoutProperty = child->GetLayoutProperty();
         const auto& childMagicItemProperty = childLayoutProperty->GetMagicItemProperty();
         const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
@@ -448,9 +450,71 @@ void FlexLayoutAlgorithm::FinalMeasureInWeightMode()
     }
 }
 
-void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProperties)
+int32_t FlexLayoutAlgorithm::GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, 0);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_RETURN(pattern, 0);
+    int32_t childrenCount = 0;
+    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
+        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
+        CHECK_NULL_RETURN(linearPattern, 0);
+        childrenCount = linearPattern->GetFlexChildrenCount();
+    } else {
+        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
+        CHECK_NULL_RETURN(flexPattern, 0);
+        childrenCount = flexPattern->GetFlexChildrenCount();
+    }
+    return childrenCount;
+}
+
+void FlexLayoutAlgorithm::CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    CHECK_NULL_VOID(childLayoutWrapper);
+    if (childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width() == 0.0f &&
+        childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() == 0.0f) {
+        auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(childLayoutProperty);
+        const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
+        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+            auto selfIdealSize = calcConstraint->selfIdealSize;
+            if (selfIdealSize->IsValid() && selfIdealSize->Width().has_value() && selfIdealSize->Height().has_value()) {
+                if (selfIdealSize->Height()->GetDimension().Value() == 0.0
+                    ) {
+                    return;
+                }
+            }
+        }
+        childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
+    FlexItemProperties& flexItemProperties)
+{
+    if (childList.empty()) {
+        return;
+    }
+    for (auto& child : childList) {
+        allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
+        child.layoutWrapper->SetActive(false);
+        --validSizeCount_;
+        child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+        const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
+            flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
+        }
+        secondaryMeasureList_.pop_back();
+    }
+}
+
+void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties)
 {
     bool outOfDisplay = false;
+    CHECK_NULL_VOID(layoutWrapper);
+    bool flexChildrenCountChangeFlag = GetChildrenCountFromPattern(layoutWrapper) != childrenCount_;
     auto iter = magicNodes_.rbegin();
     while (iter != magicNodes_.rend()) {
         auto childList = iter->second;
@@ -468,6 +532,9 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
         float crossAxisSize = crossAxisSize_;
         for (auto& child : childList) {
             const auto& childLayoutWrapper = child.layoutWrapper;
+            if (flexChildrenCountChangeFlag) {
+                CheckIfMarkDirtyNullifiedNode(childLayoutWrapper);
+            }
             UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
             childLayoutWrapper->Measure(child.layoutConstraint);
             UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
@@ -485,17 +552,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
             continue;
         }
         outOfDisplay = true;
-        for (auto& child : childList) {
-            allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
-            child.layoutWrapper->SetActive(false);
-            --validSizeCount_;
-            child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
-            const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-            if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
-            }
-            secondaryMeasureList_.pop_back();
-        }
+        PopOutOfDispayMagicNodesInPriorityMode(childList, flexItemProperties);
         ++iter;
     }
 }
@@ -514,7 +571,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
         SecondMeasureInWeightMode(firstLoopIter);
         FinalMeasureInWeightMode();
     } else if (GreatNotEqual(maxDisplayPriority_, 1) && !isInfiniteLayout_) {
-        MeasureInPriorityMode(flexItemProperties);
+        MeasureInPriorityMode(containerLayoutWrapper, flexItemProperties);
     } else {
         auto magicNodeSize = magicNodes_.size();
         auto iter = magicNodes_.rbegin();
@@ -991,6 +1048,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
     UpdateMeasureResultToPattern(layoutWrapper);
+    UpdateChildrenCountToPattern(layoutWrapper);
 }
 
 void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper)
@@ -1009,6 +1067,24 @@ void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrap
         auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
         CHECK_NULL_VOID(flexPattern);
         flexPattern->SetFlexMeasureResult(measureResult);
+    }
+}
+
+void FlexLayoutAlgorithm::UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
+        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
+        CHECK_NULL_VOID(linearPattern);
+        linearPattern->SetFlexChildrenCount(childrenCount_);
+    } else {
+        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
+        CHECK_NULL_VOID(flexPattern);
+        flexPattern->SetFlexChildrenCount(childrenCount_);
     }
 }
 
