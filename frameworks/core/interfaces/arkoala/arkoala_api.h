@@ -1121,7 +1121,7 @@ struct ArkUIKeyEvent {
     ArkUI_Float64 timestamp;
     ArkUI_Uint32 getModifierKeyState;
     ArkUI_Int32 intentionCode;
-    
+
     // user input.
     bool isConsumed;
     bool stopPropagation;
@@ -2311,6 +2311,8 @@ struct ArkUIImageModifier {
     void (*resetResizable)(ArkUINodeHandle node);
     void (*setDynamicRangeMode)(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode);
     void (*resetDynamicRangeMode)(ArkUINodeHandle node);
+    void (*setImageRotateOrientation)(ArkUINodeHandle node, ArkUI_Int32 orientation);
+    void (*resetImageRotateOrientation)(ArkUINodeHandle node);
     void (*setEnhancedImageQuality)(ArkUINodeHandle node, ArkUI_Int32 imageQuality);
     void (*resetEnhancedImageQuality)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getImageSrc)(ArkUINodeHandle node);

@@ -1046,5 +1046,13 @@ void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
     CHECK_NULL_VOID(pattern);
     pattern->SetOrientation(orientation);
 }
+
+void ImageModelNG::SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrientation(orientation);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
