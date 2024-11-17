@@ -443,6 +443,8 @@ private:
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
+    SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
+    std::mutex setAppWindowIconMutex_;
 };
 
 } // namespace OHOS::Ace
