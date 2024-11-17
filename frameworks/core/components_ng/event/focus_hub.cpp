@@ -353,14 +353,14 @@ void FocusHub::DumpFocusUie()
     }
 }
 
-bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediately()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d RequestFocusImmediately",
         GetFrameName().c_str(), GetFrameId());
-    return RequestFocusImmediatelyInner(isJudgeRootTree);
+    return RequestFocusImmediatelyInner();
 }
 
-bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediatelyInner()
 {
     auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
@@ -379,11 +379,6 @@ bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
 
     if (!IsFocusableWholePath()) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
-        return false;
-    }
-
-    if (isJudgeRootTree && !IsOnRootTree()) {
-        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
         return false;
     }
 
@@ -2126,19 +2121,6 @@ bool FocusHub::IsSelfFocusableWholePath()
         parent = parent->GetParentFocusHubWithBoundary();
     }
     return IsFocusableNode();
-}
-
-bool FocusHub::IsOnRootTree() const
-{
-    auto parent = GetParentFocusHub();
-    while (parent) {
-        auto parentName = parent->GetFrameName();
-        if (parentName == V2::ROOT_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParentFocusHub();
-    }
-    return false;
 }
 
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
