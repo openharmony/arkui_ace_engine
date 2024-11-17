@@ -1555,6 +1555,10 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
         if (!itemWrapper) {
+            if (currentIndex < gridLayoutInfo_.childrenCount_) {
+                TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
+                    gridLayoutInfo_.childrenCount_);
+            }
             LargeItemNextLineHeight(currentMainLineIndex_, layoutWrapper);
             break;
         }
