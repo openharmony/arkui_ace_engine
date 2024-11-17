@@ -239,11 +239,6 @@ public:
 
     void OnWindowHide() override;
 
-    Dimension GetTitleBarHeightBeforeMeasure() override
-    {
-        return isHideTitlebar_ ? 0.0_vp : SINGLE_LINE_TITLEBAR_HEIGHT;
-    }
-
     const RefPtr<NavDestinationScrollableProcessor>& GetScrollableProcessor() const
     {
         return scrollableProcessor_;
