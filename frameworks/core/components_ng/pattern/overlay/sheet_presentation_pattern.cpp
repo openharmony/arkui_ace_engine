@@ -1671,7 +1671,12 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    double rootWidth = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+    }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
