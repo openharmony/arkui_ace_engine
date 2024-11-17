@@ -178,6 +178,13 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     std::string viewId = ViewStackModel::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
 
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);
+
+    // LazyForEach is not in observeComponentCreation, mark isDeleting_ here
+    JSRef<JSVal> isDeleting = parentViewObj->GetProperty("isDeleting_");
+    if (isDeleting->IsBoolean() && isDeleting->ToBoolean()) {
+        return;
+    }
+
     JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
     JSRef<JSFunc> itemGenerator = JSRef<JSFunc>::Cast(params[PARAM_ITEM_GENERATOR]);
     ItemKeyGenerator keyGenFunc;
