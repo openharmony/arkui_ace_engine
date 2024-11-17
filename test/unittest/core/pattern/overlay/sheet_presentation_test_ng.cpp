@@ -1522,4 +1522,410 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding003, TestSize.Level1)
     SheetPresentationTestNg::TearDownTestCase();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: IsScrollable
+ * @tc.desc: Whether the bindsheet's scroll is scrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, IsScrollable, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 11, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 12,
+        AceType::MakeRefPtr<SheetPresentationPattern>(13, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 14, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 15, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 16,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test "IsScrollable", when scrollableDistance_ < 0.
+     */
+    scrollPattern->scrollableDistance_ = -1.0f;
+    EXPECT_EQ(sheetPattern->IsScrollable(), false);
+
+    /**
+     * @tc.steps: step4. test "IsScrollable", when scrollableDistance_ = 0.
+     */
+    scrollPattern->scrollableDistance_ = 0.0f;
+    EXPECT_EQ(sheetPattern->IsScrollable(), false);
+
+    /**
+     * @tc.steps: step5. test "IsScrollable", when scrollableDistance_ > 0.
+     */
+    scrollPattern->scrollableDistance_ = 5.2f;
+    EXPECT_EQ(sheetPattern->IsScrollable(), true);
+}
+
+/**
+ * @tc.name: ChangeScrollHeight
+ * @tc.desc: Test ChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, ChangeScrollHeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 01, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 02,
+        AceType::MakeRefPtr<SheetPresentationPattern>(03, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 04, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 05, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 06,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetStyle.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = false;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    
+    /**
+     * @tc.steps: step4. test "ChangeScrollHeight".
+     */
+    sheetPattern->ChangeScrollHeight(700);
+    sheetPattern->resizeDecreasedHeight_ = 0.0f;
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+    EXPECT_EQ(scrollLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize,
+        CalcSize(std::nullopt, CalcLength(700)));
+}
+
+/**
+ * @tc.name: IsScrollOutOfBoundary
+ * @tc.desc: Whether the bindsheet's scroll is out of boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, IsScrollOutOfBoundary, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 001, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 002,
+        AceType::MakeRefPtr<SheetPresentationPattern>(003, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto operationColumn =
+        FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(operationColumn, nullptr);
+    operationColumn->MountToParent(sheetNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 004, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(operationColumn);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 005, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 006,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetStyle.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.width = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.isTitleBuilder = false;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "IsScrollOutOfBoundary" when "IsOutOfBoundary" is true.
+     */
+    EXPECT_TRUE(layoutProperty->GetSheetStyle()->isTitleBuilder);
+    scrollPattern->IsOutOfBoundary(true);
+    EXPECT_EQ(sheetPattern->IsScrollOutOfBoundary(), false);
+
+    /**
+     * @tc.steps: step5. test "IsScrollOutOfBoundary" when "IsOutOfBoundary" is false.
+     */
+    scrollPattern->IsOutOfBoundary(false);
+    EXPECT_EQ(sheetPattern->IsScrollOutOfBoundary(), false);
+}
+
+/**
+ * @tc.name: GetFirstChildHeight
+ * @tc.desc: Test ChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, GetFirstChildHeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 102,
+        AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto operationColumn =
+        FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(operationColumn, nullptr);
+    operationColumn->MountToParent(sheetNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 104, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(operationColumn);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 105, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 106,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern and layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle and set sheetHeight.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = true;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    
+    /**
+     * @tc.steps: step4. test "GetFirstChildHeight", when isTitleBuilder is true.
+     */
+    EXPECT_TRUE(layoutProperty->GetSheetStyle()->isTitleBuilder);
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
+    sheetPattern->UpdateSheetTitle();
+    EXPECT_NE(sheetPattern->GetFirstChildHeight(), 0.0f);
+
+    /**
+     * @tc.steps: step5. test "GetFirstChildHeight", when isTitleBuilder is false.
+     */
+    sheetStyle.isTitleBuilder = false;
+    EXPECT_TRUE(layoutProperty->GetSheetStyle()->isTitleBuilder);
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
+    sheetPattern->UpdateSheetTitle();
+    EXPECT_EQ(sheetPattern->GetFirstChildHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: InitScrollProps001
+ * @tc.desc: test InitScrollProps function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, InitScrollProps001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
+        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetPattern value.
+     */
+    sheetPattern->sheetDetentHeight_.emplace_back(1);
+    sheetPattern->currentOffset_ = 1.0f;
+    sheetPattern->height_ = 0.0f;
+    sheetPattern->sheetHeightUp_ = 0.0f;
+    sheetPattern->sheetMaxHeight_ = 0.0f;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ > 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    scrollPattern->scrollableDistance_ = 5.2f;
+    sheetPattern->InitScrollProps();
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+
+    /**
+     * @tc.steps: step5. test "InitScrollProps",
+     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ < 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    scrollPattern->scrollableDistance_ = -1.0f;
+    sheetPattern->InitScrollProps();
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+
+    /**
+     * @tc.steps: step6. test "InitScrollProps"，
+     * when scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT, scrollableDistance_ = 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    scrollPattern->scrollableDistance_ = 0.0f;
+    sheetPattern->InitScrollProps();
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+}
+
+/**
+ * @tc.name: InitScrollProps002
+ * @tc.desc: test InitScrollProps function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, InitScrollProps002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 201,
+        AceType::MakeRefPtr<SheetPresentationPattern>(301, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 401, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(sheetNode);
+    auto scrollNode = FrameNode::CreateFrameNode("Scroll", 501, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 601,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+
+    /**
+     * @tc.steps: step2. get sheetPattern and scrollPattern.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. init sheetPattern value.
+     */
+    sheetPattern->sheetDetentHeight_.emplace_back(1);
+    sheetPattern->currentOffset_ = 1.0f;
+    sheetPattern->height_ = 0.0f;
+    sheetPattern->sheetHeightUp_ = 0.0f;
+    sheetPattern->sheetMaxHeight_ = 0.0f;
+
+    /**
+     * @tc.steps: step4. test "InitScrollProps"，
+     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ > 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    scrollPattern->scrollableDistance_ = 5.2f;
+    sheetPattern->InitScrollProps();
+    EXPECT_TRUE(scrollPattern->GetAlwaysEnabled());
+
+    /**
+     * @tc.steps: step5. test "InitScrollProps"。
+     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ < 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    scrollPattern->scrollableDistance_ = -1.0f;
+    sheetPattern->InitScrollProps();
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+
+    /**
+     * @tc.steps: step6. test "InitScrollProps"。
+     * when scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, scrollableDistance_ = 0.
+     */
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    scrollPattern->scrollableDistance_ = 0.0f;
+    sheetPattern->InitScrollProps();
+    EXPECT_FALSE(scrollPattern->GetAlwaysEnabled());
+}
 } // namespace OHOS::Ace::NG
