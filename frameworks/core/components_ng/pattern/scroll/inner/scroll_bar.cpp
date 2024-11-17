@@ -657,7 +657,7 @@ void ScrollBar::ScheduleDisappearDelayTask()
 {
     if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_) {
         disappearDelayTask_.Cancel();
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
