@@ -93,6 +93,9 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     previewNode->AddChild(previewCustomNode);
 
     CHECK_NULL_VOID(menuParam.isShowHoverImage);
+    auto pipeline = previewNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    ScopedLayout scope(pipeline);
     previewNode->Measure(layoutProperty->GetLayoutConstraint());
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
@@ -101,8 +104,6 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = previewNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
