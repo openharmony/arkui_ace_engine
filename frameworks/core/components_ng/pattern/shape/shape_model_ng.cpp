@@ -67,6 +67,11 @@ void ShapeModelNG::SetFill(const Color& color)
     ShapeAbstractModelNG().SetFill(color);
 }
 
+void ShapeModelNG::SetForegroundColor(const Color& color)
+{
+    ShapeAbstractModelNG().SetForegroundColor(color);
+}
+
 void ShapeModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
 {
     ShapeAbstractModelNG().SetStrokeDashOffset(dashOffset);
