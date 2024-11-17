@@ -23,11 +23,19 @@
 #include <shared_mutex>
 #include <unordered_map>
 
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::NG {
-
+class FrameNode;
+enum class DragDropInitiatingStatus : int32_t {
+    IDLE = 0,
+    READY,
+    PRESS,
+    LIFTING,
+    MOVING,
+};
 class ACE_FORCE_EXPORT DragDropGlobalController {
 public:
     ~DragDropGlobalController();
@@ -36,6 +44,10 @@ public:
 
     void UpdateMenuShowingStatus(bool isShowing);
     bool IsMenuShowing() const;
+    bool IsInMoving() const;
+    void ResetDragDropInitiatingStatus();
+    void UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,
+        const DragDropInitiatingStatus& dragStatus);
 
 private:
     DragDropGlobalController() = default;
@@ -44,6 +56,7 @@ private:
     // this is the real time menu show status flag, need to change to pair with menu target node in future
     bool isContextMenuShowing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropGlobalController);
+    RefPtr<FrameNode> currentDragNode_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

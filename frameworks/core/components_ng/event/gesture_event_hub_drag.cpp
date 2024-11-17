@@ -483,6 +483,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "Drag stop because user release mouse button");
         return;
     }
+    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         SetMouseDragMonitorState(true);
     }
@@ -854,6 +855,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 },
                 option.GetOnFinishEvent());
         }
+    } else {
+        DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && IsNeedSwitchToSubWindow()) {
         ret = RegisterCoordinationListener(pipeline);
@@ -1013,6 +1016,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     TAG_LOGE(AceLogTag::ACE_DRAG, "handle drag end callback, can not get container.");
                     return;
                 }
+                DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
                 TAG_LOGI(
                     AceLogTag::ACE_DRAG, "handle drag end callback, windowId is %{public}d.", container->GetWindowId());
                 dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, id);
@@ -1192,6 +1196,7 @@ int32_t GestureEventHub::GetSelectItemSize()
 
 void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
 {
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     auto eventHub = hub.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
