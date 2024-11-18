@@ -43,7 +43,6 @@ public:
                 finish();
             }
         });
-
     }
     ~StubSwiperController() override = default;
     virtual void ShowNext() {}
@@ -155,12 +154,10 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
     const int32_t CONTEXT_ID = 1234;
 
     static std::optional<int32_t> checkInvoke;
-    Callback_Void callbackVoid {
-        .resource = { .resourceId = Converter::ArkValue<Ark_Int32>(CONTEXT_ID) },
-        .call = [](const Ark_Int32 resourceId) {
-            checkInvoke = Converter::Convert<int32_t>(resourceId);
-        }
+    auto callbackForCheck = [](const Ark_Int32 resourceId) {
+        checkInvoke = Converter::Convert<int32_t>(resourceId);
     };
+    auto callbackVoid = ArkValue<Callback_Void>(callbackForCheck, CONTEXT_ID);
 
     Opt_Callback_Void callbackValid = ArkValue<Opt_Callback_Void>(callbackVoid);
     Opt_Callback_Void callbackUndef = ArkValue<Opt_Callback_Void>();

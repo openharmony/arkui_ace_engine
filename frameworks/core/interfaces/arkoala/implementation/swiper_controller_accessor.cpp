@@ -16,7 +16,7 @@
 #include "swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -74,10 +74,10 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto aceCallbackOpt = callback ? Converter::OptConvert<Callback_Void>(*callback) : std::nullopt;
-    if (aceCallbackOpt && aceCallbackOpt->call) {
-        auto onFinish = [arkCallback = *aceCallbackOpt]() -> void {
-            (*arkCallback.call)(arkCallback.resource.resourceId);
+    auto arkCallbackOpt = callback ? Converter::OptConvert<Callback_Void>(*callback) : std::nullopt;
+    if (arkCallbackOpt) {
+        auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
+            arkCallback.Invoke();
         };
         peerImpl->SetFinishCallback(onFinish);
     }

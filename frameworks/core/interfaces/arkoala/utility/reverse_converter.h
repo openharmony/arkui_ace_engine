@@ -571,8 +571,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // Create Ark_CallbackResource
     template <typename T, typename F,
-        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true,
-        std::enable_if_t<std::is_function_v<std::remove_pointer_t<F>>, bool> = true
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true
     >
     T ArkValue(F callbackFunc, Ark_Int32 resId = 0)
     {

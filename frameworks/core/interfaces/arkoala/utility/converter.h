@@ -214,15 +214,6 @@ namespace Converter {
         return src.chars;
     }
 
-/*
-    template<>
-    inline std::string Convert(const Ark_CustomObject& src)
-    {
-        LOGE("Convert [Ark_CustomObject] to [std::string] is not supported");
-        return "Ark_CustomObject";
-    }
-*/
-
     template<>
     inline int Convert(const Ark_Number& src)
     {

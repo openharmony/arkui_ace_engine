@@ -19,9 +19,10 @@
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/arkoala/implementation/swiper_content_transition_proxy_peer.h"
+#include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
@@ -480,17 +481,6 @@ void NestedScrollImpl(Ark_NativePointer node,
     SwiperModelNG::SetNestedScroll(frameNode, static_cast<int>(*nestedModeOpt));
 }
 
-template<typename CallbackType, typename... Params,
-    std::enable_if_t<std::is_same_v<decltype(CallbackType().resource), Ark_CallbackResource>, bool> = true,
-    std::enable_if_t<std::is_function_v<std::remove_pointer_t<decltype(CallbackType().call)>>, bool> = true
->
-void InvokeCallback(const CallbackType &arkCallback, Params... args)
-{
-    if (arkCallback.call) {
-        (*arkCallback.call)(arkCallback.resource.resourceId, std::forward<Params>(args)...);
-    }
-}
-
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Ark_SwiperContentAnimatedTransition* value)
 {
@@ -505,10 +495,12 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
         transitionInfo.timeout = *optTimeout;
     }
 
-    transitionInfo.transition = [arkCallback = value->transition](const RefPtr<SwiperContentTransitionProxy>& proxy) {
+    transitionInfo.transition =
+        [arkCallback = CallbackHelper(value->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
         SwiperContentTransitionProxyPeer peer;
         peer.SetHandler(proxy);
-        InvokeCallback(arkCallback, Ark_SwiperContentTransitionProxy{ .ptr = &peer });
+
+        arkCallback.Invoke(Ark_SwiperContentTransitionProxy{ .ptr = &peer });
     };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
