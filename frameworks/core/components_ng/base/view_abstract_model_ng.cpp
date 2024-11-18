@@ -289,10 +289,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() +
                                                            menuParam.positionOffset.GetX(),
                                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-                            CHECK_NULL_VOID(pipelineContext);
-                            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-                            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
                             std::function<void()> previewBuildFunc;
                             TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                             NG::ViewAbstract::BindMenuWithCustomNode(

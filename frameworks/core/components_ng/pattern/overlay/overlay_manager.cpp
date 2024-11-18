@@ -2042,13 +2042,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu insubwindow enter");
-    auto menuOffset = offset;
-    auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
-    if (currentSubwindow) {
-        auto subwindowRect = currentSubwindow->GetRect();
-        menuOffset -= subwindowRect.GetOffset();
-    }
-    if (!ShowMenuHelper(menu, targetId, menuOffset)) {
+    if (!ShowMenuHelper(menu, targetId, offset)) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
         return;
     }
