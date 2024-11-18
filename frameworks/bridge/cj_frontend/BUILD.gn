@@ -176,6 +176,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_view_context_ffi.cpp",
       "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
       "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
+      "interfaces/cj_ffi/curves/cj_curves_ffi.cpp",
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
       "interfaces/cj_ffi/matrix4/cj_matrix4_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
