@@ -25,8 +25,11 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/components/common/properties/shadow_config.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -882,6 +885,368 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
     EXPECT_TRUE(focusHub->IsCurrentFocus());
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
     sheetPattern->AvoidKeyboardBySheetMode();
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsCustomHeightOrDetentsChanged001
+ * @tc.desc: Test update detents of sheetStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::AUTO;
+    style.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::LARGE;
+    style.detents.emplace_back(detent);
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get sheetNode layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step4. change detents of SheetStyle.
+     * @tc.expected: padding.right is 0vp
+     */
+    detent.sheetMode = SheetMode::LARGE;
+    style.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::MEDIUM;
+    style.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::LARGE;
+    style.detents.emplace_back(detent);
+
+    /**
+     * @tc.steps: step5. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: true
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.sheetMode = SheetMode::LARGE;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsCustomHeightOrDetentsChanged002
+ * @tc.desc: Test update sheetStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.height = Dimension(100.0f, DimensionUnit::AUTO);
+    style.sheetMode = SheetMode::MEDIUM;
+    style.showDragBar = false;
+    style.showCloseIcon = false;
+    style.isTitleBuilder = false;
+    style.sheetType = SheetType::SHEET_BOTTOM;
+    style.backgroundColor = Color::GREEN;
+    style.maskColor = Color::GREEN;
+    style.bottomOffset = OffsetF(100.0, 100.0);
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get sheetNode layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: true
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.height = Dimension(200.0f, DimensionUnit::AUTO);
+    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, true);
+
+    /**
+     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: true
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.sheetMode = SheetMode::LARGE;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, true);
+
+    /**
+     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.showDragBar = true;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.showCloseIcon = true;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.isTitleBuilder = true;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.backgroundColor = Color::BLACK;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.maskColor = Color::BLACK;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.bottomOffset = OffsetF(200.0, 200.0);
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsCustomHeightOrDetentsChanged003
+ * @tc.desc: Test update sheetStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::THIN;
+    style.backgroundBlurStyle = styleOption;
+    style.sheetTitle = "title1";
+    style.sheetSubtitle = "subtile1";
+    style.interactive = false;
+    style.scrollSizeMode = ScrollSizeMode::FOLLOW_DETENT;
+    BorderWidthProperty BorderWidth;
+    BorderWidth.SetBorderWidth(Dimension(10.0));
+    style.borderWidth = BorderWidth;
+    style.borderColor = { Color::BLUE, Color::BLUE, Color::BLUE, Color::BLUE };
+    style.borderStyle = { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID };
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    style.shadow = shadow;
+    style.width = Dimension(100.0f, DimensionUnit::AUTO);
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get sheetNode layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    styleOption.blurStyle = BlurStyle::THICK;
+    style.backgroundBlurStyle = styleOption;
+    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.sheetTitle = "title2";
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.sheetSubtitle = "subtile2";
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    BorderWidth.SetBorderWidth(Dimension(20.0));
+    style.borderWidth = BorderWidth;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.borderColor = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.borderStyle = { BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED };
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    shadow = ShadowConfig::NoneShadow;
+    style.shadow = shadow;
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+
+    /**
+     * @tc.steps: step11. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.expected: false
+     */
+    layoutProperty->UpdateSheetStyle(style);
+    style.width = Dimension(200.0f, DimensionUnit::AUTO);
+    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
+    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: FireOnHeightDidChange001
+ * @tc.desc: Test FireOnHeightDidChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> { return nullptr; };
+
+    /**
+     * @tc.steps: step3. create sheet node.
+     * @tc.expected: Make sure the modalStack holds the sheetNode.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.height = Dimension(100.0f, DimensionUnit::AUTO);
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step4. same height to excute FireOnHeightDidChange.
+     * @tc.expected: preDidHeight_ is 100.
+     */
+
+    sheetPattern->FireOnHeightDidChange(100);
+    EXPECT_EQ(sheetPattern->preDidHeight_, 100);
+
+    /**
+     * @tc.steps: step5. new height to excute FireOnHeightDidChange.
+     * @tc.expected: preDidHeight_ is 200.
+     */
+    sheetPattern->FireOnHeightDidChange(200);
+    EXPECT_EQ(sheetPattern->preDidHeight_, 200);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
