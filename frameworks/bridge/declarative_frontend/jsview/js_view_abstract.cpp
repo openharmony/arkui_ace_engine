@@ -3498,6 +3498,10 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
     ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    JSRef<JSVal> enableDirectionalKeyFocus = menuOptions->GetProperty("enableDirectionalKeyFocus");
+    if (enableDirectionalKeyFocus->IsBoolean()) {
+        menuParam.enableDirectionalKeyFocus = enableDirectionalKeyFocus->ToBoolean();
+    }
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)

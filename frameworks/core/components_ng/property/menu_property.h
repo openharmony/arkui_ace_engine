@@ -80,6 +80,7 @@ struct MenuParam {
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     std::optional<NG::MarginProperty> layoutRegionMargin;
     bool isPreviewContainScale = false;
+    bool enableDirectionalKeyFocus = false;
 };
 
 } // namespace OHOS::Ace::NG

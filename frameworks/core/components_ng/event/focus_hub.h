@@ -1070,6 +1070,16 @@ public:
 
     bool GetNextFocusByStep(const KeyEvent& keyEvent);
 
+    void SetDirectionalKeyFocus(bool directionalKeyFocus)
+    {
+        enableDirectionalKeyFocus_ = directionalKeyFocus;
+    }
+
+    bool GetDirectionalKeyFocus() const
+    {
+        return enableDirectionalKeyFocus_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1205,6 +1215,7 @@ private:
     bool arrowKeyStepOut_ { true };
     bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
+    bool enableDirectionalKeyFocus_ { false };
 };
 } // namespace OHOS::Ace::NG
 
