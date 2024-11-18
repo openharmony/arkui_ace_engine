@@ -3324,10 +3324,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
         "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
-        "isAllowAddChildBelowModalUec=%{public}d",
+        "isAllowAddChildBelowModalUec=%{public}d, prohibitedRemoveByNavigation=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
         config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
-        config.isAllowAddChildBelowModalUec);
+        config.isAllowAddChildBelowModalUec, config.prohibitedRemoveByNavigation);
     return sessionId;
 }
 
