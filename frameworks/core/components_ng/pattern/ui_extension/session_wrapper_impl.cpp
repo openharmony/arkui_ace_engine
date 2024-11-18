@@ -606,12 +606,18 @@ void SessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
-        session_, std::move(backgroundCallback_));
+    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d, isHandleError = %{public}d.",
+        session_->GetPersistentId(), isHandleError);
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, std::move(backgroundCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::OnReleaseDone()

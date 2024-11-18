@@ -466,7 +466,7 @@ void SecuritySessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SecuritySessionWrapperImpl::NotifyBackground()
+void SecuritySessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
