@@ -1689,6 +1689,7 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
     ASSERT_NE(fullAPI->getAccessors(), nullptr);
     static const auto *accessor = fullAPI->getAccessors()->getSwiperContentTransitionProxyAccessor();
     ASSERT_NE(accessor, nullptr);
+    ASSERT_NE(accessor->getFinalizer, nullptr);
     ASSERT_NE(accessor->getIndex, nullptr);
 
     static std::optional<std::pair<int32_t, int32_t>> checkInvoke;
@@ -1697,6 +1698,11 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
             auto peer = reinterpret_cast<SwiperContentTransitionProxyPeer*>(parameter.ptr);
             // get to further test: incoming resource, data from incoming peer via accessor
             checkInvoke = { resourceId, accessor->getIndex(peer) };
+
+            auto destroy = reinterpret_cast<void (*)(SwiperContentTransitionProxyPeer *)>(accessor->getFinalizer());
+            if (destroy) {
+                (*destroy)(peer);
+            }
         };
     ASSERT_FALSE(checkInvoke.has_value());
 

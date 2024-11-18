@@ -28,6 +28,11 @@ namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
+
+}
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -497,10 +502,13 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 
     transitionInfo.transition =
         [arkCallback = CallbackHelper(value->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        SwiperContentTransitionProxyPeer peer;
-        peer.SetHandler(proxy);
+        auto accessor = GetSwiperContentTransitionProxyAccessor();
+        CHECK_NULL_VOID(accessor && accessor->ctor);
+        auto peer = (*accessor->ctor)();
+        CHECK_NULL_VOID(peer);
+        peer->SetHandler(proxy);
 
-        arkCallback.Invoke(Ark_SwiperContentTransitionProxy{ .ptr = &peer });
+        arkCallback.Invoke(Ark_SwiperContentTransitionProxy{ .ptr = peer });
     };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
