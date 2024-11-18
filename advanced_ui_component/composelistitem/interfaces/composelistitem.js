@@ -1535,7 +1535,7 @@ export class ComposeListItem extends ViewPU {
         catch (d) {
             let e = d.code;
             let f = d.message;
-            hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to get environment param error: ${e}, ${f}`);
+            hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${e}, ${f}`);
         }
     }
     aboutToDisappear() {
@@ -1548,7 +1548,7 @@ export class ComposeListItem extends ViewPU {
         }
     }
     calculatedRightWidth() {
-        if (this.operateItem?.text) {
+        if (this.operateItem?.text || this.operateItem?.button) {
             return RIGHT_PART_WIDTH;
         }
         if (this.operateItem?.switch) {

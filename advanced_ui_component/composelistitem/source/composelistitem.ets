@@ -750,7 +750,7 @@ export struct ComposeListItem {
       let code = (paramError as BusinessError).code;
       let message = (paramError as BusinessError).message;
       hilog.error(0x3900, 'Ace',
-        `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
+        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
     }
   }
 
@@ -772,7 +772,7 @@ export struct ComposeListItem {
   }
 
   calculatedRightWidth(): string {
-    if (this.operateItem?.text) {
+    if (this.operateItem?.text || this.operateItem?.button) {
       return RIGHT_PART_WIDTH;
     }
     if (this.operateItem?.switch) {
