@@ -8755,6 +8755,15 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     return true;
 }
 
+std::string RichEditorPattern::GetPlaceHolder() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetPlaceholderValue("");
+}
+
 Color RichEditorPattern::GetCaretColor()
 {
     if (caretColor_.has_value()) {

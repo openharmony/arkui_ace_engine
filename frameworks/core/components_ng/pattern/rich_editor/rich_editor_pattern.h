@@ -751,6 +751,8 @@ public:
         return selectedType_.value_or(TextSpanType::NONE);
     }
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
