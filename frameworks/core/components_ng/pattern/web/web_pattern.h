@@ -1002,7 +1002,6 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
