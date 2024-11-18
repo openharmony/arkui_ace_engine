@@ -4717,12 +4717,13 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     CHECK_NULL_RETURN(!isSpanStringMode_, ERROR_BAD_PARAMETERS);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
-    if (!IsPreviewTextInputting()) {
-        if (!InitPreviewText(previewTextValue, range)) {
+
+    if (IsEnPreview()) {
+        if (SetPreviewTextEn(previewTextValue, range)) {
             return ERROR_BAD_PARAMETERS;
         }
     } else {
-        if (!UpdatePreviewText(previewTextValue, range)) {
+        if (!SetPreviewTextCn(previewTextValue, range)) {
             return ERROR_BAD_PARAMETERS;
         }
     }
@@ -4731,11 +4732,34 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     return NO_ERRORS;
 }
 
-bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, const PreviewRange range)
+bool RichEditorPattern::IsEnPreview()
 {
-    if (range.start != -1 || range.end != -1) {
-        return ReplacePreviewText(previewTextValue, range);
+    // zh-cn previewTextStyle is UNDERLINE, while en previewTextStyle is NORMAL.
+    return GetPreviewTextStyle() == PreviewTextStyle::NORMAL;
+}
+
+bool RichEditorPattern::SetPreviewTextCn(const std::string& previewTextValue, const PreviewRange& range)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewTextCn");
+    if (!IsPreviewTextInputting()) {
+        return InitPreviewText(previewTextValue, range);
+    } else {
+        return UpdatePreviewText(previewTextValue, range);
     }
+}
+
+bool RichEditorPattern::SetPreviewTextEn(const std::string& previewTextValue, const PreviewRange& range)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewTextEn");
+    if (range.start != -1 || range.end != -1) {
+        return ReplaceText(previewTextValue, range);
+    } else {
+        return AppendText(previewTextValue, range);
+    }
+}
+
+bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, const PreviewRange& range)
+{
     auto& record = previewTextRecord_;
     record.needReplacePreviewText = true;
     record.previewTextHasStarted = true;
@@ -4753,9 +4777,9 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     return true;
 }
 
-bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, const PreviewRange& range)
+bool RichEditorPattern::ReplaceText(const std::string& previewTextValue, const PreviewRange& range)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ReplacePreviewText");
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ReplaceText");
     if (range.start < 0 || range.end < range.start || range.end > GetTextContentLength()) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
         return false;
@@ -4766,6 +4790,20 @@ bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, 
     previewTextRecord_.endOffset = range.end;
     ProcessInsertValue(previewTextValue, OperationType::IME, false);
     previewTextRecord_.needReplaceText = false;
+    return true;
+}
+
+bool RichEditorPattern::AppendText(const std::string& previewTextValue, const PreviewRange& range)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AppendText");
+    if (range.start != -1 || range.end != -1) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
+        return false;
+    }
+    previewTextRecord_.replacedRange = range;
+    previewTextRecord_.startOffset = range.start;
+    previewTextRecord_.endOffset = range.end;
+    ProcessInsertValue(previewTextValue, OperationType::IME, false);
     return true;
 }
 
@@ -4781,7 +4819,7 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
     }
 }
 
-bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range)
+bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range)
 {
     auto& record = previewTextRecord_;
     if (range.start == -1 && range.end == -1 && !record.previewContent.empty()) {
@@ -4922,9 +4960,9 @@ PreviewTextStyle RichEditorPattern::GetPreviewTextStyle() const
     auto property = GetLayoutProperty<RichEditorLayoutProperty>();
     if (property && property->HasPreviewTextStyle()) {
         auto style = property->GetPreviewTextStyle();
-        if (style == PREVIEW_STYLE_NORMAL) {
+        if (style.value() == PREVIEW_STYLE_NORMAL) {
             previewTextStyle = PreviewTextStyle::NORMAL;
-        } else if (style == PREVIEW_STYLE_UNDERLINE) {
+        } else if (style.value() == PREVIEW_STYLE_UNDERLINE) {
             previewTextStyle = PreviewTextStyle::UNDERLINE;
         } else {
             TAG_LOGW(
