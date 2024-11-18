@@ -14,15 +14,29 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_item_ffi.h"
+#include "bridge/cj_frontend/cppview/view_abstract.h"
+#include "bridge/common/utils/utils.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "base/utils/utils.h"
+#include "cj_lambda.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model.h"
 
 using namespace OHOS::Ace;
+using namespace OHOS::FFI;
+using namespace OHOS::Ace::Framework;
 
 extern "C" {
 void FfiOHOSAceFrameworkGridItemCreate()
 {
     NG::GridItemStyle style {};
+    GridItemModel::GetInstance()->Create(style);
+}
+
+void FfiOHOSAceFrameworkGridItemCreateWithOptions(int32_t value)
+{
+    auto style = static_cast<NG::GridItemStyle>(value);
     GridItemModel::GetInstance()->Create(style);
 }
 
@@ -49,5 +63,26 @@ void FfiOHOSAceFrameworkGridItemSetRowEnd(int32_t rowEnd)
 void FfiOHOSAceFrameworkGridItemForceRebuild(bool forceRebuild)
 {
     GridItemModel::GetInstance()->SetForceRebuild(forceRebuild);
+}
+
+void FfiOHOSAceFrameworkGridItemSelectable(bool value)
+{
+    GridItemModel::GetInstance()->SetSelectable(value);
+}
+
+void FfiOHOSAceFrameworkGridItemSelected(bool value)
+{
+    GridItemModel::GetInstance()->SetSelected(value);
+}
+
+void FfiOHOSAceFrameworkGridItemOnSelect(void (*callback)(bool isSelected))
+{
+    auto lambda = CJLambda::Create(callback);
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelectId = [node = targetNode, lambda](bool isSelected) {
+        PipelineContext::SetCallBackNode(node);
+        lambda(isSelected);
+    };
+    GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
 }
 }
