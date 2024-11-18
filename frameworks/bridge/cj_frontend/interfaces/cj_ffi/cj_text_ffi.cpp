@@ -53,77 +53,6 @@ const std::vector<NG::TextResponseType> TEXT_RESPONSE_TYPE = { NG::TextResponseT
     NG::TextResponseType::LONG_PRESS, NG::TextResponseType::SELECTED_BY_MOUSE };
 const std::vector<TextDecorationStyle> TEXT_DECORATIONS_STYLE = { TextDecorationStyle::SOLID,
     TextDecorationStyle::DOUBLE, TextDecorationStyle::DOTTED, TextDecorationStyle::DASHED, TextDecorationStyle::WAVY };
-
-std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> FormatOnCreateMenu(
-    VectorTextMenuItemHandle (*callbackOnCreateMenu)(VectorTextMenuItemHandle vecTextMenuItem))
-{
-    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> result =
-        [ffiOnAction = CJLambda::Create(callbackOnCreateMenu)](
-            const std::vector<NG::MenuItemParam>& menuItem) -> std::vector<NG::MenuOptionsParam> {
-        const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
-        const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
-        std::function<void(const std::string&)> actionCopy = [](const std::string& arg) {};
-        std::function<void(const std::string&)> actionSelectAll = [](const std::string& arg) {};
-        std::vector<NG::MenuItemParam> menuItemCopy = menuItem;
-        std::vector<FFiTextMenuItem> arr;
-        auto size = menuItemCopy.size();
-        arr.resize(size);
-        for (size_t i = 0; i < size; ++i) {
-            arr[i].content = menuItemCopy[i].menuOptionsParam.content.has_value()
-                                 ? const_cast<char*>(menuItemCopy[i].menuOptionsParam.content.value().c_str())
-                                 : nullptr;
-            arr[i].icon = menuItemCopy[i].menuOptionsParam.icon.has_value()
-                              ? const_cast<char*>(menuItemCopy[i].menuOptionsParam.icon.value().c_str())
-                              : nullptr;
-            arr[i].id = const_cast<char*>(menuItemCopy[i].menuOptionsParam.id.c_str());
-            if (menuItemCopy[i].menuOptionsParam.id == OH_DEFAULT_COPY) {
-                actionCopy = menuItemCopy[i].menuOptionsParam.action;
-            } else if (menuItemCopy[i].menuOptionsParam.id == OH_DEFAULT_SELECT_ALL) {
-                actionSelectAll = menuItemCopy[i].menuOptionsParam.action;
-            }
-        }
-        VectorTextMenuItemHandle vectorTextMenuItemHandle = &arr;
-        VectorTextMenuItemHandle newVectorTextMenuItemHandle = ffiOnAction(vectorTextMenuItemHandle);
-        auto newTextMenuItem = *reinterpret_cast<std::vector<FFiTextMenuItem>*>(newVectorTextMenuItemHandle);
-        std::vector<NG::MenuOptionsParam> vecMenuOptionsParam;
-        auto sizeCallback = newTextMenuItem.size();
-        vecMenuOptionsParam.resize(sizeCallback);
-        for (size_t i = 0; i < sizeCallback; ++i) {
-            vecMenuOptionsParam[i].content =
-                newTextMenuItem[i].content ? std::make_optional<std::string>(newTextMenuItem[i].content) : std::nullopt;
-            vecMenuOptionsParam[i].icon =
-                newTextMenuItem[i].icon ? std::make_optional<std::string>(newTextMenuItem[i].icon) : std::nullopt;
-            vecMenuOptionsParam[i].id = newTextMenuItem[i].id;
-            if (newTextMenuItem[i].id == OH_DEFAULT_COPY) {
-                vecMenuOptionsParam[i].action = actionCopy;
-            } else if (newTextMenuItem[i].id == OH_DEFAULT_SELECT_ALL) {
-                vecMenuOptionsParam[i].action = actionSelectAll;
-            } else {
-                vecMenuOptionsParam[i].action = [](const std::string& arg) {};
-            }
-        }
-        return vecMenuOptionsParam;
-    };
-    return result;
-}
-
-std::function<bool(const NG::MenuItemParam& menuItemParam)> FormatOnMenuItemClick(
-    bool (*callbackOnMenuItemClick)(FFiTextMenuItem textMenuItem, int32_t start, int32_t end))
-{
-    std::function<bool(const NG::MenuItemParam& menuItemParam)> result =
-        [ffiOnAction = CJLambda::Create(callbackOnMenuItemClick)](const NG::MenuItemParam& menuItemParam) -> bool {
-        auto menuItem =
-            FFiTextMenuItem { menuItemParam.menuOptionsParam.content.has_value()
-                                  ? const_cast<char*>(menuItemParam.menuOptionsParam.content.value().c_str())
-                                  : nullptr,
-                menuItemParam.menuOptionsParam.icon.has_value()
-                    ? const_cast<char*>(menuItemParam.menuOptionsParam.icon.value().c_str())
-                    : nullptr,
-                const_cast<char*>(menuItemParam.menuOptionsParam.id.c_str()) };
-        return ffiOnAction(menuItem, menuItemParam.start, menuItemParam.end);
-    };
-    return result;
-}
 } // namespace
 
 namespace OHOS::Ace::Framework {
@@ -334,7 +263,6 @@ void FfiOHOSAceFrameworkTextSetFont(
 
 VectorNativeShadowOptionsHandle FFICJCreateVectorNativeShadowOptions(int64_t size)
 {
-    LOGI("Create NativeShadowOptions Vector");
     return new std::vector<NativeShadowOptions>(size);
 }
 
@@ -347,10 +275,8 @@ void FFICJVectorNativeShadowOptionsDelete(VectorNativeShadowOptionsHandle vec)
 void FFICJVectorNativeShadowOptionsSetElement(
     VectorNativeShadowOptionsHandle vec, int64_t index, NativeShadowOptions shadowOptions)
 {
-    LOGI("NativeShadowOptions Vector Set Element");
     auto actualVec = reinterpret_cast<std::vector<NativeShadowOptions>*>(vec);
     (*actualVec)[index] = shadowOptions;
-    LOGI("NativeShadowOptions Vector Set Element Success");
 }
 
 void FfiOHOSAceFrameworkTextShadow(VectorStringPtr vecContent)
@@ -483,48 +409,40 @@ void FfiOHOSAceFrameworkTextSetHeightAdaptivePolicy(int32_t heightAdaptivePolicy
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[heightAdaptivePolicy]);
 }
 
-void FfiOHOSAceFrameworkTextEditMenuOptions(
-    VectorTextMenuItemHandle (*callbackOnCreateMenu)(VectorTextMenuItemHandle vecTextMenuItem),
-    bool (*callbackOnMenuItemClick)(FFiTextMenuItem textMenuItem, int32_t start, int32_t end))
+void FfiOHOSAceFrameworkTextEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
 {
-    auto onCreateMenu = [func = FormatOnCreateMenu(callbackOnCreateMenu)](
-                            const std::vector<NG::MenuItemParam>& val) -> std::vector<NG::MenuOptionsParam> {
-        return func(val);
-    };
-    auto onMenuItemClick = [func = FormatOnMenuItemClick(callbackOnMenuItemClick)](
-                               const NG::MenuItemParam& val) -> bool { return func(val); };
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenu), std::move(onMenuItemClick));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
-VectorTextMenuItemHandle FFICJCreateVectorFFiTextMenuItem(int64_t size)
+VectorTextMenuItemHandle FFICJCreateVectorFfiTextMenuItem(int64_t size)
 {
-    LOGI("Create FFiTextMenuItem Vector");
-    return new std::vector<FFiTextMenuItem>(size);
+    return new std::vector<FfiTextMenuItem>(size);
 }
 
-void FFICJVectorFFiTextMenuItemDelete(VectorTextMenuItemHandle vec)
+void FFICJVectorFfiTextMenuItemDelete(VectorTextMenuItemHandle vec)
 {
-    auto actualVec = reinterpret_cast<std::vector<FFiTextMenuItem>*>(vec);
+    auto actualVec = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vec);
     delete actualVec;
 }
 
-void FFICJVectorFFiTextMenuItemSetElement(VectorTextMenuItemHandle vec, int64_t index, FFiTextMenuItem textMenuItem)
+void FFICJVectorFfiTextMenuItemSetElement(VectorTextMenuItemHandle vec, int64_t index, FfiTextMenuItem textMenuItem)
 {
-    LOGI("FFiTextMenuItem Vector Set Element");
-    auto actualVec = reinterpret_cast<std::vector<FFiTextMenuItem>*>(vec);
+    auto actualVec = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vec);
     (*actualVec)[index] = textMenuItem;
-    LOGI("FFiTextMenuItem Vector Set Element Success");
 }
 
-FFiTextMenuItem FFICJVectorFFiTextMenuItemGetElement(VectorTextMenuItemHandle vec, int64_t index)
+FfiTextMenuItem FFICJVectorFfiTextMenuItemGetElement(VectorTextMenuItemHandle vec, int64_t index)
 {
-    auto actualVec = reinterpret_cast<std::vector<FFiTextMenuItem>*>(vec);
+    auto actualVec = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vec);
     return (*actualVec)[index];
 }
 
-int64_t FFICJVectorFFiTextMenuItemGetSize(VectorTextMenuItemHandle vec)
+int64_t FFICJVectorFfiTextMenuItemGetSize(VectorTextMenuItemHandle vec)
 {
-    auto actualVec = reinterpret_cast<std::vector<FFiTextMenuItem>*>(vec);
+    auto actualVec = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vec);
     return (*actualVec).size();
 }
 

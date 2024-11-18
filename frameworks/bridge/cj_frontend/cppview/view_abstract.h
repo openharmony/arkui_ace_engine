@@ -29,6 +29,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -36,6 +37,8 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #ifndef __OHOS_NG__
 #include "core/components/box/box_component.h"
 #include "core/components/display/display_component.h"
@@ -48,6 +51,8 @@
 #include "core/gestures/tap_gesture.h"
 #include "core/pipeline/base/component.h"
 
+using VectorTextMenuItemHandle = void*;
+
 extern "C" {
 struct NativeResourceObject {
     const char* bundleName;
@@ -56,7 +61,16 @@ struct NativeResourceObject {
     int32_t type;
     const char* paramsJsonStr;
 };
+
+struct FfiTextMenuItem {
+    ExternalString content;
+    ExternalString icon;
+    ExternalString id;
+};
 }
+
+typedef VectorTextMenuItemHandle (*CjOnCreateMenu)(VectorTextMenuItemHandle);
+typedef bool (*CjOnMenuItemClick)(FfiTextMenuItem, int32_t, int32_t);
 
 namespace OHOS::Ace {
 enum class ResourceType : uint32_t {
@@ -182,10 +196,16 @@ public:
         return false;
     }
 
+    static bool ParseEditMenuOptions(CjOnCreateMenu& cjOnCreateMenu, CjOnMenuItemClick& cjOnMenuItemClick,
+        NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClick);
+
 private:
     static void CompleteResourceObjectInner(
         NativeResourceObject& obj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
     static bool ParseCjMediaInternal(NativeResourceObject& obj, std::string& result);
+    static void ParseOnCreateMenu(CjOnCreateMenu& cjOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static void ParseOnMenuItemClick(
+        CjOnMenuItemClick& cjOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClick);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_CJ_FRONTEND_CPP_VIEW_VIEW_ABSTRACT_H

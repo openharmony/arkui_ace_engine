@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string>
 
+#include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
@@ -60,12 +61,6 @@ struct NativeShadowOptions {
     double offsetX;
     double offsetY;
     bool fill;
-};
-
-struct FFiTextMenuItem {
-    char* content;
-    char* icon;
-    char* id;
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreate(const char* content);
@@ -111,14 +106,14 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextMaxFontScale(float maxFontScale);
 CJ_EXPORT void FfiOHOSAceFrameworkTextMinFontScale(float minFontScale);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetTextSelectable(int32_t textSelectable);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetHeightAdaptivePolicy(int32_t heightAdaptivePolicy);
-CJ_EXPORT void FfiOHOSAceFrameworkTextEditMenuOptions(void* (*callbackOnCreateMenu)(void* vecTextMenuItem),
-    bool (*callbackOnMenuItemClick)(FFiTextMenuItem textMenuItem, int32_t start, int32_t end));
-CJ_EXPORT VectorTextMenuItemHandle FFICJCreateVectorFFiTextMenuItem(int64_t size);
-CJ_EXPORT void FFICJVectorFFiTextMenuItemDelete(VectorTextMenuItemHandle vec);
-CJ_EXPORT void FFICJVectorFFiTextMenuItemSetElement(
-    VectorTextMenuItemHandle vec, int64_t index, FFiTextMenuItem textMenuItem);
-CJ_EXPORT FFiTextMenuItem FFICJVectorFFiTextMenuItemGetElement(VectorTextMenuItemHandle vec, int64_t index);
-CJ_EXPORT int64_t FFICJVectorFFiTextMenuItemGetSize(VectorTextMenuItemHandle vec);
+CJ_EXPORT void FfiOHOSAceFrameworkTextEditMenuOptions(
+    CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
+CJ_EXPORT VectorTextMenuItemHandle FFICJCreateVectorFfiTextMenuItem(int64_t size);
+CJ_EXPORT void FFICJVectorFfiTextMenuItemDelete(VectorTextMenuItemHandle vec);
+CJ_EXPORT void FFICJVectorFfiTextMenuItemSetElement(
+    VectorTextMenuItemHandle vec, int64_t index, FfiTextMenuItem textMenuItem);
+CJ_EXPORT FfiTextMenuItem FFICJVectorFfiTextMenuItemGetElement(VectorTextMenuItemHandle vec, int64_t index);
+CJ_EXPORT int64_t FFICJVectorFfiTextMenuItemGetSize(VectorTextMenuItemHandle vec);
 CJ_EXPORT void FfiOHOSAceFrameworkTextEnableDataDetector(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetWordBreak(int32_t wordBreak);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetSelection(int32_t start, int32_t end);
