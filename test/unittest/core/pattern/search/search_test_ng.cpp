@@ -15,6 +15,7 @@
 
 #include "search_base.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1109,21 +1110,19 @@ HWTEST_F(SearchTestNg, SetSearchButtonAutodisable002, TestSize.Level1)
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    auto layoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+
     auto textStr = "";
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->UpdateEditingValue(textStr, 0);
-
-    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
-    ASSERT_NE(buttonFrameNode, nullptr);
-    auto renderContext = buttonFrameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->UpdateDisable(textFieldPattern->GetTextValue());
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0), 0.4);
+    EXPECT_EQ(buttonEventHub->IsEnabled(), false);
 }
 
 /**
@@ -1154,21 +1153,20 @@ HWTEST_F(SearchTestNg, SetSearchButtonAutodisable004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     ASSERT_NE(textFieldFrameNode, nullptr);
-    auto layoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+
     auto textStr = "a";
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
-    auto renderContext = buttonFrameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
     textFieldPattern->UpdateEditingValue(textStr, 0);
     searchModelInstance.SetSearchButtonAutoDisable(true);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->UpdateDisable(textFieldPattern->GetTextValue());
-    EXPECT_EQ(renderContext->GetOpacityValue(1.0), 1.0);
+    EXPECT_EQ(buttonEventHub->IsEnabled(), true);
 }
 
 /**
