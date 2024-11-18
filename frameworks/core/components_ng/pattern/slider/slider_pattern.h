@@ -153,6 +153,7 @@ public:
     }
 
     void SetSliderValue(double value, int32_t mode);
+    void InitAccessibilityVirtualNodeTask();
 
 private:
     void OnAttachToFrameNode() override;
@@ -233,8 +234,8 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
-    void InitAccessibilityVirtualNodeTask();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
@@ -323,6 +324,7 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
 
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
