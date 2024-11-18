@@ -206,7 +206,7 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, click %{public}d down, ETF: %{public}d, CTP: %{public}d, state: %{public}d",
         event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
     if (!firstInputTime_.has_value()) {
@@ -303,7 +303,7 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
@@ -376,7 +376,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
     if (IsRefereeFinished()) {
         return;
     }
