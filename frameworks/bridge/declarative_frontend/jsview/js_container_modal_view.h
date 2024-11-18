@@ -35,13 +35,14 @@ public:
 private:
     static RefPtr<NG::ContainerModalPatternEnhance> GetContainerModalPattern();
 
-    static void OnMaxBtnClick();
-    static void OnMinBtnClick();
-    static void OnCloseBtnClick();
-    static void OnLeftSplitClick();
-    static void OnRightSplitClick();
-    static void AddButtonPointLightAnim();
-    static void CallButtonsRectChange();
+    static void OnMaxBtnClick(const JSCallbackInfo& info);
+    static void OnMinBtnClick(const JSCallbackInfo& info);
+    static void OnCloseBtnClick(const JSCallbackInfo& info);
+    static void OnLeftSplitClick(const JSCallbackInfo& info);
+    static void OnRightSplitClick(const JSCallbackInfo& info);
+    static void AddButtonPointLightAnim(const JSCallbackInfo& info);
+    static void CallButtonsRectChange(const JSCallbackInfo& info);
+    static void CallMenuWidthChange(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

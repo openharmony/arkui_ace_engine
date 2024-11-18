@@ -15,8 +15,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("resource_manager_test") {
   sources = [
-    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
     "resource_manager_test.cpp",
     "resource_theme_style_test.cpp",
   ]

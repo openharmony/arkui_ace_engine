@@ -66,7 +66,7 @@ public:
     void OnMinButtonClick();
     void OnCloseButtonClick();
     void AddPointLight();
-
+    void CallMenuWidthChange(int32_t resId);
 private:
     RefPtr<FrameNode> GetButtonRowByInspectorId()
     {

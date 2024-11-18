@@ -231,4 +231,9 @@ bool SystemProperties::IsNeedSymbol()
 {
     return true;
 }
+
+bool SystemProperties::GetResourceDecoupling()
+{
+    return true;
+}
 } // namespace OHOS::Ace
