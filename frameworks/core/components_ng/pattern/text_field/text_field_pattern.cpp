@@ -1404,13 +1404,13 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         return;
     }
-    auto value = operationRecords_.back();
-    operationRecords_.pop_back();
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
-    if (operationRecords_.empty()) {
+    if (operationRecords_.size() == 1) {
         FireEventHubOnChange("");
         return;
     }
+    auto value = operationRecords_.back();
+    operationRecords_.pop_back();
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
