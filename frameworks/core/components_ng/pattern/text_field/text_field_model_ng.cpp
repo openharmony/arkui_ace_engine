@@ -97,42 +97,6 @@ void TextFieldModelNG::CreateNode(
     }
 }
 
-RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
-    const std::optional<std::string>& value, bool isTextArea)
-{
-    auto frameNode = FrameNode::CreateFrameNode(
-        isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    pattern->SetModifyDoneStatus(false);
-    auto textValue = pattern->GetTextValue();
-    if (value.has_value() && value.value() != textValue) {
-        pattern->InitEditingValueText(value.value());
-    }
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
-    if (!isTextArea) {
-        textFieldLayoutProperty->UpdateMaxLines(1);
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        pattern->SetTextInputFlag(true);
-    } else {
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
-    }
-    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    pattern->InitSurfaceChangedCallback();
-    pattern->InitSurfacePositionChangedCallback();
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    if (pipeline->GetHasPreviewTextOption()) {
-        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
-    }
-    ProcessDefaultStyleAndBehaviors(frameNode);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
-    return frameNode;
-}
-
 void TextFieldModelNG::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -259,26 +223,6 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetTextFieldController();
-}
-
-RefPtr<TextFieldControllerBase> TextFieldModelNG::GetController(FrameNode* frameNode,
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
-
-    auto textValue = pattern->GetTextValue();
-    if (value.has_value() && value.value() != textValue) {
-        auto changed = pattern->InitValueText(value.value());
-        pattern->SetTextChangedAtCreation(changed);
-    }
-
     return pattern->GetTextFieldController();
 }
 
@@ -1994,19 +1938,6 @@ std::string TextFieldModelNG::GetInputFilter(FrameNode* frameNode)
     return value;
 }
 
-RefPtr<TextFieldControllerBase> TextFieldModelNG::GetOrCreateController(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    if (!pattern->GetTextFieldController()) {
-        auto controller = AceType::MakeRefPtr<NG::TextFieldController>();
-        pattern->SetTextFieldController(controller);
-        controller->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    }
-    return pattern->GetTextFieldController();
-}
-
 InputStyle TextFieldModelNG::GetInputStyle(FrameNode* frameNode)
 {
     InputStyle value = InputStyle::DEFAULT;
@@ -2301,21 +2232,5 @@ PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
         paddings.left = std::optional<CalcLength>(property.left);
     }
     return paddings;
-}
-
-void TextFieldModelNG::SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetJSTextEditableController(controller);
-}
-
-RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetJSTextEditableController();
 }
 } // namespace OHOS::Ace::NG

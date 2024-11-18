@@ -1115,6 +1115,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
