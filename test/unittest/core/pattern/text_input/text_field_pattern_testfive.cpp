@@ -132,7 +132,6 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
     ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.Normal");
 }
 
-
 /**
  * @tc.name: GetInputStyleString001
  * @tc.desc: test testInput text GetInputStyleString

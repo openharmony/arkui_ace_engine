@@ -2549,7 +2549,6 @@ HWTEST_F(TextFieldPatternTest, FireEventHubOnChange001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     pattern->textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
