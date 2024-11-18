@@ -1612,6 +1612,7 @@ void TextFieldPattern::HandleOnPaste()
         textfield->CloseSelectOverlay(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
+        textfield->TriggerAvoidOnCaretChange();
     };
     CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
@@ -3128,7 +3129,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto previewTextCache = layoutProperty->GetPreviewTextValue({GetPreviewTextStart(), ""});
     PreviewText curPreviewText = {GetPreviewTextStart(), GetPreviewTextValue()};
     if (textCache == contentController_->GetTextValue() && previewTextCache.value == curPreviewText.value) {
-        TriggerAvoidWhenCaretGoesDown();
         return false;
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
