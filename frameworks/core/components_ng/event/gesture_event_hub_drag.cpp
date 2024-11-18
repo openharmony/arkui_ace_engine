@@ -698,14 +698,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
 
         if (IsPixelMapNeedScale() && frameTag == V2::WEB_ETS_TAG) {
-            OffsetF webOffset;
-            CHECK_NULL_VOID(pipeline);
-            auto window = pipeline->GetWindow();
-            CHECK_NULL_VOID(window);
-            auto offset = window->GetCurrentWindowRect().GetOffset();
-            webOffset.SetX(frameNodeOffset_.GetX() + offset.GetX());
-            webOffset.SetY(frameNodeOffset_.GetY() + offset.GetY());
-            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, webOffset);
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, frameNodeOffset_);
         }
 
         CHECK_NULL_VOID(imageNode);
