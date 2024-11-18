@@ -899,6 +899,9 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
             renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
             json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
         }
+        if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+            json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
+        }
     }
     if (layoutProperty_) {
         VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
