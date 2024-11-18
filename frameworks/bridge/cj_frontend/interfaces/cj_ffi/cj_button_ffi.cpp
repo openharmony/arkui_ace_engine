@@ -19,6 +19,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/button/button_model.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
+#include "core/components/common/properties/edge.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -216,7 +219,12 @@ void FfiOHOSAceFrameworkButtonSetPadding(double top, int32_t topUnit, double rig
     Dimension rightValue(right, static_cast<DimensionUnit>(rightUnit));
     Dimension bottomValue(bottom, static_cast<DimensionUnit>(bottomUnit));
     Dimension leftValue(left, static_cast<DimensionUnit>(leftUnit));
-    ViewAbstractModel::GetInstance()->SetPaddings(topValue, rightValue, bottomValue, leftValue);
+    NG::PaddingProperty paddings;
+    paddings.top = NG::CalcLength(topValue);
+    paddings.right = NG::CalcLength(rightValue);
+    paddings.bottom = NG::CalcLength(bottomValue);
+    paddings.left = NG::CalcLength(leftValue);
+    ButtonModel::GetInstance()->Padding(paddings, Edge());
 }
 
 void FfiOHOSAceFrameworkButtonSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
