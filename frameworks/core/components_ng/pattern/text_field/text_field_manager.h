@@ -35,6 +35,14 @@ struct TextFieldInfo {
     bool enableAutoFill = true;
 };
 
+struct LaterAvoidInfo {
+    bool laterAvoid = false;
+    Rect keyboardArea;
+    double positionY = 0.0;
+    double avoidHeight = 0.0;
+    int32_t orientation = -1;
+};
+
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
@@ -206,41 +214,37 @@ public:
 
     bool GetLaterAvoid() const
     {
-        return laterAvoid_;
+        return laterAvoidInfo_.laterAvoid;
     }
 
     void SetLaterAvoid(bool laterAvoid)
     {
-        laterAvoid_ = laterAvoid;
+        laterAvoidInfo_.laterAvoid = laterAvoid;
     }
 
-    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height, int32_t orientation)
+    void SetLaterAvoidArgs(LaterAvoidInfo laterAvoidInfo)
     {
-        laterAvoid_ = true;
-        laterAvoidKeyboardArea_ = keyboardArea;
-        laterAvoidPositionY_ = positionY;
-        laterAvoidHeight_ = height;
-        laterOrientation_ = orientation;
+        laterAvoidInfo_ = laterAvoidInfo;
     }
 
     Rect GetLaterAvoidKeyboardRect()
     {
-        return laterAvoidKeyboardArea_;
+        return laterAvoidInfo_.keyboardArea;
     }
 
     double GetLaterAvoidPositionY()
     {
-        return laterAvoidPositionY_;
+        return laterAvoidInfo_.positionY;
     }
 
     double GetLaterAvoidHeight()
     {
-        return laterAvoidHeight_;
+        return laterAvoidInfo_.avoidHeight;
     }
 
     int32_t GetLaterOrientation()
     {
-        return laterOrientation_;
+        return laterAvoidInfo_.orientation;
     }
 
     void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
@@ -328,11 +332,7 @@ private:
     bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
     std::unordered_map<int32_t, std::unordered_map<int32_t, TextFieldInfo>> textFieldInfoMap_;
-    bool laterAvoid_ = false;
-    Rect laterAvoidKeyboardArea_;
-    double laterAvoidPositionY_ = 0.0;
-    double laterAvoidHeight_ = 0.0;
-    int32_t laterOrientation_ = -1;
+    LaterAvoidInfo laterAvoidInfo_;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
     std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;

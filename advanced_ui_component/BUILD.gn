@@ -32,6 +32,7 @@ group("advanced_ui_component") {
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "innerfullscreenlaunchcomponent/interfaces:innerfullscreenlaunchcomponent",
     "interstitialdialogaction/interfaces:interstitialdialogaction",
+    "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",

@@ -36,6 +36,15 @@ void ShapeAbstractModelNG::SetFill(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
+void ShapeAbstractModelNG::SetForegroundColor(const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Fill, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+}
 
 void ShapeAbstractModelNG::SetFill(FrameNode* frameNode, const Color& color)
 {

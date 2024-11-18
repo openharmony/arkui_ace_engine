@@ -42,6 +42,11 @@ void ShapeAbstractModelImpl::SetFill(const Color& color)
     component->SetFill(color, option);
 }
 
+void ShapeAbstractModelImpl::SetForegroundColor(const Color& color)
+{
+    SetFill(color);
+}
+
 void ShapeAbstractModelImpl::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
 {
     auto stack = ViewStackProcessor::GetInstance();

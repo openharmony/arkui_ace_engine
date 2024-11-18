@@ -834,7 +834,12 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    DispatchPointerEvent(newPointerEvent);
+    auto pointerAction = newPointerEvent->GetPointerAction();
+    if (!(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
+        DispatchPointerEvent(newPointerEvent);
+    }
     if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();

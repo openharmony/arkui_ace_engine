@@ -461,7 +461,7 @@ void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColor(Color::BLACK);
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetFill(foregroundColor);
+    ShapeAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 } // namespace OHOS::Ace::Framework

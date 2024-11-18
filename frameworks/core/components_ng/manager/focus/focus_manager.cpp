@@ -41,7 +41,7 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTrig
         if (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView)) {
             return;
         }
-        if (!focusView->IsChildFocusViewOf(lastFocusView)) {
+        if (!focusView->IsChildFocusViewOf(lastFocusView) && IsAutoFocusTransfer()) {
             lastFocusView->LostViewFocus();
         }
     }
@@ -51,6 +51,7 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTrig
         focusViewStack_.remove(focusViewWeak);
     }
     focusViewStack_.emplace_back(focusViewWeak);
+    focusViewStackState_ = FocusViewStackState::SHOW;
     lastFocusView_ = focusViewWeak;
 
     // do not set LastWeakFocus to Previous node/scope in focusView when FocusViewShow trigger by FocusStep
@@ -66,18 +67,44 @@ void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTrig
     }
 }
 
+bool FocusManager::RearrangeViewStack()
+{
+    auto curFocusView = FocusView::GetCurrentFocusView();
+    CHECK_NULL_RETURN(curFocusView, false);
+    auto curFocusViewHub = curFocusView->GetFocusHub();
+    CHECK_NULL_RETURN(curFocusViewHub, false);
+    auto curFocusViewWeak = AceType::WeakClaim(AceType::RawPtr(curFocusView));
+    if (!curFocusViewHub->IsCurrentFocus() && focusViewStackState_ == FocusViewStackState::SHOW) {
+        if (std::find(focusViewStack_.begin(), focusViewStack_.end(), curFocusViewWeak) != focusViewStack_.end()) {
+            focusViewStack_.remove(curFocusViewWeak);
+        }
+        lastFocusView_ = focusViewStack_.back();
+        return true;
+    }
+    if (focusViewStackState_ == FocusViewStackState::CLOSE) {
+        auto ret = SetFocusViewRootScope(curFocusView);
+        return ret;
+    }
+    return false;
+}
+
 void FocusManager::FocusViewHide(const RefPtr<FocusView>& focusView)
 {
     CHECK_NULL_VOID(focusView);
-    focusView->LostViewFocus();
+    if (IsAutoFocusTransfer()) {
+        focusView->LostViewFocus();
+    }
     auto lastFocusView = lastFocusView_.Upgrade();
     if (lastFocusView && (lastFocusView == focusView || lastFocusView->IsChildFocusViewOf(focusView))) {
         lastFocusView_ = nullptr;
     }
 }
 
-void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
+void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView, bool isDetachFromTree)
 {
+    if (!IsAutoFocusTransfer() && !isDetachFromTree)  {
+        return;
+    }
     CHECK_NULL_VOID(focusView);
     focusView->LostViewFocus();
     focusView->SetIsViewHasShow(false);
@@ -89,6 +116,7 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
                 focusHub->RemoveFocusScopeIdAndPriority();
             }
             iter = focusViewStack_.erase(iter);
+            focusViewStackState_ = FocusViewStackState::CLOSE;
         } else {
             ++iter;
         }
@@ -408,6 +436,13 @@ FocusManager::FocusGuard::~FocusGuard()
     }
 }
 
+bool FocusManager::SetFocusViewRootScope(const RefPtr<FocusView>& focusView)
+{
+    auto focusViewRootScope = focusView->GetViewRootScope();
+    focusView->SetIsViewRootScopeFocused(true);
+    return focusViewRootScope->RequestFocusImmediatelyInner();
+}
+
 void FocusManager::WindowFocus(bool isFocus)
 {
     if (!isFocus) {
@@ -422,8 +457,12 @@ void FocusManager::WindowFocus(bool isFocus)
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-        auto lastViewFocusNode = curFocusView->GetFocusLeaf(curFocusViewHub);
-        lastViewFocusNode->RequestFocusImmediatelyInner();
+        if (!IsAutoFocusTransfer()) {
+            SetFocusViewRootScope(curFocusView);
+        } else {
+            auto lastViewFocusNode = curFocusView->GetFocusLeaf(curFocusViewHub);
+            lastViewFocusNode->RequestFocusImmediatelyInner();
+        }
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {

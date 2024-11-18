@@ -36,6 +36,7 @@ public:
     void SetInstanceId(int32_t instanceId);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
+    MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
     MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
     MOCK_METHOD(float, GetFontScale, ());
     MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));

@@ -1709,31 +1709,4 @@ ArkUINativeModuleValue SearchBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallI
     GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnableHapticFeedback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-
-ArkUINativeModuleValue SearchBridge::SetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    if (secondArg->IsNumber()) {
-        int32_t value = secondArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchAutoCapitalizationMode(nativeNode, value);
-    } else {
-        GetArkUINodeModifiers()->getSearchModifier()->resetSearchAutoCapitalizationMode(nativeNode);
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue SearchBridge::ResetSearchAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getSearchModifier()->resetSearchAutoCapitalizationMode(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
 } // namespace OHOS::Ace::NG

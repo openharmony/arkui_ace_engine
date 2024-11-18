@@ -69,11 +69,6 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool value) override
-    {
-        overScroll_ = value;
-    }
-
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
 private:
@@ -177,9 +172,6 @@ private:
     std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
-
-    // true if WaterFlow can be overScrolled
-    bool overScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowSegmentedLayout);
 };

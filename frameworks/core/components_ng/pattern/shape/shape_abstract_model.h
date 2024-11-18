@@ -29,6 +29,7 @@ public:
     virtual ~ShapeAbstractModel() = default;
     virtual void SetStroke(const Color& color) = 0;
     virtual void SetFill(const Color& color) = 0;
+    virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset) = 0;
     virtual void SetStrokeLineCap(int lineCapStyle) = 0;
     virtual void SetStrokeLineJoin(int lineJoinStyle) = 0;

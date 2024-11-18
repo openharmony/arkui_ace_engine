@@ -36,16 +36,6 @@ namespace OHOS::Ace {
 class ImageAnalyzerManager;
 }
 namespace OHOS::Ace::NG {
-enum class PlayerStatus {
-    NONE,
-    ERROR,
-    INITIALIZING,
-    INITIALIZED,
-    PREPARING,
-    PREPARED,
-    RELEASING,
-    RELEASED,
-};
 class VideoPattern : public Pattern {
     DECLARE_ACE_TYPE(VideoPattern, Pattern);
 
@@ -168,7 +158,7 @@ public:
 
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
-    void ResetMediaPlayer(bool isResetByUser = false);
+    void ResetMediaPlayer();
 
     void EnableDrag();
     void SetIsStop(bool isStop)
@@ -275,41 +265,6 @@ public:
         return isPrepared_;
     }
 
-    bool GetIsSeekingWhenNotPrepared() const
-    {
-        return isSeekingWhenNotPrepared_;
-    }
-    uint32_t GetSeekingPosWhenNotPrepared() const
-    {
-        return seekingPosWhenNotPrepared_;
-    }
-    SeekMode GetSeekingModeWhenNotPrepared() const
-    {
-        return seekingModeWhenNotPrepared_;
-    }
-    void UpdateVisibility(bool isVisible)
-    {
-        isVisible_ = isVisible;
-    }
-    VideoSourceInfo GetVideoSource()
-    {
-        return videoSrcInfo_;
-    }
-    void PrepareAsyncOnBg();
-    PlayerStatus GetPlayerStatus()
-    {
-        return playerStatus_;
-    }
-    void SetTargetPlayerStatus(PlayerStatus playerStatus)
-    {
-        playerStatus_ = playerStatus;
-    }
-    void InitializeMediaPlayer();
-    void PrepareAsync();
-    CancelableCallback<void()> GetInitializingTask()
-    {
-        return initializingTask_;
-    }
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
@@ -399,7 +354,7 @@ private:
     void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
-    void CheckNeedPlay();
+    void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
@@ -431,16 +386,6 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
 
-    void UpdateControlBar(uint32_t duration, bool isChangePlayBtn = false);
-    void StartPlay();
-    void SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode);
-    bool IsVideoSourceChanged();
-    void RecordSeekingInfoBeforePlaying(float currentPos, OHOS::Ace::SeekMode seekMode, bool sliderChange = false);
-    void RegisterVisibleRatioCallback();
-    void ReleaseMediaPlayer();
-    bool ShouldPrepareMediaPlayer();
-    void ResetInitializingPlayerTask();
-    bool IsPlayerInValidStatus();
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -483,13 +428,6 @@ private:
     Rect contentRect_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
-    bool isSeekingWhenNotPrepared_ = false;
-    uint32_t seekingPosWhenNotPrepared_ = 0;
-    SeekMode seekingModeWhenNotPrepared_ = SeekMode::SEEK_CLOSEST;
-    bool isStartByUser_ = false;
-    bool isVisible_ = false;
-    PlayerStatus playerStatus_ = PlayerStatus::NONE;
-    CancelableCallback<void()> initializingTask_;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

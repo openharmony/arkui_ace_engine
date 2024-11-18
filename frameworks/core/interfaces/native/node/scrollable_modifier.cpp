@@ -35,10 +35,55 @@ void ResetContentClip(ArkUINodeHandle node)
     ScrollableModelNG::SetContentClip(frameNode, ContentClipMode::DEFAULT, nullptr);
 }
 
+void SetOnReachStartCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onReachStart = reinterpret_cast<OnReachEvent*>(extraParam);
+        ScrollableModelNG::SetOnReachStart(frameNode, std::move(*onReachStart));
+    } else {
+        ScrollableModelNG::SetOnReachStart(frameNode, nullptr);
+    }
+}
+
+void ResetOnReachStartCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnReachStart(frameNode, nullptr);
+}
+
+void SetOnReachEndCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onReachEnd = reinterpret_cast<OnReachEvent*>(extraParam);
+        ScrollableModelNG::SetOnReachEnd(frameNode, std::move(*onReachEnd));
+    } else {
+        ScrollableModelNG::SetOnReachEnd(frameNode, nullptr);
+    }
+}
+
+void ResetOnReachEndCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIScrollableModifier* GetScrollableModifier()
 {
-    static const ArkUIScrollableModifier modifier = { SetContentClip, ResetContentClip };
+    static const ArkUIScrollableModifier modifier = {
+        SetContentClip,
+        ResetContentClip,
+        SetOnReachStartCallBack,
+        ResetOnReachStartCallBack,
+        SetOnReachEndCallBack,
+        ResetOnReachEndCallBack,
+    };
     return &modifier;
 }
 } // namespace NodeModifier

@@ -159,6 +159,9 @@ void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
+            if (info.GetTouches().empty()) {
+                return;
+            }
             TouchType touchType = info.GetTouches().front().GetTouchType();
             if (touchType == TouchType::DOWN) {
                 indexerPattern->isTouch_ = true;
@@ -513,7 +516,7 @@ void IndexerPattern::InitPopupPanEvent()
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "touch down at alphabetIndexer");
-    if (itemCount_ <= 0) {
+    if (itemCount_ <= 0 || info.GetTouches().empty()) {
         return;
     }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
@@ -1601,6 +1604,9 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
         info.SetStopPropagation(true);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN) {
             indexerPattern->isTouch_ = true;
@@ -1623,6 +1629,9 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
     auto touchCallback = [weak = WeakClaim(this), index](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         TouchType touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN) {
             indexerPattern->OnListItemClick(index);

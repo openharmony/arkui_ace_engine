@@ -38,6 +38,15 @@ constexpr int32_t INVALID_DESTINATION_MODE = -1;
 constexpr char JS_STRINGIFIED_UNDEFINED[] = "undefined";
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
+
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
 }
 
 std::string JSRouteInfo::GetName()
@@ -1064,13 +1073,17 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
 
 std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
 {
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, JS_STRINGIFIED_UNDEFINED);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, JS_STRINGIFIED_UNDEFINED);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-
+    auto env = GetNapiEnv();
+    if (!env) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
     if (dataSourceObj_->IsEmpty()) {
+        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     napi_value navPathStack = JsConverter::ConvertJsValToNapiValue(dataSourceObj_);
@@ -1091,17 +1104,20 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
     if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
         napi_get_and_clear_last_exception(env, &stringifyParam);
+        napi_close_handle_scope(env, scope);
         return JS_STRINGIFIED_UNDEFINED;
     }
     size_t len = 0;
     napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
     std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
     napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
+    napi_close_handle_scope(env, scope);
     return paramChar.get();
 }
 
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     JSRef<JSArray> newPathArray = JSRef<JSArray>::New();
     for (int32_t index = 0; index < static_cast<int32_t>(navdestinationsInfo.size()); ++index) {
         auto infoName = navdestinationsInfo[index].name;
@@ -1123,6 +1139,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
 
 bool JSNavigationStack::IsFromRecovery(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return false;
@@ -1136,6 +1153,7 @@ bool JSNavigationStack::IsFromRecovery(int32_t index)
 
 void JSNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return;
@@ -1145,6 +1163,7 @@ void JSNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
 
 int32_t JSNavigationStack::GetRecoveredDestinationMode(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
     auto pathInfo = GetJsPathInfo(index);
     if (pathInfo->IsEmpty()) {
         return INVALID_DESTINATION_MODE;

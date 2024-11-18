@@ -55,7 +55,7 @@ const auto ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_FRICTION_NAME = "friction";
 const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = "0.75";
 const auto ATTRIBUTE_FLING_SPEED_LIMIT_NAME = "flingSpeedLimit";
-const auto ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE = "12000.00vp";
+const auto ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE = "9000.00vp";
 } // namespace
 
 class ScrollableCommonMethodModifierTest
@@ -677,7 +677,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnabl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFrictionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;

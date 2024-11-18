@@ -15,7 +15,9 @@
 
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
-import common from '@ohos.app.ability.common';
+import { common, EnvironmentCallback } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 export enum IconType {
   BADGE = 1,
@@ -104,24 +106,16 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - ${RIGHT_ONLY_ARROW_WIDTH})';
-const RIGHT_ONLY_IMAGE_WIDTH = '48vp';
-const LEFT_ONLY_IMAGE_WIDTH = 'calc(100% - ${RIGHT_ONLY_IMAGE_WIDTH})';
-const RIGHT_ONLY_ICON_WIDTH = '32vp';
-const LEFT_ONLY_ICON_WIDTH = 'calc(100% - ${RIGHT_ONLY_ICON_WIDTH})';
-const RIGHT_ICON_SUB_ICON_WIDTH = '72vp';
-const LEFT_ICON_SUB_ICON_WIDTH = 'calc(100% - ${RIGHT_ICON_SUB_ICON_WIDTH})';
-const RIGHT_ONLY_RADIO_WIDTH = '24vp';
-const LEFT_ONLY_RADIO_WIDTH = 'calc(100% - ${RIGHT_ONLY_RADIO_WIDTH})';
-const RIGHT_ONLY_CHECKBOX_WIDTH = '24vp';
-const LEFT_ONLY_CHECKBOX_WIDTH = 'calc(100% - ${RIGHT_ONLY_CHECKBOX_WIDTH})';
-const RIGHT_ONLY_SWITCH_WIDTH = '40vp';
-const LEFT_ONLY_SWITCH_WIDTH = 'calc(100% - ${RIGHT_ONLY_SWITCH_WIDTH})';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
@@ -225,7 +219,7 @@ struct ContentItemStruct {
       }
     }
     .flexShrink(1)
-    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined :{
+    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
       top: TEXT_SAFE_MARGIN,
       bottom: TEXT_SAFE_MARGIN
     })
@@ -263,7 +257,6 @@ struct ContentItemStruct {
       LengthMetrics.vp(16)
     })
     .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
-    .width(this.isParentColumnDirection() ? undefined : this.leftWidth)
     .flexShrink(this.isParentColumnDirection() ? 0 : 1)
   }
 }
@@ -477,6 +470,7 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -505,6 +499,7 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -577,7 +572,7 @@ struct OperateItemStruct {
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
           end: LengthMetrics.vp(LISTITEM_PADDING)
         })
-      }else {
+      } else {
         Row({ space: SPECICAL_ROW_SPACE }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -704,6 +699,7 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
+  private callbackId: number | undefined = undefined;
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -743,57 +739,59 @@ export struct ComposeListItem {
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
-
   }
 
   aboutToAppear() {
+    this.fontSizeScale = this.decideFontSizeScale();
     this.onPropChange();
+    try {
+      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+    } catch (paramError) {
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
+    }
   }
 
-  calculatedLeftWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_LEFTWIDTH;
-    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_SWITCH_WIDTH;
-    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_CHECKBOX_WIDTH;
-    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_RADIO_WIDTH;
-    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-      if (this.operateItem?.subIcon != null) {
-        return LEFT_ICON_SUB_ICON_WIDTH;
-      }
-      return LEFT_ONLY_ICON_WIDTH;
-    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_IMAGE_WIDTH;
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_ARROW_WIDTH;
-    } else {
-      return LEFT_PART_WIDTH;
+  private envCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      this.fontSizeScale = this.decideFontSizeScale();
+    },
+    onMemoryLevel: (level) => {}
+  }
+
+  aboutToDisappear() {
+    if (this.callbackId) {
+      this.getUIContext()
+        .getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0);
     }
   }
 
   calculatedRightWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH;
-    } else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+    if (this.operateItem?.text) {
+      return RIGHT_PART_WIDTH;
+    }
+    if (this.operateItem?.switch) {
       return RIGHT_ONLY_SWITCH_WIDTH;
-    } else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.checkbox) {
       return RIGHT_ONLY_CHECKBOX_WIDTH;
-    } else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.radio) {
       return RIGHT_ONLY_RADIO_WIDTH;
-    } else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-      if (this.operateItem?.subIcon != null) {
+    } else if (this.operateItem?.icon) {
+      if (this.operateItem?.subIcon) {
         return RIGHT_ICON_SUB_ICON_WIDTH;
       }
       return RIGHT_ONLY_ICON_WIDTH;
-    } else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.image) {
       return RIGHT_ONLY_IMAGE_WIDTH;
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
+    } else if (this.operateItem?.arrow) {
       return RIGHT_ONLY_ARROW_WIDTH;
-    } else {
-      return RIGHT_PART_WIDTH;
     }
+    return RIGHT_CONTENT_NULL_RIGHTWIDTH;
   }
 
   decideContentItemDirection(): FlexDirection {
@@ -898,17 +896,6 @@ export struct ComposeListItem {
     )
   }
 
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
-    this.fontSizeScale = this.decideFontSizeScale();
-    let sizeResult: SizeResult = { height: 0, width: 0 };
-    children.forEach((child) => {
-      let childMeasureResult: MeasureResult = child.measure(constraint);
-      sizeResult.width = childMeasureResult.width;
-      sizeResult.height = childMeasureResult.height;
-    });
-    return sizeResult;
-  }
-
   build() {
     Stack() {
       Flex(this.getFlexOptions()) {
@@ -922,7 +909,6 @@ export struct ComposeListItem {
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
             description: this.contentItem?.description,
-            leftWidth: this.calculatedLeftWidth(),
             fontSizeScale: this.fontSizeScale,
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
@@ -997,6 +983,7 @@ export struct ComposeListItem {
         }
       }).padding(this.containerPadding)
     }
+    .width('100%')
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING

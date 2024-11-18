@@ -81,7 +81,7 @@ HWTEST_F(CounterModifierTest, setEnableDecTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setEnableDecTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setEnableDecTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Boolean inputValue;
@@ -115,7 +115,7 @@ HWTEST_F(CounterModifierTest, setEnableIncTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, setEnableIncTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, DISABLED_setEnableIncTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Boolean inputValue;

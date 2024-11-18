@@ -36,6 +36,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+        info_->isDataValid_ = false;
         return;
     }
     CheckReset();
@@ -65,7 +66,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Lanes not initialized, can't perform layout");
         return;
     }
-    if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+    if (!info_->isDataValid_) {
         return;
     }
     if (info_->targetIndex_) {
@@ -546,7 +547,7 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         info_->delta_ = -Infinity<float>();
     }
     jumpIdx = std::min(itemCnt_ - 1, jumpIdx);
-    overScroll_ = false;
+    SetCanOverScroll(false);
 
     bool inView = info_->ItemInView(jumpIdx);
     if (align == ScrollAlign::AUTO) {
@@ -636,7 +637,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         maxEnd += info_->footerHeight_;
     }
 
-    if (overScroll_) {
+    if (CanOverScroll()) {
         return;
     }
     maxEnd += info_->BotMargin();

@@ -141,22 +141,19 @@ public:
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
-    static void SetOnItemDragStart(FrameNode* frameNode,
-        std::function<void(const ItemDragInfo&, int32_t)>&& onItemDragStart);
-    static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
-    static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
-    static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
-    static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
-    static void SetOnScrollVisibleContentChange(FrameNode* frameNode,
-        OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
-    static void SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete) {};
-    static void SetOnItemMove(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& onItemMove);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
+    static void SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
+    static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
+    static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
+    static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
+    static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
+    static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

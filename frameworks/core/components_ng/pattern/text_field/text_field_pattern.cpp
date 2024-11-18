@@ -458,9 +458,6 @@ TextFieldPattern::~TextFieldPattern()
         CloseCustomKeyboard();
     }
     RemoveTextFieldInfo();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
 }
 
 void TextFieldPattern::CheckAndUpdateRecordBeforeOperation()
@@ -612,47 +609,45 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
 {
-    if (IsInPasswordMode() && IsShowPasswordIcon()) {
-        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-        CHECK_NULL_VOID(passwordArea);
-        auto node = passwordArea->GetFrameNode();
-        CHECK_NULL_VOID(node);
-        auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(textAccessibilityProperty);
-        textAccessibilityProperty->SetAccessibilityLevel("yes");
-        textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
-    }
+    CHECK_NULL_VOID(IsShowPasswordIcon());
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    auto node = passwordArea->GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
 }
 
 void TextFieldPattern::SetAccessibilityClearAction()
 {
-    if (IsShowCancelButtonMode()) {
-        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (cleanNodeResponseArea) {
-            auto stackNode = cleanNodeResponseArea->GetFrameNode();
-            CHECK_NULL_VOID(stackNode);
-            auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
-            CHECK_NULL_VOID(textAccessibilityProperty);
-            textAccessibilityProperty->SetAccessibilityLevel("yes");
-            auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
-            auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                              (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
-            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
-        }
-    }
+    CHECK_NULL_VOID(IsShowCancelButtonMode());
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_VOID(cleanNodeResponseArea);
+    auto stackNode = cleanNodeResponseArea->GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+    auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
 }
 
 void TextFieldPattern::SetAccessibilityUnitAction()
 {
-    if (unitNode_ && responseArea_) {
-        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
-        CHECK_NULL_VOID(unitNode);
-        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(unitAccessibilityProperty);
-        unitAccessibilityProperty->SetAccessibilityLevel("yes");
+    if (!unitNode_ || !responseArea_) {
+        return;
     }
+    auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+    CHECK_NULL_VOID(unitNode);
+    auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(unitAccessibilityProperty);
+    unitAccessibilityProperty->SetAccessibilityLevel("yes");
 }
 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
@@ -4217,8 +4212,6 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
-void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
-
 bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -5980,24 +5973,6 @@ std::string TextFieldPattern::TextInputActionToString() const
     }
 }
 
-std::string TextFieldPattern::AutoCapTypeToString() const
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
-    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
-        case AutoCapitalizationMode::NONE:
-            return "AutoCapitalizationMode.NONE";
-        case AutoCapitalizationMode::WORDS:
-            return "AutoCapitalizationMode.WORDS";
-        case AutoCapitalizationMode::SENTENCES:
-            return "AutoCapitalizationMode.SENTENCES";
-        case AutoCapitalizationMode::ALL_CHARACTERS:
-            return "AutoCapitalizationMode.ALL_CHARACTERS";
-        default:
-            return "AutoCapitalizationMode.NONE";
-    }
-}
-
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -6507,6 +6482,13 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
         textNodeLayoutProperty->UpdateMaxLines(ERROR_TEXT_MAXLINE);
         textNodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textNodeLayoutProperty->UpdateIsAnimationNeeded(false);
+        auto layoutProperty = host->GetLayoutProperty();
+        auto isRTL = layoutProperty && (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL);
+        if (isRTL) {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+        } else {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+        }
 
         auto accessibilityProperty = errorTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
@@ -7188,7 +7170,6 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
-    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -8819,17 +8800,43 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     // delete or insert space.
     auto wtext = GetWideText();
     if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        auto ret = SetCaretOffset(index);
+        if (!ret) {
+            return false;
+        }
         if (wtext[index] == L' ') {
-            Delete(index, index + 1);
+            DeleteForward(1);
         } else if (index > 0 && wtext[index - 1] == L' ') {
-            Delete(index - 1, index);
+            DeleteBackward(1);
         } else {
-            SetCaretPosition(index);
-            InsertValue(" ");
+            InsertValue(" ", true);
         }
         return true;
     }
     return false;
+}
+
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+{
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+    GetEmojiSubStringRange(start, end);
+    auto value = contentController_->GetSelectedValue(start, end);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    CheckAndUpdateRecordBeforeOperation();
+    Delete(start, end);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    showCountBorderStyle_ = false;
+    HandleCountStyle();
 }
 
 bool TextFieldPattern::IsShowAIWrite()

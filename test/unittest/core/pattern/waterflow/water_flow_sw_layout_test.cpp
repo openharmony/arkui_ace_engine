@@ -1951,4 +1951,60 @@ HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), -560.0f);
     EXPECT_EQ(GetChildY(frameNode_, 10), 1040.0f);
 }
+
+/**
+ * @tc.name: Illegal004
+ * @tc.desc: When the notification of Lazyforeach and section update doesn't come in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Illegal004, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    CreateWaterFlowItems(5);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_13);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 4);
+    EXPECT_EQ(info_->maxHeight_, 500);
+    // lazyforeach notification comes first.
+    for (int i = 3; i <= 4; ++i) {
+        frameNode_->RemoveChildAtIndex(3);
+    }
+    frameNode_->ChildrenUpdatedFrom(3);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    // IsSectionValid() is false, stop measure and layout.
+    EXPECT_EQ(info_->maxHeight_, 500);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 4);
+    // if IsSectionValid() is false, remain the ChildrenUpdatedFrom.
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 3);
+
+    // section update comes in next frame.
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+                                                               .itemsCount = 2, .crossCount = 2 },
+        WaterFlowSections::Section { .itemsCount = 1, .crossCount = 2 } };
+    secObj->ChangeData(0, 3, newSection);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 3);
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 2);
+    EXPECT_EQ(info_->maxHeight_, 300);
+    EXPECT_EQ(
+        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
+    EXPECT_EQ(
+        info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(
+        info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
+    EXPECT_EQ(
+        info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 200.000000 empty}");
+    EXPECT_EQ(info_->idxToLane_.size(), 3);
+    EXPECT_FALSE(info_->idxToLane_.count(3));
+}
 } // namespace OHOS::Ace::NG
