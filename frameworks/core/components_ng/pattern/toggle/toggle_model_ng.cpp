@@ -384,12 +384,16 @@ void ToggleModelNG::ResetPointRadius()
     }
 }
 
-void ToggleModelNG::SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius)
+void ToggleModelNG::SetPointRadius(FrameNode* frameNode, const std::optional<Dimension>& switchPointRadius)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        paintProperty->UpdatePointRadius(switchPointRadius);
+        if (switchPointRadius.has_value()) {
+            paintProperty->UpdatePointRadius(switchPointRadius.value());
+        } else {
+            ToggleModelNG::ResetPointRadius(frameNode);
+        }
     }
 }
 
@@ -413,12 +417,16 @@ void ToggleModelNG::SetUnselectedColor(const Color& unselectedColor)
     }
 }
 
-void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor)
+void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const std::optional<Color>& unselectedColor)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        paintProperty->UpdateUnselectedColor(unselectedColor);
+        if (unselectedColor.has_value()) {
+            paintProperty->UpdateUnselectedColor(unselectedColor.value());
+        } else {
+            paintProperty->ResetUnselectedColor();
+        }
     }
 }
 
@@ -443,12 +451,16 @@ void ToggleModelNG::ResetTrackBorderRadius()
     }
 }
 
-void ToggleModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius)
+void ToggleModelNG::SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& borderRadius)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        paintProperty->UpdateTrackBorderRadius(borderRadius);
+        if (borderRadius.has_value()) {
+            paintProperty->UpdateTrackBorderRadius(borderRadius.value());
+        } else {
+            ToggleModelNG::ResetTrackBorderRadius(frameNode);
+        }
     }
 }
 
@@ -501,16 +513,19 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
         CHECK_NULL_VOID(theme);
         color = theme->GetActiveColor();
     }
-
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
 }
 
-void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor)
+void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        paintProperty->UpdateSwitchPointColor(switchPointColor);
+        if (switchPointColor.has_value()) {
+            paintProperty->UpdateSwitchPointColor(switchPointColor.value());
+        } else {
+            paintProperty->ResetSwitchPointColor();
+        }
     }
 }
 

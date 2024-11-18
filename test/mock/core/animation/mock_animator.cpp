@@ -305,4 +305,6 @@ bool Animator::PrintVsyncInfoIfNeed() const
 {
     return false;
 }
+
+void Animator::ResetIsReverse() {}
 } // namespace OHOS::Ace

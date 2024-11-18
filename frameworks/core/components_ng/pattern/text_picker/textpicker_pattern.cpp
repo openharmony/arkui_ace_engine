@@ -1003,8 +1003,7 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     CHECK_NULL_RETURN(context, "");
     if (context->GetIsDeclarative()) {
         if (values.size() == 1) {
-            return std::string("{\"value\":") + "\"" + values[0] + "\"" + ",\"index\":" + std::to_string(indexs[0]) +
-                   ",\"status\":" + std::to_string(status) + "}";
+            return GetSelectedObjectStr(values[0], indexs[0], status);
         } else {
             return GetSelectedObjectMulti(values, indexs, status);
         }
@@ -1013,6 +1012,13 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
                 values[0] + "\"" + ",\"newSelected\":" + std::to_string(indexs[0]) +
                ",\"status\":" + std::to_string(status) + "}";
     }
+}
+
+std::string TextPickerPattern::GetSelectedObjectStr(const std::string value,
+    const uint32_t index, int32_t status) const
+{
+    return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
+           ",\"status\":" + std::to_string(status) + "}";
 }
 
 void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

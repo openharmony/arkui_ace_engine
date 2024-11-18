@@ -2155,4 +2155,9 @@ void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha
     pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
     pasteButton_->MarkModifyDone();
 }
+
+void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("selected", IsSelected(), filter);
+}
 } // namespace OHOS::Ace::NG

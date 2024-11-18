@@ -861,6 +861,8 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+void PipelineContext::FlushDirtyPropertyNodes() {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

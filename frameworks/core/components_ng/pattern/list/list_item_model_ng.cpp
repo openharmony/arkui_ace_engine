@@ -56,6 +56,13 @@ void ListItemModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ListItemModelNG::CreateListItem(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    return frameNode;
+}
+
 void ListItemModelNG::OnDidPop()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -91,9 +98,24 @@ void ListItemModelNG::SetSticky(V2::StickyMode stickyMode)
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, stickyMode);
 }
 
+void ListItemModelNG::SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode)
+{
+    if (stickyMode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, stickyMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, frameNode);
+    }
+}
+
 void ListItemModelNG::SetEditMode(uint32_t editMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EditMode, editMode);
+}
+
+void ListItemModelNG::SetEditMode(FrameNode* frameNode, uint32_t editMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EditMode, editMode, frameNode);
 }
 
 void ListItemModelNG::SetSelectable(bool selectable)
@@ -240,13 +262,18 @@ void ListItemModelNG::SetDeleteArea(FrameNode* frameNode, FrameNode* buildNode, 
 }
 
 void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
-    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+    std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
+    const std::optional<V2::SwipeEdgeEffect>& edgeEffect)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+    if (edgeEffect.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, frameNode);
+    }
 }
 
 void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
@@ -255,6 +282,14 @@ void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& sel
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelect(std::move(selectCallback));
+}
+
+void ListItemModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListItemStyle(style.value_or(V2::ListItemStyle::NONE));
 }
 
 } // namespace OHOS::Ace::NG

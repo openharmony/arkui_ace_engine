@@ -481,17 +481,25 @@ DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
 }
 
 void CalendarPickerModelNG::SetEdgeAlign(
-    FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
+    FrameNode* frameNode, const std::optional<CalendarEdgeAlign>& alignType,
+    const std::optional<DimensionOffset>& offset)
 {
-    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    pickerPattern->SetCalendarEdgeAlign(alignType);
-    pickerPattern->SetCalendarDialogOffset(offset);
-
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
+    if (offset) {
+        pickerPattern->SetCalendarDialogOffset(offset.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset.value(), frameNode);
+    } else {
+        pickerPattern->SetCalendarDialogOffset(DimensionOffset());
+        ACE_RESET_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, frameNode);
+    }
+    if (alignType) {
+        pickerPattern->SetCalendarEdgeAlign(alignType.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType.value(), frameNode);
+    } else {
+        pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_END);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, frameNode);
+    }
 }
 
 void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)

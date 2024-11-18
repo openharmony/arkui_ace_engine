@@ -292,6 +292,8 @@ private:
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
+    std::string FontFeatureToString(std::optional<FONT_FEATURES_LIST>& fontFeatureOpt) const;
+    std::string TextInputActionToString(TextInputAction action) const;
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

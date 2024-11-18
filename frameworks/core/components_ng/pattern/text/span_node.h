@@ -298,8 +298,8 @@ public:
     }
     std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
-    uint32_t GetSymbolUnicode();
-    std::string SymbolColorToString();
+    uint32_t GetSymbolUnicode() const;
+    std::string SymbolColorToString() const;
 
     virtual bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);

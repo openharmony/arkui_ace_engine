@@ -120,6 +120,13 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     UpdateMenuProperty(menuItem, menuItemProps);
 }
 
+RefPtr<FrameNode> MenuItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    return frameNode;
+}
+
 void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)
 {
     auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -170,6 +177,14 @@ void MenuItemModelNG::SetOnChange(std::function<void(bool)>&& onChange)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(onChange);
+}
+
+void MenuItemModelNG::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 
 void MenuItemModelNG::SetFontSize(const Dimension& fontSize)
@@ -258,6 +273,7 @@ void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
 
 void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value(), frameNode);
     } else {
@@ -267,6 +283,7 @@ void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optiona
 
 void MenuItemModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value(), frameNode);
     } else {
@@ -274,67 +291,106 @@ void MenuItemModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Col
     }
 }
 
-void MenuItemModelNG::SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize)
+void MenuItemModelNG::SetLabelFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value() && fontSize.value().IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, frameNode);
     }
 }
 
-void MenuItemModelNG::SetLabelFontWeight(FrameNode* frameNode, FontWeight weight)
+void MenuItemModelNG::SetLabelFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (weight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, frameNode);
+    }
 }
 
-void MenuItemModelNG::SetLabelFontFamily(FrameNode* frameNode, const std::vector<std::string> &families)
+void MenuItemModelNG::SetLabelFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontFamily, families, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (families.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontFamily, families.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontFamily, frameNode);
+    }
 }
 
-void MenuItemModelNG::SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle style)
+void MenuItemModelNG::SetLabelFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, style, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (style.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, style.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelItalicFontStyle, frameNode);
+    }
 }
 
-void MenuItemModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
+void MenuItemModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value() && fontSize.value().IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, frameNode);
     }
 }
 
-void MenuItemModelNG::SetFontWeight(FrameNode* frameNode, FontWeight weight)
+void MenuItemModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (weight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, frameNode);
+    }
 }
 
-void MenuItemModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string> &families)
+void MenuItemModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontFamily, families, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (families.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontFamily, families.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontFamily, frameNode);
+    }
 }
 
-void MenuItemModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle style)
+void MenuItemModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (style.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, frameNode);
+    }
 }
 
 void MenuItemModelNG::SetSelectIcon(FrameNode* frameNode, bool isShow)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIcon, isShow, frameNode);
 }
 
-void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::string& src)
+void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::optional<std::string>& src)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (src.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, frameNode);
+    }
 }
 
 void MenuItemModelNG::SetSelectIconSymbol(FrameNode* frameNode,
     std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply)
 {
+    CHECK_NULL_VOID(frameNode);
     if (symbolApply != nullptr) {
         auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
         CHECK_NULL_VOID(menuProperty);

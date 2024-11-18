@@ -435,7 +435,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
-    SwiperModelNG::SetNextMargin(frameNode, value);
+    SwiperModelNG::SetNextMargin(frameNode, value, std::nullopt);
 }
 
 void SetSwiperPrevMargin(
@@ -452,7 +452,7 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
-    SwiperModelNG::SetPreviousMargin(frameNode, value);
+    SwiperModelNG::SetPreviousMargin(frameNode, value, std::nullopt);
 }
 
 void SetSwiperDisplayCount(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType)
@@ -1043,19 +1043,16 @@ void SetSwiperOnChange(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
-        SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
-    } else {
-        SwiperModelNG::SetOnChange(frameNode, nullptr);
-    }
+    auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
 }
 
 void ResetSwiperOnChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetOnChange(frameNode, nullptr);
+    std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
+    SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 
 void SetSwiperOnAnimationStart(ArkUINodeHandle node, void* callback)

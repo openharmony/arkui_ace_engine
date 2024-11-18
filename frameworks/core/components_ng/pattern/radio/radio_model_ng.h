@@ -57,9 +57,9 @@ public:
     void SetBuilder(std::function<void()>&& buildFunc) override;
     static void SetRadioIndicator(int32_t indicator);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
-    static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
-    static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);
-    static void SetIndicatorColor(FrameNode* frameNode, const Color& color);
+    static void SetCheckedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetUncheckedBorderColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetIndicatorColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
@@ -68,6 +68,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);
     static bool GetChecked(FrameNode* frameNode);
     static Color GetCheckedBackgroundColor(FrameNode* frameNode);
     static Color GetUncheckedBorderColor(FrameNode* frameNode);

@@ -47,6 +47,7 @@ public:
     void HasUserDefinedOpacity() override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
+    static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

@@ -57,6 +57,10 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder);
     static void SetTabBarLabel(FrameNode* node, const std::string& label);
+    static void SetTabBar(FrameNode* node,
+        const std::optional<std::string>& label, const std::optional<std::string>& icon, TabBarBuilderFunc&& builder);
+    static void SetLayoutMode(FrameNode* node, LayoutMode layoutMode);
+    static void SetId(FrameNode* node, const std::string& id);
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;

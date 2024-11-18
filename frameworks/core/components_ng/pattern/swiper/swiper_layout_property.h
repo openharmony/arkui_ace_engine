@@ -148,7 +148,6 @@ public:
         json->PutExtAttr("arrowColor",
             propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
         json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
-        json->PutExtAttr("indicatorInteractive", propIndicatorInteractive_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
     }

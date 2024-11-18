@@ -49,7 +49,8 @@ void ResetColumnSplitDivider(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, { DEFAULT_DIVIDER_START, DEFAULT_DIVIDER_END });
+    ItemDivider divider = { DEFAULT_DIVIDER_START, DEFAULT_DIVIDER_END };
+    LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, divider);
 }
 
 namespace NodeModifier {

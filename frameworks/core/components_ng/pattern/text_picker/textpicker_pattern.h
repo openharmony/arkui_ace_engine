@@ -153,6 +153,9 @@ public:
 
     std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
 
+    std::string GetSelectedObjectStr(const std::string value,
+        const uint32_t index, int32_t status = 0) const;
+
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {

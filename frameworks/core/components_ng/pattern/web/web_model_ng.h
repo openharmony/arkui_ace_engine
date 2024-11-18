@@ -15,9 +15,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 
-#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
-#endif
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_model.h"
@@ -198,6 +195,66 @@ public:
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnabledHapticFeedback(bool isEnabled) override;
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
+    static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
+    static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);
+    static void SetSharedRenderProcessToken(FrameNode* frameNode,
+        const std::optional<std::string>& sharedRenderProcessToken);
+    static void SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController);
+    static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
+    static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
+    static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
+    static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
+    static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
+    static void SetForceDarkAccess(FrameNode* frameNode, bool access);
+    static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
+    static void SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled);
+    static void SetMetaViewport(FrameNode* frameNode, bool enabled);
+    static void SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess);
+    static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
+    static void SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled);
+    static void SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked);
+    static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);
+    static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
+    static void SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled);
+    static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
+    static void SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isEmbedModeEnabled);
+    static void SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing);
+    static void SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothDragResizeEnabled);
+    static void SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled);
+    static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
+    static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);
+    static void SetDarkMode(FrameNode* frameNode, const std::optional<WebDarkMode>& mode);
+    static void SetOverScrollMode(FrameNode* frameNode, const std::optional<OverScrollMode>& mode);
+    static void SetLayoutMode(FrameNode* frameNode, const std::optional<WebLayoutMode>& mode);
+    static void SetCopyOptionMode(FrameNode* frameNode, const std::optional<CopyOptions>& mode);
+    static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<WebKeyboardAvoidMode>& mode);
+    static void SetAudioResumeInterval(FrameNode* frameNode, const std::optional<int32_t>& resumeInterval);
+    static void SetAudioExclusive(FrameNode* frameNode, const std::optional<bool>& audioExclusive);
+    static void SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum);
+    static void InitialScale(FrameNode* frameNode, float scale);
+    static void SetUserAgent(FrameNode* frameNode, const std::string& userAgent);
+    static void SetWebStandardFont(FrameNode* frameNode, const std::string& standardFontFamily);
+    static void SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily);
+    static void SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily);
+    static void SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebFantasyFont(FrameNode* frameNode, const std::string& fixedFontFamily);
+    static void SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily);
+    static void SetDefaultFixedFontSize(FrameNode* frameNode, int32_t defaultFixedFontSize);
+    static void SetDefaultFontSize(FrameNode* frameNode, int32_t defaultFontSize);
+    static void SetMinFontSize(FrameNode* frameNode, int32_t minFontSize);
+    static void SetMinLogicalFontSize(FrameNode* frameNode, int32_t minLogicalFontSize);
+    static void SetDefaultTextEncodingFormat(FrameNode* frameNode, const std::string& textEncodingFormat);
+    static void RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type);
+    static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
+    static void JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems);
+    static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
+    static void SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

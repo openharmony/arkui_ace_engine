@@ -40,13 +40,21 @@ void ShowPrevious(ArkUINodeHandle controller)
     swiperController->ShowPrevious();
 }
 
+void ChangeIndex(ArkUINodeHandle controller, ArkUI_Int32 index, ArkUI_Bool useAnimation)
+{
+    CHECK_NULL_VOID(controller);
+    auto* swiperController = reinterpret_cast<SwiperController*>(controller);
+    swiperController->ChangeIndex(index, static_cast<bool>(useAnimation));
+}
+
 namespace NodeModifier {
 const ArkUISwiperControllerModifier* GetSwiperControllerModifier()
 {
     static const ArkUISwiperControllerModifier modifier = {
         GetSwiperController,
         ShowNext,
-        ShowPrevious
+        ShowPrevious,
+        ChangeIndex
     };
     return &modifier;
 }

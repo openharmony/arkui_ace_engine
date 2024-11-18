@@ -115,8 +115,10 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("textOverflow",
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
+    json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
 
     ToJsonValueForOption(json, filter);
+    ToJsonValueForSymbol(json, filter);
 }
 
 void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -141,6 +143,21 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("halfLeading", GetHalfLeading().value_or(false), filter);
+}
+
+void TextLayoutProperty::ToJsonValueForSymbol(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutFixedAttr("unicode",
+        std::to_string(GetSymbolSourceInfo()->GetUnicode()).c_str(), filter, FIXED_ATTR_CONTENT);
+    auto list = GetSymbolColorList();
+    CHECK_NULL_VOID(list);
+    auto jsonArrayColors = JsonUtil::CreateArray(true);
+    for (uint32_t i = 0; i < list->size(); i++) {
+        auto index = std::to_string(i);
+        jsonArrayColors->Put(index.c_str(), GetSymbolColorList()->at(i).ToString().c_str());
+    }
+    json->PutExtAttr("symbolColorList", jsonArrayColors, filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

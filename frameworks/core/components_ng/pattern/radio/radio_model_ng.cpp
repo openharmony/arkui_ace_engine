@@ -157,19 +157,31 @@ void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
 }
 
-void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, frameNode);
+    }
 }
 
-void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, frameNode);
+    }
 }
 
-void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, frameNode);
+    }
 }
 
 void RadioModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
@@ -218,6 +230,16 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRadioChecked(value);
+}
+
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
+    }
 }
 
 bool RadioModelNG::GetChecked(FrameNode* frameNode)

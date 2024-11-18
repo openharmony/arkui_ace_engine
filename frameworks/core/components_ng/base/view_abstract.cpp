@@ -209,9 +209,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -229,9 +233,13 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
-void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
+void ViewAbstract::SetBackgroundImage(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+    if (src) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -242,9 +250,13 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
 }
 
-void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat)
+void ViewAbstract::SetBackgroundImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
@@ -255,9 +267,13 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode *frameNode, const std::optional<BackgroundImageSize>& bgImgSize)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
+    if (bgImgSize) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageSize, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
@@ -2066,7 +2082,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption>& blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2074,7 +2090,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius.value_or(Dimension()), blurOption.value_or(BlurOption()));
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -3393,10 +3409,14 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
-void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+    }
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -3407,10 +3427,14 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
-void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+    }
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
@@ -3633,12 +3657,16 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateForegroundEffect(radius);
+        if (radius) {
+            target->UpdateForegroundEffect(*radius);
+        } else {
+            target->ResetForegroundEffect();
+        }
     }
 }
 
@@ -3671,6 +3699,9 @@ void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption 
 
 void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree)
 {
+    rate = NonNegative(rate) ? rate : 0.0;
+    lightUpDegree = GreatOrEqual(rate, -1.0) ? lightUpDegree : 0.0;
+    lightUpDegree = LessOrEqual(rate, 1.0) ? lightUpDegree : 0.0;
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
 }
@@ -3727,6 +3758,15 @@ void ViewAbstract::SetSharedTransition(
     CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
+        if (option) {
+            option->duration = option->duration < 0 ? CommonAnimationStyle::DEFAULT_ANIMATION_DURATION :
+                option->duration;
+            option->delay = option->delay < 0 ? 0 : option->delay;
+            option->zIndex = option->zIndex < 0 ? 0 : option->zIndex;
+            if (!option->curve) {
+                option->curve = Curves::LINEAR;
+            }
+        }
         target->SetSharedTransitionOptions(option);
         target->SetShareId(shareId);
     }
@@ -5099,6 +5139,13 @@ void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
     layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
 }
 
+void ViewAbstract::SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
 void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -5121,6 +5168,13 @@ void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized)
+{
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);

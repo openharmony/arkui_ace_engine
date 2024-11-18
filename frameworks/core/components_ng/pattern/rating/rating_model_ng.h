@@ -47,14 +47,16 @@ public:
     void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) override;
     
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetStars(FrameNode* frameNode, int32_t value);
-    static void SetStepSize(FrameNode* frameNode, double value);
+    static void SetStars(FrameNode* frameNode, const std::optional<int32_t>& value);
+    static void SetStepSize(FrameNode* frameNode, const std::optional<double>& value);
     static void SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
     static void SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag = false);
     static void SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, double value);
-    static void SetRatingOptions(FrameNode* frameNode, double rating = .0, bool indicator = false);
+    static void SetRatingOptions(FrameNode* frameNode, const std::optional<double>& rating = 0.0,
+                                 const std::optional<bool>&  indicator = false);
+    static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

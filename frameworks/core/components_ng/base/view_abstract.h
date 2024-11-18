@@ -465,7 +465,7 @@ public:
     static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBloom(FrameNode* frameNode, float value);
 
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
@@ -498,7 +498,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption> &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -525,9 +525,9 @@ public:
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
-    static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
-    static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSize(FrameNode* frameNode, const std::optional<BackgroundImageSize>& bgImgSize);
+    static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
@@ -560,9 +560,9 @@ public:
     static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
-    static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetPadding(FrameNode* frameNode, const CalcLength& value);
-    static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
@@ -592,7 +592,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
-    static void SetForegroundEffect(FrameNode* frameNode, float radius);
+    static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
@@ -776,9 +776,11 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetPositionLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
 

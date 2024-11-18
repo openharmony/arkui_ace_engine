@@ -29,9 +29,9 @@ public:
     void StrokeWidth(const Dimension& value) override;
     void LineCap(const enum LineCap& value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void StrokeWidth(FrameNode* frameNode, const Dimension& value);
-    static void LineCap(FrameNode* frameNode, const enum LineCap& value);
-    static void SetDividerColor(FrameNode* frameNode, const Color& color);
+    static void StrokeWidth(FrameNode* frameNode, std::optional<Dimension> valueOpt);
+    static void LineCap(FrameNode* frameNode, std::optional<enum LineCap> valueOpt);
+    static void SetDividerColor(FrameNode* frameNode, std::optional<Color> colorOpt);
     static void SetVertical(FrameNode* frameNode, const bool& value);
 };
 } // namespace OHOS::Ace::NG

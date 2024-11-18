@@ -264,7 +264,7 @@ HWTEST_F(TextFieldUXTest, PerformAction001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsTextArea());
     EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
     pattern_->PerformAction(textInputAction, false);
-    EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.Done");
+    EXPECT_EQ(pattern_->TextInputActionToString(), "EnterKeyType.NEW_LINE");
 }
 
 /**

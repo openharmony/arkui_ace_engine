@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr double MAX_COUNT_DOWN = 86400000.0;
 RefPtr<TextTimerController> TextTimerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -125,52 +126,95 @@ RefPtr<TextTimerController> TextTimerModelNG::InitTextController(FrameNode* fram
     return pattern->GetTextTimerController();
 }
 
-void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, bool isCountDown)
+void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, std::optional<bool>& isCountDown)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown.value_or(false), frameNode);
 }
 
-void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
+void TextTimerModelNG::SetInputCount(FrameNode* frameNode, std::optional<double>& count)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count, frameNode);
+    if (count && count.value() > 0 && count.value() < MAX_COUNT_DOWN) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
+void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value.value(), frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
+void TextTimerModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+void TextTimerModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value, frameNode);
+    if (value && value->size() > 0) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
+void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::optional<std::string>& format)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format, frameNode);
+    if (format) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, frameNode);
+    }
 }
 
-void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, frameNode);
+    }
+}
+
+void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)> && onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnTimer(std::move(onChange));
 }
 
 void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& makeFunc)

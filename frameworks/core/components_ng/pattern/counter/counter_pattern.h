@@ -95,25 +95,27 @@ public:
     {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
+        bool enableInc = false;
         auto addNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
         if (addNode) {
             auto eventHub = addNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
-                auto enableInc = eventHub->GetStateEffect();
-                json->Put("enableInc", enableInc ? "true" : "false");
+                enableInc = eventHub->GetStateEffect();
             }
         }
+        json->Put("enableInc", enableInc ? "true" : "false");
 
+        bool enableDec = false;
         auto subNode = AceType::DynamicCast<FrameNode>(
             frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
         if (subNode) {
             auto eventHub = subNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
-                auto enableDec = eventHub->GetStateEffect();
-                json->Put("enableDec", enableDec ? "true" : "false");
+                enableDec = eventHub->GetStateEffect();
             }
         }
+        json->Put("enableDec", enableDec ? "true" : "false");
     }
     
 private:

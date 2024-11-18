@@ -1,0 +1,2913 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+{
+    "enums": {
+        "Ark_Alignment": "Alignment",
+        "Ark_Axis": "Axis",
+        "Ark_BarState": "DisplayMode",
+        "Ark_ButtonRole": "ButtonRole",
+        "Ark_ButtonStyleMode": "ButtonStyleMode",
+        "Ark_ButtonType": "ButtonType",
+        "Ark_ColoringStrategy": "ShadowColorStrategy",
+        "Ark_TextContentType": "TextContentType",
+        "Ark_ContentType": "ContentType",
+        "Ark_ControlSize": "ControlSize",
+        "Ark_CopyOptions": "CopyOptions",
+        "Ark_Curve": "ArkUI_AnimationCurve",
+        "Ark_DisplayMode": "DisplayMode",
+        "Ark_EdgeEffect": "EdgeEffect",
+        "Ark_EditMode": "V2::EditMode",
+        "Ark_EnterKeyType": "TextInputAction",
+        "Ark_FontStyle": "FontStyle",
+        "Ark_FontWeight": "FontWeight",
+        "Ark_GridDirection": "GridDirection",
+        "Ark_GridItemStyle": "GridItemStyle",
+        "Ark_LineCapStyle": "LineCap",
+        "Ark_ListItemAlign": "V2::ListItemAlign",
+        "Ark_ListItemGroupArea": "ListItemGroupArea",
+        "Ark_ListItemGroupStyle": "ListItemGroupStyle",
+        "Ark_ListItemStyle": "V2::ListItemStyle",
+        "Ark_NavBarPosition": "NavBarPosition",
+        "Ark_NestedScrollMode": "NestedScrollMode",
+        "Ark_RadioIndicatorType": "RadioIndicatorType",
+        "Ark_ScrollSnapAlign": "V2::ScrollSnapAlign",
+        "Ark_ScrollState": "ScrollState",
+        "Ark_Sticky": "V2::StickyMode",
+        "Ark_StickyStyle": "V2::StickyStyle",
+        "Ark_SwipeEdgeEffect": "V2::SwipeEdgeEffect",
+        "Ark_SwiperDisplayMode": "SwiperDisplayMode",
+        "Ark_SwiperNestedScrollMode": "NestedScrollMode",
+        "Ark_TextAlign": "TextAlign",
+        "Ark_TextAreaType": "TextInputType",
+        "Ark_TextContentStyle": "TextContentStyle",
+        "Ark_TextDecorationStyle": "TextDecorationStyle",
+        "Ark_TextDecorationType": "TextDecoration",
+        "Ark_TextDeleteDirection": "TextDeleteDirection"
+    },
+    "fixtures": [
+        {
+            "name": "Boolean",
+            "type": "Ark_Boolean",
+            "validValues": [
+                ["true", "true"],
+                ["false", "false"]
+            ]
+        },
+        {
+            "name": "String",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"\"", ""],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringNoEmpty",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringRes",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"\"", ""],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringResNoEmpty",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"abc\"", "abc"],
+                ["\"xyz\"", "xyz"]
+            ]
+        },
+        {
+            "name": "StringEmptyUndefined",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
+            "name": "StringEmptyResUndefined",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"\"", "undefined"]
+            ]
+        },
+        {
+            "name": "FontFamilyResource",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"Arial\"", "Arial"],
+                ["\"Arial, Sans Serif\"", "Arial, Sans Serif"]
+            ],
+            "invalidValues": ["\"\""]
+        },
+        {
+            "name": "FontFamilyString",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"Arial\"", "Arial"],
+                ["\"Arial, Sans Serif\"", "Arial, Sans Serif"]
+            ],
+            "invalidValues": ["\"\""]
+        },
+        {
+            "name": "ColorsStr",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"#123\"", "#FF112233"],
+                ["\"#11223344\"", "#11223344"],
+                ["\"#123456\"", "#FF123456"],
+                ["\"65535\"", "#FF00FFFF"],
+                ["\"#abcdef\"", "#FFABCDEF"],
+                ["\"#aBcdeF\"", "#FFABCDEF"],
+                ["\"rgb(255, 100, 55)\"", "#FFFF6437"],
+                ["\"rgba(255, 100, 255, 0.5)\"", "#80FF64FF"]
+            ],
+            "invalidValues": [
+                "\"invalid\"",
+                "\"\"",
+                "\"rgb(270, 0xf1, 755.5f)\"",
+                "\"RgbA(255, 100, 255, 0.5)\""
+
+            ]
+        },
+        {
+            "name": "ColorsNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0", "#00000000"],
+                ["1", "#FF000001"],
+                ["65535", "#FF00FFFF"],
+                ["-1", "#FFFFFFFF"],
+                ["0xBE7AC0DE", "#BE7AC0DE"],
+                ["std::numeric_limits<float>::quiet_NaN()", "#80000000"],
+                ["std::numeric_limits<float>::infinity()", "#80000000"]
+            ]
+        },
+        {
+            "name": "TextMaxLength",
+            "type": "Ark_Number",
+            "validValues": [
+                ["20", "20"],
+                ["22.5f", "22"],
+                ["22.1f", "22"],
+                ["22.4f", "22"],
+                ["22.6f", "22"],
+                ["22.9f", "22"],
+                ["0", "0"],
+                ["-20", "INF"],
+                ["0.0f", "0"],
+                ["-22.5f", "INF"]
+            ]
+        },
+        {
+            "name": "ColorsRes",
+            "type": "Ark_Resource",
+            "resType": "COLOR",
+            "validValues": [
+                ["Color(0xA1FAC0DE)", "#A1FAC0DE"]
+            ]
+        },
+        {
+            "name": "TextInputContentType",
+            "type": "Ark_ContentType",
+            "validValues": [
+                ["ARK_CONTENT_TYPE_USER_NAME", "TextContentType.USER_NAME"],
+                ["ARK_CONTENT_TYPE_PASSWORD", "TextContentType.VISIBLE_PASSWORD"],
+                ["ARK_CONTENT_TYPE_NEW_PASSWORD", "TextContentType.NEW_PASSWORD"],
+                ["ARK_CONTENT_TYPE_FULL_STREET_ADDRESS", "TextContentType.FULL_STREET_ADDRESS"],
+                ["ARK_CONTENT_TYPE_HOUSE_NUMBER", "TextContentType.HOUSE_NUMBER"],
+                ["ARK_CONTENT_TYPE_DISTRICT_ADDRESS", "TextContentType.DISTRICT_ADDRESS"],
+                ["ARK_CONTENT_TYPE_CITY_ADDRESS", "TextContentType.CITY_ADDRESS"],
+                ["ARK_CONTENT_TYPE_PROVINCE_ADDRESS", "TextContentType.PROVINCE_ADDRESS"],
+                ["ARK_CONTENT_TYPE_COUNTRY_ADDRESS", "TextContentType.COUNTRY_ADDRESS"],
+                ["ARK_CONTENT_TYPE_PERSON_FULL_NAME", "TextContentType.PERSON_FULL_NAME"],
+                ["ARK_CONTENT_TYPE_PERSON_LAST_NAME", "TextContentType.PERSON_LAST_NAME"],
+                ["ARK_CONTENT_TYPE_PERSON_FIRST_NAME", "TextContentType.PERSON_FIRST_NAME"],
+                ["ARK_CONTENT_TYPE_PHONE_NUMBER", "TextContentType.PHONE_NUMBER"],
+                ["ARK_CONTENT_TYPE_PHONE_COUNTRY_CODE", "TextContentType.PHONE_COUNTRY_CODE"],
+                ["ARK_CONTENT_TYPE_FULL_PHONE_NUMBER", "TextContentType.FULL_PHONE_NUMBER"],
+                ["ARK_CONTENT_TYPE_EMAIL_ADDRESS", "TextContentType.EMAIL_ADDRESS"],
+                ["ARK_CONTENT_TYPE_BANK_CARD_NUMBER", "TextContentType.BANK_CARD_NUMBER"],
+                ["ARK_CONTENT_TYPE_ID_CARD_NUMBER", "TextContentType.ID_CARD_NUMBER"],
+                ["ARK_CONTENT_TYPE_NICKNAME", "TextContentType.NICKNAME"],
+                ["ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET", "TextContentType.DETAIL_INFO_WITHOUT_STREET"],
+                ["ARK_CONTENT_TYPE_FORMAT_ADDRESS", "TextContentType.FORMAT_ADDRESS"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ContentType>(-1)",
+                "static_cast<Ark_ContentType>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputLineBreakStrategy",
+            "type": "Ark_LineBreakStrategy",
+            "validValues": [
+                ["ARK_LINE_BREAK_STRATEGY_GREEDY", "greedy"],
+                ["ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY", "high-quality"],
+                ["ARK_LINE_BREAK_STRATEGY_BALANCED", "balanced"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_LineBreakStrategy>(-1)",
+                "static_cast<Ark_LineBreakStrategy>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputTextContentStyle",
+            "type": "Ark_TextContentStyle",
+            "validValues": [
+                ["ARK_TEXT_CONTENT_STYLE_DEFAULT", "TextInputStyle.Default"],
+                ["ARK_TEXT_CONTENT_STYLE_INLINE", "TextInputStyle.Inline"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_TextContentStyle>(-1)",
+                "static_cast<Ark_TextContentStyle>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "ImageSpanVerticalAlign",
+            "type": "Ark_ImageSpanAlignment",
+            "validValues": [
+                ["ARK_IMAGE_SPAN_ALIGNMENT_TOP", "VerticalAlign.TOP"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_CENTER", "VerticalAlign.CENTER"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM", "VerticalAlign.BOTTOM"],
+                ["ARK_IMAGE_SPAN_ALIGNMENT_BASELINE", "VerticalAlign.BASELINE"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ImageSpanAlignment>(-1)",
+                "static_cast<Ark_ImageSpanAlignment>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "ColorsEnum",
+            "type": "Ark_Color",
+            "validValues": [
+                ["ARK_COLOR_WHITE", "#FFFFFFFF"],
+                ["ARK_COLOR_BLACK", "#FF000000"],
+                ["ARK_COLOR_BLUE", "#FF0000FF"],
+                ["ARK_COLOR_BROWN", "#FFA52A2A"],
+                ["ARK_COLOR_GRAY", "#FF808080"],
+                ["ARK_COLOR_GREEN", "#FF008000"],
+                ["ARK_COLOR_GREY", "#FF808080"],
+                ["ARK_COLOR_ORANGE", "#FFFFA500"],
+                ["ARK_COLOR_PINK", "#FFFFC0CB"],
+                ["ARK_COLOR_RED", "#FFFF0000"],
+                ["ARK_COLOR_YELLOW", "#FFFFFF00"],
+                ["ARK_COLOR_TRANSPARENT", "#00000000"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_Color>(-1)",
+                "static_cast<Ark_Color>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "LengthNonNegNonPct",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct"],
+        },
+        {
+            "name": "LengthNonPct",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+            ],
+            "invalidValues": ["0.5_pct", "0.0_pct", "-0.8_pct"],
+        },
+        {
+            "name": "LengthNonNeg",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+        },
+        {
+            "name": "LengthAny",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+                ["-0.8_pct", "-80.00%"],
+            ],
+        },
+        {
+            "name": "DimensionsNumNonNeg",
+            "type": "Ark_Number",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "DimensionsStrNonPerc",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"123vp\"", "123.00vp"],
+                ["\"0_fp\"", "0.00fp"],
+                ["\"1.23_fp\"", "1.23fp"],
+            ],
+            "invalidValues": ["\"20%\"", "\"0%\"", "\"-20%\""],
+        },
+        {
+            "name": "DimensionsNumAny",
+            "type": "Ark_Number",
+            "validValues": [
+                ["123", "123.00vp"],
+                ["0", "0.00vp"],
+                ["1.23", "1.23vp"],
+                ["-2", "-2.00vp"],
+                ["-3.45", "-3.45vp"],
+            ],
+        },
+        {
+            "name": "DimensionsStrNonNegNonPct",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"123vp\"", "123.00vp"],
+                ["\"0vp\"", "0.00vp"],
+                ["\"1.23vp\"", "1.23vp"],
+                ["\"123fp\"", "123.00fp"],
+                ["\"0fp\"", "0.00fp"],
+                ["\"1.23fp\"", "1.23fp"],
+                ["\"123px\"", "123.00px"],
+                ["\"0px\"", "0.00px"],
+                ["\"1.23px\"", "1.23px"],
+                ["\"123lpx\"", "123.00lpx"],
+                ["\"0lpx\"", "0.00lpx"],
+                ["\"1.23lpx\"", "1.23lpx"],
+            ],
+            "invalidValues": [
+                "\"-123vp\"", "\"-123vp\"", "\"-123px\"", "\"-123lpx\"", "\"20%\"", "\"-20%\"",
+            ],
+        },
+        {
+            "name": "DimensionsResNonNegNonPct",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123._vp", "123.00vp"],
+                ["0._vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123._fp", "123.00fp"],
+                ["0._fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123._px", "123.00px"],
+                ["0._px", "0.00px"],
+                ["1.23_px", "1.23px"],
+            ],
+            "invalidValues": [
+                "-123._vp", "-123._vp", "-123._px", "0.2_pct", "-0.2_pct",
+            ],
+        },
+        {
+            "name": "NumberAnything",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["0", "0"],
+                ["-100", "-100"],
+                ["12.34", "12.34"],
+                ["-56.78", "-56.78"],
+            ],
+        },
+        {
+            "name": "NumberFloatAnything",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.000000"],
+                ["0", "0.000000"],
+                ["-100", "-100.000000"],
+                ["12.34", "12.340000"],
+                ["-56.73", "-56.730000"],
+            ],
+        },
+        {
+            "name": "NumberIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["0", "0"],
+                ["-100", "-100"],
+                ["12.34", "12"],
+                ["-56.78", "-56"],
+            ],
+        },
+        {
+            "name": "NumberNonNeg",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12.34"],
+                ["0", "0"],
+            ],
+            "invalidValues": ["-100", "-56.78"],
+        },
+        {
+            "name": "NumberPosIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["0", "-1", "-100", "-23.45"],
+        },
+        {
+            "name": "NumberNonNegIntFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "12"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
+            "name": "NumberNonNegIntCeil",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["12.34", "13"],
+                ["0", "0"],
+                ["1", "1"],
+            ],
+            "invalidValues": ["-1", "-100", "-23.45"],
+        },
+        {
+            "name": "FlingSpeedLimit",
+            "type": "Ark_Number",
+            "validValues": [
+                ["15000", "15000.00vp"],
+                ["12.34", "12.34vp"],
+                ["0.05", "0.05vp"],
+            ],
+            "invalidValues": ["-100", "-56.78", "0"],
+        },
+        {
+            "name": "FontWeightNumbers",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100"],
+                ["200", "200"],
+                ["300", "300"],
+                ["400", "400"],
+                ["500", "500"],
+                ["600", "600"],
+                ["700", "700"],
+                ["800", "800"],
+                ["900", "900"],
+            ],
+            "invalidValues": [
+                "0", "1000", "-100"
+            ]
+        },
+        {
+            "name": "FontWeightStrings",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"100\"", "100"],
+                ["\"200\"", "200"],
+                ["\"300\"", "300"],
+                ["\"400\"", "400"],
+                ["\"500\"", "500"],
+                ["\"600\"", "600"],
+                ["\"700\"", "700"],
+                ["\"800\"", "800"],
+                ["\"900\"", "900"],
+            ],
+            "invalidValues": [
+                "\"0\"", "\"1000\"", "\"-100\""
+            ]
+        },
+        {
+            "name": "ScrollableFrictionNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0.125", "0.125"],
+                ["0.75", "0.75"],
+                ["2", "2"],
+            ],
+            "invalidValues": [
+                "0", "-100"
+            ]
+        },
+        {
+            "name": "ScrollableFrictionRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.125f", "0.125"],
+                ["0.875f", "0.875"],
+                ["2.0f", "2"],
+            ],
+            "invalidValues": [
+                "0.f", "-100.f"
+            ]
+        },
+        {
+            "name": "Opacity",
+            "type": "Ark_Number",
+            "validValues":[
+                ["0.1f", "0.100000"],
+                ["0", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100", "1.000000"],
+                ["-100", "0.000000"],
+                ["1.1f", "1.000000"],
+            ],
+        },
+        {
+            "name": "OpacityResource",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["0.0f", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1.0f", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100.0f", "1.000000"],
+                ["-100.0f", "0.000000"],
+                ["1.1f", "1.000000"],
+            ]
+        },
+        {
+            "name": "TextInputBarState",
+            "type": "Ark_BarState",
+            "validValues": [
+                ["ARK_BAR_STATE_OFF", "BarState.OFF"],
+                ["ARK_BAR_STATE_AUTO", "BarState.AUTO"],
+                ["ARK_BAR_STATE_ON", "BarState.ON"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_BarState>(-1)",
+                "static_cast<Ark_BarState>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextInputBreakWord",
+            "type": "Ark_WordBreak",
+            "validValues": [
+                ["ARK_WORD_BREAK_NORMAL", "normal"],
+                ["ARK_WORD_BREAK_BREAK_ALL", "break-all"],
+                ["ARK_WORD_BREAK_BREAK_WORD", "break-word"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_WordBreak>(-1)",
+                "static_cast<Ark_WordBreak>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "TextSelectableMode",
+            "type": "Ark_TextSelectableMode",
+            "validValues": [
+                ["ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE", "selectable-unfocusable"],
+                ["ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE", "selectable-focusable"],
+                ["ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE", "unselectable"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_TextSelectableMode>(-1)",
+                "static_cast<Ark_TextSelectableMode>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "FrictionResource",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["0.0f", "0.000000"],
+                ["0.9f", "0.900000"],
+                ["1.0f", "1.000000"],
+                ["-0.1f", "0.000000"],
+                ["100.0f", "1.000000"],
+                ["-100.0f", "0.000000"],
+                ["1.1f", "1.000000"],
+            ]
+        },
+        {
+            "name": "TimeFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"EEEE, M, d\"", "EEEE, M, d"],
+                ["\"MMM dd\"", "MMM dd"],
+                ["\"MM/dd/yyyy\"", "MM/dd/yyyy"],
+                ["\"EEEE MM dd\"", "EEEE MM dd"],
+                ["\"yyyy\"", "yyyy"],
+                ["\"yy\"", "yy"],
+                ["\"MM\"", "MM"],
+                ["\"M\"", "M"],
+                ["\"dd\"", "dd"], 
+                ["\"d\"", "d"],
+                ["\"EEEE\"", "EEEE"],
+                ["\"E, EE, EEE\"", "E, EE, EEE"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"yyyy/M/d\"", "yyyy/M/d"],
+                ["\"yyyy-M-d\"", "yyyy-M-d"],
+                ["\"yyyy.M.d\"", "yyyy.M.d"],
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"hh:mm:ss\"", "hh:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"aa hh:mm\"", "aa hh:mm"],
+                ["\"hh:mm\"", "hh:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"hh:mm:ss aa\"", "hh:mm:ss aa"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"\""
+            ]
+        },
+        {
+            "name": "FontFeature",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"'ss01' on\"", "'ss01' 1"],
+                ["\"'ss01' off\"", "'ss01' 0"],
+                ["\"'ss01' 1\"", "'ss01' 1"],
+                ["\"'ss01' 0\"", "'ss01' 0"],
+                ["\"'ss01' on, 'ss02' on\"", "'ss01' 1,'ss02' 1"],
+                ["\"'ss01' on, 'ss02' off\"", "'ss01' 1,'ss02' 0"],
+                ["\"'ss01' on, ss02 off\"",  "'ss01' 1"],
+                ["\"'ss01' on\"",  "'ss01' 1"],
+            ],
+            "invalidValues": [
+                "\"\"",
+                "\"invalid\"",
+                "\"ss01 1\"",
+                "\"ss01 on, ss02 off\"",
+                "\"'incorrect' on\""
+            ]
+        },
+        {
+            "name": "TextInputCaretPosition",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"T\"", "Just_only_for_test_data_generation"],
+                ["\"Text\"", "Just_only_for_test_data_generation"],
+                ["\"Simple Text\"", "Just_only_for_test_data_generation"],
+                ["\"Very Long\\nText with new lines\\n    bla-bla-bla\"",
+                    "Just_only_for_test_data_generation"],
+                ["\"\"", "Just_only_for_test_data_generation"],
+                ["\"        \"", "Just_only_for_test_data_generation"]
+            ]
+        },
+        {
+            "name": "ShadowRaduisNumber",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123", "123.000000"],
+                ["0", "0.000000"],
+                ["1.23", "1.230000"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "ShadowRaduisRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["3.0f", "3.000000"],
+                ["0.9f", "0.900000"],
+                ["100.0f", "100.000000"],
+                ["1.1f", "1.100000"],
+            ],
+            "invalidValues": ["-1"],
+        },
+        {
+            "name": "ShadowOffsetNumber",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["123", "123.000000"],
+                ["0", "0.000000"],
+                ["1.23", "1.230000"],
+                ["-1.23", "-1.230000"],
+                ["6.54", "6.540000"],
+                ["-99", "-99.000000"],
+                ["100", "100.000000"],
+            ]
+        },
+        {
+            "name": "ShadowOffsetRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.1f", "0.100000"],
+                ["3.0f", "3.000000"],
+                ["0.9f", "0.900000"],
+                ["-100.0f", "-100.000000"],
+                ["99.0f", "99.000000"],
+                ["-1.134f", "-1.134000"],
+                ["1.1f", "1.100000"],
+            ],
+        },
+        {
+            "name": "TimerInputCount",
+            "type": "Ark_Number",
+            "resType": "FLOAT",
+            "validValues": [
+                ["1.0f", "1.000000"],
+                ["25.0f", "25.000000"],
+                ["86300000.0f","86300000.000000"]
+            ],
+            "invalidValues": [
+                "-5.0", "86400001.0"
+            ]
+        },
+        {
+            "name": "TextTimerDateFormat",
+            "type": "Ark_String",
+            "validValues":[
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"xyz\"",
+                "\"zz:rr:tt\""
+            ]
+        },
+    ],
+    "types": [
+        {
+            "name": "",
+            "fixtures": []
+        },
+        {
+            "name": "Ark_Boolean",
+            "fixtures": ["Boolean"]
+        },
+        {
+            "name": "Ark_String",
+            "fixtures": ["String"]
+        },
+        {
+            "name": "Ark_ResourceColor",
+            "fixtures": ["ColorsStr", "ColorsNum", "ColorsRes", "ColorsEnum"]
+        },
+        {
+            "name": "Ark_ResourceStr",
+            "fixtures": ["String", "StringRes"]
+        },
+        {
+            "name": "Ark_Length",
+            "fixtures": ["LengthNonNegNonPct"]
+        },
+        {
+            "name": "Ark_Number",
+            "fixtures": ["NumberAnything"]
+        },
+        {
+            "name": "Union_Number_FontWeight_String",
+            "fixtures": ["FontWeightNumbers"]
+        },
+        {
+            "name": "FontFamily",
+            "fixtures": ["FontFamilyResource", "FontFamilyString"]
+        },
+        {
+            "name": "DimensionNonNegNonPct",
+            "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct", "DimensionsResNonNegNonPct"]
+        },
+        {
+            "name": "OpacityWithResource",
+            "fixtures": ["Opacity", "OpacityResource"]
+        }
+    ],
+    "components": [
+        {
+            "name": "BaseSpan",
+            "attributes": [
+                {
+                    "name": "textBackgroundStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#00000000"
+                        },
+                        {
+                            "name": "radius",
+							"attributes": [
+                                {
+                                    "name": "topLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "topRight",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomRight",
+                                    "default": "0.00vp"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+	    {
+            "name": "ContainerSpan",
+            "attributes": [
+                {
+                    "name": "textBackgroundStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#00000000"
+                        },
+                        {
+                            "name": "radius",
+							"attributes": [
+                                {
+                                    "name": "topLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "topRight",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomLeft",
+                                    "default": "0.00vp"
+                                },
+                                {
+                                    "name": "bottomRight",
+                                    "default": "0.00vp"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "TextInput",
+            "includes": [
+                "core/components/text_field/textfield_theme.h"
+            ],
+            "themes": ["TextFieldTheme"],
+            "attributes": [
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal"
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "type",
+                    "default": "InputType.Normal"
+                },
+                {
+                    "name": "contentType",
+                    "default": "TextContentType.UNSPECIFIED",
+                    "fixtures": ["TextInputContentType"]
+                },
+                {
+                    "name": "placeholderColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "textOverflow",
+                    "default": "TextOverflow.Clip"
+                },
+                {
+                    "name": "textIndent",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "enterKeyType",
+                    "default": "EnterKeyType.Done"
+                },
+                {
+                    "name": "caretColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "caretPosition",
+                    "default": "0",
+                    "fixtures": ["NumberNonNeg"]
+                },
+                {
+                    "name": "caretStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "width",
+                            "default": "0.00px"
+                        }
+                    ]
+                },
+                {
+                    "name": "letterSpacing",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "lineSpacing",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "lineHeight",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "maxLines",
+                    "default": "3",
+                    "fixtures": ["NumberPosIntFloor"]
+                },
+                {
+                    "name": "maxLength",
+                    "default": "INF",
+                    "fixtures": ["TextMaxLength"]
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.Distributed"
+                },
+                {
+                    "name": "showPasswordIcon",
+                    "default": "true"
+                },
+                {
+                    "name": "textAlign",
+                    "default": "TextAlign.Start"
+                },
+                {
+                    "name": "enableKeyboardOnFocus",
+                    "default": "true"
+                },
+                {
+                    "name": "selectionMenuHidden",
+                    "default": "false"
+                },
+                {
+                    "name": "barState",
+                    "default": "BarState.AUTO",
+                    "fixtures": ["TextInputBarState"]
+                },
+                {
+                    "name": "wordBreak",
+                    "default": "break-word",
+                    "fixtures": ["TextInputBreakWord"]
+                },
+                {
+                    "name": "lineBreakStrategy",
+                    "default": "greedy",
+                    "fixtures": ["TextInputLineBreakStrategy"]
+                },
+                {
+                    "name": "selectAll",
+                    "default": "false"
+                },
+                {
+                    "name": "heightAdaptivePolicy",
+                    "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST"
+                },
+                {
+                    "name": "enableAutoFill",
+                    "default": "true"
+                },
+                {
+                    "name": "showPassword",
+                    "default": "false"
+                },
+                {
+                    "name": "enablePreviewText",
+                    "default": "true"
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true"
+                },
+                {
+                    "name": "style",
+                    "default": "TextInputStyle.Default",
+                    "fixtures": ["TextInputTextContentStyle"]
+                },
+                {
+                    "name": "showError",
+                    "default": "undefined",
+                    "fixtures": [
+                        "StringResNoEmpty",
+                        "StringNoEmpty",
+                        "StringEmptyResUndefined",
+                        "StringEmptyUndefined"
+                    ]
+                },
+                {
+                    "name": "passwordIcon",
+                    "attributes": [
+                        {
+                            "name": "onIconSrc",
+                            "default": "SYS_SHOW_PASSWORD_SVG"
+                        },
+                        {
+                            "name": "offIconSrc",
+                            "default": "SYS_HIDE_PASSWORD_SVG"
+                        }
+                    ]
+                },
+                {
+                    "name": "selectedBackgroundColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "placeholderFont",
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "0.00px"
+                        },
+                        {
+                            "name": "fontWeight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                        },
+                        {
+                            "name": "fontFamily",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily"
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal"
+                        }
+                    ]
+                },
+                {
+                    "name": "underlineColor",
+                    "attributes": [
+                        {
+                            "name": "normal",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "typing",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "error",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "disable",
+                            "default": "#FF000000"
+                        }
+                    ]
+                },
+                {
+                    "name": "showUnderline",
+                    "default": "false",
+                    "type": "Ark_Boolean"
+                },
+                {
+                    "name": "passwordRules",
+                    "default": "",
+                    "type": "Ark_String"
+                },
+                {
+                    "name": "showCounter",
+                    "attributes": [
+                        {
+                            "name": "value",
+                            "default": "false"
+                        },
+                        {
+                            "name": "options",
+                            "attributes": [
+                                {
+                                    "name": "thresholdPercentage",
+                                    "default": "-1",
+                                    "fixture": ["NumberIntFloor"]
+                                },
+                                {
+                                    "name": "highlightBorder",
+                                    "default": "true"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "remove": [
+                "setUnderlineColorTestUnderlineColorNormalValidValues",
+                "setUnderlineColorTestUnderlineColorErrorValidValues",
+                "setUnderlineColorTestUnderlineColorTypingValidValues",
+                "setUnderlineColorTestUnderlineColorDisableValidValues",
+                "setCaretPositionTestCaretPositionValidValues"
+            ],
+            "disable": [
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setShowCounterTestDefaultValues",
+                "setShowCounterTestShowCounterValueValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
+                "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderValidValues",
+                "setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues",
+                "setCancelButtonTestCancelButtonStyleValidValues",
+                "setCancelButtonTestCancelButtonStyleInvalidValues",
+                "setCancelButtonTestCancelButtonIconSizeValidValues",
+                "setCancelButtonTestCancelButtonIconSizeInvalidValues",
+                "setCancelButtonTestCancelButtonIconColorValidValues",
+                "setCancelButtonTestCancelButtonIconColorInvalidValues",
+                "setCancelButtonTestCancelButtonIconSrcValidValues",
+                "setCancelButtonTestCancelButtonIconSrcInvalidValues",
+                "setTextIndentTestDefaultValues",
+                "setTextInputOptionsTestDefaultValues",
+                "setTextInputOptionsTestValidValues",
+                "setTypeTestTypeValidValues",
+                "setTextOverflowTestTextOverflowValidValues",
+                "setTextOverflowTestTextOverflowInvalidValues",
+                "setTextIndentTestTextIndentInvalidValues",
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontSizeValidValues",
+                "setPlaceholderFontTestPlaceholderFontSizeInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontStyleInvalidValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontWeightTestDefaultValues",
+                "setFontWeightTestFontWeightValidValues",
+                "setFontWeightTestFontWeightInvalidValues",
+                "setCopyOptionTestCopyOptionValidValues",
+                "setCopyOptionTestCopyOptionInvalidValues",
+                "setTextAlignTestTextAlignValidValues",
+                "setPasswordIconTestDefaultValues",
+                "setPasswordIconTestPasswordIconOnIconSrcValidValues",
+                "setPasswordIconTestPasswordIconOnIconSrcInvalidValues",
+                "setPasswordIconTestPasswordIconOffIconSrcValidValues",
+                "setPasswordIconTestPasswordIconOffIconSrcInvalidValues",
+                "setCancelButtonTestDefaultValues",
+                "setCancelButtonTestValidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeValidValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeValidValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
+                "setDecorationTestDefaultValues",
+                "setDecorationTestDecorationTypeValidValues",
+                "setDecorationTestDecorationTypeInvalidValues",
+                "setDecorationTestDecorationColorValidValues",
+                "setDecorationTestDecorationColorInvalidValues",
+                "setDecorationTestDecorationStyleValidValues",
+                "setDecorationTestDecorationStyleInvalidValues",
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingValidValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
+                "setLineHeightTestDefaultValues",
+                "setLineHeightTestLineHeightValidValues",
+                "setLineHeightTestLineHeightInvalidValues",
+                "setFontFeatureTestDefaultValues",
+                "setFontFeatureTestFontFeatureValidValues",
+                "setMaxLinesTestMaxLinesInvalidValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMaxLinesTestDefaultValues"
+            ]
+        },
+        {
+            "name": "Radio",
+            "includes": [
+                "core/components/checkable/checkable_theme.h"
+            ],
+            "themes": ["RadioTheme"],
+            "disable": [
+                "setRadioOptionsTestOptionsIndicatorTypeValidValues", // Wrong enum format for RadioIndicatorType
+            ],
+            "attributes": [
+                {
+                    "name": "group",
+                    "default": ""
+                },
+                {
+                    "name": "value",
+                    "default": ""
+                },
+                {
+                    "name": "indicatorType",
+                    "default": "TICK"
+                },
+                {
+                    "name": "checked",
+                    "default": "false"
+                },
+                {
+                    "name": "radioStyle",
+                    "attributes": [
+                        {
+                            "name": "checkedBackgroundColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "uncheckedBorderColor",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "indicatorColor",
+                            "default": "#FF000000"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Blank",
+            "disable": [
+                "setColorTestColorInvalidValues", // Invalid colors doesn't rest color to default
+            ],
+            "attributes": [
+                {
+                    "name": "color",
+                    "default": "#00000000"
+                },
+                {
+                    "name": "min",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"]
+                },
+            ]
+        },
+        {
+            "name": "Button",
+            "includes": ["core/components/button/button_theme.h"],
+            "themes": ["ButtonTheme"],
+            "disable": [
+                "setFontWeightTestDefaultValues", // Value is different from documentation
+                "setFontSizeTestFontSizeValidValues", // Invalid units for 0
+                "setLabelStyleTestLabelStyleFontSizeValidValues", // Invalid units for 0
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setLabelStyleTestLabelStyleFontFamilyValidValues", // Incorrect resource processing
+                "setLabelStyleTestLabelStyleOverflowInvalidValues", // Bug in arkui?
+                "setLabelStyleTestDefaultValues", // Invalid default value for labelStyle.overflow
+                "setLabelStyleTestLabelStyleOverflowValidValues", // Invalid case for MARQUEE enum
+            ],
+            "attributes": [
+                {
+                    "name": "",
+                    "default": ""
+                },
+                {
+                    "name": "label",
+                    "default": ""
+                },
+                {
+                    "name": "type",
+                    "default": "ButtonType.Capsule"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px" // Docs says 16fp, but it is applicable only when properly initialized
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000" // Docs says #FFFFFFFF, but it is applicable only when properly initialized
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Medium",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "stateEffect",
+                    "default": "true"
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily",
+                },
+                {
+                    "name": "labelStyle",
+                    "attributes": [
+                        {
+                            "name": "overflow",
+                            "default": "TextOverflow.Ellipsis",
+                        },
+                        {
+                            "name": "maxLines",
+                            "default": "1",
+                            "fixtures": ["NumberPosIntFloor"],
+                        },
+                        {
+                            "name": "minFontSize",
+                            "default": "0.00px",
+                            "type": "DimensionNonNegNonPct",
+                        },
+                        {
+                            "name": "maxFontSize",
+                            "default": "0.00px",
+                            "type": "DimensionNonNegNonPct",
+                        },
+                        {
+                            "name": "heightAdaptivePolicy",
+                            "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST",
+                        },
+                        {
+                            "name": "font",
+                            "attributes": [
+                                {
+                                    "name": "size",
+                                    "default": "0.00px", // Docs says 16fp, but it is applicable only when properly initialized
+                                },
+                                {
+                                    "name": "weight",
+                                    "default": "FontWeight.Medium",
+                                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                                },
+                                {
+                                    "name": "family",
+                                    "default": "Harmony\"\"OS Sans",
+                                    "type": "FontFamily",
+                                },
+                                {
+                                    "name": "style",
+                                    "default": "FontStyle.Normal",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "name": "buttonStyle",
+                    "default": "ButtonStyleMode.EMPHASIZED"
+                },
+                {
+                    "name": "controlSize",
+                    "default": "ControlSize.NORMAL"
+                },
+                {
+                    "name": "role",
+                    "default": "ButtonRole.NORMAL"
+                },
+            ],
+        },
+        {
+            "name": "ColumnSplit",
+            "disable": ["setDividerTestDefaultValues"], // Wrong default values when not initialized. Need to investigate!
+            "attributes": [
+                {
+                    "name": "resizeable",
+                    "default": "false"
+                },
+                {
+                    "name": "divider",
+                    "attributes": [
+                        {
+                            "name": "startMargin",
+                            "default": "0.00vp",
+                            "fixtures": ["LengthAny"],
+                        },
+                        {
+                            "name": "endMargin",
+                            "default": "0.00vp",
+                            "fixtures": ["LengthAny"],
+                        },
+                    ]
+                },
+
+            ]
+        },
+        {
+            "name": "ImageSpan",
+            "disable": [
+                "setImageSpanOptionsTestDefaultValues",
+                "setImageSpanOptionsTestValueInvalidValues",
+                "setImageSpanOptionsTestValueValidValues",
+                "setColorFilterTestDefaultValues",
+                "setColorFilterTestValidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default":"",
+                },
+                {
+                    "name": "verticalAlign",
+                    "default":"VerticalAlign.BOTTOM",
+                    "fixtures": ["ImageSpanVerticalAlign"]
+                },
+                {
+                    "name": "colorFilter",
+                    "default":"",
+                },
+                {
+                    "name": "objectFit",
+                    "default": "ImageFit.Cover",
+                }
+            ],
+        },
+        {
+            "name": "QRCode",
+            "includes": [
+                "core/components/qrcode/qrcode_theme.h"
+            ],
+            "themes": [
+                "QrcodeTheme"
+            ],
+            "disable": [
+                "setColorTestDefaultValues", // wrong theme default color. Need to investigate!
+                "setColorTestColorInvalidValues", // wrong theme default color. Need to investigate!
+                "setBackgroundColorTestDefaultValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestBackgroundColorValidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setBackgroundColorTestBackgroundColorInvalidValues", // duplicate attribute in the JSON. Need to investigate!
+                "setContentOpacityTestDefaultValues", // invalid attribute name in the JSON. Need to investigate!
+                "setContentOpacityTestContentOpacityValidValues", // invalid attribute name in the JSON.
+                // Need to investigate!
+                "setContentOpacityTestContentOpacityInvalidValues", // invalid attribute name in the JSON.
+                // Need to investigate!
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": ""
+                },
+                {
+                     "name": "color",
+                     "default":"#FF182431"
+                },
+                {
+                    "name": "backgroundColor",
+                    "default":"#FFFFFFFF"
+                },
+                {
+                    "name": "contentOpacity",
+                    "default": "1.000000",
+                    "type": "OpacityWithResource"
+                }
+            ],
+        },
+        {
+            "name": "Image",
+             "attributes": [
+                {
+                    "name": "analyzerConfig",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "src",
+                    "default": ""
+                },
+                {
+                     "name": "alt",
+                     "default": ""
+                },
+                {
+                    "name": "imageAIOptions",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        },
+                        {
+                            "name": "aiController",
+                            "default": ""
+                        },
+                    ]
+                },
+                {
+                    "name": "colorFilter",
+                    "default": ""
+                },
+                {
+                    "name": "config",
+                    "attributes": [
+                        {
+                            "name": "types",
+                            "default": ""
+                        },
+                        {
+                            "name": "slice",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "matchTextDirection",
+                    "default": "false"
+                },
+                {
+                    "name": "fitOriginalSize",
+                    "default": "false"
+                },
+                {
+                    "name": "fillColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "objectFit",
+                    "default": "ImageFit.Cover"
+                },
+                {
+                    "name": "objectRepeat",
+                    "default": "ImageRepeat.NoRepeat"
+                },
+                {
+                    "name": "renderMode",
+                    "default": "ImageRenderMode.Original"
+                },
+                {
+                    "name": "dynamicRangeMode",
+                    "default": "dynamicRangeMode.Standard"
+                },
+                {
+                    "name": "interpolation",
+                    "default": "ImageInterpolation.None",
+                },
+                {
+                    "name": "sourceSize",
+                    "attributes": [
+                        {
+                            "name": "width",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "height",
+                            "default": "0.00vp"
+                        }
+                    ]
+                },
+                {
+                    "name": "pointLight",
+                    "attributes": [
+                        {
+                            "name": "lightSource",
+                            "attributes": [
+                                {
+                                    "name": "positionX",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "positionY",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "positionZ",
+                                    "default": "0.00vp",
+                                },
+                                {
+                                    "name": "intensity",
+                                    "default": "0",
+                                },
+                                {
+                                    "name": "color",
+                                    "default": "#FFFFFFFF",
+                                }
+                            ]
+                        },
+                        {
+                            "name": "illuminated",
+                            "default": "IlluminatedType.NONE"
+                        },
+                        {
+                            "name": "bloom",
+                            "default": "0"
+                        }
+                    ]
+                },
+                {
+                    "name" : "syncLoad",
+                    "default": "false"
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.None"
+                },
+                {
+                    "name": "resizable",
+                    "attributes": [
+                        {
+                            "name": "slice",
+                            "default": "0"
+                        }
+                    ]
+                },
+                {
+                    "name": "edgeAntialiasing",
+                    "default": ""
+                },
+                {
+                    "name": "supported",
+                    "default": "false"
+                },
+                {
+                    "name": "autoResize",
+                    "default": "false"
+                },
+                {
+                    "name": "draggable",
+                    "default": "true"
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false"
+                },
+                {
+                    "name": "enableAnalyzer",
+                    "default": "false"
+                }
+            ],
+            "disable": [
+                "setImageOptions0TestSrcValidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions0TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions1TestSrcValidValues", // Method not correctly implemented
+                "setImageOptions1TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setImageOptions2TestDefaultValues", // Method not correctly implemented
+                "setImageOptions2TestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setAltTestAltValidValues", // No fixture is defined for type Ark_CustomObject
+                "setAltTestAltInvalidValues", // No fixture is defined for type Ark_CustomObject
+                "setAutoResizeTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setSourceSizeTestDefaultValues", // values possibly double or integer
+                "setSourceSizeTestSourceSizeWidthValidValues", // values possibly double or integer
+                "setSourceSizeTestSourceSizeHeightValidValues",  // values possibly double or integer
+                "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
+                "setDraggableTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
+                "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
+                "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionYInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourcePositionZInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceIntensityValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorValidValues", // No values in the JSON
+                "setPointLightTestPointLightLightSourceColorInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedValidValues", // No values in the JSON
+                "setPointLightTestPointLightIlluminatedInvalidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomValidValues", // No values in the JSON
+                "setPointLightTestPointLightBloomInvalidValues", // No values in the JSON
+                "setAnalyzerConfigTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
+                "setResizableTestDefaultValues", // No values in the JSON
+                "setEdgeAntialiasingTestEdgeAntialiasingValidValues", // possible double or integer
+                "setResizableTestResizableSliceTopValidValues", // No values in the JSON
+                "setResizableTestResizableSliceTopInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceRightValidValues", // No values in the JSON
+                "setResizableTestResizableSliceRightInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceBottomValidValues", // No values in the JSON
+                "setResizableTestResizableSliceBottomInvalidValues", // No values in the JSON
+                "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
+                "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
+            ]
+        },
+        {
+            "name": "ScrollableCommonMethod",
+            "includes": ["core/components/scroll/scroll_bar_theme.h"],
+            "themes": ["ScrollBarTheme"],
+            "nodeTypes": ["Grid", "List", "Scroll", "WaterFlow"],
+            "attributes": [
+                {
+                    "name": "scrollBar",
+                    "default": "BarState.Off",
+                },
+                {
+                    "name": "scrollBarColor",
+                    "default": "#FF000000",
+                    "fixtures": ["ColorsStr", "ColorsNum", "ColorsEnum"],
+                },
+                {
+                    "name": "scrollBarWidth",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"],
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollForward",
+                            "default": "NestedScrollMode.SELF_ONLY",
+                        },
+                        {
+                            "name": "scrollBackward",
+                            "default": "NestedScrollMode.SELF_ONLY",
+                        },
+                    ]
+                },
+                {
+                    "name": "friction",
+                    "default": "0.75",
+                    "fixtures": ["ScrollableFrictionNum", "ScrollableFrictionRes"],
+                },
+                {
+                    "name": "flingSpeedLimit",
+                    "default": "12000.00vp",
+                    "fixtures": ["FlingSpeedLimit"],
+                },
+                {
+                    "name": "enableScrollInteraction",
+                    "default": "true"
+                },
+            ],
+            "disable": [
+                // Unusual structure of json file
+                "setEdgeEffectTestDefaultValues",
+                "setEdgeEffectTestEdgeEffectEdgeEffectValidValues",
+                "setEdgeEffectTestEdgeEffectEdgeEffectInvalidValues",
+                "setEdgeEffectTestEdgeEffectOptionsAlwaysEnabledValidValues",
+
+                // Modifier not implemented yet
+                "setFadingEdgeTestDefaultValues",
+                "setFadingEdgeTestValidValues",
+
+                // Nodes have different default values
+                "setScrollBarTestDefaultValues",
+                "setScrollBarTestScrollBarInvalidValues"
+            ]
+        },
+        {
+            "name": "Slider",
+            "includes": ["core/components/slider/slider_theme.h"],
+            "themes": ["SliderTheme"],
+            "disable": [
+                // Wrong place in JSON for options
+                "setSliderOptionsTestDefaultValues",
+                "setSliderOptionsTestOptionsValueValidValues",
+                "setSliderOptionsTestOptionsValueInvalidValues",
+                "setSliderOptionsTestOptionsMinValidValues",
+                "setSliderOptionsTestOptionsMinInvalidValues",
+                "setSliderOptionsTestOptionsMaxValidValues",
+                "setSliderOptionsTestOptionsMaxInvalidValues",
+                "setSliderOptionsTestOptionsStepValidValues",
+                "setSliderOptionsTestOptionsStepInvalidValues",
+                "setSliderOptionsTestOptionsReverseValidValues",
+                "setSliderOptionsTestOptionsReverseInvalidValues",
+                // Other
+                "setSliderOptionsTestOptionsDirectionValidValues", // Invalid enum in JSON
+                "setSliderOptionsTestOptionsDirectionInvalidValues", // Invalid enum in JSON
+                "setBlockColorTestDefaultValues", // Wrong default value
+                "setStepSizeTestDefaultValues", // Wrong default value
+                "setSelectedColorTestDefaultValues", // Wrong default value
+                "setMinLabelTestDefaultValues", // Deprecated. Doesn't seem to work
+                "setMinLabelTestMinLabelValidValues", // Deprecated. Doesn't seem to work
+                "setMaxLabelTestDefaultValues", // Deprecated. Doesn't seem to work
+                "setMaxLabelTestMaxLabelValidValues", // Deprecated. Doesn't seem to work
+                "setTrackThicknessTestDefaultValues", // Wrong default value
+                "setTrackColorTestValidValues", // Unsupported by generator yet
+                "setTrackThicknessTestTrackThicknessValidValues", // Wrong 0 value units
+                "setStepColorTestDefaultValues", // Wrong default value
+                "setTrackBorderRadiusTestDefaultValues", // Wrong default value
+                "setBlockSizeTestDefaultValues", // Wrong default value
+                "setBlockSizeTestBlockSizeWidthValidValues", // Wrong 0 value units
+                "setBlockSizeTestBlockSizeHeightValidValues", // Wrong 0 value units
+                "setBlockStyleTestDefaultValues", // Wrong JSON path?
+                "setBlockStyleTestValidValues", // Unsupported yet
+                "setMinResponsiveDistanceTestMinResponsiveDistanceValidValues", // Need float comp in UT generator
+                "setSlideRangeTestSlideRangeFromValidValues", // Need float comp in UT generator
+                "setSlideRangeTestSlideRangeToValidValues", // Need float comp in UT generator (looks like dep on from)
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": "0"
+                },
+                {
+                    "name": "min",
+                    "default": "0"
+                },
+                {
+                    "name": "max",
+                    "default": "100"
+                },
+                {
+                    "name": "step",
+                    "default": "1"
+                },
+                {
+                    "name": "style",
+                    "default": "SliderStyle.OutSet"
+                },
+                {
+                    "name": "direction",
+                    "default": "Axis.Horizontal"
+                },
+                {
+                    "name": "reverse",
+                    "default": "false"
+                },
+                {
+                    "name": "blockColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "trackColor",
+                    "default": "#19182431",
+                    "attributes": [
+                        {
+                            "name": "angle",
+                            "default": "",
+                        },
+                        {
+                            "name": "direction",
+                            "default": "",
+                        },
+                        {
+                            "name": "colors",
+                            "default": "",
+                        },
+                        {
+                            "name": "repeating",
+                            "default": "",
+                        },
+                    ],
+                },
+                {
+                    "name": "selectedColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "showSteps",
+                    "default": "false"
+                },
+                {
+                    "name": "showTips",
+                    "default": "false",
+                    "arguments": ["^", "^",],
+                },
+                {
+                    "name": "content",
+                    "default": ""
+                },
+                {
+                    "name": "trackThickness",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "blockBorderColor",
+                    "default": "#00000000"
+                },
+                {
+                    "name": "blockBorderWidth",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "stepColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "trackBorderRadius",
+                    "default": "",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "selectedBorderRadius",
+                    "default": "",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "blockSize",
+                    "attributes": [
+                        {
+                            "name": "width",
+                            "default": "0.00px",
+                            "fixtures": ["LengthNonNeg"],
+                        },
+                        {
+                            "name": "height",
+                            "default": "0.00px",
+                            "fixtures": ["LengthNonNeg"],
+                        },
+                    ]
+                },
+                {
+                    "name": "blockStyle",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "SliderBlockType.DEFAULT"
+                        },
+                        {
+                            "name": "image",
+                            "default": ""
+                        },
+                    ],
+                },
+                {
+                    "name": "stepSize",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"],
+                },
+                {
+                    "name": "sliderInteractionMode",
+                    "default": "SliderInteraction.SLIDE_AND_CLICK"
+                },
+                {
+                    "name": "minResponsiveDistance",
+                    "default": "0.000000",
+                    "fixtures": ["NumberNonNeg"],
+                },
+                {
+                    "name": "slideRange",
+                    "attributes": [
+                        {
+                            "name": "from",
+                            "default": "",
+                            "fixtures": ["NumberNonNegIntFloor"],
+                        },
+                        {
+                            "name": "to",
+                            "default": "",
+                            "fixtures": ["NumberNonNegIntCeil"],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "name": "Span",
+            "themes": ["TextTheme"],
+            "disable": [
+                "setFontTestFontFamilyValidValues", // Incorrect resource processing
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowTypeInvalidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setTextShadowTestTextShadowFillInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "arguments": ["^content"],
+                },
+                {
+                    "name": "content",
+                    "default": "",
+                    "fixtures": ["String", "StringRes"]
+                },
+                {
+                    "name": "decoration",
+                    "type": "DecorationStyleInterface",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "TextDecorationType.None",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "style",
+                            "default": "TextDecorationStyle.SOLID",
+                        },
+                    ],
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "type",
+                            "default": "ShadowType.COLOR",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": "0.0",
+                        },
+                        {
+                            "name": "fill",
+                            "default": "false",
+                        },
+                    ],
+                },
+                {
+                    "name": "letterSpacing",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc"]
+                },
+                {
+                    "name": "textCase",
+                    "default": "TextCase.Normal",
+                    "type": "TextCase",
+                },
+                {
+                    "name": "lineHeight",
+                    "default": "0.00px",
+                    "fixtures": ["LengthNonNeg"]
+                },
+                {
+                    "name": "font",
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "16.00fp",
+                            "type": "LengthNonNegNonPct",
+                        },
+                        {
+                            "name": "weight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                        },
+                        {
+                            "name": "family",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily",
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal",
+                        },
+                    ],
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily",
+                },
+                {
+                    "name": "fontSize",
+                    "default": "16.00fp",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+            ],
+        },
+        {
+            "name": "Text",
+            "attributes": [
+                {
+                    "name": "draggable",
+                    "default": "false",
+                },
+                {
+                    "name": "enableDataDetector",
+                    "default": "false",
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true",
+                },
+                {
+                    "name": "halfLeading",
+                    "default": "false",
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false",
+                },
+                {
+                    "name": "textCase",
+                    "default": "TextCase.Normal",
+                },
+                {
+                    "name": "textSelectable",
+                    "default": "selectable-unfocusable",
+                    "fixtures": ["TextSelectableMode"]
+                },
+            ],
+            "disable": [
+                "setBaselineOffsetTestBaselineOffsetInvalidValues",
+                "setBaselineOffsetTestBaselineOffsetValidValues",
+                "setBaselineOffsetTestDefaultValues",
+                "setCopyOptionTestCopyOptionInvalidValues",
+                "setCopyOptionTestCopyOptionValidValues",
+                "setCopyOptionTestDefaultValues",
+                "setDataDetectorConfigTestDefaultValues",
+                "setDataDetectorConfigTestValidValues",
+                "setDecorationTestDecorationColorInvalidValues",
+                "setDecorationTestDecorationStyleInvalidValues",
+                "setDecorationTestDecorationTypeInvalidValues",
+                "setDecorationTestDefaultValues",
+                "setEllipsisModeTestDefaultValues",
+                "setEllipsisModeTestEllipsisModeInvalidValues",
+                "setFont0TestDefaultValues",
+                "setFont0TestFontFamilyInvalidValues",
+                "setFont0TestFontFamilyValidValues",
+                "setFont0TestFontSizeInvalidValues",
+                "setFont0TestFontSizeValidValues",
+                "setFont0TestFontStyleInvalidValues",
+                "setFont0TestFontWeightInvalidValues",
+                "setFont0TestFontWeightValidValues",
+                "setFont1TestDefaultValues",
+                "setFont1TestFontFontValueFamilyInvalidValues",
+                "setFont1TestFontFontValueFamilyValidValues",
+                "setFont1TestFontFontValueSizeInvalidValues",
+                "setFont1TestFontFontValueSizeValidValues",
+                "setFont1TestFontFontValueStyleInvalidValues",
+                "setFont1TestFontFontValueStyleValidValues",
+                "setFont1TestFontFontValueWeightInvalidValues",
+                "setFont1TestFontFontValueWeightValidValues",
+                "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
+                "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
+                "setFontColorTestDefaultValues",
+                "setFontColorTestFontColorInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFeatureTestDefaultValues",
+                "setFontFeatureTestFontFeatureValidValues",
+                "setFontSizeTestDefaultValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontSizeTestFontSizeValidValues",
+                "setFontStyleTestDefaultValues",
+                "setFontStyleTestFontStyleInvalidValues",
+                "setFontWeight0TestDefaultValues",
+                "setFontWeight0TestFontWeightInvalidValues",
+                "setFontWeight0TestFontWeightValidValues",
+                "setFontWeight1TestDefaultValues",
+                "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightInvalidValues",
+                "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues",
+                "setFontWeight1TestFontWeightWeightInvalidValues",
+                "setFontWeight1TestFontWeightWeightValidValues",
+                "setHeightAdaptivePolicyTestDefaultValues",
+                "setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues",
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
+                "setLetterSpacingTestLetterSpacingValidValues",
+                "setLineBreakStrategyTestDefaultValues",
+                "setLineBreakStrategyTestLineBreakStrategyInvalidValues",
+                "setLineBreakStrategyTestLineBreakStrategyValidValues",
+                "setLineHeightTestDefaultValues",
+                "setLineHeightTestLineHeightInvalidValues",
+                "setLineHeightTestLineHeightValidValues",
+                "setMaxFontScaleTestDefaultValues",
+                "setMaxFontScaleTestMaxFontScaleInvalidValues",
+                "setMaxFontScaleTestMaxFontScaleValidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
+                "setMaxFontSizeTestMaxFontSizeValidValues",
+                "setMaxLinesTestDefaultValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMinFontScaleTestDefaultValues",
+                "setMinFontScaleTestMinFontScaleInvalidValues",
+                "setMinFontScaleTestMinFontScaleValidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+                "setMinFontSizeTestMinFontSizeValidValues",
+                "setSelectionTestDefaultValues",
+                "setSelectionTestSelectionSelectionEndValidValues",
+                "setSelectionTestSelectionSelectionStartValidValues",
+                "setTextAlignTestDefaultValues",
+                "setTextAlignTestTextAlignInvalidValues",
+                "setTextAlignTestTextAlignValidValues",
+                "setTextIndentTestDefaultValues",
+                "setTextIndentTestTextIndentInvalidValues",
+                "setTextOptionsTestDefaultValues",
+                "setTextOptionsTestValidValues",
+                "setTextOverflowTestDefaultValues",
+                "setTextOverflowTestTextOverflowOverflowInvalidValues",
+                "setTextOverflowTestTextOverflowOverflowValidValues",
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowFillInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowTypeInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setWordBreakTestDefaultValues",
+                "setWordBreakTestWordBreakInvalidValues",
+                "setWordBreakTestWordBreakValidValues",
+            ]
+        },
+        {
+            "name": "TextClock",
+            "includes":["core/components/text/text_theme.h"],
+            "themes": ["TextTheme"],
+            "disable": [
+                "setTextClockOptionsTestDefaultValues",
+                "setTextClockOptionsTestValidValues",
+                "setDateTimeOptionsTestValidValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowRadiusValidValues",
+                "setTextShadowTestTextShadowRadiusInvalidValues",
+                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowColorValidValues",
+                "setTextShadowTestTextShadowColorInvalidValues",
+                "setTextShadowTestTextShadowOffsetXValidValues",
+                "setTextShadowTestTextShadowOffsetXInvalidValues",
+                "setTextShadowTestTextShadowOffsetYValidValues",
+                "setTextShadowTestTextShadowOffsetYInvalidValues",
+                "setTextShadowTestTextShadowFillValidValues",
+                "setDateTimeOptionsTestDefaultValues"
+            ],
+            "attributes": [
+                {
+                    "name": "controller",
+                    "default": ""
+                },
+                {
+                    "name": "timeZoneOffset",
+                    "default": "0"
+                },
+                {
+                    "name": "format", 
+                    "default": "aa hh:mm:ss",
+                    "fixtures": ["TimeFormat"]
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "14.00px"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": ""
+                        },
+                        {
+                            "name": "type",
+                            "default": ""
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": ""
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": ""
+                        },
+                        {
+                            "name": "fill",
+                            "default": ""
+                        },
+                   ]
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeature"]
+                },
+            ],
+        },
+        {
+            "name": "Web",
+            "disable": [
+                // Blocked
+                "setWebOptionsTestDefaultValues",
+                "setWebOptionsTestValidValues",
+                "setJavaScriptProxyTestDefaultValues",
+                "setJavaScriptProxyTestValidValues",
+
+                // Deprecated (no need testing)
+                "setPasswordTestDefaultValues",
+                "setPasswordTestPasswordValidValues",
+                "setTableDataTestDefaultValues",
+                "setTableDataTestTableDataValidValues",
+                "setWideViewModeAccessTestDefaultValues",
+                "setWideViewModeAccessTestWideViewModeAccessValidValues",
+
+                // Not Fully Implemented
+                "setJavaScriptOnDocumentStartTestDefaultValues",
+                "setJavaScriptOnDocumentStartTestValidValues",
+                "setJavaScriptOnDocumentEndTestDefaultValues",
+                "setJavaScriptOnDocumentEndTestValidValues",
+                "setSelectionMenuOptionsTestDefaultValues",
+                "setSelectionMenuOptionsTestValidValues",
+
+                // Test Skipped (incorrect test behaviour)
+                "setDefaultTextEncodingFormatTestDefaultTextEncodingFormatValidValues",
+                "setNestedScrollTestDefaultValues",
+                "setNestedScrollTestNestedScrollScrollForwardValidValues",
+                "setNestedScrollTestNestedScrollScrollForwardInvalidValues",
+                "setNestedScrollTestNestedScrollScrollBackwardValidValues",
+                "setNestedScrollTestNestedScrollScrollBackwardInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "javaScriptAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "mediaPlayGestureAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "fileAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "onlineImageAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "domStorageAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "imageAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "mixedMode",
+                    "default": "MixedMode.None",
+                },
+                {
+                    "name": "zoomAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "geolocationAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "cacheMode",
+                    "default": "CacheMode.Default",
+                },
+                {
+                    "name": "darkMode",
+                    "default": "WebDarkMode.Off",
+                },
+                {
+                    "name": "forceDarkAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "overviewModeAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "overScrollMode",
+                    "default": "OverScrollMode.NEVER",
+                },
+                {
+                    "name": "textZoomAtio",
+                    "default": "100",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "textZoomRatio",
+                    "default": "100",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "databaseAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "initialScale",
+                    "default": "empty",
+                    "fixtures": ["NumberFloatAnything"],
+                },
+                {
+                    "name": "userAgent",
+                    "default": "",
+                },
+                {
+                    "name": "metaViewport",
+                    "default": "empty",
+                },
+                {
+                    "name": "multiWindowAccess",
+                    "default": "false",
+                },
+                {
+                    "name": "webStandardFont",
+                    "default": "sans-serif",
+                },
+                {
+                    "name": "webSerifFont",
+                    "default": "serif",
+                },
+                {
+                    "name": "webSansSerifFont",
+                    "default": "sans-serif",
+                },
+                {
+                    "name": "webFixedFont",
+                    "default": "monospace",
+                },
+                {
+                    "name": "webFantasyFont",
+                    "default": "fantasy",
+                },
+                {
+                    "name": "webCursiveFont",
+                    "default": "cursive",
+                },
+                {
+                    "name": "defaultFixedFontSize",
+                    "default": "13",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "defaultFontSize",
+                    "default": "16",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "minFontSize",
+                    "default": "8",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "minLogicalFontSize",
+                    "default": "8",
+                    "fixtures": ["NumberIntFloor"],
+                },
+                {
+                    "name": "defaultTextEncodingFormat",
+                    "default": "UTF-8",
+                    "fixtures": ["String"],
+                },
+                {
+                    "name": "forceDisplayScrollBar",
+                    "default": "false",
+                },
+                {
+                    "name": "horizontalScrollBarAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "verticalScrollBarAccess",
+                    "default": "true",
+                },
+                {
+                    "name": "pinchSmooth",
+                    "default": "false",
+                },
+                {
+                    "name": "allowWindowOpenMethod",
+                    "default": "false",
+                },
+                {
+                    "name": "layoutMode",
+                    "default": "WebLayoutMode.NONE",
+                },
+                {
+                    "name": "enableNativeEmbedMode",
+                    "default": "false",
+                },
+                {
+                    "name": "copyOptions",
+                    "default": "CopyOptions.CROSS_DEVICE",
+                },
+                {
+                    "name": "textAutosizing",
+                    "default": "true",
+                },
+                {
+                    "name": "enableSmoothDragResize",
+                    "default": "false",
+                },
+                {
+                    "name": "keyboardAvoidMode",
+                    "default": "empty",
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "empty",
+                },
+                {
+                    "name": "blockNetwork",
+                    "default": "empty",
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollUp",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollDown",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollRight",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                        {
+                            "name": "scrollLeft",
+                            "default": "NestedScrollMode.SELF_FIRST",
+                        },
+                    ],
+                },
+                {
+                    "name": "enableNativeMediaPlayer",
+                    "attributes": [
+                        {
+                            "name": "enable",
+                            "default": "false",
+                        },
+                        {
+                            "name": "shouldOverlay",
+                            "default": "false",
+                        },
+                    ],
+                },
+                {
+                    "name": "registerNativeEmbedRule",
+                    "attributes": [
+                        {
+                            "name": "tag",
+                            "default": "",
+                        },
+                        {
+                            "name": "type",
+                            "default": "",
+                        },
+                    ],
+                },
+                {
+                    "name": "mediaOptions",
+                    "attributes": [
+                        {
+                            "name": "resumeInterval",
+                            "default": "-1",
+                            "fixtures": ["NumberIntFloor"],
+                        },
+                        {
+                            "name": "audioExclusive",
+                            "default": "true",
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            "name": "WaterFlow",
+            "disable": [
+                "setWaterFlowOptionsTestDefaultValues", // not implemented modifier custom builder options!
+                "setWaterFlowOptionsTestValidValues", // not implemented modifier custom builder options!
+                "setRowsTemplateTestDefaultValues", //no default value set!
+                "setColumnsTemplateTestDefaultValues", //no default value set!
+                "setItemConstraintSizeTestDefaultValues", //no default value set!
+                "setFrictionTestDefaultValues", //json value is not string!
+                "setFrictionTestFrictionValidValues", //json value is not string!
+                "setFrictionTestFrictionInvalidValues", //json value is not string!
+                "setLayoutDirectionTestDefaultValues", // wrong name in json!
+                "setLayoutDirectionTestLayoutDirectionValidValues", // wrong name in json!
+                "setLayoutDirectionTestLayoutDirectionInvalidValues", // wrong name in json!
+            ],
+            "attributes": [
+                {
+                    "name": "columnsTemplate",
+                    "default": "1fr",
+                    "fixtures": ["StringNoEmpty"]
+                },
+                {
+                    "name": "rowsTemplate",
+                    "default": "1fr",
+                    "fixtures": ["StringNoEmpty"]
+                },
+                {
+                    "name": "itemConstraintSize",
+                    "attributes": [
+                        {
+                            "name": "minWidth",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "maxWidth",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "minHeight",
+                            "default": "0.00vp"
+                        },
+                        {
+                            "name": "maxHeight",
+                            "default": "0.00vp"
+                        }
+                    ]
+                },
+                {
+                    "name": "columnsGap",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "rowsGap",
+                    "default": "0.00vp"
+                },
+                {
+                    "name": "layoutDirection",
+                    "default": "FlexDirection.Column"
+                },
+                {
+                    "name": "enableScrollInteraction",
+                    "default": "true"
+                },
+                {
+                    "name": "nestedScroll",
+                    "attributes": [
+                        {
+                            "name": "scrollForward",
+                            "default": "NestedScrollMode.SELF_ONLY"
+                        },
+                        {
+                            "name": "scrollBackward",
+                            "default": "NestedScrollMode.SELF_ONLY"
+                        },
+                    ]
+                },
+                {
+                    "name": "friction",
+                    "default": "0.75",
+                    "fixtures": ["FrictionResource"]
+                },
+                {
+                    "name": "cachedCount",
+                    "default": "1",
+                    "fixtures": ["NumberNonNegIntFloor"]
+                },
+            ]
+        },
+        {
+            "name": "SymbolSpan",
+            "disable": [
+                "setFontColorTestValidValues",
+                "setSymbolSpanOptionsTestDefaultValues",
+                "setSymbolSpanOptionsTestValidValues",
+            ],
+            "attributes": [
+               {
+                   "name": "fontSize",
+                   "default": "16.00fp",
+                   "type": "DimensionNonNegNonPct",
+               },
+               {
+                   "name": "fontWeight",
+                   "default": "FontWeight.Normal",
+                   "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+               },
+               {
+                   "name": "fontColor",
+                   "default": "#FF000000",
+               },
+               {
+                   "name": "effectStrategy",
+                   "default": "SymbolEffectStrategy.NONE",
+               },
+               {
+                   "name": "renderingStrategy",
+                   "default": "SymbolRenderingStrategy.SINGLE",
+               },
+            ]
+       },
+       {
+            "name": "TextTimer",
+            "disable": [
+                "setTextTimerOptionsTestValidValues",
+                "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
+                "setTextShadowTestDefaultValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowTypeValidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowTypeInvalidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowColorValidValues" // Shadow coloring strategy attribute is missed in json
+            ],
+            "attributes": [
+                {
+                    "name": "isCountDown",
+                    "default": "false"
+                },
+                {
+                    "name": "count",
+                    "default": "60000.000000",
+                    "fixtures": ["TimerInputCount"]
+                },
+                {
+                    "name": "controller",
+                    "default": ""
+                },
+                {
+                    "name": "format",
+                    "default": "HH:mm:ss.SS",
+                    "fixtures": ["TextTimerDateFormat"]
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "",
+                    "fixtures": ["FontFamilyResource", "FontFamilyString"]
+                },
+                {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowRaduisNumber", "ShadowRaduisRes"]
+                        },
+                        {
+                            "name": "type",
+                            "default": "ShadowType.Color"
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                            "fixtures": ["ColorsStr", "ColorsRes", "ColorsEnum"]
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                        {
+                            "name": "fill",
+                            "default": "false",
+                            "type": "Ark_Boolean"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

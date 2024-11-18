@@ -79,11 +79,13 @@ public:
     void SetBindIndicator(bool bind) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);
-    static void SetIndex(FrameNode* frameNode, uint32_t index);
-    static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
-    static void SetDuration(FrameNode* frameNode, uint32_t duration);
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
+        const std::optional<bool> &ignoreBlank);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
+        const std::optional<bool> &ignoreBlank);
+    static void SetIndex(FrameNode* frameNode, int32_t index);
+    static void SetAutoPlayInterval(FrameNode* frameNode, int32_t interval);
+    static void SetDuration(FrameNode* frameNode, int32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
@@ -108,6 +110,7 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(int32_t index)>&& onChange);
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);

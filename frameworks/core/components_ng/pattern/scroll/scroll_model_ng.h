@@ -85,6 +85,7 @@ public:
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event);
+    static void SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event);
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);

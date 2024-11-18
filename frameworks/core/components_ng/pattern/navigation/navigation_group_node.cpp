@@ -313,6 +313,7 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     json->PutExtAttr("hideBackButton", navBarLayoutProperty->GetHideBackButtonValue(false), filter);
     json->PutExtAttr("hideTitleBar", navBarLayoutProperty->GetHideTitleBarValue(false), filter);
     json->PutExtAttr("hideToolBar", navBarLayoutProperty->GetHideToolBarValue(false), filter);
+    json->PutExtAttr("recoverable", recoverable_, filter);
 }
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)

@@ -161,12 +161,12 @@ RefPtr<TextClockController> TextClockModelNG::InitTextController(FrameNode* fram
     return pattern->GetTextClockController();
 }
 
-void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
+void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::optional<std::string>& format)
 {
-    if (format.empty()) {
+    if (!format.has_value() || format.value().empty()) {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, frameNode);
     } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format.value(), frameNode);
     }
 }
 
@@ -177,40 +177,70 @@ void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
 
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value, frameNode);
+    if (value.empty() == false) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, frameNode);
+    }
 }
 
 void TextClockModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value, frameNode);
+    if (value.empty() == false) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, frameNode);
+    }
 }
 
-void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
+void TextClockModelNG::SetFontColor(FrameNode* frameNode,  const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, color.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    }
 }
 
-void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void TextClockModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, value, frameNode);
+    if (size.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, size.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontSize, frameNode);
+    }
 }
 
-void TextClockModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+void TextClockModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, ItalicFontStyle, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, ItalicFontStyle, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, ItalicFontStyle, frameNode);
+    }
 }
 
-void TextClockModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
+void TextClockModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontWeight, value, frameNode);
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontWeight, frameNode);
+    }
 }
 
 void TextClockModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFamily, value, frameNode);
+    if (!value.empty()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFamily, value, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFamily, frameNode);
+    }
 }
 
 void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& makeFunc)

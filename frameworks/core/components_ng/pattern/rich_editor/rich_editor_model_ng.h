@@ -87,6 +87,8 @@ public:
     static void SetImagePreviewMenuParam(FrameNode* frameNode,
         std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

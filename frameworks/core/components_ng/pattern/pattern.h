@@ -592,6 +592,16 @@ public:
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
+    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
+    {
+        return nullptr;
+    }
+
+    virtual int32_t GetTotalChildCount()
+    {
+        return -1;
+    }
+
     void CheckLocalized()
     {
         auto host = GetHost();

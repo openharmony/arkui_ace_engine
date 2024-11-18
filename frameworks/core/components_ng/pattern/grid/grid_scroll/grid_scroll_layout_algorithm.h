@@ -73,6 +73,21 @@ public:
         }
     }
 
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
@@ -80,11 +95,19 @@ protected:
     virtual void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward);
 
 private:
+    enum class RequestFeature {
+        FIRST = 0,
+        SECOND
+    };
+
+    bool CheckPredictItems(
+        RequestFeature requestFeature, LayoutWrapper* layoutWrapper, float mainSize, float mainLength);
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadFromUpdateIdxToStartIndex(
         float mainSize, float crossSize, int32_t updateLineIndex, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void AdjustEndIndex(LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
 
@@ -221,6 +244,7 @@ private:
     LayoutWrapper* wrapper_;
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    int32_t prevStartMainLineIndex_ = -1;     // startMainLineIndex before upward lazy items request
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
@@ -241,6 +265,10 @@ private:
     OffsetF childFrameOffset_;
     std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

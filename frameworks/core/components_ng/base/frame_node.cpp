@@ -495,6 +495,15 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     return newChild;
 }
 
+int32_t FrameNode::GetTotalChildCount() const
+{
+    auto overrideCount = pattern_->GetTotalChildCount();
+    if (overrideCount < 0) {
+        return UINode::TotalChildCount();
+    }
+    return overrideCount;
+}
+
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -4408,14 +4417,17 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
-    if (child) {
-        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+    RefPtr<LayoutWrapper> overrideChild = pattern_->GetOrCreateChildByIndex(index);
+    if (!overrideChild) {
+        overrideChild = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    }
+    if (overrideChild) {
+        overrideChild->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
-            child->SetActive(true);
+            overrideChild->SetActive(true);
         }
     }
-    return child;
+    return overrideChild;
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)

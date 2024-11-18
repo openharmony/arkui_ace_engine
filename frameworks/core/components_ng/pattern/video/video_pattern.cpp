@@ -2326,4 +2326,41 @@ bool VideoPattern::IsPlayerInValidStatus()
     return mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid() &&
         playerStatus_ != PlayerStatus::NONE && playerStatus_ != PlayerStatus::ERROR;
 }
+
+void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
+{
+    if (videoControllerV2_) {
+        // Video Controller is already attached
+        return;
+    }
+    videoControllerV2_ = videoController;
+
+    // if pattern is attached to frame node
+    auto frameNode = frameNode_.Upgrade();
+    if (frameNode) {
+        // full screen node is not supposed to register js controller event
+        if (!InstanceOf<VideoFullScreenPattern>(this)) {
+            SetMethodCall();
+        }
+    }
+}
+
+RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
+{
+    return videoControllerV2_;
+}
+
+void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("muted", muted_ ? "true" : "false", filter);
+    json->PutExtAttr("autoPlay", autoPlay_ ? "true" : "false", filter);
+    json->PutExtAttr("loop", loop_ ? "true" : "false", filter);
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("currentProgressRate", progressRate_, filter);
+}
+
 } // namespace OHOS::Ace::NG
