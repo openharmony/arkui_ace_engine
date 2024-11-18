@@ -706,8 +706,8 @@ void TextFieldPattern::ProcessOverlayAfterLayout(const OffsetF& prevOffset)
                 pattern->StartTwinkling();
             }
             pattern->ProcessOverlay({ .menuIsShow = pattern->selectOverlay_->IsCurrentMenuVisibile() });
-            pattern->needToRefreshSelectOverlay_ = false;
         }
+        pattern->needToRefreshSelectOverlay_ = false;
     });
 }
 
@@ -5185,8 +5185,12 @@ void TextFieldPattern::HandleParentGlobalOffsetChange()
     CHECK_NULL_VOID(SelectOverlayIsOn() || selectOverlay_->SelectOverlayIsCreating());
     if (selectOverlay_->IsShowMouseMenu()) {
         CloseSelectOverlay();
-    } else {
+        return;
+    }
+    if (selectOverlay_->IsHiddenHandle() && selectOverlay_->IsSingleHandle()) {
         selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
+    } else {
+        selectOverlay_->ProcessOverlay({ .menuIsShow = false });
     }
 }
 
