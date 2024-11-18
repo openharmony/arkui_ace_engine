@@ -451,6 +451,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
+    event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
 }
 
 void GetPointerEventAction(int32_t action, PointerEvent& event)
