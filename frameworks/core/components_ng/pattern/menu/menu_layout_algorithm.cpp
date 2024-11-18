@@ -323,6 +323,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitializeParam(menuPattern);
+    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+        position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
+        TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
+            position_.ToString().c_str());
+    }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
