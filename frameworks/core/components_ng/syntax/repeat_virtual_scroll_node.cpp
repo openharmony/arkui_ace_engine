@@ -62,8 +62,15 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
     totalCount_ = totalCount;
 }
 
-void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void RepeatVirtualScrollNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        cacheStart = 0;
+        cacheEnd = 0;
+    }
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
         "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
