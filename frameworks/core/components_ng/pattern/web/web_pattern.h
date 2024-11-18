@@ -1014,7 +1014,6 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
@@ -1195,7 +1194,6 @@ private:
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
     float touchPointX = 0;
     float touchPointY = 0;
-    bool isAIEngineInit = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
