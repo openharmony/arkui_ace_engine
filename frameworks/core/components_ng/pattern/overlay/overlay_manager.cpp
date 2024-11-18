@@ -3317,12 +3317,14 @@ bool OverlayManager::RemoveModalInOverlay()
     return true;
 }
 
-bool OverlayManager::RemoveAllModalInOverlay()
+bool OverlayManager::RemoveAllModalInOverlay(bool isRouterTransition)
 {
     if (modalStack_.empty()) {
         return true;
     }
-
+    if (!isRouterTransition) {
+        return true;
+    }
     auto topModalNode = modalStack_.top().Upgrade();
     bool isModalUiextensionNode = IsModalUiextensionNode(topModalNode);
     bool isProhibitedRemoveByRouter = IsProhibitedRemoveByRouter(topModalNode);

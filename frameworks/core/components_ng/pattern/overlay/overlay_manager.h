@@ -236,7 +236,7 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
-    bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlay(bool isRouterTransition = true);
     bool RemoveAllModalInOverlayByStack();
     bool RemoveAllModalInOverlayByList();
     bool OnRemoveAllModalInOverlayByList();
