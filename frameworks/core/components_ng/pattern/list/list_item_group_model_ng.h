@@ -50,6 +50,9 @@ public:
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
+        FrameNode* frameNode, const std::optional<float>& defaultSize);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

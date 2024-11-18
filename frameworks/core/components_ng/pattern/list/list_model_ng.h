@@ -154,6 +154,9 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
+        FrameNode* frameNode, const std::optional<float>& defaultSize);
+    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

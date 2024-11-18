@@ -244,7 +244,10 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   defines = []
   include_dirs = []
 
-  public_configs = [ ":ace_core_interfaces_native_node_config", "$ace_root/test/unittest:ace_unittest_config" ]
+  public_configs = [
+    ":ace_core_interfaces_native_node_config",
+    "$ace_root/test/unittest:ace_unittest_config",
+  ]
 
   defines += [ "ARKUI_CAPI_UNITTEST " ]
   defines += [ "INCLUDE_GENERATED_SOURCES" ]

@@ -119,6 +119,28 @@ RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSi
     return pattern->GetOrCreateListChildrenMainSize();
 }
 
+RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize(
+    FrameNode* frameNode, const std::optional<float>& defaultSize)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
+    if (defaultSize.has_value()) {
+        childrenMainSize->UpdateDefaultSize(defaultSize.value());
+    }
+    return childrenMainSize;
+}
+
+RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize(
+    FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
+
 void ListItemGroupModelNG::SetListChildrenMainSize(
     FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize)
 {

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <climits>
+#include <functional>
+
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #ifdef ARKUI_CAPI_UNITTEST

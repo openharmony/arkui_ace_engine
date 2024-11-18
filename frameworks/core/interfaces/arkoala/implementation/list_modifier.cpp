@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "list_scroller_peer_impl.h"
+#include "children_main_size_peer.h"
 
 namespace OHOS::Ace::NG {
 using ListLanesType = std::variant<int, std::pair<Dimension, Dimension>>;
@@ -286,9 +287,11 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ListModelNG::SetChildrenMainSize(frameNode, convValue);
-    LOGE("ListModifier::ChildrenMainSizeImpl is not implemented yet!");
+
+    auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
+    CHECK_NULL_VOID(peer);
+    RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
+    peer->SetHandler(handler);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
                                         Ark_Boolean value)
