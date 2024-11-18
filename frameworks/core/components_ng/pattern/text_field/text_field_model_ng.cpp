@@ -1224,7 +1224,7 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, const std::optional
 void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies)
 {
     CHECK_NULL_VOID(frameNode);
-    if (fontFamilies && fontFamilies->size() > 0) {
+    if (fontFamilies && !fontFamilies->empty()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, fontFamilies.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, frameNode);

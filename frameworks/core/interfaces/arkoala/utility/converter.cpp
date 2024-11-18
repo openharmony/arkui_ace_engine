@@ -648,8 +648,7 @@ template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;
-    auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family);
-    if (fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family); fontfamiliesOpt) {
         font.fontFamilies = fontfamiliesOpt->families;
     }
     auto fontSize = OptConvert<Dimension>(src.size);
