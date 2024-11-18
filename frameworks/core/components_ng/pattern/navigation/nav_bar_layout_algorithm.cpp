@@ -33,8 +33,6 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
     CHECK_NULL_RETURN(hostNode, 0.0f);
-    auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
-    CHECK_NULL_RETURN(navBarPattern, 0.0f);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
@@ -42,8 +40,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
 
-    // if titlebar is hidden and not forced to be remeasured or there is no child in titlebar, set zero to its size.
-    if ((!navBarPattern->ForceMeasureTitleBar() && navBarLayoutProperty->GetHideTitleBarValue(false)) ||
+    /**
+     * In the follow scenarios, we need to set the titleBar size to zero.
+     * 1. TitleBar has no child.
+     * 2. Titlebar is hidden and no titleBar animation is running.
+     */
+    auto translateState = navBarLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+    if ((translateState == BarTranslateState::NONE && navBarLayoutProperty->GetHideTitleBarValue(false)) ||
         titleBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
@@ -251,9 +254,13 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
-    auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
-    CHECK_NULL_RETURN(navBarPattern, 0.0f);
-    if (!navBarPattern->ForceMeasureTitleBar() && navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
+    /**
+     * When all the following conditions are met, we consider the titleBar height to be 0:
+     * 1. TitleBar should hide.
+     * 2. No titleBar animation is running or titleBar was translate out of navigation area.
+     */
+    auto translateState = navBarLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+    if (navBarLayoutProperty->GetHideTitleBarValue(false) && translateState != BarTranslateState::TRANSLATE_ZERO) {
         return 0.0f;
     }
     auto titleBarNode = hostNode->GetTitleBarNode();
@@ -310,14 +317,26 @@ float TransferBarHeight(const RefPtr<NavBarNode>& hostNode, float originBarHeigh
         auto options = titlePattern->GetTitleBarOptions();
         barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
     }
-    // when titleBar do after measure animation or title bar is hidden, height is zero
     if (isTitleBar) {
-        if (navBarPattern->ForceMeasureTitleBar() || navBarLayoutProperty->GetHideTitleBarValue(false)) {
+        /**
+         * In the follow scenarios, we need to convert titleBar's height to zero.
+         * 1. TitleBar has translate out of the navigation area.
+         * 2. Titlebar is hidden and no titleBar animation is running.
+         */
+        auto translateState = navBarLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
+        if (translateState == BarTranslateState::TRANSLATE_HEIGHT ||
+            (translateState == BarTranslateState::NONE && navBarLayoutProperty->GetHideTitleBarValue(false))) {
             return 0.0f;
         }
-    // when toolbar do after measure animation or toolbar is hidden, height is zero
     } else {
-        if (navBarPattern->ForceMeasureToolBar() || navBarLayoutProperty->GetHideToolBarValue(false)) {
+        /**
+         * In the follow scenarios, we need to convert toolBar's height to zero.
+         * 1. ToolBar has translate out of the navigation area.
+         * 2. Toolbar is hidden and no toolBar animation is running.
+         */
+        auto translateState = navBarLayoutProperty->GetToolBarTranslateStateValue(BarTranslateState::NONE);
+        if (translateState == BarTranslateState::TRANSLATE_HEIGHT ||
+            (translateState == BarTranslateState::NONE && navBarLayoutProperty->GetHideToolBarValue(false))) {
             return 0.0f;
         }
     }
