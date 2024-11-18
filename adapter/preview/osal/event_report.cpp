@@ -82,4 +82,6 @@ void EventReport::ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool
 
 void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
+
+void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
 } // namespace OHOS::Ace
