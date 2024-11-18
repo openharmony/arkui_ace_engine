@@ -449,8 +449,8 @@ frameworks/bridge/common/dom/dom_type.cpp
 frameworks/bridge/common/dom/dom_type.h
 frameworks/bridge/common/dom/dom_video.cpp @arkuilayout
 frameworks/bridge/common/dom/dom_video.h @arkuilayout
-frameworks/bridge/common/dom/dom_web.cpp @LongLie
-frameworks/bridge/common/dom/dom_web.h @LongLie
+frameworks/bridge/common/dom/dom_web.cpp @arkwebinarkuireview
+frameworks/bridge/common/dom/dom_web.h @arkwebinarkuireview
 frameworks/bridge/common/dom/dom_xcomponent.cpp @arkuilayout
 frameworks/bridge/common/dom/dom_xcomponent.h @arkuilayout
 frameworks/bridge/common/dom/form_value.h
@@ -536,7 +536,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkRefresh.ts @arkuiscr
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRelativeContainer.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRemoteWindow.ts
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRichEditor.ts @zhuweifeng94
-frameworks/bridge/declarative_frontend/ark_component/src/ArkRichText.ts @LongLie
+frameworks/bridge/declarative_frontend/ark_component/src/ArkRichText.ts @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRowSplit.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkRow.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkScrollBar.ts @arkuiscroll
@@ -566,7 +566,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkToggle.ts @arkuipopu
 frameworks/bridge/declarative_frontend/ark_component/src/ArkUIExtensionComponent.ts @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/ark_component/src/ArkVideo.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuiscroll
-frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @LongLie
+frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuievent
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkui_architecture
@@ -718,8 +718,8 @@ frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.cpp @a
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h @arkuievent
-frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.cpp @LongLie
-frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h @LongLie
+frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/engine/js_converter.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js
 frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h @arkuistatemgmt
@@ -1191,8 +1191,8 @@ frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.cpp @arku
 frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.cpp @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/js_richeditor.h @zhuweifeng94
-frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @LongLie
-frameworks/bridge/declarative_frontend/jsview/js_richtext.h @LongLie
+frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/js_richtext.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/js_row.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row_split.cpp @arkuilayout
@@ -1303,10 +1303,10 @@ frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.cpp @arkuiscrol
 frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_web_controller.cpp @LongLie
-frameworks/bridge/declarative_frontend/jsview/js_web_controller.h @LongLie
-frameworks/bridge/declarative_frontend/jsview/js_web.cpp @LongLie
-frameworks/bridge/declarative_frontend/jsview/js_web.h @LongLie
+frameworks/bridge/declarative_frontend/jsview/js_web_controller.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/js_web_controller.h @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/js_web.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/js_web.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_xcomponent.cpp @arkuilayout
@@ -1441,8 +1441,8 @@ frameworks/bridge/declarative_frontend/jsview/models/remote_window_model_impl.cp
 frameworks/bridge/declarative_frontend/jsview/models/remote_window_model_impl.h
 frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.cpp @zhuweifeng94
 frameworks/bridge/declarative_frontend/jsview/models/richeditor_model_impl.h @zhuweifeng94
-frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.cpp @LongLie
-frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.h @LongLie
+frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/models/richtext_model_impl.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/models/row_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/row_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/scroll_bar_model_impl.cpp @arkuiscroll
@@ -1506,8 +1506,8 @@ frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.
 frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.cpp @LongLie
-frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.h @LongLie
+frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.cpp @arkwebinarkuireview
+frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.h @arkwebinarkuireview
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/scroll_bar/  @arkuiscroll
@@ -1936,7 +1936,7 @@ frameworks/core/components/declaration/image/ @arkui_image
 frameworks/core/components/declaration/input/ @huawei_g_five
 frameworks/core/components/declaration/piece/ @arkui_image
 frameworks/core/components/declaration/qrcode/ @arkui_image
-frameworks/core/components/declaration/richtext/ @LongLie
+frameworks/core/components/declaration/richtext/ @arkwebinarkuireview
 frameworks/core/components/declaration/search/ @huawei_g_five
 frameworks/core/components/declaration/side_bar/ @arkui_superman
 frameworks/core/components/declaration/span/ @huawei_g_five
@@ -1946,7 +1946,7 @@ frameworks/core/components/declaration/textarea/ @huawei_g_five
 frameworks/core/components/declaration/textfield/ @huawei_g_five
 frameworks/core/components/declaration/text/ @huawei_g_five
 frameworks/core/components/declaration/texttimer/ @arkui_image
-frameworks/core/components/declaration/web/ @LongLie
+frameworks/core/components/declaration/web/ @arkwebinarkuireview
 frameworks/core/components/declaration/xcomponent/ @arkuilayout
 frameworks/core/components/dialog/ @arkuipopupwindow
 frameworks/core/components/dialog_tween/ @arkuipopupwindow
@@ -1994,7 +1994,7 @@ frameworks/core/components/rating/ @arkuipopupwindow
 frameworks/core/components/refresh/ @arkuiscroll
 frameworks/core/components/relative_container/ @arkuilayout
 frameworks/core/components/remote_window/ 
-frameworks/core/components/rich_text/ @LongLie
+frameworks/core/components/rich_text/ @arkwebinarkuireview
 frameworks/core/components/root/ @arkuievent
 frameworks/core/components/scene_viewer/ 
 frameworks/core/components/scoring/ @arkuiframework
@@ -2037,7 +2037,7 @@ frameworks/core/components/triangle/ @arkuipopupwindow
 frameworks/core/components/tween/ @arkuiframework
 frameworks/core/components/video/ @arkuilayout
 frameworks/core/components/watch_slider/ @arkuipopupwindow
-frameworks/core/components/web/ @LongLie 
+frameworks/core/components/web/ @arkwebinarkuireview 
 frameworks/core/components/wrap/ @arkuilayout
 frameworks/core/components/xcomponent/ @arkuilayout
 frameworks/core/components_v2/ability_component/ @arkuilayout
@@ -2440,7 +2440,7 @@ frameworks/core/components_ng/pattern/ui_extension/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/video/ @arkuilayout
 frameworks/core/components_ng/pattern/view_context/ @arkuiframework
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
-frameworks/core/components_ng/pattern/web/ @LongLie
+frameworks/core/components_ng/pattern/web/ @arkwebinarkuireview
 frameworks/core/components_ng/pattern/window_scene/ 
 frameworks/core/components_ng/pattern/xcomponent/ @arkuilayout
 frameworks/core/components_ng/svg/ @arkui_image
@@ -3067,7 +3067,7 @@ test/unittest/core/pattern/ui_extension/mock/ @arkuiabilitygroup
 test/unittest/core/pattern/video/ @arkuilayout
 test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
-test/unittest/core/pattern/web/ @chenjiafeng-openharmony
+test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/property/ @chenjiafeng-openharmony
