@@ -2212,10 +2212,10 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
         pattern->scrollBar_->isScrollable_ = true;
     };
 
-    // /**
-    //  * @tc.steps: step2. Test HandleClickEvent.
-    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
-    //  */
+    /**
+    * @tc.steps: step2. Test HandleClickEvent.
+    * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    */
     pattern_->hasMousePressed_ = true;
     pattern_->HandleClickEvent(info);
     Point point(info.localLocation_.GetX(), info.localLocation_.GetY());

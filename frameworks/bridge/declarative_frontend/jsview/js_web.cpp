@@ -1239,7 +1239,6 @@ public:
         auto statusCode = args[0]->ToNumber<int32_t>();
         if (statusCode == -1) {
             TAG_LOGE(AceLogTag::ACE_WEB, "SetResponseCode: arg value is not supported!");
-            return;
         }
 
         response_->SetStatusCode(statusCode);

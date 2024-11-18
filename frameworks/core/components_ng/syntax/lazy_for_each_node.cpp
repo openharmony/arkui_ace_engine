@@ -395,10 +395,16 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void LazyForEachNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     if (!builder_) {
         return;
+    }
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        builder_->SetShowCached(cacheStart, cacheEnd);
     }
     if (builder_->SetActiveChildRange(start, end)) {
         tempChildren_.clear();

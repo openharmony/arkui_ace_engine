@@ -109,9 +109,7 @@ public:
 
     bool NeedSoftKeyboard() override;
 
-    void SetOnWindowFocused(const std::function<void()>& callback) override;
-
-    void SetOnWindowFocusedCallBack(const std::function<void()>& callback)
+    void SetOnWindowFocused(const std::function<void()>& callback) override
     {
         focusOnNodeCallback_ = callback;
     }

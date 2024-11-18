@@ -1399,13 +1399,13 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         return;
     }
-    auto value = operationRecords_.back();
-    operationRecords_.pop_back();
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
-    if (operationRecords_.empty()) {
+    if (operationRecords_.size() == 1) {
         FireEventHubOnChange("");
         return;
     }
+    auto value = operationRecords_.back();
+    operationRecords_.pop_back();
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
@@ -1802,6 +1802,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             magnifierController_->RemoveMagnifierFrameNode();
         }
+        ResetTouchAndMoveCaretState();
     }
 }
 
@@ -1825,6 +1826,18 @@ void TextFieldPattern::HandleTouchUp()
     if (GetIsPreviewText() && isTouchPreviewText_) {
         StartTwinkling();
     }
+    ResetTouchAndMoveCaretState();
+    if (isMousePressed_) {
+        isMousePressed_ = false;
+    }
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+    ScheduleDisappearDelayTask();
+}
+
+void TextFieldPattern::ResetTouchAndMoveCaretState()
+{
     if (moveCaretState_.isTouchCaret) {
         moveCaretState_.isTouchCaret = false;
         CheckScrollable();
@@ -1839,13 +1852,6 @@ void TextFieldPattern::HandleTouchUp()
             StopTwinkling();
         }
     }
-    if (isMousePressed_) {
-        isMousePressed_ = false;
-    }
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
-    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)

@@ -1578,11 +1578,11 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd);
+        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
         start -= static_cast<int32_t>(count);
         end -= static_cast<int32_t>(count);
     }

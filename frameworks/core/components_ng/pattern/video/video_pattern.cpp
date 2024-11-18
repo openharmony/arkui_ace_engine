@@ -768,20 +768,20 @@ void VideoPattern::UpdateMuted()
 {
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
         ContainerScope scope(instanceId_);
-        float volume = muted_ ? 0.0f : 1.0f;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
+        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            if (NearZero(videoVolume)) {
+            if (isMuted) {
                 mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+                mediaPlayer->SetVolume(0.0f, 0.0f);
             } else {
                 mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
-                mediaPlayer->SetVolume(videoVolume, videoVolume);
+                mediaPlayer->SetVolume(1.0f, 1.0f);
             }
         }, "ArkUIVideoUpdateMuted");
     }

@@ -223,9 +223,9 @@ private:
     void RemoveDelayResetManuallyClickFlagTask();
 
     void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
-    void InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceId);
-    void InitAddUnTrustAndEnableFormCallback(int32_t instanceId);
-    void InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceId);
+    void InitAddUninstallAndSurfaceNodeCallback(int32_t instanceId);
+    void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
+    void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);

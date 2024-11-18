@@ -58,6 +58,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 {
+    CHECK_NULL_VOID(!allSpans_.empty());
     auto lastSpan = allSpans_.back();
     CHECK_NULL_VOID(lastSpan);
     if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {

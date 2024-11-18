@@ -5280,18 +5280,6 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
     return false;
 }
 
-void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
-{
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
-        [weak = WeakClaim(this), callback]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetOnWindowFocusedCallBack(callback);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
-}
-
 bool PipelineContext::CheckThreadSafe()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
