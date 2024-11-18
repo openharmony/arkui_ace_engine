@@ -188,6 +188,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
+    isLayouted_ = false;
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -777,6 +778,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!isLayouted_) {
+        itemPosition_ = pattern->GetItemPosition();
+    }
     preStartIndex_ = pattern->GetStartIndexInItemPosition();
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         auto it = itemPosition_.find(jumpIndex_.value());
@@ -1569,6 +1573,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     UpdateOverlay(layoutWrapper);
+    isLayouted_ = true;
 }
 
 void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)

@@ -584,6 +584,7 @@ private:
     float laneGutter_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
     OffsetF paddingOffset_;
+    bool isLayouted_ = true;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
