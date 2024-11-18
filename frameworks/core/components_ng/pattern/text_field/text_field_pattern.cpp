@@ -3265,6 +3265,12 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
+void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
+{
+    selectController_->UpdateCaretIndex(
+        std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
+}
+
 bool TextFieldPattern::IsOnPasswordByPosition(const Offset& globalOffset)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
@@ -3283,12 +3289,6 @@ bool TextFieldPattern::IsOnCleanNodeByPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(frameNode, false);
     auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
-}
-
-void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
-{
-    selectController_->UpdateCaretIndex(
-        std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
 }
 
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
@@ -4270,6 +4270,7 @@ float TextFieldPattern::MeasureCounterNodeHeight()
     counterNodeLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
     counterNodeLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
     counterNodeLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
+    ScopedLayout scope(frameNode->GetContext());
     counterFrameNode->Measure(LayoutConstraintF());
     auto counterGeometryNode = counterFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(counterGeometryNode, 0.0);
@@ -6296,9 +6297,11 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
 
 void TextFieldPattern::UpdateErrorTextMargin()
 {
-    auto renderContext = GetHost()->GetRenderContext();
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -6310,6 +6313,7 @@ void TextFieldPattern::UpdateErrorTextMargin()
         CreateErrorParagraph(errorText);
         auto errorTextNode = errorTextNode_.Upgrade();
         if (errorTextNode) {
+            ScopedLayout scope(tmpHost->GetContext());
             errorTextNode->Measure(LayoutConstraintF());
             auto geometryNode = errorTextNode->GetGeometryNode();
             auto errorHeight = geometryNode ? geometryNode->GetFrameRect().Height() : 0.0f;
@@ -8762,7 +8766,6 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
 }
-
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const
 {
     auto border = GetBorderWidthProperty();

@@ -469,6 +469,79 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEvent006
+ * @tc.desc: Test KeyEvent ctrl + z/y
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    std::string expectStr = "fghij";
+    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnCopy(onCopy);
+        model.SetOnPaste(onPaste);
+    });
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + c/v to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_C);
+    event.code = KeyCode::KEY_C;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_V);
+    event.code = KeyCode::KEY_V;
+    pattern_->SetCaretPosition(0);
+    // ctrl+z undo, for this record
+    pattern_->CheckAndUpdateRecordBeforeOperation();
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.expected: shift + z/y to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_Z);
+    event.code = KeyCode::KEY_Z;
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_Y);
+    event.code = KeyCode::KEY_Y;
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: KeyEvent007
  * @tc.desc: Test KeyEvent enter
  * @tc.type: FUNC
