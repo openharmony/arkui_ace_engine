@@ -444,6 +444,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
     deps += [
@@ -943,6 +944,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
     if (is_arkui_x) {
       deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
