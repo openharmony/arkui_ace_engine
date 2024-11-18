@@ -101,7 +101,9 @@ class FrameNode {
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
     this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
     if (this._nodeId === -1) {
       return;
     }
@@ -172,11 +174,15 @@ class FrameNode {
 
   convertToFrameNode(nodePtr: NodePtr, nodeId: number = -1): FrameNode | null {
     if (nodeId === -1) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       let frameNode = new ProxyFrameNode(this.uiContext_);
       let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
       frameNode.setNodePtr(node);
       frameNode._nodeId = nodeId;
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -364,7 +370,9 @@ class FrameNode {
   }
 
   getChildrenCount(isExpanded?: boolean): number {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   getPositionToParent(): Position {
@@ -513,7 +521,9 @@ class FrameNode {
   }
 
   layout(position: Position): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   setNeedsLayout(): void {
