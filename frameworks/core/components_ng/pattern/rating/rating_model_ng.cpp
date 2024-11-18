@@ -153,7 +153,6 @@ void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&
 
 void RatingModelNG::SetChangeValue(FrameNode* frameNode, double value)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRatingScore(value);
