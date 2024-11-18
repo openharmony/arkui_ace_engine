@@ -5698,15 +5698,19 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
-    if (!host->IsVisible() && !host->IsDisappearing()) {
+    if (!host->IsVisible()) {
         // trigger transition through visibility
-        if (transitionOutCallback_) {
-            transitionOutCallback_();
+        if (host->IsOnMainTree()) {
+            if (transitionOutCallback_) {
+                transitionOutCallback_();
+            }
+            parent->MarkNeedSyncRenderTree();
+            parent->RebuildRenderContextTree();
+            FireTransitionUserCallback(false);
+            return;
         }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
-        FireTransitionUserCallback(false);
-        return;
     }
     RefPtr<UINode> breakPointChild = host;
     RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
