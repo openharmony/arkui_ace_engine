@@ -633,6 +633,12 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
 
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto controlButtonsRowLayoutProperty = controlButtonsRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsRowLayoutProperty, false);
+    if (controlButtonsRowLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttonRow are hidden");
+        return false;
+    }
     auto children = controlButtonsRow->GetChildren();
     RectF firstButtonRect;
     RectF lastButtonRect;
