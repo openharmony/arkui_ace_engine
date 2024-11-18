@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "children_main_size_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -65,9 +66,10 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ListItemGroupModelNG::SetChildrenMainSize(frameNode, convValue);
-    LOGE("ListItemGroupModifier::ChildrenMainSizeImpl is not implemented yet!");
+    auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
+    CHECK_NULL_VOID(peer);
+    RefPtr<ListChildrenMainSize> handler = ListItemGroupModelNG::GetOrCreateListChildrenMainSize(frameNode);
+    peer->SetHandler(handler);
 }
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()

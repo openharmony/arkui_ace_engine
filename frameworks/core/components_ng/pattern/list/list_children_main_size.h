@@ -55,7 +55,7 @@ public:
         onChildrenSizeChange_ = func;
     }
 
-    void ChangeData(const int32_t start, const int32_t deleteCount, const std::vector<float>& newChildrenSize)
+    virtual void ChangeData(const int32_t start, const int32_t deleteCount, const std::vector<float>& newChildrenSize)
     {
         if (deleteCount == -1) {
             childrenSize_.resize(start, DEFAULT_SIZE);
