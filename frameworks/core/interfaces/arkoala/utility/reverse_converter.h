@@ -568,6 +568,23 @@ namespace OHOS::Ace::NG::Converter {
             static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
         }
     };
+
+    // Create Ark_CallbackResource
+    template <typename T, typename F,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true,
+        std::enable_if_t<std::is_function_v<std::remove_pointer_t<F>>, bool> = true
+    >
+    T ArkValue(F callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T {
+            .resource = {
+                .resourceId = resId,
+                .hold = nullptr,
+                .release = nullptr
+            },
+            .call = callbackFunc
+        };
+    }
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

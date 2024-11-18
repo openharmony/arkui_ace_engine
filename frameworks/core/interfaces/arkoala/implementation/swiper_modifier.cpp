@@ -480,6 +480,17 @@ void NestedScrollImpl(Ark_NativePointer node,
     SwiperModelNG::SetNestedScroll(frameNode, static_cast<int>(*nestedModeOpt));
 }
 
+template<typename CallbackType, typename... Params,
+    std::enable_if_t<std::is_same_v<decltype(CallbackType().resource), Ark_CallbackResource>, bool> = true,
+    std::enable_if_t<std::is_function_v<std::remove_pointer_t<decltype(CallbackType().call)>>, bool> = true
+>
+void InvokeCallback(const CallbackType &arkCallback, Params... args)
+{
+    if (arkCallback.call) {
+        (*arkCallback.call)(arkCallback.resource.resourceId, std::forward<Params>(args)...);
+    }
+}
+
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Ark_SwiperContentAnimatedTransition* value)
 {
@@ -497,9 +508,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     transitionInfo.transition = [arkCallback = value->transition](const RefPtr<SwiperContentTransitionProxy>& proxy) {
         SwiperContentTransitionProxyPeer peer;
         peer.SetHandler(proxy);
-        if (arkCallback.call) {
-            (*arkCallback.call)(arkCallback.resource.resourceId, Ark_SwiperContentTransitionProxy{ .ptr = &peer });
-        }
+        InvokeCallback(arkCallback, Ark_SwiperContentTransitionProxy{ .ptr = &peer });
     };
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }

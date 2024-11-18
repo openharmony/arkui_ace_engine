@@ -1703,14 +1703,7 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
     // setup the callback object via C-API
     Ark_SwiperContentAnimatedTransition transition {
         .timeout = ArkValue<Opt_Number>(TIMEOUT),
-        .transition = Callback_SwiperContentTransitionProxy_Void {
-            .resource = Ark_CallbackResource {
-                .resourceId = ArkValue<Ark_Int32>(CONTEXT_ID),
-                .hold = nullptr,
-                .release = nullptr
-            },
-            .call = fakeDeveloperCallbackFunc,
-        }
+        .transition = ArkValue<Callback_SwiperContentTransitionProxy_Void>(fakeDeveloperCallbackFunc, CONTEXT_ID)
     };
     modifier_->setCustomContentTransition(node_, &transition);
 
