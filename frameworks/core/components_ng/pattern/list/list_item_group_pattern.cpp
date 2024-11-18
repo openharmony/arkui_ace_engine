@@ -428,7 +428,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool
     CHECK_NULL_VOID(listNode);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) - cached;
+    auto cacheCount = listLayoutProperty->GetCachedCountWithDefault() - cached;
     if (cacheCount < 1) {
         return;
     }

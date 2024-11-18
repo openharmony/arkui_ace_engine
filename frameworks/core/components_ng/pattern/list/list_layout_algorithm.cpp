@@ -192,7 +192,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1428,6 +1428,17 @@ std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayo
     return itemGroup->GetLayoutInfo();
 }
 
+int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const
+{
+    CHECK_NULL_RETURN(wrapper, 0);
+    auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, 0);
+    int32_t itemCount = itemGroup->GetListItemCount();
+    return itemCount == 0 ? 1 : itemCount;
+}
+
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : recycledItemPosition_) {
@@ -1464,6 +1475,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listLayoutProperty);
     // layout items.
+    int32_t itemCount = 0;
     for (auto& pos : itemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         if (!wrapper) {
@@ -1474,8 +1486,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
             pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+            itemCount += GetListItemGroupItemCount(wrapper);
         } else {
             pos.second.groupInfo.reset();
+            itemCount++;
         }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
         if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
@@ -1489,7 +1503,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     ResetLayoutItem(layoutWrapper);
-    ProcessCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+    auto cacheCount = listLayoutProperty->GetCachedCountWithDefault();
+    if (!listLayoutProperty->HasCachedCount()) {
+        int32_t newCacheCount = UpdateDefaultCachedCount(cacheCount, itemCount);
+        listLayoutProperty->SetDefaultCachedCount(newCacheCount);
+    }
+    ProcessCacheCount(layoutWrapper, cacheCount);
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
@@ -2320,5 +2339,24 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
         }
     }
     return std::make_pair(std::min(endIndex, totalItemCount_ -1), endPos);
+}
+
+int32_t ListLayoutAlgorithm::UpdateDefaultCachedCount(const int32_t oldCacheCount, const int32_t itemCount)
+{
+    if (itemCount <= 0) {
+        return oldCacheCount;
+    }
+    static float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return oldCacheCount;
+    }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_LIST, "Default cachedCount exceed 16");
+        return MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        return std::max(newCachedCount, oldCacheCount);
+    }
 }
 } // namespace OHOS::Ace::NG
