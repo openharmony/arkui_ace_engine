@@ -1613,7 +1613,12 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
     nodeInfo.SetWindowId(commonProperty.windowId);
-    nodeInfo.SetPageId(node->GetPageId());
+    // is abnormal that pageId equals to 0, use commonProperty.pageId to fix pageId
+    if (node->GetPageId()) {
+        nodeInfo.SetPageId(node->GetPageId());
+    } else {
+        nodeInfo.SetPageId(commonProperty.pageId);
+    }
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
