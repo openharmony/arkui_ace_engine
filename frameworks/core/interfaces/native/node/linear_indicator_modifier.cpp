@@ -36,7 +36,7 @@ void ResetLinearIndicatorIndicatorStyleSpace(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
@@ -55,7 +55,7 @@ void ResetLinearIndicatorIndicatorStyleStrokeWidth(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
@@ -74,7 +74,7 @@ void ResetLinearIndicatorIndicatorStyleStrokeRadius(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
@@ -92,7 +92,7 @@ void ResetLinearIndicatorIndicatorStyleTrackBackgroundColor(ArkUINodeHandle node
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
@@ -111,7 +111,7 @@ void ResetLinearIndicatorIndicatorStyleTrackColor(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
@@ -130,7 +130,7 @@ void ResetLinearIndicatorIndicatorLoop(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
     CHECK_NULL_VOID(linearIndicatorTheme);
