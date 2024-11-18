@@ -3268,7 +3268,7 @@ float ScrollablePattern::GetNestedScrollVelocity()
         return 0.0f;
     }
     uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
-    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
     if (diff >= MAX_VSYNC_DIFF_TIME) {
         nestedScrollVelocity_ = 0.0f;
     }
