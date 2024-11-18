@@ -622,7 +622,6 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
-    SupplementIdealSizeWidth(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_RETURN(context, ret);
     if (context->GetClipEdge().has_value()) {
@@ -671,16 +670,6 @@ void RichEditorPattern::FireOnReady()
     ClearOperationRecords();
     isFirstCallOnReady_ = true;
     isRichEditorInit_ = true;
-}
-
-void RichEditorPattern::SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode)
-{
-    auto layoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto&& constraint = layoutProperty->GetCalcLayoutConstraint();
-    if (!constraint || !constraint->selfIdealSize.has_value() || !constraint->selfIdealSize->Width().has_value()) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(frameRect_.Width()), std::nullopt));
-    }
 }
 
 void RichEditorPattern::MoveCaretOnLayoutSwap()
