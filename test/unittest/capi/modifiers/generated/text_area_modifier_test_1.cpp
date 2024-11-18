@@ -1185,7 +1185,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setTextOverflowTestTextOverflowValidValu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setTextOverflowTestTextOverflowInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setTextOverflowTestTextOverflowInvalidValues, TestSize.Level1)
 {
     Ark_TextOverflow initValueTextOverflow;
 

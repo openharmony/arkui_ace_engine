@@ -1227,8 +1227,7 @@
                 "setFontFeatureTestFontFeatureValidValues",
                 "setEnableHapticFeedbackTestDefaultValues",
                 "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues",
-                "setTextOverflowTestTextOverflowValidValues",
-                "setTextOverflowTestTextOverflowInvalidValues"
+                "setTextOverflowTestTextOverflowValidValues"
             ]
         },
         {
