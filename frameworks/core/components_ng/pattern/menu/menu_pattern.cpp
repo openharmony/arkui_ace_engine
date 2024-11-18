@@ -1358,12 +1358,11 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
     option.SetCurve(MENU_ANIMATION_CURVE);
     auto subImageNode = GetImageNode(subMenuNode);
-    CHECK_NULL_VOID(subImageNode);
-    auto subImageContext = subImageNode->GetRenderContext();
-    AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
+    AnimationUtils::Animate(option, [subImageNode]() {
+        CHECK_NULL_VOID(subImageNode);
+        auto subImageContext = subImageNode->GetRenderContext();
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     });
 
     option.SetCurve(Curves::FRICTION);
