@@ -518,7 +518,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isJudgeRootTree = false);
+    bool RequestFocusImmediately();
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
     void HandleLastFocusNodeInFocusWindow();
@@ -554,7 +554,6 @@ public:
 
     bool IsFocusableWholePath();
     bool IsSelfFocusableWholePath();
-    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -1143,7 +1142,7 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
-    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool RequestFocusImmediatelyInner();
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool RequestNextFocusByKey(const KeyEvent& keyEvent);
