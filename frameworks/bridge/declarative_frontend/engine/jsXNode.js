@@ -1027,8 +1027,10 @@ class FrameNode {
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getParent() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
         const nodeId = result?.nodeId;
+        __JSScopeUtil__.restoreInstanceId();
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -1129,7 +1131,9 @@ class FrameNode {
         return getUINativeModule().frameNode.isAttached(this.getNodePtr());
     }
     getInspectorInfo() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
         const inspectorInfo = JSON.parse(inspectorInfoStr);
         return inspectorInfo;
     }
