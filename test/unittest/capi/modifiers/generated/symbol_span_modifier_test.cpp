@@ -29,16 +29,7 @@ using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_VALUE_NAME = "value";
-const auto ATTRIBUTE_VALUE_I_ID_NAME = "id";
-const auto ATTRIBUTE_VALUE_I_ID_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_VALUE_I_TYPE_NAME = "type";
-const auto ATTRIBUTE_VALUE_I_TYPE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_VALUE_I_MODULE_NAME_NAME = "moduleName";
-const auto ATTRIBUTE_VALUE_I_MODULE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_VALUE_I_BUNDLE_NAME_NAME = "bundleName";
-const auto ATTRIBUTE_VALUE_I_BUNDLE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_VALUE_I_PARAMS_NAME = "params";
-const auto ATTRIBUTE_VALUE_I_PARAMS_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
@@ -73,25 +64,10 @@ public:
 HWTEST_F(SymbolSpanModifierTest, DISABLED_setSymbolSpanOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_NAME);
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_ID_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_ID_DEFAULT_VALUE) << "Default value for attribute 'value.id'";
-
-    resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_TYPE_DEFAULT_VALUE) << "Default value for attribute 'value.type'";
-
-    resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_MODULE_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_MODULE_NAME_DEFAULT_VALUE)
-        << "Default value for attribute 'value.moduleName'";
-
-    resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_BUNDLE_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_BUNDLE_NAME_DEFAULT_VALUE)
-        << "Default value for attribute 'value.bundleName'";
-
-    resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_PARAMS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_PARAMS_DEFAULT_VALUE) << "Default value for attribute 'value.params'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'value'";
 }
 
 /*

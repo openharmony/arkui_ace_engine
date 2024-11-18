@@ -194,6 +194,11 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 extern std::vector<std::tuple<std::string, Ark_ContentType, std::string>> testFixtureTextInputContentTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ContentType>> testFixtureTextInputContentTypeInvalidValues;
 
+// Fixture 'TextInputCancelButtonStyle' for type 'Ark_CancelButtonStyle'
+extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>>
+    testFixtureTextInputCancelButtonStyleValidValues;
+extern std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureTextInputCancelButtonStyleInvalidValues;
+
 // Fixture 'TextInputLineBreakStrategy' for type 'Ark_LineBreakStrategy'
 extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
     testFixtureTextInputLineBreakStrategyValidValues;
@@ -275,6 +280,11 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegI
 // Fixture 'FlingSpeedLimit' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlingSpeedLimitValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInvalidValues;
+
+// Fixture 'NumberPercentageThresholdFloor' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>>
+    testFixtureNumberPercentageThresholdFloorValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberPercentageThresholdFloorInvalidValues;
 
 // Fixture 'FontWeightNumbers' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFontWeightNumbersValidValues;

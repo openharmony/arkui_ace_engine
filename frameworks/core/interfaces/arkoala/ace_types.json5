@@ -225,6 +225,19 @@
             ]
         },
         {
+            "name": "TextInputCancelButtonStyle",
+            "type": "Ark_CancelButtonStyle",
+            "validValues": [
+                ["ARK_CANCEL_BUTTON_STYLE_CONSTANT", "0"],
+                ["ARK_CANCEL_BUTTON_STYLE_INVISIBLE", "1"],
+                ["ARK_CANCEL_BUTTON_STYLE_INPUT", "2"]
+            ],
+            "invalidValues": [
+                "static_cast<Ark_CancelButtonStyle>(-1)",
+                "static_cast<Ark_CancelButtonStyle>(INT_MAX)"
+            ]
+        },
+        {
             "name": "TextInputLineBreakStrategy",
             "type": "Ark_LineBreakStrategy",
             "validValues": [
@@ -489,6 +502,7 @@
             "validValues": [
                 ["100", "100"],
                 ["12.34", "12"],
+                ["12.55", "12"],
                 ["0", "0"],
                 ["1", "1"],
             ],
@@ -500,6 +514,7 @@
             "validValues": [
                 ["100", "100"],
                 ["12.34", "13"],
+                ["12.55", "13"],
                 ["0", "0"],
                 ["1", "1"],
             ],
@@ -514,6 +529,22 @@
                 ["0.05", "0.05vp"],
             ],
             "invalidValues": ["-100", "-56.78", "0"],
+        },
+        {
+            "name": "NumberPercentageThresholdFloor",
+            "type": "Ark_Number",
+            "validValues": [
+                ["1", "1"],
+                ["10", "10"],
+                ["22.2", "22"],
+                ["56.55", "56"],
+                ["99.0", "99"],
+                ["99.9", "99"],
+                ["100", "100"],
+                ["100.1", "100"],
+                ["100.99", "100"]
+            ],
+            "invalidValues": ["-1", "-100", "-23.1", "-33.6", "101", "0", "0.1", "0.99"]
         },
         {
             "name": "FontWeightNumbers",
@@ -978,7 +1009,8 @@
                 },
                 {
                     "name": "textIndent",
-                    "default": "0.00px"
+                    "default": "0.00vp",
+                    "fixtures": ["LengthAny"]
                 },
                 {
                     "name": "enterKeyType",
@@ -1107,10 +1139,12 @@
                     "attributes": [
                         {
                             "name": "onIconSrc",
+                            "fixtures": ["StringResNoEmpty", "StringNoEmpty"],
                             "default": "SYS_SHOW_PASSWORD_SVG"
                         },
                         {
                             "name": "offIconSrc",
+                            "fixtures": ["StringResNoEmpty", "StringNoEmpty"],
                             "default": "SYS_HIDE_PASSWORD_SVG"
                         }
                     ]
@@ -1186,11 +1220,41 @@
                                 {
                                     "name": "thresholdPercentage",
                                     "default": "-1",
-                                    "fixture": ["NumberIntFloor"]
+                                    "fixtures": ["NumberPercentageThresholdFloor"]
                                 },
                                 {
                                     "name": "highlightBorder",
                                     "default": "true"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "cancelButton",
+                    "attributes": [
+                        {
+                            "name": "style",
+                            "default": "2",
+                            "fixtures": ["TextInputCancelButtonStyle"]
+                        },
+                        {
+                            "name": "icon",
+                            "attributes": [
+                                {
+                                    "name": "size",
+                                    "default": "0.00px",
+                                    "type":"Ark_Length"
+                                },
+                                {
+                                    "name": "src",
+                                    "default": "",
+                                    "fixtures": ["StringRes"]
+                                },
+                                {
+                                    "name": "color",
+                                    "default": "#FF000000",
+                                    "type": "Ark_Color"
                                 }
                             ]
                         }
@@ -1208,27 +1272,11 @@
                 "setFontFamilyTestDefaultValues",
                 "setFontFamilyTestFontFamilyValidValues",
                 "setFontFamilyTestFontFamilyInvalidValues",
-                "setShowCounterTestDefaultValues",
-                "setShowCounterTestShowCounterValueValidValues",
-                "setShowCounterTestShowCounterOptionsThresholdPercentageValidValues",
-                "setShowCounterTestShowCounterOptionsThresholdPercentageInvalidValues",
-                "setShowCounterTestShowCounterOptionsHighlightBorderValidValues",
-                "setShowCounterTestShowCounterOptionsHighlightBorderInvalidValues",
-                "setCancelButtonTestCancelButtonStyleValidValues",
-                "setCancelButtonTestCancelButtonStyleInvalidValues",
-                "setCancelButtonTestCancelButtonIconSizeValidValues",
-                "setCancelButtonTestCancelButtonIconSizeInvalidValues",
-                "setCancelButtonTestCancelButtonIconColorValidValues",
-                "setCancelButtonTestCancelButtonIconColorInvalidValues",
-                "setCancelButtonTestCancelButtonIconSrcValidValues",
-                "setCancelButtonTestCancelButtonIconSrcInvalidValues",
-                "setTextIndentTestDefaultValues",
                 "setTextInputOptionsTestDefaultValues",
                 "setTextInputOptionsTestValidValues",
                 "setTypeTestTypeValidValues",
                 "setTextOverflowTestTextOverflowValidValues",
                 "setTextOverflowTestTextOverflowInvalidValues",
-                "setTextIndentTestTextIndentInvalidValues",
                 "setPlaceholderFontTestDefaultValues",
                 "setPlaceholderFontTestPlaceholderFontSizeValidValues",
                 "setPlaceholderFontTestPlaceholderFontSizeInvalidValues",
@@ -1244,13 +1292,6 @@
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
-                "setPasswordIconTestDefaultValues",
-                "setPasswordIconTestPasswordIconOnIconSrcValidValues",
-                "setPasswordIconTestPasswordIconOnIconSrcInvalidValues",
-                "setPasswordIconTestPasswordIconOffIconSrcValidValues",
-                "setPasswordIconTestPasswordIconOffIconSrcInvalidValues",
-                "setCancelButtonTestDefaultValues",
-                "setCancelButtonTestValidValues",
                 "setMinFontSizeTestDefaultValues",
                 "setMinFontSizeTestMinFontSizeValidValues",
                 "setMinFontSizeTestMinFontSizeInvalidValues",

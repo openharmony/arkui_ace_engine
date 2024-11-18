@@ -270,6 +270,24 @@ std::vector<std::tuple<std::string, Ark_ContentType>> testFixtureTextInputConten
         Converter::ArkValue<Ark_ContentType>(static_cast<Ark_ContentType>(INT_MAX)) },
 };
 
+// Fixture 'TextInputCancelButtonStyle' for type 'Ark_CancelButtonStyle'
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>>
+    testFixtureTextInputCancelButtonStyleValidValues = {
+        { "ARK_CANCEL_BUTTON_STYLE_CONSTANT",
+            Converter::ArkValue<Ark_CancelButtonStyle>(ARK_CANCEL_BUTTON_STYLE_CONSTANT), "0" },
+        { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE",
+            Converter::ArkValue<Ark_CancelButtonStyle>(ARK_CANCEL_BUTTON_STYLE_INVISIBLE), "1" },
+        { "ARK_CANCEL_BUTTON_STYLE_INPUT", Converter::ArkValue<Ark_CancelButtonStyle>(ARK_CANCEL_BUTTON_STYLE_INPUT),
+            "2" },
+    };
+
+std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureTextInputCancelButtonStyleInvalidValues = {
+    { "static_cast<Ark_CancelButtonStyle>(-1)",
+        Converter::ArkValue<Ark_CancelButtonStyle>(static_cast<Ark_CancelButtonStyle>(-1)) },
+    { "static_cast<Ark_CancelButtonStyle>(INT_MAX)",
+        Converter::ArkValue<Ark_CancelButtonStyle>(static_cast<Ark_CancelButtonStyle>(INT_MAX)) },
+};
+
 // Fixture 'TextInputLineBreakStrategy' for type 'Ark_LineBreakStrategy'
 std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
     testFixtureTextInputLineBreakStrategyValidValues = {
@@ -612,6 +630,7 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberPosIntFloorInv
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegIntFloorValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100" },
     { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12" },
+    { "12.55", Converter::ArkValue<Ark_Number>(12.55), "12" },
     { "0", Converter::ArkValue<Ark_Number>(0), "0" },
     { "1", Converter::ArkValue<Ark_Number>(1), "1" },
 };
@@ -626,6 +645,7 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberNonNegIntFloor
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberNonNegIntCeilValidValues = {
     { "100", Converter::ArkValue<Ark_Number>(100), "100" },
     { "12.34", Converter::ArkValue<Ark_Number>(12.34), "13" },
+    { "12.55", Converter::ArkValue<Ark_Number>(12.55), "13" },
     { "0", Converter::ArkValue<Ark_Number>(0), "0" },
     { "1", Converter::ArkValue<Ark_Number>(1), "1" },
 };
@@ -647,6 +667,30 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureFlingSpeedLimitInval
     { "-100", Converter::ArkValue<Ark_Number>(-100) },
     { "-56.78", Converter::ArkValue<Ark_Number>(-56.78) },
     { "0", Converter::ArkValue<Ark_Number>(0) },
+};
+
+// Fixture 'NumberPercentageThresholdFloor' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberPercentageThresholdFloorValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(1), "1" },
+    { "10", Converter::ArkValue<Ark_Number>(10), "10" },
+    { "22.2", Converter::ArkValue<Ark_Number>(22.2), "22" },
+    { "56.55", Converter::ArkValue<Ark_Number>(56.55), "56" },
+    { "99.0", Converter::ArkValue<Ark_Number>(99.0), "99" },
+    { "99.9", Converter::ArkValue<Ark_Number>(99.9), "99" },
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "100.1", Converter::ArkValue<Ark_Number>(100.1), "100" },
+    { "100.99", Converter::ArkValue<Ark_Number>(100.99), "100" },
+};
+
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureNumberPercentageThresholdFloorInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Number>(-1) },
+    { "-100", Converter::ArkValue<Ark_Number>(-100) },
+    { "-23.1", Converter::ArkValue<Ark_Number>(-23.1) },
+    { "-33.6", Converter::ArkValue<Ark_Number>(-33.6) },
+    { "101", Converter::ArkValue<Ark_Number>(101) },
+    { "0", Converter::ArkValue<Ark_Number>(0) },
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1) },
+    { "0.99", Converter::ArkValue<Ark_Number>(0.99) },
 };
 
 // Fixture 'FontWeightNumbers' for type 'Ark_Number'
