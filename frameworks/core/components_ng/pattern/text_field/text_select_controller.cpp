@@ -655,6 +655,8 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     caretInfo_.rect = caretRect;
     if (moveHandle) {
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    } else {
+        AdjustHandleAtEdge(caretInfo_.rect);
     }
     UpdateCaretOriginalRect(caretMetrics.offset);
 }
