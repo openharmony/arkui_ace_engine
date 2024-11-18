@@ -125,12 +125,19 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
 
 RefPtr<FocusHub> FocusView::GetFocusLeaf(const RefPtr<FocusHub>& focusHub)
 {
+    auto viewRootScope = GetViewRootScope();
+    if (!viewRootScope || viewRootScope->focusDepend_ == FocusDependence::SELF) {
+        return focusHub;
+    }
     CHECK_NULL_RETURN(focusHub, nullptr);
     auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
     CHECK_NULL_RETURN(lastFocusNode, focusHub);
+    if (!lastFocusNode->IsFocusable()) {
+        return focusHub;
+    }
     auto nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
-    while (nextFocusNode) {
+    while (nextFocusNode && nextFocusNode->IsFocusable()) {
         lastFocusNode = nextFocusNode;
         nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
         CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
