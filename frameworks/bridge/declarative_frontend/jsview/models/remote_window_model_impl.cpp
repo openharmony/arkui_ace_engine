@@ -21,9 +21,9 @@
 namespace OHOS::Ace::Framework {
 void RemoteWindowModelImpl::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode)
 {
-    auto* specializedComponent = AceType::MakeRefPtr<OHOS::Ace::RemoteWindowComponent>();
+    auto specializedComponent = AceType::MakeRefPtr<OHOS::Ace::RemoteWindowComponent>();
     CHECK_NULL_VOID(specializedComponent);
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     stack->Push(specializedComponent);
     specializedComponent->SetExternalRSNode(rsNode);

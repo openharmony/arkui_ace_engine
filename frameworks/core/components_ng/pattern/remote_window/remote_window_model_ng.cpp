@@ -27,9 +27,9 @@ void RemoteWindowModelNG::Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsN
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::REMOTE_WINDOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::REMOTE_WINDOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RemoteWindowPattern>(); });
+    CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
 #ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(frameNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(rsNode);
