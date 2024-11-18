@@ -876,8 +876,17 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
         result.offset.SetY(textBox.rect.GetTop());
 #endif
     }
-    if (paraStyle_.align != TextAlign::START) {
-        HandleTextAlign(result, paraStyle_.align);
+
+    auto textAlign = paraStyle_.align;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+    if (textAlign != TextAlign::START) {
+        HandleTextAlign(result, textAlign);
     } else {
         if (paraStyle_.leadingMargin) {
             HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
