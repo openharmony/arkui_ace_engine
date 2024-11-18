@@ -62,7 +62,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
-    return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 } // namespace
 

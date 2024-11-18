@@ -1802,6 +1802,7 @@ UserUnderlineColor TextFieldModelNG::GetUnderLineColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, UserUnderlineColor());
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, UserUnderlineColor());
     return pattern->GetUserUnderlineColor();
 }
 

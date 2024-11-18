@@ -35,6 +35,7 @@ constexpr float DEFAULT_OPACITY = 0.2;
 void TextModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
@@ -54,6 +55,7 @@ void TextModelNG::Create(const std::u16string& content)
     }
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();

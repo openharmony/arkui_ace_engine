@@ -387,6 +387,7 @@ void SetTextInputContentType(ArkUINodeHandle node, ArkUI_Uint32 contentType)
     CHECK_NULL_VOID(frameNode);
     if (contentType < 0 || contentType > static_cast<ArkUI_Uint32>(TextContentType::END)) {
         contentType = -1;
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "TextInput content type is invalid");
     }
     TextFieldModelNG::SetContentType(frameNode, static_cast<NG::TextContentType>(contentType));
 }

@@ -256,11 +256,10 @@ void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosi
 std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI)
 {
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
-    if (position >= wTextForAILength || length > wTextForAILength - position) {
-        return "";
-    } else {
+    if (position >= 0 && position < wTextForAILength && length >= 0 && length <= wTextForAILength - position) {
         return StringUtils::ToString(wTextForAI.substr(position, length));
     }
+    return "";
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(
