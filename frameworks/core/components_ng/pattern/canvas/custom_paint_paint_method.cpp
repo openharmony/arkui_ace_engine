@@ -121,13 +121,7 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
 
 CustomPaintPaintMethod::CustomPaintPaintMethod()
 {
-    auto container = Container::CurrentSafely();
-    if (container) {
-        apiVersion_ = container->GetApiTargetVersion();
-    } else {
-        // %1000 because the API version is the last three digits of the APP version
-        apiVersion_ = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-    }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)

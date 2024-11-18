@@ -49,6 +49,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     info_->childrenCount_ = wrapper_->GetTotalChildCount();
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
+        info_->isDataValid_ = false;
         return;
     }
 
@@ -85,7 +86,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
+    if (!info_->isDataValid_) {
         return;
     }
 
@@ -321,7 +322,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     }
 
     const int32_t oldStart = info_->startIndex_;
-    info_->Sync(mainSize_, overScroll_);
+    info_->Sync(mainSize_, CanOverScroll());
 
     if (!forward) {
         // measure appearing items when scrolling upwards
@@ -334,7 +335,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
                 // refill from [i] if height doesn't match record
                 info_->ClearCacheAfterIndex(i - 1);
                 Fill(i);
-                info_->Sync(mainSize_, overScroll_);
+                info_->Sync(mainSize_, CanOverScroll());
                 break;
             }
         }

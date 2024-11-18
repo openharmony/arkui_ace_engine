@@ -176,6 +176,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void OnColorConfigurationUpdate() override;
     void InitDateIndex();
     void InitClickEvent();
     void InitOnKeyEvent();

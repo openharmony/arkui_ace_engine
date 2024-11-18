@@ -47,7 +47,8 @@ void SvgFitConvertor::ApplyFit(ImageFit imageFit, RSCanvas& canvas, const Size& 
         return;
     }
     auto fitIndex = static_cast<int32_t>(imageFit);
-    fitIndex = fitIndex < static_cast<int32_t>(FIT_OPERATIONS.size()) ? fitIndex : DEFAULT_FIT_INDEX;
+    fitIndex = (fitIndex < static_cast<int32_t>(FIT_OPERATIONS.size()) && fitIndex >= 0) ?
+        fitIndex : DEFAULT_FIT_INDEX;
     FIT_OPERATIONS[fitIndex](canvas, layoutSize, svgSize);
 }
 

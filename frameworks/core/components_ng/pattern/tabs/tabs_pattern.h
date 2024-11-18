@@ -91,6 +91,8 @@ public:
 
     void AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override;
 
+    void RecoverInnerOnGestureRecognizerJudgeBegin() override;
+
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     ChangeEventPtr GetIndexChangeEvent()

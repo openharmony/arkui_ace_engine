@@ -406,13 +406,13 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    bool regular = !UseIrregularLayout();
+    bool irregular = UseIrregularLayout();
     float mainGap = GetMainGap();
-    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, regular);
+    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (!regular) {
+            if (irregular) {
                 overScroll = info_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
             } else {
                 overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -1750,20 +1750,20 @@ float GridPattern::GetEndOffset()
 {
     auto& info = info_;
     float contentHeight = info.lastMainSize_ - info.contentEndPadding_;
-    float mainGap = GetMainGap();
-    bool regular = !UseIrregularLayout();
-    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, regular);
+    const float mainGap = GetMainGap();
+    const bool irregular = UseIrregularLayout();
+    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
     if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
         // overScroll with contentHeight < viewport
-        if (!regular) {
+        if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
         float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
-    if (regular) {
+    if (!irregular) {
         return contentHeight - heightInView;
     }
     float disToBot = info_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
@@ -1802,7 +1802,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_[info_.startMainLineIndex_])) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info_.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;

@@ -142,7 +142,7 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
-    void NotifyBackground();
+    void NotifyBackground(bool isHandleError = true);
     void NotifyDestroy();
     int32_t GetInstanceId() const;
     int32_t GetSessionId() const;
@@ -176,6 +176,7 @@ public:
     void OnAreaUpdated();
     bool IsModalUec();
     bool IsForeground();
+    void OnExtensionDetachToDisplay();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)

@@ -973,6 +973,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
     OHOS::Ace::NG::RectF frameRect;
     OHOS::Ace::NG::RectF visibleInnerRect;
     OHOS::Ace::NG::RectF visibleRect;
+    frameNode->SetIsCalculateInnerVisibleRectClip(true);
     frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
     bool isClipCheckSkip = NearEqual(visibleRect.Width(), 0.0) && NearEqual(visibleRect.Height(), 0.0) &&
                            NearEqual(visibleInnerRect.Width(), 0.0) && NearEqual(visibleInnerRect.Height(), 0.0);
@@ -1652,7 +1653,12 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetIsActive(node->IsActive());
     SetRectInScreen(node, nodeInfo, commonProperty, scaleX_, scaleY_);
     nodeInfo.SetWindowId(commonProperty.windowId);
-    nodeInfo.SetPageId(node->GetPageId());
+    // is abnormal that pageId equals to 0, use commonProperty.pageId to fix pageId
+    if (node->GetPageId()) {
+        nodeInfo.SetPageId(node->GetPageId());
+    } else {
+        nodeInfo.SetPageId(commonProperty.pageId);
+    }
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
@@ -5965,10 +5971,10 @@ struct WindowSceneScale {
     float_t scaleY = 1.0f;
 };
 
-void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top,
+bool IsUpdateWindowSceneInfo(const RefPtr<NG::FrameNode>& node, int32_t& left, int32_t& top,
     WindowSceneScale& windowSceneScale)
 {
-    CHECK_NULL_VOID(node);
+    CHECK_NULL_RETURN(node, false);
     // update windowScene node commonProperty left, top position and get scale data
     auto parent = node->GetAncestorNodeOfFrame(true);
     if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
@@ -5986,7 +5992,7 @@ void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int
         // node with offsets not need to obtain the windowScene position
         auto windowSceneRect = GetFinalRealRect(parent);
         if (windowSceneRect.Left() != 0 || windowSceneRect.Top() != 0) {
-            break;
+            return false;
         }
         auto accessibilityProperty = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
@@ -5997,8 +6003,9 @@ void UpdateWindowSceneRect(const RefPtr<NG::FrameNode>& node, int32_t& left, int
             "windowScene nodeId: %{public}" PRId64
             ", left: %{public}d, top: %{public}d, windowSceneScale: [%{public}f, %{public}f]",
             parent->GetAccessibilityId(), left, top, windowSceneScale.scaleX, windowSceneScale.scaleY);
-        break;
+        return true;
     }
+    return false;
 }
 }
 
@@ -6034,10 +6041,9 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     int32_t windowSceneLeft = 0;
     int32_t windowSceneTop = 0;
     WindowSceneScale windowSceneScale;
-    UpdateWindowSceneRect(node, windowSceneLeft, windowSceneTop, windowSceneScale);
-    output.windowLeft += windowSceneLeft;
-    output.windowTop += windowSceneTop;
-    if ((windowSceneScale.scaleX != 1.0f) || (windowSceneScale.scaleY != 1.0f)) {
+    if (IsUpdateWindowSceneInfo(node, windowSceneLeft, windowSceneTop, windowSceneScale)) {
+        output.windowLeft += windowSceneLeft;
+        output.windowTop += windowSceneTop;
         scaleX_ = windowSceneScale.scaleX;
         scaleY_ = windowSceneScale.scaleY;
     }

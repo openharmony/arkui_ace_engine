@@ -297,7 +297,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        auto frameNode = GetSubMenu(customNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -354,7 +354,7 @@ RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
     return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
-RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 {
     CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
@@ -1051,7 +1051,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     CHECK_NULL_VOID(itemProperty);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
         // iamge -> symbol
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -1136,7 +1136,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     }
     if (!selectIcon_) {
         if (!itemProperty->GetSelectIconSrc().value_or("").empty() ||
-            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !SystemProperties::IsNeedSymbol()) {
             selectIcon_ = FrameNode::CreateFrameNode(
                 V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         } else {

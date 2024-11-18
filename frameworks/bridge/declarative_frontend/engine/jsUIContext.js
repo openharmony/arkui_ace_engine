@@ -849,6 +849,12 @@ class FocusController {
             return result;
         }
     }
+
+    setAutoFocusTransfer(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setAutoFocusTransfer(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class CursorController {

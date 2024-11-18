@@ -339,9 +339,9 @@ public:
     OnFocusFunc onJSFrameNodeFocusCallback_;
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
-    OnKeyCallbackFunc onKeyEventCallback_;
+    OnKeyConsumeFunc onKeyEventCallback_;
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
-    OnKeyPreImeFunc onKeyPreImeCallback_;
+    OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
@@ -518,7 +518,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isJudgeRootTree = false);
+    bool RequestFocusImmediately();
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
     void HandleLastFocusNodeInFocusWindow();
@@ -554,7 +554,6 @@ public:
 
     bool IsFocusableWholePath();
     bool IsSelfFocusableWholePath();
-    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -677,7 +676,7 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeBlurCallback_ : nullptr;
     }
 
-    void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
+    void SetOnKeyCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -692,12 +691,12 @@ public:
         }
     }
 
-    OnKeyCallbackFunc GetOnKeyCallback()
+    OnKeyConsumeFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyEventCallback_ : nullptr;
     }
 
-    void SetOnKeyPreImeCallback(OnKeyPreImeFunc&& onKeyCallback)
+    void SetOnKeyPreImeCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -712,7 +711,7 @@ public:
         }
     }
 
-    OnKeyPreImeFunc GetOnKeyPreIme()
+    OnKeyConsumeFunc GetOnKeyPreIme()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyPreImeCallback_ : nullptr;
     }
@@ -1143,7 +1142,7 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
-    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool RequestFocusImmediatelyInner();
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool RequestNextFocusByKey(const KeyEvent& keyEvent);

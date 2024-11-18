@@ -937,11 +937,6 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
-        if (dataDetectorAdapter_->GetCloseMenuForAISpanFlag()) {
-            selectOverlay_->EnableMenu();
-            dataDetectorAdapter_->SetCloseMenuForAISpanFlag(false);
-            return;
-        }
         selectOverlay_->ToggleMenu();
         selectOverlay_->SwitchToOverlayMode();
         return;
@@ -950,8 +945,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         HandleClickAISpanEvent(textOffset);
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
-        selectOverlay_->DisableMenu();
-        dataDetectorAdapter_->SetCloseMenuForAISpanFlag(true);
+        selectOverlay_->HideMenu();
         return;
     }
     HandleClickOnTextAndSpan(info);

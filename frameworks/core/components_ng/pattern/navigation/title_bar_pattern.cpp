@@ -247,7 +247,8 @@ void CreateDefaultBackButton(const RefPtr<FrameNode>& backButtonNode, const RefP
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         backButtonNode->RemoveChild(backButtonIconNode);
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -1456,27 +1457,6 @@ void TitleBarPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(backButtonNode);
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
-}
-
-void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
-{
-    currentTitleBarHeight_ = currentTitleBarHeight;
-    auto navBarNode = DynamicCast<NavBarNode>(GetHost()->GetParent());
-    if (!navBarNode || options_.brOptions.barStyle.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
-        return;
-    }
-    auto navBarContentNode = DynamicCast<FrameNode>(navBarNode->GetContentNode());
-    CHECK_NULL_VOID(navBarContentNode);
-    auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
-    CHECK_NULL_VOID(contentLayoutProperty);
-    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
-    PaddingProperty paddingProperty;
-    paddingProperty.left = safeAreaPadding ? safeAreaPadding->left : CalcLength(0.0f);
-    paddingProperty.right = safeAreaPadding ? safeAreaPadding->right : CalcLength(0.0f);
-    paddingProperty.top = CalcLength(currentTitleBarHeight);
-    paddingProperty.bottom = safeAreaPadding ? safeAreaPadding->bottom : CalcLength(0.0f);
-
-    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 
 float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const

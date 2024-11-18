@@ -1152,10 +1152,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest012, TestSize.Leve
     SystemProperties::debugEnabled_ = true;
     GestureEvent info = GestureEvent();
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     dragEventActuator->userCallback_ = nullptr;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1206,7 +1206,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest013, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 

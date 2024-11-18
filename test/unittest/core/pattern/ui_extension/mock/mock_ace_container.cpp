@@ -257,6 +257,10 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
 {
     return {};
 }
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    return 0;
+}
 void AceContainer::NotifyConfigurationChange(
     bool needReloadTransition, const ConfigurationChange& configurationChange) {}
 } // namespace OHOS::Ace::NG

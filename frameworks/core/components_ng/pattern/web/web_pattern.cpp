@@ -1345,6 +1345,7 @@ void WebPattern::ResetDragAction()
 
     isDragging_ = false;
     isReceivedArkDrag_ = false;
+    isDragStartFromWeb_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1479,6 +1480,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
 {
     isDragging_ = true;
     isReceivedArkDrag_ = true;
+    isDragStartFromWeb_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -1826,6 +1828,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         gestureHub->ResetDragActionForWeb();
         isDragging_ = false;
         isReceivedArkDrag_ = false;
+        isDragStartFromWeb_ = false;
         // cancel drag action to avoid web kernel can't process other input event
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1922,6 +1925,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1980,6 +1984,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    isReceivedArkDrag_ = isDragStartFromWeb_ ? isReceivedArkDrag_ : false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
@@ -1998,6 +2003,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
 
     auto host = GetHost();
@@ -2025,6 +2031,7 @@ void WebPattern::HandleDragCancel()
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
@@ -2041,6 +2048,7 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetFragmentHtml(htmlContent);
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
+        delegate_->dragData_->ClearImageFileNames();
     }
 }
 
@@ -2085,12 +2093,12 @@ void WebPattern::HandleFocusEvent()
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d",
-        GetWebId(), selectPopupMenuShowing_, isReceivedArkDrag_);
+        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isDragStartFromWeb: %{public}d",
+        GetWebId(), selectPopupMenuShowing_, isDragStartFromWeb_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
 
-    if (isReceivedArkDrag_) {
+    if (isDragStartFromWeb_) {
         return;
     }
     if (!selectPopupMenuShowing_) {
@@ -3341,7 +3349,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto rect = frameNode->GetGeometryNode()->GetFrameRect();
+    auto rect = frameNode->GetRenderContext()->GetPaintRectWithoutTransform();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
     // Scroll focused node into view when keyboard show.
@@ -4025,6 +4033,22 @@ bool WebPattern::IsSelectInfoValid()
     return !info.empty() && info != STRING_LF;
 }
 
+std::optional<RectF> WebPattern::GetViewPort() const
+{
+    CHECK_NULL_RETURN(GetHost(), std::nullopt);
+    auto parentNode = GetHost()->GetAncestorNodeOfFrame(true);
+    while (parentNode) {
+        auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
+        auto geometryNode = parentNode->GetGeometryNode();
+        if (scrollablePattern && geometryNode) {
+            auto offsetRelativeToWindow = parentNode->GetOffsetRelativeToWindow();
+            return RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
+        }
+        parentNode = parentNode->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
 std::string WebPattern::GetSelectInfo() const
 {
     CHECK_NULL_RETURN(delegate_, std::string());
@@ -4180,9 +4204,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle, beginTouchHandle, endTouchHandle);
-    if (overlayType == INVALID_OVERLAY) {
-        return false;
-    }
+    if (overlayType == INVALID_OVERLAY) return false;
     if (params->GetIsLongPressActived()) {
         ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
@@ -4203,6 +4225,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
+    selectInfo.ancestorViewPort = GetViewPort();
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
@@ -5294,6 +5317,10 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
     if (chooser->GetHasSelected()) {
         timePickerProperty["selected"] = PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
+    } else {
+        auto timeOfNow = GetTimeOfNow();
+        timePickerProperty["selected"] =
+            PickerTime(timeOfNow.hour24_, timeOfNow.minute_, timeOfNow.second_);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;

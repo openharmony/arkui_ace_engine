@@ -62,8 +62,15 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
     totalCount_ = totalCount;
 }
 
-void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void RepeatVirtualScrollNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        cacheStart = 0;
+        cacheEnd = 0;
+    }
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
         "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
@@ -327,8 +334,13 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         return node4Index->GetFrameChildByIndex(0, needBuild);
     }
 
+    // refresh the cached ttype and verify it hasn't changed
+    if (caches_.hasTTypeChanged(index)) {
+        return GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
+    }
+
     // if the item was in L2 cache, move item to L1 cache.
-    caches_.AddKeyToL1(key.value(), isChildReused);
+    caches_.AddKeyToL1WithNodeUpdate(key.value(), index, isChildReused);
 
     if (node4Index->GetDepth() != GetDepth() + 1) {
         node4Index->SetDepth(GetDepth() + 1);

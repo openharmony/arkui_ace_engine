@@ -447,8 +447,6 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
-
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
@@ -871,7 +869,6 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
-    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
@@ -1468,6 +1465,8 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
+    void DeleteRange(int32_t start, int32_t end) override;
+
     bool SetCaretOffset(int32_t caretPostion) override;
 
     const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
@@ -1664,7 +1663,6 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
-    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
@@ -1808,6 +1806,7 @@ private:
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
+    void ResetTouchAndMoveCaretState();
 
     RectF frameRect_;
     RectF textRect_;

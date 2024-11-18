@@ -159,7 +159,7 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
-    if (IsShowSymbol()) {
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(symbolNode, nullptr);
@@ -247,7 +247,7 @@ void PasswordResponseArea::Refresh()
     }
 
     // update node symbol
-    if (IsShowSymbol() && IsSymbolIcon()) {
+    if (IsShowSymbol() && IsSymbolIcon() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolColor();
         return;
     }
@@ -273,7 +273,7 @@ void PasswordResponseArea::ReplaceNode()
     auto oldFrameNode = passwordNode_.Upgrade();
     CHECK_NULL_VOID(oldFrameNode);
 
-    if (IsShowSymbol()) {
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(symbolNode);
@@ -314,7 +314,7 @@ void PasswordResponseArea::ChangeObscuredState()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (IsSymbolIcon()) {
+    if (IsSymbolIcon() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
@@ -658,7 +658,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     stackNode->MarkModifyDone();
 
-    if (IsShowSymbol()) {
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_RETURN(symbolNode, nullptr);
@@ -881,7 +881,7 @@ void CleanNodeResponseArea::Refresh()
     }
 
     // update node symbol
-    if (IsShowSymbol() && IsSymbolIcon()) {
+    if (IsShowSymbol() && IsSymbolIcon() && SystemProperties::IsNeedSymbol()) {
         UpdateSymbolSource();
         return;
     }
@@ -913,7 +913,7 @@ void CleanNodeResponseArea::ReplaceNode()
     auto oldFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
     CHECK_NULL_VOID(oldFrameNode);
 
-    if (IsShowSymbol()) {
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
         CHECK_NULL_VOID(symbolNode);

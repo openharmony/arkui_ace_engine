@@ -133,26 +133,6 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AutoCapTypeToString001
- * @tc.desc: test testInput text AutoCapTypeToString
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestFive, AutoCapTypeToString001, TestSize.Level0)
-{
-    CreateTextField();
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::NONE);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.NONE");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::WORDS);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.WORDS");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::SENTENCES);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.SENTENCES");
-    pattern_->UpdateAutoCapitalizationMode(AutoCapitalizationMode::ALL_CHARACTERS);
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.ALL_CHARACTERS");
-    pattern_->UpdateAutoCapitalizationMode(static_cast<AutoCapitalizationMode>(999));
-    ASSERT_EQ(pattern_->AutoCapTypeToString(), "AutoCapitalizationMode.NONE");
-}
-
-/**
  * @tc.name: GetInputStyleString001
  * @tc.desc: test testInput text GetInputStyleString
  * @tc.type: FUNC
@@ -226,7 +206,6 @@ HWTEST_F(TextFieldPatternTestFive, GetPaddingByUserValue001, TestSize.Level0)
 
     PaddingProperty padding;
     paintProperty->UpdatePaddingByUser(padding);
-    std::cout << "GetPaddingByUserValue001" << std::endl;
     theme->padding_ = Edge(1, 3, 2, 4);
     PaddingProperty paddingWhenEmpty = pattern_->GetPaddingByUserValue();
     ASSERT_EQ(paddingWhenEmpty.left, CalcLength(1));
@@ -234,7 +213,6 @@ HWTEST_F(TextFieldPatternTestFive, GetPaddingByUserValue001, TestSize.Level0)
     ASSERT_EQ(paddingWhenEmpty.top, CalcLength(3));
     ASSERT_EQ(paddingWhenEmpty.bottom, CalcLength(4));
 
-    std::cout << "GetPaddingByUserValue002" << std::endl;
     padding.SetEdges(CalcLength(1), CalcLength(2), CalcLength(3), CalcLength(4));
     paintProperty->UpdatePaddingByUser(padding);
     theme->padding_ = Edge(5, 7, 6, 8);
@@ -243,5 +221,195 @@ HWTEST_F(TextFieldPatternTestFive, GetPaddingByUserValue001, TestSize.Level0)
     ASSERT_EQ(paddingWhenEmpty.right, CalcLength(2));
     ASSERT_EQ(paddingWhenEmpty.top, CalcLength(3));
     ASSERT_EQ(paddingWhenEmpty.bottom, CalcLength(4));
+}
+
+/**
+ * @tc.name: AdjustTextRectByCleanNode001
+ * @tc.desc: test testInput text AdjustTextRectByCleanNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, AdjustTextRectByCleanNode001, TestSize.Level0)
+{
+    CreateTextField();
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto theme = pattern_->GetTheme();
+    pattern_->cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    RectF rect;
+    layoutProperty->layoutDirection_ = TextDirection::LTR;
+    pattern_->AdjustTextRectByCleanNode(rect);
+    ASSERT_EQ(rect.Left(), 0);
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    layoutProperty->UpdateCleanNodeStyle(CleanNodeStyle::CONSTANT);
+    theme->padding_ = Edge(1,3,2,4);
+    pattern_->AdjustTextRectByCleanNode(rect);
+    ASSERT_EQ(rect.Left(), 1);
+    layoutProperty->UpdateCleanNodeStyle(CleanNodeStyle::INPUT);
+    pattern_->AdjustTextRectByCleanNode(rect);
+    ASSERT_EQ(rect.Left(), 1);
+    pattern_->contentController_->content_ = "hhh";
+    pattern_->AdjustTextRectByCleanNode(rect);
+    ASSERT_EQ(rect.Left(), 2);
+    layoutProperty->UpdateCleanNodeStyle(CleanNodeStyle::INVISIBLE);
+    pattern_->contentController_->content_ = "hhh";
+    pattern_->AdjustTextRectByCleanNode(rect);
+    ASSERT_EQ(rect.Left(), 2);
+}
+
+/**
+ * @tc.name: InsertOrDeleteSpace001
+ * @tc.desc: test testInput text InsertOrDeleteSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, InsertOrDeleteSpace001, TestSize.Level0)
+{
+    CreateTextField();
+    ASSERT_EQ(pattern_->InsertOrDeleteSpace(-1), false);
+
+    pattern_->contentController_->content_ = "123 456 abc def";
+    ASSERT_EQ(pattern_->InsertOrDeleteSpace(3), true);
+
+    pattern_->contentController_->content_ = "123 456 abc def";
+    ASSERT_EQ(pattern_->InsertOrDeleteSpace(4), true);
+
+    pattern_->contentController_->content_ = "123 456 abc def";
+    ASSERT_EQ(pattern_->InsertOrDeleteSpace(5), true);
+
+    ASSERT_EQ(pattern_->InsertOrDeleteSpace(999), false);
+}
+
+/**
+ * @tc.name: IsTextEditableForStylus001
+ * @tc.desc: test testInput text IsTextEditableForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, IsTextEditableForStylus001, TestSize.Level0)
+{
+    CreateTextField();
+    auto focusHub = frameNode_->GetFocusHub();
+    auto renderContext = frameNode_->GetRenderContext();
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    focusHub->focusType_ = FocusType::DISABLE;
+    ASSERT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    focusHub->focusType_ = FocusType::NODE;
+    renderContext->UpdateOpacity(0);
+    ASSERT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    renderContext->UpdateOpacity(10);
+    ASSERT_EQ(pattern_->IsTextEditableForStylus(), true);
+}
+
+/**
+ * @tc.name: UpdateContentScroller001
+ * @tc.desc: test testInput text UpdateContentScroller
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, UpdateContentScroller001, TestSize.Level0)
+{
+    CreateTextField();
+    Offset offset(1, 1);
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_EQ(pattern_->contentScroller_.stepOffset, 0);
+
+    pattern_->contentRect_ = RectF(0, 0, 600, 900);
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_EQ(pattern_->contentScroller_.stepOffset, 0);
+
+    pattern_->moveCaretState_.isMoveCaret = true;
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 35.8395));
+
+    pattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(pattern_->axis_);
+    pattern_->SetScrollEnabled(true);
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 35.8395));
+
+    pattern_->contentScroller_.isScrolling = true;
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 35.8395));
+
+    pattern_->contentScroller_.isScrolling = false;
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 35.8395));
+
+    offset = Offset(7, 0);
+    pattern_->UpdateContentScroller(offset);
+    ASSERT_TRUE(NearEqual(pattern_->contentScroller_.stepOffset, 29.5639));
+}
+
+/**
+ * @tc.name: GetAcceptedTouchLocationInfo001
+ * @tc.desc: test testInput text GetAcceptedTouchLocationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetAcceptedTouchLocationInfo001, TestSize.Level0)
+{
+    CreateTextField();
+    TouchEventInfo touchEventInfo = TouchEventInfo("type");
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo), std::nullopt);
+    std::list<TouchLocationInfo> changedTouches;
+    TouchLocationInfo touchLocationInfo(100);
+    changedTouches.emplace_back(touchLocationInfo);
+    touchEventInfo.changedTouches_ = changedTouches;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo)->GetFingerId(), 100);
+    pattern_->moveCaretState_.isMoveCaret = true;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo), std::nullopt);
+    pattern_->moveCaretState_.touchFingerId = 100;
+    ASSERT_EQ(pattern_->GetAcceptedTouchLocationInfo(touchEventInfo)->GetFingerId(), 100);
+}
+
+/**
+ * @tc.name: GetPaddingRight001
+ * @tc.desc: test testInput text GetPaddingRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetPaddingRight001, TestSize.Level0)
+{
+    CreateTextField();
+    ASSERT_TRUE(NearEqual(pattern_->GetPaddingRight(), 2.0));
+    PaddingPropertyF padding;
+    padding.right = 10.0;
+    pattern_->utilPadding_ = padding;
+    ASSERT_EQ(pattern_->GetPaddingRight(), 10.0);
+    pattern_->utilPadding_.reset();
+    ASSERT_TRUE(NearEqual(pattern_->GetPaddingRight(), 2.0));
+}
+
+/**
+ * @tc.name: GetBorder001
+ * @tc.desc: test testInput text GetBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, GetBorder001, TestSize.Level0)
+{
+    CreateTextField();
+    BorderWidthProperty border;
+    Dimension borderDimenPx(1.0, DimensionUnit::PX);
+    border.leftDimen = borderDimenPx;
+    border.rightDimen = borderDimenPx;
+    border.topDimen = borderDimenPx;
+    border.bottomDimen = borderDimenPx;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 1.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 1.0);
+    Dimension borderDimenPe(1.0, DimensionUnit::PERCENT);
+    border.leftDimen = borderDimenPe;
+    border.rightDimen = borderDimenPe;
+    border.topDimen = borderDimenPe;
+    border.bottomDimen = borderDimenPe;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.percentReference.width_ = 0;
+    frameNode_->geometryNode_->parentLayoutConstraint_ = layoutConstraintF;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 0.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 0.0);
+    frameNode_->geometryNode_->parentLayoutConstraint_->percentReference.width_ = 10.0;
+    ASSERT_EQ(pattern_->GetBorderLeft(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderRight(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderTop(border), 10.0);
+    ASSERT_EQ(pattern_->GetBorderBottom(border), 10.0);
 }
 } // namespace OHOS::Ace::NG

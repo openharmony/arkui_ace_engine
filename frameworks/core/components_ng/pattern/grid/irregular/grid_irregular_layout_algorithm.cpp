@@ -238,7 +238,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     // adjust offset
     if (!overScroll_ && info_.endIndex_ == info_.childrenCount_ - 1) {
         float overDis =
-            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
+            -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
             return;
         }
@@ -350,7 +350,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
 
     info_.lastMainSize_ = mainSize;
-    info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_, false);
+    info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_, true);
     info_.avgLineHeight_ = info_.GetTotalLineHeight(0.0f) / static_cast<float>(info_.lineHeightMap_.size());
 
     if (info_.reachEnd_) {

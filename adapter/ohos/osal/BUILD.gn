@@ -73,6 +73,7 @@ template("ace_osal_ohos_source_set") {
       "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
+      "stylus_detector_callback.cpp",
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",

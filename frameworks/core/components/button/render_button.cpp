@@ -871,6 +871,9 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
             case ButtonStateAttribute::COLOR: {
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableColor>>(attribute);
+                if (!colorState) {
+                    return;
+                }
                 if (state == VisualState::PRESSED) {
                     SetClickedColor(backgroundColor_);  // starting animation color
                     clickedColor_ = colorState->value_; // End color

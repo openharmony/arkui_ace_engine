@@ -368,9 +368,8 @@ void SheetPresentationPattern::OnAttachToFrameNode()
 
 void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(sheetNode);
+    auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
@@ -1366,7 +1365,8 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(iconNode);
 
     // when api >= 12, use symbol format image, else use image format.
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
@@ -2535,7 +2535,8 @@ bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& 
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents) {
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
+        preStyle.sheetMode == sheetStyle.sheetMode) {
         return false;
     }
     return true;
@@ -2564,7 +2565,7 @@ float SheetPresentationPattern::GetBottomSafeArea()
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
         auto topAreaInWindow = GetTopAreaInWindow();
-        TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "rosen window sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
         return topAreaInWindow;
     } else {
         return safeAreaInsets.top_.Length();

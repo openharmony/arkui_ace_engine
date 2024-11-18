@@ -458,9 +458,6 @@ TextFieldPattern::~TextFieldPattern()
         CloseCustomKeyboard();
     }
     RemoveTextFieldInfo();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
 }
 
 void TextFieldPattern::CheckAndUpdateRecordBeforeOperation()
@@ -612,47 +609,45 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
 void TextFieldPattern::SetAccessibilityPasswordIconAction()
 {
-    if (IsInPasswordMode() && IsShowPasswordIcon()) {
-        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-        CHECK_NULL_VOID(passwordArea);
-        auto node = passwordArea->GetFrameNode();
-        CHECK_NULL_VOID(node);
-        auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(textAccessibilityProperty);
-        textAccessibilityProperty->SetAccessibilityLevel("yes");
-        textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
-    }
+    CHECK_NULL_VOID(IsShowPasswordIcon());
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    auto node = passwordArea->GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
 }
 
 void TextFieldPattern::SetAccessibilityClearAction()
 {
-    if (IsShowCancelButtonMode()) {
-        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (cleanNodeResponseArea) {
-            auto stackNode = cleanNodeResponseArea->GetFrameNode();
-            CHECK_NULL_VOID(stackNode);
-            auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
-            CHECK_NULL_VOID(textAccessibilityProperty);
-            textAccessibilityProperty->SetAccessibilityLevel("yes");
-            auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
-            auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                              (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
-            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
-        }
-    }
+    CHECK_NULL_VOID(IsShowCancelButtonMode());
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_VOID(cleanNodeResponseArea);
+    auto stackNode = cleanNodeResponseArea->GetFrameNode();
+    CHECK_NULL_VOID(stackNode);
+    auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityLevel("yes");
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+    auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
 }
 
 void TextFieldPattern::SetAccessibilityUnitAction()
 {
-    if (unitNode_ && responseArea_) {
-        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
-        CHECK_NULL_VOID(unitNode);
-        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(unitAccessibilityProperty);
-        unitAccessibilityProperty->SetAccessibilityLevel("yes");
+    if (!unitNode_ || !responseArea_) {
+        return;
     }
+    auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+    CHECK_NULL_VOID(unitNode);
+    auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(unitAccessibilityProperty);
+    unitAccessibilityProperty->SetAccessibilityLevel("yes");
 }
 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
@@ -1404,17 +1399,17 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
+    if (operationRecords_.size() == 1) {
+        FireEventHubOnChange("");
+        return;
+    }
     auto value = operationRecords_.back();
     operationRecords_.pop_back();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
     }
     redoOperationRecords_.push_back(value);
-    if (operationRecords_.empty()) {
-        FireEventHubOnChange("");
-        return;
-    }
     auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
     contentController_->SetTextValue(textEditingValue.text);
     selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
@@ -1807,6 +1802,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             magnifierController_->RemoveMagnifierFrameNode();
         }
+        ResetTouchAndMoveCaretState();
     }
 }
 
@@ -1830,6 +1826,18 @@ void TextFieldPattern::HandleTouchUp()
     if (GetIsPreviewText() && isTouchPreviewText_) {
         StartTwinkling();
     }
+    ResetTouchAndMoveCaretState();
+    if (isMousePressed_) {
+        isMousePressed_ = false;
+    }
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+    ScheduleDisappearDelayTask();
+}
+
+void TextFieldPattern::ResetTouchAndMoveCaretState()
+{
     if (moveCaretState_.isTouchCaret) {
         moveCaretState_.isTouchCaret = false;
         CheckScrollable();
@@ -1844,13 +1852,6 @@ void TextFieldPattern::HandleTouchUp()
             StopTwinkling();
         }
     }
-    if (isMousePressed_) {
-        isMousePressed_ = false;
-    }
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
-    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
@@ -4217,8 +4218,6 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
-void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
-
 bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -4986,6 +4985,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     }
     CloseSelectOverlay(true);
     StartTwinkling();
+    UpdateEditingValueToRecord();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -5452,7 +5452,6 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
-        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -5520,7 +5519,6 @@ void TextFieldPattern::DeleteForward(int32_t length)
         AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
-        UpdateEditingValueToRecord();
         return;
     }
     auto contentLength = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -5974,24 +5972,6 @@ std::string TextFieldPattern::TextInputActionToString() const
             return "EnterKeyType.Next";
         default:
             return "EnterKeyType.Done";
-    }
-}
-
-std::string TextFieldPattern::AutoCapTypeToString() const
-{
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
-    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
-        case AutoCapitalizationMode::NONE:
-            return "AutoCapitalizationMode.NONE";
-        case AutoCapitalizationMode::WORDS:
-            return "AutoCapitalizationMode.WORDS";
-        case AutoCapitalizationMode::SENTENCES:
-            return "AutoCapitalizationMode.SENTENCES";
-        case AutoCapitalizationMode::ALL_CHARACTERS:
-            return "AutoCapitalizationMode.ALL_CHARACTERS";
-        default:
-            return "AutoCapitalizationMode.NONE";
     }
 }
 
@@ -6495,6 +6475,13 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
         textNodeLayoutProperty->UpdateMaxLines(ERROR_TEXT_MAXLINE);
         textNodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textNodeLayoutProperty->UpdateIsAnimationNeeded(false);
+        auto layoutProperty = host->GetLayoutProperty();
+        auto isRTL = layoutProperty && (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL);
+        if (isRTL) {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+        } else {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+        }
 
         auto accessibilityProperty = errorTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
@@ -6783,11 +6770,11 @@ void TextFieldPattern::ApplyInlineTheme()
     renderContext->UpdateBorderColor(inlineBorderColor);
 
     if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f), CalcLength(0.0f),
-            CalcLength(0.0f) });
+        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingRight()),
+            CalcLength(theme->getInlinePaddingLeft()), CalcLength(0.0f), CalcLength(0.0f) });
     } else {
-        layoutProperty->UpdatePadding({ CalcLength(0.0f), CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f),
-            CalcLength(0.0f) });
+        layoutProperty->UpdatePadding({ CalcLength(theme->getInlinePaddingLeft()),
+            CalcLength(theme->getInlinePaddingRight()), CalcLength(0.0f), CalcLength(0.0f)});
     }
     ProcessInnerPadding();
     ProcessInlinePaddingAndMargin();
@@ -7173,7 +7160,6 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
-    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -8804,17 +8790,43 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     // delete or insert space.
     auto wtext = GetWideText();
     if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        auto ret = SetCaretOffset(index);
+        if (!ret) {
+            return false;
+        }
         if (wtext[index] == L' ') {
-            Delete(index, index + 1);
+            DeleteForward(1);
         } else if (index > 0 && wtext[index - 1] == L' ') {
-            Delete(index - 1, index);
+            DeleteBackward(1);
         } else {
-            SetCaretPosition(index);
-            InsertValue(" ");
+            InsertValue(" ", true);
         }
         return true;
     }
     return false;
+}
+
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+{
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+    GetEmojiSubStringRange(start, end);
+    auto value = contentController_->GetSelectedValue(start, end);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    CheckAndUpdateRecordBeforeOperation();
+    Delete(start, end);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    showCountBorderStyle_ = false;
+    HandleCountStyle();
 }
 
 bool TextFieldPattern::IsShowAIWrite()

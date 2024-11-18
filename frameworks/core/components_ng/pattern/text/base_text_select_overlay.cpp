@@ -1164,14 +1164,20 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
-            contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (contentRect.IsIntersectWith(parentContentRect)) {
+                contentRect = contentRect.IntersectRectT(parentContentRect);
+            } else {
+                contentRect = parentContentRect;
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
-    UpdateClipHandleViewPort(contentRect);
+    if (Positive(contentRect.Width()) && Positive(contentRect.Height())) {
+        UpdateClipHandleViewPort(contentRect);
+    }
     rect = contentRect;
     return true;
 }

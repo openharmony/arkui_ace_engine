@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 namespace OHOS::Ace::NG {
 bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
@@ -105,7 +106,10 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     }
     auto nodeBasePattern = nodeBase->GetPattern<NavDestinationPatternBase>();
     CHECK_NULL_VOID(nodeBasePattern);
-    nodeBasePattern->MarkSafeAreaPaddingChanged();
+    // Mark need update safeAreaPadding when need hide safe-area-padding-mode-toolBar by landscape menu
+    if (nodeBasePattern->GetToolBarStyle().value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING) {
+        nodeBasePattern->UpdateSafeAreaPaddingChanged(true);
+    }
     titleBarNode->RemoveChild(preMenuNode);
     titleBarNode->SetMenu(newMenuNode);
     titleBarNode->AddChild(newMenuNode);
@@ -258,5 +262,43 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
     auto toolBarDividerOffset = OffsetF(static_cast<float>(dividerOffsetX), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
+}
+
+void NavigationLayoutUtil::UpdateContentSafeAreaPadding(
+    const RefPtr<NavDestinationNodeBase>& nodeBase, float titleBarHeight)
+{
+    CHECK_NULL_VOID(nodeBase);
+    auto patternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(patternBase);
+    if (!patternBase->IsSafeAreaPaddingChanged()) {
+        return;
+    }
+    patternBase->UpdateSafeAreaPaddingChanged(false);
+    auto contentNode = AceType::DynamicCast<FrameNode>(nodeBase->GetContentNode());
+    CHECK_NULL_VOID(contentNode);
+    auto contentLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+
+    Dimension paddingTop = 0.0_vp;
+    if (patternBase->GetTitleBarStyle().value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        !NavigationTitleUtil::IsTitleBarHasOffsetY(AceType::DynamicCast<FrameNode>(nodeBase->GetTitleBarNode()))) {
+        paddingTop = Dimension(titleBarHeight);
+    }
+    Dimension paddingBottom = 0.0_vp;
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+    if (patternBase->GetToolBarStyle().value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING &&
+        toolBarNode && toolBarNode->IsVisible()) {
+        auto theme = NavigationGetTheme();
+        if (theme) {
+            paddingBottom = theme->GetHeight();
+        }
+    }
+    PaddingProperty paddingProperty;
+    paddingProperty.left = CalcLength(0.0_vp);
+    paddingProperty.right = CalcLength(0.0_vp);
+    paddingProperty.top = CalcLength(paddingTop);
+    paddingProperty.bottom = CalcLength(paddingBottom);
+
+    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 } // namespace OHOS::Ace::NG

@@ -299,7 +299,9 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& radius = frameNode->GetRenderContext()->GetBorderRadius();
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    const auto& radius = context->GetBorderRadius();
     SizeF frameSize = { -1, -1 };
     if (radius.has_value()) {
         auto radiusTopMax = std::max(radius->radiusTopLeft, radius->radiusTopRight);

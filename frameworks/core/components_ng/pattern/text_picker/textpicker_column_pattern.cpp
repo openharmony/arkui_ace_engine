@@ -1052,8 +1052,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
-        InnerHandleScroll(isDownScroll_, true);
-        HandleScrollStopEventCallback(true);
+        if (InnerHandleScroll(isDownScroll_, true)) {
+            HandleScrollStopEventCallback(true);
+        }
         return;
     }
     animationBreak_ = false;
@@ -1107,11 +1108,16 @@ void TextPickerColumnPattern::HandleDragEnd()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(!isDownScroll_, true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        if (NearZero(scrollDelta_)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
-    HandleScrollStopEventCallback(true);
+    if (!NearZero(scrollDelta_)) {
+        HandleScrollStopEventCallback(true);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -1698,11 +1704,16 @@ void TextPickerColumnPattern::PlayResetAnimation()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(!isDownScroll_, true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        if (NearZero(scrollDelta_)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
 
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
-    HandleScrollStopEventCallback(true);
+    if (!NearZero(scrollDelta_)) {
+        HandleScrollStopEventCallback(true);
+    }
 }
 
 void TextPickerColumnPattern::SetCanLoop(bool isLoop)

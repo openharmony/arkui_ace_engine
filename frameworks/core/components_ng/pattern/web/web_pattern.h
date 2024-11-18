@@ -980,6 +980,7 @@ private:
     bool IsDialogNested();
     void SelectCancel() const;
     bool IsSelectInfoValid();
+    std::optional<RectF> GetViewPort() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -1074,6 +1075,7 @@ private:
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
+    bool isDragStartFromWeb_ = false;
 
     bool isNewDragStyle_ = false;
     std::map<std::pair<WebElementType, ResponseType>,

@@ -20,6 +20,7 @@
 
 #include "base/geometry/point.h"
 #include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -55,7 +56,7 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_END = 22,
 };
 
-struct PointerEvent final {
+struct PointerEvent final : public UIInputEvent {
     int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     int32_t pullId = -1;
@@ -68,18 +69,17 @@ struct PointerEvent final {
     float force = 0.0f;
     int32_t deviceId = 0;
     TimeStamp downTime;
-    TimeStamp time;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
-    int32_t x = 0;
-    int32_t y = 0;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
     std::vector<KeyCode> pressedKeyCodes_;
     PointerAction action = PointerAction::UNKNOWN;
     std::vector<PointerEvent> history;
 
     PointerEvent() = default;
-    PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}
+    PointerEvent(float x, float y)
+        :UIInputEvent(x, y)
+    {}
     PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}

@@ -2296,6 +2296,155 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     }
 }
 
+bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
+    bool ret = false;
+    if (newXy.x != 0 && newXy.y != 0) {
+        newTouchEvent.x = newXy.x;
+        newTouchEvent.y = newXy.y;
+        newTouchEvent.screenX = newScreenXy.x;
+        newTouchEvent.screenY = newScreenXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newTouchEvent.time = TimeStamp(nanoseconds);
+        newTouchEvent.history = current;
+        newTouchEvent.isInterpolated = true;
+        newTouchEvent.inputXDeltaSlope = newXy.inputXDeltaSlope;
+        newTouchEvent.inputYDeltaSlope = newXy.inputYDeltaSlope;
+        ret = true;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+            PRIu64 "", newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
+            newTouchEvent.screenX, newTouchEvent.screenY,
+            static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
+    }
+    return ret;
+}
+
+TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp)
+{
+    TouchEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
+MouseEvent EventManager::GetResampleMouseEvent(
+    const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
+    if (newXy.x != 0 && newXy.y != 0) {
+        newMouseEvent.x = newXy.x;
+        newMouseEvent.y = newXy.y;
+        newMouseEvent.screenX = newScreenXy.x;
+        newMouseEvent.screenY = newScreenXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newMouseEvent.time = TimeStamp(nanoseconds);
+        newMouseEvent.history = current;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "Mouse Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+            PRIu64 "", newMouseEvent.id, newMouseEvent.x, newMouseEvent.y,
+            newMouseEvent.screenX, newMouseEvent.screenY,
+            static_cast<uint64_t>(newMouseEvent.time.time_since_epoch().count()));
+    }
+    return newMouseEvent;
+}
+
+MouseEvent EventManager::GetMouseLatestPoint(const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
+{
+    MouseEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
+PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
+    const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    PointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
+
+    if (newXy.x != 0 && newXy.y != 0) {
+        newPointerEvent.x = newXy.x;
+        newPointerEvent.y = newXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newPointerEvent.time = TimeStamp(nanoseconds);
+        newPointerEvent.history = current;
+    }
+    return newPointerEvent;
+}
+
+PointerEvent EventManager::GetPointerLatestPoint(const std::vector<PointerEvent>& current,
+    uint64_t nanoTimeStamp)
+{
+    PointerEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
 void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch)
 {
     if (axisTouchTestResults_.empty()) {

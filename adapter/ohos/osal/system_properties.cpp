@@ -934,4 +934,9 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
 }
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
 } // namespace OHOS::Ace

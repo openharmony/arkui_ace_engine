@@ -135,8 +135,16 @@ public:
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
+    static void SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
+    static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
+    static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
+    static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
+    static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
+    static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
 private:
     void AddDragFrameNodeToManager() const;
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

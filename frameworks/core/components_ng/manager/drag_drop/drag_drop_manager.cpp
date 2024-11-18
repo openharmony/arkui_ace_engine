@@ -489,7 +489,7 @@ std::unordered_set<int32_t> DragDropManager::FindHitFrameNodes(const Point& poin
     std::unordered_set<int32_t> frameNodeList;
     for (auto iter = nodesForDragNotify_.begin(); iter != nodesForDragNotify_.end(); iter++) {
         auto frameNode = iter->second.Upgrade();
-        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible() || frameNode->GetDepth() < 0) {
+        if (!frameNode || !frameNode->IsActive() || !frameNode->IsVisible() || !frameNode->IsOnMainTree()) {
             continue;
         }
         auto geometryNode = frameNode->GetGeometryNode();
@@ -1429,7 +1429,7 @@ int32_t DragDropManager::GetItemIndex(
         if (frameNode != draggedGridFrameNode_) {
             return eventHub->GetInsertPosition(globalX, globalY);
         }
-        auto itemFrameNode = frameNode->FindChildByPosition(globalX, globalY);
+        auto itemFrameNode = frameNode->FindChildByPositionWithoutChildTransform(globalX, globalY);
         if (!itemFrameNode) {
             if (eventHub->CheckPostionInGrid(globalX, globalY)) {
                 return eventHub->GetFrameNodeChildSize();

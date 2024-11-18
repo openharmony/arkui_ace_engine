@@ -61,6 +61,9 @@ void PagePattern::OnAttachToFrameNode()
     }
     host->GetLayoutProperty()->UpdateMeasureType(measureType);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -211,6 +214,26 @@ void PagePattern::OnDetachFromMainTree()
 #endif
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+}
+
+void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
+{
+    if (!isPageInTransition_) {
+        return;
+    }
+    auto page = GetHost();
+    CHECK_NULL_VOID(page);
+    auto renderContext = page->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveClipWithRRect();
 }
 
 void PagePattern::OnShow()
@@ -506,6 +529,10 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect)
 
 RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitionType type)
 {
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
     resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
     TranslateOptions translate;
@@ -513,7 +540,8 @@ RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitio
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto statusHeight = static_cast<float>(safeAreaInsets.top_.Length());
-    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
     resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
@@ -570,7 +598,7 @@ void PagePattern::UpdateEnterPushEffect(RefPtr<PageTransitionEffect>& effect, fl
     effect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     TranslateOptions translate;
     RectF pageTransitionRectF;
-    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+    RectF defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         pageTransitionRectF =
             RectF(0.0f, -statusHeight, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
@@ -578,7 +606,7 @@ void PagePattern::UpdateEnterPushEffect(RefPtr<PageTransitionEffect>& effect, fl
     } else {
         pageTransitionRectF =
             RectF(rect.Width() * HALF, -statusHeight, rect.Width() * HALF, REMOVE_CLIP_SIZE);
-        defaultPageTransitionRectF = RectF(0.0f, -statusHeight, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE);
+        defaultPageTransitionRectF = RectF(0.0f, -statusHeight, rect.Width(), REMOVE_CLIP_SIZE);
         translate.x = Dimension(rect.Width() * HALF);
     }
     effect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);

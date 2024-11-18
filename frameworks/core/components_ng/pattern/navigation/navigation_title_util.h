@@ -107,6 +107,9 @@ public:
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
     static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
+    static void UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
+    static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
 };
 
 } // namespace OHOS::Ace::NG

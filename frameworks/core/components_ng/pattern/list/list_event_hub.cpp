@@ -163,7 +163,7 @@ int32_t ListEventHub::GetListItemIndexByPosition(float x, float y, bool strict)
     CHECK_NULL_RETURN(listNode, 0);
 
     if (strict) {
-        auto itemFrameNode = listNode->FindChildByPosition(x, y);
+        auto itemFrameNode = listNode->FindChildByPositionWithoutChildTransform(x, y);
         CHECK_NULL_RETURN(itemFrameNode, -1);
         RefPtr<ListItemPattern> itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
         CHECK_NULL_RETURN(itemPattern, -1);
