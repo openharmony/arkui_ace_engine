@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_symbol_glyph_ffi.h"
+#include "cj_lambda.h"
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_symbol_glyph_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model.h"
-#include "cj_lambda.h"
 
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
@@ -33,7 +33,7 @@ void FfiOHOSAceFrameworkSymbolGlyphFontColor(VectorUInt32Ptr colors)
 {
     std::vector<Color> symbolColor;
     const auto& vecColor = *reinterpret_cast<std::vector<uint32_t>*>(colors);
-    for(size_t i = 0; i < vecColor.size(); ++i){
+    for (size_t i = 0; i < vecColor.size(); ++i) {
         symbolColor.emplace_back(Color(vecColor[i]));
     }
     SymbolModel::GetInstance()->SetFontColor(symbolColor);
@@ -68,10 +68,10 @@ void FfiOHOSAceFrameworkSymbolGlyphSymbolEffect(EffectOptions effectOptions)
     symbolEffectOptions.SetScopeType(static_cast<ScopeType>(effectOptions.effectScope));
     symbolEffectOptions.SetCommonSubType(static_cast<CommonSubType>(effectOptions.effectDirection));
     symbolEffectOptions.SetFillStyle(static_cast<FillStyle>(effectOptions.fillStyle));
-    if(effectOptions.activeExist){
+    if (effectOptions.activeExist) {
         symbolEffectOptions.SetIsActive(effectOptions.isActive);
     }
-    if(effectOptions.triggerExist){
+    if (effectOptions.triggerExist) {
         symbolEffectOptions.SetTriggerNum(effectOptions.triggerValue);
     }
     SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
