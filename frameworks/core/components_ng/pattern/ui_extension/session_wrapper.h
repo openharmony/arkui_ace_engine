@@ -107,7 +107,7 @@ public:
     // The lifecycle interface
     virtual void NotifyCreate() = 0;
     virtual void NotifyForeground() = 0;
-    virtual void NotifyBackground() = 0;
+    virtual void NotifyBackground(bool isHandleError = true) = 0;
     virtual void NotifyDestroy(bool isHandleError = true) = 0;
     virtual void NotifyConfigurationUpdate() = 0;
 
