@@ -1560,7 +1560,11 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
@@ -1586,7 +1590,11 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
@@ -1613,7 +1621,11 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
@@ -1654,7 +1666,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1679,7 +1695,11 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1702,7 +1722,11 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1722,7 +1746,11 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 /*
@@ -1743,7 +1771,11 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    colorMatrix_.PreConcat(colorMatrix);
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        colorMatrix_.PostConcat(colorMatrix);
+    } else {
+        colorMatrix_.PreConcat(colorMatrix);
+    }
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
