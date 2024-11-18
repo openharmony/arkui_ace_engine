@@ -324,6 +324,15 @@ void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOpti
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void ScrollModelNG::SetNestedScroll(FrameNode* frameNode,
+    const std::optional<NestedScrollMode>& forward, const std::optional<NestedScrollMode>& backward)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = forward.value_or(NestedScrollMode::SELF_ONLY),
+        .backward = backward.value_or(NestedScrollMode::SELF_ONLY)};
+    SetNestedScroll(frameNode, nestedOpt);
+}
+
 float ScrollModelNG::GetFriction(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
@@ -366,6 +375,23 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+}
+
+void ScrollModelNG::SetScrollSnap(
+    FrameNode* frameNode,
+    std::optional<ScrollSnapAlign> scrollSnapAlign,
+    const std::optional<Dimension>& intervalSize,
+    const std::vector<Dimension>& snapPaginations,
+    const std::optional<bool>& enableSnapToStart,
+    const std::optional<bool>& enableSnapToEnd)
+{
+    SetScrollSnap(
+        frameNode,
+        scrollSnapAlign.value_or(ScrollSnapAlign::NONE),
+        intervalSize.value_or(Dimension()),
+        snapPaginations,
+        std::make_pair(enableSnapToStart.value_or(true), enableSnapToEnd.value_or(true))
+    );
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
@@ -597,4 +623,18 @@ void ScrollModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollP
     CHECK_NULL_VOID(scrollBarProxy);
     pattern->SetScrollBarProxy(scrollBarProxy);
 }
+
+RefPtr<ScrollProxy> ScrollModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto scrollBarProxy = pattern->GetScrollBarProxy();
+    if (scrollBarProxy == nullptr) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    return scrollBarProxy;
+}
+
 } // namespace OHOS::Ace::NG
