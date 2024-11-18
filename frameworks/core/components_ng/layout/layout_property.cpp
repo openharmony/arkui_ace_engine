@@ -794,9 +794,13 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
-            host->GetRenderContext()->OnNodeDisappear(false);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnNodeDisappear(false);
         } else if (preVisibility.value() != VisibleType::VISIBLE && visible == VisibleType::VISIBLE) {
-            host->GetRenderContext()->OnNodeAppear(false);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnNodeAppear(false);
         }
     }
 
