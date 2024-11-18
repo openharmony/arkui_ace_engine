@@ -517,7 +517,7 @@ bool WebClientImpl::OnFileSelectorShow(
 void WebClientImpl::OnResource(const std::string& url)
 {
     // Don't use RefPtr<WebDelegate> object here!
-    // OnResource will be called in Chrome_IOThread. When the RefPtr object is
+    // OnResource will be called in a background thread. When the RefPtr object is
     // the last reference, the destructor will be called here, which may cause
     // js-object-releasing of WebDelegate in non-main thread.
     auto task = Container::CurrentTaskExecutorSafely();
