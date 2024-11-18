@@ -45,11 +45,8 @@ void SpliceImpl(ChildrenMainSizePeer* peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(start);
 
-    auto handler = peer->GetHandler().Upgrade();
-    if (!handler) {
-        LOGE("ChildrenMainSizeAccessor::SpliceImpl. A handler isn't bound to a component.");
-        return;
-    }
+    auto handler = peer->GetHandler();
+    CHECK_NULL_VOID(handler);
 
     auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart < 0) {
@@ -63,11 +60,12 @@ void SpliceImpl(ChildrenMainSizePeer* peer,
 
     auto convFloatArray = childrenSize ? Converter::OptConvert<std::vector<float>>(*childrenSize) : std::nullopt;
     auto floatArray = convFloatArray.value_or(std::vector<float>());
-    for (int32_t i = 0; i < static_cast<int32_t>(floatArray.size()); i++) {
-        if (floatArray[i] < 0) {
-            floatArray[i] = DEFAULT_SIZE; // -1 represent default size.
+    std::for_each(floatArray.begin(), floatArray.end(), [](float& size) {
+        if (size < 0.0f) {
+            size = DEFAULT_SIZE; // -1 represent default size.
         }
-    }
+    });
+
     handler->ChangeData(convStart, delCount, floatArray);
 }
 void UpdateImpl(ChildrenMainSizePeer* peer,
@@ -78,11 +76,8 @@ void UpdateImpl(ChildrenMainSizePeer* peer,
     CHECK_NULL_VOID(index);
     CHECK_NULL_VOID(childSize);
 
-    auto handler = peer->GetHandler().Upgrade();
-    if (!handler) {
-        LOGE("ChildrenMainSizeAccessor::UpdateImpl. A handler isn't bound to a component.");
-        return;
-    }
+    auto handler = peer->GetHandler();
+    CHECK_NULL_VOID(handler);
 
     auto convIndex = Converter::Convert<int32_t>(*index);
     if (convIndex < 0) {
@@ -96,11 +91,9 @@ Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 {
     // should return Ark_Float32 or Ark_Number with a float value
     CHECK_NULL_RETURN(peer, -1);
-    auto handler = peer->GetHandler().Upgrade();
-    if (!handler) {
-        LOGE("ChildrenMainSizeAccessor::UpdateImpl. A handler isn't bound to a component.");
-        return -1;
-    }
+    auto handler = peer->GetHandler();
+    CHECK_NULL_RETURN(handler, -1);
+
     return handler->GetChildSize(-1);
 }
 } // ChildrenMainSizeAccessor

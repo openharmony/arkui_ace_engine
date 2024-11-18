@@ -44,7 +44,7 @@ const Ark_Number ARK_CHILDREN_DEFAULT_SIZE = Converter::ArkValue<Ark_Number>(CHI
 class ChildrenMainSizeTest : public AccessorTestBaseParent<GENERATED_ArkUIChildrenMainSizeAccessor,
     &GENERATED_ArkUIAccessors::getChildrenMainSizeAccessor, ChildrenMainSizePeer> {
 public:
-    void SetUp(void) override
+    void SetUp() override
     {
         AccessorTestBaseParent::SetUp();
         ASSERT_NE(this->accessor_->ctor, nullptr);
@@ -62,6 +62,7 @@ public:
 
     void TearDown() override
     {
+        AccessorTestBaseParent::TearDown();
         mockChildrenMainSizeKeeper_ = nullptr;
         mockChildrenMainSize_ = nullptr;
     }
@@ -325,7 +326,7 @@ HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
     auto retValue = accessor_->getChildDefaultSize(peer_);
     EXPECT_EQ(static_cast<float>(retValue), CHILDREN_DEFAULT_SIZE);
 
-    auto ptr = peer_->GetHandler().Upgrade();
+    auto ptr = peer_->GetHandler();
     if (ptr) {
         ptr->UpdateDefaultSize(CHILDREN_DEFAULT_SIZE * 2);
     }

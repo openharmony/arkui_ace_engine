@@ -27,7 +27,7 @@ public:
     ~ChildrenMainSizePeer() = default;
     explicit ChildrenMainSizePeer(float defaultSize) : defaultSize_(defaultSize) {};
 
-    const ohos::Ace::WeakPtr<ohos::Ace::NG::ListChildrenMainSize>& GetHandler() const
+    const ohos::Ace::RefPtr<ohos::Ace::NG::ListChildrenMainSize>& GetHandler() const
     {
         return handler_;
     }
@@ -36,9 +36,8 @@ public:
     {
         handler_ = handler;
         if (defaultSize_.has_value()) {
-            auto ptr = handler_.Upgrade();
-            if (ptr) {
-                ptr->UpdateDefaultSize(defaultSize_.value());
+            if (handler_) {
+                handler_->UpdateDefaultSize(defaultSize_.value());
             }
         }
     }
@@ -50,7 +49,7 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ChildrenMainSizePeer);
-    ohos::Ace::WeakPtr<ohos::Ace::NG::ListChildrenMainSize> handler_;
+    ohos::Ace::RefPtr<ohos::Ace::NG::ListChildrenMainSize> handler_;
     std::optional<float> defaultSize_;
 };
 
