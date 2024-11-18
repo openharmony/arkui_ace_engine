@@ -359,7 +359,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setTextOverflowTestTextOverflowInvalidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setTextIndentTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setTextIndentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -378,7 +378,7 @@ HWTEST_F(TextInputModifierTest, setTextIndentTestTextIndentValidValues, TestSize
     Ark_Length initValueTextIndent;
 
     // Initial setup
-    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
+    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]);
 
     auto checkValue = [this, &initValueTextIndent](
                           const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
@@ -392,37 +392,8 @@ HWTEST_F(TextInputModifierTest, setTextIndentTestTextIndentValidValues, TestSize
             << "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setTextIndentTestTextIndentInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setTextIndentTestTextIndentInvalidValues, TestSize.Level1)
-{
-    Ark_Length initValueTextIndent;
-
-    // Initial setup
-    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
-
-    auto checkValue = [this, &initValueTextIndent](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueTextIndent = initValueTextIndent;
-
-        modifier_->setTextIndent(node_, &inputValueTextIndent);
-        inputValueTextIndent = value;
-        modifier_->setTextIndent(node_, &inputValueTextIndent);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_INDENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, value);
     }
 }
 
@@ -2000,7 +1971,7 @@ HWTEST_F(TextInputModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFocu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordIconTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPasswordIcon =
@@ -2021,15 +1992,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSrcValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordIconTestPasswordIconOnIconSrcValidValues, TestSize.Level1)
 {
     Ark_PasswordIcon initValuePasswordIcon;
 
     // Initial setup
     initValuePasswordIcon.onIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
     initValuePasswordIcon.offIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
 
     auto checkValue = [this, &initValuePasswordIcon](const std::string& input, const Opt_Union_String_Resource& value,
                           const std::string& expectedStr) {
@@ -2044,10 +2015,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSr
             << "Input value is: " << input << ", method: setPasswordIcon, attribute: passwordIcon.onIconSrc";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
         checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value), expected);
+    }
 }
 
 /*
@@ -2055,15 +2028,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSrcInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordIconTestPasswordIconOnIconSrcInvalidValues, TestSize.Level1)
 {
     Ark_PasswordIcon initValuePasswordIcon;
 
     // Initial setup
     initValuePasswordIcon.onIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
     initValuePasswordIcon.offIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
 
     auto checkValue = [this, &initValuePasswordIcon](const std::string& input, const Opt_Union_String_Resource& value) {
         Ark_PasswordIcon inputValuePasswordIcon = initValuePasswordIcon;
@@ -2078,7 +2051,6 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSr
             << "Input value is: " << input << ", method: setPasswordIcon, attribute: passwordIcon.onIconSrc";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
     // Check empty optional
@@ -2090,15 +2062,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOnIconSr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOffIconSrcValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordIconTestPasswordIconOffIconSrcValidValues, TestSize.Level1)
 {
     Ark_PasswordIcon initValuePasswordIcon;
 
     // Initial setup
     initValuePasswordIcon.onIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
     initValuePasswordIcon.offIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
 
     auto checkValue = [this, &initValuePasswordIcon](const std::string& input, const Opt_Union_String_Resource& value,
                           const std::string& expectedStr) {
@@ -2113,10 +2085,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOffIconS
             << "Input value is: " << input << ", method: setPasswordIcon, attribute: passwordIcon.offIconSrc";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
         checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value), expected);
+    }
 }
 
 /*
@@ -2124,15 +2098,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOffIconS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOffIconSrcInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPasswordIconTestPasswordIconOffIconSrcInvalidValues, TestSize.Level1)
 {
     Ark_PasswordIcon initValuePasswordIcon;
 
     // Initial setup
     initValuePasswordIcon.onIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
     initValuePasswordIcon.offIconSrc =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]));
 
     auto checkValue = [this, &initValuePasswordIcon](const std::string& input, const Opt_Union_String_Resource& value) {
         Ark_PasswordIcon inputValuePasswordIcon = initValuePasswordIcon;
@@ -2147,7 +2121,6 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPasswordIconTestPasswordIconOffIconS
             << "Input value is: " << input << ", method: setPasswordIcon, attribute: passwordIcon.offIconSrc";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
     // Check empty optional
@@ -2214,6 +2187,40 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.L
             ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
             expected);
     }
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceStr_Undefined initValueShowError;
+
+    // Initial setup
+    initValueShowError =
+        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
+            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
+
+    auto checkValue = [this, &initValueShowError](
+                          const std::string& input, const Opt_Union_ResourceStr_Undefined& value) {
+        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
+
+        modifier_->setShowError(node_, &inputValueShowError);
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    checkValue("undefined", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Undefined>(Ark_Undefined()));
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_ResourceStr_Undefined>());
 }
 
 } // namespace OHOS::Ace::NG

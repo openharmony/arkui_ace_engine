@@ -25,6 +25,9 @@
 #include "core/components/common/properties/text_style_parser.h"
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
+constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
+
 struct TextInputOptions {
     std::optional<std::string> placeholder;
     std::optional<std::string> text;
@@ -56,6 +59,30 @@ InputCounterOptions Convert(const Ark_InputCounterOptions& src)
     return options;
 }
 
+template<>
+PasswordIcon Convert(const Ark_PasswordIcon& src)
+{
+    PasswordIcon result {};
+    Converter::VisitUnion(
+        src.onIconSrc, [&result](const Ark_String& src) { result.showResult = Converter::Convert<std::string>(src); },
+        [&result](const Ark_Resource& src) {
+            result.showBundleName = Converter::Convert<std::string>(src.bundleName);
+            result.showModuleName = Converter::Convert<std::string>(src.moduleName);
+            auto resStr = Converter::OptConvert<std::string>(src);
+            result.showResult = (resStr.has_value()) ? resStr.value() : "";
+        },
+        []() {});
+    Converter::VisitUnion(
+        src.offIconSrc, [&result](const Ark_String& src) { result.hideResult = Converter::Convert<std::string>(src); },
+        [&result](const Ark_Resource& src) {
+            result.hideBundleName = Converter::Convert<std::string>(src.bundleName);
+            result.hideModuleName = Converter::Convert<std::string>(src.moduleName);
+            auto resStr = Converter::OptConvert<std::string>(src);
+            result.hideResult = (resStr.has_value()) ? resStr.value() : "";
+        },
+        []() {});
+    return result;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -116,8 +143,6 @@ void TextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(convValue);
-    Validator::ValidateNonPercent(convValue);
     TextFieldModelNG::SetTextIndent(frameNode, convValue);
 }
 void PlaceholderFontImpl(Ark_NativePointer node,
@@ -371,7 +396,8 @@ void PasswordIconImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("TextInputInterfaceModifier::PasswordIconImpl not implemented");
+    auto convValue = Converter::OptConvert<PasswordIcon>(*value);
+    TextFieldModelNG::SetPasswordIcon(frameNode, convValue);
 }
 void ShowErrorImpl(Ark_NativePointer node,
                    const Opt_Union_ResourceStr_Undefined* value)
@@ -475,9 +501,20 @@ void CancelButtonImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("TextInputInterfaceModifier::CancelButtonImpl not implemented");
+    auto cleanButtonStyle = Converter::OptConvert<CleanNodeStyle>(value->style);
+    auto optIconOptions = Converter::OptConvert<Ark_IconOptions>(value->icon);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanButtonStyle);
+    if (optIconOptions) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Converter::OptConvert<Color>(optIconOptions->color));
+        auto iconSize = Converter::OptConvert<CalcDimension>(optIconOptions->size);
+        Validator::ValidateNonNegative(iconSize);
+        Validator::ValidateNonPercent(iconSize);
+        TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+        TextFieldModelNG::SetCanacelIconSrc(frameNode, Converter::OptConvert<std::string>(optIconOptions->src));
+    }
 }
-void SelectAllImpl(Ark_NativePointer node, Ark_Boolean value)
+void SelectAllImpl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -682,6 +719,13 @@ void ShowCounterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto counterOptions = Converter::OptConvert<InputCounterOptions>(*options);
     auto isShowCounter = Converter::Convert<bool>(value);
+    if (counterOptions && counterOptions->thresholdPercentage.has_value()) {
+        int32_t thresholdValue = counterOptions->thresholdPercentage.value();
+        if (thresholdValue < MIN_THRESHOLD_PERCENTAGE || thresholdValue > MAX_THRESHOLD_PERCENTAGE) {
+            counterOptions->thresholdPercentage = std::nullopt;
+            isShowCounter = false;
+        }
+    }
     TextFieldModelNG::SetShowCounter(frameNode, isShowCounter);
     TextFieldModelNG::SetCounterType(frameNode, counterOptions->thresholdPercentage);
     TextFieldModelNG::SetShowCounterBorder(frameNode, counterOptions->highlightBorder);

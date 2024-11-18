@@ -1519,9 +1519,13 @@ void TextFieldModelNG::SetOnPasteWithEvent(
     eventHub->SetOnPasteWithEvent(std::move(func));
 }
 
-void TextFieldModelNG::SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle)
+void TextFieldModelNG::SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle, frameNode);
+    if (cleanNodeStyle) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton)
@@ -1529,19 +1533,31 @@ void TextFieldModelNG::SetIsShowCancelButton(FrameNode* frameNode, bool isShowCa
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton, frameNode);
 }
 
-void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize)
+void TextFieldModelNG::SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize, frameNode);
+    if (iconSize) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc)
+void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::optional<std::string>& iconSrc)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
+    if (iconSrc) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& iconColor)
+void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor, frameNode);
+    if (iconColor) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol)

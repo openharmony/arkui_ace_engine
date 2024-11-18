@@ -532,6 +532,17 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
         default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src)
+{
+    switch (src) {
+        case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CleanNodeStyle::CONSTANT; break;
+        case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CleanNodeStyle::INVISIBLE; break;
+        case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CleanNodeStyle::INPUT; break;
+        default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
+    }
+}
 template<>
 void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src)
 {
@@ -1005,6 +1016,18 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
         case ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL:
             dst = OHOS::Ace::SymbolEffectType::HIERARCHICAL; break;
         default: LOGE("Unexpected enum value in Ark_SymbolEffectStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
+{
+    switch (src) {
+        case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
+        case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
+        case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
+        case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

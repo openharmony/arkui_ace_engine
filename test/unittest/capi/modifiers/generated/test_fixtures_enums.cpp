@@ -84,17 +84,6 @@ std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInva
     { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_CancelButtonStyle, std::string>> testFixtureEnumCancelButtonStyleValidValues = {
-    { "ARK_CANCEL_BUTTON_STYLE_CONSTANT", ARK_CANCEL_BUTTON_STYLE_CONSTANT, "CancelButtonStyle.CONSTANT" },
-    { "ARK_CANCEL_BUTTON_STYLE_INVISIBLE", ARK_CANCEL_BUTTON_STYLE_INVISIBLE, "CancelButtonStyle.INVISIBLE" },
-    { "ARK_CANCEL_BUTTON_STYLE_INPUT", ARK_CANCEL_BUTTON_STYLE_INPUT, "CancelButtonStyle.INPUT" },
-};
-
-std::vector<std::tuple<std::string, Ark_CancelButtonStyle>> testFixtureEnumCancelButtonStyleInvalidValues = {
-    { "-1", static_cast<Ark_CancelButtonStyle>(-1) },
-    { "INT_MAX", static_cast<Ark_CancelButtonStyle>(INT_MAX) },
-};
-
 std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
     { "ARK_COLOR_WHITE", ARK_COLOR_WHITE, "Color.White" },
     { "ARK_COLOR_BLACK", ARK_COLOR_BLACK, "Color.Black" },

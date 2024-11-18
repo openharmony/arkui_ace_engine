@@ -68,8 +68,9 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
     // Initial setup
+    char testValue[] = "abc";
     Ark_Literal_String_target_NavigationType_type inputValueOptions = {
-        .target = {"abc"},
+        .target = Converter::ArkValue<Ark_String>(testValue),
         .type = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE)
     };
     auto realInputValue = Converter::ArkValue<Opt_Literal_String_target_NavigationType_type>(inputValueOptions);
@@ -80,7 +81,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, "abc");
+    EXPECT_EQ(resultStr, testValue);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
     EXPECT_EQ(resultStr, "NavigationType.Replace");
 }

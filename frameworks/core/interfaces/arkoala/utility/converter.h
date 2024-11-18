@@ -206,7 +206,7 @@ namespace Converter {
     template<>
     inline std::string Convert(const Ark_String& src)
     {
-        return (src.chars != nullptr) ? src.chars : "";
+        return (src.chars != nullptr) ? std::string(src.chars, src.length) : "";
     }
 
     template<>
@@ -214,15 +214,6 @@ namespace Converter {
     {
         return src.chars;
     }
-
-/*
-    template<>
-    inline std::string Convert(const Ark_CustomObject& src)
-    {
-        LOGE("Convert [Ark_CustomObject] to [std::string] is not supported");
-        return "Ark_CustomObject";
-    }
-*/
 
     template<>
     inline int Convert(const Ark_Number& src)
@@ -413,7 +404,8 @@ namespace Converter {
     template<>
     inline Dimension Convert(const Ark_String& src)
     {
-        return Dimension::FromString(src.chars);
+        auto str = Convert<std::string>(src);
+        return Dimension::FromString(str);
     }
 
     template<>
@@ -457,7 +449,8 @@ namespace Converter {
     template<>
     inline Color Convert(const Ark_String& src)
     {
-        return Color::FromString(src.chars);
+        auto str = std::string(src.chars, src.chars == nullptr ? 0 : src.length);
+        return Color::FromString(str);
     }
 
     template<> CalcLength Convert(const Ark_Length& src);
@@ -637,6 +630,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
+    template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
@@ -644,6 +638,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
     template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
     template<> void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src);
+    template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);

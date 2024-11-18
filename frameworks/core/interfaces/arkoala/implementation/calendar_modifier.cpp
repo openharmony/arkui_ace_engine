@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/implementation/calendar_controller_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -78,6 +79,7 @@ ObtainedMonth Convert(const Ark_MonthData& src)
 template<>
 CalendarData Convert(const Ark_Type_CalendarInterface_value& src)
 {
+    const auto peer = OptConvert<Ark_CalendarController>(src.controller);
     return {
         .date = {
             .day = Convert<int32_t>(src.date.day),
@@ -86,6 +88,7 @@ CalendarData Convert(const Ark_Type_CalendarInterface_value& src)
         .currentData = Convert<ObtainedMonth>(src.currentData),
         .preData = Convert<ObtainedMonth>(src.preData),
         .nextData = Convert<ObtainedMonth>(src.nextData),
+        .controller = peer ? reinterpret_cast<CalendarControllerPeer*>(peer->ptr)->controller : nullptr,
     };
 }
 

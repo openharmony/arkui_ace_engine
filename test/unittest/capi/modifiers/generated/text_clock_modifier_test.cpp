@@ -31,7 +31,7 @@ using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_TEXT_SHADOW_NAME = "textShadow";
 const auto ATTRIBUTE_TIME_ZONE_OFFSET_NAME = "timeZoneOffset";
-const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = "0.000000";
 const auto ATTRIBUTE_CONTROLLER_NAME = "controller";
 const auto ATTRIBUTE_CONTROLLER_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_FORMAT_NAME = "format";
@@ -86,7 +86,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, DISABLED_setTextClockOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;

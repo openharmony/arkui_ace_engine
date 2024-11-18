@@ -18,7 +18,34 @@
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/arkoala/implementation/text_clock_controller_peer_impl.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG {
+    struct TextClockOptions {
+        std::optional<float> timeZoneOffset = std::nullopt;
+        TextClockControllerPeer* peerController = nullptr;
+    };
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::Converter {
+    template<>
+    TextClockOptions Convert(const Ark_TextClockOptions& src)
+    {
+        TextClockOptions dst;
+        if (src.timeZoneOffset.tag != ARK_TAG_UNDEFINED) {
+            auto value = OptConvert<float>(src.timeZoneOffset.value);
+            // valid hoursWest is within [-14, 12]
+            Validator::ValidateByRange(value, -14.0f, 12.0f);
+            dst.timeZoneOffset = value;
+        }
+        if (src.controller.tag != ARK_TAG_UNDEFINED) {
+            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(src.controller.value.ptr);
+        }
+        return dst;
+    }
+} // namespace OHOS::Ace::NG::Converter
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockInterfaceModifier {
@@ -27,8 +54,19 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //TextClockModelNG::SetSetTextClockOptions(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    if (options->tag != ARK_TAG_UNDEFINED) {
+        auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(options->value);
+        if (textClockOptionsOpt.has_value()) {
+            TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
+        
+            auto controller = TextClockModelNG::InitTextController(frameNode);
+            CHECK_NULL_VOID(controller);
+            auto peerImplPtr = textClockOptionsOpt.value().peerController;
+            CHECK_NULL_VOID(peerImplPtr);
+            peerImplPtr->controller = std::move(controller);
+        }
+    }
 }
 } // TextClockInterfaceModifier
 namespace TextClockAttributeModifier {

@@ -38,13 +38,16 @@ public:
         SetChangeIndexImpl(
             std::bind(&StubSwiperController::ChangeIndex, this, std::placeholders::_1, std::placeholders::_2)
         );
-        SetFinishImpl(std::bind(&StubSwiperController::FinishAnimation, this));
+        SetFinishImpl([&]() {
+            if (auto finish = this->GetFinishCallback(); finish) {
+                finish();
+            }
+        });
     }
     ~StubSwiperController() override = default;
     virtual void ShowNext() {}
     virtual void ShowPrevious() {}
     virtual void ChangeIndex(int, bool) {}
-    virtual void FinishAnimation() {}
 };
 
 class MockSwiperController : public StubSwiperController {
@@ -54,7 +57,6 @@ public:
     MOCK_METHOD(void, ShowNext, ());
     MOCK_METHOD(void, ShowPrevious, ());
     MOCK_METHOD(void, ChangeIndex, (int, bool));
-    MOCK_METHOD(void, FinishAnimation, ());
 };
 } // namespace
 
@@ -149,29 +151,40 @@ HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
 HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->finishAnimation, nullptr);
+    const int32_t CONTEXT_ID = 1234;
 
-    Opt_Callback_Void callbackValid = ArkValue<Opt_Callback_Void>(Callback_Void());
+    static std::optional<int32_t> checkInvoke;
+    auto callbackForCheck = [](const Ark_Int32 resourceId) {
+        checkInvoke = Converter::Convert<int32_t>(resourceId);
+    };
+    auto callbackVoid = ArkValue<Callback_Void>(callbackForCheck, CONTEXT_ID);
+
+    Opt_Callback_Void callbackValid = ArkValue<Opt_Callback_Void>(callbackVoid);
     Opt_Callback_Void callbackUndef = ArkValue<Opt_Callback_Void>();
 
-    EXPECT_CALL(*mockSwiperController_, FinishAnimation()).Times(3);
-
     // check initial callback state in target controller
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+    EXPECT_FALSE(checkInvoke);
+    EXPECT_EQ(mockSwiperController_->GetFinishCallback(), nullptr);
 
     // test the finish animation invoking with valid callback setting
     accessor_->finishAnimation(peer_, &callbackValid);
-    EXPECT_TRUE(mockSwiperController_->GetFinishCallback());
+    ASSERT_TRUE(checkInvoke);
+    EXPECT_EQ(*checkInvoke, CONTEXT_ID);
+    checkInvoke.reset();
 
     // force reset and check no callback in target controller
     mockSwiperController_->SetFinishCallback({});
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+    EXPECT_EQ(mockSwiperController_->GetFinishCallback(), nullptr);
+    EXPECT_FALSE(checkInvoke);
 
     // test the finish animation invoking with invalid callback setting
     accessor_->finishAnimation(peer_, &callbackUndef);
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+    EXPECT_EQ(mockSwiperController_->GetFinishCallback(), nullptr);
+    EXPECT_FALSE(checkInvoke);
 
     // test the finish animation invoking without callback setting
     accessor_->finishAnimation(peer_, nullptr);
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+    EXPECT_EQ(mockSwiperController_->GetFinishCallback(), nullptr);
+    EXPECT_FALSE(checkInvoke);
 }
 } // namespace OHOS::Ace::NG
