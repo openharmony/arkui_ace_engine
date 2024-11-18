@@ -497,6 +497,10 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
 
 void NavDestinationGroupNode::CleanContent()
 {
+    // cacheNode is cached for pip info, and is no need to clean when clean content node
+    if (IsCacheNode()) {
+        return;
+    }
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     auto shallowBuilder = pattern->GetShallowBuilder();
