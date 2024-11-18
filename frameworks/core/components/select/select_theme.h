@@ -302,6 +302,10 @@ public:
             theme->menuDefaultRadius_ = pattern->GetAttr<Dimension>("menu_border_radius_new", 20.0_vp);
             theme->menuDefaultInnerRadius_ = pattern->GetAttr<Dimension>("inner_border_radius_new", 16.0_vp);
             theme->menuTextColor_= pattern->GetAttr<Color>("menu_text_color", Color(0xe5000000));
+            theme->menuDefaultWidth_ = pattern->GetAttr<Dimension>("menu_default_width", 160.0_vp);
+            theme->menuMinWidth_ = pattern->GetAttr<Dimension>("menu_min_width", 64.0_vp);
+            theme->menuMaxWidth_ = pattern->GetAttr<Dimension>("menu_max_width", 224.0_vp);
+            theme->menuMaxWidthRatio_ = pattern->GetAttr<double>("menu_max_width_ratio", 0.67f);
         }
     };
 
@@ -426,6 +430,10 @@ public:
         theme->menuDefaultRadius_ = menuDefaultRadius_;
         theme->menuDefaultInnerRadius_ = menuDefaultInnerRadius_;
         theme->menuTextColor_ = menuTextColor_;
+        theme->menuDefaultWidth_ = menuDefaultWidth_;
+        theme->menuMinWidth_ = menuMinWidth_;
+        theme->menuMaxWidth_ = menuMaxWidth_;
+        theme->menuMaxWidthRatio_ = menuMaxWidthRatio_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1105,6 +1113,26 @@ public:
         return menuDefaultInnerRadius_;
     }
 
+    const Dimension& GetMenuDefaultWidth() const
+    {
+        return menuDefaultWidth_;
+    }
+
+    const Dimension& GetMenuMinWidth() const
+    {
+        return menuMinWidth_;
+    }
+
+    const Dimension& GetMenuMaxWidth() const
+    {
+        return menuMaxWidth_;
+    }
+
+    double GetMenuMaxWidthRatio() const
+    {
+        return menuMaxWidthRatio_;
+    }
+
     const Color& GetMenuTextColor() const
     {
         return menuTextColor_;
@@ -1236,6 +1264,10 @@ private:
     Dimension menuItemGroupTitleTextFontSize_;
     Dimension menuDefaultRadius_;
     Dimension menuDefaultInnerRadius_;
+    Dimension menuDefaultWidth_;
+    Dimension menuMinWidth_;
+    Dimension menuMaxWidth_;
+    double menuMaxWidthRatio_;
     Color menuTextColor_;
 };
 

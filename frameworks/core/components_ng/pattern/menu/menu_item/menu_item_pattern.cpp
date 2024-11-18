@@ -1409,7 +1409,39 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
             textAlign = TextAlign::START;
         }
     }
-    UpdateTextOverflow(textProperty);
+
+    UpdateFont(menuProperty, theme, isLabel);
+    textProperty->UpdateContent(content);
+    UpdateTextOverflow(textProperty, theme);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
+    RefPtr<SelectTheme>& theme)
+{
+    if (theme && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (theme->GetExpandDisplay()) {
+            textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textProperty->UpdateMaxLines(1);
+        } else {
+            textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        }
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textProperty->UpdateMaxLines(1);
+    }
+    UpdateMaxLinesFromTheme(textProperty);
+}
+
+void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto& node = isLabel ? label_ : content_;
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
@@ -1433,16 +1465,10 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
-    textProperty->UpdateContent(content);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty)
 {
-    textProperty->UpdateMaxLines(1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
