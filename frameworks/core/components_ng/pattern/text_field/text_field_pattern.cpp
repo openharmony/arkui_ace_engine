@@ -613,16 +613,16 @@ void TextFieldPattern::UpdateSelectionAndHandleVisibility()
 {
     auto start = dragTextStart_;
     auto end = dragTextEnd_;
-    if (isCurrentDevicePC() && releaseInDrop_) {
+    if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
         start = selectController_->GetLastCaretIndex();
         end = StringUtils::ToWstring(contentController_->GetInsertValue()).length()
         + selectController_->GetLastCaretIndex();
-        releaseInDrop_ = false;
     }
+    releaseInDrop_ = false;
     UpdateSelection(start, end);
     showSelect_ = true;
 
-    if (isCurrentDevicePhone()) {
+    if (!isMouseOrTouchPad(sourceTool_)) {
         ProcessOverlay({ .menuIsShow = false });
     }
     auto host = GetHost();
@@ -2089,6 +2089,7 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         CHECK_NULL_RETURN(hub, itemInfo);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_RETURN(gestureHub, itemInfo);
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         if (!gestureHub->GetIsTextDraggable()) {
             return itemInfo;
         }
@@ -2141,6 +2142,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopContentScroll();
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2218,7 +2220,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
-        pattern->needSelect_ = isCurrentDevicePC();
+        pattern->needSelect_ = isMouseOrTouchPad(pattern->sourceTool_);
         pattern->releaseInDrop_ = true;
         FocusHub::LostFocusToViewRoot();
     };

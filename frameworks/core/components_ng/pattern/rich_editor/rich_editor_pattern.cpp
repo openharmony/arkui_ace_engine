@@ -656,14 +656,15 @@ void RichEditorPattern::UpdateSelectionAndHandleVisibility()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isCurrentDevicePC() && releaseInDrop_) {
+    if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
         start = lastCaretPosition_;
         end = insertValueLength_ + lastCaretPosition_;
-        releaseInDrop_ = false;
     }
+    releaseInDrop_ = false;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]", start, end);
     textSelector_.Update(start, end);
 
-    if (isCurrentDevicePhone()) {
+    if (!isMouseOrTouchPad(sourceTool_)) {
         if (!selectOverlay_->IsBothHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
             showSelect_ = true;
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -3743,6 +3744,7 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
         isDragSponsor_ = true;
         dragRange_ = { textSelector_.GetTextStart(), textSelector_.GetTextEnd() };
     }
+    sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
     timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, {});
@@ -3771,6 +3773,7 @@ void RichEditorPattern::onDragDropAndLeave()
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         if (!eventHub->IsEnabled()) {
             return;
         }
@@ -9252,7 +9255,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     if (focusHub->IsCurrentFocus()) {
         StartTwinkling();
     }
-    needSelect_ = isCurrentDevicePC();
+    needSelect_ = isMouseOrTouchPad(sourceTool_);
     releaseInDrop_ = true;
 }
 
@@ -9304,10 +9307,12 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
             dragRange_.first += strLength;
             dragRange_.second += strLength;
             HandleOnDragDeleteForward();
+            lastCaretPosition_ = currentPosition;
         } else if (currentPosition > dragRange_.second) {
             InsertValueByOperationType(insertValue, OperationType::DRAG);
             int32_t delLength = HandleOnDragDeleteForward();
             caretPosition_ -= delLength;
+            lastCaretPosition_ = currentPosition - strLength;
         }
     } else {
         InsertValueByOperationType(insertValue, OperationType::DRAG);

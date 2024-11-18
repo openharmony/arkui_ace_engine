@@ -1542,6 +1542,7 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetSourceTool(pointerEvent.sourceTool);
 }
 
 std::string DragDropManager::GetExtraInfo()

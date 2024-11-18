@@ -239,14 +239,10 @@ public:
     {
         return false;
     }
-    static bool isCurrentDevicePC()
+
+    static bool isMouseOrTouchPad(SourceTool sourceTool)
     {
-        return (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-                SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE);
-    }
-    static bool isCurrentDevicePhone()
-    {
-        return (SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
     }
 
 protected:
@@ -254,6 +250,7 @@ protected:
     bool showSelect_ = true;
     bool needSelect_ = false;
     bool releaseInDrop_ = false;
+    SourceTool sourceTool_ = SourceTool::UNKNOWN;
     std::vector<std::string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;
