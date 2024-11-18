@@ -135,7 +135,14 @@ def get_tests_out_path():
     code_path = os.getcwd()
     for _ in range(6):
         code_path = os.path.dirname(code_path)
-    code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
+    json_config_path =  os.path.join(code_path,"out/ohos_config.json")
+    if not os.path.exists(json_config_path):
+        print("{} not exist, please build linux_unittest first.".format(json_config_path))
+        code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
+    else:
+        with open(json_config_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            code_path = os.path.join(data["out_path"], "clang_x64/tests/unittest/ace_engine")
     return code_path
 
 
