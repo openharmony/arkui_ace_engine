@@ -113,6 +113,9 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     if (targetNode) {
         overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
+    if (mainContainerId_ == -1) {
+        mainContainerId_ = Container::CurrentId();
+    }
     Container::UpdateCurrent(mainContainerId_);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
