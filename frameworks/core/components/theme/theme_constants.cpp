@@ -16,6 +16,7 @@
 #include "core/components/theme/theme_constants.h"
 
 #include "base/resource/ace_res_config.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -559,6 +560,29 @@ void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
         currentThemeStyle_->SetAttr(
             THEME_ATTR_BG_COLOR, { .type = ThemeConstantsType::COLOR, .value = TRANSPARENT_BG_COLOR });
     }
+}
+
+RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
+{
+    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
+        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode localMode = pipelineContext->GetLocalColorMode();
+        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
+            // currentThemeStyle_ contains patterns for different color scheme, so need to get pattern from resAdapter_
+            auto patternStyle = resAdapter_ ? resAdapter_->GetPatternByName(patternName) : nullptr;
+            if (patternStyle != nullptr) {
+                return patternStyle;
+            }
+        }
+    }
+    auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+    if (!patternStyle && resAdapter_) {
+        patternStyle = resAdapter_->GetPatternByName(patternName);
+        ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+            .value = patternStyle };
+        currentThemeStyle_->SetAttr(patternName, value);
+    }
+    return patternStyle;
 }
 
 } // namespace OHOS::Ace
