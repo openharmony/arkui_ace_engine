@@ -14,6 +14,10 @@
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -1118,14 +1122,18 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
-    ASSERT_NE(imageSpanItem, nullptr);
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
 
-    imageSpanItem->spanItemType = SpanItemType::CustomSpan;
+    customSpanItem->spanItemType = SpanItemType::CustomSpan;
+    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    customSpanItem->SetCustomNode(builderNode);
     size_t index = 0;
     size_t textIndex = 0;
     size_t sum = 6;
-    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
+    richEditorPattern->ReplacePlaceholderWithRawSpans(customSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, sum);
 }
 
