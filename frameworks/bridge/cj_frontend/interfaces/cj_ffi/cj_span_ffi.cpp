@@ -65,7 +65,6 @@ TextBackgroundStyle ParseSpanTextBackgroundStyle(uint32_t color, CBorderRadiuses
 }
 
 extern "C" {
-
 VectorNativeTextShadows FFICJCreateVectorNativeTextShadows(int64_t size)
 {
     LOGI("Create NativeTextShadows Vector");
