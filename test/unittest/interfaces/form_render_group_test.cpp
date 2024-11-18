@@ -237,6 +237,23 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level1)
 }
 
 /**
+* @tc.name: FormRenderGroupTest_012
+* @tc.desc: Test SetVisibleChange() function.
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_012");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    group->SetVisibleChange(true);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 end";
+}
+
+/**
  * @tc.name: FormRenderGroupTest_022
  * @tc.desc: Test GetOrderedAndCurrentCompIds() function.
  * @tc.type: FUNC

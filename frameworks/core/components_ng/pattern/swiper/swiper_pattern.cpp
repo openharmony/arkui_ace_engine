@@ -4200,6 +4200,20 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUISwiperTranslate");
 }
 
+void SwiperPattern::HandleVisibleChange(bool visible)
+{
+    isVisibleArea_ = visible;
+    if (!visible) {
+        translateTask_.Cancel();
+        isInAutoPlay_ = false;
+        return;
+    }
+
+    if (NeedStartAutoPlay()) {
+        StartAutoPlay();
+    }
+}
+
 void SwiperPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -4215,21 +4229,25 @@ void SwiperPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
-        swiperPattern->isVisibleArea_ = visible;
-        if (!visible) {
-            swiperPattern->translateTask_.Cancel();
-            swiperPattern->isInAutoPlay_ = false;
-            return;
-        }
-
-        if (swiperPattern->NeedStartAutoPlay()) {
-            swiperPattern->StartAutoPlay();
-        }
+        swiperPattern->HandleVisibleChange(visible);
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     hasVisibleChangeRegistered_ = true;
+
+    auto isFormRender = pipeline->IsFormRender();
+    auto formMgr = pipeline->GetFormVisibleManager();
+    if (!isFormRender || !formMgr) {
+        return;
+    }
+    formMgr->RemoveFormVisibleChangeNode(host->GetId());
+    auto formCallback = [weak = WeakClaim(this)](bool visible) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->HandleVisibleChange(visible);
+    };
+    formMgr->AddFormVisibleChangeNode(host, formCallback);
 }
 
 bool SwiperPattern::NeedAutoPlay() const
