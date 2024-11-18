@@ -1090,4 +1090,17 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
         default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
+{
+    switch (src) {
+        case ARK_MESSAGE_LEVEL_DEBUG: dst = MessageLevel::DEBUG; break;
+        case ARK_MESSAGE_LEVEL_ERROR: dst = MessageLevel::ERROR; break;
+        case ARK_MESSAGE_LEVEL_INFO: dst = MessageLevel::INFO; break;
+        case ARK_MESSAGE_LEVEL_LOG: dst = MessageLevel::LOG; break;
+        case ARK_MESSAGE_LEVEL_WARN: dst = MessageLevel::WARN; break;
+        default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
