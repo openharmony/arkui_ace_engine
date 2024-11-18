@@ -15,6 +15,7 @@
 
 #include "search_base.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
