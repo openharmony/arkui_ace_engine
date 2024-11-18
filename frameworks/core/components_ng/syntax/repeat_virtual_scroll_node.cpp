@@ -73,10 +73,9 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
         cacheStart = 0;
         cacheEnd = 0;
     }
-    TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
-        "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
-        GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).DoSetActiveChildRange start: %{public}d - end: %{public}d; "
+        "cacheStart: %{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d",
+        static_cast<int32_t>(GetId()), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
 
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start[%d] - end[%d]; cacheStart[%d], cacheEnd[%d]",
         start, end, cacheStart, cacheEnd);
