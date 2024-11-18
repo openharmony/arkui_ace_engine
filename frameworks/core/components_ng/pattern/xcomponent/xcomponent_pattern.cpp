@@ -1792,9 +1792,12 @@ void XComponentPattern::NativeSurfaceHide()
 
 void XComponentPattern::OnWindowHide()
 {
-    if (!hasXComponentInit_ || hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(false);
     }
     NativeSurfaceHide();
     hasReleasedSurface_ = true;
@@ -1802,9 +1805,12 @@ void XComponentPattern::OnWindowHide()
 
 void XComponentPattern::OnWindowShow()
 {
-    if (!hasXComponentInit_ || !hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(true);
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;
