@@ -347,11 +347,15 @@ void JSTextField::SetCapitalizationMode(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
     if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
-        TextFieldModel::GetInstance()->SetCapitalizationMode(AutoCapitalizationMode::NONE);
+        TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
         return;
     }
-    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(jsValue->ToNumber<int32_t>());
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
     TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
 }
 

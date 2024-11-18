@@ -1162,11 +1162,15 @@ void JSSearch::SetCapitalizationMode(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
     if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
-        SearchModel::GetInstance()->SetSearchCapitalizationMode(AutoCapitalizationMode::NONE);
+        SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
         return;
     }
-    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(info[0]->ToNumber<int32_t>());
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
     SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
 }
 
