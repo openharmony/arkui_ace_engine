@@ -17,17 +17,19 @@
 
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
+using TextFieldController = OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase>;
+
 struct TextAreaControllerPeer {
-    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase>& GetController() const
+    const TextFieldController& GetController() const
     {
         return controller_;
     }
 
-    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase>& controller)
+    void SetController(const TextFieldController& controller)
     {
         controller_ = controller;
     }
 private:
-    OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase> controller_;
+    TextFieldController controller_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_AREA_CONTROLLER_PEER_H
