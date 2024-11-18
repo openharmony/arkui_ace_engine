@@ -2255,6 +2255,20 @@ std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
     return "";
 }
 
+std::optional<std::string> JsiDeclarativeEngine::GetRouteNameByUrl(
+    const std::string& url, const std::string& bundleName, const std::string& moduleName)
+{
+    auto iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
+        [&bundleName, &moduleName, &url](const auto& item) {
+            return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
+                    item.second.pagePath == url;
+        });
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->first;
+    }
+    return std::nullopt;
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
 #ifdef USE_ARK_ENGINE
