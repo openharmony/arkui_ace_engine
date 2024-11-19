@@ -2350,7 +2350,6 @@ void ViewAbstract::SetGrayScale(FrameNode *frameNode, const std::optional<Dimens
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, FrontGrayScale, frameNode);
     }
-    
 }
 
 void ViewAbstract::SetContrast(const Dimension& contrast)
@@ -2369,7 +2368,6 @@ void ViewAbstract::SetContrast(FrameNode *frameNode, const std::optional<Dimensi
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
     }
-    
 }
 
 void ViewAbstract::SetSaturate(const Dimension& saturate)
@@ -2406,7 +2404,6 @@ void ViewAbstract::SetSepia(FrameNode *frameNode, const std::optional<Dimension>
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, FrontSepia, frameNode);
     }
-    
 }
 
 void ViewAbstract::SetInvert(const InvertVariant& invert)
