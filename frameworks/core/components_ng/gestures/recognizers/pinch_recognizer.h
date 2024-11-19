@@ -52,7 +52,7 @@ private:
     GestureJudgeResult TriggerGestureJudgeCallback();
     Offset ComputePinchCenter();
 
-    bool IsCtrlBeingPressed();
+    bool IsCtrlBeingPressed(const AxisEvent& event);
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
