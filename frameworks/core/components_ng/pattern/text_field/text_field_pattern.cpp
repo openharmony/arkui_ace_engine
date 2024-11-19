@@ -1594,7 +1594,6 @@ void TextFieldPattern::HandleOnPaste()
             start = textfield->selectController_->GetCaretIndex();
             end = textfield->selectController_->GetCaretIndex();
         }
-        textfield->UpdateEditingValueToRecord();
         std::wstring pasteData = StringUtils::ToWstring(data);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
@@ -1605,6 +1604,7 @@ void TextFieldPattern::HandleOnPaste()
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
         textfield->selectController_->UpdateCaretIndex(newCaretPosition);
+        textfield->UpdateEditingValueToRecord();
         if (layoutProperty->HasMaxLength()) {
             textfield->CalcCounterAfterFilterInsertValue(originLength - (end - start), data,
                 static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
