@@ -489,12 +489,12 @@ public:
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption> &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
-    static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
-    static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
+    static void SetSepia(FrameNode* frameNode, const std::optional<Dimension>& sepia);
+    static void SetSaturate(FrameNode* frameNode, const std::optional<Dimension>& saturate);
     static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
-    static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
-    static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
-    static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
+    static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
     static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
@@ -532,7 +532,7 @@ public:
     static void SetSphericalEffect(FrameNode* frameNode, double radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
-    static void SetUseEffect(FrameNode* frameNode, bool useEffect);
+    static void SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
@@ -598,7 +598,7 @@ public:
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
-    static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
+    static void SetUseShadowBatching(FrameNode* frameNode, const std::optional<bool>& useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
     static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);

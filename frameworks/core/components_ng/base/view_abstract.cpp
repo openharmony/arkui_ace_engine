@@ -2324,9 +2324,14 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
 }
 
-void ViewAbstract::SetBrightness(FrameNode *frameNode, const Dimension& brightness)
+void ViewAbstract::SetBrightness(FrameNode *frameNode, const std::optional<Dimension>& brightness)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness, frameNode);
+    if (brightness.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontBrightness, frameNode);
+    }
 }
 
 void ViewAbstract::SetGrayScale(const Dimension& grayScale)
@@ -2337,9 +2342,15 @@ void ViewAbstract::SetGrayScale(const Dimension& grayScale)
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
 }
 
-void ViewAbstract::SetGrayScale(FrameNode *frameNode, const Dimension& grayScale)
+void ViewAbstract::SetGrayScale(FrameNode *frameNode, const std::optional<Dimension>& grayScale)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale, frameNode);
+    if (grayScale.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontGrayScale, frameNode);
+    }
+    
 }
 
 void ViewAbstract::SetContrast(const Dimension& contrast)
@@ -2350,9 +2361,15 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
 }
 
-void ViewAbstract::SetContrast(FrameNode *frameNode, const Dimension& contrast)
+void ViewAbstract::SetContrast(FrameNode *frameNode, const std::optional<Dimension>& contrast)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast, frameNode);
+    if (contrast.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
+    }
+    
 }
 
 void ViewAbstract::SetSaturate(const Dimension& saturate)
@@ -2363,9 +2380,14 @@ void ViewAbstract::SetSaturate(const Dimension& saturate)
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
 }
 
-void ViewAbstract::SetSaturate(FrameNode *frameNode, const Dimension& saturate)
+void ViewAbstract::SetSaturate(FrameNode *frameNode, const std::optional<Dimension>& saturate)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate, frameNode);
+    if (saturate.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontSaturate, frameNode);
+    }
 }
 
 void ViewAbstract::SetSepia(const Dimension& sepia)
@@ -2376,9 +2398,15 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetSepia(FrameNode *frameNode, const Dimension& sepia)
+void ViewAbstract::SetSepia(FrameNode *frameNode, const std::optional<Dimension>& sepia)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia, frameNode);
+    if (sepia.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontSepia, frameNode);
+    }
+    
 }
 
 void ViewAbstract::SetInvert(const InvertVariant& invert)
@@ -3080,9 +3108,14 @@ void ViewAbstract::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
     ACE_UPDATE_NODE_RENDER_CONTEXT(RenderFit, renderFit, frameNode);
 }
 
-void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
+void ViewAbstract::SetUseEffect(FrameNode* frameNode, const std::optional<bool>& useEffect)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect, frameNode);
+    if (useEffect.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseEffect, useEffect.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseEffect, frameNode);
+    }
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
@@ -3685,9 +3718,14 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     }
 }
 
-void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, const std::optional<bool>& useShadowBatching)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
+    if (useShadowBatching.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, UseShadowBatching, frameNode);
+    }
 }
 
 void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
