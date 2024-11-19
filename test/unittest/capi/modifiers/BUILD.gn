@@ -105,6 +105,7 @@ ace_unittest("capi_all_modifiers_test") {
     "time_picker_modifier_test.cpp",
     "toggle_modifier_test.cpp",
     "video_modifier_test.cpp",
+    "water_flow_modifier_test.cpp",
     "web_modifier_test.cpp",
   ]
   sources += [
