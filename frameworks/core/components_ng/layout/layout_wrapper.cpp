@@ -409,7 +409,7 @@ float LayoutWrapper::GetPageCurrentOffset()
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_RETURN(stageManager, 0.0f);
-    auto pageNode = stageManager->GetLastPageWithTransition();
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_RETURN(pageNode, 0.0f);
     auto pageRenderContext = pageNode->GetRenderContext();
     CHECK_NULL_RETURN(pageRenderContext, 0.0f);
