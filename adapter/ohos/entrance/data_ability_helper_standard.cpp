@@ -53,7 +53,6 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
 #ifdef MEDIA_LIBRARY_EXISTS
     ACE_FUNCTION_TRACE();
     Uri fileUri(uri);
-    LOGI("QueryThumbnailResFromDataAbility GetThumbnail uri=%{public}s", uri.c_str());
     return mgr_.GetThumbnail(fileUri).release();
 #else
     return nullptr;

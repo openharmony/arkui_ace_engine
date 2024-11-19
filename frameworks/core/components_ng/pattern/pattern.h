@@ -640,13 +640,13 @@ public:
         return false;
     }
 
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+
     virtual bool RenderCustomChild(int64_t deadline)
     {
         return true;
     }
-
-    virtual void AddInnerOnGestureRecognizerJudgeBegin(
-        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

@@ -1532,7 +1532,6 @@ bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
         ->GetLocalHandle()
         ->IsStrictEquals(extSpanObj_->GetEcmaVM(), extSpanObj_->GetLocalHandle());
 }
-
 void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 {
     extSpanObj_ = extSpanObj;
