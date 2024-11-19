@@ -136,7 +136,7 @@ public:
         const std::optional<std::string>& value, bool isTextArea);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& valueOpt);
     static void SetInputStyle(FrameNode* frameNode, const std::optional<InputStyle>& valueOpt);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
@@ -166,7 +166,7 @@ public:
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
     static void SetNormalUnderlineColor(FrameNode* frameNode, const std::optional<Color>& normalColor);
     static void SetUserUnderlineColor(FrameNode* frameNode, const std::optional<UserUnderlineColor>& userColor);
-    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
     static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
     static void SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -280,6 +280,8 @@ public:
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
+    static RefPtr<TextFieldControllerBase> GetController(FrameNode* frameNode,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
 
 private:
     void AddDragFrameNodeToManager() const;

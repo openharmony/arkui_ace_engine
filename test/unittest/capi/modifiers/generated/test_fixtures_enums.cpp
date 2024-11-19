@@ -491,6 +491,20 @@ std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureEnumTextAlignInva
     { "INT_MAX", static_cast<Ark_TextAlign>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_TextAreaType, std::string>> testFixtureEnumTextAreaTypeValidValues = {
+    { "ARK_TEXT_AREA_TYPE_NORMAL", ARK_TEXT_AREA_TYPE_NORMAL, "TextAreaType.NORMAL" },
+    { "ARK_TEXT_AREA_TYPE_NUMBER", ARK_TEXT_AREA_TYPE_NUMBER, "TextAreaType.NUMBER" },
+    { "ARK_TEXT_AREA_TYPE_PHONE_NUMBER", ARK_TEXT_AREA_TYPE_PHONE_NUMBER, "TextAreaType.PHONE_NUMBER" },
+    { "ARK_TEXT_AREA_TYPE_EMAIL", ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
+    { "ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL", ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL, "TextAreaType.NUMBER_DECIMAL" },
+    { "ARK_TEXT_AREA_TYPE_URL", ARK_TEXT_AREA_TYPE_URL, "TextAreaType.URL" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextAreaType>> testFixtureEnumTextAreaTypeInvalidValues = {
+    { "-1", static_cast<Ark_TextAreaType>(-1) },
+    { "INT_MAX", static_cast<Ark_TextAreaType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues = {
     { "ARK_TEXT_CASE_NORMAL", ARK_TEXT_CASE_NORMAL, "TextCase.Normal" },
     { "ARK_TEXT_CASE_LOWER_CASE", ARK_TEXT_CASE_LOWER_CASE, "TextCase.LowerCase" },
@@ -500,6 +514,16 @@ std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumT
 std::vector<std::tuple<std::string, Ark_TextCase>> testFixtureEnumTextCaseInvalidValues = {
     { "-1", static_cast<Ark_TextCase>(-1) },
     { "INT_MAX", static_cast<Ark_TextCase>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TextContentStyle, std::string>> testFixtureEnumTextContentStyleValidValues = {
+    { "ARK_TEXT_CONTENT_STYLE_DEFAULT", ARK_TEXT_CONTENT_STYLE_DEFAULT, "TextContentStyle.DEFAULT" },
+    { "ARK_TEXT_CONTENT_STYLE_INLINE", ARK_TEXT_CONTENT_STYLE_INLINE, "TextContentStyle.INLINE" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureEnumTextContentStyleInvalidValues = {
+    { "-1", static_cast<Ark_TextContentStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_TextContentStyle>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_TextDecorationStyle, std::string>>

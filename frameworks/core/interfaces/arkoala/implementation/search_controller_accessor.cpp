@@ -15,31 +15,7 @@
 
 #include "search_controller_accessor_peer_impl.h"
 #include "arkoala_api_generated.h"
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
-{
-    switch (src) {
-        case ARK_MENU_POLICY_DEFAULT: dst = MenuPolicy::DEFAULT; break;
-        case ARK_MENU_POLICY_HIDE: dst = MenuPolicy::HIDE; break;
-        case ARK_MENU_POLICY_SHOW: dst = MenuPolicy::SHOW; break;
-        default:
-            LOGE("Unexpected enum value in Ark_MenuPolicy: %{public}d", src);
-    }
-}
-
-template<>
-SelectionOptions Convert(const Ark_SelectionOptions& options)
-{
-    SelectionOptions selectionOptions;
-    auto menuPolicy = OptConvert<MenuPolicy>(options.menuPolicy);
-    if (menuPolicy) {
-        selectionOptions.menuPolicy = *menuPolicy;
-    }
-    return selectionOptions;
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
