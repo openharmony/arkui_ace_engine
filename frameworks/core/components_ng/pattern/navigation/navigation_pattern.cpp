@@ -2555,6 +2555,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
+    auto overlayManager = pipeline->GetOverlayManager();
+    if (overlayManager) {
+        overlayManager->RemoveAllModalInOverlay(false);
+    }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
     }
