@@ -252,7 +252,9 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
-    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();

@@ -659,8 +659,79 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.selfIdealSize.SetWidth(selectMenuWidth);
     }
 
+    // The menu width child Constraint is added to the 2in1 device in API13
+    UpdateChildConstraintByDevice(menuPattern, childConstraint, constraint.value());
+
     auto parentItem = menuPattern->GetParentMenuItem();
     CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
+}
+
+bool MenuLayoutAlgorithm::CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN), false);
+    if (menuPattern->IsSubMenu()) {
+        auto parentItem = menuPattern->GetParentMenuItem();
+        CHECK_NULL_RETURN(parentItem, false);
+        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_RETURN(parentPattern, false);
+        auto expandingMode = parentPattern->GetExpandingMode();
+        if (expandingMode == SubMenuExpandingMode::SIDE) {
+            return true;
+        }
+        return false;
+    }
+
+    if (menuPattern->IsMenu() || menuPattern->IsContextMenu()) {
+        return true;
+    }
+    return false;
+}
+
+void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
+    LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint)
+{
+    CHECK_NULL_VOID(menuPattern);
+
+    // only 2in1 device has restrictions on the menu width in API13
+    if (!CheckChildConstraintCondition(menuPattern)) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    
+    auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_VOID(expandDisplay);
+
+    auto menuMinWidth = theme->GetMenuMinWidth().ConvertToPx();
+    auto menuDefaultWidth = theme->GetMenuDefaultWidth().ConvertToPx();
+    auto menuMaxWidth = theme->GetMenuMaxWidthRatio() * SystemProperties::GetDeviceWidth();
+    double minWidth = 0.0f;
+    double maxWidth = 0.0f;
+
+    auto firstMenu = menuPattern->GetFirstInnerMenu();
+    CHECK_NULL_VOID(firstMenu);
+    auto layoutProperty = firstMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasMenuWidth()) {
+        auto menuWidth = layoutProperty->GetMenuWidthValue();
+        auto menuWidthPX = (menuWidth.Unit() == DimensionUnit::PERCENT) ?
+            menuWidth.Value() * layoutConstraint.percentReference.Width() : menuWidth.ConvertToPx();
+        if (LessNotEqual(menuWidthPX, menuMinWidth) || GreatNotEqual(menuWidthPX, menuMaxWidth)) {
+            minWidth = menuDefaultWidth;
+            maxWidth = menuMaxWidth;
+        } else {
+            minWidth = menuWidthPX;
+            maxWidth = menuWidthPX;
+        }
+    } else {
+        minWidth = menuDefaultWidth;
+        maxWidth = menuMaxWidth;
+    }
+    childConstraint.minSize.SetWidth(minWidth);
+    childConstraint.maxSize.SetWidth(maxWidth);
 }
 
 void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
