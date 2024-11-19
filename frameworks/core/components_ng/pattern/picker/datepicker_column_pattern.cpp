@@ -141,7 +141,8 @@ void DatePickerColumnPattern::ParseTouchListener()
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
             pattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             pattern->OnTouchUp();
             pattern->SetLocalDownDistance(0.0f);
         }

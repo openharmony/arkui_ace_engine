@@ -264,8 +264,7 @@ void CheckBoxGroupPattern::UpdateUIStatus(bool check)
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto selectStatus = paintProperty->GetSelectStatus();
-    TAG_LOGD(
-        AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update ui status %{public}d %{public}d", check, selectStatus);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update status %{public}d %{public}d", check, selectStatus);
     if (selectStatus == CheckBoxGroupPaintProperty::SelectStatus::PART) {
         uiStatus_ = check ? UIStatus::PART_TO_ON : UIStatus::PART_TO_OFF;
     } else {
