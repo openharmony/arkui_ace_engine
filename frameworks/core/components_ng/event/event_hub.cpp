@@ -778,7 +778,10 @@ void EventHub::SetEnabled(bool enabled)
 {
     auto host = GetFrameNode();
     if (enabled_ != enabled && host) {
-        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        }
     }
     enabled_ = enabled;
     developerEnabled_ = enabled;
