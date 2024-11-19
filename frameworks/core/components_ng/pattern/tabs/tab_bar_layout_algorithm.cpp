@@ -49,6 +49,7 @@ constexpr int8_t TWO = 2;
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
