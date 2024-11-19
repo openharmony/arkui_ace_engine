@@ -191,6 +191,7 @@ public:
      */
     bool itemEnd_ = false;
     bool offsetEnd_ = false; // last item's bottom is in viewport
+    bool isDataValid_ = true;
 
     Axis axis_ = Axis::VERTICAL;
 
