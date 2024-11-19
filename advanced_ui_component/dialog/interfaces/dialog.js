@@ -117,6 +117,7 @@ export class TipsDialog extends ViewPU {
         this.imageIndex = 0;
         this.textIndex = 1;
         this.checkBoxIndex = 2;
+        this.appMaxFontScale = 3.2;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -193,6 +194,9 @@ export class TipsDialog extends ViewPU {
         }
         if (params.checkBoxIndex !== undefined) {
             this.checkBoxIndex = params.checkBoxIndex;
+        }
+        if (params.appMaxFontScale !== undefined) {
+            this.appMaxFontScale = params.appMaxFontScale;
         }
     }
 
@@ -566,6 +570,7 @@ export class TipsDialog extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(TextAlign.Center);
                         Text.maxLines(CONTENT_MAX_LINES);
+                        Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.width('100%');
                     }, Text);
@@ -625,6 +630,8 @@ export class TipsDialog extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
+        let uiContext = this.getUIContext();
+        this.appMaxFontScale = uiContext.getMaxFontScale();
         this.initButtons();
         this.initMargin();
     }
@@ -2126,7 +2133,7 @@ export class AlertDialog extends ViewPU {
             });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
-            Text.onAreaChange((oldValue, newValue) => {
+            Text.onSizeChange((oldValue, newValue) => {
                 this.updateTextAlign(Number(newValue.width));
             });
             Text.onKeyEvent((event) => {
@@ -4061,7 +4068,7 @@ export class PopoverDialog extends ViewPU {
         this.__visible = new SynchedPropertySimpleTwoWayPU(params.visible, this, 'visible');
         this.__popover = new SynchedPropertyObjectOneWayPU(params.popover, this, 'popover');
         this.targetBuilder = undefined;
-        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover.width, this, 'dialogWidth');
+        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover?.width, this, 'dialogWidth');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
