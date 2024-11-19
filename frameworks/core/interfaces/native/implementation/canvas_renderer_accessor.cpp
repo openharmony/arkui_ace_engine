@@ -50,8 +50,44 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "XOR", CompositeOperation::XOR }
 };
 
+using StyleType = std::variant<std::optional<Color>, CanvasGradientPeer*, CanvasPatternPeer*>;
+
+const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolder", "100", "200", "300", "400", "500",
+    "600", "700", "800", "900" };
+const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
+const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+constexpr double DEFAULT_QUALITY = 0.92;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr double DIFF = 1e-10;
+
 } // namespace
 namespace Converter {
+template<>
+StyleType Convert(const Ark_CanvasPattern& src)
+{
+    return reinterpret_cast<CanvasPatternPeer*>(src.ptr)
+}
+
+template<>
+StyleType Convert(const Ark_String& src)
+{
+    return reinterpret_cast<CanvasGradientPeer*>(src.ptr)
+}
+
+template<>
+StyleType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<Color>(src);
+}
+
+template<>
+StyleType Convert(const Ark_Number& src)
+{
+    return Converter::OptConvert<Color>(src);
+}
 
 template<>
 void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
@@ -536,9 +572,7 @@ void SetTransform1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(transform);
     auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
-    if (!opt) {
-        return;
-    }
+    CHECK_NULL_VOID(opt);
     auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
     CHECK_NULL_VOID(matrixPeer);
     auto param = matrixPeer->GetTransformParam();
@@ -669,28 +703,52 @@ void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
 
     auto opt = Converter::OptConvert<CompositeOperation>(*globalCompositeOperation);
-    if (!opt) {
-        return;
-    }
+    CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetGlobalCompositeOperationImpl(*opt);
 }
 void SetFillStyleImpl(CanvasRendererPeer* peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
-    
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(path);
-    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
-    CHECK_NULL_VOID(pathPeer);
-    auto path2D = pathPeer->GetCanvasPath2D();
-    CHECK_NULL_VOID(path2D);
-    peerImpl->TriggerStroke1Impl(path2D);
+    CHECK_NULL_VOID(fillStyle);
+    auto opt = Converter::OptConvert<StyleType>(*fillStyle);
+    CHECK_NULL_VOID(opt);
+    if (auto color = std::get_if < std::optional<Color>(&(*opt)); color) {
+        CHECK_NULL_VOID(*color);
+        peerImpl->TriggerSetFillStyleImpl(**color);
+    } else if (auto peer = std::get_if<CanvasGradientPeer*>(&(*opt)); peer) {
+        CHECK_NULL_VOID(*peer);
+        auto gradient = (*peer)->GetGradient();
+        peerImpl->TriggerSetFillStyleImpl(gradient);
+    } else if (auto peer = std::get_if<CanvasPatternPeer*>(&(*opt)); peer) {
+        CHECK_NULL_VOID(*peer);
+        auto pattern = (*peer)->GetPattern();
+        peerImpl->TriggerSetFillStyleImpl(pattern);
+    }
 }
 void SetStrokeStyleImpl(CanvasRendererPeer* peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillStyle);
+    auto opt = Converter::OptConvert<StyleType>(*fillStyle);
+    CHECK_NULL_VOID(opt);
+    if (auto color = std::get_if < std::optional<Color>(&(*opt)); color) {
+        CHECK_NULL_VOID(*color);
+        peerImpl->TriggerSetStrokeStyleImpl(**color);
+    } else if (auto peer = std::get_if<CanvasGradientPeer*>(&(*opt)); peer) {
+        CHECK_NULL_VOID(*peer);
+        auto gradient = (*peer)->GetGradient();
+        peerImpl->TriggerSetStrokeStyleImpl(gradient);
+    } else if (auto peer = std::get_if<CanvasPatternPeer*>(&(*opt)); peer) {
+        CHECK_NULL_VOID(*peer);
+        auto pattern = (*peer)->GetPattern();
+        peerImpl->TriggerSetStrokeStyleImpl(pattern);
+    }
 }
 void GetFilterImpl(CanvasRendererPeer* peer)
 {
@@ -831,8 +889,9 @@ void SetShadowBlurImpl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto blur = static_cast<double>(Converter::Convert<float>(*shadowBlur));
-    peerImpl->TriggerSetShadowBlurImpl(blur);
+    auto opt = static_cast<double>(Converter::OptConvert<float>(*shadowBlur));
+    CHECK_NULL_VOID(opt);
+    peerImpl->TriggerSetShadowBlurImpl(*opt);
 }
 void GetShadowColorImpl(CanvasRendererPeer* peer)
 {
@@ -846,8 +905,9 @@ void SetShadowColorImpl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto color = Converter::Convert<Color>(*shadowColor);
-    peerImpl->TriggerSetShadowColorImpl(color);
+    auto opt = Converter::OptConvert<Color>(*shadowColor);
+    CHECK_NULL_VOID(opt);
+    peerImpl->TriggerSetShadowColorImpl(*opt);
 }
 Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer)
 {
@@ -904,6 +964,56 @@ void GetFontImpl(CanvasRendererPeer* peer)
 void SetFontImpl(CanvasRendererPeer* peer,
                  const Ark_String* font)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(font);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto fontStr = Converter::Convert<std::string>(*font);
+
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            auto weight = StringUtils::StringToFontWeight(fontProp, FontWeight::NORMAL);
+            peerImpl->TriggerUpdateFontWeight(weight);
+
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            auto fontStyle = fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? FontStyle::ITALIC : FontStyle::NORMAL;
+            peerImpl->TriggerUpdateFontStyle(fontStyle);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            std::vector<std::string> fontFamilies;
+            std::stringstream stream(fontProp);
+            std::string fontFamily;
+            while (getline(stream, fontFamily, ',')) {
+                fontFamilies.emplace_back(fontFamily);
+            }
+            peerImpl->TriggerUpdateFontFamilies(fontFamilies);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            Dimension size;
+            if (fontProp.find("vp") != std::string::npos) {
+                Dimension dimension = StringToDimension(str);
+                if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+                    peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
+                } else if (dimension.Unit() == DimensionUnit::VP) {
+                    peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value() * GetDensity(true)));
+                }
+                peerImpl->TriggerUpdateFontSize(Dimension(0.0));
+            } else {
+                std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+                peerImpl->TriggerUpdateFontSize(Dimension(StringUtils::StringToDouble(fontProp)));
+            }
+        }
+    }
+    if (!updateFontStyle) {
+        peerImpl->TriggerUpdateFontStyle(FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        peerImpl->TriggerUpdateFontStyle(FontWeight::NORMAL);
+    }
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {

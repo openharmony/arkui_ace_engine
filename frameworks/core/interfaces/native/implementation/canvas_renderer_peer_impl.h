@@ -69,6 +69,19 @@ public:
     void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
     void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
     void TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData);
+    void TriggerSetFillStyleImpl(const Color& color);
+    void TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
+    void TriggerSetFillStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
+    void TriggerSetStrokeStyleImpl(const Color& color);
+    void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
+    void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
+    void TriggerUpdateFontWeight(FontWeight weight);
+    void TriggerUpdateFontStyle(FontStyle style);
+    void TriggerUpdateFontFamilies(const std::vector<std::string>& families);
+    void TriggerUpdateFontSize(const Dimension& size)
+
+    
+
 
 
 
