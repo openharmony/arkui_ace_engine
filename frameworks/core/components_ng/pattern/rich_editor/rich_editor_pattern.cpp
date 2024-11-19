@@ -6936,11 +6936,13 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     focusHub->RequestFocusImmediately();
     SetCaretPosition(selectEnd);
 
-    TextInsertValueInfo spanInfo;
-    CalcInsertValueObj(spanInfo);
-    auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
-    auto isNeedSelected = spanNode && (spanNode->GetTag() == V2::IMAGE_ETS_TAG ||
-        spanNode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG);
+    auto isNeedSelected = false;
+    if (selectEnd == selectStart + 1) {
+        auto selectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+        auto results = selectInfo.GetSelection().resultObjects;
+        // select image or builder
+        isNeedSelected = results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE;
+    }
     if (isNeedSelected && BetweenSelectedPosition(info.GetGlobalLocation())) {
         selectedType_ = TextSpanType::IMAGE;
         FireOnSelect(selectStart, selectEnd);
