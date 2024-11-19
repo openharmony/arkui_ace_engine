@@ -2178,6 +2178,9 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
@@ -2202,6 +2205,8 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     }
 }
 
@@ -2696,6 +2701,7 @@ void TextPattern::OnModifyDone()
     selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
+        textLayoutProperty->OnPropertyChangeMeasure();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -3482,6 +3488,10 @@ void TextPattern::DumpInfo()
             UtfUtils::Str16ToStr8(textLayoutProp->GetContent().value_or(u" "))));
     }
     DumpTextStyleInfo();
+    DumpTextLayoutProperty();
+    if (contentMod_) {
+        contentMod_->ContentModifierDump();
+    }
     dumpLog.AddDesc(
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
@@ -3496,6 +3506,15 @@ void TextPattern::DumpInfo()
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo();
     }
+}
+
+void TextPattern::DumpTextLayoutProperty()
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(
+        std::string("FontColor-property: ").append(textLayoutProp->GetTextColorValue(Color::BLACK).ColorToString()));
 }
 
 void TextPattern::DumpTextStyleInfo()
@@ -3875,6 +3894,9 @@ void TextPattern::SetTextDetectEnable(bool enable)
         dataDetectorAdapter_->CancelAITask();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 bool TextPattern::CanStartAITask()
@@ -4013,6 +4035,9 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     }
 }
 
@@ -4265,6 +4290,9 @@ void TextPattern::OnSensitiveStyleChange(bool isSensitive)
     CHECK_NULL_VOID(host);
     isSensitive_ = isSensitive;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 bool TextPattern::IsSensitiveEnalbe()

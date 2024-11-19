@@ -88,6 +88,7 @@ public:
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
+    void MarkDirtyNode() const;
 
 private:
     friend class NG::TextPattern;
