@@ -373,6 +373,7 @@ protected:
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
     PageTransitionType type_ = PageTransitionType::NONE;
+    std::shared_ptr<AnimationUtils::Animation> currCustomAnimation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

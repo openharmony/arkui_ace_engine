@@ -113,6 +113,8 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
     };
     auto effect = FindPageTransitionEffect(type_);
     if (effect && effect->GetUserCallback()) {
+        AnimationUtils::StopAnimation(currCustomAnimation_);
+        host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
         RouteType routeType = (type_ == PageTransitionType::ENTER_POP || type_ == PageTransitionType::EXIT_POP)
                                   ? RouteType::POP
                                   : RouteType::PUSH;
@@ -123,7 +125,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
         AnimationOption option(effect->GetCurve(), effect->GetDuration());
         option.SetDelay(effect->GetDelay());
         option.SetOnFinishEvent(wrappedOnFinish);
-        auto animation = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
+        currCustomAnimation_ = AnimationUtils::StartAnimation(option, [weakPage = WeakPtr<FrameNode>(host)]() {
             auto pageNode = weakPage.Upgrade();
             CHECK_NULL_VOID(pageNode);
             pageNode->UpdateAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY, 1.0f);
