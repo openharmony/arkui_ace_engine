@@ -17,7 +17,9 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/components_ng/pattern/stepper/stepper_event_hub.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -118,5 +120,178 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE) << "Passed value is: optional";
+}
+
+/*
+ * @tc.name: setOnFinishTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnFinish, nullptr);
+    const int32_t CONTEXT_ID = 123;
+    const int32_t INDEX_ARG = 0;
+
+    static std::optional<int32_t> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId) =
+        [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    modifier_->setOnFinish(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->FireFinishEvent(INDEX_ARG);
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+}
+
+/*
+ * @tc.name: setOnSkipTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnSkip, nullptr);
+    const int32_t CONTEXT_ID = 123;
+    const int32_t INDEX_ARG = 0;
+
+    static std::optional<int32_t> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId) =
+        [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    modifier_->setOnSkip(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->FireSkipEvent(INDEX_ARG);
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+}
+
+/*
+ * @tc.name: setOnChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnChange, nullptr);
+    const int32_t CONTEXT_ID = 123;
+    const int32_t FIRST_ARG = 0;
+    const int32_t SECOND_ARG = 1;
+
+    static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
+        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+            checkData = { resourceId, Converter::Convert<int32_t>(first),
+                Converter::Convert<int32_t>(last) };
+        };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    modifier_->setOnChange(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->FireChangeEvent(FIRST_ARG, SECOND_ARG);
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
+    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
+    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
+}
+
+/*
+ * @tc.name: setOnNextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnNext, nullptr);
+    const int32_t CONTEXT_ID = 123;
+    const int32_t FIRST_ARG = 0;
+    const int32_t SECOND_ARG = 1;
+
+    static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
+        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+            checkData = { resourceId, Converter::Convert<int32_t>(first),
+                Converter::Convert<int32_t>(last) };
+        };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    modifier_->setOnNext(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->FireNextEvent(FIRST_ARG, SECOND_ARG);
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
+    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
+    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
+}
+
+/*
+ * @tc.name: setOnPreviousTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnPrevious, nullptr);
+    const int32_t CONTEXT_ID = 123;
+    const int32_t FIRST_ARG = 0;
+    const int32_t SECOND_ARG = 1;
+
+    static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
+    void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
+        [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+            checkData = { resourceId, Converter::Convert<int32_t>(first),
+                Converter::Convert<int32_t>(last) };
+        };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    modifier_->setOnPrevious(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->FirePreviousEvent(FIRST_ARG, SECOND_ARG);
+    // check the invoking result
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
+    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
+    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
 }
 } // namespace OHOS::Ace::NG
