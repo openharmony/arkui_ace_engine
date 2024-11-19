@@ -29,6 +29,22 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_12 = 12;
+constexpr int MARTRIX_INDEX_0 = 0;
+constexpr int MARTRIX_INDEX_1 = 1;
+constexpr int MARTRIX_INDEX_2 = 2;
+constexpr int MARTRIX_INDEX_3 = 3;
+constexpr int MARTRIX_INDEX_4 = 4;
+constexpr int MARTRIX_INDEX_5 = 5;
+constexpr int MARTRIX_INDEX_6 = 6;
+constexpr int MARTRIX_INDEX_7 = 7;
+constexpr int MARTRIX_INDEX_8 = 8;
+constexpr int MARTRIX_INDEX_9 = 9;
+constexpr int MARTRIX_INDEX_10 = 10;
+constexpr int MARTRIX_INDEX_11 = 11;
+constexpr int MARTRIX_INDEX_12 = 12;
+constexpr int MARTRIX_INDEX_13 = 13;
+constexpr int MARTRIX_INDEX_14 = 14;
+constexpr int MARTRIX_INDEX_15 = 15;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
@@ -295,6 +311,36 @@ void ResetSyncLoad(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
+}
+
+void SetImageMatrix(ArkUINodeHandle node, const ArkUI_Float32* matrix)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Matrix4 matrix4Value = Matrix4(matrix[MARTRIX_INDEX_0], matrix[MARTRIX_INDEX_4], matrix[MARTRIX_INDEX_8],
+        matrix[MARTRIX_INDEX_12], matrix[MARTRIX_INDEX_1], matrix[MARTRIX_INDEX_5], matrix[MARTRIX_INDEX_9],
+            matrix[MARTRIX_INDEX_13], matrix[MARTRIX_INDEX_2], matrix[MARTRIX_INDEX_6], matrix[MARTRIX_INDEX_10],
+                matrix[MARTRIX_INDEX_14], matrix[MARTRIX_INDEX_3], matrix[MARTRIX_INDEX_7],
+                    matrix[MARTRIX_INDEX_11], matrix[MARTRIX_INDEX_15]);
+    ImageModelNG::SetImageMatrix(frameNode, matrix4Value);
+}
+
+void ResetImageMatrix(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 defaultValue = Matrix4(matrix[MARTRIX_INDEX_0], matrix[MARTRIX_INDEX_4], matrix[MARTRIX_INDEX_8],
+        matrix[MARTRIX_INDEX_12], matrix[MARTRIX_INDEX_1], matrix[MARTRIX_INDEX_5], matrix[MARTRIX_INDEX_9],
+            matrix[MARTRIX_INDEX_13], matrix[MARTRIX_INDEX_2], matrix[MARTRIX_INDEX_6], matrix[MARTRIX_INDEX_10],
+                matrix[MARTRIX_INDEX_14], matrix[MARTRIX_INDEX_3], matrix[MARTRIX_INDEX_7],
+                    matrix[MARTRIX_INDEX_11], matrix[MARTRIX_INDEX_15]);
+    ImageModelNG::SetImageMatrix(frameNode, defaultValue);
 }
 
 void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
@@ -942,9 +988,10 @@ const ArkUIImageModifier* GetImageModifier()
 {
     static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
         ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
-        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
-        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
-        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
+        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetImageMatrix, ResetImageMatrix, SetObjectFit, ResetObjectFit,
+        SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
+        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor,
+        SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
         ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit,
         SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
         SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, SetImageBorderWithValues, ResetImageBorder,
@@ -962,8 +1009,8 @@ const ArkUIImageModifier* GetImageModifier()
 const CJUIImageModifier* GetCJUIImageModifier()
 {
     static const CJUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
+        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
+        SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
         SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
