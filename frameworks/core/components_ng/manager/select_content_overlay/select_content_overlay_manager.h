@@ -33,6 +33,10 @@ struct LegacyManagerCallbacks {
     std::function<void()> selectionResetCallback;
 };
 
+enum class NodeType {
+    HANDLE, TOUCH_MENU, HANDLE_WITH_MENU, RIGHT_CLICK_MENU
+};
+
 class ACE_EXPORT SelectContentOverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(SelectContentOverlayManager, AceType);
 
@@ -108,7 +112,7 @@ private:
     bool CloseInternal(int32_t holderId, bool animation, CloseReason reason);
     void DestroySelectOverlayNode(const RefPtr<FrameNode>& node);
     void DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node);
-    void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation);
+    void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation, NodeType nodeType);
     void MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation);
     std::function<void()> MakeMenuCallback(OptionMenuActionId actionId, const SelectOverlayInfo& info);
     SelectOverlayInfo BuildSelectOverlayInfo(int32_t requestCode);
