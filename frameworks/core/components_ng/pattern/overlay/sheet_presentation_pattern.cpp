@@ -431,17 +431,12 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
     if (sheetStyle.borderWidth.has_value()) {
-        auto sheetRadius = sheetTheme->GetSheetRadius();
         auto borderWidth = sheetStyle.borderWidth.value();
-        BorderRadiusProperty borderRadius;
-        if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
-            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
-            borderRadius.SetRadius(sheetRadius);
-        } else {
-            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
+        bool bottomDimenInvalid = !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET);
+        if (bottomDimenInvalid) {
             borderWidth.bottomDimen = 0.0_vp;
         }
-        renderContext->UpdateBorderRadius(borderRadius);
         layoutProperty->UpdateBorderWidth(borderWidth);
         renderContext->UpdateBorderWidth(borderWidth);
     } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
@@ -1911,24 +1906,27 @@ void SheetPresentationPattern::ClipSheetNode()
     CHECK_NULL_VOID(renderContext);
     ResetClipShape();
     auto sheetType = GetSheetType();
-    std::string clipPath;
     float half = 0.5f;
     if (sheetSize.Width() * half < sheetRadius.ConvertToPx()) {
         sheetRadius = Dimension(sheetSize.Width() * half);
     }
     if (sheetType == SheetType::SHEET_POPUP) {
-        clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
-    } else if (sheetType == SheetType::SHEET_CENTER) {
-        clipPath = GetCenterStyleSheetClipPath(sheetSize, sheetRadius);
-    } else {
-        clipPath = GetBottomStyleSheetClipPath(sheetSize, sheetRadius);
-    }
-    if (!sheetTheme->IsOuterBorderEnable() || sheetType == SheetType::SHEET_POPUP) {
         auto path = AceType::MakeRefPtr<Path>();
+        auto clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
         renderContext->UpdateClipShape(path);
+        return;
     }
+    BorderRadiusProperty borderRadius;
+    if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
+        borderRadius.SetRadius(sheetRadius);
+    }
+    if (IsSheetBottomStyle()) {
+        // set 1px for avoiding doudble radius black lines.
+        borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 1.0_px, 1.0_px);
+    }
+    renderContext->UpdateBorderRadius(borderRadius);
 }
 
 bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
@@ -2334,7 +2332,7 @@ void SheetPresentationPattern::FireOnHeightDidChange(float height)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
+    if (!IsSheetBottomStyle()) {
         OnHeightDidChange(centerHeight_);
     } else {
         OnHeightDidChange(height_);
@@ -2370,7 +2368,7 @@ void SheetPresentationPattern::FireOnWidthDidChange(RefPtr<FrameNode> sheetNode)
 void SheetPresentationPattern::FireOnTypeDidChange()
 {
     auto sheetType = sheetType_;
-    if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW) {
+    if (IsSheetBottomStyle() || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         sheetType = SheetType::SHEET_BOTTOM;
     }
     if (preType_ == sheetType) {
