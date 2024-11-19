@@ -50,12 +50,20 @@ public:
 
     virtual RefPtr<Theme> GetTheme(ThemeType type) = 0;
 
+    virtual RefPtr<Theme> GetTheme(ThemeType type, int32_t themeScopeId) = 0;
+
     virtual void LoadResourceThemes() {}
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
+    }
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        return AceType::DynamicCast<T>(GetTheme(T::TypeId(), themeScopeId));
     }
 
     virtual uint32_t GetResourceLimitKeys() const

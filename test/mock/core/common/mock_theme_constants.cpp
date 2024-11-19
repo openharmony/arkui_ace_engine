@@ -196,6 +196,11 @@ void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
 {
 }
 
+RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
+{
+    return nullptr;
+}
+
 std::shared_ptr<Media::PixelMap> ThemeConstants::GetPixelMap(uint32_t key) const
 {
     return nullptr;

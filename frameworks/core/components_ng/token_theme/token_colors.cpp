@@ -342,17 +342,17 @@ Color TokenColors::InteractiveClick() const
     return colors_[INTERACTIVE_CLICK];
 }
 
-const char* GetColorNameByIndex(int32_t idx)
+const char* TokenColors::GetColorNameByIndex(int32_t idx)
 {
     return GetTokenColorDataByIndex(idx).colorName;
 }
 
-int32_t GetSystemColorResIdByIndex(int32_t idx)
+int32_t TokenColors::GetSystemColorResIdByIndex(int32_t idx)
 {
     return GetTokenColorDataByIndex(idx).systemResourceId;
 }
 
-const TokenColorData& GetTokenColorDataByIndex(int32_t idx)
+const TokenColorData& TokenColors::GetTokenColorDataByIndex(int32_t idx)
 {
     return (idx >= 0 && idx < TokenColors::TOTAL_NUMBER) ? colorData[idx] : colorData[TokenColors::TOTAL_NUMBER];
 }
