@@ -110,4 +110,8 @@ uint64_t RosenRenderSurface::GetUniqueIdNum() const
 
 void RosenRenderSurface::RegisterBufferCallback() {}
 
+void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
+
+void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
+
 } // namespace OHOS::Ace::NG
