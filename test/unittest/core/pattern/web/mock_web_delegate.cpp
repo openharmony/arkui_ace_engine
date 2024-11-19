@@ -1064,7 +1064,7 @@ bool WebDelegate::ExecuteAction(
 {
     return false;
 }
-void WebDelegate::SetAccessibilityState(bool state) {}
+void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {

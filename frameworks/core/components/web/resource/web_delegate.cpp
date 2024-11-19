@@ -97,6 +97,7 @@ const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
+constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
@@ -767,7 +768,7 @@ void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
 
 WebDelegate::~WebDelegate()
 {
-    SetAccessibilityState(false);
+    SetAccessibilityState(false, false);
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
@@ -6772,7 +6773,7 @@ bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     return true;
 }
 
-void WebDelegate::SetAccessibilityState(bool state)
+void WebDelegate::SetAccessibilityState(bool state, bool isDelayed)
 {
     if (state == accessibilityState_) {
         return;
@@ -6781,7 +6782,11 @@ void WebDelegate::SetAccessibilityState(bool state)
     if (state) {
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
+        uint32_t delayedTime = 0;
+        if (isDelayed) {
+            delayedTime = ACCESSIBILITY_DELAY_MILLISECONDS;
+        }
+        context->GetTaskExecutor()->PostDelayedTask(
             [weak = WeakClaim(this), state]() {
                 auto delegate = weak.Upgrade();
                 CHECK_NULL_VOID(delegate);
@@ -6793,7 +6798,7 @@ void WebDelegate::SetAccessibilityState(bool state)
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+            TaskExecutor::TaskType::PLATFORM, delayedTime, "ArkUIWebSetAccessibilityState");
     } else {
         CHECK_NULL_VOID(nweb_);
         nweb_->SetAccessibilityState(state);
