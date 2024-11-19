@@ -107,8 +107,7 @@
             "rightSide":"Show on right"
         },
         "datepicker":{
-            "lunarSwitch":"Show lunar calendar",
-            "prev":"PREV"
+            "lunarSwitch":"Show lunar calendar"
         },
         "navigation":{
             "back":"Back",
@@ -2388,8 +2387,7 @@
             "fullScreen":"[TS_954629]_Full Screen"
         },
         "datepicker":{
-            "lunarSwitch":"[TS_954634]_Show lunar calendar",
-            "prev":"[TS_954625]_PREV"
+            "lunarSwitch":"[TS_954634]_Show lunar calendar"
         }
     }
 }
