@@ -1263,6 +1263,16 @@
             "themes": ["TextFieldTheme"],
             "attributes": [
                 {
+                    "name": "minFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "maxFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
                     "name": "fontColor",
                     "default": "#FF000000"
                 },
@@ -1276,7 +1286,8 @@
                 },
                 {
                     "name": "fontWeight",
-                    "default": "FontWeight.Normal"
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
                 },
                 {
                     "name": "fontFamily",
@@ -1562,9 +1573,6 @@
                 "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
-                "setFontFamilyTestDefaultValues",
-                "setFontFamilyTestFontFamilyValidValues",
-                "setFontFamilyTestFontFamilyInvalidValues",
                 "setTextInputOptionsTestDefaultValues",
                 "setTextInputOptionsTestValidValues",
                 "setTypeTestTypeValidValues",
@@ -1578,19 +1586,9 @@
                 "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
                 "setPlaceholderFontTestPlaceholderFontStyleInvalidValues",
-                "setFontSizeTestFontSizeInvalidValues",
-                "setFontWeightTestDefaultValues",
-                "setFontWeightTestFontWeightValidValues",
-                "setFontWeightTestFontWeightInvalidValues",
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
-                "setMinFontSizeTestDefaultValues",
-                "setMinFontSizeTestMinFontSizeValidValues",
-                "setMinFontSizeTestMinFontSizeInvalidValues",
-                "setMaxFontSizeTestDefaultValues",
-                "setMaxFontSizeTestMaxFontSizeValidValues",
-                "setMaxFontSizeTestMaxFontSizeInvalidValues",
                 "setDecorationTestDefaultValues",
                 "setDecorationTestDecorationTypeValidValues",
                 "setDecorationTestDecorationTypeInvalidValues",
@@ -1607,7 +1605,6 @@
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
-                "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestDefaultValues"
             ]
         },
