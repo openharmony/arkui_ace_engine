@@ -210,9 +210,10 @@ ohos_unittest("AnimationTest") {
     ":config_animation_test",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/googletest:gtest_main",
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps += [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
   if (!is_ohos_standard_system) {
     external_deps = [

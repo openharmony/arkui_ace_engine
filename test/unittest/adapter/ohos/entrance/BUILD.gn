@@ -36,8 +36,8 @@ ohos_unittest("container_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock_main",
   ]
+  external_deps = [ "googletest:gmock_main" ]
 }
 
 group("entrance_unittest") {

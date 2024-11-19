@@ -75,9 +75,12 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
-    "//third_party/googletest:gtest_main",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
   part_name = ace_engine_part
 }
 
@@ -148,9 +151,12 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
-    "//third_party/googletest:gtest_main",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
 
   part_name = ace_engine_part
 }
@@ -190,11 +196,12 @@ ohos_unittest("ImageCompressorTest") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
-    "//third_party/googletest:gtest_main",
   ]
   defines = [ "ENABLE_OPENCL" ]
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "opencl-headers:libcl",
   ]
   part_name = ace_engine_part

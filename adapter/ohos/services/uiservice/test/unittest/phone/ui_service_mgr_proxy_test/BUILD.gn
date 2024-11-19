@@ -30,8 +30,6 @@ ohos_unittest("ui_service_mgr_proxy_test") {
   deps = [
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice_static_ohos",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -39,6 +37,8 @@ ohos_unittest("ui_service_mgr_proxy_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "ipc:ipc_core",
   ]
 }
