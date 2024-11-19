@@ -280,6 +280,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, pan %{public}d up, state: %{public}d, currentFingers: %{public}d, fingers: %{public}d",
         event.touchEventId, event.id, refereeState_, currentFingers_, fingers_);
+    extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }

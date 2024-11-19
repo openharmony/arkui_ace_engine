@@ -349,6 +349,7 @@ private:
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void LogTouchTestRecognizerStates(int32_t touchEventId);
     void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);

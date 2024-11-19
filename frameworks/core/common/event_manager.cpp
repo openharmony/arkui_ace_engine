@@ -774,6 +774,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch)
 {
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+        LogTouchTestRecognizerStates(point.id);
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {
             ft->SetFrameTraceLimit();
@@ -794,6 +795,50 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
     if (!point.isFalsified) {
         lastSourceTool_ = point.sourceTool;
     }
+}
+
+void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
+{
+    if (eventTree_.eventTreeList.size() == 0) {
+        return;
+    }
+    std::string log = "";
+    auto lastEventTree = eventTree_.eventTreeList.back();
+
+    std::map<int32_t, std::string> hitFrameNode;
+    std::list<NG::FrameNodeSnapshot> frameNodeSnapShots = lastEventTree.hitTestTree;
+    for (auto iter : frameNodeSnapShots) {
+        hitFrameNode[iter.nodeId] = iter.tag;
+    }
+
+    std::list<RefPtr<GestureSnapshot>> gestureSnapshots = lastEventTree.gestureTree[touchEventId];
+    for (auto gestureSnapshot : gestureSnapshots) {
+        if (gestureSnapshot->type.find("TouchEventActuator") != std::string::npos ||
+            gestureSnapshot->type.find("ExclusiveRecognizer") != std::string::npos ||
+            gestureSnapshot->type.find("ParallelRecognizer") != std::string::npos ||
+            gestureSnapshot->type.find("SequenceRecognizer") != std::string::npos) {
+            continue;
+        }
+        std::string gestureLog = "{";
+        gestureLog += "types: " + gestureSnapshot->type.substr(0, gestureSnapshot->type.find("Recognizer"));
+        gestureLog += ", node: " + hitFrameNode[gestureSnapshot->nodeId];
+
+        auto stateHistorys = gestureSnapshot->stateHistory;
+        for (auto stateHistory : stateHistorys) {
+            if (stateHistory.procedure.find("Down") != std::string::npos) {
+                gestureLog += ", prcd: Down";
+            } else {
+                gestureLog += ", prcd: Up";
+            }
+            gestureLog += ", state: " + stateHistory.state;
+            if (stateHistory.extraInfo != "") {
+                gestureLog += ", extraInfo: " + stateHistory.extraInfo;
+            }
+        }
+        gestureLog += "}";
+        log += gestureLog;
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)
@@ -865,13 +910,13 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
-            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent,
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent, "",
                 NG::TransRefereeState(recognizer->GetRefereeState()),
                 NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
         }
         if (!recognizer && !isStopTouchEvent && sendOnTouch) {
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
-            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
     }
@@ -912,13 +957,13 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
             auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
             if (recognizer) {
                 entry->HandleMultiContainerEvent(point);
-                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point, "",
                     NG::TransRefereeState(recognizer->GetRefereeState()),
                     NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
             }
             if (!recognizer && !isStopTouchEvent) {
                 isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                     std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
             }
         }
