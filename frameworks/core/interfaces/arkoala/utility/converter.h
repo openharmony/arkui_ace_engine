@@ -378,6 +378,10 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
+    template<> PickerValueType Convert(const Ark_String& src);
+    template<> PickerValueType Convert(const Array_String& src);
+    template<> PickerSelectedType Convert(const Ark_Number& src);
+    template<> PickerSelectedType Convert(const Array_Number& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
