@@ -1612,6 +1612,41 @@
             ]
         },
         {
+            "name": "GridRow",
+            "includes": [],
+            "themes": [],
+            "remove" : ["setGridRowOptionsTestDefaultValues"],
+            "disable": [
+                "setGridRowOptionsTestValidValues",
+                "setAlignItemsTestDefaultValues",
+                "setAlignItemsTestAlignItemsValidValues",
+                "setAlignItemsTestAlignItemsInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "alignItems",
+                    "default": "ItemAlign.Start",
+                },
+                {
+                    "name": "gutter",
+                    "default": {"x": 0, "y":0}
+                },
+                {
+                    "name": "direction",
+                    "default": "GridRowDirection.Row"
+                },
+                {
+                    "name": "breakpoints",
+                    "default": {"value": ["320vp", "600vp", "840vp"], "reference": "BreakpointsReference.WindowSize"}
+                },
+                {
+                    "name": "columns",
+                    "default": "12",
+                    "fixtures": ["NumberNonNeg"]
+                }
+            ]
+        },
+        {
             "name": "Radio",
             "includes": [
                 "core/components/checkable/checkable_theme.h"

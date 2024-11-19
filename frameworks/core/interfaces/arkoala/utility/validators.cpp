@@ -112,5 +112,16 @@ void ValidateNonNegative(std::optional<int>& value)
         value.reset();
     }
 }
+void ValidateNonNegative(std::optional<V2::GridContainerSize>& value)
+{
+    if (value.has_value()) {
+        auto val = value.value();
+        bool fail = Negative(val.lg) || Negative(val.md) || Negative(val.sm) || Negative(val.xl)
+            || Negative(val.xs) || Negative(val.xxl);
+        if (fail) {
+            value.reset();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
