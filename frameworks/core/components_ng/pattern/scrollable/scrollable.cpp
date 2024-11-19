@@ -993,6 +993,8 @@ void Scrollable::ProcessSpringMotion(double position)
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        } else {
+            ACE_SCOPED_TRACE("Spring to same position");
         }
     }
     auto distance = currentPos_ - finalPosition_;
