@@ -321,8 +321,21 @@ ohos_source_set("ace_components_syntax") {
     "$ace_root/frameworks/core/components_ng/syntax/repeat_virtual_scroll_caches.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/repeat_virtual_scroll_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/repeat_virtual_scroll_node.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/with_theme_node.cpp",
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  configs = [ ":ace_unittest_config" ]
+}
+
+# ace components token theme
+ohos_source_set("ace_components_token_theme") {
+  testonly = true
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  sources = [
+    "$ace_root/frameworks/core/components_ng/token_theme/token_colors.cpp",
+    "$ace_root/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+  ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -341,6 +354,7 @@ ohos_source_set("ace_components_render") {
     "$ace_root/frameworks/core/components_ng/render/ellipse_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/line_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/render/polygon_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",

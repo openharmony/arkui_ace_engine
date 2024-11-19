@@ -21,9 +21,9 @@
 namespace OHOS::Ace::NG {
 
 PaintWrapper::PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
-    RefPtr<PaintProperty> layoutProperty, RefPtr<ExtensionHandler> handler)
+    RefPtr<PaintProperty> paintProperty, RefPtr<ExtensionHandler> handler)
     : renderContext_(std::move(renderContext)), geometryNode_(std::move(geometryNode)),
-      paintProperty_(std::move(layoutProperty)), extensionHandler_(std::move(handler))
+      paintProperty_(std::move(paintProperty)), extensionHandler_(std::move(handler))
 {}
 
 PaintWrapper::~PaintWrapper() = default;
