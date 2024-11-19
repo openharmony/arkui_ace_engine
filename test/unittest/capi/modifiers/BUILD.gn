@@ -21,6 +21,7 @@ ace_unittest("capi_all_modifiers_test") {
     # place here your UT source code
     "alphabet_indexer_modifier_test.cpp",
     "badge_modifier_test.cpp",
+    "base_span_modifier_test.cpp",
     "blank_modifier_test.cpp",
     "button_modifier_resources_test.cpp",
     "button_modifier_test.cpp",
