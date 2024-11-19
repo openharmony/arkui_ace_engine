@@ -116,4 +116,54 @@ FlexAlign RowModelNG::GetAlignItems(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(LinearLayoutProperty, CrossAxisAlign, value, frameNode, value);
     return value;
 }
+
+void RowModelNG::SetPointLightBloom(FrameNode* frameNode, const std::optional<float_t>& bloom)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (bloom.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, bloom.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Bloom, frameNode);
+    }
+}
+
+void RowModelNG::SetPointLightIlluminated(FrameNode* frameNode, const std::optional<uint32_t>& illuminated)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (illuminated.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, illuminated.value(), frameNode);
+    } else {
+       ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
+    }
+}
+void RowModelNG::SetPointLightSourcePosition(FrameNode* frameNode,
+    const std::optional<float_t>& x,
+    const std::optional<float_t>& y,
+    const std::optional<float_t>& z)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (x.has_value()) {
+  //     ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, illuminated.value(), frameNode);
+    } else {
+  //     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
+    }
+}
+void RowModelNG::SetPointLightSourceIntensity(FrameNode* frameNode, const std::optional<float_t>& intensity)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (intensity.has_value()) {
+    //   ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, intensity.value(), frameNode);
+    } else {
+    //   ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
+    }
+}
+void RowModelNG::SetPointLightSourceColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (color.has_value()) {
+    //   ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated, color.value(), frameNode);
+    } else {
+    //   ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
