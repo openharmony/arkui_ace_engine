@@ -564,6 +564,7 @@ void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
 
 RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
 {
+    // if LocalColorMode is different from SystemColorMode, GetPattern from SysResMgr directly by LocolColorMode
     if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
         ColorMode systemMode = SystemProperties::GetColorMode();
         ColorMode localMode = pipelineContext->GetLocalColorMode();
@@ -575,6 +576,12 @@ RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternNa
             }
         }
     }
+
+    if (!currentThemeStyle_) {
+        TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+        return nullptr;
+    }
+    currentThemeStyle_->CheckThemeStyleLoaded(patternName);
     auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
     if (!patternStyle && resAdapter_) {
         patternStyle = resAdapter_->GetPatternByName(patternName);
