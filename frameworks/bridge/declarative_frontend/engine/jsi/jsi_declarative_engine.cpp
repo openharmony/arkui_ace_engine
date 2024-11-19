@@ -1592,7 +1592,8 @@ bool JsiDeclarativeEngine::LoadPageSource(
 
 bool JsiDeclarativeEngine::LoadPageSource(
     const std::shared_ptr<std::vector<uint8_t>>& content,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback,
+    const std::string& contentName)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("LoadJs by buffer");
@@ -1601,7 +1602,7 @@ bool JsiDeclarativeEngine::LoadPageSource(
     CHECK_NULL_RETURN(container, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (!arkRuntime->EvaluateJsCode(content->data(), content->size())) {
+    if (!arkRuntime->EvaluateJsCode(content->data(), content->size(), contentName)) {
         return false;
     }
     return true;

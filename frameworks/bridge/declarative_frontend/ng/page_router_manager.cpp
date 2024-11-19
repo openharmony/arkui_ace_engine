@@ -140,6 +140,7 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
+    info.params = params;
 
 #if !defined(PREVIEW)
     auto container = Container::Current();
@@ -1231,7 +1232,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     pageRouterStack_.emplace_back(pageNode);
 
     if (target.content && !target.content->empty()) {
-        loadJsByBuffer_(target.content, target.errorCallback);
+        loadJsByBuffer_(target.content, target.errorCallback, target.params);
     } else {
         loadJs_(target.path, target.errorCallback);
     }
