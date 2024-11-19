@@ -3642,7 +3642,7 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize
  * @return CustomSpanMeasureInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create();
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件测量信息。
@@ -3666,7 +3666,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
  * @return CustomSpanMetrics实例。
  * @since 12
 */
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create();
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void);
 
 /**
  * @brief 销毁自定义段落组件度量信息。
@@ -3705,7 +3705,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
  * @return CustomSpanDrawInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create();
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件绘制信息。

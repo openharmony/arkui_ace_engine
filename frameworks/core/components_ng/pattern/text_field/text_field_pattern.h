@@ -308,7 +308,7 @@ public:
         return counterTextNode_;
     }
 
-    WeakPtr<FrameNode> GetErrorNode()
+    WeakPtr<FrameNode> GetErrorNode() const
     {
         return errorTextNode_;
     }
