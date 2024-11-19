@@ -198,14 +198,14 @@ typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
  *
  * @since 14
  */
-struct ArkUI_CustomProperty;
+typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 
 /**
  * @brief Define ActiveChildenInfo class information.
  *
  * @since 14
  */
-struct ArkUI_ActiveChildrenInfo;
+typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 
 /**
  * @brief Provides the number types of ArkUI in the native code.
