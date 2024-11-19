@@ -3381,9 +3381,8 @@ void PipelineContext::DispatchMouseEvent(
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
     if (static_cast<int32_t>(format) == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle nodeId=%{public}d style=%{public}d windowId=%{public}d "
-            "isByPass=%{public}d mouseStyleNodeId_=%{public}d",
-            nodeId, static_cast<int32_t>(format), windowId, isByPass, mouseStyleNodeId_.value_or(-1));
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle [%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
+            nodeId, mouseStyleNodeId_.value_or(-1), static_cast<int32_t>(format), windowId, isByPass);
     }
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
