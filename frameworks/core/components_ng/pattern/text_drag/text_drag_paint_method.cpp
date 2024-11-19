@@ -44,5 +44,13 @@ void TextDragPaintMethod::UpdateHandleInfo(const RichEditorDragInfo& info)
     modifier->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     modifier->SetFirstHandle(info.firstHandle);
     modifier->SetSecondHandle(info.secondHandle);
+    auto screenWdith = SystemProperties::GetDevicePhysicalWidth();
+    auto screenHeight = SystemProperties::GetDevicePhysicalHeight();
+    RectF boundsRect(-handleDiameter - screenWdith, -handleDiameter - screenHeight,
+        info.frameWidth + (screenWdith + handleDiameter) * CONSTANT_DOUBLE,
+        info.frameHight + (screenHeight + handleDiameter) * CONSTANT_DOUBLE);
+    modifier->SetBoundsRect(boundsRect);
+    auto selectorColor = info.selectedBackgroundColor;
+    modifier->SetSelectedColor(selectorColor->GetValue());
 }
 } // namespace OHOS::Ace::NG
