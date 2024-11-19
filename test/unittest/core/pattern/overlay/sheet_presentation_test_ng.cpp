@@ -877,13 +877,13 @@ HWTEST_F(SheetPresentationTestNg, OnWindowSizeChanged001, TestSize.Level1)
     sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MOVE);
 
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM_FREE_WINDOW);
     pipelineContext->windowManager_ = windowManager;
     pipelineContext->windowManager_->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
     sheetPattern->OnWindowSizeChanged(0, 0,  WindowSizeChangeReason::ROTATION);
 
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOMLANDSPACE);
-    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOMLANDSPACE);
+    EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_BOTTOM_FREE_WINDOW);
     sheetPattern->isScrolling_ = false;
     pipelineContext->windowManager_->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_FLOATING; };
     sheetPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
