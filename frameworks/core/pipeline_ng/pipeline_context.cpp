@@ -2320,6 +2320,13 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
+    auto containerId = Container::CurrentId();
+    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
+    if (subWindowContainerId >= 0) {
+        auto subPipeline = GetContextByContainerId(subWindowContainerId);
+        ContainerScope scope(subWindowContainerId);
+        subPipeline->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+    }
     if (reason == FocusActiveReason::USE_API) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
         autoFocusInactive_ = autoFocusInactive;
