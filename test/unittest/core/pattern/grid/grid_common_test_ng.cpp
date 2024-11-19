@@ -143,26 +143,6 @@ HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyEvent003
- * @tc.desc: Test HandleDirectionKey func
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, KeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Test HandleDirectionKey
-     * @tc.expected: Only KEY_DPAD_UP/KEY_DPAD_DOWN will return true
-     */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(pattern_->HandleDirectionKey(KeyCode::KEY_UNKNOWN));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
-}
-
-/**
  * @tc.name: MouseSelect001
  * @tc.desc: Test mouse select
  * @tc.type: FUNC
@@ -969,11 +949,11 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Scroll to second row
-     * @tc.expected: Would change startMainLineIndex_, focus last child.
+     * @tc.expected: item 1 scroll out of viewport, lost focus
      */
     gridFocusNode->RequestFocusImmediately();
     ScrollTo(ITEM_HEIGHT + 1.f);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 }
 
 /**
@@ -1437,5 +1417,43 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: Focus002
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableGridItems(18, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. When focus grid from the outside
+     * @tc.expected: Will focus first child
+     */
+    auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
+    gridFocusNode->RequestFocusImmediately();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Scroll to third row
+     * @tc.expected: item 0 scroll out of viewport, lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT * 2, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to top
+     * @tc.expected: item 0 scroll into viewport, request focus
+     */
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT * 2, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

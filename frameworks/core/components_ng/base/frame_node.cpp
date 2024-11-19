@@ -592,36 +592,46 @@ bool FrameNode::IsSupportDrawModifier()
 void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    node->ProcessOffscreenTask();
-    node->MarkModifyDone();
-    node->UpdateLayoutPropertyFlag();
-    node->SetActive();
-    node->isLayoutDirtyMarked_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITaskWithSingleDirtyNode(node);
-    }
-    auto predictLayoutNode = std::move(node->predictLayoutNode_);
-    for (auto& node : predictLayoutNode) {
-        auto frameNode = node.Upgrade();
-        if (frameNode && pipeline) {
-            pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
+    auto task = [weak = AceType::WeakClaim(AceType::RawPtr(node))]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        node->ProcessOffscreenTask();
+        node->MarkModifyDone();
+        node->UpdateLayoutPropertyFlag();
+        node->SetActive();
+        node->isLayoutDirtyMarked_ = true;
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITaskWithSingleDirtyNode(node);
         }
-    }
-    if (pipeline) {
-        pipeline->FlushSyncGeometryNodeTasks();
-    }
+        auto predictLayoutNode = std::move(node->predictLayoutNode_);
+        for (auto& node : predictLayoutNode) {
+            auto frameNode = node.Upgrade();
+            if (frameNode && pipeline) {
+                pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
+            }
+        }
+        if (pipeline) {
+            pipeline->FlushSyncGeometryNodeTasks();
+        }
 
-    auto paintProperty = node->GetPaintProperty<PaintProperty>();
-    auto wrapper = node->CreatePaintWrapper();
-    if (wrapper != nullptr) {
-        wrapper->FlushRender();
+        auto paintProperty = node->GetPaintProperty<PaintProperty>();
+        auto wrapper = node->CreatePaintWrapper();
+        if (wrapper != nullptr) {
+            wrapper->FlushRender();
+        }
+        paintProperty->CleanDirty();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushModifier();
+        pipeline->FlushMessages();
+        node->SetActive(false);
+    };
+    auto pipeline = node->GetContext();
+    if (pipeline && pipeline->IsLayouting()) {
+        pipeline->AddAfterLayoutTask(task);
+        return;
     }
-    paintProperty->CleanDirty();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushModifier();
-    pipeline->FlushMessages();
-    node->SetActive(false);
+    task();
 }
 
 void FrameNode::InitializePatternAndContext()
@@ -885,6 +895,9 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
             json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
         }
     }
+    if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+        json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
+    }
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
         json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
     }
@@ -975,6 +988,9 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyCommonInfo(json);
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
+    if (pattern_) {
+        DumpSimplifyInfo(json);
+    }
     if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
     }
@@ -1183,6 +1199,9 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
 
+    if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+        PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
+    }
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1792,20 +1811,32 @@ void FrameNode::ThrottledVisibleTask()
         return;
     }
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
+    auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
+    RectF frameRect = visibleResult.frameRect;
+    RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+    if (visibleAreaRealTime) {
+        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            throttledCallbackOnTheWay_ = false;
+            return;
+        }
+        ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = ratio;
         throttledCallbackOnTheWay_ = false;
-        return;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    } else {
+        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+            lastThrottledVisibleRatio_ = ratio;
+        }
+        throttledCallbackOnTheWay_ = false;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
-    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-    lastThrottledVisibleRatio_ = ratio;
-    throttledCallbackOnTheWay_ = false;
-    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback()
@@ -2498,24 +2529,30 @@ VectorF FrameNode::GetTransformScale() const
 
 bool FrameNode::IsPaintRectWithTransformValid()
 {
-    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
+    auto& paintRectWithTransform = GetOrRefreshMatrixFromCache().paintRectWithTransform;
     if (NearZero(paintRectWithTransform.Width()) || NearZero(paintRectWithTransform.Height())) {
         return true;
     }
     return false;
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const TouchEvent& touchEvent)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const TouchEvent& touchEvent,
+    std::vector<RectF>* regionList)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
     if (pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent)) {
         paintRect = pattern_->ExpandDefaultResponseRegion(paintRect);
     }
-    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchEvent.sourceType));
+    std::vector<RectF> responseRegionList;
+    if (regionList) {
+        responseRegionList = *regionList;
+    } else {
+        responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchEvent.sourceType));
+    }
 
     auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
+    MapPointTo(revertPoint, GetOrRefreshMatrixFromCache().revertMatrix);
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext_->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
@@ -2552,11 +2589,13 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
             targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }
 
-        if (GetExposeInnerGestureFlag()) {
-            auto pattern = GetPattern();
-            if (pattern) {
+        auto pattern = GetPattern();
+        if (pattern) {
+            if (GetExposeInnerGestureFlag()) {
                 auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
                 pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            } else {
+                pattern->RecoverInnerOnGestureRecognizerJudgeBegin();
             }
         }
     }
@@ -2566,7 +2605,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
     if (!isActive_) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
             GetTag().c_str(), paintRect.ToString().c_str());
@@ -2577,7 +2617,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         return HitTestResult::OUT_OF_REGION;
     }
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
-    auto localMat = renderContext_->GetLocalTransformMatrix();
+    auto localMat = cacheMatrixInfo.localMatrix;
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
         localMat_ = localMat;
     }
@@ -2602,7 +2642,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent);
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent, &responseRegionList);
         AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList, touchRestrict.touchTestType);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
@@ -2632,7 +2672,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto localTransformOffset = preLocation - localPoint;
 
     auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
+    MapPointTo(revertPoint, cacheMatrixInfo.revertMatrix);
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
@@ -2800,7 +2840,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionList.emplace_back(rect);
         return responseRegionList;
     }
-    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(GetContext());
     bool isMouseEvent = (static_cast<SourceType>(sourceType) == SourceType::MOUSE);
     if (isMouseEvent) {
         if (gestureHub->GetResponseRegion().empty() && (gestureHub->GetMouseResponseRegion().empty())) {
@@ -2980,7 +3020,7 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     auto localPoint = parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
     renderContext_->GetPointWithTransform(localPoint);
     auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
+    MapPointTo(revertPoint, GetOrRefreshMatrixFromCache().revertMatrix);
     auto subRevertPoint = revertPoint - renderContext_->GetPaintRectWithoutTransform().GetOffset();
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
@@ -3674,7 +3714,39 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
         }
 
         auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(child->GetPositionToWindowWithTransform());
+        globalFrameRect.SetOffset(child->GetOffsetRelativeToWindow());
+
+        if (globalFrameRect.IsInRegion(PointF(x, y))) {
+            hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
+        }
+    }
+
+    if (hitFrameNodes.empty()) {
+        return nullptr;
+    }
+
+    return hitFrameNodes.rbegin()->second;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByPositionWithoutChildTransform(float x, float y)
+{
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthAllFrame(children);
+    auto parentOffset = GetPositionToWindowWithTransform();
+    for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
+        auto geometryNode = child->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        auto childOffset = child->GetGeometryNode()->GetFrameOffset();
+        childOffset += parentOffset;
+        globalFrameRect.SetOffset(childOffset);
 
         if (globalFrameRect.IsInRegion(PointF(x, y))) {
             hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
@@ -4704,7 +4776,7 @@ void FrameNode::RecordExposureInner()
 void FrameNode::AddFrameNodeSnapshot(
     bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
@@ -5256,24 +5328,28 @@ bool FrameNode::IsContextTransparent()
     return true;
 }
 
-Matrix4& FrameNode::GetOrRefreshRevertMatrixFromCache(bool forceRefresh)
+CacheMatrixInfo& FrameNode::GetOrRefreshMatrixFromCache(bool forceRefresh)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, localRevertMatrix_);
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, cacheMatrixInfo_);
     auto nanoTimestamp = pipeline->GetVsyncTime();
+    CHECK_NULL_RETURN(renderContext_, cacheMatrixInfo_);
     auto rect = renderContext_->GetPaintRectWithoutTransform();
     // the caller is trying to refresh cache forcedly or the cache is invalid
-    if (!isLocalRevertMatrixAvailable_ || forceRefresh || prePaintRect_ != rect ||
+    if (!isTransformNotChanged_ || forceRefresh || prePaintRect_ != rect ||
         getCacheNanoTime_ + MATRIX_CACHE_TIME_THRESHOLD < nanoTimestamp) {
-        localRevertMatrix_ = renderContext_->GetRevertMatrix();
-        isLocalRevertMatrixAvailable_ = true;
+        cacheMatrixInfo_.revertMatrix = renderContext_->GetRevertMatrix();
+        cacheMatrixInfo_.paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
+        cacheMatrixInfo_.localMatrix = Matrix4::CreateTranslate(-rect.GetOffset().GetX(),
+            -rect.GetOffset().GetY(), 0) * cacheMatrixInfo_.revertMatrix;
+        isTransformNotChanged_ = true;
         getCacheNanoTime_ = nanoTimestamp;
         prePaintRect_ = rect;
-        return localRevertMatrix_;
+        return cacheMatrixInfo_;
     }
 
     // cache valid
-    return localRevertMatrix_;
+    return cacheMatrixInfo_;
 }
 
 // apply the matrix to the given point specified by dst
@@ -5940,5 +6016,28 @@ bool FrameNode::IsDebugInspectorId()
     }
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
     return debugInspectorId == GetInspectorId().value_or("");
+}
+
+RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
+{
+    auto pageNode = GetPageNode();
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsView = pageNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(jsView, nullptr);
+    auto rootNode = jsView->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    return rootNode;
+}
+
+std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
+{
+    std::list<RefPtr<FrameNode>> list;
+    for (int32_t i = 0; i < TotalChildCount(); i++) {
+        auto child = GetFrameNodeChildByIndex(i, false, false);
+        if (child->IsActive()) {
+            list.emplace_back(Referenced::Claim(child));
+        }
+    }
+    return list;
 }
 } // namespace OHOS::Ace::NG

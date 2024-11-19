@@ -241,7 +241,7 @@ private:
     Dimension hotSpotCircleRadius_;
     Dimension focusPaddingRadius_;
     Dimension focusPaintWidth_;
-    std::string passPointTxt_ = "";
+    std::string passPointTxt_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_THEME_H

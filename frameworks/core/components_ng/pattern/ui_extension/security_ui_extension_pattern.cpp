@@ -122,6 +122,20 @@ RefPtr<AccessibilitySessionAdapter> SecurityUIExtensionPattern::GetAccessibility
     return accessibilitySessionAdapter_;
 }
 
+void SecurityUIExtensionPattern::OnExtensionDetachToDisplay()
+{
+    if (contentNode_ == nullptr) {
+        PLATFORM_LOGW("ContentNode is null when OnExtensionDetachToDisplay.");
+        return;
+    }
+
+    PLATFORM_LOGI("OnExtensionDetachToDisplay");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SecurityUIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     if (!wantWrap) {

@@ -62,10 +62,6 @@ struct TouchEvent final : public UIInputEvent {
     // different ids.
     int32_t postEventNodeId = 0;
     int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
-    float screenX = 0.0f;
-    float screenY = 0.0f;
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
     double size = 0.0;
@@ -405,6 +401,7 @@ public:
     ~GestureEventResult() = default;
 
     virtual void SetGestureEventResult(bool result) = 0;
+    virtual void SetGestureEventResult(bool result, bool stopPropagation) = 0;
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {

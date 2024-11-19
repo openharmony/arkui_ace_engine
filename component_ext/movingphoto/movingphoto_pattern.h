@@ -185,6 +185,7 @@ private:
     void StartAnimation();
     void StopPlayback();
     void PausePlayback();
+    void RefreshMovingPhoto();
     void StopAnimation();
     void StopAnimationCallback();
     void StartAutoPlay();
@@ -209,6 +210,7 @@ private:
     void GetPixelMap();
     int64_t GetUriCoverPosition();
     void HandleAnalyzerPlayEvent(bool canPlay);
+    bool IsRefreshMovingPhotoReturn(bool status);
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -240,6 +242,8 @@ private:
     bool isAnalyzerCreated_ = false;
     bool isPixelMapChanged_ = false;
     bool isAnalyzerPlaying_ = false;
+    bool isRefreshMovingPhoto_ = false;
+    bool isRefreshMovingPhotoPlaying_ = false;
     
     Rect lastBoundsRect_;
     Rect contentRect_;

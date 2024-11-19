@@ -63,7 +63,7 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void CreateTextWithDragNode(const std::string& textContent, const TextProperty& textProperty);
+    void CreateTextWithDragNode(const std::u16string& textContent, const TextProperty& textProperty);
     void SetTextProperty(TextModelNG& model, const TextProperty& textProperty);
     void GetInstance();
     void SetMockParagraphExpectCallParas(MockParagraphExpectCallParas params);

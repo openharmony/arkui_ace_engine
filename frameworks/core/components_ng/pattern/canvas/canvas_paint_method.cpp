@@ -144,8 +144,17 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     }
 
     if (HasShadow()) {
-        RSRect rec = RSRect(
-            canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        auto tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+        CHECK_NULL_VOID(tempPixelMap);
+        RSRect rec;
+        if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
+            apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+            rec = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
+        } else {
+            rec = RSRect(canvasImage.dx, canvasImage.dy,
+                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        }
         RSPath path;
         path.AddRect(rec);
         PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
@@ -370,7 +379,12 @@ bool CanvasPaintMethod::DrawBitmap(RefPtr<RenderContext> renderContext, RSBitmap
         return false;
     }
     currentBitmap.Free();
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format;
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_PREMUL };
+    } else {
+        format = { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    }
     currentBitmap.Build(lastLayoutSize_.Width(), lastLayoutSize_.Height(), format);
 
     RSCanvas currentCanvas;

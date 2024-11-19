@@ -459,6 +459,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
+    event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
 }
 
 void GetPointerEventAction(int32_t action, PointerEvent& event)
@@ -584,7 +585,8 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
     }
 }
 
-void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode)
+void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
+    bool useRealtimeMatrix)
 {
     CHECK_NULL_VOID(point);
     int32_t pointerId = point->GetPointerId();
@@ -599,7 +601,7 @@ void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, cons
             yRelative = item.GetWindowYPos();
         }
         NG::PointF transformPoint(xRelative, yRelative);
-        NG::NGGestureRecognizer::Transform(transformPoint, frameNode);
+        NG::NGGestureRecognizer::Transform(transformPoint, frameNode, useRealtimeMatrix);
         item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
         item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
         item.SetWindowXPos(transformPoint.GetX());
@@ -625,7 +627,7 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
         }
         auto windowX = xRelative;
         auto windowY = yRelative;
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
         auto windowWidth = displayWindowRect.Width();

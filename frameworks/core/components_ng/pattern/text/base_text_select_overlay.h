@@ -261,7 +261,13 @@ public:
     {
         return std::nullopt;
     }
-    void AddAvoidKeyboardCallback();
+    void AddAvoidKeyboardCallback(bool isCustomKeyboard);
+    void RemoveAvoidKeyboardCallback();
+
+    bool IsEnableContainerModal() override
+    {
+        return enableContainerModal_;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -300,7 +306,8 @@ protected:
     {
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
-    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
+    virtual void UpdateMenuWhileAncestorNodeChanged(
+        bool shouldHideMenu, bool shouldShowMenu, FrameNodeChangeInfoFlag extraFlag);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     static bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     static bool GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect);
@@ -313,6 +320,10 @@ protected:
     bool IsHandleInParentSafeAreaPadding();
     bool IsHandleInParentSafeAreaPadding(const RectF& firstRect, const RectF& secondRect);
     bool CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle);
+    void CheckEnableContainerModal()
+    {
+        enableContainerModal_ = true;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -343,6 +354,7 @@ private:
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
+    bool enableContainerModal_ = false;
 };
 
 } // namespace OHOS::Ace::NG

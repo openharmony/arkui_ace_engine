@@ -1316,24 +1316,23 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     if (validAction.find(event.action) == validAction.end()) {
         return false;
     }
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        return DispatchMouseEventInGreatOrEqualAPI13(event);
+    }
+    return DispatchMouseEventInLessAPI13(event);
+}
+
+bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event)
+{
     MouseTestResult handledResults;
     bool isStopPropagation = false;
     if (event.button != MouseButton::NONE_BUTTON) {
-        auto mouseTargetIter = pressMouseTestResults_.find(event.button);
-        if (mouseTargetIter != pressMouseTestResults_.end()) {
-            for (const auto& mouseTarget : mouseTargetIter->second) {
-                if (!mouseTarget) {
-                    continue;
-                }
-                handledResults.emplace_back(mouseTarget);
-                if (mouseTarget->HandleMouseEvent(event)) {
-                    isStopPropagation = true;
-                    break;
-                }
-            }
+        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+            mouseTargetIter != pressMouseTestResultsMap_.end()) {
+            DispatchMouseEventToPressResults(event, mouseTargetIter->second, handledResults, isStopPropagation);
         }
         if (event.action == MouseAction::PRESS) {
-            pressMouseTestResults_[event.button] = currMouseTestResults_;
+            pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
         } else if (event.action == MouseAction::RELEASE) {
             DoSingleMouseActionRelease(event.button);
         }
@@ -1342,6 +1341,59 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         DoMouseActionRelease();
     }
     return DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+}
+
+bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
+{
+    MouseTestResult handledResults;
+    bool isStopPropagation = false;
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        DispatchMouseEventToPressResults(event, pressMouseTestResults_, handledResults, isStopPropagation);
+        if (event.action == MouseAction::PRESS) {
+            pressMouseTestResults_ = currMouseTestResults_;
+        } else if (event.action == MouseAction::RELEASE) {
+            DoMouseActionRelease();
+        }
+    }
+    if (event.pullAction == MouseAction::PULL_UP) {
+        DoMouseActionRelease();
+    }
+    for (const auto& mouseTarget : currMouseTestResults_) {
+        if (!mouseTarget) {
+            continue;
+        }
+        if (!isStopPropagation) {
+            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+            if (ret && mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+            continue;
+        }
+        if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+            pressMouseTestResults_.end()) {
+            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+            if (mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
+    MouseTestResult& handledResults, bool& isStopPropagation)
+{
+    for (const auto& mouseTarget : targetResults) {
+        if (!mouseTarget) {
+            continue;
+        }
+        handledResults.emplace_back(mouseTarget);
+        if (mouseTarget->HandleMouseEvent(event)) {
+            isStopPropagation = true;
+            break;
+        }
+    }
 }
 
 bool EventManager::DispatchMouseEventToCurResults(
@@ -1359,10 +1411,10 @@ bool EventManager::DispatchMouseEventToCurResults(
             }
             continue;
         }
-        auto mouseTargetIter = pressMouseTestResults_.find(event.button);
-        if ((mouseTargetIter != pressMouseTestResults_.end() &&
+        auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
-            mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResults_.end()) {
+            mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
             // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
             if (mouseTarget->HandleMouseEvent(event)) {
                 return true;
@@ -1379,7 +1431,7 @@ void EventManager::DoMouseActionRelease()
 
 void EventManager::DoSingleMouseActionRelease(MouseButton button)
 {
-    pressMouseTestResults_.erase(button);
+    pressMouseTestResultsMap_.erase(button);
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
@@ -2242,6 +2294,155 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
         falsifyEvent.pointers = lastTouchEvent_.pointers;
         DispatchTouchEvent(falsifyEvent, sendOnTouch);
     }
+}
+
+bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
+    bool ret = false;
+    if (newXy.x != 0 && newXy.y != 0) {
+        newTouchEvent.x = newXy.x;
+        newTouchEvent.y = newXy.y;
+        newTouchEvent.screenX = newScreenXy.x;
+        newTouchEvent.screenY = newScreenXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newTouchEvent.time = TimeStamp(nanoseconds);
+        newTouchEvent.history = current;
+        newTouchEvent.isInterpolated = true;
+        newTouchEvent.inputXDeltaSlope = newXy.inputXDeltaSlope;
+        newTouchEvent.inputYDeltaSlope = newXy.inputYDeltaSlope;
+        ret = true;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+            PRIu64 "", newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
+            newTouchEvent.screenX, newTouchEvent.screenY,
+            static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
+    }
+    return ret;
+}
+
+TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp)
+{
+    TouchEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
+MouseEvent EventManager::GetResampleMouseEvent(
+    const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
+    if (newXy.x != 0 && newXy.y != 0) {
+        newMouseEvent.x = newXy.x;
+        newMouseEvent.y = newXy.y;
+        newMouseEvent.screenX = newScreenXy.x;
+        newMouseEvent.screenY = newScreenXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newMouseEvent.time = TimeStamp(nanoseconds);
+        newMouseEvent.history = current;
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "Mouse Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+            PRIu64 "", newMouseEvent.id, newMouseEvent.x, newMouseEvent.y,
+            newMouseEvent.screenX, newMouseEvent.screenY,
+            static_cast<uint64_t>(newMouseEvent.time.time_since_epoch().count()));
+    }
+    return newMouseEvent;
+}
+
+MouseEvent EventManager::GetMouseLatestPoint(const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
+{
+    MouseEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
+}
+
+PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
+    const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp)
+{
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
+        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    PointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
+
+    if (newXy.x != 0 && newXy.y != 0) {
+        newPointerEvent.x = newXy.x;
+        newPointerEvent.y = newXy.y;
+        std::chrono::nanoseconds nanoseconds(nanoTimeStamp);
+        newPointerEvent.time = TimeStamp(nanoseconds);
+        newPointerEvent.history = current;
+    }
+    return newPointerEvent;
+}
+
+PointerEvent EventManager::GetPointerLatestPoint(const std::vector<PointerEvent>& current,
+    uint64_t nanoTimeStamp)
+{
+    PointerEvent result;
+    uint64_t gap = UINT64_MAX;
+    for (auto iter = current.begin(); iter != current.end(); iter++) {
+        uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
+        if (timeStamp == nanoTimeStamp) {
+            result = *iter;
+            return result;
+        } else if (timeStamp > nanoTimeStamp) {
+            if (timeStamp - nanoTimeStamp < gap) {
+                gap = timeStamp - nanoTimeStamp;
+                result = *iter;
+            }
+        } else {
+            if (nanoTimeStamp - timeStamp < gap) {
+                gap = nanoTimeStamp - timeStamp;
+                result = *iter;
+            }
+        }
+    }
+    return result;
 }
 
 void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch)

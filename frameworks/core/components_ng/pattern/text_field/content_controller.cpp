@@ -143,10 +143,9 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             break;
         }
         case TextInputType::VISIBLE_PASSWORD:
-        case TextInputType::NEW_PASSWORD: {
-            textChanged |= FilterWithAscii(result);
             break;
-        }
+        case TextInputType::NEW_PASSWORD:
+            break;
         case TextInputType::NUMBER_PASSWORD: {
             textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
             break;
@@ -352,7 +351,7 @@ bool ContentController::FilterWithEvent(const std::string& filter, std::string& 
 
 void ContentController::erase(int32_t startIndex, int32_t length)
 {
-    if (startIndex < 0 || startIndex >= GetWideText().length()) {
+    if (startIndex < 0 || startIndex >= static_cast<int32_t>(GetWideText().length())) {
         return;
     }
     auto wideText = GetWideText().erase(startIndex, length);

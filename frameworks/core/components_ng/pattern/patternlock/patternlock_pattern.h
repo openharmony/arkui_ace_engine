@@ -122,6 +122,7 @@ private:
     void HandleTextOnAccessibilityFocusCallback(int32_t x, int32_t y);
     void ModifyAccessibilityVirtualNode();
     bool GetHandleCircleRadius(float& handleCircleRadius);
+    std::string ReplacePlaceHolder(const std::string& str, int32_t number);
     void UpdateAccessibilityTextNode(RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y);
     void HandleTouchEvent(const TouchEventInfo& info);
     void OnTouchDown(const TouchLocationInfo& info);

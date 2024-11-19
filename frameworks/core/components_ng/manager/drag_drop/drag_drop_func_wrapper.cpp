@@ -118,7 +118,7 @@ bool ConfirmCurPointerEventInfo(
     };
     int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
-        dragAction->sourceType, sourceTool, std::move(stopDragCallback));
+        dragAction->sourceType, sourceTool, dragAction->displayId, std::move(stopDragCallback));
     if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
         dragAction->pointer = MOUSE_POINTER_ID;
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
@@ -132,9 +132,6 @@ void EnvelopedDragData(
 {
     auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);
@@ -424,7 +421,7 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
@@ -449,7 +446,7 @@ float DragDropFuncWrapper::RadiusToSigma(float radius)
 std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     const std::optional<BlurStyleOption>& blurStyleOp)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -525,6 +522,7 @@ std::string DragDropFuncWrapper::GetAnonyString(const std::string &fullString)
 // ancestor will NOT check boundary of window scene
 OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary)
 {
+    CHECK_NULL_RETURN(frameNode, OffsetF());
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     auto paintRect = context->GetPaintRectWithoutTransform();

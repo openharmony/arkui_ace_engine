@@ -95,8 +95,7 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StartPlayback();
-            },
-            "ArkUIMovingPhotoStart");
+            }, "ArkUIMovingPhotoStart");
     });
 
     controller_->SetStopPlaybackImpl([weak = WeakClaim(this), uiTaskExecutor]() {
@@ -106,8 +105,17 @@ void MovingPhotoPattern::OnAttachToFrameNode()
                 CHECK_NULL_VOID(pattern);
                 ContainerScope scope(pattern->instanceId_);
                 pattern->StopPlayback();
-            },
-            "ArkUIMovingPhotoStop");
+            }, "ArkUIMovingPhotoStop");
+    });
+
+    controller_->SetRefreshMovingPhotoImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+        uiTaskExecutor.PostTask(
+            [weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->RefreshMovingPhoto();
+            }, "RefreshMovingPhoto");
     });
 
     RegisterVisibleAreaChange();
@@ -154,7 +162,6 @@ void MovingPhotoPattern::InitEvent()
     CHECK_NULL_VOID(gestureHub);
     if (longPressEvent_) {
         gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
-        return;
     }
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -207,9 +214,19 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress isEnableAnalyzer_ return.");
         return;
     }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress auto&Repeat return.");
-        return;
+    if (isRefreshMovingPhoto_) {
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress IsRefreshMovingPhotoReturn:%{public}d.",
+                isRefreshMovingPhoto_);
+            return;
+        }
+        isRefreshMovingPhotoPlaying_ = true;
+    } else {
+        if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleLongPress IsRefreshMovingPhotoReturn not:%{public}d.",
+                isRefreshMovingPhoto_);
+            return;
+        }
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleLongPress start.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -222,7 +239,6 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
     }
     if (isSetAutoPlayPeriod_ && (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE ||
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
-        isSetAutoPlayPeriod_ = false;
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration);
@@ -235,8 +251,8 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     if (currentPlayStatus_ == PlaybackStatus::ERROR) {
         ResetMediaPlayer();
     }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent auto&Repeat return.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (!isPrepared_ || isPlayByController_) {
@@ -265,6 +281,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto UpdateImageNode start.");
     if (startAnimationFlag_) {
         needUpdateImageNode_ = true;
         return;
@@ -517,7 +534,7 @@ void MovingPhotoPattern::HandleImageAnalyzerMode()
             StartImageAnalyzer();
         }
     }
-    if (!isEnableAnalyzer_ && IsSupportImageAnalyzer()) {
+    if (!isEnableAnalyzer_ && IsSupportImageAnalyzer() && imageAnalyzerManager_) {
         DestroyAnalyzerOverlay();
         LongPressEventModify(true);
     }
@@ -653,7 +670,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             UpdateAnalyzerUIConfig(geometryNode);
         }
     }
-    if (IsSupportImageAnalyzer() && !isEnableAnalyzer_) {
+    if (imageAnalyzerManager_ && !isEnableAnalyzer_) {
         DestroyAnalyzerOverlay();
         LongPressEventModify(true);
     }
@@ -863,7 +880,9 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     UpdateMediaPlayerSpeed();
     UpdateMediaPlayerMuted();
-    VisiblePlayback();
+    if (!isRefreshMovingPhoto_) {
+        VisiblePlayback();
+    }
 }
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
@@ -874,10 +893,13 @@ void MovingPhotoPattern::OnMediaPlayerStoped()
 
 void MovingPhotoPattern::OnMediaPlayerCompletion()
 {
-    if (isPlayByController_ || autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        isPlayByController_ = false;
-        StopAnimation();
+    if (!isRefreshMovingPhotoPlaying_) {
+        if (isPlayByController_ || autoAndRepeatLevel_ != PlaybackMode::NONE) {
+            isPlayByController_ = false;
+            StopAnimation();
+        }
     }
+    
     FireMediaPlayerFinish();
 }
 
@@ -923,9 +945,8 @@ void MovingPhotoPattern::StartPlayback()
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "StartPlayback autoAndRepeatLevel_:%{public}d.",
-            autoAndRepeatLevel_);
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (currentPlayStatus_ == PlaybackStatus::STOPPED) {
@@ -1015,14 +1036,57 @@ void MovingPhotoPattern::PausePlayback()
     if (currentPlayStatus_ != PlaybackStatus::STARTED || !isPrepared_) {
         return;
     }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "PausePlayback autoAndRepeatLevel_:%{public}d.",
-            autoAndRepeatLevel_);
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhotoPlaying_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     isPlayByController_ = false;
     Pause();
     StopAnimation();
+}
+
+void MovingPhotoPattern::RefreshMovingPhoto()
+{
+    if (uri_ == "") {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
+        return;
+    }
+    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto autoAndRepeatLevel_ is not none.");
+        return;
+    }
+    if (currentPlayStatus_ == PlaybackStatus::STARTED) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto currentPlayStatus_ is STARTED.");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+    CHECK_NULL_VOID(dataProvider);
+    if (!layoutProperty->HasMovingPhotoUri() || !layoutProperty->HasVideoSource()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto source is null.");
+        return;
+    }
+    std::string imageSrc = dataProvider->GetMovingPhotoImageUri(uri_);
+    imageSrc += "?date_modified" + std::to_string(GetMicroTickCount());
+    ImageSourceInfo src;
+    src.SetSrc(imageSrc);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
+    UpdateImageNode();
+    fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
+    isRefreshMovingPhoto_ = true;
+    ResetMediaPlayer();
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+    }
+    if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
+        UpdateAnalyzerOverlay();
+    }
 }
 
 void MovingPhotoPattern::StopAnimation()
@@ -1031,6 +1095,9 @@ void MovingPhotoPattern::StopAnimation()
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StopAnimationCallback();
         return;
+    }
+    if (isRefreshMovingPhotoPlaying_) {
+        isRefreshMovingPhotoPlaying_ = false;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1195,8 +1262,8 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
     if (currentPlayStatus_ == PlaybackStatus::STARTED || !isPrepared_ || isPlayByController_) {
         return;
     }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleImageAnalyzerPlayCallBack auto&Repeat return.");
+    if (IsRefreshMovingPhotoReturn(isRefreshMovingPhoto_)) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent IsRefreshMovingPhotoReturn.");
         return;
     }
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -1218,9 +1285,13 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
 
 void MovingPhotoPattern::Start()
 {
+    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto start play.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
+    }
+    if (isRefreshMovingPhoto_) {
+        isRefreshMovingPhoto_ = false;
     }
     if (currentPlayStatus_ == PlaybackStatus::STOPPED) {
         mediaPlayer_->PrepareAsync();
@@ -1428,7 +1499,10 @@ void MovingPhotoPattern::VisibleAreaCallback(bool visible)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto VisibleAreaCallback:%{public}d.", visible);
     if (visible) {
-        if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO &&
+            (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE ||
+            currentPlayStatus_ == PlaybackStatus::PAUSED)) {
+            isSetAutoPlayPeriod_ = true;
             SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
         }
         MediaResetToPlay();
@@ -1437,6 +1511,10 @@ void MovingPhotoPattern::VisibleAreaCallback(bool visible)
             PausePlayback();
         } else if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
             StopPlayback();
+        }
+        if (isRefreshMovingPhoto_) {
+            isSetAutoPlayPeriod_ = false;
+            ResetMediaPlayer();
         }
     }
 }
@@ -1673,14 +1751,36 @@ int64_t MovingPhotoPattern::GetUriCoverPosition()
 void MovingPhotoPattern::HandleAnalyzerPlayEvent(bool canPlay)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto HandleAnalyzerPlayEvent:%{public}d", canPlay);
+    if (isAnalyzerPlaying_ == canPlay || isPlayByController_) {
+        return;
+    }
     if (isAnalyzerPlaying_ && !canPlay) {
         Pause();
         StopAnimation();
     }
     isAnalyzerPlaying_ = canPlay;
     if (canPlay) {
+        if (isRefreshMovingPhoto_) {
+            isRefreshMovingPhotoPlaying_ = true;
+        }
         HandleImageAnalyzerPlayCallBack();
     }
+}
+
+bool MovingPhotoPattern::IsRefreshMovingPhotoReturn(bool status)
+{
+    if (status) {
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "IsRefreshMovingPhotoReturn:%{public}d.", status);
+            return true;
+        }
+    } else {
+        if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "IsRefreshMovingPhotoReturn not:%{public}d.", status);
+            return true;
+        }
+    }
+    return false;
 }
 
 MovingPhotoPattern::~MovingPhotoPattern()

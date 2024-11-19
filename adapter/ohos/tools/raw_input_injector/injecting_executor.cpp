@@ -104,6 +104,9 @@ bool InjectingExecutor::InjectOnePonterEvent(
         }
         // 1. prepare the pointer event
         auto pointerEvent = MMI::PointerEvent::Create();
+        if (!pointerEvent) {
+            continue;
+        }
         pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
         pointerEvent->SetPointerAction(activingPointer.actionType);
         pointerEvent->SetPointerId(activingPointer.finger);

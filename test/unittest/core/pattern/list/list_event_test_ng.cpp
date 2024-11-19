@@ -813,7 +813,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign010, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     CreateDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), -LIST_HEIGHT);
     DragAction(frameNode_, Offset(), -100, 0);
     EXPECT_TRUE(Position(0));
 

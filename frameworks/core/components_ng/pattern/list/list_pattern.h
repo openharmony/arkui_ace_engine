@@ -104,9 +104,9 @@ public:
         return maxListItemIndex_;
     }
 
-    int32_t GetDefaultCachedCount() const
+    int32_t GetStartIndexInItemPosition() const
     {
-        return defCachedCount_;
+        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
     }
 
     bool IsScrollable() const override
@@ -161,7 +161,7 @@ public:
             });
     }
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -350,6 +350,8 @@ public:
         return canOverScroll;
     }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
+
+    SizeF GetChildrenExpandedSize() override;
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -454,6 +456,7 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     float listTotalHeight_ = 0.0f;
@@ -489,7 +492,6 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
-    int32_t defCachedCount_ = 1;
 };
 } // namespace OHOS::Ace::NG
 

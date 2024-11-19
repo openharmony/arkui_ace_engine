@@ -333,7 +333,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
 
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
@@ -341,12 +341,12 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
-    textLayoutProperty->UpdateContent("x");
+    textLayoutProperty->UpdateContent(u"x");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     layoutProperty_->UpdateBadgeMaxCount(5);
-    textLayoutProperty->UpdateContent("hello");
+    textLayoutProperty->UpdateContent(u"hello");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
@@ -357,7 +357,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
         badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     }
 
-    textLayoutProperty->UpdateContent(" ");
+    textLayoutProperty->UpdateContent(u" ");
     for (int32_t i = 0; i < 3; ++i) {
         auto badgePosition = static_cast<BadgePosition>(i);
         layoutProperty_->UpdateBadgePosition(badgePosition);
@@ -543,7 +543,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
      * @tc.steps: step5. call Measure with layoutWrapper.
      * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
      */
-    textLayoutProperty->UpdateContent("1");
+    textLayoutProperty->UpdateContent(u"1");
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
 
@@ -652,7 +652,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     layoutWrapper->AppendChild(firstChildLayoutWrapper);
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("badge value");
+    textLayoutProperty->UpdateContent(u"badge value");
 
     /**
      * @tc.steps: step3. update layoutWrapper and go to different branch.
@@ -785,7 +785,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -817,7 +817,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -849,7 +849,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -884,7 +884,7 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
     badge.Create(badgeParameters);
     {
         TextModelNG model;
-        model.Create("text");
+        model.Create(u"text");
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -957,5 +957,236 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetBadgeCountValue(), COUNT);
     EXPECT_EQ(layoutProperty->GetBadgePositionXValue(), Dimension(1));
     EXPECT_EQ(layoutProperty->GetBadgePositionYValue(), Dimension(1));
+}
+
+/**
+ * @tc.name: BadgeDumpInfoTest001
+ * @tc.desc: test badge pattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfoTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // update badge layoutProperty and go to different branch
+    layoutProperty_->UpdateBadgeValue("");
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty_->GetBadgeValueValue(), "");
+
+    layoutProperty_->UpdateBadgeValue("test");
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty_->GetBadgeValueValue(), "test");
+}
+
+/**
+ * @tc.name: BadgeDumpInfoTest002
+ * @tc.desc: test badge pattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfoTest002, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // update badge layoutProperty and go to different branch
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    layoutProperty_->UpdateBadgeValue("");
+    pattern_->DumpInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeValueValue(), "");
+
+    layoutProperty_->UpdateBadgeValue("test");
+    pattern_->DumpInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeValueValue(), "test");
+}
+
+/**
+ * @tc.name: BadgeDumpInfoTest003
+ * @tc.desc: test badge pattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfoTest003, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // update badge layoutProperty and go to different branch
+    layoutProperty_->UpdateBadgeCount(1);
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 1);
+
+    layoutProperty_->UpdateBadgeCount(100);
+    pattern_->DumpInfo();
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 100);
+}
+
+/**
+ * @tc.name: BadgeDumpInfoTest004
+ * @tc.desc: test badge pattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpInfoTest004, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // update badge layoutProperty and go to different branch
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    layoutProperty_->UpdateBadgeCount(1);
+    pattern_->DumpInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 1);
+
+    layoutProperty_->UpdateBadgeCount(100);
+    pattern_->DumpInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 100);
+}
+
+/**
+ * @tc.name: BadgeDumpSimplifyInfoTest001
+ * @tc.desc: test badge pattern DumpSimplifyInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeDumpSimplifyInfoTest001, TestSize.Level1)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    badge.Create(badgeParameters);
+    GetInstance();
+
+    // test frameNode has not
+    pattern_->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->OnModifyDone();
+
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern_->DumpSimplifyInfo(json);
+
+    // update badge layoutProperty and go to different branch
+    layoutProperty_->UpdateBadgeCount(1);
+    pattern_->DumpSimplifyInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 1);
+
+    layoutProperty_->UpdateBadgeCount(0);
+    layoutProperty_->UpdateBadgeMaxCount(0);
+    pattern_->DumpSimplifyInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 0);
+
+    layoutProperty_->UpdateBadgeValue("test");
+    layoutProperty_->UpdateBadgeTextColor(Color::GREEN);
+    layoutProperty_->UpdateBadgeCircleSize(BADGE_CIRCLE_SIZE);
+    layoutProperty_->UpdateBadgeFontSize(BADGE_FONT_SIZE);
+    pattern_->DumpSimplifyInfo(json);
+    EXPECT_EQ(layoutProperty_->GetBadgeValueValue(), "test");
+    EXPECT_EQ(layoutProperty_->GetBadgeCircleSizeValue(), BADGE_CIRCLE_SIZE);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColorValue(), Color::GREEN);
+    EXPECT_EQ(layoutProperty_->GetBadgeFontSizeValue(), BADGE_FONT_SIZE);
 }
 } // namespace OHOS::Ace::NG

@@ -32,7 +32,7 @@ const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 } // namespace
 class FlexNewTestNG : public FlexBaseTestNG {
 public:
-    RefPtr<FrameNode> CreateNormalFrameNode(const std::string& content, const std::string& tag)
+    RefPtr<FrameNode> CreateNormalFrameNode(const std::u16string& content, const std::string& tag)
     {
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
@@ -83,11 +83,11 @@ HWTEST_F(FlexNewTestNG, Example, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
         // // step: create child nodes
-        auto text1 = CreateText("text1", [this](TextModelNG model) {
+        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
-        auto text2 = CreateText("text2", [this](TextModelNG model) {
+        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -147,7 +147,7 @@ HWTEST_F(FlexNewTestNG, HandleBlankFirstTimeMeasure001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        blankFrameNode = CreateNormalFrameNode("blank", V2::BLANK_ETS_TAG);
+        blankFrameNode = CreateNormalFrameNode(u"blank", V2::BLANK_ETS_TAG);
     });
     ASSERT_NE(frameNode, nullptr);
     CreateLayoutTask(frameNode);
@@ -205,7 +205,7 @@ HWTEST_F(FlexNewTestNG, PlaceChildren001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        textFrameNode = CreateNormalFrameNode("text", V2::TEXT_ETS_TAG);
+        textFrameNode = CreateNormalFrameNode(u"text", V2::TEXT_ETS_TAG);
     });
     CreateLayoutTask(frameNode);
     auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
@@ -271,8 +271,8 @@ HWTEST_F(FlexNewTestNG, SecondaryMeasureByProperty001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        auto textFrameNode1 = CreateNormalFrameNode("text1", V2::TEXT_ETS_TAG);
-        auto textFrameNode2 = CreateNormalFrameNode("text2", V2::BLANK_ETS_TAG);
+        auto textFrameNode1 = CreateNormalFrameNode(u"text1", V2::TEXT_ETS_TAG);
+        auto textFrameNode2 = CreateNormalFrameNode(u"text2", V2::BLANK_ETS_TAG);
     });
     CreateLayoutTask(frameNode);
     auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
@@ -341,11 +341,11 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        auto text1 = CreateText("text1", [this](TextModelNG model) {
+        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
-        auto text2 = CreateText("text2", [this](TextModelNG model) {
+        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -408,11 +408,11 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes002, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        auto text1 = CreateText("text1", [this](TextModelNG model) {
+        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
-        auto text2 = CreateText("text2", [this](TextModelNG model) {
+        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -471,7 +471,7 @@ HWTEST_F(FlexNewTestNG, ReverseFlexDirection001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        auto text = CreateText("text", [this](TextModelNG model) {
+        auto text = CreateText(u"text", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -522,7 +522,7 @@ HWTEST_F(FlexNewTestNG, CheckIsGrowOrShrink001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        textFrameNode = CreateText("text", [this](TextModelNG model) {
+        textFrameNode = CreateText(u"text", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -626,7 +626,7 @@ HWTEST_F(FlexNewTestNG, UpdateLayoutConstraintOnCrossAxis001, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        textFrameNode = CreateText("text", [this](TextModelNG model) {
+        textFrameNode = CreateText(u"text", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
@@ -679,11 +679,11 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes003, TestSize.Level1)
         ViewAbstract::SetWidth(CalcLength(300.0f));
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
-        auto text1 = CreateText("text1", [this](TextModelNG model) {
+        auto text1 = CreateText(u"text1", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });
-        auto text2 = CreateText("text2", [this](TextModelNG model) {
+        auto text2 = CreateText(u"text2", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(100.0f));
             ViewAbstract::SetHeight(CalcLength(50.0f));
         });

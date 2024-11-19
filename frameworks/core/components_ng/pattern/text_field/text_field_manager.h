@@ -84,18 +84,7 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField)
-    {
-        auto node = onFocusTextField.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto frameNode = node->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
-        if (scrollableNode) {
-            isScrollableChild_ = true;
-        }
-        TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
-    }
+    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
 
     bool IsScrollableChild()
     {
@@ -225,12 +214,13 @@ public:
         laterAvoid_ = laterAvoid;
     }
 
-    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height)
+    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height, int32_t orientation)
     {
         laterAvoid_ = true;
         laterAvoidKeyboardArea_ = keyboardArea;
         laterAvoidPositionY_ = positionY;
         laterAvoidHeight_ = height;
+        laterOrientation_ = orientation;
     }
 
     Rect GetLaterAvoidKeyboardRect()
@@ -246,6 +236,11 @@ public:
     double GetLaterAvoidHeight()
     {
         return laterAvoidHeight_;
+    }
+
+    int32_t GetLaterOrientation()
+    {
+        return laterOrientation_;
     }
 
     void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
@@ -282,17 +277,28 @@ public:
         return isImeAttached_;
     }
 
-    void AddAvoidKeyboardCallback(const std::function<void()>&& callback)
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
     {
-        afterAvoidKeyboardCallbacks_.emplace_back(std::move(callback));
+        if (isCustomKeyboard) {
+            avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+        } else {
+            avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+        }
     }
 
-    void OnAfterAvoidKeyboard()
+    void RemoveAvoidKeyboardCallback(int32_t id)
     {
-        auto callbacks = std::move(afterAvoidKeyboardCallbacks_);
-        for (auto&& callback : callbacks) {
-            if (callback) {
-                callback();
+        avoidCustomKeyboardCallbacks_.erase(id);
+        avoidSystemKeyboardCallbacks_.erase(id);
+    }
+
+    void OnAfterAvoidKeyboard(bool isCustomKeyboard)
+    {
+        auto callbacks =
+            isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+        for (const auto& pair : callbacks) {
+            if (pair.second) {
+                pair.second();
             }
         }
     }
@@ -326,9 +332,11 @@ private:
     Rect laterAvoidKeyboardArea_;
     double laterAvoidPositionY_ = 0.0;
     double laterAvoidHeight_ = 0.0;
+    int32_t laterOrientation_ = -1;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
-    std::list<std::function<void()>> afterAvoidKeyboardCallbacks_;
+    std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
+    std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
 };
 

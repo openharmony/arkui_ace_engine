@@ -499,7 +499,7 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
             { V2::TAB_BAR_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<TabBarPattern>(nullptr); });
+                        type, nodeId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
                 } },
             { V2::SWIPER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {

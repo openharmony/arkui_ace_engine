@@ -1124,6 +1124,11 @@ PipelineContext* UINode::GetContext() const
     return context;
 }
 
+PipelineContext* UINode::GetAttachedContext() const
+{
+    return context_;
+}
+
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {
@@ -1750,7 +1755,7 @@ void UINode::NotifyWebPattern(bool isRegister)
     }
 }
 
-void UINode::GetContainerComponentText(std::string& text)
+void UINode::GetContainerComponentText(std::u16string& text)
 {
     for (const auto& child : GetChildren()) {
         if (InstanceOf<FrameNode>(child) && child->GetTag() == V2::TEXT_ETS_TAG) {
@@ -1759,7 +1764,7 @@ void UINode::GetContainerComponentText(std::string& text)
             CHECK_NULL_VOID(pattern);
             auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            text = layoutProperty->GetContent().value_or("");
+            text = layoutProperty->GetContent().value_or(u"");
             break;
         }
         child->GetContainerComponentText(text);

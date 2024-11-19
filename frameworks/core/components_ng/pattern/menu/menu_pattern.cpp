@@ -205,10 +205,22 @@ void MenuPattern::OnAttachToFrameNode()
         auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(warpperPattern);
         if (!warpperPattern->IsHide()) {
-            menuWarpper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
+    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->SetHasFoldModeChangedTransition(true);
+    };
+    foldDisplayModeChangedCallbackId_ =
+        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -243,6 +255,12 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
+
+    if (foldDisplayModeChangedCallbackId_.has_value()) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void MenuPattern::OnModifyDone()
@@ -1946,7 +1964,8 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect()) {
+    auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
+    if (hasTransition) {
         disappearOffset_ = endOffset_;
         return;
     }
@@ -1965,7 +1984,8 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
         auto imagePattern = preview->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(imagePattern);
         auto imageRawSize = imagePattern->GetRawImageSize();
-        if (previewSize.IsPositive() && imageRawSize.IsPositive() && imageRawSize > previewSize) {
+        auto isOriginSizeGreater = previewSize.IsPositive() && imageRawSize.IsPositive() && imageRawSize > previewSize;
+        if (isOriginSizeGreater) {
             appearScale *= imageRawSize.Width() / previewSize.Width();
         }
 
@@ -1992,5 +2012,24 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
 
     originOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, appearScale);
     disappearOffset_ = GetPreviewMenuAnimationOffset(previewCenter, previewSize, disappearScale);
+}
+
+void MenuPattern::UpdateMenuPathParams(std::optional<MenuPathParams> pathParams)
+{
+    pathParams_ = pathParams;
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
+}
+
+void MenuPattern::OnDetachFromMainTree()
+{
+    auto wrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapperNode);
+    auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestPathRender();
 }
 } // namespace OHOS::Ace::NG

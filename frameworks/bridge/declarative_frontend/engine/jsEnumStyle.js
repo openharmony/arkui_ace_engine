@@ -247,6 +247,15 @@ var ImageRenderMode;
   ImageRenderMode[ImageRenderMode["Template"] = 1] = "Template";
 })(ImageRenderMode || (ImageRenderMode = {}));
 
+var ImageRotateOrientation;
+(function (ImageRotateOrientation) {
+  ImageRotateOrientation[ImageRotateOrientation["AUTO"] = 0] = "AUTO";
+  ImageRotateOrientation[ImageRotateOrientation["UP"] = 1] = "UP";
+  ImageRotateOrientation[ImageRotateOrientation["RIGHT"] = 2] = "RIGHT";
+  ImageRotateOrientation[ImageRotateOrientation["DOWN"] = 3] = "DOWN";
+  ImageRotateOrientation[ImageRotateOrientation["LEFT"] = 4] = "LEFT";
+})(ImageRotateOrientation || (ImageRotateOrientation = {}));
+
 var ImageInterpolation;
 (function (ImageInterpolation) {
   ImageInterpolation[ImageInterpolation["None"] = 0] = "None";
@@ -715,6 +724,8 @@ var FormDimension;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
+  FormDimension["DIMENSION_2_3"] = 8;
+  FormDimension["DIMENSION_3_3"] = 9;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -981,14 +992,6 @@ var TextAreaType;
   TextAreaType[TextAreaType["URL"] = 13] = "URL";
 })(TextAreaType || (TextAreaType = {}));
 
-var AutoCapitalizationMode;
-(function (AutoCapitalizationMode) {
-  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
-  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
-  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
-  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
-})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
-
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
@@ -1052,6 +1055,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
+
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
 (function (NavigationOperation) {
@@ -1144,7 +1155,9 @@ var SourceTool;
 (function (SourceTool) {
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool["Finger"] = 1;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool["Pen"] = 2;
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
@@ -1225,6 +1238,12 @@ var OverScrollMode;
   OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
   OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
 })(OverScrollMode || (OverScrollMode = {}));
+
+var BlurOnKeyboardHideMode;
+(function (BlurOnKeyboardHideMode) {
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["SILENT"] = 0] = "SILENT";
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["BLUR"] = 1] = "BLUR";
+})(BlurOnKeyboardHideMode || (BlurOnKeyboardHideMode = {}));
 
 var RenderExitReason;
 (function (RenderExitReason) {
@@ -1473,10 +1492,10 @@ var BlurType;
   BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
 })(BlurType || (BlurType = {}));
 
-var EffectType;
+let EffectType;
 (function (EffectType) {
-  EffectType[EffectType["DEFAULT"] = 0] = "DEFAULT";
-  EffectType[EffectType["WINDOW_EFFECT"] = 1] = "WINDOW_EFFECT";
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
 })(EffectType || (EffectType = {}));
 
 var ThemeColorMode;
@@ -2030,7 +2049,7 @@ class TextMenuItemId {
   static get CUT() {
     return new TextMenuItemId('OH_DEFAULT_CUT');
   }
-  
+
   static get COPY() {
     return new TextMenuItemId('OH_DEFAULT_COPY');
   }
@@ -2264,11 +2283,11 @@ class NavPathStack {
     let animated = true;
     if (typeof param === 'boolean') {
       animated = param;
-    } else if (param !== undefined && param != null) {
+    } else if (param !== undefined && param !== null) {
       if (typeof param.animated === 'boolean') {
         animated = param.animated;
       }
-      if (param.launchMode !== undefined) {
+      if (param.launchMode !== undefined && param.launchMode !== null) {
         launchMode = param.launchMode;
       }
     }
@@ -2321,7 +2340,12 @@ class NavPathStack {
   }
   pushDestination(info, optionParam) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
@@ -2398,7 +2422,12 @@ class NavPathStack {
   }
   replaceDestination(info, navigationOptions) {
     if (!this.checkPathValid(info)) {
-      return;
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
     }
     let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
     if (promiseWithLaunchMode !== undefined) {

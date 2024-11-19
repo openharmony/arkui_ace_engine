@@ -554,11 +554,10 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
-void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent, double distanceThreshold)
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
-    clickEventActuator_->AddDistanceThreshold(distanceThreshold);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
@@ -663,7 +662,6 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
         click = clickEventActuator_->GetClickEvent();
         CHECK_NULL_RETURN(click, true);
         click(info);
-        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
         return true;
     }
     const RefPtr<ClickRecognizer> clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
@@ -1105,20 +1103,22 @@ void GestureEventHub::SetLongPressEvent(
 }
 
 // Set by user define, which will replace old one.
-void GestureEventHub::SetPanEvent(
-    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
+void GestureEventHub::SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+    Dimension distance, bool isOverrideDistance)
 {
     if (!panEventActuator_) {
-        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(
+            WeakClaim(this), direction, fingers, distance.ConvertToPx(), isOverrideDistance);
     }
     panEventActuator_->ReplacePanEvent(panEvent);
 }
 
-void GestureEventHub::AddPanEvent(
-    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
+void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+    Dimension distance, bool isOverrideDistance)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
-        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(
+            WeakClaim(this), direction, fingers, distance.ConvertToPx(), isOverrideDistance);
     }
     panEventActuator_->AddPanEvent(panEvent);
 }

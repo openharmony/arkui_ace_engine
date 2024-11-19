@@ -22,6 +22,7 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
@@ -50,7 +51,7 @@ class NavigationManager : public virtual AceType {
 public:
     using DumpLogDepth = int;
     using DumpCallback = std::function<void(DumpLogDepth)>;
-    NavigationManager() = default;
+    NavigationManager();
     ~NavigationManager() = default;
 
     void AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback);
@@ -82,6 +83,48 @@ public:
         isInteractive_ = false;
     }
 
+    void SetCurNodeAnimationCached(bool curNodeAnimationCached)
+    {
+        curNodeAnimationCached_ = curNodeAnimationCached;
+    }
+    void SetCurrentNodeNeverSet(bool currentNodeNeverSet)
+    {
+        currentNodeNeverSet_ = currentNodeNeverSet;
+    }
+
+    void SetPreNodeHasAnimation(bool preNodeHasAnimation)
+    {
+        preNodeHasAnimation_ = preNodeHasAnimation;
+    }
+
+    void SetNavNodeInTransition(const RefPtr<FrameNode>& curNode, const RefPtr<FrameNode>& preNode)
+    {
+        curNavNode_ = curNode;
+        preNavNode_ = preNode;
+    }
+
+    void SetIsNavigationOnAnimation(bool isInAnimation)
+    {
+        isInAnimation_ = isInAnimation;
+    }
+
+    bool IsNavigationInAnimation() const
+    {
+        return isInAnimation_;
+    }
+
+    bool HasCacheNavigationNodeEnable()
+    {
+        return hasCacheNavigationNodeEnable_;
+    }
+
+    void UpdateRenderGroup(const RefPtr<FrameNode>& curNode, bool isSet);
+    void UpdatePreNavNodeRenderGroupProperty();
+    void ResetCurNavNodeRenderGroupProperty();
+    void UpdateCurNavNodeRenderGroupProperty();
+    void CacheNavigationNodeAnimation();
+    bool CheckChildrenAnimationAndTagState(const RefPtr<FrameNode>& node);
+    RefPtr<FrameNode> GetNavDestContentFrameNode(const RefPtr<FrameNode>& node);
     bool AddInteractiveAnimation(const std::function<void()>& addCallback);
 
     bool AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode);
@@ -108,6 +151,14 @@ private:
     std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
+
+    RefPtr<FrameNode> curNavNode_;
+    RefPtr<FrameNode> preNavNode_;
+    bool currentNodeNeverSet_ = true;
+    bool curNodeAnimationCached_ = false;
+    bool preNodeHasAnimation_ = false;
+    bool isInAnimation_ = false;
+    bool hasCacheNavigationNodeEnable_ = false;
     int32_t interactiveAnimationId_ = -1;
 };
 } // namespace OHOS::Ace::NG

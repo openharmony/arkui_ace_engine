@@ -90,7 +90,7 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (!callback_) {
         return;
@@ -172,7 +172,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -278,7 +278,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
 
 void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this), isCatchMode]() {
@@ -313,7 +313,7 @@ void LongPressRecognizer::DoRepeat()
 
 void LongPressRecognizer::StartRepeatTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -329,7 +329,7 @@ void LongPressRecognizer::StartRepeatTimer()
 
 double LongPressRecognizer::ConvertPxToVp(double offset) const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
 
     double vpOffset = context->ConvertPxToVp(Dimension(offset, DimensionUnit::PX));
@@ -381,7 +381,7 @@ void LongPressRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     timer_.Cancel();
     deadlineTimer_.Cancel();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
 }

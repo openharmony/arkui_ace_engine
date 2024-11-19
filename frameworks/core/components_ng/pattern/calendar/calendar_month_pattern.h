@@ -134,6 +134,8 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth);

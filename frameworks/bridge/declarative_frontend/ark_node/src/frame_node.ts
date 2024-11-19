@@ -125,6 +125,13 @@ class FrameNode {
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;
   }
+  getValidNodePtr(): NodePtr {
+    if (this.nodePtr_) {
+      return this.nodePtr_;
+    } else {
+      throw Error('The FrameNode has been disposed!');
+    }
+  }
   dispose(): void {
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -389,12 +396,12 @@ class FrameNode {
   }
 
   getMeasuredSize(): Size {
-    const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+    const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
     return { width: size[0], height: size[1] };
   }
 
   getLayoutPosition(): Position {
-    const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+    const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
     return { x: position[0], y: position[1] };
   }
 

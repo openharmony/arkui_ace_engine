@@ -35,7 +35,11 @@
 #ifndef _ARKUI_UI_INPUT_EVENT_H_
 #define _ARKUI_UI_INPUT_EVENT_H_
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

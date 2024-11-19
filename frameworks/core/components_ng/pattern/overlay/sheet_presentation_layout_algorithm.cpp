@@ -46,6 +46,53 @@ void SheetPresentationLayoutAlgorithm::InitParameter()
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     sheetRadius_ = sheetTheme->GetSheetRadius().ConvertToPx();
+    // if 2in1, enableHoverMode is true by default.
+    auto enableHoverMode = sheetStyle_.enableHoverMode.value_or(sheetTheme->IsOuterBorderEnable() ? true : false);
+    hoverModeArea_ = sheetStyle_.hoverModeArea.value_or(
+        sheetTheme->IsOuterBorderEnable() ? HoverModeAreaType::TOP_SCREEN : HoverModeAreaType::BOTTOM_SCREEN);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    isKeyBoardShow_ = keyboardInsert.IsValid();
+    isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+}
+
+void SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto foldCreaseRect = sheetPattern->GetFoldScreenRect();
+    if (sheetType_ == SheetType::SHEET_CENTER && isHoverMode_) {
+        float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+        float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "upScreenHeight: %{public}f, downScreenHeight: %{public}f.", upScreenHeight,
+            downScreenHeight);
+        sheetHeight_ = std::min(sheetHeight_,
+            (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_) ? upScreenHeight : downScreenHeight);
+    }
+}
+
+void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto foldCreaseRect = sheetPattern->GetFoldScreenRect();
+    auto frameSizeHeight = geometryNode->GetFrameSize().Height();
+    if (sheetType_ == SheetType::SHEET_CENTER && isHoverMode_) {
+        float upScreenHeight = foldCreaseRect.Top() - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx();
+        float downScreenHeight = sheetMaxHeight_ - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - foldCreaseRect.Bottom();
+        sheetOffsetY_ = (hoverModeArea_ == HoverModeAreaType::TOP_SCREEN || isKeyBoardShow_)
+                            ? (SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() +
+                                  (upScreenHeight - frameSizeHeight) / SHEET_HALF_SIZE)
+                            : (foldCreaseRect.Bottom() + (downScreenHeight - frameSizeHeight) / SHEET_HALF_SIZE);
+    }
 }
 
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -59,10 +106,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
+    InitParameter();
     auto maxSize = layoutConstraint->maxSize;
     if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
         auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -85,6 +129,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             sheetWidth_ = width;
         }
+        CalculateSheetHeightInOtherScenes(layoutWrapper);
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
@@ -164,7 +209,9 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     } else if (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
         sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_ + sheetStyle_.bottomOffset->GetY());
+        sheetOffsetX_ = sheetOffsetX_ + sheetStyle_.bottomOffset->GetX();
     }
+    CalculateSheetOffsetInOtherScenes(layoutWrapper);
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
         sheetOffsetX_, sheetOffsetY_);
     OffsetF positionOffset;

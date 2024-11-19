@@ -67,6 +67,7 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetInstanceId();
+    void OnExtensionDetachToDisplay();
 
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     void OnWindowShow() override;

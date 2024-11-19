@@ -3093,6 +3093,7 @@ stateMgmtDFX.inRenderingElementId = new Array();
 stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT = 50;
 stateMgmtDFX.DUMP_MAX_LENGTH = 10;
 stateMgmtDFX.DUMP_LAST_LENGTH = 3;
+stateMgmtDFX.enableDebug = false;
 function setProfilerStatus(profilerStatus) {
     stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
     stateMgmtDFX.enableProfiler = profilerStatus;
@@ -3100,6 +3101,21 @@ function setProfilerStatus(profilerStatus) {
 class DumpInfo {
     constructor() {
         this.observedPropertiesInfo = [];
+    }
+}
+function setAceDebugMode() {
+    stateMgmtDFX.enableDebug = true;
+}
+class aceDebugTrace {
+    static begin(...args) {
+        if (stateMgmtDFX.enableDebug) {
+            aceTrace.begin(...args);
+        }
+    }
+    static end() {
+        if (stateMgmtDFX.enableDebug) {
+            aceTrace.end();
+        }
     }
 }
 /*
@@ -4561,7 +4577,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             return '-r'.match(param) != null || param.startsWith('-viewId=');
         };
         let dfxCommands = [];
-        for (var i = 0; i < commands.length; i++) {
+        for (let i = 0; i < commands.length; i++) {
             let command = commands[i];
             if (isFlag(command)) {
                 if (command.startsWith('-viewId=')) {
@@ -6666,7 +6682,7 @@ class ViewPU extends PUV2ViewBase {
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
-        aceTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
+        aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
         if (this.isRenderInProgress) {
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
         }
@@ -6698,7 +6714,7 @@ class ViewPU extends PUV2ViewBase {
             cb.call(this, varName);
         }
         this.restoreInstanceId();
-        aceTrace.end();
+        aceDebugTrace.end();
         
     }
     /**
@@ -6734,7 +6750,7 @@ class ViewPU extends PUV2ViewBase {
             return;
         }
         
-        aceTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
+        aceDebugTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
         
         this.syncInstanceId();
         for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
@@ -6762,7 +6778,7 @@ class ViewPU extends PUV2ViewBase {
         if (this.dirtDescendantElementIds_.size) {
             this.markNeedUpdate();
         }
-        aceTrace.end();
+        aceDebugTrace.end();
         
     }
     /**
@@ -8171,7 +8187,7 @@ class ObserveV2 {
      *
      */
     updateDirty2(updateUISynchronously = false) {
-        aceTrace.begin('updateDirty2');
+        aceDebugTrace.begin('updateDirty2');
         
         // obtain and unregister the removed elmtIds
         UINodeRegisterProxy.obtainDeletedElmtIds();
@@ -8216,11 +8232,11 @@ class ObserveV2 {
             }
         } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
         
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     updateDirtyComputedProps(computed) {
         
-        aceTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
+        aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
         computed.forEach((id) => {
             let comp;
             let weakComp = this.id2cmp_[id];
@@ -8235,11 +8251,11 @@ class ObserveV2 {
                 }
             }
         });
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     updateDirtyMonitorPaths(monitors) {
         
-        aceTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
+        aceDebugTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
         let weakMonitor;
         let monitor;
         let ret = 0;
@@ -8254,11 +8270,11 @@ class ObserveV2 {
                 this.monitorFuncsToRun_.add(ret);
             }
         });
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     runDirtyMonitors(monitors) {
         
-        aceTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
+        aceDebugTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
         let weakMonitor;
         let monitor;
         let monitorTarget;
@@ -8274,7 +8290,7 @@ class ObserveV2 {
                 }
             }
         });
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     /**
      * This version of UpdateUINodes does not wait for VSYNC, violates rules
@@ -8286,7 +8302,7 @@ class ObserveV2 {
      */
     updateUINodesSynchronously(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
+        aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
         let view;
         let weak;
         elmtIds.forEach((elmtId) => {
@@ -8302,7 +8318,7 @@ class ObserveV2 {
                 }
             } // if ViewV2 or ViewPU
         });
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
     // ViewPU/ViewV2 queues the elmtId that need update, marks the CustomNode dirty in RenderContext
@@ -8310,7 +8326,7 @@ class ObserveV2 {
     // much slower
     updateUINodes(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
+        aceDebugTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
         let viewWeak;
         let view;
         elmtIds.forEach((elmtId) => {
@@ -8326,7 +8342,7 @@ class ObserveV2 {
                 }
             }
         });
-        aceTrace.end();
+        aceDebugTrace.end();
     }
     constructMonitor(owningObject, owningObjectName) {
         let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
@@ -9549,6 +9565,10 @@ class ViewV2 extends PUV2ViewBase {
     debugInfoStateVars() {
         let retVal = `|--${this.constructor.name}[${this.id__()}]\n`;
         let meta = this[ObserveV2.V2_DECO_META];
+        if (!meta) {
+            retVal += ' No State Variables';
+            return retVal;
+        }
         Object.getOwnPropertyNames(meta)
             .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
             .forEach((varName) => {

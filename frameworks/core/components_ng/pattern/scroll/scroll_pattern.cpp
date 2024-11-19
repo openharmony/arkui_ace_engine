@@ -166,7 +166,7 @@ bool ScrollPattern::ScrollSnapTrigger()
 {
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
-    if (scrollBar && scrollBar->IsPressed()) {
+    if (scrollBar && scrollBar->IsDriving()) {
         return false;
     }
     if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
@@ -803,7 +803,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
@@ -1372,5 +1372,16 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         infochildren->Put(child);
     }
     json->Put("scrollMeasureInfos", infochildren);
+}
+
+SizeF ScrollPattern::GetChildrenExpandedSize()
+{
+    auto axis = GetAxis();
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewPort_.Width(), viewPortExtent_.Height());
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

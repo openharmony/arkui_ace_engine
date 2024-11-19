@@ -138,6 +138,8 @@ public:
     {
         return navDestinationPathInfo_;
     }
+    
+    int32_t GetNavigationNodeId() const;
 
     void SetNeedRemoveInPush(bool need)
     {
@@ -147,6 +149,16 @@ public:
     bool NeedRemoveInPush() const
     {
         return needRemoveInPush_;
+    }
+
+    void SetSystemTransitionType(NavigationSystemTransitionType type)
+    {
+        systemTransitionType_ = type;
+    }
+
+    NavigationSystemTransitionType GetSystemTransitionType() const
+    {
+        return systemTransitionType_;
     }
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
@@ -191,6 +203,11 @@ public:
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
+    bool IsNeedContentTransition();
+    bool TransitionContentInValid();
+    bool IsNeedTitleTransition();
+
+    std::string ToDumpString();
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -207,6 +224,7 @@ private:
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
     std::list<WeakPtr<UINode>> textNodeList_;
+    NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
 };
 
 } // namespace OHOS::Ace::NG

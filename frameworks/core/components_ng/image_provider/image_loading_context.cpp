@@ -15,6 +15,8 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -503,7 +505,18 @@ void ImageLoadingContext::MakeCanvasImage(
 
 SizeF ImageLoadingContext::GetImageSize() const
 {
-    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1.0, -1.0);
+    CHECK_NULL_RETURN(imageObj_, SizeF(-1.0, -1.0));
+    auto imageSize = imageObj_->GetImageSize();
+    auto orientation = imageObj_->GetOrientation();
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+        return {imageSize.Height(), imageSize.Width()};
+    }
+    return imageSize;
+}
+
+SizeF ImageLoadingContext::GetOriginImageSize() const
+{
+    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1, -1);
 }
 
 ImageFit ImageLoadingContext::GetImageFit() const

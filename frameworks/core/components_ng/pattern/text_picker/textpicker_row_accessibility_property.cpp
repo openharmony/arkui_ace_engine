@@ -26,6 +26,9 @@ std::string TextPickerRowAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(textPickerPattern, "");
     auto allChildNode = textPickerPattern->GetColumnNodes();
     std::string result = "";
+    if (allChildNode.size() == 1) {
+        return result;
+    }
     for (auto it : allChildNode) {
         CHECK_NULL_RETURN(it.second, "");
         auto textPickerColumnPattern = it.second->GetPattern<NG::TextPickerColumnPattern>();

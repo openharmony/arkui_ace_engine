@@ -1498,6 +1498,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
+        LocalScope scope(obj_.GetEcmaVM());
         Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
@@ -1699,7 +1700,8 @@ bool JsiDeclarativeEngine::LoadPageSource(
 
 bool JsiDeclarativeEngine::LoadPageSource(
     const std::shared_ptr<std::vector<uint8_t>>& content,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback,
+    const std::string& contentName)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("LoadJs by buffer");
@@ -1708,7 +1710,7 @@ bool JsiDeclarativeEngine::LoadPageSource(
     CHECK_NULL_RETURN(container, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (!arkRuntime->EvaluateJsCode(content->data(), content->size())) {
+    if (!arkRuntime->EvaluateJsCode(content->data(), content->size(), contentName)) {
         return false;
     }
     return true;
@@ -2732,6 +2734,31 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
     };
     
     LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
+#endif
+}
+
+void JsiDeclarativeEngine::JsSetAceDebugMode()
+{
+#if defined(PREVIEW)
+    return;
+#else
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> setAceDebugMode = globalObject->GetProperty("setAceDebugMode");
+    if (!setAceDebugMode->IsFunction()) {
+        return;
+    }
+    const auto func = JSRef<JSFunc>::Cast(setAceDebugMode);
+    ContainerScope scope(instanceId_);
+    func->Call(globalObject);
 #endif
 }
 

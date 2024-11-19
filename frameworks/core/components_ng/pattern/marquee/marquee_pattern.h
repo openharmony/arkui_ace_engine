@@ -92,6 +92,7 @@ public:
         frameRateRange_[type] = rateRange;
     }
     TextDirection GetTextDirection(const std::string& content, TextDirection direction);
+    void OnFontScaleConfigurationUpdate() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

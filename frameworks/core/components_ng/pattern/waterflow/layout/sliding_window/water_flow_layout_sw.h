@@ -50,6 +50,8 @@ private:
 
     void ApplyDelta(float delta);
 
+    void MeasureBeforeAnimation(int32_t targetIdx);
+
     void MeasureToTarget(int32_t targetIdx);
 
     /**
@@ -161,6 +163,11 @@ private:
      * @brief Measure all items in view to check if any item's height changed.
      */
     bool ItemHeightChanged() const;
+
+    /**
+     * @brief Data validity check
+     */
+    bool CheckData() const;
 
     /**
      * @brief Layout a single section of items

@@ -114,6 +114,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     auto context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, frameNode);
     auto textFieldTheme = context->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, frameNode);
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
@@ -864,7 +865,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     buttonRenderContext->UpdateClipEdge(true);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    std::string defaultText = "Search";
+    std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
@@ -1030,17 +1031,6 @@ void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
         value = TextInputAction::SEARCH;
     }
     pattern->UpdateTextInputAction(value);
-}
-
-void SearchModelNG::SetSearchCapitalizationMode(AutoCapitalizationMode value)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetMaxLength(uint32_t value)
@@ -1918,14 +1908,5 @@ void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
-}
-
-void SearchModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textFieldChild);
-    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
-    pattern->UpdateAutoCapitalizationMode(value);
 }
 } // namespace OHOS::Ace::NG

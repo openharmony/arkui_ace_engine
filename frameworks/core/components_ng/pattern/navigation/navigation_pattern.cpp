@@ -19,11 +19,13 @@
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -414,7 +416,7 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
         static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
     if (foldStatus != currentFoldStatus_) {
         currentFoldStatus_ = foldStatus;
@@ -615,17 +617,25 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
-    if (!needSyncWithJsStack_ || !isFinishInteractiveAnimation_) {
+    if (!needSyncWithJsStack_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+            "not need SyncWithJsStack, needSyncWithJsStack_ %{public}d", needSyncWithJsStack_);
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
+    if (!isFinishInteractiveAnimation_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "sync with js stack, id: %{public}s, UINodeId: %{public}d, preStackSize: %{public}d, newStackSize: %{public}d",
+        hostNode->GetCurId().c_str(), hostNode->GetId(), preStackSize_, navigationStack_->Size());
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
-
     preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -649,8 +659,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         UpdateIsAnimation(preTopNavPath_);
         lastPreIndex_ = 0;
         if (preTopNavPath_.has_value()) {
-            lastPreIndex_ = navigationStack_->FindIndex(preTopNavPath_->first,
-            preTopNavPath_->second, true);
+            lastPreIndex_ = navigationStack_->FindIndex(preTopNavPath_->first, preTopNavPath_->second, true);
         }
         FireInterceptionEvent(true, newTopNavPath);
         if (needSyncWithJsStack_) {
@@ -906,15 +915,7 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
             navBarNode->SetJSViewActive(true);
         }
-        auto stageManager = context->GetStageManager();
-        if (stageManager != nullptr) {
-            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            auto pageInfo = pagePattern->GetPageInfo();
-            NotifyPageShow(pageInfo->GetPageUrl());
-        }
+        ProcessPageShowEvent();
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
@@ -944,8 +945,8 @@ void NavigationPattern::CheckTopNavPathChange(
     bool animated = navigationStack_->GetAnimatedValue();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d, isDialog: "
-        "%{public}d",
-        disableAllAnimation, animated, isPopPage, isDialog);
+        "%{public}d, isReplace: %{public}d, isCustomAnimation: %{public}d",
+        disableAllAnimation, animated, isPopPage, isDialog, isReplace_, isCustomAnimation_);
     if (disableAllAnimation || !animated) {
         // transition without animation need to run before layout for geometryTransition.
         StartTransition(preTopNavDestination, newTopNavDestination, false, isPopPage, isShow);
@@ -1127,6 +1128,24 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     pageUrlChecker->NotifyPageShow(pageName);
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageName(pageName);
+    }
+}
+
+void NavigationPattern::ProcessPageShowEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    if (stageManager) {
+        RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        NotifyPageShow(pageInfo->GetPageUrl());
     }
 }
 
@@ -1948,6 +1967,7 @@ void NavigationPattern::DumpInfo()
 bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will trigger navigation custom animation");
     if ((!preTopNavDestination && !newTopNavDestination) || !onTransition_) {
         return false;
     }
@@ -2001,8 +2021,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
                 pattern->RecoveryToLastStack(preDestination, topDestination);
+                pattern->SyncWithJsStackIfNeeded();
             }
-            pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
         };
@@ -2154,14 +2174,9 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
         operation = NavigationOperation::PUSH;
         // if animated with navBarNode, recover navBar visibility
         hostNode->SetNeedSetInvisible(false);
-    } else if (!newTopNavDestination) {
-        operation = NavigationOperation::POP;
-    } else if (isPopPage) {
-        operation = NavigationOperation::POP;
     } else {
-        operation = NavigationOperation::PUSH;
+        operation = (!newTopNavDestination || isPopPage) ? NavigationOperation::POP : NavigationOperation::PUSH;
     }
-
     /* set transition animation flag fro navBarNode or navDestinationNode */
     if (operation == NavigationOperation::PUSH) {
         if (preTopDestination != nullptr) {
@@ -2172,7 +2187,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             CHECK_NULL_RETURN(navBarNode, navigationTransition);
             navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
         }
-
         if (newTopNavDestination != nullptr) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
         }
@@ -2190,7 +2204,13 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation start: operation: %{public}d", operation);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "custom animation start: operation: %{public}d, preInfo name: %{public}s, preInfo id: %{public}s, topInfo "
+        "name: %{public}s, curInfo id: %{public}s",
+        operation, preInfo ? preInfo->GetNavPathInfo()->GetName().c_str() : "null",
+        preInfo ? std::to_string(preInfo->GetNavDestinationId()).c_str() : "null",
+        topInfo ? topInfo->GetNavPathInfo()->GetName().c_str() : "null",
+        topInfo ? std::to_string(topInfo->GetNavDestinationId()).c_str() : "null");
     return onTransition_(preInfo, topInfo, operation);
 }
 
@@ -2369,9 +2389,6 @@ void NavigationPattern::AddToDumpManager()
             return;
         }
         auto infos = stack->DumpStackInfo();
-        for (const auto& info : infos) {
-            DumpLog::GetInstance().Print(depth, info);
-        }
     };
     mgr->AddNavigationDumpCallback(node->GetId(), node->GetDepth(), callback);
 }
@@ -2711,6 +2728,7 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
+        CloseLongPressDialog();
     }
 }
 
@@ -3133,5 +3151,43 @@ void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
     auto contentNode = navigationNode->GetContentNode();
     CHECK_NULL_VOID(contentNode);
     contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationPattern::CloseLongPressDialog()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
+    CHECK_NULL_VOID(titleBarPattern);
+    auto backButtonDialogNode = titleBarPattern->GetBackButtonDialogNode();
+    if (backButtonDialogNode) {
+        overlayManager->CloseDialog(backButtonDialogNode);
+        titleBarPattern->SetBackButtonDialogNode(nullptr);
+    }
+
+    auto menuItemDialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
+    if (menuItemDialogNode) {
+        overlayManager->CloseDialog(menuItemDialogNode);
+        titleBarPattern->SetLargeFontPopUpDialogNode(nullptr);
+    }
+
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarPattern = AceType::DynamicCast<NavToolbarPattern>(toolBarNode->GetPattern());
+    CHECK_NULL_VOID(toolBarPattern);
+    auto toolBarItemDialogNode = toolBarPattern->GetDialogNode();
+    if (toolBarItemDialogNode) {
+        overlayManager->CloseDialog(toolBarItemDialogNode);
+        toolBarPattern->SetToolBarItemDialogNode(nullptr);
+    }
 }
 } // namespace OHOS::Ace::NG

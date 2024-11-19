@@ -14,8 +14,7 @@
  */
 
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
-import { Drawer } from '../../components/Drawer';
-import { RadioBlock, SliderBlock, useEnabled } from 'common';
+import { Drawer, RadioBlock, SliderBlock, useEnabled } from 'common';
 
 
 @Component

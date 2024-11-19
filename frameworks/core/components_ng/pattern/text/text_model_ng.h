@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
+    void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override;
     void SetFont(const Font& value) override;
@@ -87,8 +88,8 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
-    static void InitText(FrameNode* frameNode, std::string& value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
+    static void InitText(FrameNode* frameNode, std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
@@ -138,7 +139,7 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
-    static std::string GetContent(FrameNode* frameNode);
+    static std::u16string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);

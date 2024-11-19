@@ -41,6 +41,7 @@ void ScrollTestNg::SetUpTestSuite()
     scrollBarTheme->touchWidth_ = Dimension(DEFAULT_TOUCH_WIDTH, DimensionUnit::VP);
     scrollBarTheme->activeWidth_ = Dimension(DEFAULT_ACTIVE_WIDTH, DimensionUnit::VP);
     scrollBarTheme->normalWidth_ = Dimension(DEFAULT_NORMAL_WIDTH, DimensionUnit::VP);
+    scrollBarTheme->foregroundColor_ = Color::FromString(SCROLL_BAR_COLOR);
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
@@ -120,7 +121,7 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
     contentChildren_.clear();
     for (int32_t index = 0; index < childNumber; index++) {
         TextModelNG textModel;
-        textModel.Create("text");
+        textModel.Create(u"text");
         SetSize(layoutProperty_->GetAxis(), CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE));
         contentChildren_.emplace_back(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         ViewStackProcessor::GetInstance()->Pop();

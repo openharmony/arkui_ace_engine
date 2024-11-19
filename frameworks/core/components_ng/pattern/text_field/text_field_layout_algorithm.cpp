@@ -219,7 +219,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
     }
     // first line indent
     CHECK_NULL_VOID(paragraph_);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -741,10 +741,11 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateFrameSizeConstraint(
     CHECK_NULL_RETURN(frameNode, frameSizeConstraintF);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, frameSizeConstraintF);
-    auto left = pattern->GetBorderLeft() + pattern->GetPaddingLeft();
-    auto right = pattern->GetBorderRight() + pattern->GetPaddingRight();
-    auto top = pattern->GetBorderTop() + pattern->GetPaddingTop();
-    auto bottom = pattern->GetBorderBottom() + pattern->GetPaddingBottom();
+    auto border = pattern->GetBorderWidthProperty();
+    auto left = pattern->GetBorderLeft(border) + pattern->GetPaddingLeft();
+    auto right = pattern->GetBorderRight(border) + pattern->GetPaddingRight();
+    auto top = pattern->GetBorderTop(border) + pattern->GetPaddingTop();
+    auto bottom = pattern->GetBorderBottom(border) + pattern->GetPaddingBottom();
     frameSizeConstraintF.maxSize.AddPadding(left, right, top, bottom);
     frameSizeConstraintF.minSize.AddPadding(left, right, top, bottom);
     return frameSizeConstraintF;
@@ -810,7 +811,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(paragraph_);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -875,7 +876,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(paragraph_);
     inlineParagraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -927,7 +928,7 @@ void TextFieldLayoutAlgorithm::GetSuitableSize(SizeF& maxSize, LayoutWrapper* la
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);

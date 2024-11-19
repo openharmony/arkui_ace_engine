@@ -106,6 +106,14 @@ public:
         return sandBoxCount_ > 0;
     }
 
+    size_t GetAnimationsCount() const override
+    {
+        if (rsNode_) {
+            return rsNode_->GetAnimationsCount();
+        }
+        return 0;
+    }
+
     void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
@@ -242,13 +250,8 @@ public:
     void UpdateWindowFocusState(bool isFocused) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
-    void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
-    float GetStatusBarHeight();
-
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
-    void ResetPageTransitionEffect() override;
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap);
@@ -366,15 +369,9 @@ public:
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
-#ifndef USE_ROSEN_DRAWING
-    bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
-    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
-#else
     bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
-#endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
@@ -414,7 +411,7 @@ public:
     void SetMarkNodeGroup(bool isNodeGroup) override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
     Matrix4 GetRevertMatrix() override;
@@ -534,9 +531,6 @@ protected:
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
-    virtual RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
-    RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
-
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
 
@@ -565,11 +559,7 @@ protected:
     void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
     void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
     void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
-#ifndef USE_ROSEN_DRAWING
-    void PaintSkBgImage();
-#else
     void PaintRSBgImage();
-#endif
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
@@ -616,6 +606,8 @@ protected:
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
 
+    void RegisterDensityChangedCallback();
+
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;
@@ -625,9 +617,9 @@ protected:
     float OnePixelValueRounding(float value);
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
-    void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void RoundToPixelGrid(bool isRound, uint16_t flag);
     void OnePixelRounding();
-    void OnePixelRounding(bool isRound, uint8_t flag);
+    void OnePixelRounding(uint16_t flag = 0);
     Matrix4 GetMatrix();
     Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
@@ -729,7 +721,7 @@ protected:
     bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
-    RectF contentClipRect_;
+    std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 

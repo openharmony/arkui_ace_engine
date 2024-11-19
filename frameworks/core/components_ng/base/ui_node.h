@@ -184,6 +184,7 @@ public:
 
     // performance.
     PipelineContext* GetContext() const;
+    PipelineContext* GetAttachedContext() const;
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
@@ -757,7 +758,7 @@ public:
 
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
+    void GetContainerComponentText(std::u16string& text);
 
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
@@ -882,7 +883,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = INT32_MAX;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;

@@ -61,14 +61,14 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-    auto maxSize =
-        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight -
-                                                    (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
+    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    auto top = safeAreaInsets.top_.Length();
+    auto maxSize = SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight - top);
     layoutConstraint.maxSize = maxSize;
     bool isMouseCustomMenu = false;
     if (info_->menuInfo.menuBuilder) {
@@ -77,7 +77,8 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
         auto customNode = customMenuLayoutWrapper->GetHostNode();
         if (customNode && customNode->GetTag() != "SelectMenu") {
             auto customMenuLayoutConstraint = layoutConstraint;
-            CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
+            customMenuLayoutConstraint.selfIdealSize =
+                OptionalSizeF(std::nullopt, customMenuLayoutConstraint.maxSize.Height());
             customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
             isMouseCustomMenu = true;
         }
@@ -95,7 +96,7 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
 void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
     LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -141,7 +142,7 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
         }
     }
     auto maxHeight = layoutConstraint->selfIdealSize.Height().value_or(0.0f);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, menuOffset);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -269,7 +270,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 {
     auto menuItem = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(menuItem, OffsetF());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -432,7 +433,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 void SelectOverlayLayoutAlgorithm::AdjustMenuInRootRect(
     OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -473,7 +474,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     }
     // avoid soft keyboard and root bottom
     if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -504,7 +505,7 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuOffsetAtSingleHandleBottom(const Re
     OffsetF& menuOffset, double spaceBetweenText)
 {
     CHECK_NULL_VOID(info_->isSingleHandle);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -521,7 +522,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(c
 {
     auto menuOffset = menuRect.GetOffset();
     CHECK_NULL_RETURN(info_->isSingleHandle, menuOffset);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, menuOffset);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -589,7 +590,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
         defaultMenuEndOffset_ - OffsetF(extensionWidth, -menuHeight - MORE_MENU_INTERVAL.ConvertToPx());
     auto extensionBottom = extensionOffset.GetY() + extensionHeight;
     auto isCoveredBySoftKeyBoard = [extensionBottom]() -> bool {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, false);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, false);
@@ -611,7 +612,7 @@ bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()
 OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     LayoutWrapper* layoutWrapper, float menuWidth, float menuHeight)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -662,7 +663,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
 void SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember,
                                                             float& offsetY)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);

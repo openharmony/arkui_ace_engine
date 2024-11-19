@@ -265,9 +265,16 @@ void WaterFlowLayoutInfo::ResetFooter()
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
     TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
+    int32_t itemCount = 0;
+    for (const auto& item : items_[0]) {
+        itemCount += static_cast<int32_t>(item.second.size());
+    }
+    if (resetFrom >= itemCount) {
+        return;
+    }
     maxHeight_ = 0.0f;
-    startIndex_ = resetFrom;
     ClearCacheAfterIndex(resetFrom - 1);
+    startIndex_ = std::max(resetFrom - 1, 0);
 }
 
 int32_t WaterFlowLayoutInfo::GetCrossCount() const

@@ -298,7 +298,8 @@ public:
     bool LoadPageSource(const std::string& url,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
+        const std::string& contentName = "") override;
     int32_t LoadNavDestinationSource(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName, bool isSingleton) override;
 
@@ -432,6 +433,8 @@ public:
     }
 
     void JsStateProfilerResgiter();
+
+    void JsSetAceDebugMode();
 
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;

@@ -158,12 +158,12 @@ public:
 
     void UpdateChainWeight(const LayoutWeightPair& value);
 
-    void UpdatePixelRound(uint8_t value)
+    void UpdatePixelRound(uint16_t value)
     {
         pixelRoundFlag_ = value;
     }
 
-    uint8_t GetPixelRound() const {
+    uint16_t GetPixelRound() const {
         return pixelRoundFlag_;
     }
 
@@ -367,6 +367,11 @@ public:
         return needOffsetLocalizedEdges_;
     }
 
+    void ResetMarkAnchorStart()
+    {
+        markAnchorStart_.reset();
+    }
+
     void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
     {
         markAnchorStart_ = markAnchorStart;
@@ -401,6 +406,7 @@ private:
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
+    bool DecideMirror();
 
     const std::string PixelRoundToJsonValue() const;
 
@@ -440,7 +446,7 @@ private:
 
     bool usingPosition_ = true;
 
-    uint8_t pixelRoundFlag_  = 0;
+    uint16_t pixelRoundFlag_  = 0;
 
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;

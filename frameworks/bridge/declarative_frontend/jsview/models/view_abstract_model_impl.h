@@ -91,7 +91,7 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override {}
 
     void SetLayoutPriority(int32_t priority) override;
-    void SetPixelRound(uint8_t value) override;
+    void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
     void SetLayoutWeight(const NG::LayoutWeightPair& value) override {};
     void SetLayoutDirection(TextDirection value) override;
@@ -190,7 +190,7 @@ public:
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
@@ -326,6 +326,7 @@ public:
     void SetBloom(const float value) override {};
     void SetPositionLocalizedEdges(bool needLocalized) override {};
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
+    void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
 };
 

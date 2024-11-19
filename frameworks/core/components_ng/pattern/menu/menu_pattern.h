@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
@@ -506,6 +508,16 @@ public:
         lastPosition_ = lastPosition;
     }
 
+    void UpdateLastArrowPlacement(std::optional<Placement> lastArrowPlacement)
+    {
+        lastArrowPlacement_ = lastArrowPlacement;
+    }
+
+    std::optional<Placement> GetLastArrowPlacement()
+    {
+        return lastArrowPlacement_;
+    }
+
     void SetIsEmbedded()
     {
         isEmbedded_ = true;
@@ -536,6 +548,13 @@ public:
         return disappearOffset_;
     }
 
+    void UpdateMenuPathParams(std::optional<MenuPathParams> pathParams);
+
+    std::optional<MenuPathParams> GetMenuPathParams()
+    {
+        return pathParams_;
+    }
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -555,6 +574,7 @@ private:
     void OnAttachToFrameNode() override;
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
 
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
@@ -609,6 +629,7 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
@@ -623,6 +644,7 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
+    std::optional<Placement> lastArrowPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF disappearOffset_;
@@ -643,6 +665,7 @@ private:
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

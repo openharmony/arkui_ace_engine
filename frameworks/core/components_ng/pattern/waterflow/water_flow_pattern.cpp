@@ -327,7 +327,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         MarkDirtyNodeSelf();
     }
 
-    GetHost()->ChildrenUpdatedFrom(-1);
+    if (layoutInfo_->isDataValid_) {
+        GetHost()->ChildrenUpdatedFrom(-1);
+    }
+    layoutInfo_->isDataValid_ = true;
 
     return NeedRender();
 }
@@ -408,6 +411,9 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScroll
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
+    if (layoutProperty->IsReverse()) {
+        distance = -distance;
+    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
@@ -834,5 +840,23 @@ void WaterFlowPattern::DumpInfoAddSections()
         index++;
     }
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
+}
+
+SizeF WaterFlowPattern::GetChildrenExpandedSize()
+{
+    auto viewSize = GetViewSizeMinusPadding();
+    auto axis = GetAxis();
+    float estimatedHeight = 0.0f;
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+        estimatedHeight = info->EstimateContentHeight();
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

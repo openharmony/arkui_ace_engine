@@ -22,7 +22,7 @@
 #include <variant>
 #include <vector>
 
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS {
 class IRemoteObject;

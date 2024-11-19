@@ -39,6 +39,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -238,6 +239,7 @@ void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectR
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    LocalScope scope(vm);
     uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
@@ -263,24 +265,6 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    uint32_t argc = runtimeCallInfo->GetArgsNumber();
-    if (argc != 1) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    AddCustomTitleBarComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1550,6 +1534,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomButton));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

@@ -61,6 +61,11 @@ private:
     void UpdateInner(const RequestFormInfo& info);
 
 private:
+    void InitAddFormAcquireCallback(int32_t instanceID);
+    void InitAddFormUpdateCallback(int32_t instanceID);
+    void InitAddFormErrorCallback(int32_t instanceID);
+    void InitAddFormUninstallCallback(int32_t instanceID);
+
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
 

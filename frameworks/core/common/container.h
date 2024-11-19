@@ -201,11 +201,6 @@ public:
         return {};
     }
 
-    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
-    {
-        return {};
-    }
-
     virtual std::string GetHapPath() const
     {
         return {};
@@ -498,7 +493,7 @@ public:
 
     virtual bool GetCurPointerEventInfo(
         int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -561,6 +556,15 @@ public:
         }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
+    }
+
+    static int32_t GetCurrentApiTargetVersion()
+    {
+        auto container = Current();
+        if (!container) {
+            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        }
+        return container->GetApiTargetVersion();
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)

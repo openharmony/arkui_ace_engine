@@ -191,6 +191,7 @@ public:
     virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
     virtual bool IsFromRecovery(int32_t index) { return false; }
     virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
+    virtual int32_t GetSize() const { return -1; }
 
     const WeakPtr<UINode>& GetNavigationNode()
     {

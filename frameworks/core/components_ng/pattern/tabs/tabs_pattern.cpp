@@ -379,7 +379,19 @@ void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFu
     auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
     CHECK_NULL_VOID(targetComponent);
     targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
-    targetComponent->SetInnerNodeGestureRecognizerJudge();
+    targetComponent->SetInnerNodeGestureRecognizerJudge(true);
+}
+
+void TabsPattern::RecoverInnerOnGestureRecognizerJudgeBegin()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
+    CHECK_NULL_VOID(targetComponent);
+    targetComponent->SetOnGestureRecognizerJudgeBegin(nullptr);
+    targetComponent->SetInnerNodeGestureRecognizerJudge(false);
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()

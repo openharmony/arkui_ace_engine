@@ -31,6 +31,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -66,7 +67,7 @@ public:
     void TearDown() override;
     bool InitOptionTestNg();
     RefPtr<FrameNode> frameNode_;
-    RefPtr<OptionPattern> optionPattern_;
+    RefPtr<MenuItemPattern> optionPattern_;
     RefPtr<OptionAccessibilityProperty> optionAccessibilityProperty_;
 
 protected:
@@ -108,10 +109,10 @@ PaintWrapper* OptionTestNg::GetPaintWrapper(RefPtr<OptionPaintProperty> paintPro
 bool OptionTestNg::InitOptionTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     CHECK_NULL_RETURN(frameNode_, false);
 
-    optionPattern_ = frameNode_->GetPattern<OptionPattern>();
+    optionPattern_ = frameNode_->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(optionPattern_, false);
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -185,9 +186,9 @@ HWTEST_F(OptionTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Related function is called.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), [](){return AceType::MakeRefPtr<MenuItemPattern>(true, 0);});
     ASSERT_NE(frameNode, nullptr);
-    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    auto optionPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
     optionPattern->SetAccessibilityAction();
 
@@ -457,7 +458,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -606,7 +607,8 @@ HWTEST_F(OptionTestNg, CreatePasteButton001, TestSize.Level1)
      * @tc.expected: Option node created success.
      */
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    auto option = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(0));
+    auto option = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
+    ASSERT_NE(option, nullptr);
 
     /**
      * @tc.steps: step2. Create row node.
@@ -660,7 +662,7 @@ HWTEST_F(OptionTestNg, OptionLayoutTest005, TestSize.Level1)
     rosenLayoutWrapper->GetLayoutProperty()->UpdateCalcLayoutProperty(calcLayoutConstraint);
     auto tmpOptionNode = rosenLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(tmpOptionNode);
-    auto optionPattern = tmpOptionNode->GetPattern<OptionPattern>();
+    auto optionPattern = tmpOptionNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(optionPattern);
     optionPattern->SetIsSelectOption(true);
     optionPattern->SetHasOptionWidth(true);
@@ -726,7 +728,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -764,7 +766,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);

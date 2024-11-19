@@ -25,7 +25,7 @@ struct VectorF {
 
     bool operator==(const VectorF& other) const
     {
-        return NearEqual(x, other.x) && NearEqual(y, other.y);
+        return NearEqual(x, other.x, 1e-5) && NearEqual(y, other.y, 1e-5);
     }
 
     VectorF operator*(float value) const

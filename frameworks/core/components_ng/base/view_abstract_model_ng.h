@@ -538,7 +538,7 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetPixelRound(uint8_t value) override
+    void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);
     }
@@ -946,19 +946,19 @@ public:
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     }
 
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
-    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -1159,6 +1159,11 @@ public:
     void SetFocusable(bool focusable) override
     {
         ViewAbstract::SetFocusable(focusable);
+    }
+
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
     }
 
     void SetFocusNode(bool focus) override {}
@@ -1487,6 +1492,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
@@ -1526,6 +1532,11 @@ private:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override
     {
         ViewAbstract::SetMarkAnchorStart(markAnchorStart);
+    }
+
+    void ResetMarkAnchorStart() override
+    {
+        ViewAbstract::ResetMarkAnchorStart();
     }
 
     void SetOffsetLocalizedEdges(bool needLocalized) override

@@ -414,19 +414,39 @@ RefPtr<FrameNode> SecurityComponentLayoutAlgorithm::GetSecCompChildNode(RefPtr<F
 void SecurityComponentLayoutAlgorithm::UpdateTextRectPoint()
 {
     if (isVertical_) {
-        double contextWidth = std::max(text_.width_, icon_.width_);
-        textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
-        textRightBottomPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_ +
-            text_.height_);
+        if (icon_.width_ > text_.width_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + text_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + text_.width_,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        }
     } else {
-        double contextHeight = std::max(text_.height_, icon_.height_);
-        textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + contextHeight);
-        textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_ +
-            contextHeight);
+        if (icon_.height_ > text_.height_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + text_.height_);
+        }
     }
 }
 
@@ -773,7 +793,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     auto frameNode = layoutWrapper->GetHostNode();
     // default return LTR
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
-    std::string text = "";
+    std::u16string text = u"";
     // get button string
     for (const auto& child : frameNode->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
@@ -792,8 +812,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     if (text.empty()) {
         return TextDirection::LTR;
     }
-    auto wString = StringUtils::ToWstring(text);
-    for (const auto& charInStr : wString) {
+    for (const auto& charInStr : text) {
         auto direction = u_charDirection(charInStr);
         if (direction == UCharDirection::U_LEFT_TO_RIGHT) {
             return TextDirection::LTR;

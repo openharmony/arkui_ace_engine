@@ -1290,39 +1290,56 @@ void DialogPattern::UpdateSheetIconAndText()
     }
 }
 
+void DialogPattern::UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnIndex)
+{
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSkipColorConfigurationUpdate();
+    // parse button text color and background color
+    std::string textColorStr;
+    std::optional<Color> bgColor;
+    ParseButtonFontColorAndBgColor(dialogProperties_.buttons[btnIndex], textColorStr, bgColor);
+    // update background color
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(bgColor.value());
+    auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+    CHECK_NULL_VOID(buttonTextNode);
+    auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(buttonTextLayoutProperty);
+    Color textColor;
+    Color::ParseColorString(textColorStr, textColor);
+    buttonTextLayoutProperty->UpdateContent(dialogProperties_.buttons[btnIndex].text);
+    buttonTextLayoutProperty->UpdateTextColor(textColor);
+    buttonTextNode->MarkModifyDone();
+    buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void DialogPattern::UpdateButtonsProperty()
 {
-    CHECK_NULL_VOID(buttonContainer_);
     int32_t btnIndex = 0;
-    isFirstDefaultFocus_ = true;
-    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
-        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
-            continue;
+    if (buttonContainer_) {
+        isFirstDefaultFocus_ = true;
+        for (const auto& buttonNode : buttonContainer_->GetChildren()) {
+            if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+                continue;
+            }
+            auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
+            UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
+            ++btnIndex;
         }
-        auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
-        CHECK_NULL_VOID(buttonFrameNode);
-        auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSkipColorConfigurationUpdate();
-        // parse button text color and background color
-        std::string textColorStr;
-        std::optional<Color> bgColor;
-        ParseButtonFontColorAndBgColor(dialogProperties_.buttons[btnIndex], textColorStr, bgColor);
-        // update background color
-        auto renderContext = buttonFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackgroundColor(bgColor.value());
-        auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
-        CHECK_NULL_VOID(buttonTextNode);
-        auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(buttonTextLayoutProperty);
-        Color textColor;
-        Color::ParseColorString(textColorStr, textColor);
-        buttonTextLayoutProperty->UpdateContent(dialogProperties_.buttons[btnIndex].text);
-        buttonTextLayoutProperty->UpdateTextColor(textColor);
-        buttonTextNode->MarkModifyDone();
-        buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        ++btnIndex;
+    } else if (menuNode_.Upgrade()) {
+        for (const auto& rowNode : menuNode_.Upgrade()->GetChildren()) {
+            if (rowNode->GetTag() != V2::ROW_ETS_TAG) {
+                continue;
+            }
+            auto buttonFrameNode = DynamicCast<FrameNode>(rowNode->GetFirstChild());
+            if (buttonFrameNode && buttonFrameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+                UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
+            }
+            ++btnIndex;
+        }
     }
 }
 

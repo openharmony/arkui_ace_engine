@@ -181,8 +181,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
-    auto offsetBase = OffsetF(
-        pattern->GetPaddingLeft() + pattern->GetBorderLeft(), pattern->GetPaddingTop() + pattern->GetBorderTop());
+    auto border = pattern->GetBorderWidthProperty();
+    auto offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
+        pattern->GetPaddingTop() + pattern->GetBorderTop(border));
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }

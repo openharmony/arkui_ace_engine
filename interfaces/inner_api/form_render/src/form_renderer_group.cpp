@@ -113,6 +113,15 @@ void FormRendererGroup::OnUnlock()
     InnerAddForm(currentFormRequest);
 }
 
+void FormRendererGroup::SetVisibleChange(bool isVisible)
+{
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("SetVisibleChange failed, formRenderer is null");
+        return;
+    }
+    formRenderer_->SetVisibleChange(isVisible);
+}
+
 void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
 {
     HILOG_DEBUG("InnerAddForm called");
@@ -125,18 +134,25 @@ void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
             HILOG_ERROR("InnerAddForm create form render failed");
             return;
         }
-        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
-            std::to_string(formJsInfo.formId).c_str());
+        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}zu",
+            compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str(),
+            formJsInfo.formData.size());
         formRenderer_->AddForm(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
     } else if (initState_ == FormRendererInitState::PRE_INITIALIZED) {
-        HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s", compId.c_str(),
-            std::to_string(formJsInfo.formId).c_str());
+        HILOG_INFO("RunFormPage compId is %{public}s. formId is %{public}s, formJsInfo.formData.size is %{public}zu",
+            compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str(),
+            formJsInfo.formData.size());
         formRenderer_->RunFormPage(want, formJsInfo);
         initState_ = FormRendererInitState::INITIALIZED;
     } else { // initState_ == FormRendererInitState::INITIALIZED
-        HILOG_INFO("AttachForm compId is %{public}s formRequests size is :%{public}s.",
-            compId.c_str(), std::to_string(formRequests_.size()).c_str());
+        HILOG_INFO("AttachForm compId is %{public}s, formRequests size is %{public}s, \
+            formJsInfo.formData.size is %{public}zu",
+            compId.c_str(),
+            std::to_string(formRequests_.size()).c_str(),
+            formJsInfo.formData.size());
         formRenderer_->AttachForm(want, formJsInfo);
     }
 }
@@ -158,6 +174,20 @@ void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
         }
         formRequest.formJsInfo = formJsInfo;
         formRequest.isDynamic = formJsInfo.isDynamic;
+    }
+}
+
+void FormRendererGroup::UpdateFormSizeOfFormRequests(double width, double height, float borderWidth)
+{
+    for (auto iter = formRequests_.begin(); iter != formRequests_.end(); ++iter) {
+        iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+        iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+        iter->want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, static_cast<float>(borderWidth));
+    }
+    if (formRenderer_ != nullptr) {
+        formRenderer_->UpdateFormSize(width, height, borderWidth);
+    } else {
+        HILOG_WARN("formRenderer is null");
     }
 }
 

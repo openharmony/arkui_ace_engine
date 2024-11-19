@@ -138,7 +138,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
@@ -352,6 +352,8 @@ public:
         float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
 
     void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+
+    SizeF GetChildrenExpandedSize() override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

@@ -368,7 +368,7 @@ void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value);
 }
 
-void ViewAbstract::SetPixelRound(uint8_t value)
+void ViewAbstract::SetPixelRound(uint16_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -376,7 +376,7 @@ void ViewAbstract::SetPixelRound(uint8_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
 }
 
-void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint8_t value)
+void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint16_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
 }
@@ -1036,6 +1036,14 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
+void ViewAbstract::DisableOnPreDrag(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearOnPreDrag();
+}
+
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1168,6 +1176,15 @@ void ViewAbstract::SetFocusable(bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetTabStop(bool tabStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabStop(tabStop);
+}
+
 void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -1182,7 +1199,7 @@ void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1631,6 +1648,9 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CheckIfParentNeedMarkDirty(frameNode);
     ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
@@ -1640,8 +1660,28 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CheckIfParentNeedMarkDirty(frameNode);
     ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+}
+
+void ViewAbstract::CheckIfParentNeedMarkDirty(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parentNode);
+    // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property,
+    // need to remeasure in the dynamic switch scenario.
+    if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (!renderContext->HasPositionEdges() || !renderContext->HasPosition()) {
+            parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
 }
 
 void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
@@ -1952,13 +1992,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     CHECK_NULL_VOID(overlayManager);
 
     if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        bool isShown = SubwindowManager::GetInstance()->GetShown();
-        if (!isShown) {
-            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
-        } else {
-            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
-        }
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
 
@@ -1992,15 +2026,8 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     }
     if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
         targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        bool isShown = SubwindowManager::GetInstance()->GetShown();
-        if (!isShown) {
-            SubwindowManager::GetInstance()->ShowMenuNG(
-                std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
-        } else {
-            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetNode->GetId());
-            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
-        }
+        SubwindowManager::GetInstance()->ShowMenuNG(
+            std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
     NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -2945,6 +2972,7 @@ void ViewAbstract::ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
 void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    CheckIfParentNeedMarkDirty(frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, PositionEdges, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
@@ -2952,6 +2980,7 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& v
 void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
 {
     CHECK_NULL_VOID(frameNode);
+    CheckIfParentNeedMarkDirty(frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Position, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(PositionEdges, value, frameNode);
 }
@@ -3153,6 +3182,7 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -3281,6 +3311,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
+}
+
+void ViewAbstract::SetTabStop(FrameNode* frameNode, bool tabStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetTabStop(tabStop);
 }
 
 void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
@@ -3900,7 +3938,7 @@ void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFu
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
-void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3913,6 +3951,14 @@ bool ViewAbstract::GetFocusable(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsFocusable();
+}
+
+bool ViewAbstract::GetTabStop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsTabStop();
 }
 
 bool ViewAbstract::GetDefaultFocus(FrameNode* frameNode)
@@ -3944,13 +3990,22 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto instanceId = context->GetInstanceId();
-    ContainerScope scope(instanceId);
     if (value) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->RequestFocus();
     } else {
+        auto context = frameNode->GetAttachedContext();
+        if (!context) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS,
+                "Can't find Node %{public}s/%{public}d attachedContext, please check the timing of the function call.",
+                frameNode->GetTag().c_str(), frameNode->GetId());
+            return;
+        }
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->LostFocusToViewRoot();
     }
 }
@@ -4391,7 +4446,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -4408,7 +4463,7 @@ Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -5051,6 +5106,15 @@ void ViewAbstract::SetMarkAnchorStart(Dimension& markAnchorStart)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateMarkAnchorStart(markAnchorStart);
+}
+
+void ViewAbstract::ResetMarkAnchorStart()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetMarkAnchorStart();
 }
 
 void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)

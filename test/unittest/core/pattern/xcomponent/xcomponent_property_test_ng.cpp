@@ -1932,4 +1932,181 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest050, TestSize.Level1)
     xComponent.SetRenderFit(RENDER_FIT);
     EXPECT_EQ(pattern->handlingSurfaceRenderContext_, nullptr);
 }
+
+/**
+ * @tc.name: XComponentModelNGTest051
+ * @tc.desc: Test XComponentModelNG SetRenderFit for FrameNode, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent frameNode.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    ArkUI_Int32 nodeId = 0;
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit for xcomponent framenode.
+     *            case: renderFit = RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetRenderFit(RenderFit::BOTTOM_RIGHT)).WillOnce(Return());
+    XComponentModelNG::SetRenderFit(frameNode.GetRawPtr(), RenderFit::BOTTOM_RIGHT);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest052
+ * @tc.desc: Test XComponentModelNG SetRenderFit for FrameNode, type = XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent framenode.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    ArkUI_Int32 nodeId = 0;
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit for xcomponent framenode.
+     *            case: renderFit = RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is not called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    XComponentModelNG::SetRenderFit(frameNode.GetRawPtr(), RenderFit::BOTTOM_RIGHT);
+    EXPECT_EQ(pattern->handlingSurfaceRenderContext_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest053
+ * @tc.desc: Test XComponentModelNG EnableSecure for FrameNode, type != XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent framenode.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    ArkUI_Int32 nodeId = 0;
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call EnableSecure for xcomponent framenode.
+     *            case: isSecure = true
+     * @tc.expected: renderContextForSurface_->SetSecurityLayer(isSecure) is not called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    XComponentModelNG::EnableSecure(frameNode.GetRawPtr(), true);
+    EXPECT_EQ(pattern->renderContextForSurface_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest054
+ * @tc.desc: Test XComponentModelNG EnableSecure for FrameNode, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create xcomponent framenode.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    ArkUI_Int32 nodeId = 0;
+    auto frameNode = XComponentModelNG::CreateFrameNode(
+        nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call EnableSecure for xcomponent framenode.
+     *            case: isSecure = true
+     * @tc.expected: renderContextForSurface_->SetSecurityLayer(isSecure) is called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .WillOnce(Return());
+    XComponentModelNG::EnableSecure(frameNode.GetRawPtr(), true);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest055
+ * @tc.desc: Test XComponentModelNG EnableSecure, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call EnableSecure.
+     *            case: isSecure = true
+     * @tc.expected: renderContextForSurface_->SetSecurityLayer(isSecure) is called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .WillOnce(Return());
+    xComponent.EnableSecure(true);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest056
+ * @tc.desc: Test XComponentModelNG EnableSecure, type != XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call EnableSecure.
+     *            case: isSecure = true
+     * @tc.expected: renderContextForSurface_->SetSecurityLayer(isSecure) is not called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    xComponent.EnableSecure(true);
+    EXPECT_EQ(pattern->renderContextForSurface_, nullptr);
+}
 } // namespace OHOS::Ace::NG

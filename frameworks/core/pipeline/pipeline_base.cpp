@@ -852,6 +852,70 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+bool PipelineBase::FireUIExtensionEventValid()
+{
+    if (!uiExtensionEventCallback_ || !IsFocusWindowIdSetted()) {
+        return false;
+    }
+    return true;
+}
+
+void PipelineBase::SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    uiExtensionEventCallback_ = callback;
+}
+
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    ACE_SCOPED_TRACE("AddUIExtensionCallbackEvent event[%u]", static_cast<uint32_t>(eventId));
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
+void PipelineBase::FireAllUIExtensionEvents()
+{
+    if (!FireUIExtensionEventValid() || uiExtensionEvents_.empty()) {
+        return;
+    }
+    for (auto it = uiExtensionEvents_.begin(); it != uiExtensionEvents_.end();) {
+        uiExtensionEventCallback_(static_cast<uint32_t>(it->eventId));
+        if (!it->repeat) {
+            it = uiExtensionEvents_.erase(it);
+        }
+    }
+}
+
+void PipelineBase::FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId)
+{
+    if (!FireUIExtensionEventValid()) {
+        return;
+    }
+    uiExtensionEventCallback_(static_cast<uint32_t>(eventId));
+}
+
+void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback)
+{
+    ACE_FUNCTION_TRACE();
+    accessibilityCallback_ = callback;
+}
+
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+    ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
+    accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+}
+
+void PipelineBase::FireAccessibilityEvents()
+{
+    if (!accessibilityCallback_ || accessibilityEvents_.empty()) {
+        return;
+    }
+    for (auto it = accessibilityEvents_.begin(); it != accessibilityEvents_.end();) {
+        accessibilityCallback_(static_cast<uint32_t>(it->eventId), it->parameter);
+        it = accessibilityEvents_.erase(it);
+    }
+}
+
 void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
 {
     if (callback) {

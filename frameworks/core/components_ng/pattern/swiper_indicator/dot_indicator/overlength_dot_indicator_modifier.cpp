@@ -261,10 +261,11 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        if (!modifier->blackPointsAnimEnd_) {
+        if (!modifier->blackPointsAnimEnd_ && (modifier->needUpdate_ || !modifier->isAutoPlay_)) {
             modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
             modifier->currentOverlongType_ = modifier->targetOverlongType_;
             modifier->blackPointsAnimEnd_ = true;
+            modifier->needUpdate_ = false;
         }
     });
 }
@@ -611,7 +612,10 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
 void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margin,
     const LinearVector<float>& itemHalfSizes, GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop)
 {
-    StopAnimation(false);
+    StopBlackAnimation();
+
+    needUpdate_ = false;
+    blackPointsAnimEnd_ = true;
     currentSelectedIndex_ = targetSelectedIndex_;
     currentOverlongType_ = targetOverlongType_;
     isTouchBottomLoop_ = false;
@@ -636,21 +640,8 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     PlayLongPointAnimation(pointCenterX, gestureState, touchBottomTypeLoop, animationEndCenterX_, false);
 }
 
-void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
+void OverlengthDotIndicatorModifier::StopBlackAnimation()
 {
-    if (ifImmediately) {
-        AnimationOption option;
-        option.SetDuration(0);
-        option.SetCurve(Curves::LINEAR);
-        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
-            auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID(modifier);
-            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
-            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
-        });
-    }
-
-    blackPointsAnimEnd_ = true;
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
@@ -667,6 +658,23 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
+}
+
+void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
+{
+    if (ifImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
+            modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
+        });
+    }
+
+    StopBlackAnimation();
 }
 
 void OverlengthDotIndicatorModifier::InitOverlongSelectedIndex(int32_t pageIndex)

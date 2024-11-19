@@ -69,6 +69,37 @@ void ViewAbstractModelNG::BindMenuGesture(
     gestureHub->BindMenu(std::move(showMenu));
 }
 
+bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId)
+{
+    RefPtr<NG::PipelineContext> pipeline = nullptr;
+    if (menuParam.isShowInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_RETURN(subwindow, false);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_RETURN(childContainer, false);
+        pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    } else {
+        pipeline = NG::PipelineContext::GetCurrentContext();
+    }
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_RETURN(menuNode, false);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    if (menuParam.hasTransitionEffect) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        renderContext->UpdateChainedTransition(menuParam.transition);
+    }
+    if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
+        overlayManager->HideMenu(menuNode, targetId, false);
+    }
+    return true;
+}
+
 void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
@@ -76,24 +107,8 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto menuNode = overlayManager->GetMenuNode(targetId);
-    if (menuNode) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
-        auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
-        if (menuParam.hasTransitionEffect) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateChainedTransition(menuParam.transition);
-        }
-        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
-            overlayManager->HideMenu(menuNode, targetId, false);
-        }
+    if (CheckMenuIsShow(menuParam, targetId)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
@@ -261,30 +276,30 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-                TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                 auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                    TAG_LOGI(AceLogTag::ACE_MENU, "Post rightClick task for menu");
                     info.SetStopPropagation(true);
-                }
-                taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
-                        auto targetNode = weakTarget.Upgrade();
-                        CHECK_NULL_VOID(targetNode);
-                        NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                            info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-                        CHECK_NULL_VOID(pipelineContext);
-                        auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-                        menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-                        if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                    taskExecutor->PostTask(
+                        [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
+                            auto targetNode = weakTarget.Upgrade();
+                            CHECK_NULL_VOID(targetNode);
+                            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() +
+                                                           menuParam.positionOffset.GetX(),
+                                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                            CHECK_NULL_VOID(pipelineContext);
+                            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+                            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
                             std::function<void()> previewBuildFunc;
+                            TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                             NG::ViewAbstract::BindMenuWithCustomNode(
                                 std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
-                        }
-                    },
-                    TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
+                        },
+                        TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
+                }
             };
             auto inputHub = targetNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(inputHub);

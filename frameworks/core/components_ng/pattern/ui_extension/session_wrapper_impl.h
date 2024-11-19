@@ -71,6 +71,7 @@ public:
     void OnDisconnect(bool isAbnormal) override;
     void OnReleaseDone() override;
     void OnExtensionTimeout(int32_t errorCode) override;
+    void OnExtensionDetachToDisplay() override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
     // The interface about the accessibility
@@ -101,6 +102,7 @@ public:
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WindowSizeChangeReason GetSizeChangeReason() const override;
+    int32_t GetInstanceIdFromHost();
 
 private:
     void InitAllCallback();

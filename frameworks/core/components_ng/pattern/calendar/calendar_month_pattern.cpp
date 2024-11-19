@@ -263,12 +263,72 @@ float CalendarMonthPattern::GetWidth(const RefPtr<FrameNode>& host)
     return width;
 }
 
+void CalendarMonthPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto swiperNode = host->GetParent();
+    CHECK_NULL_VOID(swiperNode);
+    auto calendarNode = swiperNode->GetParent();
+    CHECK_NULL_VOID(calendarNode);
+    auto scrollNode = calendarNode->GetParent();
+    CHECK_NULL_VOID(scrollNode);
+    auto columnNode = scrollNode->GetParent();
+    CHECK_NULL_VOID(columnNode);
+    auto rowNode = columnNode->GetChildAtIndex(WEEK_ROW_INDEX);
+    CHECK_NULL_VOID(rowNode);
+    auto textNodes = rowNode->GetChildren();
+    for (auto textNode : textNodes) {
+        auto textFrameNode = AceType::DynamicCast<NG::FrameNode>(textNode);
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
+    }
+}
+
+void CalendarMonthPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto swiperNode = host->GetParent();
+    CHECK_NULL_VOID(swiperNode);
+    auto calendarNode = swiperNode->GetParent();
+    CHECK_NULL_VOID(calendarNode);
+    auto scrollNode = calendarNode->GetParent();
+    CHECK_NULL_VOID(scrollNode);
+    auto columnNode = scrollNode->GetParent();
+    CHECK_NULL_VOID(columnNode);
+    auto rowNode = columnNode->GetChildAtIndex(WEEK_ROW_INDEX);
+    CHECK_NULL_VOID(rowNode);
+    auto textNodes = rowNode->GetChildren();
+    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
+    int32_t column = 0;
+    for (auto textNode : textNodes) {
+        std::string weekContent { weekNumbers[column % CALENDAR_WEEK_DAYS] };
+        auto textFrameNode = AceType::DynamicCast<NG::FrameNode>(textNode);
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(weekContent);
+        ++column;
+    }
+}
+
 void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto width = GetWidth(host);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -298,6 +358,7 @@ void CalendarMonthPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& c
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateFontSize(fontSize);
+        textLayoutProperty->UpdateTextColor(theme->GetCalendarTheme().weekColor);
         textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(calendarDaySize), std::nullopt));
     }
 
@@ -936,8 +997,10 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     if (calendarDay.month.month != obtainedMonth_.month) {
         buttonAccessibilityProperty->SetAccessibilityDescription(disabledDesc_);
     } else if (index == selectedIndex_) {
+        // Delete the description of the selected node
         buttonAccessibilityProperty->SetAccessibilityDescription(" ");
     } else {
+        // Set the default description to other nodes
         buttonAccessibilityProperty->SetAccessibilityDescription("");
     }
     buttonAccessibilityProperty->SetUserDisabled(calendarDay.month.month != obtainedMonth_.month ? true : false);

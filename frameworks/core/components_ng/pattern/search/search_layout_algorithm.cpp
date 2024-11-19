@@ -104,6 +104,13 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     auto cancelButtonHeight =
         layoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconSizeMeasure_.Height())).ConvertToPx() +
         spaceHeight;
+
+    // cancel button height should be less than searchHeight
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    cancelButtonHeight = std::min(cancelButtonHeight, searchHeight);
+
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 
@@ -292,8 +299,8 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonWrapper->Measure(buttonLayoutConstraint);
 
     // deal with pixel round
-    auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                        static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    auto pixelRound = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                        static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
     buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width

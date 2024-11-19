@@ -144,7 +144,7 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -157,7 +157,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -226,7 +226,7 @@ void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 {
     float baselineOffset = textStyle.GetBaselineOffset().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -412,10 +412,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             for (auto&& info : paragraphs) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
-                if (onlyTextColorAnimation_ && animatableTextColor_) {
-                    auto length = paragraph->GetParagraphText().length();
-                    paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
-                }
+                ChangeParagraphColor(paragraph);
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
                 paintOffsetY += paragraph->GetHeight();
             }
@@ -437,6 +434,8 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_VOID(paragraph);
+    ChangeParagraphColor(paragraph);
     float textRacePercent = GetTextRaceDirection() == TextDirection::LTR ?
         GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
     float paragraph1Offset =
@@ -449,6 +448,15 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
         paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+    }
+}
+
+void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragraph)
+{
+    CHECK_NULL_VOID(paragraph);
+    if (onlyTextColorAnimation_ && animatableTextColor_) {
+        auto length = paragraph->GetParagraphText().length();
+        paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
     }
 }
 
@@ -869,7 +877,7 @@ void TextContentModifier::StartTextRace()
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }

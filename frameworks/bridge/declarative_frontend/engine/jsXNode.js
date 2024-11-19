@@ -817,6 +817,13 @@ class FrameNode {
     getNodePtr() {
         return this.nodePtr_;
     }
+    getValidNodePtr() {
+        if (this.nodePtr_) {
+            return this.nodePtr_;
+        } else {
+            throw Error('The FrameNode has been disposed!');
+        }
+    }
     dispose() {
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
@@ -1059,11 +1066,11 @@ class FrameNode {
         return { x: position[0], y: position[1] };
     }
     getMeasuredSize() {
-        const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+        const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
         return { width: size[0], height: size[1] };
     }
     getLayoutPosition() {
-        const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+        const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
         return { x: position[0], y: position[1] };
     }
     getUserConfigBorderWidth() {
@@ -1147,7 +1154,9 @@ class FrameNode {
         const minSize = constraint.minSize;
         const maxSize = constraint.maxSize;
         const percentReference = constraint.percentReference;
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width, maxSize.height, percentReference.width, percentReference.height);
+        __JSScopeUtil__.restoreInstanceId();
     }
     layout(position) {
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);

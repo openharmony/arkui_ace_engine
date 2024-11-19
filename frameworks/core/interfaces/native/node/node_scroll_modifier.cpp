@@ -550,6 +550,17 @@ void GetScrollFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[0].i32 = static_cast<int32_t>(NG::ScrollableModelNG::GetFadingEdge(frameNode));
     (*values)[1].f32 = NG::ScrollableModelNG::GetFadingEdgeLength(frameNode);
 }
+
+void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    SizeF size = pattern->GetChildrenExpandedSize();
+    (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
+    (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -593,6 +604,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
         SetScrollFadingEdge, ResetScrollFadingEdge, GetScrollFadingEdge,
         SetScrollFling,
+        GetScrollContentSize,
     };
     /* clang-format on */
     return &modifier;

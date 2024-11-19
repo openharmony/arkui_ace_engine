@@ -1675,6 +1675,16 @@ typedef enum {
     NODE_CLICK_DISTANCE = 97,
 
     /**
+     * @brief Defines the moving distance limit for the component-bound tap gesture.
+     * This attribute can be set as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: allowed moving distance of a finger, in vp. \n
+     *
+     */
+    NODE_TAB_STOP = 98,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4212,6 +4222,19 @@ typedef enum {
     NODE_SCROLL_FADING_EDGE,
 
     /**
+     * @brief Obtains the total size of all child components when fully expanded in the scrollable component.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: total width of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     * .value[1].f32: total height of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     *
+     * @since 14
+     */
+    NODE_SCROLL_SIZE,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *
@@ -5446,6 +5469,31 @@ typedef enum {
      */
     NODE_ON_DRAG_END = 20,
     /**
+     * @brief Defines the event triggered when a key event occurs.
+     *
+     * The callback can be triggered during interactions with a focused window using an external keyboard or other input
+     * device. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
+     */
+    NODE_ON_KEY_EVENT = 21,
+    /**
+     * @brief Defines the event triggered before the input method responds to the key action.
+     *
+     * If the return value of this callback is <b>true</b>, it is considered that the key event has been consumed, and
+     * subsequent event callbacks (<b>keyboardShortcut</b>, input method events, <b>onKeyEvent</b>) will be intercepted
+     * and no longer triggered.
+     * The callback can be triggered during interactions with a focused window using an external keyboard or other input
+     * device. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 14
+     */
+    NODE_ON_KEY_PRE_IME = 22,
+    /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
      * 触发该事件的条件：文本设置TextDataDetectorConfig且识别成功后。\n
@@ -5834,6 +5882,19 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
      */
     NODE_TEXT_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
+
+    /**
+     * @brief Defines the event triggered when an item is selected and scrolling has stopped in the
+     * <b>ARKUI_NODE_TEXT_PICKER</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0...11].i32</b>: value of the selected item. \n
+     *
+     * @since 14
+     */
+    NODE_TEXT_PICKER_EVENT_ON_SCROLL_STOP = 15001,
 
     /**
      * @brief Defines the event triggered when a date is selected in the <b>NODE_CALENDAR_PICKER</b>.
@@ -7436,6 +7497,69 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
  * @since 13
  */
 void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
+
+/**
+ * @brief Get the value of the custom property of the component.
+ *
+ * @param node ArkUI-NodeHandle pointer.
+ * @param name The name of the custom attribute.
+ * @param handle The structure of the custom attribute corresponding to the key parameter name obtained.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* name, ArkUI_CustomProperty** handle);
+
+/**
+ * @brief Get the parent node to obtain the component nodes created by ArkTs.
+ *
+ * @param node Target node object.
+ * @return Return the pointer of the component.
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve all active child nodes of a node.
+ *
+ * @param head Pass in the node that needs to be obtained.
+ * @param handle The structure corresponding to the sub node information of the head node.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_ActiveChildrenInfo** handle);
+
+/**
+ * @brief Retrieve the root node of the current page.
+ *
+ * @param node Target node object.
+ * @return Return the pointer of the component.
+ * @since 14
+ */
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve whether the component is labeled by C-API.
+ *
+ * @param node Target node object.
+ * @return Return whether the node is a Tag created by C-API,
+ *         true represents created by C-API, false represents not created by C-API.
+ * @since 14
+ */
+bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node);
+
+/**
+ * @brief Get the type of node.
+ *
+ * @param node Target node object.
+ * @return Return the type of the node.
+ *         For specific open types, refer to {@link ArkUI_NodeType}. For unopened nodes, return -1.
+ * @since 14
+ */
+int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
 
 /**
  * @brief The event called when the sliding operation offset changes.

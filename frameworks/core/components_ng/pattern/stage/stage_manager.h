@@ -24,6 +24,7 @@
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/stage/page_transition_effect.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -40,7 +41,7 @@ public:
     // PushUrl and ReplaceUrl both use PushPage function
     virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
-    virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
+    virtual bool PopPage(const RefPtr<FrameNode>& inPageNode, bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
     virtual bool CleanPageStack();
     virtual bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
@@ -90,21 +91,47 @@ public:
     
     virtual bool CheckPageFocus();
 
+    void SetSrcPage(const RefPtr<FrameNode>& pageNode)
+    {
+        srcPageNode_ = pageNode;
+    }
+
+    void AddAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation, bool isPush)
+    {
+        if (isPush) {
+            pushAnimations_.emplace_back(animation);
+            return;
+        }
+        popAnimations_.emplace_back(animation);
+    }
+
+    void AbortAnimation();
+
+    int32_t GetAnimationId() const
+    {
+        return animationId_;
+    }
+
 protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path);
-    void StopPageTransition();
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
+    std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
+
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
 
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
+    int32_t animationId_ = -1;
     bool stageInTrasition_ = false;
 #if defined(ENABLE_SPLIT_MODE)
     bool isNewPageReplacing_ = false;
 #endif
+    std::string replaceSrcPageInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -65,6 +67,16 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuWrapperPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return AceType::MakeRefPtr<MenuWrapperPaintMethod>();
     }
 
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
@@ -315,6 +327,7 @@ public:
     void SetMenuStatus(MenuStatus value)
     {
         menuStatus_ = value;
+        RequestPathRender();
     }
 
     MenuStatus GetMenuStatus() const
@@ -342,6 +355,16 @@ public:
     void SetHasPreviewTransitionEffect(bool hasPreviewTransitionEffect)
     {
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
+    }
+
+    bool HasFoldModeChangedTransition() const
+    {
+        return hasFoldModeChangeTransition_;
+    }
+
+    void SetHasFoldModeChangedTransition(bool hasTransition)
+    {
+        hasFoldModeChangeTransition_ = hasTransition;
     }
 
     void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
@@ -481,6 +504,8 @@ public:
         return isShowFromUser_;
     }
 
+    void RequestPathRender();
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -501,6 +526,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     // mark self and all children no-draggable
     void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
+    void MarkAllMenuNoDraggable();
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
@@ -535,6 +561,7 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    bool hasFoldModeChangeTransition_ = false;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;

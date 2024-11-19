@@ -139,10 +139,6 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
-{
-    return {};
-}
 bool AceContainer::IsLauncherContainer()
 {
     return true;
@@ -200,7 +196,7 @@ uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
     return 0;
 }
 bool AceContainer::GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
 {
     return true;
 }
@@ -260,6 +256,10 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
 {
     return {};
+}
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    return 0;
 }
 void AceContainer::NotifyConfigurationChange(
     bool needReloadTransition, const ConfigurationChange& configurationChange) {}

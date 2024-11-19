@@ -36,6 +36,16 @@ namespace OHOS::Ace {
 class ImageAnalyzerManager;
 }
 namespace OHOS::Ace::NG {
+enum class PlayerStatus {
+    NONE,
+    ERROR,
+    INITIALIZING,
+    INITIALIZED,
+    PREPARING,
+    PREPARED,
+    RELEASING,
+    RELEASED,
+};
 class VideoPattern : public Pattern {
     DECLARE_ACE_TYPE(VideoPattern, Pattern);
 
@@ -285,9 +295,20 @@ public:
     {
         return videoSrcInfo_;
     }
-    void SetIsRequestMediaPlayerBySeek(bool isRequestMediaPlayerBySeek)
+    void PrepareAsyncOnBg();
+    PlayerStatus GetPlayerStatus()
     {
-        isRequestMediaPlayerBySeek_ = isRequestMediaPlayerBySeek;
+        return playerStatus_;
+    }
+    void SetTargetPlayerStatus(PlayerStatus playerStatus)
+    {
+        playerStatus_ = playerStatus;
+    }
+    void InitializeMediaPlayer();
+    void PrepareAsync();
+    CancelableCallback<void()> GetInitializingTask()
+    {
+        return initializingTask_;
     }
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -406,7 +427,6 @@ private:
     void UpdateOverlayVisibility(VisibleType type);
 
     void UpdateControlBar(uint32_t duration, bool isChangePlayBtn = false);
-    void SetSurfaceForMediaPlayer();
     void StartPlay();
     void SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode);
     bool IsVideoSourceChanged();
@@ -414,8 +434,8 @@ private:
     void RegisterVisibleRatioCallback();
     void ReleaseMediaPlayer();
     bool ShouldPrepareMediaPlayer();
-    void UpdatePlayingFlags();
-    void CleanPlayingFlags();
+    void ResetInitializingPlayerTask();
+    bool IsPlayerInValidStatus();
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -461,11 +481,10 @@ private:
     bool isSeekingWhenNotPrepared_ = false;
     uint32_t seekingPosWhenNotPrepared_ = 0;
     SeekMode seekingModeWhenNotPrepared_ = SeekMode::SEEK_CLOSEST;
-    bool isSetMediaSurfaceDone_ = false;
     bool isStartByUser_ = false;
     bool isVisible_ = false;
-    bool isRequestMediaPlayerBySeek_ = false;
-    bool isReleasingMediaPlayer_ = false;
+    PlayerStatus playerStatus_ = PlayerStatus::NONE;
+    CancelableCallback<void()> initializingTask_;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

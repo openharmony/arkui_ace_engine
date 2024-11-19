@@ -150,10 +150,11 @@ public:
     struct PreviewTextRecord {
         int32_t startOffset = INVALID_VALUE;
         int32_t endOffset = INVALID_VALUE;
-        bool isPreviewTextInputting = false;
+        bool previewTextHasStarted = false;
         std::string previewContent;
         std::string newPreviewContent;
-        bool hasDiff = false;
+        bool needReplacePreviewText = false;
+        bool needReplaceText = false;
         PreviewRange replacedRange;
         bool isSpanSplit = false;
 
@@ -161,7 +162,7 @@ public:
         {
             auto jsonValue = JsonUtil::Create(true);
             JSON_STRING_PUT_STRING(jsonValue, previewContent);
-            JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
+            JSON_STRING_PUT_BOOL(jsonValue, previewTextHasStarted);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
             JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
@@ -174,15 +175,16 @@ public:
             startOffset = INVALID_VALUE;
             endOffset = INVALID_VALUE;
             previewContent.clear();
-            isPreviewTextInputting = false;
-            hasDiff = false;
+            previewTextHasStarted = false;
+            needReplacePreviewText = false;
+            needReplaceText = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
             isSpanSplit = false;
         }
 
         bool IsValid() const
         {
-            return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
+            return !previewContent.empty() && previewTextHasStarted && startOffset >= 0 && endOffset >= startOffset;
         }
     };
 
@@ -265,6 +267,7 @@ public:
 
     void SetSupportPreviewText(bool isTextPreviewSupported)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enablePreviewText=%{public}d", isTextPreviewSupported);
         isTextPreviewSupported_ = isTextPreviewSupported;
     }
 
@@ -470,7 +473,7 @@ public:
     void HandleSelectFontStyle(KeyCode code) override;
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
-    int32_t HandleSelectPosition(bool isForward);
+    int32_t HandleKbVerticalSelection(bool isUp);
     int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
@@ -509,17 +512,13 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     std::string GetContentBySpans();
-    ResultObject TextEmojiSplit(int32_t& start, int32_t end, std::string& content);
-    SelectionInfo GetEmojisBySelect(int32_t start, int32_t end);
-    void MixTextEmojiUpdateStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
-    void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart);
+    void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     void GetSelectSpansPositionInfo(
         int32_t& start, int32_t& end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<RefPtr<UINode>>::const_iterator GetSpanNodeIter(int32_t index);
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
-    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -534,6 +533,7 @@ public:
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
+    void AdjustAddPosition(TextSpanOptions& options);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
@@ -554,6 +554,7 @@ public:
     void CheckEditorTypeChange();
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
+    void UpdateParentOffsetAndOverlay();
     void CreateHandles() override;
     void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
@@ -795,6 +796,7 @@ public:
 
     void SetCaretColor(const Color& caretColor)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
@@ -803,6 +805,8 @@ public:
 
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
+            selectedBackgroundColor.ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
@@ -925,6 +929,7 @@ public:
     TextStyle GetDefaultTextStyle();
     void SetEnableHapticFeedback(bool isEnabled)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setEnableHapticFeedback=%{public}d", isEnabled);
         isEnableHapticFeedback_ = isEnabled;
     }
 
@@ -932,6 +937,7 @@ public:
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
@@ -946,8 +952,8 @@ public:
         CHECK_NULL_VOID(IsSelected());
         auto focusHub = GetFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
         isOnlyRequestFocus_ = true;
+        IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
     DisplayMode GetBarDisplayMode()
@@ -1041,6 +1047,7 @@ private:
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
     bool HandleUserLongPressEvent(GestureEvent& info);
+    bool HandleUserDoubleClickEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
     void HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool);
@@ -1285,10 +1292,12 @@ private:
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview(bool deletePreviewText = true);
+    void NotifyImfFinishTextPreview();
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
+    void ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options);
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
@@ -1316,6 +1325,8 @@ private:
     void SetImageSelfResponseEvent(bool isEnable);
     void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void AddSpanHoverEvent(
+        RefPtr<SpanItem> spanItem, const RefPtr<FrameNode>& frameNode, const SpanOptionBase& options);
     void UpdateImagePreviewParam();
     void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
@@ -1328,6 +1339,7 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    const bool isAPI14Plus;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;

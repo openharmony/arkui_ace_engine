@@ -141,6 +141,11 @@ public:
         getFreeMultiWindowModeEnabledStateCallback_ = std::move(callback);
     }
 
+    void SetPerformBackCallback(WindowCallback&& callback)
+    {
+        windowPerformBackCallback_ = callback;
+    }
+
     void WindowMinimize() const
     {
         if (windowMinimizeCallback_) {
@@ -189,6 +194,11 @@ public:
         if (windowStartMoveCallback_) {
             windowStartMoveCallback_();
         }
+    }
+
+    void WindowPerformBack()
+    {
+        windowPerformBackCallback_();
     }
 
     bool GetWindowStartMoveFlag() const
@@ -273,6 +283,7 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowCallback windowPerformBackCallback_;
     WindowGetStartMoveFlagCallback WindowGetStartMoveFlagCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;

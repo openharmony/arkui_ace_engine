@@ -19,12 +19,13 @@
 
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Ace {
 constexpr int32_t PROCESS_WAIT_TIME = 20;
 constexpr float DOUBLE = 2.0;
-constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 400;
+constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 600;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -94,6 +95,16 @@ void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
     allowUpdate_ = allowUpdate;
 }
 
+void FormRendererDispatcherImpl::SetVisible(bool isVisible)
+{
+    isVisible_ = isVisible;
+}
+
+bool FormRendererDispatcherImpl::IsVisible()
+{
+    return isVisible_;
+}
+
 void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
 {
@@ -103,6 +114,9 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
+    // form existed in Sceneboard window always get undefined sizeChangeReason, use Visible to control anim instead
+    reason = isVisible_ ? static_cast<uint32_t>(Rosen::WindowSizeChangeReason::ROTATION) :
+        static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
     handler->PostTask([content = uiContent_, width, height, reason, rsTransaction, borderWidth, this]() {
         auto uiContent = content.lock();
         if (!uiContent) {
@@ -129,7 +143,6 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         protocol.SetDuration(duration);
         // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
         auto curve = Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        
         Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
         
         float uiWidth = width - borderWidth * DOUBLE;
@@ -148,7 +161,6 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
 
     auto formRenderer = formRenderer_.lock();
     if (!formRenderer) {
-        HILOG_ERROR("formRenderer is nullptr");
         return;
     }
     formRenderer->OnSurfaceChange(width, height, borderWidth);

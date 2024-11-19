@@ -21,8 +21,8 @@
 namespace OHOS::Ace::NG {
 
 using StartShowTabBarFunc = std::function<void(int32_t delay)>;
-using StopShowTabBarFunc = std::function<void()>;
-using SetUpdateTabBarHiddenRatioFunc = std::function<void(float ratio)>;
+using CancelShowTabBarFunc = std::function<void()>;
+using UpdateTabBarHiddenOffsetFunc = std::function<void(float offset)>;
 using SetTabBarTranslateFunc = std::function<void(const TranslateOptions& options)>;
 using SetTabBarOpacityFunc = std::function<void(float opacity)>;
 
@@ -45,27 +45,27 @@ public:
         }
     }
 
-    void SetStopShowTabBarImpl(const StopShowTabBarFunc& stopShowTabBarImpl)
+    void SetCancelShowTabBarImpl(const CancelShowTabBarFunc& cancelShowTabBarImpl)
     {
-        stopShowTabBarImpl_ = stopShowTabBarImpl;
+        cancelShowTabBarImpl_ = cancelShowTabBarImpl;
     }
 
-    void StopShowTabBar()
+    void CancelShowTabBar()
     {
-        if (stopShowTabBarImpl_) {
-            stopShowTabBarImpl_();
+        if (cancelShowTabBarImpl_) {
+            cancelShowTabBarImpl_();
         }
     }
 
-    void SetUpdateTabBarHiddenRatioImpl(const SetUpdateTabBarHiddenRatioFunc& updateTabBarHiddenRatioImpl)
+    void SetUpdateTabBarHiddenOffsetImpl(const UpdateTabBarHiddenOffsetFunc& updateTabBarHiddenOffsetImpl)
     {
-        updateTabBarHiddenRatioImpl_ = updateTabBarHiddenRatioImpl;
+        updateTabBarHiddenOffsetImpl_ = updateTabBarHiddenOffsetImpl;
     }
 
-    void UpdateTabBarHiddenRatio(float ratio)
+    void UpdateTabBarHiddenOffset(float offset)
     {
-        if (updateTabBarHiddenRatioImpl_) {
-            updateTabBarHiddenRatioImpl_(ratio);
+        if (updateTabBarHiddenOffsetImpl_) {
+            updateTabBarHiddenOffsetImpl_(offset);
         }
     }
 
@@ -95,8 +95,8 @@ public:
 
 private:
     StartShowTabBarFunc startShowTabBarImpl_;
-    StopShowTabBarFunc stopShowTabBarImpl_;
-    SetUpdateTabBarHiddenRatioFunc updateTabBarHiddenRatioImpl_;
+    CancelShowTabBarFunc cancelShowTabBarImpl_;
+    UpdateTabBarHiddenOffsetFunc updateTabBarHiddenOffsetImpl_;
     SetTabBarTranslateFunc setTabBarTranslateImpl_;
     SetTabBarOpacityFunc setTabBarOpacityImpl_;
 };

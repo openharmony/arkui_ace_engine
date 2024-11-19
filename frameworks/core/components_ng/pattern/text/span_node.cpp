@@ -291,7 +291,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
 }
 
 void SpanItem::UpdateSymbolSpanParagraph(
-    const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder)
+    const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder, bool isDragging)
 {
     CHECK_NULL_VOID(builder);
     auto symbolSpanStyle = textStyle;
@@ -309,6 +309,9 @@ void SpanItem::UpdateSymbolSpanParagraph(
         }
         if (symbolUnicode != 0) {
             UpdateSymbolSpanColor(frameNode, symbolSpanStyle);
+        }
+        if (!symbolEffectSwitch_ || isDragging) {
+            symbolSpanStyle.SetEffectStrategy(0);
         }
         symbolSpanStyle.SetFontFamilies({"HM Symbol"});
         builder->PushStyle(symbolSpanStyle);
@@ -453,7 +456,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             finalSelEnd = contentLength;
         }
         if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
@@ -585,7 +588,6 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
     COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
     COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
-
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
@@ -601,16 +603,27 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
-
+    if (textStyle_.has_value()) {
+        sameSpan->textStyle_ = textStyle_;
+    }
     if (backgroundStyle.has_value()) {
         sameSpan->backgroundStyle = backgroundStyle;
     }
-
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
+
+#define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
+    if ((group)->Has##name()) {                                  \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, (group)->prop##name.value()); \
+    } else if (textStyle_.has_value()) {                         \
+        auto temp##name = textStyle_->Get##inheritName();        \
+        TLVUtil::WriteUint8(buff, (tag));                        \
+        TLVUtil::Write##type(buff, temp##name);                  \
+    }
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -632,38 +645,8 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
     TLVUtil::WriteString(buff, content);
-    // encode fontStyle
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows);
-    WRITE_TEXT_STYLE_TLV(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
-    WRITE_TEXT_STYLE_TLV(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle);
-    WRITE_TEXT_STYLE_TLV(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase);
-    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension);
-    WRITE_TEXT_STYLE_TLV(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension);
-
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, HeightAdaptivePolicy,
-        TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LeadingMargin, TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineBreakStrategy,
-        TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+    EncodeFontStyleTlv(buff);
+    EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
         if (backgroundStyle->backgroundColor.has_value()) {
             TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR);
@@ -679,6 +662,47 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     return true;
 };
+
+void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
+{
+    WRITE_TLV_INHERIT(fontStyle, FontSize, TLV_SPAN_FONT_STYLE_FONTSIZE, Dimension, FontSize);
+    WRITE_TLV_INHERIT(fontStyle, TextColor, TLV_SPAN_FONT_STYLE_TEXTCOLOR, Color, TextColor);
+    WRITE_TLV_INHERIT(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows, TextShadows);
+    WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
+    WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
+    WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
+    WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
+    WRITE_TLV_INHERIT(fontStyle, TextDecoration, TLV_SPAN_FONT_STYLE_TEXTDECORATION, TextDecoration, TextDecoration);
+    WRITE_TLV_INHERIT(
+        fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
+    WRITE_TLV_INHERIT(fontStyle, TextDecorationStyle, TLV_SPAN_FONT_STYLE_TEXTDECORATIONSTYLE, TextDecorationStyle,
+        TextDecorationStyle);
+    WRITE_TLV_INHERIT(fontStyle, TextCase, TLV_SPAN_FONT_STYLE_TEXTCASE, TextCase, TextCase);
+    WRITE_TLV_INHERIT(fontStyle, AdaptMinFontSize, TLV_SPAN_FONT_STYLE_ADPATMINFONTSIZE, Dimension, AdaptMinFontSize);
+    WRITE_TLV_INHERIT(fontStyle, AdaptMaxFontSize, TLV_SPAN_FONT_STYLE_ADPATMAXFONTSIZE, Dimension, AdaptMaxFontSize);
+    WRITE_TLV_INHERIT(fontStyle, LetterSpacing, TLV_SPAN_FONT_STYLE_LETTERSPACING, Dimension, LetterSpacing);
+}
+
+void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
+{
+    WRITE_TLV_INHERIT(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension, LineHeight);
+    WRITE_TLV_INHERIT(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension, LineSpacing);
+    WRITE_TLV_INHERIT(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline, TextBaseline);
+    WRITE_TLV_INHERIT(
+        textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension, BaselineOffset);
+    WRITE_TLV_INHERIT(textLineStyle, TextOverflow, TLV_SPAN_TEXT_LINE_STYLE_TEXTOVERFLOW, TextOverflow, TextOverflow);
+    WRITE_TLV_INHERIT(textLineStyle, TextAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTALIGN, TextAlign, TextAlign);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, MaxLength, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+    WRITE_TLV_INHERIT(textLineStyle, MaxLines, TLV_SPAN_TEXT_LINE_STYLE_MAXLINES, Int32, MaxLines);
+    WRITE_TEXT_STYLE_TLV(
+        textLineStyle, HeightAdaptivePolicy, TLV_SPAN_TEXT_LINE_STYLE_HEIGHTADAPTIVEPOLICY, TextHeightAdaptivePolicy);
+    WRITE_TLV_INHERIT(textLineStyle, TextIndent, TLV_SPAN_TEXT_LINE_STYLE_TEXTINDENT, Dimension, TextIndent);
+    WRITE_TEXT_STYLE_TLV(textLineStyle, LeadingMargin, TLV_SPAN_TEXT_LINE_STYLE_LEADINGMARGIN, LeadingMargin);
+    WRITE_TLV_INHERIT(textLineStyle, WordBreak, TLV_SPAN_TEXT_LINE_STYLE_WORDBREAK, WordBreak, WordBreak);
+    WRITE_TLV_INHERIT(textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy,
+        LineBreakStrategy);
+    WRITE_TLV_INHERIT(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode, EllipsisMode);
+}
 
 RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
 {
@@ -780,6 +804,15 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
 {
+    if (spanItemType == SpanItemType::NORMAL) {
+        // ImageSpan(resource)场景，复制图片为属性字符串为空格。ImageSpanItem::GetSameStyleSpanItem获取到的spanItemType为NORMAL
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
+        TLVUtil::WriteInt32(buff, interval.first);
+        TLVUtil::WriteInt32(buff, interval.second);
+        TLVUtil::WriteString(buff, content);
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+        return true;
+    }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
@@ -922,7 +955,20 @@ void ImageSpanItem::ResetImageSpanOptions()
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
-    sameSpan->SetImageSpanOptions(options);
+    if (options.HasValue()) {
+        sameSpan->SetImageSpanOptions(options);
+    } else {
+        // 用与Text控件复制ImageSpan子控件，生成并保存options数据
+        sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+        if (!(sameSpan->options.imagePixelMap.value())) {
+            /*
+                ImageSpan子控件，存在resource和pixelMap两种来源。
+                ImageSpan(resource)场景，复制图片为属性字符串为空格。
+                因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
+            */
+            sameSpan->spanItemType = SpanItemType::NORMAL;
+        }
+    }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
@@ -930,6 +976,62 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
         sameSpan->backgroundStyle = backgroundStyle;
     }
     return sameSpan;
+}
+
+ImageSpanOptions ImageSpanItem::GetImageSpanOptionsFromImageNode() const
+{
+    ImageSpanOptions imageSpanOptions;
+    auto frameNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, imageNodeId);
+    CHECK_NULL_RETURN(frameNode, imageSpanOptions);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, imageSpanOptions);
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    if (sourceInfo.has_value()) {
+        imageSpanOptions.image = sourceInfo->GetSrc();
+        imageSpanOptions.bundleName = sourceInfo->GetBundleName();
+        imageSpanOptions.moduleName = sourceInfo->GetModuleName();
+        imageSpanOptions.imagePixelMap = sourceInfo->GetPixmap();
+    }
+    imageSpanOptions.imageAttribute = CreateImageSpanAttribute(layoutProperty);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext && renderContext->HasBorderRadius()) {
+        imageSpanOptions.imageAttribute->borderRadius = renderContext->GetBorderRadius();
+    }
+    return imageSpanOptions;
+}
+
+ImageSpanAttribute ImageSpanItem::CreateImageSpanAttribute(const RefPtr<ImageLayoutProperty>& layoutProperty) const
+{
+    ImageSpanAttribute imageSpanAttribute;
+    auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        auto width = layoutConstraint->selfIdealSize->Width();
+        auto height = layoutConstraint->selfIdealSize->Height();
+        ImageSpanSize imageSpanSize;
+        if (width.has_value()) {
+            imageSpanSize.width = width->GetDimension();
+        }
+        if (height.has_value()) {
+            imageSpanSize.height = height->GetDimension();
+        }
+        imageSpanAttribute.size = imageSpanSize;
+    }
+    imageSpanAttribute.verticalAlign = layoutProperty->GetVerticalAlign();
+    imageSpanAttribute.objectFit = layoutProperty->GetImageFit();
+    auto& margin = layoutProperty->GetMarginProperty();
+    if (margin) {
+        MarginProperty marginProperty;
+        marginProperty.UpdateWithCheck(*margin);
+        imageSpanAttribute.marginProp = marginProperty;
+    }
+    auto& padding = layoutProperty->GetPaddingProperty();
+    if (padding) {
+        MarginProperty paddingProperty;
+        paddingProperty.UpdateWithCheck(*padding);
+        imageSpanAttribute.paddingProp = paddingProperty;
+    }
+    return imageSpanAttribute;
 }
 
 ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)

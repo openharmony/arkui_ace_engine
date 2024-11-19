@@ -42,6 +42,7 @@ public:
     void FireOnSubmit(const std::string& value, NG::TextFieldCommonEvent& event)
     {
         if (onSubmit_) {
+            event.SetText(value);
             onSubmit_(value, event);
         }
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {

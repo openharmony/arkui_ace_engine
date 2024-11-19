@@ -1349,6 +1349,34 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetSwipeStatus004
+ * @tc.desc: Reset swipe status when ListDirection changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, ResetSwipeStatus004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+
+    /**
+     * @tc.steps: step1. Swipe first item
+     * @tc.expected: The first item swiperIndex_ changed.
+     */
+    DragSwiperItem(item_, START_NODE_LEN, 0);
+    EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
+
+    /**
+     * @tc.steps: step2. Change ListDirection
+     * @tc.expected: Rest status
+     */
+    model.SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
+}
+
+/**
  * @tc.name: OtherTest001
  * @tc.desc: Test SetStartNode
  * @tc.type: FUNC
@@ -1392,30 +1420,10 @@ HWTEST_F(ListSwipeTestNg, OtherTest002, TestSize.Level1)
 
 /**
  * @tc.name: OtherTest003
- * @tc.desc: Test InitSwiperAction
- * @tc.type: FUNC
- */
-HWTEST_F(ListSwipeTestNg, OtherTest003, TestSize.Level1)
-{
-    CreateList();
-    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
-    CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None);
-    CreateSwipeDone();
-
-    itemPattern_->curOffset_ = 10.f;
-    itemPattern_->OnModifyDone();
-    EXPECT_EQ(itemPattern_->curOffset_, 10.f);
-    layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
-    itemPattern_->OnModifyDone();
-    EXPECT_EQ(itemPattern_->curOffset_, 0.f);
-}
-
-/**
- * @tc.name: OtherTest004
  * @tc.desc: Test closeAllSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
+HWTEST_F(ListSwipeTestNg, OtherTest003, TestSize.Level1)
 {
     SwipeActionState curState = SwipeActionState::COLLAPSED;
     auto onStateChangeFunc = [&curState](SwipeActionState state) { curState = state; };
@@ -1444,11 +1452,11 @@ HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: OtherTest005
+ * @tc.name: OtherTest004
  * @tc.desc: Test SetDeleteArea after create list done
  * @tc.type: FUNC
  */
-HWTEST_F(ListSwipeTestNg, OtherTest005, TestSize.Level1)
+HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
 {
     CreateList();
     ListItemModelNG itemModel = CreateListItem();

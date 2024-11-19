@@ -96,20 +96,23 @@ public:
     void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
     {
         lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
-        isNeedTriggerScroll_ = true;
+        if (isNeedTriggerScroll_.has_value()) {
+            isNeedTriggerScroll_ = true;
+        }
     }
     RefPtr<FocusHub> GetLastFocusStateNode() const
     {
         return lastFocusStateNode_.Upgrade();
     }
 
-    void SetNeedTriggerScroll(bool isNeedTriggerScroll)
+    void SetNeedTriggerScroll(std::optional<bool> isNeedTriggerScroll)
     {
         isNeedTriggerScroll_ = isNeedTriggerScroll;
     }
+
     bool GetNeedTriggerScroll() const
     {
-        return isNeedTriggerScroll_;
+        return isNeedTriggerScroll_.value_or(false);
     }
 
     void PaintFocusState();
@@ -122,6 +125,12 @@ public:
 
     void UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason);
     RefPtr<FocusHub> GetCurrentFocus();
+    void UpdateSwitchingEndReason(SwitchingEndReason reason)
+    {
+        if (isSwitchingFocus_.value_or(false)) {
+            endReason_ = reason;
+        }
+    }
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
@@ -144,7 +153,12 @@ private:
 
     WeakPtr<FocusHub> lastFocusStateNode_;
     WeakPtr<FocusHub> currentFocus_;
-    bool isNeedTriggerScroll_ = false;
+    /**
+     * In the case of a scrollable component's sliding state, this variable will be set to nullopt to prevent the
+     * ScrollBy animation triggered by FireFocusScroll from interrupting the sliding animation of the component.
+     * In the SetLastFocusStateNode method, this variable will not be set to true until it has value.
+     */
+    std::optional<bool> isNeedTriggerScroll_ = false;
     FocusHubScopeMap focusHubScopeMap_;
 
     std::map<int32_t, FocusChangeCallback> listeners_;

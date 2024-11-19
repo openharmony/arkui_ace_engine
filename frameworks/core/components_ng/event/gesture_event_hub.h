@@ -159,8 +159,7 @@ public:
     void ClearUserOnTouch();
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
-        double distanceThreshold = std::numeric_limits<double>::infinity());
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent);
     bool IsClickEventsEmpty() const;
@@ -172,8 +171,10 @@ public:
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
     // Set by user define, which will replace old one.
-    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
+        bool isOverrideDistance = false);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
+        bool isOverrideDistance = false);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.

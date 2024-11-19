@@ -302,6 +302,11 @@ public:
         duringInteraction_ = duringInteraction;
     }
 
+    std::optional<int32_t> GetJumpIndex() const
+    {
+        return jumpIndex_;
+    }
+
 private:
     void LayoutForward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
@@ -403,6 +408,7 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    float currentIgnoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

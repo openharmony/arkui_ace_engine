@@ -18,15 +18,19 @@ import { BindPopupBootcamp } from './BindPopupBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
 import { ImageboxGroupBootcamp } from '../displays/ImageBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
+import { TextBootcamp } from './TextBootcamp';
+import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
   label: '展示类',
   children: [
+    { name: 'text', label: '文本/Text' },
     { name: 'bindpopup', label: '气泡/BindPopup' },
     { name: 'toast', label: '即时反馈/Toast' },
     { name: 'image', label: '图片/Image' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
+    { name: 'spanurl', label: '超链接/text' },
   ]
 };
 
@@ -40,6 +44,10 @@ export function DisplaysDestination(name: string, route: Route) {
     ImageboxGroupBootcamp({ title: route.label })
   } else if (name === 'displays/scrollbar') {
     ScrollBarBootcamp({ title: route.label })
+  } else if (name === 'displays/text') {
+    TextBootcamp({ title: route.label })
+  } else if (name === 'displays/spanurl') {
+    TextSpanUrlBootcamp({ title: route.label })
   }
 }
 

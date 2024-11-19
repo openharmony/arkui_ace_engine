@@ -344,7 +344,7 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info) {};
+    virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
     {
@@ -368,12 +368,14 @@ private:
 
     void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
     RefPtr<UINode> BuildSubMenuCustomNode();
+    RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode);
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();
     void OnExpandChanged(const RefPtr<FrameNode>& expandableNode);
     void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 
@@ -398,9 +400,15 @@ private:
     void UpdateIconSrc();
     bool UpdateOptionFocus(KeyCode code);
     void UpdatePasteFontColor(const Color& fontColor);
+    void UpdatePasteDisabledOpacity(const double disabledColorAlpha);
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
+    }
+    // make render after measure and layout
+    inline bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
     }
 
     std::list<TouchRegion> hoverRegions_;

@@ -151,6 +151,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     RegisterTouchCallback(overlayInfo);
     RegisterHandleCallback(overlayInfo);
     selectOverlayHolder_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+    UpdateSelectOverlayInfoInternal(overlayInfo);
     return overlayInfo;
 }
 
@@ -190,14 +191,24 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
             CHECK_NULL_VOID(overlayCallback);
             overlayCallback->OnHandleMoveStart(event, isFirst);
         };
-    info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
+    info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this)](
+                            const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
-        overlayCallback->OnHandleMove(rect, isFirst);
+        auto handle = rect;
+        if (weakManager.Upgrade()) {
+            weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
+        }
+        overlayCallback->OnHandleMove(handle, isFirst);
     };
-    info.onHandleMoveDone = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
+    info.onHandleMoveDone = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this)](
+                                const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
+        auto handle = rect;
+        if (weakManager.Upgrade()) {
+            weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
+        }
         overlayCallback->OnHandleMoveDone(rect, isFirst);
     };
     info.onHandleReverse = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isReverse) {
@@ -352,6 +363,7 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
     if (menuPattern) {
         if ((dirty & DIRTY_SELECT_AREA) == DIRTY_SELECT_AREA) {
             auto selectArea = selectOverlayHolder_->GetSelectArea();
+            ConvertRectRelativeToParent(selectArea);
             menuPattern->UpdateSelectArea(selectArea);
         }
         if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
@@ -374,6 +386,9 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
     }
     if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
         auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+        if (viewPort) {
+            ConvertRectRelativeToParent(*viewPort);
+        }
         if (menuPattern) {
             menuPattern->UpdateViewPort(viewPort);
         }
@@ -399,10 +414,16 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
     std::optional<SelectHandleInfo> firstHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE) {
         firstHandleInfo = selectOverlayHolder_->GetFirstHandleInfo();
+        if (firstHandleInfo) {
+            ConvertHandleRelativeToParent(*firstHandleInfo);
+        }
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
         secondHandleInfo = selectOverlayHolder_->GetSecondHandleInfo();
+        if (secondHandleInfo) {
+            ConvertHandleRelativeToParent(*secondHandleInfo);
+        }
     }
     if (!firstHandleInfo && !secondHandleInfo) {
         return;
@@ -585,6 +606,11 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
     if (container && container->IsScenceBoardWindow()) {
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
+    } else if (rootNode && selectOverlayHolder_ && selectOverlayHolder_->IsEnableContainerModal()) {
+        auto containerModalRoot = GetContainerModalRoot();
+        if (containerModalRoot) {
+            rootNode = containerModalRoot;
+        }
     }
     return rootNode;
 }
@@ -828,6 +854,7 @@ OptionMenuType SelectContentOverlayManager::GetShowMenuType()
 void SelectContentOverlayManager::HandleGlobalEvent(const TouchEvent& touchEvent, const NG::OffsetF& rootOffset)
 {
     NG::PointF point { touchEvent.x - rootOffset.GetX(), touchEvent.y - rootOffset.GetY() };
+    point = point - GetContainerModalOffset();
     if (touchEvent.type == TouchType::DOWN) {
         isIntercept_ = IsTouchInSelectOverlayArea(point);
     }
@@ -861,13 +888,15 @@ bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF&
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
     }
     // get the menu rect not the out wrapper
+    auto modalOffset = GetContainerModalOffset();
     const auto& children = current->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
         if (child == nullptr || !child->GetGeometryNode()) {
             continue;
         }
-        auto frameRect = RectF(child->GetTransformRelativeOffset(), child->GetGeometryNode()->GetFrameSize());
+        auto frameRect =
+            RectF(child->GetTransformRelativeOffset() - modalOffset, child->GetGeometryNode()->GetFrameSize());
         if (frameRect.IsInRegion(point)) {
             return true;
         }
@@ -1037,5 +1066,86 @@ bool SelectContentOverlayManager::IsHiddenHandle()
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsHiddenHandle();
+}
+
+void SelectContentOverlayManager::UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo)
+{
+    if (!selectOverlayHolder_ || !selectOverlayHolder_->IsEnableContainerModal()) {
+        return;
+    }
+    if (overlayInfo.ancestorViewPort) {
+        ConvertRectRelativeToParent(*overlayInfo.ancestorViewPort);
+    }
+    ConvertRectRelativeToParent(overlayInfo.selectArea);
+    ConvertHandleRelativeToParent(overlayInfo.firstHandle);
+    ConvertHandleRelativeToParent(overlayInfo.secondHandle);
+    if (overlayInfo.isUsingMouse) {
+        overlayInfo.rightClickOffset -= GetContainerModalOffset();
+    }
+}
+
+OffsetF SelectContentOverlayManager::GetContainerModalOffset()
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, OffsetF());
+    if (!selectOverlayHolder_->IsEnableContainerModal()) {
+        return OffsetF();
+    }
+    auto rootNode = GetContainerModalRoot();
+    CHECK_NULL_RETURN(rootNode, OffsetF());
+    return rootNode->GetTransformRelativeOffset();
+}
+
+void SelectContentOverlayManager::ConvertRectRelativeToParent(RectF& rect)
+{
+    rect.SetOffset(rect.GetOffset() - GetContainerModalOffset());
+}
+
+void SelectContentOverlayManager::ConvertHandleRelativeToParent(SelectHandleInfo& info)
+{
+    auto modalOffset = GetContainerModalOffset();
+    if (modalOffset.NonOffset()) {
+        return;
+    }
+    ConvertRectRelativeToParent(info.paintRect);
+    if (info.isPaintHandleWithPoints) {
+        info.paintInfo = info.paintInfo - modalOffset;
+    }
+    if (info.paintInfoConverter) {
+        info.paintInfoConverter = [weak = WeakClaim(this), converter = std::move(info.paintInfoConverter)](
+                                      const SelectHandlePaintInfo& paintInfo) {
+            auto manager = weak.Upgrade();
+            CHECK_NULL_RETURN(manager, RectF());
+            auto tmpPaintInfo = paintInfo;
+            tmpPaintInfo = tmpPaintInfo + manager->GetContainerModalOffset();
+            return converter(tmpPaintInfo);
+        };
+    }
+}
+
+void SelectContentOverlayManager::RevertRectRelativeToRoot(RectF& handle)
+{
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    if (shareOverlayInfo_->handleLevelMode == HandleLevelMode::EMBED) {
+        return;
+    }
+    handle.SetOffset(handle.GetOffset() + GetContainerModalOffset());
+}
+
+RefPtr<FrameNode> SelectContentOverlayManager::GetContainerModalRoot()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    if (rootNode) {
+        auto context = rootNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(context, nullptr);
+        auto windowModal = context->GetWindowModal();
+        if (windowModal == WindowModal::CONTAINER_MODAL) {
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, nullptr);
+            auto overlayRoot = overlayManager->GetRootNode();
+            CHECK_NULL_RETURN(overlayRoot.Upgrade(), nullptr);
+            return DynamicCast<FrameNode>(overlayRoot.Upgrade());
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

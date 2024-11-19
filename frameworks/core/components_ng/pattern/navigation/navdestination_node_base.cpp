@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 
+#include "base/utils/utf_helper.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -57,7 +58,7 @@ std::string NavDestinationNodeBase::GetBarItemsString(bool isMenu) const
             if (!textLayoutProperty) {
                 jsonToolBarItem->Put("value", "");
             } else {
-                jsonToolBarItem->Put("value", textLayoutProperty->GetContentValue("").c_str());
+                jsonToolBarItem->Put("value", UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u"")).c_str());
             }
         } else {
             jsonToolBarItem->Put("value", "");
@@ -67,5 +68,14 @@ std::string NavDestinationNodeBase::GetBarItemsString(bool isMenu) const
     }
     jsonValue->Put("items", jsonOptions);
     return jsonValue->ToString();
+}
+
+bool NavDestinationNodeBase::IsToolBarVisible() const
+{
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(GetToolBarNode());
+    CHECK_NULL_RETURN(toolBarNode, false);
+    auto layoutProperty = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;
 }
 } // namespace OHOS::Ace::NG

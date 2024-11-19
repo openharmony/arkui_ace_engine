@@ -861,17 +861,17 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
 
     pattern_->SetTextFromUser(false);
     progressModel.SetValue(10.0);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(""), "10%");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"10%");
     EXPECT_EQ(paintProperty_->GetTextValue(""), "10%");
     progressModel.SetTextDefaultStyle(textNode, VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS);
-    EXPECT_EQ(paintProperty_->GetTextValue(""), textLayoutProperty->GetContentValue(""));
+    EXPECT_EQ(StringUtils::Str8ToStr16(paintProperty_->GetTextValue("")), textLayoutProperty->GetContentValue(u""));
 
     paintProperty_->UpdateEnableShowText(false);
     progressModel.SetValue(20.0);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(""), "");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"");
     EXPECT_EQ(paintProperty_->GetTextValue(""), "");
     progressModel.SetTextDefaultStyle(textNode, VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS);
-    EXPECT_EQ(paintProperty_->GetTextValue(""), textLayoutProperty->GetContentValue(""));
+    EXPECT_EQ(StringUtils::Str8ToStr16(paintProperty_->GetTextValue("")), textLayoutProperty->GetContentValue(u""));
 }
 
 /**

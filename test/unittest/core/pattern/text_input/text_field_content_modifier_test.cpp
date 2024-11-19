@@ -119,6 +119,9 @@ HWTEST_F(TextFieldContentModifierTest, CreateNodePaintMethod002, TestSize.Level1
      * @tc.steps: step2. call CreateNodePaintMethod
      * tc.expected: step2. Check if the value is created.
      */
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetDisplayMode(DisplayMode::ON);
     auto paint = pattern_->CreateNodePaintMethod();
     EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
 
@@ -169,6 +172,9 @@ HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate001, TestSize.Level1)
      * @tc.steps: step2. call CreateNodePaintMethod
      * tc.expected: step2. Check if the value is created.
      */
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    pattern_->scrollBar_->SetScrollable(true);
+    pattern_->scrollBar_->SetDisplayMode(DisplayMode::ON);
     auto paint = pattern_->CreateNodePaintMethod();
     EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
 

@@ -16,13 +16,6 @@
 #include "core/common/task_runner_adapter_impl.h"
 
 namespace OHOS::Ace {
-TaskRunnerAdapterImpl::~TaskRunnerAdapterImpl()
-{
-    if (eventHandler_) {
-        eventHandler_->RemoveAllEvents();
-    }
-}
-
 void TaskRunnerAdapterImpl::Initialize(bool useCurrentEventRunner, const std::string& name)
 {
     if (useCurrentEventRunner) {

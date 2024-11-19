@@ -656,6 +656,8 @@ public:
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
+    virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

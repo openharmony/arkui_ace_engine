@@ -35,7 +35,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
-    if (!IsDataValid(info_, itemCnt_)) {
+    if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+        info_->isDataValid_ = false;
         return;
     }
     CheckReset();
@@ -43,7 +44,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
-        MeasureToTarget(*info_->targetIndex_);
+        MeasureBeforeAnimation(*info_->targetIndex_);
     } else {
         MeasureOnOffset(info_->delta_);
     }
@@ -65,7 +66,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Lanes not initialized, can't perform layout");
         return;
     }
-    if (!IsDataValid(info_, itemCnt_)) {
+    if (!info_->isDataValid_) {
         return;
     }
     if (info_->targetIndex_) {
@@ -73,10 +74,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         return;
     }
 
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     if (!props_->HasCachedCount()) {
         info_->UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     info_->BeginCacheUpdate();
     RecoverCacheItems(cacheCount);
 
@@ -97,7 +98,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     if (info_->itemEnd_) {
         LayoutFooter(paddingOffset, reverse);
     } else if (info_->footerIndex_ == 0) {
-        wrapper_->GetChildByIndex(0)->SetActive(false);
+        auto child = wrapper_->GetChildByIndex(0);
+        if (child) {
+            child->SetActive(false);
+        }
     }
 
     UpdateOverlay(wrapper_);
@@ -115,8 +119,8 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
             info_->InitSegments(sections, 0);
         }
         // implies section update
-        if (info_->margins_.empty()) {
-            auto constraint = props_->GetLayoutConstraint();
+        const auto& constraint = props_->GetLayoutConstraint();
+        if (info_->margins_.empty() && constraint) {
             info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentedInit(sections, info_->margins_, frameSize);
@@ -132,7 +136,9 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     info_->segmentCache_.clear();
     info_->margins_.resize(1);
 
-    auto scale = props_->GetLayoutConstraint()->scaleProperty;
+    const auto& constraint = props_->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto scale = constraint->scaleProperty;
     auto rowsGap = ConvertToPx(props_->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap = ConvertToPx(props_->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     mainGaps_ = { axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap };
@@ -186,12 +192,11 @@ void WaterFlowLayoutSW::CheckReset()
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
-            FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+            FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
             return;
-        } else {
-            info_->maxHeight_ = 0.0f;
-            info_->ClearDataFrom(updateIdx, mainGaps_);
         }
+        info_->maxHeight_ = 0.0f;
+        info_->ClearDataFrom(updateIdx, mainGaps_);
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
@@ -207,6 +212,21 @@ void WaterFlowLayoutSW::CheckReset()
     }
 }
 
+bool WaterFlowLayoutSW::CheckData() const
+{
+    const size_t n = info_->segmentTails_.size();
+    if (mainGaps_.size() != n || crossGaps_.size() != n || itemsCrossSize_.size() != n || info_->margins_.size() != n) {
+        TAG_LOGW(ACE_WATERFLOW, "Internal data initialized incorrectly. Expected section size = %{public}zu", n);
+        return false;
+    }
+    if (info_->lanes_.size() != n) {
+        TAG_LOGW(ACE_WATERFLOW, "lanes initialized incorrectly. Actual = %{public}zu. Expected = %{public}zu", n,
+            info_->lanes_.size());
+        return false;
+    }
+    return true;
+}
+
 void WaterFlowLayoutSW::MeasureOnOffset(float delta)
 {
     // handle initial layout
@@ -214,14 +234,13 @@ void WaterFlowLayoutSW::MeasureOnOffset(float delta)
         info_->ResetWithLaneOffset(info_->TopMargin());
     }
 
+    const bool forward = NonPositive(delta);
+    forward ? ClearBack(mainLen_) : ClearFront(); // clear items recorded during target pos calculation
+
     ApplyDelta(delta);
     AdjustOverScroll();
-    // clear out items outside viewport after position change
-    if (Positive(delta)) {
-        ClearBack(mainLen_);
-    } else {
-        ClearFront();
-    }
+    // clear items that moved out of viewport
+    forward ? ClearFront() : ClearBack(mainLen_);
 }
 
 void WaterFlowLayoutSW::ApplyDelta(float delta)
@@ -242,21 +261,27 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
     }
 }
 
+void WaterFlowLayoutSW::MeasureBeforeAnimation(int32_t targetIdx)
+{
+    const std::pair prevRange { info_->startIndex_, info_->endIndex_ };
+    MeasureToTarget(targetIdx);
+
+    // skip Layout, only measure to calculate target position
+    const int32_t cacheCount = props_->GetCachedCountValue(1);
+    wrapper_->SetActiveChildRange(nodeIdx(prevRange.first), nodeIdx(prevRange.second), cacheCount, cacheCount,
+        props_->GetShowCachedItemsValue(false));
+}
+
 void WaterFlowLayoutSW::MeasureToTarget(int32_t targetIdx)
 {
     if (itemCnt_ == 0) {
         return;
     }
-    const std::pair prevRange { info_->startIndex_, info_->endIndex_ };
     if (targetIdx < info_->startIndex_) {
         FillFront(-FLT_MAX, info_->startIndex_ - 1, targetIdx);
     } else if (targetIdx > info_->endIndex_) {
         FillBack(FLT_MAX, info_->endIndex_ + 1, targetIdx);
     }
-
-    const int32_t cacheCount = props_->GetCachedCountValue(1);
-    wrapper_->SetActiveChildRange(nodeIdx(prevRange.first), nodeIdx(prevRange.second), cacheCount, cacheCount,
-        props_->GetShowCachedItemsValue(false));
 }
 
 namespace {
@@ -377,6 +402,10 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
 float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
+    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+        return 0.0f;
+    }
+
     auto& lane = info_->lanes_[secIdx][laneIdx];
     lane.endPos += mainGaps_[secIdx] + itemLen;
     if (lane.items_.empty()) {
@@ -389,6 +418,10 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
+    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+        return 0.0f;
+    }
+
     auto& lane = info_->lanes_[secIdx][laneIdx];
     lane.startPos -= mainGaps_[secIdx] + itemLen;
     if (lane.items_.empty()) {
@@ -451,21 +484,16 @@ void WaterFlowLayoutSW::ClearBack(float bound)
 {
     int32_t startIdx = info_->StartIndex();
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current startIndex = %{public}d", i,
-                startIdx);
-            break;
-        }
-        size_t laneIdx = info_->idxToLane_.at(i);
-        auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
-        float itemStartPos = lane.endPos - lane.items_.back().mainSize;
+        auto* lane = info_->GetMutableLane(i);
+        CHECK_NULL_BREAK(lane);
+        float itemStartPos = lane->endPos - lane->items_.back().mainSize;
         if (LessNotEqual(itemStartPos, bound)) {
             break;
         }
-        lane.items_.pop_back();
-        lane.endPos = itemStartPos - mainGaps_[info_->GetSegment(i)];
-        if (lane.items_.empty()) {
-            lane.endPos += mainGaps_[info_->GetSegment(i)];
+        lane->items_.pop_back();
+        lane->endPos = itemStartPos - mainGaps_[info_->GetSegment(i)];
+        if (lane->items_.empty()) {
+            lane->endPos += mainGaps_[info_->GetSegment(i)];
         }
     }
 }
@@ -474,25 +502,20 @@ void WaterFlowLayoutSW::ClearFront()
 {
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(
-                ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current endIndex = %{public}d", i, endIdx);
+        auto* lane = info_->GetMutableLane(i);
+        CHECK_NULL_BREAK(lane);
+        const float& itemLen = lane->items_.front().mainSize;
+        if (NearZero(itemLen) && NearZero(lane->startPos)) {
             break;
         }
-        size_t laneIdx = info_->idxToLane_.at(i);
-        auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
-        const float& itemLen = lane.items_.front().mainSize;
-        if (NearZero(itemLen) && NearZero(lane.startPos)) {
-            break;
-        }
-        const float itemEndPos = lane.startPos + itemLen;
+        const float itemEndPos = lane->startPos + itemLen;
         if (Positive(itemEndPos)) {
             break;
         }
-        lane.items_.pop_front();
-        lane.startPos = itemEndPos + mainGaps_[info_->GetSegment(i)];
-        if (lane.items_.empty()) {
-            lane.startPos -= mainGaps_[info_->GetSegment(i)];
+        lane->items_.pop_front();
+        lane->startPos = itemEndPos + mainGaps_[info_->GetSegment(i)];
+        if (lane->items_.empty()) {
+            lane->startPos -= mainGaps_[info_->GetSegment(i)];
         }
     }
 }
@@ -563,13 +586,20 @@ void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
         }
         case ScrollAlign::CENTER: {
             if (noSkip) {
+                if (!info_->idxToLane_.count(jumpIdx)) {
+                    break;
+                }
                 float itemH = MeasureChild(jumpIdx, info_->idxToLane_.at(jumpIdx));
                 ApplyDelta(
                     -info_->DistanceToTop(jumpIdx, mainGaps_[info_->GetSegment(jumpIdx)]) + (mainLen_ - itemH) / 2.0f);
             } else {
                 info_->ResetWithLaneOffset(mainLen_ / 2.0f);
                 info_->idxToLane_ = { { jumpIdx, 0 } };
-                auto& lane = info_->lanes_[info_->GetSegment(jumpIdx)][0];
+                int32_t secIdx = info_->GetSegment(jumpIdx);
+                if (info_->lanes_[secIdx].empty()) {
+                    break;
+                }
+                auto& lane = info_->lanes_[secIdx][0];
                 float itemH = MeasureChild(jumpIdx, 0);
                 lane.startPos = (mainLen_ - itemH) / 2.0f;
                 lane.endPos = (mainLen_ + itemH) / 2.0f;
@@ -641,7 +671,9 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane) const
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
-    return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    const float res = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    info_->CacheItemHeight(idx, res);
+    return res;
 }
 
 namespace {
@@ -670,6 +702,7 @@ void WaterFlowLayoutSW::LayoutSection(
             const bool isCache = item.idx < info_->startIndex_ || item.idx > info_->endIndex_;
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
+                mainPos += item.mainSize + mainGaps_[idx];
                 continue;
             }
             auto childNode = child->GetGeometryNode();
@@ -723,7 +756,7 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 
 bool WaterFlowLayoutSW::PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
-    if (!IsDataValid(info_, itemCnt_)) {
+    if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         return false;
     }
     cacheDeadline_ = deadline;
@@ -787,11 +820,10 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
             info_->GetSegment(idx));
         return false;
     }
-    auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);
-    CHECK_NULL_RETURN(child, false);
-    const float mainLen = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    const auto mainLen = info_->GetCachedHeight(idx);
+    CHECK_NULL_RETURN(mainLen, false);
     info_->PrepareSectionPos(idx, !front);
-    front ? FillFrontHelper(mainLen, idx, it->second) : FillBackHelper(mainLen, idx, it->second);
+    front ? FillFrontHelper(*mainLen, idx, it->second) : FillBackHelper(*mainLen, idx, it->second);
     return true;
 }
 } // namespace OHOS::Ace::NG

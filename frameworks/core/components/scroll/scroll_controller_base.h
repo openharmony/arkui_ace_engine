@@ -24,6 +24,7 @@
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -127,6 +128,21 @@ public:
     virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 
     virtual void SetObserver(const ScrollerObserver& observer) {}
+
+    virtual void SetObserverManager(const RefPtr<ScrollerObserverManager>& mgr)
+    {
+        observerMgr_ = mgr;
+    }
+
+    virtual RefPtr<ScrollerObserverManager> GetObserverManager() const
+    {
+        return observerMgr_;
+    }
+
+    virtual void StopAnimate() {}
+
+protected:
+    RefPtr<ScrollerObserverManager> observerMgr_ = nullptr;
 };
 } // namespace OHOS::Ace
 

@@ -400,6 +400,7 @@ void ParseCapsuleFontWeight(
 {
     Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
     std::string weight;
@@ -420,6 +421,7 @@ void ParseCapsuleFontStyle(
 {
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
     uint8_t style = static_cast<uint8_t>(theme->GetTextStyle().GetFontStyle());
@@ -438,6 +440,7 @@ void ParseCapsuleFontFamily(
 {
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
     std::vector<std::string> fontFamilies;
@@ -508,6 +511,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
     auto fontFamilies = theme->GetTextStyle().GetFontFamilies();

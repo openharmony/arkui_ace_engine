@@ -369,7 +369,7 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_010, TestSize.Leve
     navigationPattern->needSyncWithJsStack_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = false;
     navigationPattern->SyncWithJsStackIfNeeded();
-    EXPECT_TRUE(navigationPattern->needSyncWithJsStack_);
+    EXPECT_FALSE(navigationPattern->needSyncWithJsStack_);
     navigationPattern->needSyncWithJsStack_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = true;
     navigationPattern->SyncWithJsStackIfNeeded();
@@ -1234,6 +1234,52 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_046, TestSize.Leve
         std::pair<std::string, RefPtr<UINode>>("preTopNavDestination", preTopNavDestination);
     auto ret = navigationPattern->ApplyTopNavPathSystemBarStyleOrRestore(windowManager, topNavPath);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: NavigationPatternTestOne_047
+ * @tc.desc: Test Register dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation contentNode.
+     */
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationNode->depth_ = 7;
+
+    /**
+     * @tc.steps: step2. create navDestination contentNode.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    navDestinationNode->index_ = 0;
+    navDestinationNode->mode_ = NavDestinationMode::STANDARD;
+    navDestinationPattern->name_ = "pageOne";
+    navDestinationPattern->isOnShow_ = true;
+    navDestinationPattern->navDestinationId_ = 22;
+
+    /**
+     * @tc.steps: step3. check dumpString.
+     */
+    std::string navigationDumpInfo = "|-> Navigation ID: 11, Depth: 7, Mode: \"AUTO(SPLIT)\", NavDestinations:";
+    std::string navDestinationDumpInfo = "| [0]{ ID: 22, Name: \"pageOne\", Mode: \"STANDARD\", IsOnShow: \"TRUE\" }";
+    std::string navigationDumpString = navigationNode->ToDumpString();
+    EXPECT_EQ(navigationDumpString, navigationDumpInfo);
+    std::string navDestinationDumpString = navDestinationNode->ToDumpString();
+    EXPECT_EQ(navDestinationDumpString, navDestinationDumpInfo);
 }
 
 /**

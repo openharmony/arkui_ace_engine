@@ -1029,6 +1029,29 @@ HWTEST_F(TextFieldUXTest, CopyOption004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CopyOption005
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption005, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is not vaild
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(static_cast<CopyOptions>(99));
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
+}
+
+/**
  * @tc.name: enableAutoFill001
  * @tc.desc: test testInput enableAutoFill
  * @tc.type: FUNC
@@ -2183,9 +2206,12 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     GestureEvent info;
     info.localLocation_ = Offset(1.0f, 110.0f);
-    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
-    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
-    pattern_->scrollBar_->isScrollable_ = true;
+    auto setupScrolbar = [pattern = pattern_]() {
+        pattern->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+        pattern->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+        pattern->scrollBar_->isScrollable_ = true;
+    };
+
     // /**
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
@@ -2193,14 +2219,17 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     pattern_->hasMousePressed_ = true;
     pattern_->HandleClickEvent(info);
     Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
     info.localLocation_ = Offset(1.0f, 1.0f);
     pattern_->HandleClickEvent(info);
     Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
     info.localLocation_ = Offset(1.0f, 300.0f);
     pattern_->HandleClickEvent(info);
     Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
 }
 

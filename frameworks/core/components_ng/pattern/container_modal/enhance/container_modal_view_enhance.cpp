@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 
 #include "core/components/theme/advanced_pattern_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -59,9 +61,22 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     CHECK_NULL_RETURN(containerPattern, nullptr);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
-    containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
+    containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
     containerPattern->Init();
     return containerModalNode;
+}
+
+RefPtr<FrameNode> ContainerModalViewEnhance::BuildCustomButtonRow(RefPtr<FrameNode>& containerRow)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance BuildCustomButtonRow called");
+    CHECK_NULL_RETURN(containerRow, nullptr);
+    auto isSucc = ExecuteCustomTitleAbc();
+    if (!isSucc) {
+        return nullptr;
+    }
+    auto customNode = NG::ViewStackProcessor::GetInstance()->GetCustomButtonNode();
+    containerRow->AddChild(customNode);
+    return containerRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
@@ -69,8 +84,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance BuildTitle called");
     auto titleRow = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(titleRow, nullptr);
-    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
-    pattern->SetTapGestureEvent(titleRow);
     return titleRow;
 }
 
@@ -87,14 +100,16 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
         });
     maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
 
+    // add long press event
     WeakPtr<FrameNode> weakMaximizeBtn = maximizeBtn;
     auto longPressCallback = [weakPattern, weakMaximizeBtn](GestureEvent& info) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto maximizeBtn = weakMaximizeBtn.Upgrade();
         CHECK_NULL_VOID(maximizeBtn);
-        pattern->OnMaxBtnGestureEvent(maximizeBtn);
+        pattern->ShowMaxMenu(maximizeBtn);
     };
+    // diable mouse left!
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
     hub->SetLongPressEvent(longPressEvent, false, true);
@@ -170,7 +185,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& 
     auto renderContext = gestureRow->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdatePosition(OffsetT<Dimension>());
-    pattern->SetTapGestureEvent(gestureRow);
     auto layoutProp = gestureRow->GetLayoutProperty();
     layoutProp->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

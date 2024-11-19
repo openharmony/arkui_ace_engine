@@ -56,6 +56,9 @@ const std::string MODULE_NAME_PREFIX = "moduleName:";
 
 const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
 const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
+const int32_t PARAM_ZERO = 0;
+const int32_t PARAM_ONE = 1;
+const int32_t PARAM_TWO = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -824,9 +827,14 @@ public:
     {
         if (eventResult_) {
             bool result = true;
-            if (args.Length() == 1 && args[0]->IsBoolean()) {
-                result = args[0]->ToBoolean();
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
                 eventResult_->SetGestureEventResult(result);
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+                eventResult_->SetGestureEventResult(result, stopPropagation);
             }
         }
     }
@@ -1229,6 +1237,11 @@ public:
             return;
         }
         auto statusCode = args[0]->ToNumber<int32_t>();
+        if (statusCode == -1) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "SetResponseCode: arg value is not supported!");
+            return;
+        }
+
         response_->SetStatusCode(statusCode);
     }
 
@@ -1961,6 +1974,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("overScrollMode", &JSWeb::OverScrollMode);
+    JSClass<JSWeb>::StaticMethod("blurOnKeyboardHideMode", &JSWeb::BlurOnKeyboardHideMode);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
@@ -3610,6 +3624,23 @@ void JSWeb::OverScrollMode(int overScrollMode)
             break;
     }
     WebModel::GetInstance()->SetOverScrollMode(mode);
+}
+
+void JSWeb::BlurOnKeyboardHideMode(int blurOnKeyboardHideMode)
+{
+    auto mode = BlurOnKeyboardHideMode::SILENT;
+    switch (blurOnKeyboardHideMode) {
+        case 0:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+        case 1:
+            mode = BlurOnKeyboardHideMode::BLUR;
+            break;
+        default:
+            mode = BlurOnKeyboardHideMode::SILENT;
+            break;
+    }
+    WebModel::GetInstance()->SetBlurOnKeyboardHideMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)

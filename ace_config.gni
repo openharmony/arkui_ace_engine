@@ -61,6 +61,9 @@ declare_args() {
 
   # Enable navigation split mode support
   ace_engine_feature_enable_nav_split_mode = false
+
+  # Enable aps framework support
+  ace_engine_feature_enable_aps = false
 }
 
 enable_dump_drawcmd = false
@@ -262,10 +265,9 @@ if (defined(global_parts_info) &&
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.graphic_graphic_2d_ext)) {
-  aps_enable = true
-  ace_common_defines += [ "APS_ENABLE" ]
-} else {
-  aps_enable = false
+  if (ace_engine_feature_enable_aps) {
+    ace_common_defines += [ "APS_ENABLE" ]
+  }
 }
 
 if (ace_engine_feature_asbng_path == "") {

@@ -78,6 +78,7 @@ enum class SwitchingStartReason : int32_t {
     LOST_FOCUS_TO_VIEW_ROOT = 3,
     REMOVE_SELF = 4,
     REMOVE_CHILD = 5,
+    LOST_FOCUS_TO_TABSTOP = 6,
 };
 enum class SwitchingEndReason : int32_t {
     DEFAULT = 0,
@@ -85,6 +86,7 @@ enum class SwitchingEndReason : int32_t {
     DEPENDENCE_SELF = 2,
     NO_FOCUSABLE_CHILD = 3,
     NODE_FOCUS = 4,
+    TAB_STOP = 5,
 };
 enum class SwitchingUpdateReason : int32_t {
     DEFAULT = 0,
@@ -337,9 +339,9 @@ public:
     OnFocusFunc onJSFrameNodeFocusCallback_;
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
-    OnKeyCallbackFunc onKeyEventCallback_;
+    OnKeyConsumeFunc onKeyEventCallback_;
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
-    OnKeyPreImeFunc onKeyPreImeCallback_;
+    OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
@@ -522,6 +524,7 @@ public:
     void HandleLastFocusNodeInFocusWindow();
 
     static void LostFocusToViewRoot();
+    void LostFocusToTabStop(const RefPtr<FocusHub>& focusNode);
 
     bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
@@ -569,6 +572,11 @@ public:
 
     void SetFocusable(bool focusable, bool isExplicit = true);
 
+    void SetTabStop(bool tabStop)
+    {
+        tabStop_ = tabStop;
+    }
+
     bool GetFocusable() const
     {
         return focusable_;
@@ -584,6 +592,11 @@ public:
     bool IsCurrentFocus() const
     {
         return currentFocus_;
+    }
+
+    bool IsTabStop() const
+    {
+        return tabStop_;
     }
     bool IsCurrentFocusWholePath();
 
@@ -664,7 +677,7 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeBlurCallback_ : nullptr;
     }
 
-    void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
+    void SetOnKeyCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -679,12 +692,12 @@ public:
         }
     }
 
-    OnKeyCallbackFunc GetOnKeyCallback()
+    OnKeyConsumeFunc GetOnKeyCallback()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyEventCallback_ : nullptr;
     }
 
-    void SetOnKeyPreImeCallback(OnKeyPreImeFunc&& onKeyCallback)
+    void SetOnKeyPreImeCallback(OnKeyConsumeFunc&& onKeyCallback)
     {
         if (!focusCallbackEvents_) {
             focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
@@ -699,7 +712,7 @@ public:
         }
     }
 
-    OnKeyPreImeFunc GetOnKeyPreIme()
+    OnKeyConsumeFunc GetOnKeyPreIme()
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->onKeyPreImeCallback_ : nullptr;
     }
@@ -789,6 +802,7 @@ public:
     /* Manipulation on node-tree is forbidden in operation. */
     template <bool isReverse = false>
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation);
+    bool AnyChildFocusHub(bool isReverse, const std::function<bool(const RefPtr<FocusHub>&)>& operation);
     template <bool isReverse = false>
     void AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation);
 
@@ -1049,11 +1063,20 @@ public:
     WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
 
     bool IsNeedPaintFocusStateSelf();
+
+    void LostChildFocusToSelf();
+
+    static bool IsFocusStepKey(KeyCode keyCode);
+
+    bool GetNextFocusByStep(const KeyEvent& keyEvent);
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
     bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
+    bool RequestNextFocusOfKeyEnter();
+    bool RequestNextFocusOfKeyEsc();
     bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
@@ -1087,6 +1110,10 @@ private:
  
     bool CalculatePosition();
 
+    bool IsLeafFocusScope();
+
+    void ClearLastFocusNode();
+
     void SetScopeFocusAlgorithm();
 
     void SetLastFocusNodeIndex(const RefPtr<FocusHub>& focusNode);
@@ -1106,6 +1133,8 @@ private:
     bool UpdateFocusView();
 
     bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    bool IsChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    void CloseChildFocusView();
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
     bool RequestFocusByPriorityInScope();
     bool IsInFocusGroup();
@@ -1174,6 +1203,8 @@ private:
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool arrowKeyStepOut_ { true };
+    bool tabStop_ { false };
+    bool isSwitchByEnter_ { false };
 };
 } // namespace OHOS::Ace::NG
 

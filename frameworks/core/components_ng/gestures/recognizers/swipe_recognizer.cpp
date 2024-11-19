@@ -275,7 +275,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     time_ = event.time;
     lastAxisEvent_ = event;
     UpdateTouchPointWithAxisEvent(event);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {

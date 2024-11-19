@@ -2466,7 +2466,7 @@ OffsetF BubbleLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const Siz
 
 void BubbleLayoutAlgorithm::UpdateMarginByWidth()
 {
-    isGreatWrapperWidth_ = GreatOrEqual(childSize_.Width(), wrapperSize_.Width() - MARGIN_SPACE.ConvertToPx());
+    isGreatWrapperWidth_ = GreatOrEqual(childSize_.Width(), wrapperSize_.Width() - marginStart_ - marginEnd_);
     marginStart_ = isGreatWrapperWidth_ ? 0.0f : marginStart_;
     marginEnd_ = isGreatWrapperWidth_ ? 0.0f : marginEnd_;
 }

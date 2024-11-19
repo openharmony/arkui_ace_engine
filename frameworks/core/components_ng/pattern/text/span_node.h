@@ -204,6 +204,8 @@ public:
     std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+    OnHoverFunc onHover;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -217,7 +219,8 @@ public:
     int32_t selectedEnd = -1;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(
-        const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder);
+        const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder,
+        bool isDragging = false);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
@@ -274,6 +277,17 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+
+    void SetDoubleClickEvent(GestureEventFunc&& onDoubleClick_)
+    {
+        onDoubleClick = std::move(onDoubleClick_);
+    }
+
+    void SetHoverEvent(OnHoverFunc&& onHover_)
+    {
+        onHover = std::move(onHover_);
+    }
+
     void SetIsParentText(bool isText)
     {
         isParentText = isText;
@@ -297,6 +311,16 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    bool GetSymbolEffectSwitch() const
+    {
+        return symbolEffectSwitch_;
+    }
+
+    void SetSymbolEffectSwitch(bool symbolEffectSwitch)
+    {
+        symbolEffectSwitch_ = symbolEffectSwitch;
+    }
+
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -308,10 +332,13 @@ public:
     }
 
 private:
+    void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
+    void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
+    bool symbolEffectSwitch_ = true;
     uint32_t symbolId_ = 0;
 };
 
@@ -563,6 +590,48 @@ public:
     {
         return false;
     }
+
+    void OnModifyDone() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+        CHECK_NULL_VOID(!IsInitHoverEvent_);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto inputHub = eventHub->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(inputHub);
+        auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "placeholder, on hover event isHover=%{public}d", isHover);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnHover(isHover);
+        };
+        auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
+        inputHub->AddOnHoverEvent(hoverEvent);
+        IsInitHoverEvent_ = true;
+    }
+
+    void OnHover(bool isHover)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
+        auto pipelineContext = parent->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto frameId = parent->GetId();
+        if (isHover) {
+            pipelineContext->FreeMouseStyleHoldNode(frameId);
+        } else {
+            pipelineContext->FreeMouseStyleHoldNode();
+            pipelineContext->SetMouseStyleHoldNode(frameId);
+            pipelineContext->ChangeMouseStyle(frameId, OHOS::Ace::MouseFormat::TEXT_CURSOR);
+        }
+    }
+
+    bool IsInitHoverEvent_ = false;
 };
 
 class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
@@ -700,6 +769,9 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+private:
+    ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
+    ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;
 };
 
 class ACE_EXPORT ImageSpanNode : public FrameNode {

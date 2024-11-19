@@ -133,6 +133,7 @@ private:
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
+    void ChangeParagraphColor(const RefPtr<Paragraph>& paragraph);
     void DrawObscuration(DrawingContext& drawingContext);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
@@ -181,7 +182,7 @@ private:
     std::optional<Color> textDecorationColor_;
     Color lastTextDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
-    float lastTextDecorationColorAlpha_;
+    float lastTextDecorationColorAlpha_ = 0.0f;
     bool textDecorationAnimatable_ { false };
 
     std::optional<Dimension> baselineOffset_;

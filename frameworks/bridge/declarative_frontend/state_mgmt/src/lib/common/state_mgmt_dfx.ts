@@ -19,6 +19,7 @@ class stateMgmtDFX {
   private static readonly DUMP_MAX_PROPERTY_COUNT: number = 50;
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
+  public static enableDebug: boolean = false;
 
   public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
     changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
@@ -162,3 +163,20 @@ class DumpInfo {
 
 // global function used to throw error in Promise
 declare function _arkUIUncaughtPromiseError(error: any);
+
+function setAceDebugMode(): void {
+  stateMgmtDFX.enableDebug = true;
+}
+
+class aceDebugTrace {
+  public static begin(...args: any): void {
+    if (stateMgmtDFX.enableDebug) {
+      aceTrace.begin(...args);
+    }
+  }
+  public static end(): void {
+    if (stateMgmtDFX.enableDebug) {
+      aceTrace.end();
+    }
+  }
+}

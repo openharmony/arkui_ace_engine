@@ -667,6 +667,27 @@ void ResetListFadingEdge(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
+
+void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetShowCached(frameNode, show);
+}
+
+void ResetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetShowCached(frameNode, false);
+}
+
+ArkUI_Bool GetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetShowCached(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -687,7 +708,8 @@ const ArkUIListModifier* GetListModifier()
         SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
         SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
         SetInitialScroller, ResetInitialScroller, SetListMaintainVisibleContentPosition,
-        ResetListMaintainVisibleContentPosition, SetListFadingEdge, ResetListFadingEdge };
+        ResetListMaintainVisibleContentPosition, SetListFadingEdge, ResetListFadingEdge,
+        SetShowCached, ResetShowCached, GetShowCached };
     return &modifier;
 }
 

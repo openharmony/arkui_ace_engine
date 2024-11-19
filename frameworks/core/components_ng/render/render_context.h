@@ -171,6 +171,7 @@ public:
     enum class PatternType : int8_t {
         DEFAULT,
         VIDEO,
+        XCOM,
 #ifdef PLATFORM_VIEW_SUPPORTED
         PLATFORM_VIEW,
 #endif
@@ -268,14 +269,8 @@ public:
         return isSynced_;
     }
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
-    {
-        return false;
-    }
-
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
-    virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
@@ -348,7 +343,7 @@ public:
         return {};
     }
 
-    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 
@@ -730,6 +725,10 @@ public:
     virtual void SetRenderFit(RenderFit renderFit) {}
 
     virtual void UpdateWindowBlur() {}
+    virtual size_t GetAnimationsCount() const
+    {
+        return 0;
+    }
 
 protected:
     RenderContext() = default;

@@ -329,7 +329,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
-    nullptr,
+    NodeModifier::SetOnKeyEvent,
     NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
@@ -346,6 +346,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragLeave,
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
+    NodeModifier::SetOnKeyPreIme,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -429,6 +430,7 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnChange,
+    NodeModifier::SetTextPickerOnScrollStop,
 };
 
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -528,7 +530,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     NodeModifier::ResetOnHover,
     NodeModifier::ResetOnBlur,
-    nullptr,
+    NodeModifier::ResetOnKeyEvent,
     NodeModifier::ResetOnMouse,
     NodeModifier::ResetOnAreaChange,
     NodeModifier::ResetOnVisibleAreaChange,
@@ -538,6 +540,14 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
+    NodeModifier::ResetOnDragStart,
+    NodeModifier::ResetOnDragEnter,
+    NodeModifier::ResetOnDragDrop,
+    NodeModifier::ResetOnDragMove,
+    NodeModifier::ResetOnDragLeave,
+    NodeModifier::ResetOnDragEnd,
+    NodeModifier::ResetOnPreDrag,
+    NodeModifier::ResetOnKeyPreIme,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

@@ -60,6 +60,8 @@ public:
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
     UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content,
+        napi_value storage, const std::string& contentName) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
@@ -99,11 +101,13 @@ public:
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
-    void UpdateDecorVisible(bool visible, bool hasDeco) override;
+    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
+    void UpdateDecorVisible(bool visible, bool hasDecor) override;
+    void UpdateWindowBlur();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 

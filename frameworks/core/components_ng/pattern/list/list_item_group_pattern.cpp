@@ -118,7 +118,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_ };
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
+    return MakeRefPtr<ListItemGroupPaintMethod>(
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
 }
 
 void ListItemGroupPattern::SyncItemsToCachedItemPosition()
@@ -143,11 +144,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
         backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
         adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
-        adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
-        itemPosition_ = layoutAlgorithm->GetItemPosition();
-        cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
         layoutAlgorithm->SetCacheParam(std::nullopt);
-        return false;
     }
     if (lanes_ != layoutAlgorithm->GetLanes()) {
         lanes_ = layoutAlgorithm->GetLanes();
@@ -552,19 +549,20 @@ std::pair<int32_t, int32_t> ListItemGroupPattern::UpdateCachedIndexOmni(int32_t 
     return { forwardRes, backwardRes };
 }
 
-std::pair<int32_t, int32_t> ListItemGroupPattern::UpdateCachedIndex(
+CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
     bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache)
 {
+    CachedIndexInfo res;
     auto host = GetHost();
     if (!host) {
         forwardCachedIndex_ = -1;
         backwardCachedIndex_ = INT_MAX;
-        return { forwardCachedIndex_, backwardCachedIndex_ };
+        return res;
     }
     auto listNode = GetListFrameNode();
     bool show = listNode && listNode->GetLayoutProperty<ListLayoutProperty>() ?
         listNode->GetLayoutProperty<ListLayoutProperty>()->GetShowCachedItemsValue(false) : false;
-    if (itemTotalCount_ == -1) {
+    if (itemTotalCount_ == -1 || host->CheckNeedForceMeasureAndLayout()) {
         CalculateItemStartIndex();
         itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_;
     }
@@ -576,18 +574,31 @@ std::pair<int32_t, int32_t> ListItemGroupPattern::UpdateCachedIndex(
         UpdateActiveChildRange(show);
         reCache_ = false;
     }
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     if (forwardCache > -1 && backwardCache > -1 && !itemPosition_.empty()) {
-        auto res = UpdateCachedIndexOmni(forwardCache, backwardCache);
-        forwardCachedIndex_ = res.first;
-        backwardCachedIndex_ = res.second;
+        auto cached = UpdateCachedIndexOmni(forwardCache, backwardCache);
+        forwardCachedIndex_ = cached.first;
+        backwardCachedIndex_ = cached.second;
+        int32_t startIndex = itemPosition_.begin()->first;
+        int32_t endIndex = itemPosition_.rbegin()->first;
+        res.forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes - 1) / lanes;
+        res.forwardCacheMax = (itemTotalCount_ - 1 - endIndex + lanes - 1) / lanes;
+        res.backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes - 1) / lanes;
+        res.backwardCacheMax = (startIndex + lanes - 1) / lanes;
     } else if (forwardCache > -1) {
         forwardCachedIndex_ = UpdateCachedIndexForward(outOfView, show, forwardCache);
         backwardCachedIndex_ = INT_MAX;
+        int32_t endIndex = (outOfView || itemPosition_.empty()) ? -1 : itemPosition_.rbegin()->first;
+        res.forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes - 1) / lanes;
+        res.forwardCacheMax = (itemTotalCount_ - 1 - endIndex + lanes - 1) / lanes;
     } else if (backwardCache > -1) {
         forwardCachedIndex_ = -1;
         backwardCachedIndex_ = UpdateCachedIndexBackward(outOfView, show, backwardCache);
+        int32_t startIndex = (outOfView || itemPosition_.empty()) ? itemTotalCount_ : itemPosition_.begin()->first;
+        res.backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes - 1) / lanes;
+        res.backwardCacheMax = (startIndex + lanes - 1) / lanes;
     }
-    return { forwardCachedIndex_, backwardCachedIndex_ };
+    return res;
 }
 
 bool ListItemGroupPattern::NeedCacheForward(const LayoutWrapper* listWrapper) const
@@ -614,8 +625,8 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     CHECK_NULL_VOID(listPattern);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCountForward = listLayoutProperty->GetCachedCountValue(1) - forwardCached;
-    auto cacheCountBackward = listLayoutProperty->GetCachedCountValue(1) - backwardCached;
+    auto cacheCountForward = listLayoutProperty->GetCachedCountWithDefault() - forwardCached;
+    auto cacheCountBackward = listLayoutProperty->GetCachedCountWithDefault() - backwardCached;
     if (cacheCountForward < 1 && cacheCountBackward < 1) {
         return;
     }

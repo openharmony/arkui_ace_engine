@@ -249,4 +249,28 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest007, TestSize.Level1)
     bool result3 = ifElseNode->TryRetake("node2");
     EXPECT_FALSE(result3);
 }
+
+/**
+ * @tc.name: FlushUpdateAndMarkDirty001
+ * @tc.desc: Test for FlushUpdateAndMarkDirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IfElseSyntaxTestNg, FlushUpdateAndMarkDirty001, TestSize.Level1)
+{
+    IfElseModelNG ifElse;
+    ifElse.Create();
+
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(ifElseNode, nullptr);
+    EXPECT_EQ(ifElseNode->GetTag(), V2::JS_IF_ELSE_ETS_TAG);
+    ifElseNode->branchIdChanged_ = true;
+    
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    ifElseNode->SetParent(node);
+    ASSERT_NE(ifElseNode->GetParent(), nullptr);
+    ASSERT_EQ(ifElseNode->GetParent()->GetTag(), "node");
+    ifElseNode->FlushUpdateAndMarkDirty();
+    EXPECT_FALSE(ifElseNode->branchIdChanged_);
+}
 } // namespace OHOS::Ace::NG

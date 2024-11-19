@@ -21,10 +21,20 @@ if (PUV2ViewBase.contextStack === undefined) {
 }
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const hilog = requireNapi('hilog');
-const PUBLIC_MORE = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_more'],
-  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const PUBLIC_BACK = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_back'],
-  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const PUBLIC_MORE = {
+  'id': -1,
+  'type': 20000,
+  params: ['sys.media.ohos_ic_public_more'],
+  'bundleName': '__harDefaultBundleName__',
+  'moduleName': '__harDefaultModuleName__'
+};
+const PUBLIC_BACK = {
+  'id': -1,
+  'type': 20000,
+  params: ['sys.media.ohos_ic_back'],
+  'bundleName': '__harDefaultBundleName__',
+  'moduleName': '__harDefaultModuleName__'
+};
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
@@ -234,7 +244,6 @@ export class SelectTitleBar extends ViewPU {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: {
                   'id': -1,
                   'type': 10001,
@@ -663,7 +672,7 @@ class CollapsibleMenuSection extends ViewPU {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1;
       }
@@ -1190,6 +1199,7 @@ class ImageMenuItem extends ViewPU {
       Row.backgroundColor(this.getBgColor());
       Row.justifyContent(FlexAlign.Center);
       Row.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
+      Row.enabled(this.item.isEnabled);
       ViewStackProcessor.visualState('focused');
       Row.border({
         radius: {

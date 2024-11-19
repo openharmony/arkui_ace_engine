@@ -208,6 +208,8 @@ private:
         int32_t dimensionHeight);
     void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
     void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void SetExternalRenderOpacity(double opacity);
+    bool ShouldDoSkeletonAnimation();
     void DoSkeletonAnimation();
     void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
@@ -219,7 +221,14 @@ private:
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
+
+    void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
+    void InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceId);
+    void InitAddUnTrustAndEnableFormCallback(int32_t instanceId);
+    void InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceId);
+    void InitOtherCallback(int32_t instanceId);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
+    void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;

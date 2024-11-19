@@ -77,6 +77,7 @@ protected:
     virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnRemoveBlank() {}
+    virtual void OnAppRemoveStartingWindow() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<FrameNode> appWindow_;
@@ -99,6 +100,7 @@ private:
     bool IsSnapshotSizeChanged();
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
+    bool CheckAndAddStartingWindowAboveLocked();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     friend class LifecycleListener;

@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
 RefPtr<EventManager> GetCurrentEventManager()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
 
     return context->GetEventManager();
@@ -401,7 +401,7 @@ RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
 
 void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
@@ -416,7 +416,7 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     if (!recognizer) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);

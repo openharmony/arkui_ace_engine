@@ -36,16 +36,6 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
-{
-    CHECK_NULL_VOID(row);
-    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-}
-
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerNode = GetHost();
@@ -276,24 +266,43 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
 
-    if (!panEvent_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto windowManager = pipeline->GetWindowManager();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    // touch the title to move the floating window
+    auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
+        auto windowManager = wk.Upgrade();
         CHECK_NULL_VOID(windowManager);
-        // touch the title to move the floating window
-        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
-            auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID(windowManager);
-            if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
-                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
-                windowManager->WindowStartMove();
-                SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
+            (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
+            windowManager->WindowStartMove();
+            SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        }
+    };
+
+    std::vector<RefPtr<Gesture>> gestures;
+    auto mousePanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0);
+    mousePanGesture->SetTag("mousePanGesture");
+    gestures.emplace_back(mousePanGesture);
+    auto fingerPanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 5);
+    fingerPanGesture->SetTag("fingerPanGesture");
+    gestures.emplace_back(fingerPanGesture);
+    auto gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    mousePanGesture->SetOnActionStartId(panActionStart);
+    fingerPanGesture->SetOnActionStartId(panActionStart);
+    eventHub->AddGesture(gestureGroup);
+    eventHub->SetOnGestureJudgeNativeBegin([](
+        const RefPtr<NG::GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info)->GestureJudgeResult {
+            // MousePanGesture has higher priority. When using touch, should reject mousePanGesture.
+            // This means only fingerPanGesture or SourceTool::MOUSE are accepted.
+            if (gestureInfo->GetTag() == "mousePanGesture" && info->GetSourceTool() != SourceTool::MOUSE) {
+                TAG_LOGD(AceLogTag::ACE_APPBAR, "AddPanEvent: GestureJudgeResult REJECT");
+                return GestureJudgeResult::REJECT;
             }
-        };
-        panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
-    }
-    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+            return GestureJudgeResult::CONTINUE;
+    });
 }
 
 void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
@@ -952,4 +961,14 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
     windowPaintRect_ = expectRect;
 }
+void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
+{
+    CHECK_NULL_VOID(row);
+    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
+}
+
 } // namespace OHOS::Ace::NG

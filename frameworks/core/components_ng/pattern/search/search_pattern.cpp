@@ -116,6 +116,7 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
         auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
         auto textLayoutWrapper = imageHost->CreateLayoutWrapper();
         CHECK_NULL_VOID(textLayoutWrapper);
+        ScopedLayout scope(frameNode->GetContext());
         textLayoutWrapper->Measure(layoutConstraint);
     }
 }
@@ -867,7 +868,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     // If the focus is on the search, press Enter to request keyboard.
-    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH) {
+    if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::SEARCH && !IsSearchAttached()) {
         RequestKeyboard();
         return true;
     }
@@ -977,6 +978,17 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     } else {
         return true;
     }
+}
+
+bool SearchPattern::IsSearchAttached()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    return textFieldManager->GetIsImeAttached();
 }
 
 void SearchPattern::PaintFocusState(bool recoverFlag)
@@ -1327,6 +1339,12 @@ void SearchPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldGeometryNode = textFieldFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(textFieldGeometryNode);
+    auto textFieldFrameRect = textFieldGeometryNode->GetFrameRect();
+    auto relTextFieldLocalLocation = Offset(info.GetLocalLocation().GetX() - textFieldFrameRect.GetX(),
+        info.GetLocalLocation().GetY() - textFieldFrameRect.GetY());
+    info.SetLocalLocation(relTextFieldLocalLocation);
     textFieldPattern->HandleClickEvent(info);
 }
 
@@ -1751,7 +1769,7 @@ void SearchPattern::CreateSearchIcon(const std::string& src, bool forceUpdate)
         return;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        src.empty()) {
+        src.empty() && SystemProperties::IsNeedSymbol()) {
         CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated(), false);
     } else {
         GetSearchNode()->SetSearchImageIconOptions(IconOptions(src));
@@ -1781,7 +1799,8 @@ void SearchPattern::CreateCancelIcon()
         UpdateCancelSymbolIconColor();
         return;
     }
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated(), false);
     } else {
         GetSearchNode()->SetCancelImageIconOptions(IconOptions());

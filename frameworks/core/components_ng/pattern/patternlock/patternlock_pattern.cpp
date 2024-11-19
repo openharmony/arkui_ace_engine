@@ -227,6 +227,21 @@ void PatternLockPattern::ModifyAccessibilityVirtualNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
+std::string PatternLockPattern::ReplacePlaceHolder(const std::string& str, int32_t number)
+{
+    std::string result = str;
+    std::string numberStr = std::to_string(number);
+
+    size_t pos = result.find("%d");
+    if (pos != std::string::npos) {
+        result.replace(pos, 2, numberStr); // 2: "%d" length
+    } else {
+        result = str + numberStr;
+    }
+
+    return result;
+}
+
 void PatternLockPattern::UpdateAccessibilityTextNode(
     RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y)
 {
@@ -241,8 +256,9 @@ void PatternLockPattern::UpdateAccessibilityTextNode(
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
     auto message = patternLockTheme->GetPassPointTxt();
-    std::string text = message + std::to_string(index);
+    std::string text = ReplacePlaceHolder(message, index);
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);

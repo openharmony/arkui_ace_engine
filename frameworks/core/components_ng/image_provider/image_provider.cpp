@@ -261,9 +261,6 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 {
     if (!RegisterTask(src.GetKey(), ctxWp)) {
         // task is already running, only register callbacks
-        auto&& dfxConfig = src.GetImageDfxConfig();
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Register CreateImageObject fail. src = %{private}s-%{public}s.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
     if (sync) {
@@ -303,32 +300,33 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return nullptr;
     }
     rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
-    auto [size, frameCount] = rosenImageData->Parse();
-    if (!size.IsPositive()) {
+    auto codec = rosenImageData->Parse();
+    if (!codec.imageSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
             "%{private}s, frameCount is %{public}d, nodeId = %{public}s.",
-            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount,
-            imageDfxConfig.ToStringWithoutSrc().c_str());
+            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
+            codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
-    if (frameCount > 1) {
-        auto imageObject = MakeRefPtr<AnimatedImageObject>(src, size, data);
-        imageObject->SetFrameCount(frameCount);
+    RefPtr<ImageObject> imageObject;
+    if (codec.frameCount > 1) {
+        auto imageObject = MakeRefPtr<AnimatedImageObject>(src, codec.imageSize, data);
+        imageObject->SetOrientation(codec.orientation);
+        imageObject->SetFrameCount(codec.frameCount);
         return imageObject;
     }
-    return MakeRefPtr<StaticImageObject>(src, size, data);
+    imageObject = MakeRefPtr<StaticImageObject>(src, codec.imageSize, data);
+    imageObject->SetOrientation(codec.orientation);
+    return imageObject;
 }
 
 void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
     const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
 {
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
-    auto&& dfxConfig = obj->GetImageDfxConfig();
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Register decoderTask fail. src = %{private}s-%{public}s.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
     if (imageDecoderOptions.sync) {

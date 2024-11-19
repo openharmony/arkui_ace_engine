@@ -900,6 +900,8 @@ void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     // pause animation if prop is initially set to invisible
     if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         image->ControlAnimation(false);
+    } else {
+        image->ControlAnimation(true);
     }
 }
 

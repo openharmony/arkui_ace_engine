@@ -157,7 +157,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true });
     impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
     g_nodeSet.emplace(arkUINode);
     return arkUINode;
@@ -166,6 +166,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
+    if (!CheckIsCNode(nativePtr)) {
+        return;
+    }
     if (nativePtr->customEventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
         nativePtr->customEventListeners);
@@ -194,6 +197,9 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
 void DisposeNode(ArkUI_NodeHandle nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
+    if (!CheckIsCNode(nativePtr)) {
+        return;
+    }
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
@@ -207,6 +213,10 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
+    // a
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
@@ -221,6 +231,9 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
@@ -235,6 +248,9 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
@@ -250,6 +266,9 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
@@ -265,6 +284,9 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (!CheckIsCNode(parentNode) || !CheckIsCNode(childNode)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     // already check in entry point.
     if (parentNode->type == -1) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
@@ -317,7 +339,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
-    if (nodePtr == nullptr) {
+    if (nodePtr == nullptr || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
@@ -372,7 +394,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
-    if (nodePtr == nullptr) {
+    if (nodePtr == nullptr || !CheckIsCNode(nodePtr)) {
         return;
     }
     if (!nodePtr->extraData) {
@@ -418,6 +440,25 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
+void HandleTouchEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->touchEvent);
+}
+
+void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->mouseEvent);
+}
+
+void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputEvent = &(innerEvent->keyEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -449,15 +490,17 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if ((g_eventReceiver || (event.node && event.node->eventListeners))  && ConvertEvent(innerEvent, &event)) {
         event.targetId = innerEvent->nodeId;
         ArkUI_UIInputEvent uiEvent;
-        if (eventType == NODE_TOUCH_EVENT || eventType == NODE_ON_TOUCH_INTERCEPT) {
-            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-            uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
-            uiEvent.inputEvent = &(innerEvent->touchEvent);
-            event.origin = &uiEvent;
-        } else if (eventType == NODE_ON_MOUSE) {
-            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
-            uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
-            uiEvent.inputEvent = &(innerEvent->mouseEvent);
+        std::map<ArkUI_NodeEventType, std::function<void(ArkUI_UIInputEvent&, ArkUINodeEvent*)>> eventHandlers = {
+            {NODE_TOUCH_EVENT, HandleTouchEvent},
+            {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
+            {NODE_ON_MOUSE, HandleMouseEvent},
+            {NODE_ON_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent}
+        };
+
+        auto it = eventHandlers.find(eventType);
+        if (it != eventHandlers.end()) {
+            it->second(uiEvent, innerEvent);
             event.origin = &uiEvent;
         } else {
             event.origin = innerEvent;
@@ -505,6 +548,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case DRAG_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->dragEvent.subKind);
+            break;
+        case KEY_INPUT_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
             break;
         default:
             break; /* Empty */
@@ -557,7 +603,7 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 
 int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
 {
-    if (!node) {
+    if (!node || !CheckIsCNode(node)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!userData) {
@@ -574,7 +620,7 @@ void* GetUserData(ArkUI_NodeHandle node)
 
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
-    if (!nodePtr) {
+    if (!nodePtr || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
@@ -598,7 +644,7 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
-    if (!nodePtr) {
+    if (!nodePtr || !CheckIsCNode(nodePtr)) {
         return;
     }
     ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
@@ -626,7 +672,7 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
 {
-    if (!nodePtr || !eventReceiver) {
+    if (!nodePtr || !eventReceiver || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!nodePtr->eventListeners) {
@@ -642,7 +688,7 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(Ark
 
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
 {
-    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners) {
+    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners || !CheckIsCNode(nodePtr)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(nodePtr->eventListeners);
@@ -672,6 +718,14 @@ void* GetParseJsMedia()
         return nullptr;
     }
     return reinterpret_cast<void*>(parseJsMedia);
+}
+
+bool CheckIsCNode(ArkUI_NodeHandle node)
+{
+    if (node->cNode || node->buildNode) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NodeModel
 

@@ -32,7 +32,7 @@ void ScrollPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    UpdateFadingGradient(renderContext, paintWrapper);
+    UpdateFadingGradient(renderContext);
     TryContentClip(paintWrapper);
 }
 

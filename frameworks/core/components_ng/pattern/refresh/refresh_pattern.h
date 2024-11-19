@@ -147,6 +147,9 @@ private:
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
+    float GetLoadingProgressOpacity();
+    float GetLoadingTextOpacity();
+    Color GetLoadingProgressColor();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}

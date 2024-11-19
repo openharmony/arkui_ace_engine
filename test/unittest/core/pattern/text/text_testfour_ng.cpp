@@ -31,7 +31,7 @@ public:
 HWTEST_F(TextTestFourNg, UpdateFontFeature002, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -54,7 +54,7 @@ HWTEST_F(TextTestFourNg, UpdateFontFeature002, TestSize.Level1)
 HWTEST_F(TextTestFourNg, SetLineSpacing001, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -189,7 +189,7 @@ HWTEST_F(TextTestFourNg, InitKeyEvent001, TestSize.Level1)
      * @tc.steps: step2. Initialize text and copyOption.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("123456789");
+    textModelNG.Create(u"123456789");
     textModelNG.SetCopyOption(CopyOptions::InApp);
 
     /**
@@ -222,7 +222,7 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
      * @tc.steps: step2. Initialize text and textSelector_.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("123456789");
+    textModelNG.Create(u"123456789");
     textPattern->copyOption_ = CopyOptions::InApp;
     textPattern->textSelector_.Update(2, 6);
 

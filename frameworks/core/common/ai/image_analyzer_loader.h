@@ -19,6 +19,9 @@
 #define NAPI_VERSION 8
 
 #include <memory>
+
+#include "js_native_api_types.h"
+
 #include "interfaces/inner_api/ace/ai/image_analyzer_interface.h"
 
 namespace OHOS::Ace {

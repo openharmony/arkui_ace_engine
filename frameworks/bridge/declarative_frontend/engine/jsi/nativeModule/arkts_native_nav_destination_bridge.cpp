@@ -22,6 +22,23 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_NONE = 1;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_TITLE = 2;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_CONTENT = 3;
+
+NavigationSystemTransitionType ParseTransitionType(int32_t value)
+{
+    switch (value) {
+        case JS_EMUN_TRANSITIONTYPE_NONE:
+            return NG::NavigationSystemTransitionType::NONE;
+        case JS_EMUN_TRANSITIONTYPE_TITLE:
+            return NG::NavigationSystemTransitionType::TITLE;
+        case JS_EMUN_TRANSITIONTYPE_CONTENT:
+            return NG::NavigationSystemTransitionType::CONTENT;
+        default:
+            return NG::NavigationSystemTransitionType::DEFAULT;
+    }
+}
 
 ArkUINativeModuleValue NavDestinationBridge::SetHideTitleBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -299,6 +316,36 @@ ArkUINativeModuleValue NavDestinationBridge::ResetRecoverable(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetRecoverable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetNavDestinationSystemTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsNumber()) {
+        GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationSystemTransition(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto value = info[1]->ToNumber<int32_t>();
+    NavigationSystemTransitionType type = ParseTransitionType(value);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationSystemTransition(
+        nativeNode,
+        static_cast<ArkUI_Int32>(type));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetNavDestinationSystemTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationSystemTransition(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

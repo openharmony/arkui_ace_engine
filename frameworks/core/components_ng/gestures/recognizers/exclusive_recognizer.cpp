@@ -299,8 +299,9 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 void ExclusiveRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
-        if (child) {
-            child->CleanRecognizerState();
+        auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
+        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+            childRecognizer->CleanRecognizerState();
         }
     }
     if ((refereeState_ == RefereeState::SUCCEED ||

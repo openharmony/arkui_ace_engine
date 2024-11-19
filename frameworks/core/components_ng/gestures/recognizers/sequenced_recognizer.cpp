@@ -106,11 +106,8 @@ void SequencedRecognizer::OnBlocked()
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        if (point.sourceType == SourceType::TOUCH) {
-            inputEventType_ = InputEventType::TOUCH_SCREEN;
-        } else {
-            inputEventType_ = InputEventType::MOUSE_BUTTON;
-        }
+        inputEventType_ = point.sourceType == SourceType::TOUCH ? InputEventType::TOUCH_SCREEN :
+            InputEventType::MOUSE_BUTTON;
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, sequenced %{public}d type: %{public}d",
             point.touchEventId, point.id, static_cast<int32_t>(point.type));
     }
@@ -136,7 +133,7 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     }
     switch (point.type) {
         case TouchType::DOWN:
-            if (touchPoints_.size() == 1) {
+            if (touchPoints_.size() == 1 && curRecognizer->IsAllowedType(point.sourceTool)) {
                 deadlineTimer_.Cancel();
             }
             [[fallthrough]];
@@ -150,7 +147,8 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING)) {
+    if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING) &&
+        curRecognizer->IsAllowedType(point.sourceTool)) {
         DeadlineTimer();
     }
     return true;
@@ -180,7 +178,8 @@ bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
         curRecognizer->HandleEvent(point);
     }
 
-    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING)) {
+    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING) &&
+        curRecognizer->IsAllowedType(point.sourceTool)) {
         DeadlineTimer();
     }
     return true;
@@ -299,7 +298,7 @@ void SequencedRecognizer::OnResetStatus()
 
 void SequencedRecognizer::DeadlineTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -355,8 +354,9 @@ bool SequencedRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 void SequencedRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
-        if (child) {
-            child->CleanRecognizerState();
+        auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
+        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+            childRecognizer->CleanRecognizerState();
         }
     }
     if ((refereeState_ == RefereeState::SUCCEED ||

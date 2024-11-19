@@ -54,8 +54,6 @@ RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     uint32_t directNum = panGestureOption->GetDirection().type;
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
@@ -289,12 +287,15 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (currentFingers_ == fingers_) {
+    // In CrossPlatform, MOVE point has sampled, but the UP point is original coordinate,
+    // and participating in the Velocity calculation may cause abnormal rates
+    if (currentFingers_ == fingers_ && SystemProperties::IsNeedResampleTouchPoints()) {
         UpdateTouchPointInVelocityTracker(event);
     } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
+
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
@@ -427,7 +428,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
@@ -854,7 +855,7 @@ void PanRecognizer::ChangeDirection(const PanDirection& direction)
 {
     if (direction_.type != direction.type) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "Pan change direction from %{public}d to %{public}d, tag = %{public}s",
             static_cast<int32_t>(direction_.type), static_cast<int32_t>(direction.type),
             node ? node->GetTag().c_str() : "null");
         direction_.type = direction.type;

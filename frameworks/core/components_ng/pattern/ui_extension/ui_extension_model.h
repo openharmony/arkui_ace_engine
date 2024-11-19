@@ -36,6 +36,12 @@ namespace NG {
 class SecurityUIExtensionProxy;
 class UIExtensionProxy;
 
+struct InnerModalUIExtensionConfig {
+    bool isAsyncModalBinding = false;
+    bool isModal = true;
+    bool isDensityFollowHost = false;
+};
+
 struct UIExtensionConfig {
     RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;

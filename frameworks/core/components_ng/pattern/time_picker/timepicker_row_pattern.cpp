@@ -1216,7 +1216,7 @@ bool TimePickerRowPattern::CheckFocusID(int32_t childSize)
         focusKeyID_ = childSize - 1;
         return false;
     }
-    if (NeedAdaptForAging()) {
+    if (NeedAdaptForAging() && !GetIsShowInDatePickerDialog()) {
         if (GetCurrentPage() == 1) {
             if (focusKeyID_ < 1) {
                 focusKeyID_ = 1;

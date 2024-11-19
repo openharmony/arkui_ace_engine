@@ -21,6 +21,11 @@
 #include "core/components_ng/syntax/for_each_base_node.h"
 
 namespace OHOS::Ace::NG {
+enum class ListItemDragState {
+    IDLE,
+    LONG_PRESS,
+    DRAGGING,
+};
 class ListItemDragManager : public AceType {
     DECLARE_ACE_TYPE(ListItemDragManager, AceType)
 
@@ -83,6 +88,7 @@ private:
     VectorF prevScale_{ 1.f, 1.f };
     Shadow prevShadow_;
     int32_t prevZIndex_ = 0;
+    ListItemDragState dragState_ = ListItemDragState::IDLE;
 };
 } // namespace OHOS::Ace::NG
 

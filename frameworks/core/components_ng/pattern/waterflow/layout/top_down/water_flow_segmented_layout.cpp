@@ -28,7 +28,7 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
+bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
 {
     if (info->segmentTails_.empty()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section is empty.");
@@ -48,7 +48,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     InitEnv(wrapper);
     info_->childrenCount_ = wrapper_->GetTotalChildCount();
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
-    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+    if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
+        info_->isDataValid_ = false;
         return;
     }
 
@@ -85,7 +86,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+    if (!info_->isDataValid_) {
         return;
     }
 
@@ -109,10 +110,10 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
 
     const bool isReverse = props_->IsReverse();
+    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     if (!props_->HasCachedCount()) {
         info_->UpdateDefaultCachedCount();
     }
-    const int32_t cacheCount = props_->GetCachedCountValue(info_->defCachedCount_);
     const int32_t maxIdx = std::min(info_->endIndex_ + cacheCount, static_cast<int32_t>(info_->itemInfos_.size() - 1));
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
