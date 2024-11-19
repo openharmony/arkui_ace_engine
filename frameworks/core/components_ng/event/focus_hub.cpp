@@ -2357,11 +2357,15 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
 {
-    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
-        return false;
-    }
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
+    auto isDirectionKeyDown = GetDirectionalKeyFocus() && event.IsDirectionalKey() &&
+        event.action == KeyAction::DOWN;
+    auto isTabDown = event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN;
+    if (!isDirectionKeyDown && !isTabDown) {
+        return false;
+    }
+    
     auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;

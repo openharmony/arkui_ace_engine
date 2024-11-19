@@ -3435,10 +3435,16 @@ bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
     auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
     auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
+    bool isDPADDown = false;
+    if (event.action == KeyAction::DOWN && event.IsDirectionalKey() &&
+        curEntryFocusViewFrame && curEntryFocusViewFrame->GetFocusHub() &&
+        curEntryFocusViewFrame->GetFocusHub()->GetDirectionalKeyFocus()) {
+        isDPADDown = true;
+    }
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
 
-    if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
+    if ((isKeyTabDown || isDPADDown) && isViewRootScopeFocused && curFocusView) {
         // Current focused on the view root scope. Tab key used to extend focus.
         // If return true. This tab key will just trigger onKeyEvent process.
         isTabJustTriggerOnKeyEvent_ = curFocusView->TriggerFocusMove();
@@ -3446,7 +3452,7 @@ bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
 
     // Tab key set focus state from inactive to active.
     // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
+    bool isHandleFocusActive = (isKeyTabDown || isDPADDown) && SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
     if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
