@@ -10340,11 +10340,13 @@ bool RichEditorPattern::CursorMoveLineEnd()
 {
     int32_t position = 0;
     if (!textSelector_.SelectNothing()) {
-        CaretOffsetInfo caretInfo = GetCaretOffsetInfoByPosition(textSelector_.GetTextEnd());
+        position = textSelector_.GetTextEnd();
+        CaretOffsetInfo caretInfo = GetCaretOffsetInfoByPosition(position);
         bool cursorAtLineEnd = !NearEqual(caretInfo.caretOffsetUp.GetX(), caretInfo.caretOffsetDown.GetX(), 0.5f);
-        if (cursorAtLineEnd) {
-            position = textSelector_.GetTextEnd();
-        } else {
+        bool cursorAfterNewLine = (position - 1) == GetParagraphEndPosition(position - 1);
+        if (cursorAfterNewLine) {
+            --position;
+        } else if (!cursorAtLineEnd) {
             position = CalcLineEndPosition(textSelector_.GetTextEnd());
         }
     } else {
@@ -10496,10 +10498,6 @@ int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
             selectEndOffset.GetY() == newCaretOffset.GetY()) {
             return textSelector_.GetTextEnd();
         }
-    }
-    bool isParagraphStart = newPos == GetParagraphBeginPosition(newPos);
-    if (isParagraphStart && newPos != GetTextContentLength() && newPos != 0 && isUp) {
-        return newPos - 1;
     }
     return newPos;
 }
