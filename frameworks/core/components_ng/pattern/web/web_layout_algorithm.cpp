@@ -46,9 +46,6 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         TAG_LOGD(AceLogTag::ACE_WEB, "WebLayoutAlgorithm::Measure,drawSize : %{public}s", drawSize.ToString().c_str());
         layoutWrapper->GetGeometryNode()->SetFrameSize(drawSize);
     }
-    if (pattern->GetRenderMode() == RenderMode::SYNC_RENDER) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
 }
 
 bool WebLayoutAlgorithm::IsValidRootLayer(int32_t x, RenderMode renderMode)

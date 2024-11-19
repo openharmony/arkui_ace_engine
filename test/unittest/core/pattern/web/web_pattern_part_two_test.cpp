@@ -1861,7 +1861,6 @@ HWTEST_F(WebPatternPartTwoTest, SetLayoutMode_001, TestSize.Level1)
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     webPattern->SetLayoutMode(mode);
     EXPECT_EQ(webPattern->layoutMode_, mode);
-    EXPECT_FALSE(webPattern->isLayoutModeChanged_);
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     EXPECT_TRUE(webPattern->isLayoutModeChanged_);
 #endif

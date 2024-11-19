@@ -328,8 +328,14 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
     if (!surfaceNode) {
         return;
     }
-    CompareBufferSize(width, height, surfaceNode);
+    bool res = CompareBufferSize(width, height, surfaceNode);
     ACE_SCOPED_TRACE("Web DrawBuffer");
+    if (res && isNeedSyncGeometryProperties_) {
+        RectF keyBoardAvoidRect = RectF(keyBoardAvoidRect_.GetX(), keyBoardAvoidRect_.GetY(), width, height);
+        ACE_SCOPED_TRACE("Web DrawBuffer, SyncGeometryProperties: %s", keyBoardAvoidRect.ToString().c_str());
+        rosenRenderContext->SyncGeometryProperties(keyBoardAvoidRect);
+        isNeedSyncGeometryProperties_ = false;
+    }
     rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
