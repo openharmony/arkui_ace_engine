@@ -36,14 +36,6 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static FlexAlign GetJustifyContent(FrameNode* frameNode);
     static FlexAlign GetAlignItems(FrameNode* frameNode);
-    static void SetPointLightBloom(FrameNode* frameNode, const std::optional<float_t>& bloom);
-    static void SetPointLightIlluminated(FrameNode* frameNode, const std::optional<uint32_t>& illuminated);
-    static void SetPointLightSourcePosition(FrameNode* frameNode,
-        const std::optional<float_t>& x,
-        const std::optional<float_t>& y,
-        const std::optional<float_t>& z);
-    static void SetPointLightSourceIntensity(FrameNode* frameNode, const std::optional<float_t>& intensity);
-    static void SetPointLightSourceColor(FrameNode* frameNode, const std::optional<Color>& color);
 };
 
 } // namespace OHOS::Ace::NG

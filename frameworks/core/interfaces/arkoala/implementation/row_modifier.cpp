@@ -13,28 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/arkoala/utility/ace_engine_types.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 struct RowOptions {
     std::optional<Dimension> space;
-};
-
-struct PointLightStyle {
-    std::optional<uint32_t> illuminated;
-    std::optional<float_t> bloom;
-    std::optional<float_t> x;
-    std::optional<float_t> y;
-    std::optional<float_t> z;
-    std::optional<float_t> intensity;
-    std::optional<Color> color;
 };
 }
 
@@ -58,20 +49,6 @@ RowOptions Convert(const Ark_RowOptions& src)
     };
 }
 
-template<>
-PointLightStyle Convert(const Ark_PointLightStyle& src)
-{
-    PointLightStyle options;
-    options.bloom = (float)Converter::ConvertOrDefault(src.bloom, 0);
-    options.illuminated = (uint32_t)Converter::ConvertOrDefault(src.illuminated, 0);
-    Ark_LightSource lightSource = src.lightSource.value;
-    options.x = Converter::OptConvert<float_t>(lightSource.positionX.value);
-    options.y = Converter::OptConvert<float_t>(lightSource.positionY.value);
-    options.z = Converter::OptConvert<float_t>(lightSource.positionZ.value);
-    options.intensity = (float)Converter::ConvertOrDefault(lightSource.intensity, 0);
-    options.color = Converter::OptConvert<Color>(lightSource.color);
-    return options;
-}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -108,15 +85,39 @@ void JustifyContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto pointLightStyle = Converter::Convert<PointLightStyle>(*value);
-    RowModelNG::SetPointLightBloom(frameNode, pointLightStyle.bloom);
-    RowModelNG::SetPointLightIlluminated(frameNode, pointLightStyle.illuminated);
-    RowModelNG::SetPointLightSourcePosition(frameNode, pointLightStyle.x, pointLightStyle.y, pointLightStyle.z);
-    RowModelNG::SetPointLightSourceIntensity(frameNode, pointLightStyle.intensity);
-    RowModelNG::SetPointLightSourceColor(frameNode, pointLightStyle.color);
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
+    auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelNG::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
+#endif
 }
 void ReverseImpl(Ark_NativePointer node,
                  const Ark_Union_Boolean_Undefined* value)

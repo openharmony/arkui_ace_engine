@@ -35,6 +35,9 @@ constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
+const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
+const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -786,6 +789,84 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
     } else {
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
+    }
+}
+
+void ViewAbstractModelNG::SetBloom(FrameNode *frameNode, const std::optional<float>& value,
+    const RefPtr<ThemeConstants>& themeConstants)
+{
+    CHECK_NULL_VOID(themeConstants);
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetBloom(frameNode, *value);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Bloom, frameNode);
+    }
+    double bloomRadius = themeConstants->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
+    Color bloomColor = themeConstants->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+    Shadow shadow;
+    shadow.SetBlurRadius(value.value_or(0.0f) * bloomRadius);
+    shadow.SetColor(bloomColor);
+    std::vector<Shadow> shadows { shadow };
+    ViewAbstractModelNG::SetBackShadow(frameNode, shadows);
+}
+
+void ViewAbstractModelNG::SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetIlluminatedBorderWidth(frameNode, value);
+}
+
+void ViewAbstractModelNG::SetLightIlluminated(FrameNode *frameNode, const std::optional<uint32_t>& value,
+    const RefPtr<ThemeConstants>& themeConstants)
+{
+    CHECK_NULL_VOID(themeConstants);
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetLightIlluminated(frameNode, *value);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
+    }
+    auto illuminatedBorderWidth = themeConstants->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+    ViewAbstractModelNG::SetIlluminatedBorderWidth(frameNode, illuminatedBorderWidth);
+}
+
+
+void ViewAbstractModelNG::SetBackShadow(FrameNode *frameNode, const std::vector<Shadow>& shadows)
+{
+    if (!shadows.empty()) {
+        ViewAbstract::SetBackShadow(frameNode, shadows[0]);
+    }
+}
+
+void ViewAbstractModelNG::SetLightPosition(FrameNode* frameNode, const std::optional<CalcDimension>& positionX,
+    const std::optional<CalcDimension>& positionY, const std::optional<CalcDimension>& positionZ)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (positionX && positionY && positionZ) {
+        ViewAbstract::SetLightPosition(frameNode, *positionX, *positionY, *positionZ);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightPosition, frameNode);
+    }
+}
+
+void ViewAbstractModelNG::SetLightIntensity(FrameNode* frameNode, const std::optional<float>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetLightIntensity(frameNode, *value);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIntensity, frameNode);
+    }
+}
+
+void ViewAbstractModelNG::SetLightColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (value) {
+        ViewAbstract::SetLightColor(frameNode, *value);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightColor, frameNode);
     }
 }
 

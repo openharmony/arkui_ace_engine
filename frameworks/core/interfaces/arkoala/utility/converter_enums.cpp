@@ -1103,4 +1103,19 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
         default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src)
+{
+    switch (src) {
+        case ARK_ILLUMINATED_TYPE_NONE: dst = ARK_ILLUMINATED_TYPE_NONE; break;
+        case ARK_ILLUMINATED_TYPE_BORDER: dst = ARK_ILLUMINATED_TYPE_BORDER; break;
+        case ARK_ILLUMINATED_TYPE_CONTENT: dst = ARK_ILLUMINATED_TYPE_CONTENT; break;
+        case ARK_ILLUMINATED_TYPE_BORDER_CONTENT: dst = ARK_ILLUMINATED_TYPE_BORDER_CONTENT; break;
+        case ARK_ILLUMINATED_TYPE_BLOOM_BORDER: dst = ARK_ILLUMINATED_TYPE_BLOOM_BORDER; break;
+        case ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT: dst = ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT; break;
+        default:
+            LOGE("Unknown illumination type: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

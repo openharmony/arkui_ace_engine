@@ -87,5 +87,20 @@ enum class MessageLevel {
 
 using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
 using PickerValueType = std::variant<std::string, std::vector<std::string>>;
+
+struct LightSource {
+    std::optional<CalcDimension> x;
+    std::optional<CalcDimension> y;
+    std::optional<CalcDimension> z;
+    std::optional<float> intensity;
+    std::optional<Color> lightColor;
+};
+
+struct PointLightStyle {
+    std::optional<LightSource> lightSource;
+    std::optional<int> illuminationType;
+    std::optional<float> bloom;
+};
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
