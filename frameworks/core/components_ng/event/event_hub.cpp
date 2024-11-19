@@ -292,8 +292,10 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     CHECK_NULL_VOID(frameNode);
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
     frameNode->InitLastArea();
+    if (onAreaChangedInnerCallbacks_.find(id) == onAreaChangedInnerCallbacks_.end()) {
+        hasInnerAreaChangeUntriggered_.emplace_back(id);
+    }
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
-    hasInnerAreaChangeUntriggered_.emplace_back(id);
 }
 
 void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
