@@ -250,6 +250,10 @@ private:
     bool longPointLeftAnimEnd_ = true;
     bool longPointRightAnimEnd_ = true;
 
+    bool isFirstPaintLongPoint_ = true;
+    float firstDotActiveStartAngle_ = 0.0f;
+    float firstDotActiveEndAngle_ = 0.0f;
+
     int32_t currentIndex_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(CircleDotIndicatorModifier);
     float backgroundOffset_ = 0.0;
