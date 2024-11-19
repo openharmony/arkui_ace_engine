@@ -44,6 +44,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+// default clicked & hover color for background blend when theme is null(value from SelectTheme)
+const Color DEFAULT_CLICKED_COLOR(0x19000000);
+const Color DEFAULT_HOVER_COLOR(0x0c000000);
 constexpr double VELOCITY = 0.0f;
 constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
@@ -196,7 +199,10 @@ void MenuItemPattern::OnModifyDone()
         }
         SetAccessibilityAction();
 
-        host->GetRenderContext()->SetClipToBounds(true);
+        auto renderContext = host->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetClipToBounds(true);
+        }
         if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             InitLongPressEvent();
         }
@@ -747,7 +753,9 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         return;
     }
     // change menu item paint props on press
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         NotifyPressStatus(true);
@@ -797,15 +805,17 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
-        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+        lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
-        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        auto touchUpOffset = touches.front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
@@ -2030,7 +2040,9 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2038,7 +2050,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     // enter press status
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
-        SetBgBlendColor(theme->GetClickedColor());
+        SetBgBlendColor(theme ? theme->GetClickedColor() : DEFAULT_CLICKED_COLOR);
         PlayBgColorAnimation(false);
 
         props->UpdatePress(true);
@@ -2048,7 +2060,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         // leave press status
         if (IsHover()) {
-            SetBgBlendColor(theme->GetHoverColor());
+            SetBgBlendColor(theme ? theme->GetHoverColor() : DEFAULT_HOVER_COLOR);
         } else {
             SetBgBlendColor(Color::TRANSPARENT);
         }
