@@ -537,4 +537,38 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent006, TestSize.Level1
     richEditorPattern->HandleAISpanHoverEvent(info);
     EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
 }
+
+/**
+ * @tc.name: AddSpanHoverEven001
+ * @tc.desc: test AddSpanHoverEven
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, AddSpanHoverEven001, TestSize.Level1)
+{
+    // 0: Get richEditor Node and richEditor Pattern
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->spans_.clear();
+
+    // 1: addImageSpan
+    ImageSpanOptions options;
+    UserMouseOptions mouseOption;
+    UserGestureOptions gestureOption;
+    auto gestureFunc = [](GestureEvent& info) -> void {};
+    auto hoverFunc = [](bool, HoverInfo& info) -> void {};
+    gestureOption.onDoubleClick = gestureFunc;
+    mouseOption.onHover = hoverFunc;
+    options.userMouseOption = mouseOption;
+    options.userGestureOption = gestureOption;
+    richEditorPattern->AddImageSpan(options);
+
+    // 2: check doubleClick and hover func.
+    EXPECT_EQ(richEditorPattern->spans_.size(), 1);
+    auto it = richEditorPattern->spans_.begin();
+    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(*it);
+    ASSERT_NE(imageSpanItem, nullptr);
+    EXPECT_NE(imageSpanItem->options.userMouseOption.onHover, nullptr);
+    EXPECT_NE(imageSpanItem->options.userGestureOption.onDoubleClick, nullptr);
+}
 } // namespace OHOS::Ace::NG
