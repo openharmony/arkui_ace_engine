@@ -474,6 +474,16 @@ public:
         currentPullId_ = -1;
     }
 
+    void SetIsDisableDefaultDropAnimation(bool disableDefaultDropAnimation = false)
+    {
+        disableDefaultDropAnimation_ = disableDefaultDropAnimation;
+    }
+
+    bool IsDisableDefaultDropAnimation() const
+    {
+        return disableDefaultDropAnimation_;
+    }
+
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
 private:
@@ -575,6 +585,7 @@ private:
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
+    bool disableDefaultDropAnimation_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

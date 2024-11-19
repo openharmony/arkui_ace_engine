@@ -838,6 +838,7 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
         SetDraggingPressedState(false);
     }
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+        SetIsDisableDefaultDropAnimation(true);
         OnDragEnd(DragPointerEvent(
             touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
             "");
@@ -1085,15 +1086,14 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
         pipeline->FlushMessages();
     }
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
-                                     pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG,
-            "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
-            "WindowId is %{public}d, pointerEventId is %{public}d.",
-            useCustomAnimation, windowId, pointerEventId);
+                                     pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() mutable {
         auto manager = weak.Upgrade();
         if (manager) {
             manager->HideDragPreviewOverlay();
+            useCustomAnimation = manager->IsDisableDefaultDropAnimation() ? true : useCustomAnimation;
         }
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag, start do drop animation. useCustomAnimation is %{public}d,"
+            "WindowId is %{public}d, pointerEventId is %{public}d.", useCustomAnimation, windowId, pointerEventId);
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);

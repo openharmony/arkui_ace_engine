@@ -885,6 +885,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragStart(info, extraInfoLimited, GetFrameNode());
     if (!dragDropManager->IsDraggingPressed(info.GetPointerId())) {
+        dragDropManager->SetIsDisableDefaultDropAnimation(true);
         dragDropManager->OnDragEnd(
             DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
@@ -927,13 +928,6 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
     gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
-    CHECK_NULL_VOID(dragDropProxy_);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    if (dragDropManager->IsDragged()) {
-        dragDropProxy_->OnDragMove(info);
-    }
 }
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
