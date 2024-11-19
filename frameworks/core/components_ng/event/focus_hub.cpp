@@ -37,6 +37,8 @@ float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<Frame
     float contentStartOffset, float contentEndOffset)
 {
     constexpr float notMove = 0.0f;
+    CHECK_NULL_RETURN(parentFrameNode, notMove);
+    CHECK_NULL_RETURN(curFrameNode, notMove);
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(parentGeometryNode, notMove);
     auto parentFrameSize = parentGeometryNode->GetFrameSize();

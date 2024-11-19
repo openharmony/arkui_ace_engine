@@ -151,6 +151,7 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_RETURN(pointerEvent, TouchEvent());
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
