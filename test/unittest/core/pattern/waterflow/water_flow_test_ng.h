@@ -62,6 +62,7 @@ protected:
     AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
     RectF GetLazyChildRect(int32_t itemIndex);
+    RefPtr<FrameNode> GetItem(int32_t index, bool isCache = false);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;
