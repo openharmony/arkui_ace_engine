@@ -137,6 +137,7 @@ public:
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
     static void SetCancelDefaultIcon();
+    static void ResetCancelIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
 };
 
