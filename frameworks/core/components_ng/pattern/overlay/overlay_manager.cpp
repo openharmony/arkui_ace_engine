@@ -6466,7 +6466,7 @@ void OverlayManager::RemoveGatherNode()
 
 void OverlayManager::RemoveGatherNodeWithAnimation()
 {
-    if (!hasGatherNode_) {
+    if (!hasGatherNode_ || DragDropGlobalController::GetInstance().IsInMoving()) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node with animation");

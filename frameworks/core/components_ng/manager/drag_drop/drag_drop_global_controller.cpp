@@ -18,6 +18,8 @@
 #include <csignal>
 #include <thread>
 
+#include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
 
 DragDropGlobalController::~DragDropGlobalController() {}
@@ -40,5 +42,26 @@ bool DragDropGlobalController::IsMenuShowing() const
     return isContextMenuShowing_;
 }
 
+void DragDropGlobalController::UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,
+    const DragDropInitiatingStatus& dragStatus)
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    CHECK_NULL_VOID(frameNode);
+    if (dragStatus == DragDropInitiatingStatus::MOVING) {
+        currentDragNode_ = frameNode;
+    }
+}
+
+bool DragDropGlobalController::IsInMoving() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return currentDragNode_;
+}
+
+void DragDropGlobalController::ResetDragDropInitiatingStatus()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    currentDragNode_ = nullptr;
+}
 
 } // namespace OHOS::Ace
