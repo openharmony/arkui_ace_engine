@@ -112,6 +112,14 @@ void ValidateNonNegative(std::optional<int>& value)
         value.reset();
     }
 }
+
+void ValidatePositive(std::optional<int>& value)
+{
+    if (value.has_value() && NonPositive(value.value())) {
+        value.reset();
+    }
+}
+
 void ValidateNonNegative(std::optional<V2::GridContainerSize>& value)
 {
     if (value.has_value()) {

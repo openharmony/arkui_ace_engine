@@ -14,32 +14,54 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/file_selector_param_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
 FileSelectorParamPeer* CtorImpl()
 {
-    return nullptr;
+    return new FileSelectorParamPeer();
+}
+static void DestroyPeer(FileSelectorParamPeer *peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
 }
 void GetTitleImpl(FileSelectorParamPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->GetTitle();
+    // title need to be returned
+    LOGE("FileSelectorParamAccessor::GetTitleImpl - return value need to be supported");
 }
 Ark_NativePointer GetModeImpl(FileSelectorParamPeer* peer)
 {
+    CHECK_NULL_RETURN(peer && peer->handler, 0);
+    peer->handler->GetMode();
+    // mode need to be returned
+    LOGE("FileSelectorParamAccessor::GetModeImpl - return value need to be supported");
     return 0;
 }
 void GetAcceptTypeImpl(FileSelectorParamPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->GetAcceptType();
+    // accept type need to be returned
+    LOGE("FileSelectorParamAccessor::GetAcceptTypeImpl - return value need to be supported");
 }
 Ark_Boolean IsCaptureImpl(FileSelectorParamPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, false);
+    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsCapture());
 }
 } // FileSelectorParamAccessor
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
