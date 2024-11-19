@@ -1617,7 +1617,7 @@ void JSTextField::SetCancelDefaultIcon()
     TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
 }
 
-void JSTextField::ResetCancelIcon() 
+void JSTextField::ResetCancelIcon()
 {
     TextFieldModel::GetInstance()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
     TextFieldModel::GetInstance()->SetIsShowCancelButton(false);
