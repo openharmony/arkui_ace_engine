@@ -1394,7 +1394,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             static_cast<uint32_t>(inputNumber) > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
-            TextFieldModel::GetInstance()->SetShowCounter(false);
+            TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
             return;
         }
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
