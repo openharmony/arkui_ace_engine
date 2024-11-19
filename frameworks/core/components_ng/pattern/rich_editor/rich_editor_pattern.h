@@ -576,11 +576,6 @@ public:
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
 
-    bool IsUsingMouse() const
-    {
-        return isMousePressed_;
-    }
-
     void ResetIsMousePressed()
     {
         isMousePressed_ = false;

@@ -3492,7 +3492,7 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
 {
     CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "long press callback");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "long press callback, sourceType=%{public}d", info.GetSourceDevice());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
@@ -6545,6 +6545,7 @@ void RichEditorPattern::InitTouchEvent()
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->sourceType_ = info.GetSourceDevice();
         pattern->HandleTouchEvent(info);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
