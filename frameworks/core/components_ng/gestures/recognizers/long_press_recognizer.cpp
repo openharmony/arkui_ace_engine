@@ -57,17 +57,9 @@ void LongPressRecognizer::OnAccepted()
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
     refereeState_ = RefereeState::SUCCEED;
-    if (onLongPress_ && !touchPoints_.empty()) {
-        TouchEvent trackPoint = touchPoints_.begin()->second;
-        PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, trackPoint.postEventNodeId);
-        LongPressInfo info(trackPoint.id);
-        info.SetTimeStamp(time_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        onLongPress_(info);
+    if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
+        std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
+        time_ = TimeStamp(nanoseconds);
     }
 
     UpdateFingerListInfo();
