@@ -391,7 +391,6 @@ ArkUINativeModuleValue TextAreaBridge::SetShowCounter(ArkUIRuntimeCallInfo *runt
         thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
             thresholdValue = static_cast<int32_t>(ILLEGAL_VALUE);
-            showCounter = false;
         }
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaShowCounterOptions(
