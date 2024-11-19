@@ -110,8 +110,13 @@ extern std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy>>
     testFixtureEnumSymbolRenderingStrategyInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureEnumTextAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureEnumTextAlignInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_TextAreaType, std::string>> testFixtureEnumTextAreaTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_TextAreaType>> testFixtureEnumTextAreaTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextCase, std::string>> testFixtureEnumTextCaseValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextCase>> testFixtureEnumTextCaseInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_TextContentStyle, std::string>>
+    testFixtureEnumTextContentStyleValidValues;
+extern std::vector<std::tuple<std::string, Ark_TextContentStyle>> testFixtureEnumTextContentStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_TextDecorationStyle, std::string>>
     testFixtureEnumTextDecorationStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_TextDecorationStyle>> testFixtureEnumTextDecorationStyleInvalidValues;

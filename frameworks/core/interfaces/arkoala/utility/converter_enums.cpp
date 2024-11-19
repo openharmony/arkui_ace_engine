@@ -461,6 +461,19 @@ void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
 }
 
 template<>
+void AssignCast(std::optional<TextHeightAdaptivePolicy>& dst, const Ark_TextHeightAdaptivePolicy& src)
+{
+    switch (src) {
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST:
+            dst = TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST; break;
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST: dst = TextHeightAdaptivePolicy::MAX_LINES_FIRST; break;
+        case ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST:
+            dst = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST; break;
+        default: LOGE("Unexpected enum value in Ark_TextHeightAdaptivePolicy: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src)
 {
     switch (src) {
@@ -505,6 +518,18 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
         case ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_TEXT_AREA_TYPE_URL: dst = TextInputType::URL; break;
         default: LOGE("Unexpected enum value in Ark_TextAreaType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
+{
+    switch (src) {
+        case ARK_TEXT_OVERFLOW_NONE: dst = TextOverflow::NONE; break;
+        case ARK_TEXT_OVERFLOW_ELLIPSIS: dst = TextOverflow::ELLIPSIS; break;
+        case ARK_TEXT_OVERFLOW_CLIP: dst = TextOverflow::CLIP; break;
+        case ARK_TEXT_OVERFLOW_MARQUEE: dst = TextOverflow::MARQUEE; break;
+        default: LOGE("Unexpected enum value in Ark_TextOverflow: %{public}d", src);
     }
 }
 
@@ -647,6 +672,18 @@ void AssignCast(std::optional<V2::ScrollSnapAlign>& dst, const Ark_ScrollSnapAli
         case ARK_SCROLL_SNAP_ALIGN_START: dst = V2::ScrollSnapAlign::START; break;
         case ARK_SCROLL_SNAP_ALIGN_CENTER: dst = V2::ScrollSnapAlign::CENTER; break;
         case ARK_SCROLL_SNAP_ALIGN_END: dst = V2::ScrollSnapAlign::END; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSnapAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<Ace::ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src)
+{
+    switch (src) {
+        case ARK_SCROLL_SNAP_ALIGN_NONE: dst = Ace::ScrollSnapAlign::NONE; break;
+        case ARK_SCROLL_SNAP_ALIGN_START: dst = Ace::ScrollSnapAlign::START; break;
+        case ARK_SCROLL_SNAP_ALIGN_CENTER: dst = Ace::ScrollSnapAlign::CENTER; break;
+        case ARK_SCROLL_SNAP_ALIGN_END: dst = Ace::ScrollSnapAlign::END; break;
         default: LOGE("Unexpected enum value in Ark_ScrollSnapAlign: %{public}d", src);
     }
 }
@@ -883,6 +920,18 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
         case ARK_LINE_BREAK_STRATEGY_GREEDY: dst = LineBreakStrategy::GREEDY; break;
         case ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY: dst = LineBreakStrategy::HIGH_QUALITY; break;
         default: LOGE("Unexpected enum value in Ark_LineBreakStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
+{
+    switch (src) {
+        case ARK_MENU_POLICY_DEFAULT: dst = MenuPolicy::DEFAULT; break;
+        case ARK_MENU_POLICY_HIDE: dst = MenuPolicy::HIDE; break;
+        case ARK_MENU_POLICY_SHOW: dst = MenuPolicy::SHOW; break;
+        default:
+            LOGE("Unexpected enum value in Ark_MenuPolicy: %{public}d", src);
     }
 }
 

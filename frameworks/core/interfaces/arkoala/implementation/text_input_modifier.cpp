@@ -282,10 +282,11 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto families = Converter::OptConvert<StringArray>(*value);
-    if (families) {
-        TextFieldModelNG::SetFontFamily(frameNode, families.value());
+    std::optional<StringArray> families;
+    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
     }
+    TextFieldModelNG::SetFontFamily(frameNode, families);
 }
 void OnCopyImpl(Ark_NativePointer node,
                 const Callback_String_Void* value)
@@ -544,7 +545,7 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<TextHeightAdaptivePolicy>(value);
+    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(value);
     TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void EnableAutoFillImpl(Ark_NativePointer node,

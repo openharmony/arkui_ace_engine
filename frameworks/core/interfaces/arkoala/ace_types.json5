@@ -963,6 +963,274 @@
             ]
         },
         {
+            "name": "TextArea",
+            "includes": [
+                "core/components/text_field/textfield_theme.h"
+            ],
+            "themes": ["TextFieldTheme"],
+            "attributes": [
+                {
+                    "name": "minFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "maxFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "value",
+                    "attributes": [
+                        {
+                            "name": "placeholder",
+                            "default": ""
+                        },
+                        {
+                            "name": "text",
+                            "default": ""
+                        },
+                        {
+                            "name": "controller",
+                            "default": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "showCounter",
+                    "attributes": [
+                        {
+                            "name": "value",
+                            "default": "false"
+                        },
+                        {
+                            "name": "options",
+                            "attributes": [
+                                {
+                                    "name": "thresholdPercentage",
+                                    "default": "-1",
+                                    "fixtures": ["NumberPercentageThresholdFloor"]
+                                },
+                                {
+                                    "name": "highlightBorder",
+                                    "default": "true"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "style",
+                    "default": "TextContentStyle.DEFAULT"
+                },
+                {
+                    "name": "decoration",
+                    "type": "DecorationStyleInterface",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "TextDecorationType.None",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "style",
+                            "default": "TextDecorationStyle.SOLID",
+                        },
+                    ],
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
+                },
+                {
+                    "name": "type",
+                    "default": "TextAreaType.NORMAL"
+                },
+                {
+                    "name": "contentType",
+                    "default": "TextContentType.UNSPECIFIED",
+                    "fixtures": ["TextInputContentType"]
+                },
+                {
+                    "name": "placeholderColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "textOverflow",
+                    "default": "TextOverflow.Clip"
+                },
+                {
+                    "name": "textIndent",
+                    "default": "0.00vp",
+                    "fixtures": ["LengthAny"]
+                },
+                {
+                    "name": "enterKeyType",
+                    "default": "EnterKeyType.Done"
+                },
+                {
+                    "name": "caretColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "caretPosition",
+                    "default": "0",
+                    "fixtures": ["NumberNonNeg"]
+                },
+                {
+                    "name": "caretStyle",
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "default": "#FF000000"
+                        },
+                        {
+                            "name": "width",
+                            "default": "0.00px"
+                        }
+                    ]
+                },
+                {
+                    "name": "letterSpacing",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct"
+                },
+                {
+                    "name": "lineSpacing",
+                    "default": "0.00px"
+                },
+                {
+                    "name": "lineHeight",
+                    "default": "0.00vp",
+                },
+                {
+                    "name": "maxLines",
+                    "default": "3",
+                    "fixtures": ["NumberPosIntFloor"]
+                },
+                {
+                    "name": "maxLength",
+                    "default": "INF",
+                    "fixtures": ["TextMaxLength"]
+                },
+                {
+                    "name": "copyOption",
+                    "default": "CopyOptions.Local"
+                },
+                {
+                    "name": "textAlign",
+                    "default": "TextAlign.Start"
+                },
+                {
+                    "name": "enableKeyboardOnFocus",
+                    "default": "true"
+                },
+                {
+                    "name": "selectionMenuHidden",
+                    "default": "false"
+                },
+                {
+                    "name": "barState",
+                    "default": "BarState.AUTO",
+                    "fixtures": ["TextInputBarState"]
+                },
+                {
+                    "name": "wordBreak",
+                    "default": "break-word",
+                    "fixtures": ["TextInputBreakWord"]
+                },
+                {
+                    "name": "lineBreakStrategy",
+                    "default": "greedy",
+                    "fixtures": ["TextInputLineBreakStrategy"]
+                },
+                {
+                    "name": "heightAdaptivePolicy",
+                    "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST"
+                },
+                {
+                    "name": "enableAutoFill",
+                    "default": "true"
+                },
+                {
+                    "name": "enablePreviewText",
+                    "default": "true"
+                },
+                {
+                    "name": "selectedBackgroundColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "placeholderFont",
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "0.00px"
+                        },
+                        {
+                            "name": "weight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                        },
+                        {
+                            "name": "family",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily"
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal"
+                        }
+                    ]
+                }
+            ],
+            "disable": [
+                "setTextAreaOptionsTestValidValues",
+                "setPlaceholderFontTestDefaultValues",
+				"setPlaceholderFontTestPlaceholderFontSizeValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+                "setEnterKeyTypeTestDefaultValues",
+                "setEnterKeyTypeTestEnterKeyTypeInvalidValues",
+                "setTextAlignTestTextAlignValidValues",
+                "setCopyOptionTestCopyOptionValidValues",
+                "setCopyOptionTestCopyOptionInvalidValues",
+                "setMaxLinesTestDefaultValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMaxLinesTestMaxLinesInvalidValues",
+                "setLineHeightTestLineHeightValidValues",
+                "setLineHeightTestLineHeightInvalidValues",
+                "setFontFeatureTestDefaultValues",
+                "setFontFeatureTestFontFeatureValidValues",
+                "setEnableHapticFeedbackTestDefaultValues",
+                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues",
+                "setTextOverflowTestTextOverflowValidValues"
+            ]
+        },
+        {
             "name": "TextInput",
             "includes": [
                 "core/components/text_field/textfield_theme.h"
