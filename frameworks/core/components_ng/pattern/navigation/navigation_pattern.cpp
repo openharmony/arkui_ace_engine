@@ -2205,13 +2205,17 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
+    RefPtr<NavDestinationPattern> prePattern =
+        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    RefPtr<NavDestinationPattern> newPattern =
+        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "custom animation start: operation: %{public}d, preInfo name: %{public}s, preInfo id: %{public}s, topInfo "
-        "name: %{public}s, curInfo id: %{public}s",
-        operation, preInfo ? preInfo->GetNavPathInfo()->GetName().c_str() : "null",
-        preInfo ? std::to_string(preInfo->GetNavDestinationId()).c_str() : "null",
-        topInfo ? topInfo->GetNavPathInfo()->GetName().c_str() : "null",
-        topInfo ? std::to_string(topInfo->GetNavDestinationId()).c_str() : "null");
+        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
+        "top name: %{public}s, id: %{public}s",
+        operation, prePattern ? prePattern->GetName().c_str() : "null",
+        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
+        newPattern ? newPattern->GetName().c_str() : "null",
+        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
     return onTransition_(preInfo, topInfo, operation);
 }
 
