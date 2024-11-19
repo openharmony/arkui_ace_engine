@@ -243,19 +243,28 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            const bool isCache = item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_;
-            auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache && !showCache);
+            const bool isCache =
+                !showCache && (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_);
+            auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
-            wrapper->Layout();
+
+            if (isCache) {
+                continue;
+            }
+            if (wrapper->CheckNeedForceMeasureAndLayout()) {
+                wrapper->Layout();
+            } else {
+                wrapper->GetHostNode()->ForceSyncGeometryNode();
+            }
             // recode restore info
             if (item.first == layoutInfo_->startIndex_) {
                 layoutInfo_->storedOffset_ = mainOffset;
             }
 
-            if (!isCache && NonNegative(mainOffset + item.second.second)) {
+            if (NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
