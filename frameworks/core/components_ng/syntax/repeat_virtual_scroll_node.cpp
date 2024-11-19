@@ -338,8 +338,13 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         return node4Index->GetFrameChildByIndex(0, needBuild);
     }
 
+    // refresh the cached ttype and verify it hasn't changed
+    if (caches_.CheckTTypeChanged(index)) {
+        return GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
+    }
+
     // if the item was in L2 cache, move item to L1 cache.
-    caches_.AddKeyToL1(key.value(), isChildReused);
+    caches_.AddKeyToL1WithNodeUpdate(key.value(), index, isChildReused);
 
     if (node4Index->GetDepth() != GetDepth() + 1) {
         node4Index->SetDepth(GetDepth() + 1);
