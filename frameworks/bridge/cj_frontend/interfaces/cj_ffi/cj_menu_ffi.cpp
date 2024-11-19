@@ -21,6 +21,10 @@
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
+namespace {
+enum class SubMenuExpandingMode { SIDE = 0, EMBEDDED, STACK };
+} // namespace
+
 extern "C" {
 void FfiOHOSAceFrameworkMenuCreate()
 {

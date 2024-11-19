@@ -22,7 +22,6 @@
 #include "core/components/text_span/text_span_component.h"
 
 using VectorUInt32Ptr = void*;
-using VectorStringPtr = void*;
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkSymbolSpanCreate(uint32_t id);

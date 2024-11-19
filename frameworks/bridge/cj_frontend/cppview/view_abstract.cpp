@@ -81,7 +81,11 @@ void CompleteResourceObjectFromParams(
     }
     auto identity = identityValue->GetString();
     if (!ViewAbstract::ParseDollarResource(
-            identity, targetModule, resType, resName, obj.type == UNKNOWN_RESOURCE_TYPE)) {
+        identity,
+        targetModule,
+        resType,
+        resName,
+        obj.type == UNKNOWN_RESOURCE_TYPE)) {
         return;
     }
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
@@ -456,7 +460,9 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
 
 bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }

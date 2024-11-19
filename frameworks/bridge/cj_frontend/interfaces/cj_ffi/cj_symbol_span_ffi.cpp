@@ -40,7 +40,6 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 } // namespace
 
 extern "C" {
-
 void FfiOHOSAceFrameworkSymbolSpanCreate(uint32_t id)
 {
     SymbolSpanModel::GetInstance()->Create(id);

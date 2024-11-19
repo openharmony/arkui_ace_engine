@@ -30,8 +30,6 @@ struct CBorderRadiuses {
     int32_t bottomRightUnit;
 };
 
-enum class SubMenuExpandingMode { SIDE = 0, EMBEDDED, STACK };
-
 extern "C" {
 struct DividerParams {
     double width;
