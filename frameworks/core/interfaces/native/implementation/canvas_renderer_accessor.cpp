@@ -17,6 +17,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "canvas_renderer_peer_impl.h"
+#include "canvas_path_peer.h"
+#include "canvas_pattern_peer.h"
+#include "canvas_gradient_peer.h"
+#include "matrix2d_peer.h"
+#include "image_bitmap_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -168,6 +173,15 @@ void Stroke0Impl(CanvasRendererPeer* peer)
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Materialized* path)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
+    CHECK_NULL_VOID(pathPeer);
+    auto path2D = pathPeer->GetCanvasPath2D();
+    CHECK_NULL_VOID(path2D);
+    peerImpl->TriggerStroke1Impl(path2D);
 }
 Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
@@ -512,11 +526,24 @@ void SetTransform0Impl(CanvasRendererPeer* peer,
     if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
-    peerImpl->TriggerSetTransform0Impl(param);
+    peerImpl->TriggerSetTransformImpl(param);
 }
 void SetTransform1Impl(CanvasRendererPeer* peer,
                        const Opt_Matrix2D* transform)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(transform);
+    auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    if (!opt) {
+        return;
+    }
+    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    CHECK_NULL_VOID(matrixPeer);
+    auto param = matrixPeer->GetTransformParam();
+    CHECK_NULL_VOID(param);
+    peerImpl->TriggerSetTransformImpl(*param);
 }
 void TransformImpl(CanvasRendererPeer* peer,
                    const Ark_Number* a,
@@ -546,7 +573,7 @@ void TransformImpl(CanvasRendererPeer* peer,
     if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
-    peerImpl->TriggerSetTransform0Impl(param);
+    peerImpl->TriggerTransformImpl(param);
 }
 void TranslateImpl(CanvasRendererPeer* peer,
                    const Ark_Number* x,
@@ -569,6 +596,23 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_Materialized* bitmap)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(bitmap);
+    auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
+    CHECK_NULL_VOID(bitmapPeer);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = bitmapPeer->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    peerImpl->TriggerTransferFromImageBitmapImpl(pixelMap);
+#else 
+    auto canvasImage = bitmapPeer->GetCanvasImage();
+    CHECK_NULL_VOID(canvasImage);
+    auto imageData = (*canvasImage).imageData;
+    CHECK_NULL_VOID(imageData);
+    peerImpl->TriggerTransferFromImageBitmapImpl(*imageData);
+#endif
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
 {
@@ -633,6 +677,16 @@ void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
 void SetFillStyleImpl(CanvasRendererPeer* peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
+    
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
+    CHECK_NULL_VOID(pathPeer);
+    auto path2D = pathPeer->GetCanvasPath2D();
+    CHECK_NULL_VOID(path2D);
+    peerImpl->TriggerStroke1Impl(path2D);
 }
 void SetStrokeStyleImpl(CanvasRendererPeer* peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)

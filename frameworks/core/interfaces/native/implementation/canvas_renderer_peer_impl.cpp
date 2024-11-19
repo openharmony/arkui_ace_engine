@@ -192,7 +192,7 @@ void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
     }
     pattern_->StrokeText(text, x, y, maxWidth);
 }
-void CanvasRendererPeerImpl::TriggerSetTransform0Impl(const TransformParam& param)
+void CanvasRendererPeerImpl::TriggerSetTransformImpl(const TransformParam& param)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetTransform0Impl pattern "
@@ -300,5 +300,39 @@ void CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl(double offsetY)
     }
     pattern_->UpdateShadowOffsetY(offsetY);
 }
+
+
+
+void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStroke1Impl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Stroke(path);
+}
+
+void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->TransferFromImageBitmap(pixelMap);
+}
+
+void TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->TransferFromImageBitmap(imageData);
+}
+
+
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

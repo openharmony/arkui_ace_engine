@@ -14,18 +14,26 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "matrix2d_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
+static void DestroyPeer(Matrix2DPeer* peer)
+{
+    if (peer) {
+        delete peer;
+    }
+}
 Matrix2DPeer* CtorImpl()
 {
-    return nullptr;
+    return new Matrix2DPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {

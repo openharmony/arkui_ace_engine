@@ -23,8 +23,9 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -52,7 +53,7 @@ public:
     void TriggerSetGlobalAlphaImpl(double alpha);
     void TriggerFillTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void TriggerStrokeTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void TriggerSetTransform0Impl(const TransformParam& param);
+    void TriggerSetTransformImpl(const TransformParam& param);
     void TriggerTransformImpl(const TransformParam& param);
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
@@ -64,6 +65,12 @@ public:
     void TriggerSetShadowColorImpl(Color& color);
     void TriggerSetShadowOffsetXImpl(double offsetX);
     void TriggerSetShadowOffsetYImpl(double offsetY);
+
+    void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
+    void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
+    void TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData);
+
+
 
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {

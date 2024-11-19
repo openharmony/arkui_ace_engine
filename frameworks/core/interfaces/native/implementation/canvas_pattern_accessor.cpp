@@ -14,18 +14,26 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "canvas_patternh_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
+static void DestroyPeer(CanvasPatternPeer* peer)
+{
+    if (peer) {
+        delete peer;
+    }
+}
 CanvasPatternPeer* CtorImpl()
 {
-    return nullptr;
+    return new CanvasPatternPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void SetTransformImpl(CanvasPatternPeer* peer,
                       const Opt_Matrix2D* transform)
