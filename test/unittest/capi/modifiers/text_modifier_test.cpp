@@ -62,6 +62,19 @@ const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
 const auto RES_NAME = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::COLOR);
 const auto RES_NAME1 = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::FLOAT);
 
+const uint32_t FLOAT_RES_0_ID = 100;
+const double FLOAT_RES_0_VALUE = 0.705f;
+const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, NodeModifier::ResourceType::FLOAT);
+
+const uint32_t FLOAT_RES_1_ID = 101;
+const double FLOAT_RES_1_VALUE = 5.2f;
+const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, NodeModifier::ResourceType::FLOAT);
+
+const uint32_t FLOAT_RES_2_ID = 102;
+const float FLOAT_RES_2_VALUE = 10.f;
+const auto FLOAT_RES_2_STORED_VALUE = Dimension(FLOAT_RES_2_VALUE, DimensionUnit::PX);
+const Ark_Resource FLOAT_RES_2 = CreateResource(FLOAT_RES_2_ID, NodeModifier::ResourceType::FLOAT);
+
 const auto FONT_SIZE_ATTR_DEFAULT_VALUE = "16.00fp";
 const auto TEXT_OVERFLOW_ATTR_DEFAULT_VALUE = "TextOverflow.Clip";
 
@@ -92,6 +105,10 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<TextTheme>();
+
+        AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
+        AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
+        AddResource(FLOAT_RES_2_ID, FLOAT_RES_2_STORED_VALUE);
 
         // setup the test event handler
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
@@ -189,25 +206,25 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal3, "10.00px");
 }
 
-HWTEST_F(TextModifierTest, DISABLED_setMinFontScale, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
 {
     const Ark_Union_Number_Resource scale1 = {
         .selector = 0,
-        .value0 = Converter::ArkValue<Ark_Number>(1.25f)
+        .value0 = Converter::ArkValue<Ark_Number>(0.825f)
     };
 
     modifier_->setMinFontScale(node_, &scale1);
     auto checkVal1 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal1, "1.250000");
+    EXPECT_EQ(checkVal1, "0.825000");
 
-    auto scale2 = CreateResourceUnion<Ark_Union_Number_Resource>(RES_NAME);
+    const auto scale2 = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(FLOAT_RES_0);
 
     modifier_->setMinFontScale(node_, &scale2);
     auto checkVal2 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "0.000000");
+    EXPECT_EQ(checkVal2, "0.705000");
 }
 
-HWTEST_F(TextModifierTest, DISABLED_setMaxFontScale, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMaxFontScale, TestSize.Level1)
 {
     const Ark_Union_Number_Resource scale1 = {
         .selector = 0,
@@ -218,11 +235,11 @@ HWTEST_F(TextModifierTest, DISABLED_setMaxFontScale, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
     EXPECT_EQ(checkVal1, "1.250000");
 
-    auto scale2 = CreateResourceUnion<Ark_Union_Number_Resource>(RES_NAME);
+    const auto scale2 = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(FLOAT_RES_1);
 
     modifier_->setMaxFontScale(node_, &scale2);
     auto checkVal2 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "0.000000");
+    EXPECT_EQ(checkVal2, "5.200000");
 }
 
 HWTEST_F(TextModifierTest, setFontStyle, TestSize.Level1)
@@ -282,7 +299,7 @@ HWTEST_F(TextModifierTest, setTextAlign, TestSize.Level1)
     EXPECT_EQ(checkVal4, "TextAlign.Justify");
 }
 
-HWTEST_F(TextModifierTest, DISABLED_setLineHeight, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
 {
     const Ark_Union_Number_String_Resource size1 = {
         .selector = 0,
@@ -301,7 +318,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeight, TestSize.Level1)
     auto checkVal2 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
     EXPECT_EQ(checkVal2, "12.00vp");
 
-    auto size3 = CreateResourceUnion<Ark_Union_Number_String_Resource>(RES_NAME);
+    const auto size3 = Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(FLOAT_RES_2);
 
     modifier_->setLineHeight(node_, &size3);
     auto checkVal3 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);

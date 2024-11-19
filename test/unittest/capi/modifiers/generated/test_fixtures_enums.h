@@ -85,9 +85,6 @@ extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixt
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
-    testFixtureEnumLineBreakStrategyValidValues;
-extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureEnumLineBreakStrategyInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>>

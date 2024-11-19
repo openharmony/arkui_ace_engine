@@ -59,6 +59,12 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { MAX_FONT_SCALE_RES_0_ID, MAX_FONT_SCALE_RES_0_STR, 1.0f },
+    { MAX_FONT_SCALE_RES_1_ID, MAX_FONT_SCALE_RES_1_STR, 3.41f },
+    { MAX_FONT_SCALE_RES_2_ID, MAX_FONT_SCALE_RES_2_STR, 50.f },
+    { MIN_FONT_SCALE_RES_0_ID, MIN_FONT_SCALE_RES_0_STR, 0.125f },
+    { MIN_FONT_SCALE_RES_1_ID, MIN_FONT_SCALE_RES_1_STR, 0.5f },
+    { MIN_FONT_SCALE_RES_2_ID, MIN_FONT_SCALE_RES_2_STR, 1.0f },
     { SCROLLABLE_FRICTION_RES_0_ID, SCROLLABLE_FRICTION_RES_0_STR, 0.125f },
     { SCROLLABLE_FRICTION_RES_1_ID, SCROLLABLE_FRICTION_RES_1_STR, 0.875f },
     { SCROLLABLE_FRICTION_RES_2_ID, SCROLLABLE_FRICTION_RES_2_STR, 2.0f },
@@ -536,6 +542,30 @@ std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetrics
     { "-0.8_pct", Converter::ArkValue<Ark_LengthMetrics>(-0.8_pct) },
 };
 
+// Fixture 'BaselineOffsetNum' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureBaselineOffsetNumValidValues = {
+    { "123", Converter::ArkValue<Ark_Number>(123), "123" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0" },
+    { "-2", Converter::ArkValue<Ark_Number>(-2), "-2" },
+};
+
+// Fixture 'BaselineOffsetStr' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureBaselineOffsetStrValidValues = {
+    { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123" },
+    { "\"-123vp\"", Converter::ArkValue<Ark_String>("-123vp"), "-123" },
+    { "\"0vp\"", Converter::ArkValue<Ark_String>("0vp"), "0" },
+    { "\"123fp\"", Converter::ArkValue<Ark_String>("123fp"), "123" },
+    { "\"-123fp\"", Converter::ArkValue<Ark_String>("-123fp"), "-123" },
+    { "\"0fp\"", Converter::ArkValue<Ark_String>("0fp"), "0" },
+    { "\"123px\"", Converter::ArkValue<Ark_String>("123px"), "123" },
+    { "\"-123px\"", Converter::ArkValue<Ark_String>("-123px"), "-123" },
+    { "\"0px\"", Converter::ArkValue<Ark_String>("0px"), "0" },
+    { "\"1.23px\"", Converter::ArkValue<Ark_String>("1.23px"), "1" },
+    { "\"123lpx\"", Converter::ArkValue<Ark_String>("123lpx"), "123" },
+    { "\"-123lpx\"", Converter::ArkValue<Ark_String>("-123lpx"), "-123" },
+    { "\"0lpx\"", Converter::ArkValue<Ark_String>("0lpx"), "0" },
+};
+
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues = {
     { "123", Converter::ArkValue<Ark_Number>(123), "123.00vp" },
@@ -743,6 +773,52 @@ std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNe
         CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, NodeModifier::ResourceType::FLOAT) },
     { "ResName:DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR",
         CreateResource(DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, NodeModifier::ResourceType::FLOAT) },
+};
+
+// Fixture 'MaxFontScaleNum' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    { "2.5", Converter::ArkValue<Ark_Number>(2.5), "2.500000" },
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+};
+
+// Fixture 'MaxFontScaleRes' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureMaxFontScaleResValidValues = {
+    { "ResId:MAX_FONT_SCALE_RES_0_ID", CreateResource(MAX_FONT_SCALE_RES_0_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:MAX_FONT_SCALE_RES_0_STR", CreateResource(MAX_FONT_SCALE_RES_0_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResId:MAX_FONT_SCALE_RES_1_ID", CreateResource(MAX_FONT_SCALE_RES_1_ID, NodeModifier::ResourceType::FLOAT),
+        "3.410000" },
+    { "ResName:MAX_FONT_SCALE_RES_1_STR", CreateResource(MAX_FONT_SCALE_RES_1_STR, NodeModifier::ResourceType::FLOAT),
+        "3.410000" },
+    { "ResId:MAX_FONT_SCALE_RES_2_ID", CreateResource(MAX_FONT_SCALE_RES_2_ID, NodeModifier::ResourceType::FLOAT),
+        "50.000000" },
+    { "ResName:MAX_FONT_SCALE_RES_2_STR", CreateResource(MAX_FONT_SCALE_RES_2_STR, NodeModifier::ResourceType::FLOAT),
+        "50.000000" },
+};
+
+// Fixture 'MinFontScaleNum' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues = {
+    { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.100000" },
+    { "0.89", Converter::ArkValue<Ark_Number>(0.89), "0.890000" },
+    { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+};
+
+// Fixture 'MinFontScaleRes' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureMinFontScaleResValidValues = {
+    { "ResId:MIN_FONT_SCALE_RES_0_ID", CreateResource(MIN_FONT_SCALE_RES_0_ID, NodeModifier::ResourceType::FLOAT),
+        "0.125000" },
+    { "ResName:MIN_FONT_SCALE_RES_0_STR", CreateResource(MIN_FONT_SCALE_RES_0_STR, NodeModifier::ResourceType::FLOAT),
+        "0.125000" },
+    { "ResId:MIN_FONT_SCALE_RES_1_ID", CreateResource(MIN_FONT_SCALE_RES_1_ID, NodeModifier::ResourceType::FLOAT),
+        "0.500000" },
+    { "ResName:MIN_FONT_SCALE_RES_1_STR", CreateResource(MIN_FONT_SCALE_RES_1_STR, NodeModifier::ResourceType::FLOAT),
+        "0.500000" },
+    { "ResId:MIN_FONT_SCALE_RES_2_ID", CreateResource(MIN_FONT_SCALE_RES_2_ID, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
+    { "ResName:MIN_FONT_SCALE_RES_2_STR", CreateResource(MIN_FONT_SCALE_RES_2_STR, NodeModifier::ResourceType::FLOAT),
+        "1.000000" },
 };
 
 // Fixture 'NumberAnything' for type 'Ark_Number'

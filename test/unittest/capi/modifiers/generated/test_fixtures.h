@@ -65,6 +65,12 @@ enum ResID {
     DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    MAX_FONT_SCALE_RES_0_ID,
+    MAX_FONT_SCALE_RES_1_ID,
+    MAX_FONT_SCALE_RES_2_ID,
+    MIN_FONT_SCALE_RES_0_ID,
+    MIN_FONT_SCALE_RES_1_ID,
+    MIN_FONT_SCALE_RES_2_ID,
     SCROLLABLE_FRICTION_RES_0_ID,
     SCROLLABLE_FRICTION_RES_1_ID,
     SCROLLABLE_FRICTION_RES_2_ID,
@@ -139,6 +145,12 @@ inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NO
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto MAX_FONT_SCALE_RES_0_STR = "MAX_FONT_SCALE_RES_0_STR";
+inline constexpr auto MAX_FONT_SCALE_RES_1_STR = "MAX_FONT_SCALE_RES_1_STR";
+inline constexpr auto MAX_FONT_SCALE_RES_2_STR = "MAX_FONT_SCALE_RES_2_STR";
+inline constexpr auto MIN_FONT_SCALE_RES_0_STR = "MIN_FONT_SCALE_RES_0_STR";
+inline constexpr auto MIN_FONT_SCALE_RES_1_STR = "MIN_FONT_SCALE_RES_1_STR";
+inline constexpr auto MIN_FONT_SCALE_RES_2_STR = "MIN_FONT_SCALE_RES_2_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_0_STR = "SCROLLABLE_FRICTION_RES_0_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_1_STR = "SCROLLABLE_FRICTION_RES_1_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_2_STR = "SCROLLABLE_FRICTION_RES_2_STR";
@@ -277,6 +289,12 @@ extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixture
 extern std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetricsNonNegInvalidValues;
 
+// Fixture 'BaselineOffsetNum' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureBaselineOffsetNumValidValues;
+
+// Fixture 'BaselineOffsetStr' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureBaselineOffsetStrValidValues;
+
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;
@@ -303,6 +321,18 @@ extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsR
 // Fixture 'DimensionsResNonNegNonPct' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegNonPctInvalidValues;
+
+// Fixture 'MaxFontScaleNum' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues;
+
+// Fixture 'MaxFontScaleRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureMaxFontScaleResValidValues;
+
+// Fixture 'MinFontScaleNum' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues;
+
+// Fixture 'MinFontScaleRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureMinFontScaleResValidValues;
 
 // Fixture 'NumberAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues;
