@@ -20,7 +20,7 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG::Converter;
 
 ImageBitmapPeer::ImageBitmapPeer()
-    : width(0), 
+    : width(0),
       height(0),
       loadingCtx_(nullptr),
       canvasImage_(nullptr),
