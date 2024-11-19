@@ -4893,7 +4893,7 @@ struct ArkUIFrameNodeModifier {
     void (*freeCustomPropertyCharPtr)(char* value, ArkUI_Uint32 size);
     ArkUINodeHandle (*getCurrentPageRootNode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getNodeTag)(ArkUINodeHandle node);
-    void (*getActiveChildrenInfo)(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size);
+    void (*getActiveChildrenInfo)(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Int32* size);
     void (*getCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value);
 };
 

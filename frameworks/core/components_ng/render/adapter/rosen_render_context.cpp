@@ -3723,10 +3723,9 @@ void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregr
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
     rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
-            [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas)
-            {
-                CHECK_NULL_VOID(canvas);
-                foregroundDraw(*canvas);
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<RSCanvas> canvas) {
+            CHECK_NULL_VOID(canvas);
+            foregroundDraw(*canvas);
         });
 }
 
