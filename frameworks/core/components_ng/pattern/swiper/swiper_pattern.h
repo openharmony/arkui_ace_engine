@@ -706,7 +706,7 @@ protected:
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
     std::optional<int32_t> targetIndex_;
-    int32_t swiperProportion_ = 2;
+    float swiperProportion_ = 2.0f;
     int32_t propertyAnimationIndex_ = -1;
 
     bool hasTabsAncestor_ = false;
