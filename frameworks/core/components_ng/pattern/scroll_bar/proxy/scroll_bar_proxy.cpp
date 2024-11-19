@@ -42,10 +42,10 @@ float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
     return scrollablePattern->GetBarOffset();
 }
 
-double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
+float GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
 {
     auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    CHECK_NULL_RETURN(scrollablePattern, 0.f);
     return scrollablePattern->GetScrollBarOutBoundaryExtent();
 }
 } // namespace
@@ -160,7 +160,7 @@ void ScrollBarProxy::NotifyScrollBar() const
         scrollableNodeOffset += -GetScrollableNodeOffset(pattern);
     }
 
-    double scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
+    float scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {

@@ -207,7 +207,7 @@ public:
         return barOffset_;
     }
 
-    double GetScrollBarOutBoundaryExtent() const
+    float GetScrollBarOutBoundaryExtent() const
     {
         return scrollBarOutBoundaryExtent_;
     }
@@ -918,7 +918,7 @@ private:
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     bool isScrolling_ = false;
-    double scrollBarOutBoundaryExtent_ = 0.0;
+    float scrollBarOutBoundaryExtent_ = 0.f;
     std::optional<float> ratio_;
     double friction_ = -1.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
