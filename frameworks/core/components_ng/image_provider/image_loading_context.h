@@ -172,8 +172,8 @@ private:
     DEFINE_SET_NOTIFY_TASK(LoadFail);
 
     // tasks that run when entering a new state
-    void OnUnloaded();
     void OnDataLoading();
+    void OnUnloaded();
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
