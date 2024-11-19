@@ -342,6 +342,25 @@ std::vector<std::tuple<std::string, Ark_ImageSpanAlignment>> testFixtureImageSpa
         Converter::ArkValue<Ark_ImageSpanAlignment>(static_cast<Ark_ImageSpanAlignment>(INT_MAX)) },
 };
 
+// Fixture 'ProgressType' for type 'Ark_ProgressType'
+std::vector<std::tuple<std::string, Ark_ProgressType, std::string>> testFixtureProgressTypeValidValues = {
+    { "ARK_PROGRESS_TYPE_LINEAR", Converter::ArkValue<Ark_ProgressType>(ARK_PROGRESS_TYPE_LINEAR),
+        "ProgressStyle.Linear" },
+    { "ARK_PROGRESS_TYPE_RING", Converter::ArkValue<Ark_ProgressType>(ARK_PROGRESS_TYPE_RING), "ProgressStyle.Ring" },
+    { "ARK_PROGRESS_TYPE_ECLIPSE", Converter::ArkValue<Ark_ProgressType>(ARK_PROGRESS_TYPE_ECLIPSE),
+        "ProgressStyle.Eclipse" },
+    { "ARK_PROGRESS_TYPE_SCALE_RING", Converter::ArkValue<Ark_ProgressType>(ARK_PROGRESS_TYPE_SCALE_RING),
+        "ProgressStyle.ScaleRing" },
+    { "ARK_PROGRESS_TYPE_CAPSULE", Converter::ArkValue<Ark_ProgressType>(ARK_PROGRESS_TYPE_CAPSULE),
+        "ProgressStyle.Capsule" },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgressTypeInvalidValues = {
+    { "static_cast<Ark_ProgressType>(-1)", Converter::ArkValue<Ark_ProgressType>(static_cast<Ark_ProgressType>(-1)) },
+    { "static_cast<Ark_ProgressType>(INT_MAX)",
+        Converter::ArkValue<Ark_ProgressType>(static_cast<Ark_ProgressType>(INT_MAX)) },
+};
+
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {
     { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
@@ -589,6 +608,13 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberF
     { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.000000" },
     { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.340000" },
     { "-56.73", Converter::ArkValue<Ark_Number>(-56.73), "-56.730000" },
+};
+
+// Fixture 'NumberFloatPositive' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatPositiveValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.000000" },
+    { "50", Converter::ArkValue<Ark_Number>(50), "50.000000" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
 };
 
 // Fixture 'NumberIntFloor' for type 'Ark_Number'

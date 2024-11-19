@@ -767,6 +767,7 @@ public:
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
+    static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
 
 private:
     static void AddDragFrameNodeToManager();

@@ -5058,4 +5058,11 @@ void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string&
     frameNode->RemoveCustomProperty(key);
 }
 
+void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag.value_or(false));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 } // namespace OHOS::Ace::NG

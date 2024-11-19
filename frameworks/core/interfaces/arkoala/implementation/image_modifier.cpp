@@ -299,8 +299,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetPrivacySensitive(Converter::Convert<bool>(value));
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    ViewAbstract::SetPrivacySensitive(frameNode, Converter::Convert<bool>(value));
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Ark_CustomObject* value)

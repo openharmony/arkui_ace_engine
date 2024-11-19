@@ -58,6 +58,7 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str(), filter);
     ToJsonValueForCapsule(json, filter);
     json->PutExtAttr("progressGradientColor", ToJsonGradientColor().c_str(), filter);
+    json->PutExtAttr("privacySensitive", GetIsSensitive().value_or(false), filter);
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const

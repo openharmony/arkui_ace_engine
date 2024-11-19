@@ -370,6 +370,8 @@ namespace Converter {
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> Gradient Convert(const Ark_LinearGradient& value);
+    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
@@ -385,6 +387,7 @@ namespace Converter {
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
+    template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
