@@ -63,8 +63,6 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId()]() {
-            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto pagePattern = weak.Upgrade();
             CHECK_NULL_VOID(pagePattern);
             auto page = pagePattern->GetHost();
