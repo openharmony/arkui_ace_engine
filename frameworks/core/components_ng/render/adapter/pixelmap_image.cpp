@@ -46,11 +46,8 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
 constexpr int32_t BORDER_RADIUS_ARRAY_SIZE = 4;
-constexpr float CENTER_NUM = 2.0f;
-constexpr float DEGREE_RIGHT = 90.0f;
-constexpr float DEGREE_DOWN = 180.0f;
-constexpr float DEGREE_LEFT = 270.0f;
-constexpr float DEGREE_DEFAULT = 0.0f;
+constexpr int32_t DEGREE_NINETY = 90;
+constexpr int32_t DEGREE_HUNDRED_EIGHTY = 180;
 
 void PrintDrawingLatticeConfig(const Rosen::Drawing::Lattice& lattice, const RSRect& dstRect)
 {
@@ -140,17 +137,17 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
 }
 #endif
 
-float CalculateRotateDegree(ImageRotateOrientation orientation)
+int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
     switch (orientation) {
         case ImageRotateOrientation::LEFT:
-            return DEGREE_LEFT;
+            return -DEGREE_NINETY;
         case ImageRotateOrientation::RIGHT:
-            return DEGREE_RIGHT;
+            return DEGREE_NINETY;
         case ImageRotateOrientation::DOWN:
-            return DEGREE_DOWN;
+            return DEGREE_HUNDRED_EIGHTY;
         default:
-            return DEGREE_DEFAULT;
+            return 0;
     }
 }
 } // namespace
@@ -361,9 +358,8 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
+    rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
     recordingCanvas.AttachBrush(brush);
-    auto degree = CalculateRotateDegree(config.orientation_);
-    recordingCanvas.Rotate(degree, recordingCanvas.GetWidth() / CENTER_NUM, recordingCanvas.GetHeight() / CENTER_NUM);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
             dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),

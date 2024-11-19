@@ -256,9 +256,15 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         layoutWrapper->SetActiveChildRange(start, end, cachedCountBackward, cachedCountForward, show);
         return;
     } else if (show && !cachedItemPosition_.empty()) {
-        int32_t start = itemStartIndex_ + cachedItemPosition_.begin()->first;
-        int32_t end = itemStartIndex_ + cachedItemPosition_.rbegin()->first;
-        layoutWrapper->SetActiveChildRange(start, end);
+        int32_t start = cachedItemPosition_.begin()->first;
+        int32_t end = cachedItemPosition_.rbegin()->first;
+        int32_t count = end - start + 1;
+        if (start == 0) {
+            layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, count, show);
+        } else if (end == totalItemCount_ - 1) {
+            int32_t endLimit = end + itemStartIndex_ + 1;
+            layoutWrapper->SetActiveChildRange(endLimit, endLimit, count, 0, show);
+        }
         return;
     }
     auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
@@ -1141,12 +1147,10 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         UpdateZIndex(footerWrapper);
         footerMainSize = footerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float footerPos = 0.0f;
-        if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) && !itemPosition_.empty()) {
+        if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
             float stickyPos = contentStartOffset_ - mainPos;
-            if (GetEndIndex() == totalItemCount_ - 1) {
-                stickyPos = std::min(stickyPos, GetEndPosition() - footerMainSize);
-            }
+            stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             footerPos = std::max(footerPos, stickyPos);
             footerPos = std::min(footerPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
         }
@@ -1189,12 +1193,10 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterLTR(LayoutWrapper* layoutWr
         UpdateZIndex(headerWrapper);
         headerMainSize = headerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float headerPos = 0.0f;
-        if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) && !itemPosition_.empty()) {
+        if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
             float stickyPos = contentStartOffset_ - mainPos;
-            if (GetEndIndex() == totalItemCount_ - 1) {
-                stickyPos = std::min(stickyPos, GetEndPosition() - headerMainSize);
-            }
+            stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             headerPos = std::max(headerPos, stickyPos);
         }
         LayoutIndex(headerWrapper, paddingOffset, crossSize, headerPos);
@@ -1347,7 +1349,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrap
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex + i < totalItemCount_; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }
@@ -1387,7 +1390,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex - i >= 0; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }

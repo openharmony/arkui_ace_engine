@@ -612,29 +612,38 @@ void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect)
 }
 
 RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
-    float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth)
+    float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth)
 {
     if (!GetIsShowInDialog()) {
-        piantRectHeight = piantRectHeight - OFFSET_LENGTH.ConvertToPx();
+        paintRectHeight = paintRectHeight - OFFSET_LENGTH.ConvertToPx();
         centerY = centerY + OFFSET.ConvertToPx();
-    } else {
-        piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
-        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
-        centerX = centerX + FOUCS_WIDTH.ConvertToPx();
-    }
-    if (!GetIsShowInDialog()) {
-        if (piantRectWidth > columnWidth) {
-            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
-            centerX = currentFocusIndex * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
+        if (paintRectWidth > columnWidth) {
+            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
+            centerX = currentFocusIndex * (paintRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
                       FOUCS_WIDTH.ConvertToPx();
         } else {
             centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
         }
+        AdjustFocusBoxOffset(centerX, centerY);
     } else {
-        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-        centerX = currentFocusIndex * columnWidth + (columnWidth - piantRectWidth) / HALF;
+        paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
+        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+        paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
     }
-    return RectF(centerX, centerY, piantRectWidth, piantRectHeight);
+    return RectF(centerX, centerY, paintRectWidth, paintRectHeight);
+}
+
+void TextPickerPattern::AdjustFocusBoxOffset(float& centerX, float& centerY)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetPadding()) {
+        centerX += geometryNode->GetPadding()->left.value_or(0.0);
+        centerY += geometryNode->GetPadding()->top.value_or(0.0);
+    }
 }
 
 void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -658,7 +667,9 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
-    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetPaddingSize();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * RATE;
     auto currentFocusIndex = focusKeyID_;
@@ -670,10 +681,10 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
                    PRESS_INTERVAL.ConvertToPx() * RATE;
     auto centerY = (frameSize.Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
+    float paintRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float paintRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
     auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
-        centerX, centerY, piantRectWidth, piantRectHeight, columnWidth);
+        centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
     paintRect.SetRect(focusPaintRect);
     SetFocusCornerRadius(paintRect);
 }

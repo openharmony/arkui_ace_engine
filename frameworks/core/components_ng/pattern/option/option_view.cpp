@@ -16,6 +16,7 @@
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/option/option_row_pattern.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -248,7 +249,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, std::vector<
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        AceType::MakeRefPtr<OptionRowPattern>());
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
@@ -269,7 +270,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const Option
     auto option = Create(index);
     CHECK_NULL_RETURN(option, nullptr);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        AceType::MakeRefPtr<OptionRowPattern>());
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
@@ -289,7 +290,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const SelectParam& param, int32
     LOGI("create option value = %s", param.text.c_str());
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        AceType::MakeRefPtr<OptionRowPattern>());
     row->MountToParent(option);
 
     auto pattern = option->GetPattern<MenuItemPattern>();

@@ -37,6 +37,8 @@ float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<Frame
     float contentStartOffset, float contentEndOffset)
 {
     constexpr float notMove = 0.0f;
+    CHECK_NULL_RETURN(parentFrameNode, notMove);
+    CHECK_NULL_RETURN(curFrameNode, notMove);
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(parentGeometryNode, notMove);
     auto parentFrameSize = parentGeometryNode->GetFrameSize();
@@ -353,14 +355,14 @@ void FocusHub::DumpFocusUie()
     }
 }
 
-bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediately()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d RequestFocusImmediately",
         GetFrameName().c_str(), GetFrameId());
-    return RequestFocusImmediatelyInner(isJudgeRootTree);
+    return RequestFocusImmediatelyInner();
 }
 
-bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediatelyInner()
 {
     auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
@@ -379,11 +381,6 @@ bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
 
     if (!IsFocusableWholePath()) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
-        return false;
-    }
-
-    if (isJudgeRootTree && !IsOnRootTree()) {
-        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
         return false;
     }
 
@@ -2128,19 +2125,6 @@ bool FocusHub::IsSelfFocusableWholePath()
     return IsFocusableNode();
 }
 
-bool FocusHub::IsOnRootTree() const
-{
-    auto parent = GetParentFocusHub();
-    while (parent) {
-        auto parentName = parent->GetFrameName();
-        if (parentName == V2::ROOT_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParentFocusHub();
-    }
-    return false;
-}
-
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
     if (GetTabIndex() > 0 && IsFocusableWholePath()) {
@@ -2375,11 +2359,15 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
 {
-    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
-        return false;
-    }
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
+    auto isDirectionKeyDown = GetDirectionalKeyFocus() && event.IsDirectionalKey() &&
+        event.action == KeyAction::DOWN;
+    auto isTabDown = event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN;
+    if (!isDirectionKeyDown && !isTabDown) {
+        return false;
+    }
+    
     auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;

@@ -237,18 +237,13 @@ public:
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
 
-    bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
-
-    bool ReplacePreviewText(const std::string& previewTextValue, const PreviewRange& range);
-
-    bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
-
     const PreviewTextInfo GetPreviewTextInfo() const;
 
     void FinishTextPreview() override;
 
     void ReceivePreviewTextStyle(const std::string& style) override
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewTextStyle: [%{public}s]", style.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PreviewTextStyle, style);
     }
 
@@ -388,7 +383,6 @@ public:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleSelectOverlayOnLayoutSwap();
     void FireOnReady();
-    void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap();
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
@@ -581,11 +575,6 @@ public:
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
-
-    bool IsUsingMouse() const
-    {
-        return isMousePressed_;
-    }
 
     void ResetIsMousePressed()
     {
@@ -934,6 +923,8 @@ public:
     }
 
     bool InsertOrDeleteSpace(int32_t index) override;
+
+    void DeleteRange(int32_t start, int32_t end) override;
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
@@ -1333,6 +1324,13 @@ private:
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
+    bool SetPreviewTextCn(const std::string& previewTextValue, const PreviewRange& range);
+    bool SetPreviewTextEn(const std::string& previewTextValue, const PreviewRange& range);
+    bool InitPreviewText(const std::string& previewTextValue, const PreviewRange& range);
+    bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
+    bool AppendText(const std::string& previewTextValue, const PreviewRange& range);
+    bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
+    bool IsEnPreview();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

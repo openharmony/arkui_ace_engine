@@ -134,6 +134,8 @@ public:
 
     virtual void RegisterBufferCallback() {}
 
+    virtual void OnWindowStateChange(bool isShow) {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

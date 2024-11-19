@@ -870,4 +870,9 @@ void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<
     dividerRenderContext->UpdateTransformTranslate(option);
     dividerRenderContext->UpdateOpacity(opacity);
 }
+
+bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
+{
+    return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
+}
 } // namespace OHOS::Ace::NG

@@ -540,9 +540,12 @@ void UIExtensionPattern::OnWindowShow()
 
 void UIExtensionPattern::OnWindowHide()
 {
-    UIEXT_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    UIEXT_LOGI("The window is being hidden and the component is %{public}s, state is '%{public}s.",
+        isVisible_ ? "visible" : "invisible", ToString(state_));
     if (isVisible_) {
         NotifyBackground();
+    } else if (state_ == AbilityState::FOREGROUND) {
+        NotifyBackground(false);
     }
 }
 
@@ -587,12 +590,12 @@ void UIExtensionPattern::NotifyForeground()
     }
 }
 
-void UIExtensionPattern::NotifyBackground()
+void UIExtensionPattern::NotifyBackground(bool isHandleError)
 {
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ == AbilityState::FOREGROUND) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'BACKGROUND'.", ToString(state_));
         state_ = AbilityState::BACKGROUND;
-        sessionWrapper_->NotifyBackground();
+        sessionWrapper_->NotifyBackground(isHandleError);
     }
 }
 
@@ -834,7 +837,12 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    DispatchPointerEvent(newPointerEvent);
+    auto pointerAction = newPointerEvent->GetPointerAction();
+    if (!(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
+        DispatchPointerEvent(newPointerEvent);
+    }
     if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();

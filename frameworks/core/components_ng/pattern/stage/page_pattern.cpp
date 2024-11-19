@@ -468,7 +468,9 @@ bool PagePattern::AvoidKeyboard() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    return safeAreaManager->KeyboardSafeAreaEnabled();
 }
 
 bool PagePattern::RemoveOverlay()

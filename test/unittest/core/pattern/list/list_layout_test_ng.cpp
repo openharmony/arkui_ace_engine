@@ -1901,4 +1901,83 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest002, TestSize.Level1)
     FlushLayoutTask(frameNode_, true);
     EXPECT_EQ(pattern_->currentOffset_, 170);
 }
+
+/**
+ * @tc.name: GetChildrenExpandedSize
+ * @tc.desc: Test List GetChildrenExpandedSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(3);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 3));
+
+    auto padding = 2 * 5.f;
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH - padding, ITEM_MAIN_SIZE * 3));
+
+    ClearOldNodes();
+    model = CreateList();
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 13));
+
+    ClearOldNodes();
+    model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 13 + SPACE * 12));
+
+    ClearOldNodes();
+    model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 13, LIST_HEIGHT - padding));
+
+    ClearOldNodes();
+    model = CreateList();
+    model.SetLanes(2);
+    model.SetSpace(Dimension(SPACE));
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 7 + SPACE * 6, LIST_HEIGHT - padding));
+
+    ClearOldNodes();
+    model = CreateList();
+    auto childrenSize = model.GetOrCreateListChildrenMainSize();
+    childrenSize->UpdateDefaultSize(ITEM_MAIN_SIZE);
+    childrenSize->ChangeData(2, 2, { 101.f, 102.f });
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(101.f)));
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(102.f)));
+    CreateListItems(8);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, 1003.f));
+
+    ClearOldNodes();
+    CreateList();
+    CreateListItemGroups(2);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, 400.f));
+
+    ClearOldNodes();
+    model = CreateList();
+    model.SetListDirection(Axis::NONE);
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+
+    ClearOldNodes();
+    model = CreateList();
+    model.SetListDirection(Axis::FREE);
+    CreateListItems(13);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+}
 } // namespace OHOS::Ace::NG

@@ -1192,4 +1192,32 @@ HWTEST_F(MovingphotoTestNg, UpdateAnalyzerUIConfig001, TestSize.Level1)
     EXPECT_TRUE(movingphotoPattern->isEnableAnalyzer_);
 }
 
+/**
+ * @tc.name: RefreshMovingPhoto001
+ * @tc.desc: Test RefreshMovingPhoto
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, RefreshMovingPhoto001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto and get MovingPhotoPattern.
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    EXPECT_TRUE(frameNode);
+    MovingPhotoModelNG movingphoto;
+    movingphoto.Create(AceType::MakeRefPtr<MovingPhotoController>());
+    auto movingphotoNode =ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(movingphotoNode, nullptr);
+    auto movingphotoPattern = movingphotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingphotoPattern, nullptr);
+    auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_NE(movingPhotoLayoutProperty, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    movingphotoPattern->RefreshMovingPhoto();
+
+    EXPECT_FALSE(movingphotoPattern->isRefreshMovingPhoto_);
+}
+
 } //namespace OHOS::Ace::NG

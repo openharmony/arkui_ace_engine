@@ -181,7 +181,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
 
-    algo->overScroll_ = true;
+    algo->SetCanOverScroll(true);
     info->currentOffset_ = -200.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -200.0f);
@@ -331,7 +331,7 @@ HWTEST_F(WaterFlowSegmentTest, Layout002, TestSize.Level1)
     info->footerIndex_ = 0;
 
     info->currentOffset_ = -100.0f;
-    algo->overScroll_ = true;
+    algo->SetCanOverScroll(true);
     algo->Measure(AceType::RawPtr(frameNode_));
     algo->Layout(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 1);
@@ -1678,5 +1678,42 @@ HWTEST_F(WaterFlowSegmentTest, Illegal004, TestSize.Level1)
     };
     EXPECT_EQ(info->items_, itemsMap);
     EXPECT_EQ(info->itemInfos_.size(), 3);
+}
+
+/**
+ * @tc.name: GridGetChildrenExpandedSize001
+ * @tc.desc: Test WaterFlow GetChildrenExpandedSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowGetChildrenExpandedSize001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    int32_t childCnt = static_cast<int32_t>(info->itemInfos_.size());
+    auto estimatedHeight = info->maxHeight_ / childCnt * info->childrenCount_;
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WATER_FLOW_WIDTH, estimatedHeight));
+
+    auto padding = 10.f;
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WATER_FLOW_WIDTH - padding, estimatedHeight));
+
+    ClearOldNodes();
+    model = CreateWaterFlow();
+    model.SetLayoutDirection(FlexDirection::ROW);
+    model.SetRowsTemplate("1fr 1fr");
+    CreateWaterFlowItems(60);
+    CreateDone(frameNode_);
+
+    info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    childCnt = static_cast<int32_t>(info->itemInfos_.size());
+    estimatedHeight = info->maxHeight_ / childCnt * info->childrenCount_;
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(estimatedHeight, WATER_FLOW_HEIGHT));
+
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(estimatedHeight, WATER_FLOW_HEIGHT - padding));
 }
 } // namespace OHOS::Ace::NG

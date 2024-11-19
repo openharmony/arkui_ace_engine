@@ -71,11 +71,15 @@ void RichEditorContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     auto offset = richEditorPattern->GetTextRect().GetOffset();
     const auto& rectsForPlaceholders = richEditorPattern->GetRectsForPlaceholders();
     auto customSpanPlaceholderInfo = richEditorPattern->GetCustomSpanPlaceholderInfo();
+    auto rectsForPlaceholderSize = rectsForPlaceholders.size();
     for (auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw || pManager_->GetParagraphs().empty()) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
+        if (index >= static_cast<int32_t>(rectsForPlaceholderSize) || index < 0) {
+            return;
+        }
         const auto& rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager_->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;

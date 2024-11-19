@@ -633,7 +633,8 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     CHECK_NULL_VOID(hostNode);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "sync with js stack, id: %{public}s, UINodeId: %{public}d, preStackSize: %{public}d, newStackSize: %{public}d",
-        hostNode->GetCurId().c_str(), hostNode->GetId(), preStackSize_, navigationStack_->Size());
+        hostNode->GetCurId().c_str(), hostNode->GetId(), navigationStack_->Size(),
+        static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
     preContext_ = nullptr;
@@ -2204,13 +2205,17 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
+    RefPtr<NavDestinationPattern> prePattern =
+        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    RefPtr<NavDestinationPattern> newPattern =
+        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "custom animation start: operation: %{public}d, preInfo name: %{public}s, preInfo id: %{public}s, topInfo "
-        "name: %{public}s, curInfo id: %{public}s",
-        operation, preInfo ? preInfo->GetNavPathInfo()->GetName().c_str() : "null",
-        preInfo ? std::to_string(preInfo->GetNavDestinationId()).c_str() : "null",
-        topInfo ? topInfo->GetNavPathInfo()->GetName().c_str() : "null",
-        topInfo ? std::to_string(topInfo->GetNavDestinationId()).c_str() : "null");
+        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
+        "top name: %{public}s, id: %{public}s",
+        operation, prePattern ? prePattern->GetName().c_str() : "null",
+        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
+        newPattern ? newPattern->GetName().c_str() : "null",
+        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
     return onTransition_(preInfo, topInfo, operation);
 }
 
@@ -2499,6 +2504,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     std::string toPathInfo;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    bool isNotNeedAnimation = !isAnimated;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    isNotNeedAnimation = !isAnimated ||
+        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 &&
+            !isBackPage_ && !isCustomAnimation_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
+        navigationMode_, isNotNeedAnimation);
+#endif
 
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
@@ -2506,7 +2519,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(preDestinationPattern);
         auto navDestinationName = preDestinationPattern->GetName();
         fromPathInfo += ", navDesitinationName: " + navDestinationName;
-        if ((isPopPage || preDestination->NeedRemoveInPush()) && !isAnimated) {
+        if ((isPopPage || preDestination->NeedRemoveInPush()) && isNotNeedAnimation) {
             /**
              * when transition without animation, 'pop' and 'push with remove' need to post
              * afterLayoutTask to delay old top's onDisappear. So set this flag to 'false'
@@ -2542,17 +2555,13 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
+    auto overlayManager = pipeline->GetOverlayManager();
+    if (overlayManager) {
+        overlayManager->RemoveAllModalInOverlay(false);
+    }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
     }
-    bool isNotNeedAnimation = !isAnimated;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    isNotNeedAnimation = !isAnimated ||
-        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 &&
-            !isBackPage_ && !isCustomAnimation_);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
-        navigationMode_, isNotNeedAnimation);
-#endif
     if (isNotNeedAnimation) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);

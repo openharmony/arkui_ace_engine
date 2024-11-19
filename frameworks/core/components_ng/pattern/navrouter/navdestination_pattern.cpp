@@ -142,20 +142,8 @@ void NavDestinationPattern::OnModifyDone()
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
-    if (isHideToolbar_ != navDestinationLayoutProperty->GetHideToolBarValue(false) ||
-        isHideTitlebar_ != navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
-        safeAreaPaddingChanged_ = true;
-    }
-    isHideToolbar_ = navDestinationLayoutProperty->GetHideToolBarValue(false);
-    isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
-    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && navDestinationContentNode) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
-        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navDestinationContentNode->MarkModifyDone();
-    }
-
+    UpdateHideBarProperty();
+    ExpandContentSafeAreaIfNeeded();
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     bool needRunTitleBarAnimation = false;

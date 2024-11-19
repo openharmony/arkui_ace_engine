@@ -137,12 +137,8 @@ template("bridge_common") {
         "dom/dom_stepper_item.cpp",
         "dom/dom_tool_bar.cpp",
         "dom/dom_tool_bar_item.cpp",
+        "dom/dom_video.cpp",
       ]
-    }
-
-    if (defined(config.video_components_support) &&
-        config.video_components_support) {
-      sources += [ "dom/dom_video.cpp" ]
     }
 
     # xcomponent components supports phone, TV and wearable except PC Preview

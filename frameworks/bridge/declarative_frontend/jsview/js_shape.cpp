@@ -347,7 +347,7 @@ void JSShape::SetForegroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], foregroundColor)) {
         return;
     }
-    ShapeModel::GetInstance()->SetFill(foregroundColor);
+    ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 

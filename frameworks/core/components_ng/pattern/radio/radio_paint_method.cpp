@@ -40,7 +40,7 @@ RadioModifier::RadioModifier()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
-
+    CHECK_NULL_VOID(radioTheme);
     pointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetPointColor()));
     AttachProperty(pointColor_);
 

@@ -525,33 +525,33 @@ void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* g
 
 void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto pipeline = uiNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("AddCustomProperty doesn't run on UI thread");
         return;
     }
-    ViewAbstract::AddCustomProperty(frameNode, key, value);
+    ViewAbstract::AddCustomProperty(uiNode, key, value);
 }
 
 void RemoveCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto pipeline = uiNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RemoveCustomProperty doesn't run on UI thread");
         return;
     }
-    ViewAbstract::RemoveCustomProperty(frameNode, key);
+    ViewAbstract::RemoveCustomProperty(uiNode, key);
 }
 
 ArkUINodeHandle GetCurrentPageRootNode(ArkUINodeHandle node)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto rootNode = frameNode->GetCurrentPageRootNode();
+    auto uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    auto rootNode = uiNode->GetCurrentPageRootNode();
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(rootNode));
 }
 
@@ -569,7 +569,7 @@ void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkU
     auto childList = frameNode->GetActiveChildren();
     *size = childList.size();
     *items = new ArkUINodeHandle[*size];
-    int i = 0;
+    int32_t i = 0;
     for (auto& child : childList) {
         (*items)[i++] = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(child));
     }

@@ -518,7 +518,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isJudgeRootTree = false);
+    bool RequestFocusImmediately();
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
     void HandleLastFocusNodeInFocusWindow();
@@ -554,7 +554,6 @@ public:
 
     bool IsFocusableWholePath();
     bool IsSelfFocusableWholePath();
-    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -1070,6 +1069,16 @@ public:
 
     bool GetNextFocusByStep(const KeyEvent& keyEvent);
 
+    void SetDirectionalKeyFocus(bool directionalKeyFocus)
+    {
+        enableDirectionalKeyFocus_ = directionalKeyFocus;
+    }
+
+    bool GetDirectionalKeyFocus() const
+    {
+        return enableDirectionalKeyFocus_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1143,7 +1152,7 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
-    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool RequestFocusImmediatelyInner();
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool RequestNextFocusByKey(const KeyEvent& keyEvent);
@@ -1205,6 +1214,7 @@ private:
     bool arrowKeyStepOut_ { true };
     bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
+    bool enableDirectionalKeyFocus_ { false };
 };
 } // namespace OHOS::Ace::NG
 

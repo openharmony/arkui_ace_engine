@@ -670,4 +670,49 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(pattern_->IsAtBottom());
 }
+
+/**
+ * @tc.name: ScrollGetChildrenExpandedSize001
+ * @tc.desc: Test Scroll GetChildrenExpandedSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent(100.f);
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH, 100.f));
+
+    auto padding = 2 * 5.f;
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 100.f));
+
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 2000.f));
+
+    pattern_->SetAxis(Axis::HORIZONTAL);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(100.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, SCROLL_HEIGHT -padding));
+
+    ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2000.f, SCROLL_HEIGHT - padding));
+
+    ViewAbstract::SetMargin(AceType::RawPtr(contentNode), CalcLength(5.f));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, SCROLL_HEIGHT - padding));
+
+    pattern_->SetAxis(Axis::NONE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+
+    pattern_->SetAxis(Axis::FREE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+}
 } // namespace OHOS::Ace::NG

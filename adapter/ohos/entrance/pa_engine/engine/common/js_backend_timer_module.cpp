@@ -170,7 +170,7 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
         napi_ref value = nullptr;
         std::shared_ptr<NativeReference> valueRef;
         napi_create_reference(env, argv[index], 1, &value);
-        valueRef.reset(reinterpret_cast<NativeReference*>(ref));
+        valueRef.reset(reinterpret_cast<NativeReference*>(value));
         task.PushArgs(valueRef);
     }
 

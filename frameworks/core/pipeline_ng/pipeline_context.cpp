@@ -914,6 +914,7 @@ void PipelineContext::FlushFocusView()
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
+        focusManager_->SetFocusViewStackState(FocusViewStackState::IDLE);
     }
 }
 
@@ -2319,6 +2320,13 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
+    auto containerId = Container::CurrentId();
+    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
+    if (subWindowContainerId >= 0) {
+        auto subPipeline = GetContextByContainerId(subWindowContainerId);
+        ContainerScope scope(subWindowContainerId);
+        subPipeline->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+    }
     if (reason == FocusActiveReason::USE_API) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
         autoFocusInactive_ = autoFocusInactive;
@@ -3380,9 +3388,8 @@ void PipelineContext::DispatchMouseEvent(
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
 {
     if (static_cast<int32_t>(format) == 0) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle nodeId=%{public}d style=%{public}d windowId=%{public}d "
-            "isByPass=%{public}d mouseStyleNodeId_=%{public}d",
-            nodeId, static_cast<int32_t>(format), windowId, isByPass, mouseStyleNodeId_.value_or(-1));
+        TAG_LOGI(AceLogTag::ACE_MOUSE, "ChangeMouseStyle [%{public}d,%{public}d,%{public}d,%{public}d,%{public}d]",
+            nodeId, mouseStyleNodeId_.value_or(-1), static_cast<int32_t>(format), windowId, isByPass);
     }
     auto window = GetWindow();
     if (window && window->IsUserSetCursor()) {
@@ -3434,10 +3441,16 @@ bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
     auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
     auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
+    bool isDPADDown = false;
+    if (event.action == KeyAction::DOWN && event.IsDirectionalKey() &&
+        curEntryFocusViewFrame && curEntryFocusViewFrame->GetFocusHub() &&
+        curEntryFocusViewFrame->GetFocusHub()->GetDirectionalKeyFocus()) {
+        isDPADDown = true;
+    }
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     isTabJustTriggerOnKeyEvent_ = false;
 
-    if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
+    if ((isKeyTabDown || isDPADDown) && isViewRootScopeFocused && curFocusView) {
         // Current focused on the view root scope. Tab key used to extend focus.
         // If return true. This tab key will just trigger onKeyEvent process.
         isTabJustTriggerOnKeyEvent_ = curFocusView->TriggerFocusMove();
@@ -3445,7 +3458,7 @@ bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
 
     // Tab key set focus state from inactive to active.
     // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = isKeyTabDown && SetIsFocusActive(true);
+    bool isHandleFocusActive = (isKeyTabDown || isDPADDown) && SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
     if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
@@ -5277,18 +5290,6 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
         return navigationMgr_->AddInteractiveAnimation(animationCallback);
     }
     return false;
-}
-
-void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
-{
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
-        [weak = WeakClaim(this), callback]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetOnWindowFocusedCallBack(callback);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetOnWindowFocusedCallback");
 }
 
 bool PipelineContext::CheckThreadSafe()

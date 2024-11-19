@@ -254,6 +254,7 @@ private:
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
     void InitOrRefreshSlipFactor();
+    RefPtr<PanEvent> CreatePanEvent();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

@@ -28,7 +28,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
 {
     bool hasProperty = false;
     auto result = napi_has_named_property(env, value, "nodePtr_", &hasProperty);
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (result == napi_ok && hasProperty) {
         napi_value frameNodePtr = nullptr;
         auto result = napi_get_named_property(env, value, "nodePtr_", &frameNodePtr);

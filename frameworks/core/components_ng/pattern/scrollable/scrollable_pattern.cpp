@@ -228,7 +228,7 @@ RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateInputEventHub();
 }
 

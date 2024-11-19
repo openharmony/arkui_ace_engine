@@ -452,7 +452,6 @@ HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
     layoutProperty->UpdateShowCounter(true);
     layoutProperty->UpdateMaxLength(1024);
     layoutProperty->UpdateShowUnderline(true);
-
     pattern->CalcCounterBoundHeight();
     pattern->CalculateBoundsRect();
     pattern->deleteForwardOperations_.emplace(10);

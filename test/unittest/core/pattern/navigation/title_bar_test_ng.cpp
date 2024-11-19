@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/common/mock_container.h"
@@ -2679,5 +2680,62 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
      */
     titleBarPattern->HandleLongPressActionEnd();
     ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarHoverModeTest001
+ * @tc.desc: Test IsNeedHoverModeAction and CalculateTitlebarOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters
+     */
+    CreateNavBar();
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. itleBarParentTypeValue is NAVBAR and NavigationTitleMode is MINI.
+     * @tc.expected: Hover mode is false and offset is 0.0f.
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAVBAR);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::MINI);
+    bool hover = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover);
+    auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);
+    EXPECT_EQ(offset, 0.0f);
+}
+
+/**
+ * @tc.name: TitleBarHoverModeTest002
+ * @tc.desc: Test IsNeedHoverModeAction and CalculateTitlebarOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. When barStyle is STANDARD or enableHoverMode is false.
+     * @tc.expected: Hover mode is false and offset is 0.0f.
+     */
+    NavigationTitlebarOptions opt1;
+    opt1.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    titleBarPattern_->SetTitlebarOptions(std::move(opt1));
+    bool hover1 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover1);
+    NavigationTitlebarOptions opt2;
+    opt2.enableHoverMode = false;
+    titleBarPattern_->SetTitlebarOptions(std::move(opt2));
+    bool hover2 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover2);
+    auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);
+    EXPECT_EQ(offset, 0.0f);
 }
 } // namespace OHOS::Ace::NG

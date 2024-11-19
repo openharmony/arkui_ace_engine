@@ -49,7 +49,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
-constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 500;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -1234,10 +1234,15 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     InitAddFormUpdateAndErrorCallback(instanceID);
-    InitAddFormUninstallAndSurfaceChangeCallback(instanceID);
-    InitAddUnTrustAndEnableFormCallback(instanceID);
-    InitAddFormSurfaceNodeAndDetachCallback(instanceID);
+    InitAddUninstallAndSurfaceNodeCallback(instanceID);
+    InitAddFormSurfaceChangeAndDetachCallback(instanceID);
+    InitAddUnTrustAndSnapshotCallback(instanceID);
     InitOtherCallback(instanceID);
+    const std::function<void(bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback =
+        [this](bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
+            FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
+        };
+    context->SetSizeChangeByRotateCallback(callback);
 }
 
 void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
@@ -2007,8 +2012,6 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
     auto pipeline = host->GetContext();
 
     formManagerBridge_->AddFormUpdateCallback(
@@ -2028,6 +2031,7 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                 },
                 "ArkUIFormUpdateCard");
         });
+
     formManagerBridge_->AddFormErrorCallback(
         [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
             ContainerScope scope(instanceID);
@@ -2044,12 +2048,11 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
         });
 }
 
-void FormPattern::InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceID)
+
+void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
     auto pipeline = host->GetContext();
     formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
         ContainerScope scope(instanceID);
@@ -2064,59 +2067,7 @@ void FormPattern::InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceI
             },
             "ArkUIFormFireUninstallEvent");
     });
-    formManagerBridge_->AddFormSurfaceChangeCallback(
-        [weak = WeakClaim(this), instanceID, pipeline](float width, float height, float borderWidth) {
-            ContainerScope scope(instanceID);
-            CHECK_NULL_VOID(pipeline);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak, instanceID, width, height, borderWidth] {
-                    ContainerScope scope(instanceID);
-                    auto form = weak.Upgrade();
-                    CHECK_NULL_VOID(form);
-                    form->FireFormSurfaceChangeCallback(width, height, borderWidth);
-                },
-                "ArkUIFormFireSurfaceChange");
-        });
-}
 
-void FormPattern::InitAddUnTrustAndEnableFormCallback(int32_t instanceID)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto pipeline = host->GetContext();
-    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
-            [weak, instanceID] {
-                ContainerScope scope(instanceID);
-                auto formPattern = weak.Upgrade();
-                CHECK_NULL_VOID(formPattern);
-                formPattern->HandleUnTrustForm();
-            },
-            "ArkUIFormHandleUnTrust");
-    });
-    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
-            [weak, instanceID, enable] {
-                ContainerScope scope(instanceID);
-                auto formPattern = weak.Upgrade();
-                CHECK_NULL_VOID(formPattern);
-                formPattern->HandleEnableForm(enable);
-            },
-            "ArkUIFormHandleEnableForm");
-    });
-}
-
-void FormPattern::InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceID)
-{
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](
             const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
@@ -2135,6 +2086,28 @@ void FormPattern::InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceID)
                 },
                 "ArkUIFormFireSurfaceNodeCallback");
         });
+}
+
+void FormPattern::InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+
+    formManagerBridge_->AddFormSurfaceChangeCallback(
+        [weak = WeakClaim(this), instanceID, pipeline](float width, float height, float borderWidth) {
+            ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(pipeline);
+            auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask(
+                [weak, instanceID, width, height, borderWidth] {
+                    ContainerScope scope(instanceID);
+                    auto form = weak.Upgrade();
+                    CHECK_NULL_VOID(form);
+                    form->FireFormSurfaceChangeCallback(width, height, borderWidth);
+                },
+                "ArkUIFormFireSurfaceChange");
+        });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
         ContainerScope scope(instanceID);
@@ -2142,16 +2115,34 @@ void FormPattern::InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceID)
         CHECK_NULL_VOID(formPattern);
         formPattern->FireFormSurfaceDetachCallback();
     });
-}
 
-void FormPattern::InitOtherCallback(int32_t instanceID)
-{
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
+        formPattern->DelayResetManuallyClickFlag();
         formPattern->OnActionEvent(action);
+    });
+}
+
+void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak, instanceID] {
+                ContainerScope scope(instanceID);
+                auto formPattern = weak.Upgrade();
+                CHECK_NULL_VOID(formPattern);
+                formPattern->HandleUnTrustForm();
+            },
+            "ArkUIFormHandleUnTrust");
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
@@ -2171,21 +2162,40 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
             CHECK_NULL_VOID(formPattern);
             formPattern->SetFormLinkInfos(infos);
         });
+}
 
+
+void FormPattern::InitOtherCallback(int32_t instanceID)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
-        [weak = WeakClaim(this), instanceID](int32_t& top, int32_t& left) {
+        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
             ContainerScope scope(instanceID);
             auto context = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(context);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostSyncTask(
-                [weak, instanceID, &top, &left] {
-                    ContainerScope scope(instanceID);
-                    auto form = weak.Upgrade();
-                    CHECK_NULL_VOID(form);
-                    form->GetRectRelativeToWindow(top, left);
-                },
-                "ArkUIFormGetRectRelativeToWindow");
+            auto uiTaskExecutor =
+                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                form->GetRectRelativeToWindow(top, left);
+                }, "ArkUIFormGetRectRelativeToWindow");
+        });
+
+    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
+        ContainerScope scope(instanceID);
+        CHECK_NULL_VOID(pipeline);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID, enable] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleEnableForm(enable);
+            }, "ArkUIFormHandleEnableForm");
         });
 }
 
