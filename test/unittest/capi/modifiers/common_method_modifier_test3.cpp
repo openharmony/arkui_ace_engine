@@ -53,24 +53,6 @@ class CommonMethodModifierTest3 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
-
-    RefPtr<GestureEventHub> GetGestureEventHub()
-    {
-        if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
-            if (auto eventHub = fnode->GetEventHub<NG::EventHub>(); eventHub) {
-                return eventHub->GetOrCreateGestureEventHub();
-            }
-        }
-        return nullptr;
-    }
-
-    RefPtr<MockRenderContext> GetMockRenderContext()
-    {
-        if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
-            return AceType::DynamicCast<MockRenderContext>(fnode->GetRenderContext());
-        }
-        return nullptr;
-    }
 };
 
 /*
