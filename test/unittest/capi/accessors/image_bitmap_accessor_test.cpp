@@ -38,8 +38,8 @@ public:
     MOCK_METHOD(void, Close, ());
     MOCK_METHOD(Ark_Int32, GetHeight, ());
     MOCK_METHOD(Ark_Int32, GetWidth, ());
-    void SetHeight(int value) { height_ = value; }
-    void SetWidth(int value) { width_ = value; }
+    void SetHeight(int value) { height = value; }
+    void SetWidth(int value) { width = value; }
 };
 }
 

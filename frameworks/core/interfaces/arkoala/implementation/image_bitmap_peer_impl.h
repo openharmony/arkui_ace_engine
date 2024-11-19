@@ -19,6 +19,8 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+using ImageBitmapPeerCanvasImageRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage>;
+
 struct ImageBitmapPeer {
 public:
     ImageBitmapPeer();
@@ -31,7 +33,7 @@ public:
     void LoadImage(const std::string& src);
     void SetCloseCallback(std::function<void()>&& callback);
 
-    const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage>& GetCanvasImage() const
+    const ImageBitmapPeerCanvasImageRefPtr& GetCanvasImage() const
     {
         return canvasImage_;
     }
@@ -49,13 +51,13 @@ private:
 
 protected:
     std::string src_;
-    double width_;
-    double height_;
+    double width;
+    double height;
     OHOS::Ace::ImageSourceInfo sourceInfo_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
 
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> canvasImage_;
+    ImageBitmapPeerCanvasImageRefPtr canvasImage_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageObject> imageObj_;
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> svgDom_;

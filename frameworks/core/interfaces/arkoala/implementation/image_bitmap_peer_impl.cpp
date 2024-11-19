@@ -19,16 +19,16 @@
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG::Converter;
 
-ImageBitmapPeer::ImageBitmapPeer(): 
-    width_(0), 
-    height_(0),
-    loadingCtx_(nullptr),
-    canvasImage_(nullptr),
-    imageObj_(nullptr),
-    pixelMap_(nullptr),
-    svgDom_(nullptr),
-    imageFit_(ImageFit::NONE),
-    bindingSize_(0)
+ImageBitmapPeer::ImageBitmapPeer()
+    : width(0), 
+      height(0),
+      loadingCtx_(nullptr),
+      canvasImage_(nullptr),
+      imageObj_(nullptr),
+      pixelMap_(nullptr),
+      svgDom_(nullptr),
+      imageFit_(ImageFit::NONE),
+      bindingSize_(0)
 {
 }
 
@@ -41,8 +41,8 @@ void ImageBitmapPeer::Close()
         closeCallback();
     }
     closeCallbacks_.clear();
-    width_ = 0;
-    height_ = 0;
+    width = 0;
+    height = 0;
 
     loadingCtx_ = nullptr;
     canvasImage_ = nullptr;
@@ -53,12 +53,12 @@ void ImageBitmapPeer::Close()
 
 Ark_Int32 ImageBitmapPeer::GetHeight()
 {
-    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height_));
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height));
 }
 
 Ark_Int32 ImageBitmapPeer::GetWidth()
 {
-    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width_));
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
 }
 
 void ImageBitmapPeer::SetCloseCallback(std::function<void()>&& callback)
@@ -96,8 +96,8 @@ void ImageBitmapPeer::LoadImage(const ImageSourceInfo& sourceInfo)
 void ImageBitmapPeer::OnImageDataReady()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    width_ = loadingCtx_->GetImageSize().Width();
-    height_ = loadingCtx_->GetImageSize().Height();
+    width = loadingCtx_->GetImageSize().Width();
+    height = loadingCtx_->GetImageSize().Height();
     loadingCtx_->MakeCanvasImageIfNeed(loadingCtx_->GetImageSize(), true, ImageFit::NONE);
 }
 
@@ -117,8 +117,8 @@ void ImageBitmapPeer::OnImageLoadSuccess()
 
 void ImageBitmapPeer::OnImageLoadFail(const std::string& errorMsg)
 {
-    width_ = 0;
-    height_ = 0;
+    width = 0;
+    height = 0;
     pixelMap_ = nullptr;
     svgDom_ = nullptr;
 }
