@@ -147,6 +147,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, pinch %{public}d up, state: %{public}d, activeSize:%{public}d, fingers:%{public}d",
         event.touchEventId, event.id, refereeState_, static_cast<int32_t>(activeFingers_.size()), fingers_);
+    extraInfo_ = "activeSize: " + std::to_string(static_cast<int32_t>(activeFingers_.size()));
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);

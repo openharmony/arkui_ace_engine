@@ -74,11 +74,11 @@ struct EventTreeRecord {
 
     void AddGestureSnapshot(int32_t finger, RefPtr<GestureSnapshot>&& gesture);
 
-    void AddGestureProcedure(uint64_t id,
-        const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp = 0);
+    void AddGestureProcedure(uint64_t id, const std::string& procedure, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
-    void AddGestureProcedure(uint64_t id,
-        const TouchEvent& point, const std::string& state, const std::string& disposal, int64_t timestamp = 0);
+    void AddGestureProcedure(uint64_t id, const TouchEvent& point, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
