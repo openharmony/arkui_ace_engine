@@ -66,7 +66,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-
+    
     struct Rect {
         float left;
         float right;
@@ -148,7 +148,7 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
     res = safeAreaManager_->GetCombinedSafeArea(SafeAreaExpandOpts());
     CommonExpectEQ(Rect{res.left_.start, res.right_.end, res.top_.start, res.bottom_.end},
                    Rect{0.0f, 0.0f, 0.0f, 0.0f});
-
+    
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), true);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
@@ -411,12 +411,12 @@ HWTEST_F(SafeAreaManagerTest, WindowWrapperOffsetTest, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto manager = pipeline->GetSafeAreaManager();
     auto windowManager = pipeline->GetWindowManager();
-
+    
     pipeline->SetWindowModal(WindowModal::NORMAL);
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback1));
     auto ret = manager->GetWindowWrapperOffset();
     EXPECT_EQ(ret, OffsetF());
-
+    
     pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
     windowManager->SetWindowGetModeCallBack(std::move(windowModeCallback1));
     ret = manager->GetWindowWrapperOffset();
