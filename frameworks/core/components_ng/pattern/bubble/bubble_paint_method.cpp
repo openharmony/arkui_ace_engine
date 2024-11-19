@@ -833,7 +833,9 @@ void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
     path->SetValue(clipPath_);
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateClipShape(path);
+    if (childSize_.IsPositive() && renderContext) {
+        renderContext->UpdateClipShape(path);
+    }
 }
 
 } // namespace OHOS::Ace::NG
