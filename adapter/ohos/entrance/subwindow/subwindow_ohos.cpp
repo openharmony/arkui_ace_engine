@@ -414,6 +414,24 @@ NG::RectF SubwindowOhos::GetRect()
     return windowRect_;
 }
 
+void SubwindowOhos::ResizeDialogSubwindow()
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    if (!(NearEqual(defaultDisplay->GetWidth(), window_->GetRect().width_) &&
+        NearEqual(defaultDisplay->GetHeight(), window_->GetRect().height_))) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [this]() {
+                ResizeWindow();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow");
+    }
+}
+
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup enter");

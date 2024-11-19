@@ -186,6 +186,8 @@ public:
     virtual bool Close() = 0;
     virtual bool IsToastSubWindow() = 0;
     virtual void DestroyWindow() = 0;
+    virtual void ResizeDialogSubwindow() = 0;
+
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;

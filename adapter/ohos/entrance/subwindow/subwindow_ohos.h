@@ -159,6 +159,8 @@ public:
     bool IsToastSubWindow() override;
     void DestroyWindow() override;
 
+    void ResizeDialogSubwindow() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

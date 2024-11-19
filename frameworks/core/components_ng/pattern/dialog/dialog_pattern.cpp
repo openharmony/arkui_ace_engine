@@ -1815,6 +1815,25 @@ bool DialogPattern::IsShowInFreeMultiWindow()
     return container->IsFreeMultiWindow();
 }
 
+bool DialogPattern::IsShowInFloatingWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFloatingWindow();
+}
+
 void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
