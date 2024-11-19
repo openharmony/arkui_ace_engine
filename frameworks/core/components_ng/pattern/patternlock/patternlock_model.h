@@ -42,6 +42,8 @@ public:
     virtual void SetActiveCircleColor(const Color& activeCircleColor);
     virtual void SetActiveCircleRadius(const Dimension& activeCircleRadius);
     virtual void SetEnableWaveEffect(bool enableWaveEffect);
+    virtual void SetEnableForeground(bool enableForeground);
+    virtual void SetSkipUnselectedPoint(bool isSkipUnselectedPoint);
 
 private:
     static std::unique_ptr<PatternLockModel> instance_;
