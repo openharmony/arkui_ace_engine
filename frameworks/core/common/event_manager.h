@@ -333,6 +333,8 @@ public:
 
     TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
 
+    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -358,7 +360,6 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
-    void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
