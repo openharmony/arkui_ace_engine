@@ -32,7 +32,7 @@ ImageBitmapPeer* CtorImpl(const Ark_String* src)
     auto peer = new ImageBitmapPeer();
     auto stringSrc = Converter::Convert<std::string>(*src);
     if (!stringSrc.empty()) {
-         peer->LoadImage(stringSrc);
+        peer->LoadImage(stringSrc);
     }
     return peer;
 }

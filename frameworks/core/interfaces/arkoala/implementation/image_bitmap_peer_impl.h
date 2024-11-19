@@ -21,7 +21,7 @@
 
 struct ImageBitmapPeer {
 public:
-    ImageBitmapPeer() = default;
+    ImageBitmapPeer();
     virtual ~ImageBitmapPeer() = default;
     
     void Close();
@@ -33,7 +33,7 @@ public:
 
     const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage>& GetCanvasImage() const
     {
-        return image_;
+        return canvasImage_;
     }
     const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& GetPixelMap() const
     {
@@ -49,17 +49,17 @@ private:
 
 protected:
     std::string src_;
-    double width_ = 0;
-    double height_ = 0;
+    double width_;
+    double height_;
     OHOS::Ace::ImageSourceInfo sourceInfo_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
 
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> image_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> canvasImage_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageObject> imageObj_;
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> svgDom_;
-    OHOS::Ace::ImageFit imageFit_ = OHOS::Ace::ImageFit::NONE;
+    OHOS::Ace::ImageFit imageFit_;
     OHOS::Ace::NG::SizeF imageSize_;
-    size_t bindingSize_ = 0;
+    size_t bindingSize_;
 };

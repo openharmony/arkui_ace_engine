@@ -19,7 +19,21 @@
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG::Converter;
 
-void ImageBitmapPeer::Close() {
+ImageBitmapPeer::ImageBitmapPeer(): 
+    width_(0), 
+    height_(0),
+    loadingCtx_(nullptr),
+    canvasImage_(nullptr),
+    imageObj_(nullptr),
+    pixelMap_(nullptr),
+    svgDom_(nullptr),
+    imageFit_(ImageFit::NONE),
+    bindingSize_(0)
+{
+}
+
+void ImageBitmapPeer::Close()
+{
     for (const auto& closeCallback : closeCallbacks_) {
         if (!closeCallback) {
             continue;
@@ -31,18 +45,20 @@ void ImageBitmapPeer::Close() {
     height_ = 0;
 
     loadingCtx_ = nullptr;
-    image_ = nullptr;
+    canvasImage_ = nullptr;
     imageObj_ = nullptr;
     pixelMap_ = nullptr;
     svgDom_ = nullptr;
 }
 
-Ark_Int32 ImageBitmapPeer::GetHeight() {
-   return OHOS::Ace::NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height_));
+Ark_Int32 ImageBitmapPeer::GetHeight()
+{
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height_));
 }
 
-Ark_Int32 ImageBitmapPeer::GetWidth() {
-   return OHOS::Ace::NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width_));
+Ark_Int32 ImageBitmapPeer::GetWidth()
+{
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width_));
 }
 
 void ImageBitmapPeer::SetCloseCallback(std::function<void()>&& callback)
@@ -60,20 +76,20 @@ void ImageBitmapPeer::LoadImage(const std::string& src)
 
 void ImageBitmapPeer::LoadImage(const ImageSourceInfo& sourceInfo)
 {
-    auto dataReadyCallback = [loader = this](const OHOS::Ace::ImageSourceInfo& sourceInfo) {
+    auto dataReadyCallback = [loader = this](const ImageSourceInfo& sourceInfo) {
         CHECK_NULL_VOID(loader);
         loader->OnImageDataReady();
     };
-    auto loadSuccessCallback = [loader = this](const OHOS::Ace::ImageSourceInfo& sourceInfo) {
+    auto loadSuccessCallback = [loader = this](const ImageSourceInfo& sourceInfo) {
         CHECK_NULL_VOID(loader);
         loader->OnImageLoadSuccess();
     };
-    auto loadFailCallback = [loader = this](const OHOS::Ace::ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    auto loadFailCallback = [loader = this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         CHECK_NULL_VOID(loader);
         loader->OnImageLoadFail(errorMsg);
     };
     NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
-    loadingCtx_ = AceType::MakeRefPtr<OHOS::Ace::NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
+    loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
     loadingCtx_->LoadImageData();
 }
 
@@ -88,11 +104,11 @@ void ImageBitmapPeer::OnImageDataReady()
 void ImageBitmapPeer::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    image_ = loadingCtx_->MoveCanvasImage();
-    CHECK_NULL_VOID(image_);
+    canvasImage_ = loadingCtx_->MoveCanvasImage();
+    CHECK_NULL_VOID(canvasImage_);
     imageObj_ = loadingCtx_->MoveImageObject();
     CHECK_NULL_VOID(imageObj_);
-    pixelMap_ = image_->GetPixelMap();
+    pixelMap_ = canvasImage_->GetPixelMap();
     svgDom_ = imageObj_->GetSVGDom();
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();

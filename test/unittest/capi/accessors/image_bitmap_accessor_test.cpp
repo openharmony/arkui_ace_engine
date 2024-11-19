@@ -80,10 +80,10 @@ private:
         );
 
 public:
-   inline static const GENERATED_ArkUIImageBitmapAccessor *accessor_ =
+    inline static const GENERATED_ArkUIImageBitmapAccessor *accessor_ =
         fullAPI_->getAccessors()->getImageBitmapAccessor();
     inline static void (*finalyzer_)(MockImageBitmapPeer *) = nullptr;
-   MockImageBitmapPeer *peer_ = nullptr;
+    MockImageBitmapPeer *peer_ = nullptr;
 };
 
 /**
