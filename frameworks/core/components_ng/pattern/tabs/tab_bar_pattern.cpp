@@ -556,6 +556,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!dragEvent_);
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
         auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
@@ -2400,8 +2401,7 @@ bool TabBarPattern::IsContainsBuilder()
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
 {
     auto weak = AceType::WeakClaim(this);
-    const auto& pattern = weak.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
 
     currentOffset_ = 0.0f;
     host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
@@ -3174,7 +3174,8 @@ void TabBarPattern::InitTurnPageRateEvent()
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 auto pattern = weak.Upgrade();
-                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                CHECK_NULL_VOID(pattern);
+                if (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f)) {
                     pattern->isTouchingSwiper_ = false;
                 }
                 pattern->SetMaskAnimationExecuted(false);
