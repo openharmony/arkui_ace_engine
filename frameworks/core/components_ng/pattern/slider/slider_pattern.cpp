@@ -165,14 +165,11 @@ void SliderPattern::InitSliderAccessibilityEnabledRegister()
 
 void SliderPattern::InitAccessibilityVirtualNodeTask()
 {
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    if (!isInitAccessibilityVirtualNode_) {
+    if (!isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask(
             [weak = WeakClaim(this)]() {
                 auto sliderPattern = weak.Upgrade();
@@ -200,12 +197,7 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
 
 void SliderPattern::AccessibilityVirtualNodeRenderTask()
 {
-    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier()) {
-        return;
-    }
-    if (!isInitAccessibilityVirtualNode_) {
-        InitAccessibilityVirtualNodeTask();
-    } else {
+    if (isInitAccessibilityVirtualNode_ && CheckCreateAccessibilityVirtualNode()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContextRefPtr();
@@ -216,6 +208,19 @@ void SliderPattern::AccessibilityVirtualNodeRenderTask()
             sliderPattern->ModifyAccessibilityVirtualNode();
         });
     }
+}
+
+bool SliderPattern::CheckCreateAccessibilityVirtualNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, false);
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || UseContentModifier() || !isShowSteps) {
+        return false;
+    }
+    return true;
 }
 
 bool SliderPattern::InitAccessibilityVirtualNode()
