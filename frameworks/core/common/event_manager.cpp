@@ -189,14 +189,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ ")
-            .append("tag: ")
-            .append(item.second.tag)
+        resultInfo.append("{ ").append("tag: ").append(item.second.tag);
+#ifndef IS_RELEASE_VERSION
+        resultInfo.append(", inspectorId: ")
+            .append(item.second.inspectorId)
             .append(", frameRect: ")
-            .append(item.second.frameRect)
-            .append(", depth: ")
-            .append(std::to_string(item.second.depth))
-            .append(" };");
+            .append(item.second.frameRect);
+#endif
+        resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
