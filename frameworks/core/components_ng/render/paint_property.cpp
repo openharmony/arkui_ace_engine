@@ -29,4 +29,9 @@ RefPtr<FrameNode> PaintProperty::GetHost() const
     return host_.Upgrade();
 }
 
+void PaintProperty::UpdatePaintPropertyHost(const PaintProperty* renderProperty)
+{
+    host_ = renderProperty->host_;
+}
+
 } // namespace OHOS::Ace::NG

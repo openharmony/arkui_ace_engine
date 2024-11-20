@@ -49,12 +49,10 @@ public:
 
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
+    void UpdatePaintPropertyHost(const PaintProperty* renderProperty);
 
 protected:
-    void UpdatePaintProperty(const PaintProperty* renderProperty)
-    {
-        host_ = renderProperty->host_;
-    }
+    void UpdatePaintProperty(const PaintProperty* renderProperty) {}
 
     ACE_DISALLOW_COPY_AND_MOVE(PaintProperty);
 
