@@ -81,6 +81,8 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         return false;
     }
 
+    // Keep handle visible when moving
+    CHECK_NULL_RETURN(!isHandleMoving_ || IsSingleHandle(), true);
     auto visibleContentRect = GetVisibleContentRect();
     GetClipHandleViewPort(visibleContentRect);
     if (visibleContentRect.IsEmpty()) {
