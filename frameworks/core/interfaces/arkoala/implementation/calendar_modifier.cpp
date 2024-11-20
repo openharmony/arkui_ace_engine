@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/interfaces/arkoala/implementation/calendar_controller_peer.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -291,8 +294,15 @@ void OnSelectChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CalendarModelNG::SetOnSelectChange(frameNode, convValue);
+    auto onSelectChange = [arkCallback = CallbackHelper(*value)](const std::string& dataStr) {
+        const auto json = JsonUtil::ParseJsonString(dataStr);
+        arkCallback.Invoke(Ark_CalendarSelectedDate {
+            .year = Converter::ArkValue<Ark_Number>(json->GetInt("year")),
+            .month = Converter::ArkValue<Ark_Number>(json->GetInt("month")),
+            .day = Converter::ArkValue<Ark_Number>(json->GetInt("day")),
+        });
+    };
+    CalendarModelNG::SetOnSelectChange(frameNode, onSelectChange);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
                        const Callback_CalendarRequestedData_Void* value)
@@ -300,8 +310,17 @@ void OnRequestDataImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CalendarModelNG::SetOnRequestData(frameNode, convValue);
+    auto onRequestData = [arkCallback = CallbackHelper(*value)](const std::string& dataStr) {
+        const auto json = JsonUtil::ParseJsonString(dataStr);
+        arkCallback.Invoke(Ark_CalendarRequestedData {
+            .year = Converter::ArkValue<Ark_Number>(json->GetInt("year")),
+            .month = Converter::ArkValue<Ark_Number>(json->GetInt("month")),
+            .currentYear = Converter::ArkValue<Ark_Number>(json->GetInt("currentYear")),
+            .currentMonth = Converter::ArkValue<Ark_Number>(json->GetInt("currentMonth")),
+            .monthState = Converter::ArkValue<Ark_Number>(json->GetInt("MonthState")),
+        });
+    };
+    CalendarModelNG::SetOnRequestData(frameNode, onRequestData);
 }
 } // CalendarAttributeModifier
 const GENERATED_ArkUICalendarModifier* GetCalendarModifier()
