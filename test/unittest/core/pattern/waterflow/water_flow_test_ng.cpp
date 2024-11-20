@@ -314,6 +314,11 @@ RectF WaterFlowTestNg::GetLazyChildRect(int32_t itemIndex)
     return waterFlowItem->GetGeometryNode()->GetFrameRect();
 }
 
+RefPtr<FrameNode> WaterFlowTestNg::GetItem(int32_t index, bool isCache)
+{
+    return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(index, isCache));
+}
+
 /**
  * @tc.name: LazyForeachLayout001
  * @tc.desc: Test LazyForeach Layout

@@ -1950,6 +1950,7 @@ HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
     UpdateCurrentOffset(-50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), -560.0f);
     EXPECT_EQ(GetChildY(frameNode_, 10), 1040.0f);
+    EXPECT_EQ(GetChildLayoutProperty<LayoutProperty>(frameNode_, 0)->GetPropertyChangeFlag(), 0);
 }
 
 /**
