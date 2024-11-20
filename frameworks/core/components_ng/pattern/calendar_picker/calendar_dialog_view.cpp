@@ -165,14 +165,10 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (shadowTheme) {
-            auto colorMode = SystemProperties::GetColorMode();
-            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
-        }
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (shadowTheme) {
+        auto colorMode = SystemProperties::GetColorMode();
+        renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
     }
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
