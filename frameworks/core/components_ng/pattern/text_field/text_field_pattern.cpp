@@ -4199,11 +4199,13 @@ void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
         return;
     }
     if (focusIndex_ != FocuseIndex::TEXT && insertValue == " ") {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FocusIndex not on text, don't insert now");
         HandleSpaceEvent();
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
     if (FinishTextPreviewByPreview(insertValue)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Using Preview Instead of directly insert");
         return;
     }
     inputOperations_.emplace(InputOperation::INSERT);
