@@ -204,8 +204,8 @@ HWTEST_F(GridRowModifierTest, setGridRowOptionsTestDefaultValues, TestSize.Level
     EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE) << "Default value for attribute 'options.direction'";
 }
 
-using tupleGutterOptionTest = std::tuple<GutterOptionTest, GutterOption, GutterOptionTest>;
-static std::vector<tupleGutterOptionTest> testGutterOptionValidValues = {
+using TupleGutterOptionTest = std::tuple<GutterOptionTest, GutterOption, GutterOptionTest>;
+static std::vector<TupleGutterOptionTest> testGutterOptionValidValues = {
     {{.x=0, .y=0}, {Dimension(0), Dimension(0)}, {.x=0, .y=0}},
     {{.x=1, .y=2}, {Dimension(1), Dimension(2)}, {.x=1, .y=2}},
     {{.x=2, .y=1}, {Dimension(2), Dimension(1)}, {.x=2, .y=1}},
@@ -213,13 +213,13 @@ static std::vector<tupleGutterOptionTest> testGutterOptionValidValues = {
     {{.x=4, .y=3}, {Dimension(4), Dimension(3)}, {.x=4, .y=3}},
 };
 
-static std::vector<tupleGutterOptionTest> testGutterOptionInvalidValues = {
+static std::vector<TupleGutterOptionTest> testGutterOptionInvalidValues = {
     {{.x=0, .y=0}, {Dimension(-1), Dimension(-1)}, {.x=0, .y=0}},
     {{.x=0, .y=0}, {Dimension(-2), Dimension(-2)}, {.x=0, .y=0}},
 };
 
-using tupleColumnsOptionTest = std::tuple<std::string, int32_t, std::string>;
-static std::vector<tupleColumnsOptionTest> testColumnsOptionValidValues = {
+using TupleColumnsOptionTest = std::tuple<std::string, int32_t, std::string>;
+static std::vector<TupleColumnsOptionTest> testColumnsOptionValidValues = {
     {"0", 0, "0"},
     {"1", 1, "1"},
     {"6", 6, "6"},
@@ -227,8 +227,8 @@ static std::vector<tupleColumnsOptionTest> testColumnsOptionValidValues = {
     {"18", 18, "18"},
 };
 
-using tupleColumnsOptionTest = std::tuple<std::string, int32_t, std::string>;
-static std::vector<tupleColumnsOptionTest> testColumnsOptionInvalidValues = {
+using TupleColumnsOptionTest = std::tuple<std::string, int32_t, std::string>;
+static std::vector<TupleColumnsOptionTest> testColumnsOptionInvalidValues = {
     {"-1", -1, "12"},
     {"-2", -2, "12"},
 };
