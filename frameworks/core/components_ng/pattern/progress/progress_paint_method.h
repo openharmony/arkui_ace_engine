@@ -99,6 +99,7 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
+        UpdateCapsuleProgress(paintWrapper);
     }
 
     void GetThemeData();
@@ -106,6 +107,7 @@ public:
 
 private:
     Gradient GenerateRingProgressColor(PaintWrapper* paintWrapper);
+    void UpdateCapsuleProgress(PaintWrapper* paintWrapper);
 
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
@@ -118,6 +120,14 @@ private:
     Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
     Color ringProgressEndSideColor_ = Color::BLUE;
     Color ringProgressBeginSideColor_ = Color::BLUE;
+
+    Color capsuleBgFocusedColor_;
+    Color capsuleSelectFocusedColor_;
+    Color capsuleInprogressBgColor_;
+    Color capsuleInprogressBorderColor_;
+    Dimension capsuleInprogressBorderWidth_;
+    Color defaultBorderColor_;
+    Dimension defaultBorderWidth_;
 
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;

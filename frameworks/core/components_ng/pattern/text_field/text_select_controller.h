@@ -182,6 +182,11 @@ public:
         return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
     }
     
+    int32_t GetLastCaretIndex()
+    {
+        return lastCaretPos_;
+    }
+
     int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
@@ -250,6 +255,7 @@ private:
     WeakPtr<Pattern> pattern_;
     TimeStamp lastAiPosTimeStamp_;
     TextAffinity textAffinity_ = TextAffinity::DOWNSTREAM;
+    int32_t lastCaretPos_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

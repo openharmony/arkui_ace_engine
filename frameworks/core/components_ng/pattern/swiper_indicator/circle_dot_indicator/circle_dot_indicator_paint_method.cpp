@@ -138,7 +138,6 @@ void CircleDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* pai
 {
     auto [longPointAngle, itemSizes] = CalculateLongPointCenterAngle(paintWrapper, true);
     longPointAngle_ = longPointAngle;
-    CalculatePointCenterAngle();
     if (circleDotIndicatorModifier_->GetIsPressed()) {
         circleDotIndicatorModifier_->UpdatePressToNormalPaintProperty(
             itemSizes, vectorBlackPointAngle_, vectorBlackPointRadius_, longPointAngle_);
@@ -387,7 +386,7 @@ std::tuple<float, float, float> CircleDotIndicatorPaintMethod::GetMoveRate()
     float longPointLeftCenterMoveRate = 0.0f;
     float longPointRightCenterMoveRate = 0.0f;
 
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && currentIndex_ != 0) {
         blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
             CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
                                        .MoveInternal(1.0 - std::abs(actualTurnPageRate));
@@ -435,10 +434,11 @@ void CircleDotIndicatorPaintMethod::CalculatePointCenterAngle()
             }
         }
     }
+    CalculateLongPointCenterAngle(longPointLeftCenterMoveRate, longPointRightCenterMoveRate);
 }
 
-void CircleDotIndicatorPaintMethod::CalculateLongPointCenterAngle(float longPointLeftCenterMoveRate,
-    float longPointRightCenterMoveRate)
+void CircleDotIndicatorPaintMethod::CalculateLongPointCenterAngle(
+    float longPointLeftCenterMoveRate, float longPointRightCenterMoveRate)
 {
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         longPointAngle_.first = longPointAngle_.first - ITEM_SHRINK_PADDING * longPointLeftCenterMoveRate;
@@ -581,7 +581,7 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
             } else {
                 // NUMBER_TWO: half of angle
                 itemCenterAngle = (allPointArcAngle / NUMBER_TWO) - (dotActiveAngle / NUMBER_TWO) -
-                                  dotActivePaddingAngle - (itemIndex - 1) * dotPaddingAngle;    // 1: exclude one point
+                                  dotActivePaddingAngle - (itemIndex - 1) * dotPaddingAngle; // 1: exclude one point
             }
         } else if (itemIndex == currentIndex) {
             itemCenterAngle = (allPointArcAngle / NUMBER_TWO) -                          // NUMBER_TWO: half of angle
@@ -589,7 +589,7 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
         } else if (itemIndex > currentIndex) {
             // NUMBER_TWO: half of angle
             itemCenterAngle = (allPointArcAngle / NUMBER_TWO) - (itemIndex - NUMBER_TWO) * dotPaddingAngle -
-                              dotActivePaddingAngle * NUMBER_TWO;                        // NUMBER_TWO: diploid
+                              dotActivePaddingAngle * NUMBER_TWO; // NUMBER_TWO: diploid
         } else {
             // NUMBER_TWO: half of angle
             itemCenterAngle = (allPointArcAngle / NUMBER_TWO) - itemIndex * dotPaddingAngle;
@@ -598,7 +598,7 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
     } else {
         if (itemIndex == 0) {
             itemCenterAngle = (dotActiveAngle / NUMBER_TWO) + dotActivePaddingAngle + // NUMBER_TWO: half of angle
-                              (itemIndex - 1) * dotPaddingAngle -            // 1: exclude one point
+                              (itemIndex - 1) * dotPaddingAngle -                     // 1: exclude one point
                               (allPointArcAngle / NUMBER_TWO);                        // NUMBER_TWO: half of angle
         } else if (itemIndex == currentIndex) {
             itemCenterAngle = (itemIndex - 1) * dotPaddingAngle + dotActivePaddingAngle - // 1: exclude one point

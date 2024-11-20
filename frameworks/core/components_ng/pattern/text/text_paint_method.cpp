@@ -197,7 +197,7 @@ std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
     float lastLineBottom = -1.0f;
     for (const auto& info : selectedRects) {
         auto rects = info.first;
-        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom, info.second.direction);
         auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
         for (auto& rect : rects) {
             TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);

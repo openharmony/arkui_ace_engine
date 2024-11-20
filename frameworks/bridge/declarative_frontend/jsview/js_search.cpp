@@ -327,6 +327,13 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
+        }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
         if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
@@ -1155,11 +1162,15 @@ void JSSearch::SetCapitalizationMode(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
     if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
-        SearchModel::GetInstance()->SetSearchCapitalizationMode(AutoCapitalizationMode::NONE);
+        SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
         return;
     }
-    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(info[0]->ToNumber<int32_t>());
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
     SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
 }
 

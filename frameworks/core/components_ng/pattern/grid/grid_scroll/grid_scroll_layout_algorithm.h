@@ -34,9 +34,14 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetCanOverScroll(bool canOverScroll)
+    void SetCanOverScrollStart(bool canOverScroll)
     {
-        canOverScroll_ = canOverScroll;
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll)
+    {
+        canOverScrollEnd_ = canOverScroll;
     }
 
     void SetScrollSource(int32_t scrollSource)
@@ -213,7 +218,8 @@ private:
     bool isChildrenUpdated_ = false;
 
     bool expandSafeArea_ = false;
-    bool canOverScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool enableSkipping_ = true; // enables skipping lines on a large offset change.
     GridLayoutInfo scrollGridLayoutInfo_;
 

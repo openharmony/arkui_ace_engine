@@ -1807,8 +1807,8 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
      */
     bool headerResult = false;
     bool footerResult = false;
-    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
-    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader", LIST_WIDTH, LIST_HEIGHT));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter", LIST_WIDTH, LIST_HEIGHT));
     const char newFooter[] = "NewFooter";
     const char newHeader[] = "NewHeader";
     auto children = group0->GetChildren();
@@ -1832,6 +1832,50 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
     group0Pattern->RemoveFooter();
     group0Children = group0->GetChildren();
     EXPECT_EQ(group0Children.size(), 2);
+}
+
+/**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateListItems(1);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(-100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(200);
+    ASSERT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateListItems(1);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(-200);
+    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
 }
 
 /**

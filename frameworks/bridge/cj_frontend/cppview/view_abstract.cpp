@@ -260,10 +260,8 @@ void ViewAbstract::CjEnabled(bool enabled)
     ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
 
-void ViewAbstract::CompleteResourceObject(NativeResourceObject& obj)
+void ViewAbstract::CompleteResourceObject(NativeResourceObject& obj, std::string& bundleName, std::string& moduleName)
 {
-    std::string bundleName;
-    std::string moduleName;
     int32_t resId = UNKNOWN_RESOURCE_ID;
     CompleteResourceObjectInner(obj, bundleName, moduleName, resId);
 }
@@ -310,6 +308,7 @@ bool ViewAbstract::ConvertResourceType(const std::string& typeName, ResourceType
         { "integer", ResourceType::INTEGER },
         { "strarray", ResourceType::STRARRAY },
         { "intarray", ResourceType::INTARRAY },
+        { "symbol", ResourceType::SYMBOL },
     };
     auto it = resTypeMap.find(typeName);
     if (it == resTypeMap.end()) {
@@ -338,7 +337,9 @@ bool ViewAbstract::ParseDollarResource(const std::string& resPath, std::string& 
 
 bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -400,7 +401,9 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
 
 bool ViewAbstract::ParseCjMedia(NativeResourceObject& obj, std::string& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     return ParseCjMediaInternal(obj, result);
 }
 
@@ -455,9 +458,31 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
     return false;
 }
 
+bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
+{
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
+    if (obj.type == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
+    auto resourceObject = GetResourceObjectByBundleAndModule(obj);
+    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
+        result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));
+        return true;
+    }
+    return false;
+}
+
 bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -498,7 +523,9 @@ bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
 bool ViewAbstract::ParseCjDimension(
     NativeResourceObject& obj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -554,7 +581,9 @@ bool ViewAbstract::ParseCjDimensionFP(NativeResourceObject& obj, CalcDimension& 
 
 bool ViewAbstract::ParseCjDouble(NativeResourceObject& obj, double& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -613,7 +642,9 @@ bool ViewAbstract::ParseCjInteger(NativeResourceObject& obj, uint32_t& result)
 
 bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -647,7 +678,9 @@ bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
 
 bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<uint32_t>& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -680,7 +713,9 @@ bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<ui
 
 bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std::string>& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }

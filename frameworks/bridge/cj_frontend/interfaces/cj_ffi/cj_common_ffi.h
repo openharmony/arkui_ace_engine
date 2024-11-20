@@ -305,6 +305,21 @@ struct AtCPackage {
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
+
+struct CJIndicator {
+    double left;
+    int32_t leftUnit;
+    double top;
+    int32_t topUnit;
+    double right;
+    int32_t rightUnit;
+    double bottom;
+    int32_t bottomUnit;
+    double start;
+    int32_t startUnit;
+    double end;
+    int32_t endUnit;
+};
 }
 
 namespace OHOS::Ace {

@@ -28,14 +28,13 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension INDICATOR_PADDING_DOT = 12.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
+constexpr Dimension INDICATOR_ITEM_SPACE_POINT = 8.0_vp;
+constexpr int32_t MULTIPLIER = 2;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
 constexpr float MAX_FONT_SCALE = 2.0f;
@@ -51,7 +50,11 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(indicatorTheme);
+    host->GetRenderContext()->SetClipToBounds(indicatorTheme->GetClipEdge());
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
@@ -146,6 +149,17 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
             });
             pipeline->RequestFrame();
         });
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitClickEvent(gestureHub);
+        InitHoverMouseEvent();
+        InitTouchEvent(gestureHub);
+        InitLongPressEvent(gestureHub);
+        InitFocusEvent();
+    }
 }
 
 void SwiperIndicatorPattern::UpdateFocusable() const
@@ -166,6 +180,135 @@ void SwiperIndicatorPattern::UpdateFocusable() const
     CHECK_NULL_VOID(accessibilityProperty);
     auto level = focusable ? "auto" : "no";
     accessibilityProperty->SetAccessibilityLevel(level);
+}
+
+void SwiperIndicatorPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(indicatorTheme);
+    auto focusPadding = indicatorTheme->GetIndicatorFocusedPadding().ConvertToPx();
+    auto swiperSize = geometryNode->GetFrameSize();
+    auto maxDisplayCount = swiperPattern->GetMaxDisplayCount() > 0 ? swiperPattern->GetMaxDisplayCount()
+                                                                   : swiperPattern->DisplayIndicatorTotalCount();
+    float itemWidth = indicatorTheme->GetSize().ConvertToPx();
+    float itemHeight = indicatorTheme->GetSize().ConvertToPx();
+    auto indicatorHeightPadding = indicatorTheme->GetIndicatorBgHeight().ConvertToPx();
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE_POINT.ConvertToPx()) * (maxDisplayCount - 1);
+    auto paddingSide = indicatorTheme->GetIndicatorPaddingDot().ConvertToPx();
+    auto width = itemWidth * (maxDisplayCount + 1) + allPointSpaceSum +
+        MULTIPLIER * paddingSide + MULTIPLIER * focusPadding;
+    auto height = itemHeight + MULTIPLIER * indicatorHeightPadding + MULTIPLIER * focusPadding;
+    auto widthSize = swiperSize.Width() + MULTIPLIER * focusPadding;
+    auto heightSize = swiperSize.Height() + MULTIPLIER * focusPadding;
+    auto widthDiff = (widthSize - width) / MULTIPLIER;
+    auto heightDiff = (heightSize - height) / MULTIPLIER;
+    paintRect.SetRect({ widthDiff - focusPadding, heightDiff - focusPadding, width, height });
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPadding),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPadding));
+}
+
+void SwiperIndicatorPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+    focusEventInitialized_ = true;
+}
+
+void SwiperIndicatorPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    AddIsFocusActiveUpdateEvent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        OnIsFocusActiveUpdate(true);
+    }
+}
+
+void SwiperIndicatorPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void SwiperIndicatorPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void SwiperIndicatorPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void SwiperIndicatorPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(isFocusAcitve);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -236,7 +379,7 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto isRtl = IsHorizontalAndRightToLeft();
     auto currentIndex = GetCurrentIndex();
     auto margin = HandleTouchClickMargin();
-    auto lengthBeforeCurrentIndex = margin + INDICATOR_PADDING_DEFAULT.ConvertToPx() +
+    auto lengthBeforeCurrentIndex = margin + theme->GetIndicatorPaddingDot().ConvertToPx() +
                                     (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = GetDirection();
@@ -401,29 +544,32 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(swiperTheme);
+    auto indicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(indicatorTheme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    float itemWidthValue =
+        static_cast<float>(paintProperty->GetItemWidthValue(indicatorTheme->GetSize()).ConvertToPx());
+    float itemHeightValue =
+        static_cast<float>(paintProperty->GetItemHeightValue(indicatorTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue =
-        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(indicatorTheme->GetSize()).ConvertToPx() * 2);
     paintProperty->GetIsCustomSizeValue(false) ? selectedItemWidthValue *= 0.5f : selectedItemWidthValue;
     // diameter calculation
-    float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
-    float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
+    double indicatorScale = indicatorTheme->GetIndicatorScale();
+    float itemWidth = itemWidthValue * indicatorScale;
+    float itemHeight = itemHeightValue * indicatorScale;
+    float selectedItemWidth = selectedItemWidthValue * indicatorScale;
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = GetCurrentShownIndex();
     auto [itemCount, step] = CalculateStepAndItemCount();
     int32_t loopCount = SwiperIndicatorUtils::CalcLoopCount(currentIndex, itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = GetDirection();
-    float centerX = static_cast<float>(INDICATOR_PADDING_DOT.ConvertToPx());
+    float centerX = static_cast<float>((indicatorTheme->GetIndicatorPaddingDot()).ConvertToPx());
     float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
     int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
@@ -819,7 +965,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
                                 swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
@@ -855,7 +1001,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     int32_t itemCount = swiperPattern->DisplayIndicatorTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
-    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    auto indicatorPadding = static_cast<float>(theme->GetIndicatorPaddingDot().ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
@@ -1125,8 +1271,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
-        swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+    if (swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
 

@@ -266,8 +266,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->UpdateInspectorId(id);
     } else {
         auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
-        layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
-            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
+        auto subTabItemHorizontalPadding_ = tabTheme->GetSubTabItemHorizontalPadding();
+        layoutProperty->UpdatePadding({ CalcLength(subTabItemHorizontalPadding_),
+            CalcLength(subTabItemHorizontalPadding_), CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
     }
 
     bool isFrameNode = false;

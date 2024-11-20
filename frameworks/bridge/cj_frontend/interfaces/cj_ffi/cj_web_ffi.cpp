@@ -14,8 +14,10 @@
  */
 
 #include "cj_web_ffi.h"
+
 #include "application_context.h"
 #include "cj_lambda.h"
+
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -236,8 +238,8 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
         int32_t parentNWebId = -1;
         bool isPopup = CJWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(src, std::move(setIdCallback), std::move(setHapPathCallback),
-            parentNWebId, isPopup, renderMode, mode);
+        WebModel::GetInstance()->Create(
+            src, std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, mode);
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         if (!controller->customeSchemeCmdLine_.empty()) {
             WebModel::GetInstance()->SetCustomScheme(controller->customeSchemeCmdLine_);
@@ -449,7 +451,7 @@ void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceReques
     auto instanceId = Container::CurrentId();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
-        const BaseEventInfo* info) -> bool  {
+                               const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, false);
@@ -534,5 +536,74 @@ void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode)
 void FfiOHOSAceFrameworkWebForceDarkAccess(bool access)
 {
     WebModel::GetInstance()->SetForceDarkAccess(access);
+}
+
+void FfiWebEnableNativemediaPlayer(bool enable, bool shouldOverlay)
+{
+    WebModel::GetInstance()->SetNativeVideoPlayerConfig(enable, shouldOverlay);
+}
+
+void FfiWebOnControllerAttached(void (*callback)())
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [func = CJLambda::Create(callback), node = frameNode]() {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope(webNode->GetInstanceId());
+        auto context = PipelineBase::GetCurrentContext();
+        if (context) {
+            context->UpdateCurrentActiveNode(node);
+        }
+        auto executor = Container::CurrentTaskExecutorSafely();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask([func]() { func(); }, TaskExecutor::TaskType::UI, "ArkUIWebControllerAttached");
+    };
+    WebModel::GetInstance()->SetOnControllerAttached(std::move(lambda));
+}
+
+void FfiWebOnPermissionRequest(void (*callback)(COnPermissionRequestEvent))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+        auto permissionObj = OHOS::Ace::Framework::CJWebPermissionRequest();
+        permissionObj.SetEvent(*eventInfo);
+
+        auto denyWrapper = [](void* objPtr) {
+            auto permission = static_cast<CJWebPermissionRequest*>(objPtr);
+            permission->Deny();
+        };
+        auto getOriginWrapper = [](void* objPtr) -> ExternalString {
+            auto permission = static_cast<CJWebPermissionRequest*>(objPtr);
+            return Utils::MallocCString(permission->GetOrigin());
+        };
+        auto getAccessibleResourceWrapper = [](void* objPtr) -> VectorStringHandle {
+            auto permission = static_cast<CJWebPermissionRequest*>(objPtr);
+            auto result = new std::vector<std::string>;
+            *result = permission->GetAccessibleResources();
+            return result;
+        };
+        auto grantWrapper = [](VectorStringHandle resources, void* objPtr) {
+            auto permission = static_cast<CJWebPermissionRequest*>(objPtr);
+            auto resVec = reinterpret_cast<std::vector<std::string>*>(resources);
+            permission->Grant(*resVec);
+        };
+        auto freeWrapper = [](void* objPtr) {
+            if (objPtr) {
+                auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+                delete permission;
+            }
+        };
+        CPermissionRequest cRequest { .deny = denyWrapper,
+            .getOrigin = getOriginWrapper,
+            .getAccessibleResource = getAccessibleResourceWrapper,
+            .grant = grantWrapper,
+            .permissionPtr = &permissionObj,
+            .free = freeWrapper };
+
+        COnPermissionRequestEvent cEvent { .request = cRequest };
+        func(cEvent);
+    };
+    WebModel::GetInstance()->SetPermissionRequestEventId(lambda);
 }
 }

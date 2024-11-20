@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace {
-class WaterFlowModel {
+class ACE_FORCE_EXPORT WaterFlowModel {
 public:
     static WaterFlowModel* GetInstance();
     virtual ~WaterFlowModel() = default;
@@ -65,7 +65,7 @@ public:
     virtual void SetFriction(double friction) = 0;
     virtual void SetCachedCount(int32_t value, bool show = false) = 0;
 
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     EdgeEffect GetEdgeEffect() const
     {
         return EdgeEffect::NONE;

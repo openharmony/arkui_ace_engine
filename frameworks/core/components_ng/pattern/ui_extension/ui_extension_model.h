@@ -45,7 +45,7 @@ struct UIExtensionConfig {
 };
 }
 
-class ACE_EXPORT UIExtensionModel {
+class ACE_FORCE_EXPORT UIExtensionModel {
 public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;

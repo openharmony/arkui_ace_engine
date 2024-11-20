@@ -41,12 +41,14 @@
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
+      OHOS::Ace::ActionSheetModel::*;
       OHOS::Ace::Animator::*;
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
+      OHOS::Ace::CubicCurve::*;
       OHOS::Ace::Curves::*;
       OHOS::Ace::EngineHelper::*;
       OHOS::Ace::EventReport::*;
@@ -64,6 +66,7 @@
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
+      OHOS::Ace::SpringCurve::*;
       OHOS::Ace::SpringMotion::*;
       OHOS::Ace::SubwindowManager::*;
       "OHOS::Ace::SystemGridInfo::ToString() const";
@@ -165,6 +168,7 @@
       OHOS::Ace::StepperItemModel::*;
       OHOS::Ace::SwiperModel::*;
       OHOS::Ace::SymbolModel::*;
+      OHOS::Ace::SymbolSpanModel::*;
       OHOS::Ace::TabsModel::*;
       OHOS::Ace::TabContentModel::*;
       OHOS::Ace::TextClockModel::*;
@@ -409,6 +413,43 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
+
+      OHOS::Ace::CalendarModel::*;
+      OHOS::Ace::CalendarPickerModel::*;
+      OHOS::Ace::CanvasModel::*;
+      OHOS::Ace::CommonViewModel::*;
+      OHOS::Ace::EffectComponentModel::*;
+      OHOS::Ace::FolderStackModel::*;
+      OHOS::Ace::FormLinkModel::*;
+      OHOS::Ace::GestureModel::*;
+      OHOS::Ace::TapGestureModel::*;
+      OHOS::Ace::LongPressGestureModel::*;
+      OHOS::Ace::PanGestureModel::*;
+      OHOS::Ace::SwipeGestureModel::*;
+      OHOS::Ace::PinchGestureModel::*;
+      OHOS::Ace::RotationGestureModel::*;
+      OHOS::Ace::GestureGroupModel::*;
+      OHOS::Ace::TimeoutGestureModel::*;
+      OHOS::Ace::GridContainerModel::*;
+      OHOS::Ace::ModelView::*;
+      OHOS::Ace::NavDestinationModel::*;
+      OHOS::Ace::NavRouterModel::*;
+      OHOS::Ace::NodeContainerModel::*;
+      OHOS::Ace::OptionView::*;
+      OHOS::Ace::ParticleModel::*;
+      OHOS::Ace::PluginModel::*;
+      OHOS::Ace::RecycleViewModel::*;
+      OHOS::Ace::RemoteWindowModel::*;
+      OHOS::Ace::ScrollableModelNG::*;
+      OHOS::Ace::SymbolModel::*;
+      OHOS::Ace::TimePickerModel::*;
+      OHOS::Ace::UIExtensionModel::*;
+      OHOS::Ace::WaterFlowModel::*;
+      OHOS::Ace::RootSceneModel::*;
+      OHOS::Ace::ScreenModel::*;
+      OHOS::Ace::XComponentModel::*;
+      OHOS::Ace::RepeatVirtualScrollModel::*;
+      OHOS::Ace::RepeatModel::*;
     };
   local:
     *;

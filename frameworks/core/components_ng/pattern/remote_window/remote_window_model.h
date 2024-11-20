@@ -25,13 +25,13 @@
 #include "core/components_ng/pattern/remote_window/remote_window_pattern.h"
 
 namespace OHOS::Ace {
-class RemoteWindowModel {
+class ACE_FORCE_EXPORT RemoteWindowModel {
 public:
     static RemoteWindowModel* GetInstance();
     virtual ~RemoteWindowModel() = default;
 
     virtual void Create(const std::shared_ptr<OHOS::Rosen::RSNode>& rsNode);
-    
+
 private:
     static std::unique_ptr<RemoteWindowModel> instance_;
     static std::mutex mutex_;

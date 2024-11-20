@@ -233,11 +233,12 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
 
-void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+    WaterFlowModelNG::SetEdgeEffect(
+        frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, static_cast<EffectEdge>(edge));
 }
 
 void ResetEdgeEffect(ArkUINodeHandle node)
@@ -246,7 +247,7 @@ void ResetEdgeEffect(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     EdgeEffect edgeEffect = EdgeEffect::NONE;
     ArkUI_Bool alwaysEnabled = false;
-    WaterFlowModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    WaterFlowModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, EffectEdge::ALL);
 }
 
 ArkUI_Int32 GetLayoutDirection(ArkUINodeHandle node)

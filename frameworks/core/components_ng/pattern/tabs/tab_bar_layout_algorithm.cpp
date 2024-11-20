@@ -44,6 +44,7 @@ constexpr int8_t MASK_COUNT = 2;
 constexpr int8_t SM_COLUMN_NUM = 4;
 constexpr int8_t MD_COLUMN_NUM = 8;
 constexpr int8_t LG_COLUMN_NUM = 12;
+constexpr int8_t FOCUS_BOARD = 2;
 constexpr int8_t TWO = 2;
 } // namespace
 
@@ -244,7 +245,15 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     if (axis_ == Axis::HORIZONTAL) {
         auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
-        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(ScrollableBarModeOptions());
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        ScrollableBarModeOptions defaultOptions;
+        defaultOptions.margin = tabTheme->GetTabBarDefaultMargin();
+        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(defaultOptions);
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
         MeasureVisibleItems(layoutWrapper, childLayoutConstraint);
 
@@ -326,6 +335,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     CHECK_NULL_RETURN(pipelineContext, {});
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, {});
+    auto focusBoardPadding = tabTheme->GetBoardFocusPadding().ConvertToPx();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     if (axis_ == Axis::HORIZONTAL) {
         isBarAdaptiveHeight_ = GetBarAdaptiveHeight(layoutWrapper);
@@ -341,6 +351,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
             if (NearEqual(fontscale_, thirdLargeFontSizeScale_) && NearEqual(fontscale_, lastFontScale_)) {
                 frameSize.SetHeight(thirdLargeFontHeight_.value_or(0.0f));
             }
+            frameSize.MinusHeight(focusBoardPadding * FOCUS_BOARD);
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         }
@@ -352,6 +363,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
                                     : frameSize.Height() / childCount_);
             childLayoutConstraint.selfIdealSize = OptionalSizeF(frameSize);
         } else {
+            frameSize.MinusWidth(focusBoardPadding * FOCUS_BOARD);
             childLayoutConstraint.maxSize.SetHeight(Infinity<float>());
             childLayoutConstraint.selfIdealSize.SetWidth(frameSize.Width());
         }

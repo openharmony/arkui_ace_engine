@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,16 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, focusPattern);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, focusPattern);
+        auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(menuTheme->GetFocusStyleType()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -239,6 +249,8 @@ protected:
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
+    void InitFocusPadding();
+    Dimension focusPadding_ = 0.0_vp;
 
 private:
     friend class ServiceCollaborationMenuAceHelper;
@@ -256,8 +268,11 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTextMarquee(bool isMarqueeStart);
     void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
+    void InitTextFadeOut();
     void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void SetThemeProps(const RefPtr<FrameNode>& host);
     void UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
@@ -280,6 +295,12 @@ private:
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
+
+    void NeedFocusEvent();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
@@ -329,6 +350,11 @@ private:
     bool expandingModeSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
+
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isTextFadeOut_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

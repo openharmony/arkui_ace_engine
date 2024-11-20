@@ -70,7 +70,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 };
 }
 
@@ -127,7 +128,7 @@ public:
         const std::string& bundleName = "", const std::string& moduleName = "");
     static void CjEnabled(bool enabled);
 
-    static void CompleteResourceObject(NativeResourceObject& obj);
+    static void CompleteResourceObject(NativeResourceObject& obj, std::string& bundleName, std::string& moduleName);
     static void CompleteResourceObjectWithBundleName(
         NativeResourceObject& obj, std::string& bundleName, std::string& moduleName, int32_t& resId);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
@@ -136,6 +137,7 @@ public:
 
     static bool ParseCjString(NativeResourceObject& obj, std::string& result);
     static bool ParseCjMedia(NativeResourceObject& obj, std::string& result);
+    static bool ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result);
     static bool ParseCjColor(NativeResourceObject& obj, Color& result);
     static bool ParseCjDimension(
         NativeResourceObject& obj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
@@ -151,7 +153,9 @@ public:
     template<typename T>
     static bool ParseCjInteger(NativeResourceObject& obj, T& result)
     {
-        CompleteResourceObject(obj);
+        std::string bundleName;
+        std::string moduleName;
+        CompleteResourceObject(obj, bundleName, moduleName);
         if (obj.type == -1) {
             return false;
         }

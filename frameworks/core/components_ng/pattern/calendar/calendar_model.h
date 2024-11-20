@@ -20,11 +20,11 @@
 #include "core/components_ng/pattern/calendar/calendar_data.h"
 
 namespace OHOS::Ace {
-class CalendarModel {
+class ACE_FORCE_EXPORT CalendarModel {
 public:
     static CalendarModel* GetInstance();
     virtual ~CalendarModel() = default;
-    
+
     virtual void Create(const CalendarModelData& calendarModelData) = 0;
     virtual void SetOffDays(const std::string& offDays) = 0;
     virtual void SetShowHoliday(const bool showHoliday) = 0;

@@ -16,10 +16,11 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_TEXTAREA_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_TEXTAREA_FFI_H
 
+#include "ffi_remote_data.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components/text_field/text_field_controller.h"
-#include "ffi_remote_data.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -33,6 +34,8 @@ public:
     {
         controller_ = controller;
     }
+    void StopEditing();
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options);
 
 private:
     RefPtr<TextFieldControllerBase> controller_;
@@ -43,6 +46,9 @@ extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkTextAreaCreate(const char* placeholder, const char* text, int64_t controllerID);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextAreaControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerCaretPosition(int64_t selfID, int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerStopEditing(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
+    int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t option);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTAREA_FFI_H

@@ -57,32 +57,65 @@ const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE = 2;
 const FADEOUT_GRADIENT_WIDTH = 32;
 const FADEOUT_ENABLE = 'true';
-const MAX_DIALOG_WIDTH = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_container_max_width'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 400);
-const BUTTON_HORIZONTAL_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_right_padding_horizontal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const BUTTON_HORIZONTAL_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const BUTTON_HORIZONTAL_SPACE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_button_horizontal_space'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
-const BODY_L = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const BODY_M = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 14);
-const BODY_S = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Body_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 12);
-const TITLE_S = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.Title_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 20);
-const PADDING_LEVEL_8 = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const DEFAULT_IMAGE_SIZE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_tip_image_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 64);
-const TIP_TEXT_TOP_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_tip_text_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const TIP_CHECKBOX_TOP_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
-const TIP_CHECKBOX_BOTTOM_PADDING = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_bottom_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
-const TIP_CHECKBOX_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_end_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
-const SUBTITLE_SIZE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_subtitle_font_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 14);
-const CHECKBOX_CONTAINER_HEIGHT = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_checkbox_min_height'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 48);
-const CONTENT_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_content_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const SCROLL_END_MARGIN = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_scroll_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
-const DIALOG_DIVIDER_SHOW = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_divider_show'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1, true);
-const ALERT_BUTTON_STYLE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2, true);
-const ALERT_TITLE_ALIGNMENT = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.alert_title_alignment'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1);
-const ERROR_BUTTON_STYLE = getLengthMetricsByResource({ 'id': -1, 'type': 10002, params: ['sys.float.dialog_error_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2);
-const IS_FADEOUT_ENABLE = getStringByName('ohos_id_text_fadeout_enable_default') === FADEOUT_ENABLE;
-const TITLE_FONT_WEIGHT = FontWeight[getStringByName('dialog_title_font_weight') || 'Bold'];
-const CONTENT_FONT_WEIGHT = FontWeight[getStringByName('dialog_content_font_weight') || 'Medium'];
-
+const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
+const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
+const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
+const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
+const BODY_L = getNumberByResourceId(125830970, 16);
+const BODY_M = getNumberByResourceId(125830971, 14);
+const BODY_S = getNumberByResourceId(125830972, 12);
+const TITLE_S = getNumberByResourceId(125830966, 20);
+const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
+const DEFAULT_IMAGE_SIZE = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834614, 'type': 10002, params: ['sys.float.dialog_tip_image_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 64);
+});
+const TIP_TEXT_TOP_PADDING = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834615, 'type': 10002, params: ['sys.float.dialog_tip_text_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+});
+const TIP_CHECKBOX_TOP_PADDING = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834617, 'type': 10002, params: ['sys.float.dialog_checkbox_top_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+});
+const TIP_CHECKBOX_BOTTOM_PADDING = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834618, 'type': 10002, params: ['sys.float.dialog_checkbox_bottom_padding'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8, true);
+});
+const TIP_CHECKBOX_END_MARGIN = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834621, 'type': 10002, params: ['sys.float.dialog_checkbox_end_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 8);
+});
+const SUBTITLE_SIZE = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834619, 'type': 10002, params: ['sys.float.dialog_subtitle_font_size'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 14);
+});
+const CHECKBOX_CONTAINER_HEIGHT = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834622, 'type': 10002, params: ['sys.float.dialog_checkbox_min_height'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 48, true);
+});
+const CONTENT_END_MARGIN = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834623, 'type': 10002, params: ['sys.float.dialog_content_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+});
+const SCROLL_END_MARGIN = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834624, 'type': 10002, params: ['sys.float.dialog_scroll_right_margin'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 16);
+});
+const DIALOG_DIVIDER_SHOW = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125831202, 'type': 10002, params: ['sys.float.dialog_divider_show'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1, true);
+});
+const ALERT_BUTTON_STYLE = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125831085, 'type': 10002, params: ['sys.float.alert_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2, true);
+});
+const ALERT_TITLE_ALIGNMENT = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125831126, 'type': 10002, params: ['sys.float.alert_title_alignment'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 1);
+});
+const ERROR_BUTTON_STYLE = lazyInit(() => {
+    return getLengthMetricsByResource({ 'id': 125834620, 'type': 10002, params: ['sys.float.dialog_error_button_style'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, 2);
+});
+const IS_FADEOUT_ENABLE = lazyInit(() => {
+    return getString({ 'id': 125831120, 'type': 10003, params: ['sys.string.ohos_id_text_fadeout_enable_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }) === FADEOUT_ENABLE;
+});
+const TITLE_FONT_WEIGHT = lazyInit(() => {
+    let y23 = FontWeight[getString({ 'id': 125834613, 'type': 10003, params: ['sys.string.dialog_title_font_weight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }) || 'Bold'];
+    return y23;
+});
+const CONTENT_FONT_WEIGHT = lazyInit(() => {
+    let x23 = FontWeight[getString({ 'id': 125834616, 'type': 10003, params: ['sys.string.dialog_content_font_weight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }) || 'Medium'];
+    return x23;
+});
 export class TipsDialog extends ViewPU {
     constructor(l23, m23, n23, o23 = -1, p23 = undefined, q23) {
         super(l23, n23, o23, q23);
@@ -92,7 +125,7 @@ export class TipsDialog extends ViewPU {
         this.controller = undefined;
         this.imageRes = null;
         this.__imageSize =
-            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE }, this, 'imageSize');
+            new ObservedPropertyObjectPU({ width: DEFAULT_IMAGE_SIZE(), height: DEFAULT_IMAGE_SIZE() }, this, 'imageSize');
         this.title = null;
         this.content = null;
         this.checkAction = undefined;
@@ -346,7 +379,7 @@ export class TipsDialog extends ViewPU {
                                             this.ifElseBranchUpdateFunction(1, () => {
                                                 this.observeComponentCreation2((t22, u22) => {
                                                     Column.create();
-                                                    Column.padding({ top: TIP_TEXT_TOP_PADDING });
+                                                    Column.padding({ top: TIP_TEXT_TOP_PADDING() });
                                                 }, Column);
                                                 this.observeComponentCreation2((r22, s22) => {
                                                     WithTheme.create({
@@ -403,7 +436,7 @@ export class TipsDialog extends ViewPU {
                                                 this.ifElseBranchUpdateFunction(1, () => {
                                                     this.observeComponentCreation2((g22, h22) => {
                                                         Column.create();
-                                                        Column.padding({ top: TIP_TEXT_TOP_PADDING });
+                                                        Column.padding({ top: TIP_TEXT_TOP_PADDING() });
                                                     }, Column);
                                                     this.observeComponentCreation2((e22, f22) => {
                                                         WithTheme.create({
@@ -455,8 +488,8 @@ export class TipsDialog extends ViewPU {
                     this.checkAction(this.isChecked);
                 }
             });
-            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING });
-            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT });
+            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() });
+            Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT() });
             Row.width('100%');
         }, Row);
         this.observeComponentCreation2((h21, i21) => {
@@ -476,7 +509,7 @@ export class TipsDialog extends ViewPU {
                             }
                         });
                         Checkbox.accessibilityLevel('yes');
-                        Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) });
+                        Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN()) });
                     }, Checkbox);
                     Checkbox.pop();
                     this.observeComponentCreation2((j21, k21) => {
@@ -516,8 +549,8 @@ export class TipsDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Image.constraintSize({
-                maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
-                maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
+                maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE(),
+                maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE()
             });
         }, Image);
         Column.pop();
@@ -526,7 +559,7 @@ export class TipsDialog extends ViewPU {
     textPart(j20 = null) {
         this.observeComponentCreation2((z20, a21) => {
             Scroll.create(this.contentScroller);
-            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -535,7 +568,7 @@ export class TipsDialog extends ViewPU {
         }, Scroll);
         this.observeComponentCreation2((x20, y20) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
+            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
         }, Column);
         this.observeComponentCreation2((r20, s20) => {
             If.create();
@@ -587,7 +620,7 @@ export class TipsDialog extends ViewPU {
                             strokeWidth: LengthMetrics.px(0)
                         });
                         Text.fontSize(this.getContentFontSize());
-                        Text.fontWeight(CONTENT_FONT_WEIGHT);
+                        Text.fontWeight(CONTENT_FONT_WEIGHT());
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(this.textAlignment);
                         Text.width('100%');
@@ -641,7 +674,7 @@ export class TipsDialog extends ViewPU {
     }
 
     initMargin() {
-        this.marginOffset = 0 - SCROLL_END_MARGIN;
+        this.marginOffset = 0 - SCROLL_END_MARGIN();
     }
 
     rerender() {
@@ -745,7 +778,7 @@ class TipsDialogContentLayout extends ViewPU {
             let n19 = z18[this.checkBoxIndex];
             let o19 = {
                 maxWidth: a19.maxWidth,
-                minHeight: CHECKBOX_CONTAINER_HEIGHT,
+                minHeight: CHECKBOX_CONTAINER_HEIGHT(),
                 maxHeight: a19.maxHeight
             };
             let p19 = n19.measure(o19);
@@ -1444,7 +1477,7 @@ class ConfirmDialogContentLayout extends ViewPU {
         let d15 = y14[this.checkboxIndex];
         let e15 = {
             maxWidth: z14.maxWidth,
-            minHeight: CHECKBOX_CONTAINER_HEIGHT,
+            minHeight: CHECKBOX_CONTAINER_HEIGHT(),
             maxHeight: z14.maxHeight
         };
         let f15 = d15.measure(e15);
@@ -1644,7 +1677,7 @@ export class ConfirmDialog extends ViewPU {
         }, Column);
         this.observeComponentCreation2((d14, e14) => {
             Scroll.create(this.contentScroller);
-            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -1653,7 +1686,7 @@ export class ConfirmDialog extends ViewPU {
         }, Scroll);
         this.observeComponentCreation2((b14, c14) => {
             Column.create();
-            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
+            Column.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
         }, Column);
         this.observeComponentCreation2((y13, z13) => {
             Text.create(this.content);
@@ -1663,7 +1696,7 @@ export class ConfirmDialog extends ViewPU {
                 strokeWidth: LengthMetrics.px(0)
             });
             Text.fontSize(`${BODY_L}fp`);
-            Text.fontWeight(CONTENT_FONT_WEIGHT);
+            Text.fontWeight(CONTENT_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.textAlign(this.textAlign);
             Text.onKeyEvent((a14) => {
@@ -1687,7 +1720,7 @@ export class ConfirmDialog extends ViewPU {
                 this.isChecked = !this.isChecked;
             });
             Row.width('100%');
-            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING, bottom: TIP_CHECKBOX_BOTTOM_PADDING });
+            Row.padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() });
         }, Row);
         this.observeComponentCreation2((s13, t13) => {
             Checkbox.create({ name: '', group: 'checkboxGroup' });
@@ -1700,13 +1733,13 @@ export class ConfirmDialog extends ViewPU {
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
             Checkbox.accessibilityLevel('yes');
-            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN) });
+            Checkbox.margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN()) });
         }, Checkbox);
         Checkbox.pop();
         this.observeComponentCreation2((q13, r13) => {
             Text.create(this.checkTips);
-            Text.fontSize(`${SUBTITLE_SIZE}fp`);
-            Text.fontWeight(CONTENT_FONT_WEIGHT);
+            Text.fontSize(`${SUBTITLE_SIZE()}fp`);
+            Text.fontWeight(CONTENT_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.maxLines(CONTENT_MAX_LINES);
             Text.focusable(false);
@@ -1881,7 +1914,7 @@ export class ConfirmDialog extends ViewPU {
     }
 
     initMargin() {
-        this.marginOffset = 0 - SCROLL_END_MARGIN;
+        this.marginOffset = 0 - SCROLL_END_MARGIN();
     }
 
     initButtons() {
@@ -2086,7 +2119,7 @@ export class AlertDialog extends ViewPU {
         }, Column);
         this.observeComponentCreation2((k11, l11) => {
             Scroll.create(this.contentScroller);
-            Scroll.fadingEdge(IS_FADEOUT_ENABLE, { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
+            Scroll.fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) });
             Scroll.nestedScroll({
                 scrollForward: NestedScrollMode.PARALLEL,
                 scrollBackward: NestedScrollMode.PARALLEL
@@ -2103,7 +2136,7 @@ export class AlertDialog extends ViewPU {
             Text.fontSize(`${BODY_L}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
-            Text.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN) });
+            Text.margin({ end: LengthMetrics.vp(CONTENT_END_MARGIN()) });
             Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
             Text.textAlign(this.textAlign);
             Text.onAreaChange((i11, j11) => {
@@ -2150,14 +2183,14 @@ export class AlertDialog extends ViewPU {
     }
 
     getMargin() {
-        return 0 - SCROLL_END_MARGIN;
+        return 0 - SCROLL_END_MARGIN();
     }
 
     getFontWeight() {
         if (this.primaryTitle || this.secondaryTitle) {
             return FontWeight.Regular;
         }
-        return CONTENT_FONT_WEIGHT;
+        return CONTENT_FONT_WEIGHT();
     }
 
     rerender() {
@@ -2474,7 +2507,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonMinFontSize = new ObservedPropertyObjectPU(9, this, 'buttonMinFontSize');
         this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleMaxFontSize');
         this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'primaryTitleMinFontSize');
-        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_SIZE}fp`, this, 'secondaryTitleMaxFontSize');
+        this.__secondaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_SIZE()}fp`, this, 'secondaryTitleMaxFontSize');
         this.__secondaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_S}fp`, this, 'secondaryTitleMinFontSize');
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -3175,7 +3208,7 @@ class CustomDialogContentComponent extends ViewPU {
         }, Row);
         this.observeComponentCreation2((r5, s5) => {
             Text.create(this.primaryTitle);
-            Text.fontWeight(TITLE_FONT_WEIGHT);
+            Text.fontWeight(TITLE_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
             Text.maxFontSize(ObservedObject.GetRawObject(this.primaryTitleMaxFontSize));
@@ -3295,7 +3328,7 @@ class CustomDialogContentComponent extends ViewPU {
      * @returns TextAlign
      */
     initTitleTextAlign() {
-        let h5 = ALERT_TITLE_ALIGNMENT;
+        let h5 = ALERT_TITLE_ALIGNMENT();
         if (h5 === TextAlign.Start) {
             this.titleTextAlign = TextAlign.Start;
         }
@@ -3602,7 +3635,7 @@ class CustomDialogContentComponent extends ViewPU {
      * @returns divider color
      */
     getDividerColor() {
-        if (!this.buttons || this.buttons.length === 0 || !DIALOG_DIVIDER_SHOW) {
+        if (!this.buttons || this.buttons.length === 0 || !DIALOG_DIVIDER_SHOW()) {
             return Color.Transparent;
         }
         if (this.buttons[0].buttonStyle === ButtonStyleMode.TEXTUAL || this.buttons[0].buttonStyle === undefined) {
@@ -3631,7 +3664,7 @@ class CustomDialogContentComponent extends ViewPU {
             return true;
         }
         if (q3.buttonStyle !== undefined &&
-            q3.buttonStyle !== ALERT_BUTTON_STYLE) {
+            q3.buttonStyle !== ALERT_BUTTON_STYLE()) {
             return true;
         }
         if (q3.background === undefined && q3.fontColor === undefined) {
@@ -3721,11 +3754,36 @@ function __Button__setButtonProperties(z2, a3) {
     });
     Button.defaultFocus(true);
     Button.buttonStyle(z2.buttonStyle ??
-        (z2.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE : ALERT_BUTTON_STYLE));
+        (z2.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()));
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.ROUNDED_RECTANGLE);
 }
-
+function getNumberByResourceId(s6, h7, n10) {
+    try {
+        let u12 = resourceManager.getSystemResourceManager().getNumber(s6);
+        if (u12 > 0 || n10) {
+            return u12;
+        }
+        else {
+            return h7;
+        }
+    }
+    catch (q11) {
+        let k12 = q11.code;
+        let r12 = q11.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${k12}, message: ${r12}`);
+        return h7;
+    }
+}
+function lazyInit(v3) {
+    let p6 = null;
+    return () => {
+        if (p6 === null) {
+            p6 = v3();
+        }
+        return p6;
+    };
+}
 function getLengthMetricsByResource(r2, s2, u3) {
     if (!r2) {
         hilog.error(0x3900, 'Ace', 'CustomContentDialog getLengthMetricsByResource error');
@@ -3746,17 +3804,21 @@ function getLengthMetricsByResource(r2, s2, u3) {
     }
 }
 
-function getStringByName(m2) {
-    let n2 = '';
+function getString(f13) {
+    let e16 = '';
+    if (!f13) {
+        hilog.error(0x3900, 'Ace', 'CustomContentDialog getString error');
+        return e16;
+    }
     try {
-        n2 = getContext().resourceManager.getStringByNameSync(m2);
+        e16 = getContext().resourceManager.getStringSync(f13.id);
     }
-    catch (o2) {
-        let p2 = o2.code;
-        let q2 = o2.message;
-        hilog.error(0x3900, 'Ace', `CustomContentDialog getStringByName error, code: ${p2}, message: ${q2}`);
+    catch (k16) {
+        let o16 = k16.code;
+        let p16 = k16.message;
+        hilog.error(0x3900, 'Ace', `CustomContentDialog getString error, code: ${o16}, message: ${p16}`);
     }
-    return n2;
+    return e16;
 }
 
 function getAccessibilityText(f2, g2) {

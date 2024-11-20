@@ -68,6 +68,7 @@ constexpr Dimension DEFAULT_ITEM_SELECT_WIDTH = 5.0_vp;
 constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
 constexpr float HALF_DIVISOR = 2.0f;
 constexpr float PADDING_DIFF = ITEM_DILATE_PADDING - ITEM_DILATE_FADE_PADDING;
+constexpr float MAX_DIFF = 0.01f;
 } // namespace
 
 CircleDotIndicatorModifier::CircleDotIndicatorModifier()
@@ -178,6 +179,10 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     if (touchBottomType_ == TouchBottomType::START) {
         startAngle = startAngle - allPointArcAngle;
         drawAngle *= OBTAIN_OPPOSITE;
+    }
+    if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
+        startAngle = -startAngle;
+        drawAngle = -drawAngle;
     }
     auto drawPoint = GetArcPoint(contentProperty);
     canvas.AttachPen(pen);
@@ -378,7 +383,14 @@ void CircleDotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, Conten
     float itemSelectWidth = contentProperty.itemSelectWidth;
     float dotActiveStartAngle = contentProperty.dotActiveStartAngle;
     float dotActiveEndAngle = contentProperty.dotActiveEndAngle;
-
+    if (isFirstPaintLongPoint_) {
+        if (LessOrEqual(std::abs(firstDotActiveStartAngle_ - dotActiveStartAngle), MAX_DIFF)) {
+            isFirstPaintLongPoint_ = false;
+        } else {
+            dotActiveStartAngle = firstDotActiveStartAngle_;
+            dotActiveEndAngle = firstDotActiveEndAngle_;
+        }
+    }
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(itemSelectWidth);
@@ -423,6 +435,10 @@ void CircleDotIndicatorModifier::UpdateShrinkPaintProperty(const LinearVector<fl
     itemRadius_->Set(normalItemSizes[ITEM_RADIUS]);
     itemSelectWidth_->Set(normalItemSizes[SELECTED_ITEM_RADIUS] * 2);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
+        if (isFirstPaintLongPoint_) {
+            firstDotActiveStartAngle_ = longPointAngle.first;
+            firstDotActiveEndAngle_ = longPointAngle.second;
+        }
         dotActiveStartAngle_->Set(longPointAngle.first);
         dotActiveEndAngle_->Set(longPointAngle.second);
     }

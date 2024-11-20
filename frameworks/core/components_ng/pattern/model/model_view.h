@@ -48,7 +48,7 @@ struct ModelViewContext {
 #endif
 };
 
-class ModelView {
+class ACE_FORCE_EXPORT ModelView {
 public:
     static ModelView* GetInstance();
     virtual ~ModelView() = default;

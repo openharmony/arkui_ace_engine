@@ -15,6 +15,7 @@
 
 #include "search_base.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1080,6 +1081,95 @@ HWTEST_F(SearchTestNg, SetSearchButtonFontSize001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSearchButtonAutodisable001
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+    EXPECT_EQ(buttonLayoutProperty->GetAutoDisableValue(), true);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable002
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+
+    auto textStr = "";
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->UpdateEditingValue(textStr, 0);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateDisable(textFieldPattern->GetTextValue());
+    EXPECT_EQ(buttonEventHub->IsEnabled(), false);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable003
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable003, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    searchModelInstance.SetSearchButtonAutoDisable(false);
+    EXPECT_EQ(buttonLayoutProperty->GetAutoDisableValue(), false);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable004
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable004, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+
+    auto textStr = "a";
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->UpdateEditingValue(textStr, 0);
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateDisable(textFieldPattern->GetTextValue());
+    EXPECT_EQ(buttonEventHub->IsEnabled(), true);
+}
+
+/**
  * @tc.name: SetTextColor001
  * @tc.desc: Set text color
  * @tc.type: FUNC
@@ -2006,6 +2096,44 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
     searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
 }
+
+/**
+ * @tc.name: SetSearchCapitalizationMode001
+ * @tc.desc: SetSearchCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    EXPECT_EQ(AutoCapitalizationMode::SENTENCES, textFieldPattern->GetAutoCapitalizationMode());
+}
+
+/**
+ * @tc.name: SetSearchCapitalizationMode002
+ * @tc.desc: SetSearchCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchCapitalizationMode002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::WORDS);
+    EXPECT_EQ(AutoCapitalizationMode::WORDS, textFieldPattern->GetAutoCapitalizationMode());
+}
+
 /**
  * @tc.name: SetEnablePreviewText
  * @tc.desc: Test SetEnablePreviewText

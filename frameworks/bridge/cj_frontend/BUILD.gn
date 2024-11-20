@@ -79,6 +79,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/animator/cj_animator.cpp",
       "interfaces/cj_ffi/animator/cj_animator_ffi.cpp",
       "interfaces/cj_ffi/base/cj_base_ffi.cpp",
+      "interfaces/cj_ffi/cj_action_sheet_ffi.cpp",
       "interfaces/cj_ffi/cj_alert_dialog_ffi.cpp",
       "interfaces/cj_ffi/cj_alphabet_indexer_ffi.cpp",
       "interfaces/cj_ffi/cj_animate_param_ffi.cpp",
@@ -162,6 +163,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       "interfaces/cj_ffi/cj_swiper_ffi.cpp",
       "interfaces/cj_ffi/cj_symbol_glyph_ffi.cpp",
+      "interfaces/cj_ffi/cj_symbol_span_ffi.cpp",
       "interfaces/cj_ffi/cj_tab_ffi.cpp",
       "interfaces/cj_ffi/cj_text_clock_ffi.cpp",
       "interfaces/cj_ffi/cj_text_ffi.cpp",
@@ -177,7 +179,9 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_view_context_ffi.cpp",
       "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
       "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
+      "interfaces/cj_ffi/curves/cj_curves_ffi.cpp",
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
+      "interfaces/cj_ffi/matrix4/cj_matrix4_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
       "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
       "interfaces/cj_ffi/router/cj_router_ffi.cpp",
@@ -193,6 +197,8 @@ template("cj_frontend") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
     ]
+
+    external_deps += [ "graphic_2d:2d_graphics" ]
 
     deps += [
       "$ace_root/frameworks/core:ace_container_scope",
