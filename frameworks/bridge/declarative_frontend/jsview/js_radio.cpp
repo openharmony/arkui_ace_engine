@@ -32,6 +32,9 @@
 
 namespace OHOS::Ace {
 
+std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
+std::mutex RadioModel::mutex_;
+
 enum class RadioIndicatorType {
     TICK = 0,
     DOT,
@@ -40,18 +43,21 @@ enum class RadioIndicatorType {
 
 RadioModel* RadioModel::GetInstance()
 {
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-    static NG::RadioModelNG instance;
-    return &instance;
+            instance_.reset(new NG::RadioModelNG());
 #else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::RadioModelNG instance;
-        return &instance;
-    } else {
-        static Framework::RadioModelImpl instance;
-        return &instance;
-    }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RadioModelNG());
+            } else {
+                instance_.reset(new Framework::RadioModelImpl());
+            }
 #endif
+        }
+    }
+    return instance_.get();
 }
 
 } // namespace OHOS::Ace

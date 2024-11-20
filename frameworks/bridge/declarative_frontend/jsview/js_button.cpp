@@ -35,20 +35,26 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
+std::unique_ptr<ButtonModel> ButtonModel::instance_ = nullptr;
+std::mutex ButtonModel::mutex_;
+
 ButtonModel* ButtonModel::GetInstance()
 {
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
 #ifdef NG_BUILD
-    static NG::ButtonModelNG instance;
-    return &instance;
+            instance_.reset(new NG::ButtonModelNG());
 #else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::ButtonModelNG instance;
-        return &instance;
-    } else {
-        static Framework::ButtonModelImpl instance;
-        return &instance;
-    }
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::ButtonModelNG());
+            } else {
+                instance_.reset(new Framework::ButtonModelImpl());
+            }
 #endif
+        }
+    }
+    return instance_.get();
 }
 } // namespace OHOS::Ace
 
