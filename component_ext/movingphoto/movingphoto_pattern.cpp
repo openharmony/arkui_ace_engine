@@ -401,8 +401,8 @@ void MovingPhotoPattern::PrepareMediaPlayer()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask(
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
         [weak = WeakClaim(this)] {
             auto movingPhotoPattern = weak.Upgrade();
             CHECK_NULL_VOID(movingPhotoPattern);
