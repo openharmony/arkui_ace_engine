@@ -14,31 +14,47 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/http_auth_handler_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
 HttpAuthHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new HttpAuthHandlerPeer();
+}
+static void DestroyPeer(HttpAuthHandlerPeer *peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
 }
 Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
                         const Ark_String* userName,
                         const Ark_String* password)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_Boolean>(false));
+    CHECK_NULL_RETURN(userName, Converter::ArkValue<Ark_Boolean>(false));
+    CHECK_NULL_RETURN(password, Converter::ArkValue<Ark_Boolean>(false));
+    std::string name = Converter::Convert<std::string>(*userName);
+    std::string pass = Converter::Convert<std::string>(*password);
+    return Converter::ArkValue<Ark_Boolean>(peer->handler->Confirm(name, pass));
 }
 void CancelImpl(HttpAuthHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->Cancel();
 }
 Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
 {
-    return 0;
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_Boolean>(false));
+    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsHttpAuthInfoSaved());
 }
 } // HttpAuthHandlerAccessor
 const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
