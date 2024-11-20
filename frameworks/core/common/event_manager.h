@@ -184,10 +184,10 @@ public:
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp);
 
-    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-        const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp);
+    DragPointerEvent GetResamplePointerEvent(const std::vector<DragPointerEvent>& history,
+        const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp);
 
-    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp);
+    DragPointerEvent GetPointerLatestPoint(const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp);
 
     MouseEvent GetResampleMouseEvent(
         const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp);

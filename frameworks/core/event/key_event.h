@@ -19,6 +19,7 @@
 #include <map>
 
 #include "core/event/ace_events.h"
+#include "core/event/non_pointer_event.h"
 
 namespace OHOS::MMI {
 class KeyEvent;
@@ -437,52 +438,26 @@ enum class KeyAction : int32_t {
     CLICK = 3,
 };
 
-enum class KeyIntention : int32_t {
-    INTENTION_UNKNOWN = -1,
-    INTENTION_UP = 1,
-    INTENTION_DOWN = 2,
-    INTENTION_LEFT = 3,
-    INTENTION_RIGHT = 4,
-    INTENTION_SELECT = 5,
-    INTENTION_ESCAPE = 6,
-    INTENTION_BACK = 7,
-    INTENTION_FORWARD = 8,
-    INTENTION_MENU = 9,
-    INTENTION_HOME = 10,
-    INTENTION_PAGE_UP = 11,
-    INTENTION_PAGE_DOWN = 12,
-    INTENTION_ZOOM_OUT = 13,
-    INTENTION_ZOOM_IN = 14,
-
-    INTENTION_MEDIA_PLAY_PAUSE = 100,
-    INTENTION_MEDIA_FAST_FORWARD = 101,
-    INTENTION_MEDIA_FAST_REWIND = 102,
-    INTENTION_MEDIA_FAST_PLAYBACK = 103,
-    INTENTION_MEDIA_NEXT = 104,
-    INTENTION_MEDIA_PREVIOUS = 105,
-    INTENTION_MEDIA_MUTE = 106,
-    INTENTION_VOLUTE_UP = 107,
-    INTENTION_VOLUTE_DOWN = 108,
-
-    INTENTION_CALL = 200,
-    INTENTION_ENDCALL = 201,
-    INTENTION_REJECTCALL = 202,
-
-    INTENTION_CAMERA = 300,
-};
-
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 
 ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 
-struct KeyEvent final {
-    KeyEvent() = default;
-    KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTime, TimeStamp timeStamp,
-        int32_t metaKey, int64_t deviceId, SourceType sourceType, std::vector<uint8_t> enhanceData)
-        : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime),
-          timeStamp(timeStamp), metaKey(metaKey), deviceId(deviceId), sourceType(sourceType), enhanceData(enhanceData)
-    {}
+struct KeyEvent final : public NonPointerEvent {
+    KeyEvent()
+    {
+        eventType = UIInputEventType::KEY;
+    }
+    KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTimeStamp,
+        TimeStamp timeStamp, int32_t metaKey, int64_t deviceIdNum, SourceType source, std::vector<uint8_t> enhanceData)
+        : code(code), action(action), pressedCodes(std::move(pressedCodes)), timeStamp(timeStamp), metaKey(metaKey),
+          enhanceData(enhanceData)
+    {
+        repeatTime = repeatTimeStamp;
+        deviceId = deviceIdNum;
+        sourceType = source;
+        eventType = UIInputEventType::KEY;
+    }
     KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime = 0, int64_t timeStamp = 0, int64_t deviceId = 0,
         SourceType sourceType = SourceType::KEYBOARD)
     {
@@ -512,7 +487,7 @@ struct KeyEvent final {
         }
         return false;
     }
- 
+
     bool IsExactlyKey(const std::vector<KeyCode>& expectCodes) const
     {
         auto pressedKeysCnt = pressedCodes.size();
@@ -584,11 +559,8 @@ struct KeyEvent final {
     // When the key is held down for a long period of time, it will be accumulated once in a while.
     // Note that In the long press scene, you will receive a DOWN and an extra LONG_PRESS event. If you only want to
     // identify the click event, you can use CLICK event.
-    int32_t repeatTime = 0;
     TimeStamp timeStamp;
     int32_t metaKey = 0;
-    int64_t deviceId = 0;
-    SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
     bool isPreIme = false;

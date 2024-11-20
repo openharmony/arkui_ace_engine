@@ -16,6 +16,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/event/event_constants.h"
+#include "core/event/key_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -408,11 +410,11 @@ void PipelineContext::FlushDragEvents()
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::string extraInfo,
     const RefPtr<FrameNode>& node,
-    const std::list<PointerEvent>& pointEvent)
+    const std::list<DragPointerEvent>& pointEvent)
 {
-    std::unordered_map<int, PointerEvent> idToPoints;
+    std::unordered_map<int, DragPointerEvent> idToPoints;
     bool needInterpolation = true;
-    std::unordered_map<int32_t, PointerEvent> newIdPoints;
+    std::unordered_map<int32_t, DragPointerEvent> newIdPoints;
     for (auto iter = pointEvent.rbegin(); iter != pointEvent.rend(); ++iter) {
         idToPoints.emplace(iter->pointerId, *iter);
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
@@ -432,7 +434,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
-            PointerEvent newPointerEvent = eventManager_->GetResamplePointerEvent(
+            DragPointerEvent newPointerEvent = eventManager_->GetResamplePointerEvent(
                 historyPointsEventById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newPointerEvent.x != 0 && newPointerEvent.y != 0) {
                 newIdPoints[idIter.first] = newPointerEvent;
@@ -444,13 +446,13 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
-    std::unordered_map<int32_t, PointerEvent> newIdPoints,
+    std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
     std::string& extraInfo,
-    std::unordered_map<int, PointerEvent> &idToPoints,
+    std::unordered_map<int, DragPointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
-    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent;
-    std::list<PointerEvent> dragPoint;
+    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
+    std::list<DragPointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
         lastDispatchTime[iter.first] = GetVsyncTime();
@@ -3488,6 +3490,15 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
     eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
 }
 
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
+{
+    if (event.eventType == UIInputEventType::KEY) {
+        const KeyEvent* keyEvent = static_cast<const KeyEvent*>(&event);
+        return OnKeyEvent(*keyEvent);
+    }
+    return false;
+}
+
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     CHECK_NULL_RETURN(eventManager_, false);
@@ -3511,7 +3522,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         auto manager = GetDragDropManager();
         if (manager && manager->IsMSDPDragging()) {
             manager->SetIsDragCancel(true);
-            manager->OnDragEnd(PointerEvent(0, 0), "");
+            manager->OnDragEnd(DragPointerEvent(0, 0), "");
             manager->SetIsDragCancel(false);
             return true;
         }
@@ -4161,7 +4172,7 @@ void PipelineContext::RequireSummary()
     manager->RequireSummary();
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {
     auto manager = GetDragDropManager();
@@ -4215,7 +4226,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
 }
 
-void PipelineContext::CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     std::string extraInfo = manager->GetExtraInfo();
@@ -4226,7 +4237,7 @@ void PipelineContext::CompensatePointerMoveEvent(const PointerEvent& event, cons
     if (lastEventIter == nodeToPointEvent_.end() || lastEventIter->second.empty()) {
         return;
     }
-    PointerEvent pointerEvent = lastEventIter->second.back();
+    DragPointerEvent pointerEvent = lastEventIter->second.back();
     auto iter = eventManager_->GetLastDispatchTime().find(pointerEvent.pointerEventId);
     if (iter != eventManager_->GetLastDispatchTime().end()) {
         if (static_cast<uint64_t>(pointerEvent.time.time_since_epoch().count()) > iter->second) {
@@ -4236,11 +4247,11 @@ void PipelineContext::CompensatePointerMoveEvent(const PointerEvent& event, cons
 }
 
 bool PipelineContext::CompensatePointerMoveEventFromUnhandledEvents(
-    const PointerEvent& event, const RefPtr<FrameNode>& node)
+    const DragPointerEvent& event, const RefPtr<FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     std::string extraInfo = manager->GetExtraInfo();
-    std::vector<PointerEvent> history;
+    std::vector<DragPointerEvent> history;
     if (dragEvents_.empty()) {
         return false;
     }

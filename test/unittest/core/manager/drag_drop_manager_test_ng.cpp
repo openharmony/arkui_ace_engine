@@ -741,7 +741,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    PointerEvent point;
+    DragPointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -895,7 +895,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest017, TestSize.Level1)
      * @tc.steps: step3. call UpdateDragEvent.
      * @tc.expected: pipeline is not null.
      */
-    dragDropManager->UpdateDragEvent(event, PointerEvent(1, 1));
+    dragDropManager->UpdateDragEvent(event, DragPointerEvent(1, 1));
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
 }
@@ -1377,7 +1377,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest034, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
 
-    OHOS::Ace::PointerEvent point;
+    OHOS::Ace::DragPointerEvent point;
     RefPtr<FrameNode> dragFrameNode = nullptr;
     dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, dragFrameNode);
 
