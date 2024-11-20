@@ -136,6 +136,7 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
         ResponseLinkResult& responseLinkResult) override;
+    void InitDragDropStatusToIdle();
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(
@@ -284,6 +285,16 @@ public:
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
 
+    void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
+    {
+        isThumbnailCallbackTriggered_ = isThumbnailCallbackTriggered;
+    }
+
+    void TryTriggerThumbnailCallback();
+
+    void GetThumbnailPixelMap(bool isSync);
+    void GetThumbnailPixelMapForCustomNode(bool isSync = false);
+
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
     void UpdatePreviewOptionDefaultAttr(const RefPtr<FrameNode>& frameNode);
@@ -328,8 +339,9 @@ private:
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
-    bool isOnBeforeLiftingAnimation = false;
+    bool isOnBeforeLiftingAnimation_ = false;
     bool isDragPrepareFinish_ = false;
+    bool isThumbnailCallbackTriggered_ = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
