@@ -3045,13 +3045,29 @@ void UIContentImpl::SetAppWindowTitle(const std::string& title)
 
 void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
+    std::lock_guard<std::mutex> lock(setAppWindowIconMutex_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
     ContainerScope scope(instanceId_);
-    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [container, pixelMap]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    };
+
+    // Cancel the pending task
+    setAppWindowIconTask_.Cancel();
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        setAppWindowIconTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
+        taskExecutor->PostTask(setAppWindowIconTask_,
+            TaskExecutor::TaskType::UI, "ArkUISetAppWindowIcon");
+    }
 }
 
 void UIContentImpl::UpdateFormData(const std::string& data)
