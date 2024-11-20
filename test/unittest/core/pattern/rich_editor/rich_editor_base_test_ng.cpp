@@ -34,7 +34,7 @@ public:
     void TearDown() override;
     static void TearDownTestSuite();
 private:
-    void TestModifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
+    void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
         const OffsetF& localOffset);
 };
 
@@ -1545,10 +1545,10 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
     /**
      * @tc.steps: step3. Test cases of magnifier.
      */
-    TestModifier(richEditorPattern, controller, localOffset);
+    TestMagnifier(richEditorPattern, controller, localOffset);
 }
 
-void RichEditorBaseTestNg::TestModifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
+void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
     const OffsetF& localOffset)
 {
     richEditorPattern->HandleTouchUp();
