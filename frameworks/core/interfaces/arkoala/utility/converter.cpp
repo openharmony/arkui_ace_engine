@@ -1172,4 +1172,41 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
     dst->error = Converter::OptConvert<Color>(src.error);
     dst->disable = Converter::OptConvert<Color>(src.disable);
 }
+
+template<>
+PickerValueType Convert(const Ark_String& src)
+{
+    auto str = Converter::Convert<std::string>(src);
+    return str;
+}
+
+template<>
+PickerValueType Convert(const Array_String& src)
+{
+    return Converter::Convert<std::vector<std::string>>(src);
+}
+
+template<>
+PickerSelectedType Convert(const Ark_Number& src)
+{
+    auto selected = Converter::Convert<int32_t>(src);
+    if (selected < 0) {
+        selected = 0;
+    }
+    return static_cast<uint32_t>(selected);
+}
+
+template<>
+PickerSelectedType Convert(const Array_Number& src)
+{
+    std::vector<uint32_t> dst;
+    std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
+    for (auto selected : tmp) {
+        if (selected < 0) {
+            selected = 0;
+        }
+        dst.push_back(static_cast<uint32_t>(selected));
+    }
+    return dst;
+}
 } // namespace OHOS::Ace::NG::Converter
