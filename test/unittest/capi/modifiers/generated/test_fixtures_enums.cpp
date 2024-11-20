@@ -665,15 +665,4 @@ std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayout
     { "INT_MAX", static_cast<Ark_WebLayoutMode>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureEnumWordBreakValidValues = {
-    { "ARK_WORD_BREAK_NORMAL", ARK_WORD_BREAK_NORMAL, "WordBreak.NORMAL" },
-    { "ARK_WORD_BREAK_BREAK_ALL", ARK_WORD_BREAK_BREAK_ALL, "WordBreak.BREAK_ALL" },
-    { "ARK_WORD_BREAK_BREAK_WORD", ARK_WORD_BREAK_BREAK_WORD, "WordBreak.BREAK_WORD" },
-};
-
-std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureEnumWordBreakInvalidValues = {
-    { "-1", static_cast<Ark_WordBreak>(-1) },
-    { "INT_MAX", static_cast<Ark_WordBreak>(INT_MAX) },
-};
-
 } // namespace OHOS::Ace::NG::Fixtures

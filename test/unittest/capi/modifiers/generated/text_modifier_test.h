@@ -22,6 +22,7 @@
 #include "test_fixtures.h"
 #include "type_helpers.h"
 
+#include "core/components/text/text_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -64,9 +65,9 @@ const auto ATTRIBUTE_FONT_I_FONT_VALUE_I_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_NAME = "enableVariableFontWeight";
 const auto ATTRIBUTE_FONT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_COLOR_NAME = "fontColor";
-const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "fontSize";
-const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "16.00fp";
 const auto ATTRIBUTE_MIN_FONT_SIZE_NAME = "minFontSize";
 const auto ATTRIBUTE_MIN_FONT_SIZE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_MAX_FONT_SIZE_NAME = "maxFontSize";
@@ -76,7 +77,7 @@ const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_MAX_FONT_SCALE_NAME = "maxFontScale";
 const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_STYLE_NAME = "fontStyle";
-const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
 const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_NAME = "weight";
@@ -88,7 +89,7 @@ const auto ATTRIBUTE_TEXT_ALIGN_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_LINE_HEIGHT_NAME = "lineHeight";
 const auto ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TEXT_OVERFLOW_I_OVERFLOW_NAME = "overflow";
-const auto ATTRIBUTE_TEXT_OVERFLOW_I_OVERFLOW_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_TEXT_OVERFLOW_I_OVERFLOW_DEFAULT_VALUE = "TextOverflow.Clip";
 const auto ATTRIBUTE_FONT_FAMILY_NAME = "fontFamily";
 const auto ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
@@ -122,11 +123,11 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME = "fill";
 const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME = "heightAdaptivePolicy";
-const auto ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE = "TextHeightAdaptivePolicy.MAX_LINES_FIRST";
 const auto ATTRIBUTE_TEXT_INDENT_NAME = "textIndent";
 const auto ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_WORD_BREAK_NAME = "wordBreak";
-const auto ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE = "break-word";
 const auto ATTRIBUTE_LINE_BREAK_STRATEGY_NAME = "lineBreakStrategy";
 const auto ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_SELECTION_I_SELECTION_START_NAME = "selectionStart";
@@ -134,7 +135,7 @@ const auto ATTRIBUTE_SELECTION_I_SELECTION_START_DEFAULT_VALUE = "!NOT-DEFINED!"
 const auto ATTRIBUTE_SELECTION_I_SELECTION_END_NAME = "selectionEnd";
 const auto ATTRIBUTE_SELECTION_I_SELECTION_END_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_ELLIPSIS_MODE_NAME = "ellipsisMode";
-const auto ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE = "EllipsisMode.END";
 const auto ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME = "enableDataDetector";
 const auto ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_NAME = "types";
@@ -165,6 +166,8 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+
+        SetupTheme<TextTheme>();
 
         for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
             AddResource(id, res);

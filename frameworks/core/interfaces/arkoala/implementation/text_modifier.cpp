@@ -15,6 +15,7 @@
 
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
@@ -28,6 +29,18 @@ ACE_FORCE_EXPORT FONT_FEATURES_LIST ParseFontFeatureSettings(const std::string& 
 
 namespace NG {
 namespace Converter {
+namespace WeightNum {
+int32_t W100 = 100;
+int32_t W200 = 200;
+int32_t W300 = 300;
+int32_t W400 = 400;
+int32_t W500 = 500;
+int32_t W600 = 600;
+int32_t W700 = 700;
+int32_t W800 = 800;
+int32_t W900 = 900;
+} // namespace WeightNum
+
 struct FontSettingOptions {
     std::optional<bool> enableVariableFontWeight;
 };
@@ -49,6 +62,24 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
         case ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE: dst = TextSelectableMode::UNSELECTABLE; break;
         default: LOGE("Unexpected enum value in Ark_TextSelectableMode: %{public}d", src);
     }
+}
+
+std::optional<int32_t> FontWeightToInt(const FontWeight& src)
+{
+    std::optional<int32_t> dst;
+    switch (src) {
+        case FontWeight::W100: dst = WeightNum::W100; break;
+        case FontWeight::W200: dst = WeightNum::W200; break;
+        case FontWeight::W300: dst = WeightNum::W300; break;
+        case FontWeight::W400: dst = WeightNum::W400; break;
+        case FontWeight::W500: dst = WeightNum::W500; break;
+        case FontWeight::W600: dst = WeightNum::W600; break;
+        case FontWeight::W700: dst = WeightNum::W700; break;
+        case FontWeight::W800: dst = WeightNum::W800; break;
+        case FontWeight::W900: dst = WeightNum::W900; break;
+        default: dst = std::nullopt; break;
+    }
+    return dst;
 }
 }
 
@@ -126,9 +157,7 @@ void FontColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
-    if (color) {
-        TextModelNG::SetTextColor(frameNode, color.value());
-    }
+    TextModelNG::SetTextColor(frameNode, color);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Union_Number_String_Resource* value)
@@ -138,13 +167,9 @@ void FontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
 
     auto fontSize = Converter::OptConvert<Dimension>(*value);
-    if (fontSize) {
-        TextModelNG::SetFontSize(frameNode, fontSize.value());
-    } else {
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        TextModelNG::SetFontSize(frameNode, theme->GetTextStyle().GetFontSize());
-    }
+    Validator::ValidateNonNegative(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    TextModelNG::SetFontSize(frameNode, fontSize);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -196,7 +221,8 @@ void FontStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetItalicFontStyle(frameNode, static_cast<Ace::FontStyle>(value));
+    auto fontStyle = Converter::OptConvert<Ace::FontStyle>(value);
+    TextModelNG::SetItalicFontStyle(frameNode, fontStyle);
 }
 void FontWeight0Impl(Ark_NativePointer node,
                      const Ark_Union_Number_FontWeight_String* value)
@@ -205,9 +231,9 @@ void FontWeight0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weight = Converter::OptConvert<FontWeight>(*value);
-    if (weight) {
-        TextModelNG::SetFontWeight(frameNode, weight.value());
-    }
+    TextModelNG::SetFontWeight(frameNode, weight);
+    auto variableWeight = weight ? Converter::FontWeightToInt(weight.value()) : std::nullopt;
+    TextModelNG::SetVariableFontWeight(frameNode, variableWeight);
 }
 void FontWeight1Impl(Ark_NativePointer node,
                      const Ark_Union_Number_FontWeight_String* weight,
@@ -262,7 +288,8 @@ void TextOverflowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextModelNG::SetTextOverflow(frameNode, static_cast<TextOverflow>(value->overflow));
+    auto convValue = Converter::OptConvert<TextOverflow>(value->overflow);
+    TextModelNG::SetTextOverflow(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -368,7 +395,8 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetHeightAdaptivePolicy(frameNode, static_cast<TextHeightAdaptivePolicy>(value));
+    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(value);
+    TextModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void TextIndentImpl(Ark_NativePointer node,
                     const Ark_Length* value)
@@ -386,7 +414,8 @@ void WordBreakImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetWordBreak(frameNode, static_cast<WordBreak>(value));
+    auto convValue = Converter::OptConvert<WordBreak>(value);
+    TextModelNG::SetWordBreak(frameNode, convValue);
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
                            Ark_LineBreakStrategy value)
@@ -413,7 +442,8 @@ void EllipsisModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetEllipsisMode(frameNode, static_cast<EllipsisMode>(value));
+    auto convValue = Converter::OptConvert<EllipsisMode>(value);
+    TextModelNG::SetEllipsisMode(frameNode, convValue);
 }
 void EnableDataDetectorImpl(Ark_NativePointer node,
                             Ark_Boolean value)

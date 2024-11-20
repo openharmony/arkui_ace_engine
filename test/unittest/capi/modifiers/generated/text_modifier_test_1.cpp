@@ -827,7 +827,7 @@ HWTEST_F(TextModifierTest, DISABLED_setFont1TestFontOptionsEnableVariableFontWei
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -880,7 +880,7 @@ HWTEST_F(TextModifierTest, setFontColorTestFontColorValidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontColorTestFontColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueFontColor;
 
@@ -915,7 +915,7 @@ HWTEST_F(TextModifierTest, DISABLED_setFontColorTestFontColorInvalidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -929,13 +929,13 @@ HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
     initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](const std::string& input,
                           const Ark_Union_Number_String_Resource& value, const std::string& expectedStr) {
@@ -949,13 +949,15 @@ HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize
             << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value), expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value), expected);
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -963,13 +965,13 @@ HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueFontSize;
 
     // Initial setup
     initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueFontSize](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
@@ -984,7 +986,15 @@ HWTEST_F(TextModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSi
             << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
 }
@@ -1302,7 +1312,7 @@ HWTEST_F(TextModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1345,7 +1355,7 @@ HWTEST_F(TextModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontStyleTestFontStyleInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Level1)
 {
     Ark_FontStyle initValueFontStyle;
 
