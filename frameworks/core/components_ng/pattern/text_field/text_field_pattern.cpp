@@ -7953,7 +7953,16 @@ void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& res
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     CHECK_NULL_VOID(imageFrameNode);
     auto imageRect = imageFrameNode->GetGeometryNode()->GetFrameRect();
-    RectF rect(stackRect.GetX(), stackRect.GetY(), imageRect.Width(), imageRect.Height());
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    RectF rect;
+    if (isRTL) {
+        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width(),
+            stackRect.GetY(), imageRect.Width(), imageRect.Height());
+    } else {
+        rect = RectF(stackRect.GetX(), stackRect.GetY(), imageRect.Width(), imageRect.Height());
+    }
     paintRect.SetRect(rect);
 }
 
