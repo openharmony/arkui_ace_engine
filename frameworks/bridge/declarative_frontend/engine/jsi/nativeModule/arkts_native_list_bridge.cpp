@@ -970,11 +970,27 @@ ArkUINativeModuleValue ListBridge::SetOnScrollIndex(ArkUIRuntimeCallInfo* runtim
         panda::Local<panda::NumberRef> centerParam = panda::NumberRef::New(vm, center);
         // 3: Array length
         panda::Local<panda::JSValueRef> params[3] = { startParam, endParam, centerParam };
-        func->Call(vm, func.ToLocal(), params, 3);// 3: Array length
+        func->Call(vm, func.ToLocal(), params, 3); // 3: Array length
     };
     GetArkUINodeModifiers()->getListModifier()->setOnListScrollIndexCallBack(
         nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
+}
+
+Local<panda::ObjectRef> SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo)
+{
+    const char* keys[] = { "index", "itemIndexInGroup", "itemGroupArea" };
+    auto indexInGroup = panda::NumberRef::Undefined(vm);
+    if (indexInfo.indexInGroup != -1) {
+        indexInGroup = panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.indexInGroup));
+    }
+    auto area = panda::NumberRef::Undefined(vm);
+    if (indexInfo.area != -1) {
+        area = panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.area));
+    }
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(indexInfo.index)), indexInGroup,
+        area };
+    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
 ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -998,22 +1014,15 @@ ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeC
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
-        const char* keys[] = { "index", "itemGroupArea", "itemIndexInGroup" };
-        Local<JSValueRef> startValues[] = { panda::NumberRef::New(vm, static_cast<int32_t>(start.index)),
-            panda::NumberRef::New(vm, static_cast<int32_t>(start.indexInGroup)),
-            panda::NumberRef::New(vm, static_cast<int32_t>(start.area)) };
-        Local<JSValueRef> endValues[] = { panda::NumberRef::New(vm, static_cast<int32_t>(end.index)),
-            panda::NumberRef::New(vm, static_cast<int32_t>(end.indexInGroup)),
-            panda::NumberRef::New(vm, static_cast<int32_t>(end.area)) };
-        auto startParam = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, startValues);
-        auto endParam = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, endValues);
+        auto startParam = SetListItemIndex(vm, start);
+        auto endParam = SetListItemIndex(vm, end);
         startParam->SetNativePointerFieldCount(vm, 1);
         startParam->SetNativePointerField(vm, 0, static_cast<void*>(&startParam));
         endParam->SetNativePointerFieldCount(vm, 1);
         endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));        
         // 2: Array length
         panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
-        func->Call(vm, func.ToLocal(), params, 2);// 2: Array length
+        func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
     };
     GetArkUINodeModifiers()->getListModifier()->setOnScrollVisibleContentChange(
         nativeNode, reinterpret_cast<void*>(&callback));
