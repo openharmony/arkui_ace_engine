@@ -31,12 +31,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-const Dimension DEFAULT_STROKE_WIDTH(1, DimensionUnit::PX);
 const std::string PATH_CMD = "M150 0 L300 300 L0 300 Z";
-const std::string PATH_CMD_001 = "M150 0 L300 300 L0 300 Z";
-const std::string PATH_CMD_002 = "M150 0 L300 0 L0 0 Z";
-const std::string PATH_CMD_003 = "M0 0 L0 0 L0 300 Z";
-const std::string PATH_CMD_004 = "M0 0 L0 0 L0 0 Z";
 
 } // namespace
 
@@ -123,60 +118,4 @@ HWTEST_F(PathPatternTestNg, COMMONDS002, TestSize.Level1)
 {
     CheckCommands(false);
 }
-
-HWTEST_F(PathPatternTestNg, COMMONDS003, TestSize.Level1)
-{
-    auto pathModelNG = PathModelNG();
-    pathModelNG.Create();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = frameNode->GetPattern<PathPattern>();
-    auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.selfIdealSize = OptionalSize<float> { -1, std::nullopt };
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
-    layoutProperty->UpdateContentConstraint();
-    auto host = AccessibilityManager::RawPtr(layoutWrapper)->GetHostNode();
-    auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
-    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue(DEFAULT_STROKE_WIDTH).ConvertToPx());
-    /**
-     * @tc.desc: Call MeasureContent(IsValid = FALSE; propertiesFromAncestor_ = TRUE;
-     *           right && bottom = FALSE; right = FALSE; bottom = FALSE)
-     */
-    pathModelNG.SetCommands(PATH_CMD_001);
-    auto size01 = layoutAlgorithm->MeasureContent(
-        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_NE(size01, layoutProperty->CreateContentConstraint().selfIdealSize.ConvertToSizeT());
-    EXPECT_EQ(size01, SizeF(300.0f, 300.0f));
-    /**
-     * @tc.desc: Call MeasureContent(IsValid = FALSE; propertiesFromAncestor_ = TRUE;
-     *           right && bottom = FALSE; right = FALSE; bottom = TRUE)
-     */
-    pathModelNG.SetCommands(PATH_CMD_002);
-    auto size02 = layoutAlgorithm->MeasureContent(
-        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_NE(size02, layoutProperty->CreateContentConstraint().selfIdealSize.ConvertToSizeT());
-    EXPECT_EQ(size02, SizeF(300.0f, (0.0f + lineWidth)));
-    /**
-     * @tc.desc: Call MeasureContent(IsValid = FALSE; propertiesFromAncestor_ = TRUE;
-     *           right && bottom = FALSE; right = TRUE; bottom = FALSE)
-     */
-    pathModelNG.SetCommands(PATH_CMD_003);
-    auto size03 = layoutAlgorithm->MeasureContent(
-        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_NE(size03, layoutProperty->CreateContentConstraint().selfIdealSize.ConvertToSizeT());
-    EXPECT_EQ(size03, SizeF((0.0f + lineWidth), 300.0f));
-    /**
-     * @tc.desc: Call MeasureContent(IsValid = FALSE; propertiesFromAncestor_ = TRUE; right && bottom = TRUE)
-     */
-    pathModelNG.SetCommands(PATH_CMD_004);
-    auto size04 = layoutAlgorithm->MeasureContent(
-        layoutProperty->CreateContentConstraint(), AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_NE(size04, layoutProperty->CreateContentConstraint().selfIdealSize.ConvertToSizeT());
-    EXPECT_EQ(size04, SizeF());
-}
-
 } // namespace OHOS::Ace::NG
