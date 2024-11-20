@@ -3857,7 +3857,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
     if (spanItem->fontStyle) {
         textStyle.fontColor = spanItem->fontStyle->GetTextColor().value_or(style.GetTextColor()).ColorToString();
         textStyle.fontSize =
-            spanItem->fontStyle->GetFontSize().value_or(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
+            spanItem->fontStyle->GetFontSize().value_or(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP)).ConvertToFp();
         textStyle.fontStyle =
             static_cast<int32_t>(spanItem->fontStyle->GetItalicFontStyle().value_or(OHOS::Ace::FontStyle::NORMAL));
         textStyle.fontWeight = static_cast<int32_t>(spanItem->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL));
@@ -5289,7 +5289,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetSpanRangeEnd(spanItem->position);
     retInfo.SetOffsetInSpan(caretPosition_ - retInfo.GetSpanRangeStart());
     retInfo.SetFontColor(spanNode->GetTextColorValue(Color::BLACK).ColorToString());
-    retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp());
+    retInfo.SetFontSize(spanNode->GetFontSizeValue(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP)).ConvertToVp());
     retInfo.SetFontStyle(spanNode->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     retInfo.SetFontWeight(static_cast<int32_t>(spanNode->GetFontWeightValue(FontWeight::NORMAL)));
     retInfo.SetTextStyle(GetTextStyleObject(spanNode));
@@ -9612,7 +9612,7 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
         SetTextStyleToRet(retInfo, *textStyle);
     } else {
         retInfo.SetFontColor((Color::BLACK).ColorToString());
-        retInfo.SetFontSize(Dimension(16.0f, DimensionUnit::VP).ConvertToVp());
+        retInfo.SetFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP).ConvertToVp());
         retInfo.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
         retInfo.SetFontWeight(static_cast<int32_t>(FontWeight::NORMAL));
         retInfo.SetTextDecoration(TextDecoration::NONE);
@@ -10943,7 +10943,7 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
 {
     auto theme = GetTheme<RichEditorTheme>();
     TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
-    style.SetFontSize(Dimension(16.0f, DimensionUnit::VP));
+    style.SetFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
     style.SetFontFeatures(ParseFontFeatureSettings("\"pnum\" 1"));
     style.SetFontFamilies({ "HarmonyOS Sans" });
     return style;
