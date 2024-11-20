@@ -83,6 +83,8 @@ public:
     static void SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
+    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+        const ImageSourceInfo& imageSourceInfo, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
@@ -105,7 +107,9 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
-
+    static void SetOnTitleModeChange(FrameNode* frameNode,
+        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode);

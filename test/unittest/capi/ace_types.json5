@@ -397,6 +397,61 @@
             "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
         },
         {
+            "name": "LengthPositive",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["1.23_px", "1.23px"],
+                ["0.5_pct", "50.00%"],
+            ],
+            "invalidValues": ["0.0_vp", "0.0_fp", "0.0_px", "0.0_pct", "-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+        },
+        {
+            "name": "ResDataForLength",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["432.0_vp", "432.00vp"],   // RES_DATA_FOR_LENGTH_0_ID
+                ["123.0_fp", "123.00fp"],
+                ["22.55_px", "22.55px"],
+                ["0.5_pct", "50.00%"],
+
+                ["0.0_vp", "0.00vp"],
+                ["0.0_fp", "0.00fp"],
+                ["0.0_px", "0.00px"],
+                ["0.0_pct", "0.00%"],
+
+                ["-2.3_vp", "-2.30vp"],
+                ["-4.5_fp", "-4.50fp"],
+                ["-5.6_px", "-5.60px"],
+                ["-0.8_pct", "-80.00%"],
+            ],
+        },
+        {
+            "name": "LengthResPositive",
+            "type": "Ark_Length",
+            "validValues": [
+                ["Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_0_ID}", "432.00vp"],
+                ["Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_1_ID}", "123.00fp"],
+                ["Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_2_ID}", "22.55px"],
+                ["Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_3_ID}", "50.00%"],
+            ],
+            "invalidValues": [
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_4_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_5_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_6_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_7_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_8_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_9_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_10_ID}",
+                "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_11_ID}",
+            ],
+        },
+        {
             "name": "LengthAny",
             "type": "Ark_Length",
             "validValues": [
@@ -749,6 +804,23 @@
                 ["100.0f", "1.000000"],
                 ["-100.0f", "0.000000"],
                 ["1.1f", "1.000000"],
+            ]
+        },
+        {
+            "name" : "FixtureNavBarWidthRange",
+            "type": "Ark_Tuple_Dimension_Dimension",
+            "validValues": [
+                ["std::pair<Dimension, Dimension>{0.1_fp, 10.0_vp}", "0.10fp, 10.00vp"],
+                ["std::pair<Dimension, Dimension>{0.1_px, 112.0_vp}", "0.10px, 112.00vp"],
+                ["std::pair<Dimension, Dimension>{5, 6}", "5.00px, 6.00px"],
+                ["std::pair<Dimension, Dimension>{0.5_pct, 100}", "50.00%, 100.00px"],
+            ],
+            "invalidValues": [
+                "std::pair<Dimension, Dimension>{0, 0}",
+                "std::pair<Dimension, Dimension>{-0.1f, INT_MIN}",
+                "std::pair<Dimension, Dimension>{-123._px, 0._fp}",
+                "std::pair<Dimension, Dimension>{0, -0.15_pct}",
+                "std::pair<Dimension, Dimension>{0._px, -432.01_vp}",
             ]
         },
         {
@@ -2042,6 +2114,83 @@
                 }
 
             ],
+        },
+        {
+            "name": "Navigation",
+            "disable": [
+                "setNavigationOptions1TestDefaultValues",
+                "setNavigationOptions1TestValidValues",
+                "setModeTestDefaultValues",
+                "setModeTestModeValidValues",
+                "setModeTestModeInvalidValues",
+                "setBackButtonIconTestDefaultValues",
+                "setBackButtonIconTestBackButtonIconValidValues",
+                "setBackButtonIconTestBackButtonIconInvalidValues",
+                "setHideNavBarTestDefaultValues",
+                "setTitleTestDefaultValues",
+                "setTitleTestValidValues",
+                "setTitleTestTitleValueMainValidValues",
+                "setTitleTestTitleValueMainInvalidValues",
+                "setTitleTestTitleValueSubValidValues",
+                "setTitleTestTitleValueSubInvalidValues",
+                "setTitleTestTitleValueHeightValidValues",
+                "setTitleTestTitleValueHeightInvalidValues",
+                "setTitleTestTitleOptionsBackgroundColorValidValues",
+                "setTitleTestTitleOptionsBackgroundColorInvalidValues",
+                "setTitleTestTitleOptionsBackgroundBlurStyleValidValues",
+                "setTitleTestTitleOptionsBackgroundBlurStyleInvalidValues",
+                "setTitleTestTitleOptionsBarStyleValidValues",
+                "setTitleTestTitleOptionsBarStyleInvalidValues",
+                "setTitleTestTitleOptionsEnableHoverModeValidValues",
+                "setTitleTestTitleOptionsEnableHoverModeInvalidValues",
+                "setSubTitleTestDefaultValues",
+                "setHideTitleBar0TestDefaultValues",
+                "setHideTitleBar1TestDefaultValues",
+                "setHideTitleBar1TestHideTitleBarHideValidValues",
+                "setHideTitleBar1TestHideTitleBarAnimatedValidValues",
+                "setHideBackButtonTestDefaultValues",
+                "setTitleModeTestDefaultValues",
+                "setTitleModeTestTitleModeInvalidValues",
+                "setMenusTestDefaultValues",
+                "setMenusTestValidValues",
+                "setToolBarTestDefaultValues",
+                "setToolBarTestValidValues",
+                "setToolbarConfigurationTestDefaultValues",
+                "setToolbarConfigurationTestValidValues",
+                "setHideToolBar0TestDefaultValues",
+                "setHideToolBar1TestDefaultValues",
+                "setHideToolBar1TestHideToolBarHideValidValues",
+                "setHideToolBar1TestHideToolBarAnimatedValidValues",
+                "setIgnoreLayoutSafeAreaTestDefaultValues",
+                "setIgnoreLayoutSafeAreaTestValidValues",
+                "setSystemBarStyleTestDefaultValues",
+                "setSystemBarStyleTestValidValues",
+                "setRecoverableTestDefaultValues",
+                "setRecoverableTestValidValues",
+                "setRecoverableTestRecoverableInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "navBarWidth",
+                    "default": "240.00vp",
+                    "fixtures" : ["LengthPositive", "LengthResPositive"]
+                },
+                {
+                    "name": "navBarPosition",
+                    "default": "NavBarPosition.Start",
+                    "type": "Ark_NavBarPosition",
+                },
+                {
+                    "name": "navBarWidthRange",
+                    "default": "240.00vp, 432.00vp",
+                    "fixtures": ["FixtureNavBarWidthRange"]
+                },
+                {
+                    "name": "minContentWidth",
+                    "default": "360.00vp",
+                    "fixtures": ["LengthPositive", "LengthResPositive"]
+                },
+            ]
         },
         {
             "name": "QRCode",

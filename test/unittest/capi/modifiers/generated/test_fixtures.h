@@ -37,6 +37,18 @@ enum ResID {
     FONT_FAMILY_RESOURCE_1_ID,
     FONT_FAMILY_RESOURCE_2_ID,
     COLORS_RES_0_ID,
+    RES_DATA_FOR_LENGTH_0_ID,
+    RES_DATA_FOR_LENGTH_1_ID,
+    RES_DATA_FOR_LENGTH_2_ID,
+    RES_DATA_FOR_LENGTH_3_ID,
+    RES_DATA_FOR_LENGTH_4_ID,
+    RES_DATA_FOR_LENGTH_5_ID,
+    RES_DATA_FOR_LENGTH_6_ID,
+    RES_DATA_FOR_LENGTH_7_ID,
+    RES_DATA_FOR_LENGTH_8_ID,
+    RES_DATA_FOR_LENGTH_9_ID,
+    RES_DATA_FOR_LENGTH_10_ID,
+    RES_DATA_FOR_LENGTH_11_ID,
     DIMENSIONS_RES_NON_NEG_0_ID,
     DIMENSIONS_RES_NON_NEG_1_ID,
     DIMENSIONS_RES_NON_NEG_2_ID,
@@ -111,6 +123,18 @@ inline constexpr auto FONT_FAMILY_RESOURCE_0_STR = "FONT_FAMILY_RESOURCE_0_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_1_STR = "FONT_FAMILY_RESOURCE_1_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_2_STR = "FONT_FAMILY_RESOURCE_2_STR";
 inline constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_0_STR = "RES_DATA_FOR_LENGTH_0_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_1_STR = "RES_DATA_FOR_LENGTH_1_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_2_STR = "RES_DATA_FOR_LENGTH_2_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_3_STR = "RES_DATA_FOR_LENGTH_3_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_4_STR = "RES_DATA_FOR_LENGTH_4_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_5_STR = "RES_DATA_FOR_LENGTH_5_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_6_STR = "RES_DATA_FOR_LENGTH_6_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_7_STR = "RES_DATA_FOR_LENGTH_7_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_8_STR = "RES_DATA_FOR_LENGTH_8_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_9_STR = "RES_DATA_FOR_LENGTH_9_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_10_STR = "RES_DATA_FOR_LENGTH_10_STR";
+inline constexpr auto RES_DATA_FOR_LENGTH_11_STR = "RES_DATA_FOR_LENGTH_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_0_STR = "DIMENSIONS_RES_NON_NEG_0_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_1_STR = "DIMENSIONS_RES_NON_NEG_1_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_2_STR = "DIMENSIONS_RES_NON_NEG_2_STR";
@@ -270,6 +294,17 @@ extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonPctI
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidValues;
 
+// Fixture 'LengthPositive' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositiveValidValues;
+extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositiveInvalidValues;
+
+// Fixture 'ResDataForLength' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDataForLengthValidValues;
+
+// Fixture 'LengthResPositive' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthResPositiveValidValues;
+extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthResPositiveInvalidValues;
+
 // Fixture 'LengthAny' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthAnyValidValues;
 
@@ -362,6 +397,12 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 
 // Fixture 'OpacityResource' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpacityResourceValidValues;
+
+// Fixture 'FixtureNavBarWidthRange' for type 'Ark_Tuple_Dimension_Dimension'
+extern std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension, std::string>>
+    testFixtureFixtureNavBarWidthRangeValidValues;
+extern std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension>>
+    testFixtureFixtureNavBarWidthRangeInvalidValues;
 
 // Fixture 'TextInputBarState' for type 'Ark_BarState'
 extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureTextInputBarStateValidValues;

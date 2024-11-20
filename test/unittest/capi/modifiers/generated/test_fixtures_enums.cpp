@@ -39,6 +39,38 @@ std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvali
     { "INT_MAX", static_cast<Ark_BarState>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_BarStyle, std::string>> testFixtureEnumBarStyleValidValues = {
+    { "ARK_BAR_STYLE_STANDARD", ARK_BAR_STYLE_STANDARD, "BarStyle.STANDARD" },
+    { "ARK_BAR_STYLE_STACK", ARK_BAR_STYLE_STACK, "BarStyle.STACK" },
+};
+
+std::vector<std::tuple<std::string, Ark_BarStyle>> testFixtureEnumBarStyleInvalidValues = {
+    { "-1", static_cast<Ark_BarStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_BarStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_BlurStyle, std::string>> testFixtureEnumBlurStyleValidValues = {
+    { "ARK_BLUR_STYLE_THIN", ARK_BLUR_STYLE_THIN, "BlurStyle.Thin" },
+    { "ARK_BLUR_STYLE_REGULAR", ARK_BLUR_STYLE_REGULAR, "BlurStyle.Regular" },
+    { "ARK_BLUR_STYLE_THICK", ARK_BLUR_STYLE_THICK, "BlurStyle.Thick" },
+    { "ARK_BLUR_STYLE_BACKGROUND_THIN", ARK_BLUR_STYLE_BACKGROUND_THIN, "BlurStyle.BACKGROUND_THIN" },
+    { "ARK_BLUR_STYLE_BACKGROUND_REGULAR", ARK_BLUR_STYLE_BACKGROUND_REGULAR, "BlurStyle.BACKGROUND_REGULAR" },
+    { "ARK_BLUR_STYLE_BACKGROUND_THICK", ARK_BLUR_STYLE_BACKGROUND_THICK, "BlurStyle.BACKGROUND_THICK" },
+    { "ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK", ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK,
+        "BlurStyle.BACKGROUND_ULTRA_THICK" },
+    { "ARK_BLUR_STYLE_NONE", ARK_BLUR_STYLE_NONE, "BlurStyle.NONE" },
+    { "ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN", ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN, "BlurStyle.COMPONENT_ULTRA_THIN" },
+    { "ARK_BLUR_STYLE_COMPONENT_THIN", ARK_BLUR_STYLE_COMPONENT_THIN, "BlurStyle.COMPONENT_THIN" },
+    { "ARK_BLUR_STYLE_COMPONENT_REGULAR", ARK_BLUR_STYLE_COMPONENT_REGULAR, "BlurStyle.COMPONENT_REGULAR" },
+    { "ARK_BLUR_STYLE_COMPONENT_THICK", ARK_BLUR_STYLE_COMPONENT_THICK, "BlurStyle.COMPONENT_THICK" },
+    { "ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK", ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK, "BlurStyle.COMPONENT_ULTRA_THICK" },
+};
+
+std::vector<std::tuple<std::string, Ark_BlurStyle>> testFixtureEnumBlurStyleInvalidValues = {
+    { "-1", static_cast<Ark_BlurStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_BlurStyle>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_BreakpointsReference, std::string>>
     testFixtureEnumBreakpointsReferenceValidValues = {
         { "ARK_BREAKPOINTS_REFERENCE_WINDOW_SIZE", ARK_BREAKPOINTS_REFERENCE_WINDOW_SIZE,
@@ -398,6 +430,39 @@ std::vector<std::tuple<std::string, Ark_MixedMode>> testFixtureEnumMixedModeInva
     { "INT_MAX", static_cast<Ark_MixedMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_NavBarPosition, std::string>> testFixtureEnumNavBarPositionValidValues = {
+    { "ARK_NAV_BAR_POSITION_START", ARK_NAV_BAR_POSITION_START, "NavBarPosition.Start" },
+    { "ARK_NAV_BAR_POSITION_END", ARK_NAV_BAR_POSITION_END, "NavBarPosition.End" },
+};
+
+std::vector<std::tuple<std::string, Ark_NavBarPosition>> testFixtureEnumNavBarPositionInvalidValues = {
+    { "-1", static_cast<Ark_NavBarPosition>(-1) },
+    { "INT_MAX", static_cast<Ark_NavBarPosition>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_NavigationMode, std::string>> testFixtureEnumNavigationModeValidValues = {
+    { "ARK_NAVIGATION_MODE_STACK", ARK_NAVIGATION_MODE_STACK, "NavigationMode.Stack" },
+    { "ARK_NAVIGATION_MODE_SPLIT", ARK_NAVIGATION_MODE_SPLIT, "NavigationMode.Split" },
+    { "ARK_NAVIGATION_MODE_AUTO", ARK_NAVIGATION_MODE_AUTO, "NavigationMode.Auto" },
+};
+
+std::vector<std::tuple<std::string, Ark_NavigationMode>> testFixtureEnumNavigationModeInvalidValues = {
+    { "-1", static_cast<Ark_NavigationMode>(-1) },
+    { "INT_MAX", static_cast<Ark_NavigationMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_NavigationTitleMode, std::string>>
+    testFixtureEnumNavigationTitleModeValidValues = {
+        { "ARK_NAVIGATION_TITLE_MODE_FREE", ARK_NAVIGATION_TITLE_MODE_FREE, "NavigationTitleMode.Free" },
+        { "ARK_NAVIGATION_TITLE_MODE_FULL", ARK_NAVIGATION_TITLE_MODE_FULL, "NavigationTitleMode.Full" },
+        { "ARK_NAVIGATION_TITLE_MODE_MINI", ARK_NAVIGATION_TITLE_MODE_MINI, "NavigationTitleMode.Mini" },
+    };
+
+std::vector<std::tuple<std::string, Ark_NavigationTitleMode>> testFixtureEnumNavigationTitleModeInvalidValues = {
+    { "-1", static_cast<Ark_NavigationTitleMode>(-1) },
+    { "INT_MAX", static_cast<Ark_NavigationTitleMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_NestedScrollMode, std::string>> testFixtureEnumNestedScrollModeValidValues = {
     { "ARK_NESTED_SCROLL_MODE_SELF_ONLY", ARK_NESTED_SCROLL_MODE_SELF_ONLY, "NestedScrollMode.SELF_ONLY" },
     { "ARK_NESTED_SCROLL_MODE_SELF_FIRST", ARK_NESTED_SCROLL_MODE_SELF_FIRST, "NestedScrollMode.SELF_FIRST" },
@@ -651,6 +716,16 @@ std::vector<std::tuple<std::string, Ark_TextOverflow, std::string>> testFixtureE
 std::vector<std::tuple<std::string, Ark_TextOverflow>> testFixtureEnumTextOverflowInvalidValues = {
     { "-1", static_cast<Ark_TextOverflow>(-1) },
     { "INT_MAX", static_cast<Ark_TextOverflow>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TitleHeight, std::string>> testFixtureEnumTitleHeightValidValues = {
+    { "ARK_TITLE_HEIGHT_MAIN_ONLY", ARK_TITLE_HEIGHT_MAIN_ONLY, "TitleHeight.MainOnly" },
+    { "ARK_TITLE_HEIGHT_MAIN_WITH_SUB", ARK_TITLE_HEIGHT_MAIN_WITH_SUB, "TitleHeight.MainWithSub" },
+};
+
+std::vector<std::tuple<std::string, Ark_TitleHeight>> testFixtureEnumTitleHeightInvalidValues = {
+    { "-1", static_cast<Ark_TitleHeight>(-1) },
+    { "INT_MAX", static_cast<Ark_TitleHeight>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_WaterFlowLayoutMode, std::string>>

@@ -23,6 +23,7 @@ generated_sources = [
   "grid_row_modifier_test.cpp",
   "image_modifier_test.cpp",
   "image_span_modifier_test.cpp",
+  "navigation_modifier_test.cpp",
   "progress_modifier_test.cpp",
   "qr_code_modifier_test.cpp",
   "radio_modifier_test.cpp",
