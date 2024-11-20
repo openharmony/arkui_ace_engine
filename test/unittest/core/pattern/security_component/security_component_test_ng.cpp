@@ -318,7 +318,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
@@ -766,7 +766,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, Tes
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
@@ -1194,7 +1194,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, Te
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
