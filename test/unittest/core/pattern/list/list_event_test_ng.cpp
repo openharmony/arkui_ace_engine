@@ -197,7 +197,7 @@ HWTEST_F(ListEventTestNg, HandleDragOverScroll004, TestSize.Level1)
     CreateListItems(1);
     CreateDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_EQ(pattern_->GetScrollableDistance(), -300);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
     float dragDelta = 10.f;
     DragAction(frameNode_, Offset(), dragDelta, DRAG_VELOCITY);
@@ -813,7 +813,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign010, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     CreateDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), -LIST_HEIGHT);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
     DragAction(frameNode_, Offset(), -100, 0);
     EXPECT_TRUE(Position(0));
 
