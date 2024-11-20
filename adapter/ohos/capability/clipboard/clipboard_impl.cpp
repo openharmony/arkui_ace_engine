@@ -133,11 +133,9 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
-    if (!taskExecutor_ || !callback) {
-        return;
-    }
-
+    CHECK_NULL_VOID(taskExecutor_);
     if (syncMode) {
         GetDataSync(callback);
     } else {

@@ -77,6 +77,9 @@ RefPtr<SpanBase> FontSpan::GetSubSpan(int32_t start, int32_t end)
 
 void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
+    if (!spanItem || !spanItem->fontStyle) {
+        return;
+    }
     if (font_.fontColor.has_value()) {
         spanItem->fontStyle->UpdateTextColor(font_.fontColor.value());
     }
@@ -260,11 +263,19 @@ RefPtr<SpanBase> BaselineOffsetSpan::GetSubSpan(int32_t start, int32_t end)
 
 void BaselineOffsetSpan::AddBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
+    CHECK_NULL_VOID(spanItem);
+    if (!spanItem->textLineStyle) {
+        spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
+    }
     spanItem->textLineStyle->UpdateBaselineOffset(baselineOffset_);
 }
 
 void BaselineOffsetSpan::RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    CHECK_NULL_VOID(spanItem);
+    if (!spanItem->textLineStyle) {
+        spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
+    }
     spanItem->textLineStyle->ResetBaselineOffset();
 }
 
