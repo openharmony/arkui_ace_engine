@@ -281,6 +281,8 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
+    ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
@@ -288,6 +290,8 @@ void XComponentPattern::OnAttachToMainTree()
 
 void XComponentPattern::OnDetachFromMainTree()
 {
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
+    ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
@@ -471,15 +475,15 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
             auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
-                ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
-                eventHub->FireDestroyEvent();
+                ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
+                eventHub->FireDestroyEvent(GetId());
             }
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
             {
-                ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
-                eventHub->FireControllerDestroyedEvent(surfaceId_);
+                ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
+                eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
             }
         }
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -621,11 +625,12 @@ void XComponentPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_.value_or("no id")));
     DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
     DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_.value_or("no library name")));
+    DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
+    DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
 }
 
 void XComponentPattern::DumpAdvanceInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -694,12 +699,12 @@ void XComponentPattern::XComponentSizeInit()
         eventHub->FireSurfaceInitEvent(id_.value(), host->GetId());
     }
     {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
+        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
         eventHub->FireLoadEvent(GetId());
     }
     {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
-        eventHub->FireControllerCreatedEvent(surfaceId_);
+        ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
+        eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
     }
 }
 
@@ -950,6 +955,8 @@ void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal(std::move(onFocusEvent));
 
     auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleKeyEvent[%{public}d,%{public}d,%{public}d,%{public}" PRId64 "]",
+            event.action, event.code, event.sourceType, event.deviceId);
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         return pattern->HandleKeyEvent(event);
@@ -1051,6 +1058,8 @@ void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     CHECK_NULL_VOID(!mouseEvent_);
 
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleMouseEvent[%{public}f,%{public}f,%{public}d,%{public}d]",
+            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetAction(), info.GetButton());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
@@ -1093,11 +1102,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT,
-        "XComponent HandleTouchEvent x = %{public}f, y = %{public}f, id = %{public}d, type = %{public}zu, size = "
-        "%{public}u",
-        touchEventPoint_.x, touchEventPoint_.y, touchEventPoint_.id, touchType,
-        static_cast<uint32_t>(info.GetTouches().size()));
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleTouchEvent[%{public}f,%{public}f,%{public}d,%{public}zu,%{public}u]",
+        localOffset.GetX(), localOffset.GetY(), touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
+        static_cast<uint32_t>(touchInfo.GetSize()));
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
@@ -1620,7 +1627,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
+        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
         eventHub->FireLoadEvent(GetId());
     }
 }
@@ -1632,8 +1639,8 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
-        eventHub->FireDestroyEvent();
+        ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
+        eventHub->FireDestroyEvent(GetId());
     }
 }
 
@@ -1645,14 +1652,14 @@ void XComponentPattern::OnSurfaceCreated()
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
-        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
         CHECK_NULL_VOID(callback->OnSurfaceCreated);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
+        ACE_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated[w:%f,h:%f]", GetId().c_str(), width, height);
         callback->OnSurfaceCreated(nativeXComponent_.get(), nativeWindow_);
     } else {
         auto host = GetHost();
@@ -1660,8 +1667,8 @@ void XComponentPattern::OnSurfaceCreated()
         auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
-            eventHub->FireControllerCreatedEvent(surfaceId_);
+            ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
+            eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
         }
     }
 }
@@ -1691,14 +1698,14 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
         CHECK_NULL_VOID(callback);
         CHECK_NULL_VOID(callback->OnSurfaceChanged);
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] native OnSurfaceChanged", GetId().c_str());
+            ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceChanged[w:%f,h:%f]", GetId().c_str(), width, height);
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
         auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent", GetId().c_str());
+            ACE_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent[w:%f,h:%f]", GetId().c_str(), width, height);
             eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect);
         }
     }
@@ -1707,7 +1714,6 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
 void XComponentPattern::OnSurfaceDestroyed()
 {
     if (isNativeXComponent_) {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
         CHECK_RUN_ON(UI);
         CHECK_NULL_VOID(nativeXComponent_);
         CHECK_NULL_VOID(nativeXComponentImpl_);
@@ -1715,6 +1721,8 @@ void XComponentPattern::OnSurfaceDestroyed()
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
         CHECK_NULL_VOID(callback->OnSurfaceDestroyed);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceDestroyed", GetId().c_str());
+        ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
         callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
         nativeXComponentImpl_->SetSurface(nullptr);
     } else {
@@ -1723,8 +1731,8 @@ void XComponentPattern::OnSurfaceDestroyed()
         auto eventHub = host->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
-            eventHub->FireControllerDestroyedEvent(surfaceId_);
+            ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
+            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
         }
     }
 }
