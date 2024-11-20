@@ -30,10 +30,6 @@
             "next":"下一步"
         },
         "window":{
-            "maximize":"最大化显示",
-            "exitMaximize":"退出最大化显示",
-            "fullScreen":"全屏显示",
-            "exitFullScreen":"退出全屏显示",
             "leftSide":"窗口显示在屏幕左侧",
             "rightSide":"窗口显示在屏幕右侧"
         },
@@ -99,10 +95,6 @@
             "next":"Next"
         },
         "window":{
-            "maximize":"Maximize",
-            "exitMaximize":"Exit Maximize",
-            "fullScreen":"Full Screen",
-            "exitFullScreen":"Exit Full Screen",
             "leftSide":"Show on left",
             "rightSide":"Show on right"
         },
@@ -2380,11 +2372,7 @@
         },
         "window":{
             "leftSide":"[TS_954622]_Show on left",
-            "maximize":"[TS_954623]_Maximize",
-            "rightSide":"[TS_954624]_Show on right",
-            "exitMaximize":"[TS_954635]_Exit Maximize",
-            "exitFullScreen":"[TS_954630]_Exit Full Screen",
-            "fullScreen":"[TS_954629]_Full Screen"
+            "rightSide":"[TS_954624]_Show on right"
         },
         "datepicker":{
             "lunarSwitch":"[TS_954634]_Show lunar calendar"
