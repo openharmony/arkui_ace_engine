@@ -163,6 +163,20 @@ RefPtr<FocusHub> FocusHub::GetRootFocusHub()
     return parent;
 }
 
+RefPtr<FocusHub> FocusHub::GetFocusLeaf()
+{
+    auto leafFocusNode = AceType::Claim(this);
+    auto nextFocusNode = leafFocusNode;
+    while (nextFocusNode && nextFocusNode->IsFocusable()) {
+        if (nextFocusNode->focusDepend_ == FocusDependence::SELF) {
+            return nextFocusNode;
+        }
+        leafFocusNode = nextFocusNode;
+        nextFocusNode = nextFocusNode->GetLastWeakFocusNode().Upgrade();
+    }
+    return leafFocusNode;
+}
+
 std::string FocusHub::GetFrameName() const
 {
     auto frameNode = GetFrameNode();
@@ -1079,7 +1093,7 @@ bool FocusHub::RequestNextFocusOfKeyEsc()
     CHECK_NULL_RETURN(curFocusView, false);
     auto curFocusViewHub = curFocusView->GetFocusHub();
     CHECK_NULL_RETURN(curFocusViewHub, false);
-    auto lastViewFocusHub = curFocusView->GetFocusLeaf(curFocusViewHub);
+    auto lastViewFocusHub = curFocusViewHub->GetFocusLeaf();
     CHECK_NULL_RETURN(lastViewFocusHub, false);
     auto viewRootScope = curFocusView->GetViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
