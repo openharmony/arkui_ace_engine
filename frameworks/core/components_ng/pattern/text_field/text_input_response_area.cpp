@@ -651,6 +651,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
+    stackLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -681,6 +682,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     imageLayoutProperty->UpdateImageSourceInfo(info);
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
     InitClickEvent(stackNode);
@@ -790,7 +792,7 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
     textFieldPattern->CleanNodeResponseKeyEvent();
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
 }
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
@@ -833,9 +835,13 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
             CHECK_NULL_VOID(symbolProperty);
             symbolProperty->UpdateFontSize(CalcDimension(iconSize));
         }
+        stackLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     } else {
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
         iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+        stackLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        iconLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     }
     iconFrameNode->MarkModifyDone();
     iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
