@@ -100,6 +100,7 @@ void SliderPattern::OnModifyDone()
     SetAccessibilityAction();
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
+    InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
 }
 
@@ -155,6 +156,42 @@ void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
         pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
             AccessibilityProperty::Level::NO_STR);
     }
+}
+
+class SliderAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    SliderAccessibilitySAObserverCallback(
+        const WeakPtr<SliderPattern> &weakSliderPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakSliderPattern_(weakSliderPattern)
+    {}
+
+    ~SliderAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto sliderPattern = weakSliderPattern_.Upgrade();
+        CHECK_NULL_RETURN(sliderPattern, false);
+        if (state) {
+            sliderPattern->InitAccessibilityVirtualNodeTask();
+        }
+        return true;
+    }
+private:
+    WeakPtr<SliderPattern> weakSliderPattern_;
+};
+
+void SliderPattern::InitSliderAccessibilityEnabledRegister()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilitySAObserverCallback_ = std::make_shared<SliderAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
 }
 
 void SliderPattern::InitAccessibilityVirtualNodeTask()
