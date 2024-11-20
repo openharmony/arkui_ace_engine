@@ -16,6 +16,7 @@
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 
 namespace OHOS::Ace::NG {
@@ -732,6 +733,32 @@ HWTEST_F(GridLayoutRangeTest, ScrollEnabled001, TestSize.Level1)
     for (int i = 0; i < 10; ++i) {
         UpdateCurrentOffset(-200.0f);
         EXPECT_TRUE(pattern_->scrollable_);
+    }
+}
+
+/**
+ * @tc.name: Focus001
+ * @tc.desc: Test Grid changing focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Focus001, TestSize.Level1)
+{
+    auto model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    const auto options = GetOptionDemo14();
+    model.SetLayoutOptions(options);
+    model.SetCachedCount(1);
+    CreateDone();
+    for (int i = 0; i < 10; ++i) {
+        UpdateCurrentOffset(-200.0f);
+        for (int i = pattern_->info_.startIndex_; i <= pattern_->info_.endIndex_; ++i) {
+            bool hasInfo = GetChildPattern<GridItemPattern>(frameNode_, i)->GetIrregularItemInfo().has_value();
+            if (options.irregularIndexes.count(i)) {
+                EXPECT_TRUE(hasInfo);
+            } else {
+                EXPECT_FALSE(hasInfo);
+            }
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -124,6 +124,7 @@ GridItemModelNG GridTestNg::CreateGridItem(float width, float height, GridItemSt
     } else if (height != NULL_VALUE) {
         ViewAbstract::SetHeight(CalcLength(height));
     }
+    ViewAbstract::SetFocusable(true);
     return itemModel;
 }
 

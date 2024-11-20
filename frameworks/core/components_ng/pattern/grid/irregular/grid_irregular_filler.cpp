@@ -369,6 +369,7 @@ void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, Gri
     props->UpdateCrossIndex(col);
 
     if (size.rows == 1 && size.columns == 1) {
+        pattern->ResetGridItemInfo();
         return;
     }
     pattern->SetIrregularItemInfo({ .mainIndex = row,
