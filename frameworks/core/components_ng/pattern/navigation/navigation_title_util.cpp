@@ -66,7 +66,7 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
     // read navdestination "more" button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.more");
+    std::string message = theme ? theme->GetMoreMessage() : "";
     SetAccessibility(menuItemNode, message);
 
     // set navdestination titleBar "more" button inspectorId
@@ -344,7 +344,9 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
             auto targetNode = weakTargetNode.Upgrade();
             CHECK_NULL_VOID(targetNode);
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            popupParam->SetMessage(Localization::GetInstance()->GetEntryLetters("common.more"));
+            auto theme = NavigationGetTheme();
+            CHECK_NULL_VOID(theme);
+            popupParam->SetMessage(theme->GetMoreMessage());
             popupParam->SetIsShow(isHover);
             popupParam->SetBlockEvent(false);
             ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
@@ -498,7 +500,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_RETURN(theme, nullptr);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        message = theme->GetMoreMessage();
         if (message.empty()) {
             message = accessibilityProperty->GetAccessibilityText();
         }
