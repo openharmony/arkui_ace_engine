@@ -40,6 +40,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowNext();
     });
 
@@ -49,6 +50,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowPrevious();
     });
 
