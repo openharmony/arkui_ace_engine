@@ -550,6 +550,7 @@ void ResetInitialIndex(ArkUINodeHandle node)
 
 void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit)
 {
+    CHECK_NULL_VOID(option);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     for (uint32_t i = 0; i < option->mainSize.size(); i++) {

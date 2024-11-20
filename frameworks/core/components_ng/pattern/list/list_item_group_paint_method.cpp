@@ -22,6 +22,7 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
         return;
     }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
@@ -58,8 +59,8 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& info,
     std::list<int32_t> lastLineIndex;
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
-        auto nextId = child.first - info.lanes;
-        nextIsPressed = nextId < 0 ? child.second.isPressed : itemPosition_[nextId].isPressed;
+        auto nextId = itemPosition_.find(child.first - info.lanes);
+        nextIsPressed = (nextId == itemPosition_.end()) ? child.second.isPressed : nextId->second.isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             DrawDivider(child.first, laneIdx, info, dividerPainter, canvas);
         }
