@@ -64,8 +64,6 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
-constexpr Dimension CUSTOM_CONTROL_BUTTON_LEFT = 8.0_vp;
-constexpr Dimension CUSTOM_CONTROL_BUTTON_TOP = 16.0_vp;
 } // namespace
 
 class SideBarLayoutTestNg : public testing::Test {
@@ -1267,83 +1265,5 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg029, TestSize.Level1)
     sideBarLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->minSideBarWidth_, layoutAlgorithm->maxSideBarWidth_);
-}
-
-/**
- * @tc.name: SideBarLayoutTestNg0030
- * @tc.desc: Test SideBar Measure control button in version 13
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0030, TestSize.Level1)
-{
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
-    SideBarContainerModelNG SideBarContainerModelInstance;
-    auto sideBarFrameNode =
-        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
-    EXPECT_FALSE(sideBarFrameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
-    EXPECT_FALSE(layoutWrapper == nullptr);
-    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
-    EXPECT_FALSE(sideBarPattern == nullptr);
-    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
-    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
-    SizeF value(SIZEF_WIDTH, SIZEF_HEIGHT);
-    sideBarLayoutProperty->UpdateMarginSelfIdealSize(value);
-    sideBarLayoutProperty->UpdateContentConstraint();
-    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
-    EXPECT_FALSE(layoutAlgorithm == nullptr);
-    auto parentWidth = MAX_PARENT_WIDTH;
-    sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
-    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
-
-    layoutAlgorithm->MeasureControlButton(sideBarLayoutProperty, layoutWrapper, parentWidth);
-    EXPECT_NE(layoutWrapper->layoutProperty_, nullptr);
-    EXPECT_NE(layoutWrapper->geometryNode_, nullptr);
-
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
-}
-
-/**
- * @tc.name: SideBarLayoutTestNg031
- * @tc.desc: Test SideBar LayoutControlButton in version 13
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg031, TestSize.Level1)
-{
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
-
-    auto sideBarFrameNode =
-        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
-    EXPECT_FALSE(sideBarFrameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    auto layoutWrapper = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
-    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
-    EXPECT_FALSE(sideBarPattern == nullptr);
-    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
-    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
-    SizeF value(SIZEF_WIDTH, SIZEF_HEIGHT);
-    sideBarLayoutProperty->UpdateMarginSelfIdealSize(value);
-    sideBarLayoutProperty->UpdateContentConstraint();
-    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
-    EXPECT_FALSE(layoutAlgorithm == nullptr);
-    auto buttonLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
-    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->UpdateControlButtonLeft(CUSTOM_CONTROL_BUTTON_LEFT);
-    layoutProperty->UpdateControlButtonTop(CUSTOM_CONTROL_BUTTON_TOP);
-    layoutAlgorithm->LayoutControlButton(&layoutWrapper, buttonLayoutWrapper);
-    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonLeft().value_or(CUSTOM_CONTROL_BUTTON_LEFT).Value(),
-        CUSTOM_CONTROL_BUTTON_LEFT.Value()));
-    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonTop().value_or(CUSTOM_CONTROL_BUTTON_TOP).Value(),
-        CUSTOM_CONTROL_BUTTON_TOP.Value()));
-    
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG
