@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG {
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
-                expiringItem_[itemInfo.first] = LazyForEachCacheChild(index, itemInfo.second);
+                expiringItem_.emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
                 cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
             } else {
                 cachedItems_[index] = itemInfo;
