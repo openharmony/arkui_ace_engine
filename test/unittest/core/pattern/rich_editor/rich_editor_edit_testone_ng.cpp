@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1249,21 +1248,17 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSi
     std::string previewTextValue = INIT_VALUE_1;
     PreviewRange previewRange;
 
-    previewRange.start = -1;
-    previewRange.end = -1;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
-
-    previewRange.start = 0;
-    previewRange.end = -1;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), -1);
-
-    previewRange.start = -1;
-    previewRange.end = 0;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), -1);
-
-    previewRange.start = 0;
-    previewRange.end = 0;
-    ASSERT_EQ(richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange), 0);
+    std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
+    testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
+    testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
+    testPreviewList.emplace_back(-1, 0, PREVIEW_TEXT_VALUE1, -1);
+    testPreviewList.emplace_back(0, 0, PREVIEW_TEXT_VALUE1, 0);
+    PreviewRange previewRange;
+    for (const auto& testCase : testPreviewList) {
+        previewRange.start = std::get<0>(testCase);
+        previewRange.end = std::get<1>(testCase);
+        ASSERT_EQ(richEditorPattern->SetPreviewText(std::get<2>(testCase), previewRange), std::get<3>(testCase));
+    }
 }
 
 /**
