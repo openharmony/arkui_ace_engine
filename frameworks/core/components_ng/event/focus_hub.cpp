@@ -1484,7 +1484,7 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d focus", GetFrameName().c_str(), GetFrameId());
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d focus", GetFrameName().c_str(), GetFrameId());
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -1521,7 +1521,7 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d blur by %{public}d", GetFrameName().c_str(),
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d blur by %{public}d", GetFrameName().c_str(),
         GetFrameId(), blurReason_);
     if (onBlurInternal_) {
         onBlurInternal_();

@@ -310,7 +310,7 @@ bool FocusView::RequestDefaultFocus()
         auto ret = viewRootScope->RequestFocusImmediatelyInner();
         // set neverShown_ false when request focus on focus view success
         neverShown_ &= !ret;
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on root scope: %{public}s/%{public}d return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
@@ -326,7 +326,7 @@ bool FocusView::RequestDefaultFocus()
     }
     // set neverShown_ false when request focus on focus view success
     neverShown_ &= !ret;
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
 }
 
