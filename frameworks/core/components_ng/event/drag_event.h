@@ -293,7 +293,8 @@ public:
     void TryTriggerThumbnailCallback();
 
     void GetThumbnailPixelMap(bool isSync);
-    void GetThumbnailPixelMapForCustomNode(bool isSync = false);
+    void GetThumbnailPixelMapForCustomNode();
+    void GetThumbnailPixelMapForCustomNodeSync();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
