@@ -149,26 +149,6 @@ namespace OHOS::Ace::NG::Converter {
         toValue.xxl = optVal.has_value() ? optVal.value() : V2::DEFAULT_COLUMN_NUMBER;
         return toValue;
     }
-    template<>
-    FlexAlign Convert(const Ark_ItemAlign& value)
-    {
-        switch (value) {
-            case ARK_ITEM_ALIGN_AUTO:
-                return FlexAlign::AUTO;
-            case ARK_ITEM_ALIGN_START:
-                return FlexAlign::FLEX_START;
-            case ARK_ITEM_ALIGN_CENTER:
-                return FlexAlign::CENTER;
-            case ARK_ITEM_ALIGN_END:
-                return FlexAlign::FLEX_END;
-            case ARK_ITEM_ALIGN_BASELINE:
-                return FlexAlign::BASELINE;
-            case ARK_ITEM_ALIGN_STRETCH:
-                return FlexAlign::STRETCH;
-            default:
-                return FlexAlign::SPACE_CUSTOMIZATION;
-        }
-    }
 } // Converter
 namespace OHOS::Ace::NG::Validator {
     void ValidateNonNegative(std::optional<V2::Gutter>& value)
