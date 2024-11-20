@@ -6939,7 +6939,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     auto isNeedSelected = false;
     if (selectEnd == selectStart + 1) {
         auto selectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-        auto& results = selectInfo.GetSelection().resultObjects;
+        auto&& results = selectInfo.GetSelection().resultObjects;
         // select image or builder
         isNeedSelected = results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE;
     }
