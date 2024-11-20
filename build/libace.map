@@ -235,6 +235,7 @@
       OHOS::Ace::PipelineBase::RegisterFont*;
       OHOS::Ace::PipelineBase::GetSystemFontList*;
       OHOS::Ace::PipelineBase::GetSystemFont*;
+      OHOS::Ace::PipelineBase::GetUIFontConfig*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
