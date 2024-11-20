@@ -480,8 +480,11 @@ ohos_source_set("ace_core_extra") {
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:static_icuuc",
+  ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
   ]
   configs = [ ":ace_unittest_config" ]
 }
@@ -576,7 +579,10 @@ ohos_source_set("ace_components_mock") {
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
+  ]
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
   ]
   configs = [ ":ace_unittest_config" ]
 }

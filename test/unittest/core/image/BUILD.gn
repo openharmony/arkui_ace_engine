@@ -98,9 +98,11 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
-    "//third_party/googletest:gmock_main",
   ]
-  external_deps = [ "cJSON:cjson" ]
+  external_deps = [
+    "cJSON:cjson",
+    "googletest:gmock_main",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
@@ -124,10 +126,12 @@ ohos_unittest("image_file_cache_test_ng") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
   ]
 
-  external_deps = [ "skia:skia_canvaskit" ]
+  external_deps = [
+    "googletest:gmock_main",
+    "skia:skia_canvaskit",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

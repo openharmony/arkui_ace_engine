@@ -34,10 +34,10 @@ template("ace_unittest") {
   render = false
   ace_unittest_name = target_name
   ace_unittest_config = [ "$ace_root/test/unittest:ace_unittest_config" ]
-  ace_external_deps = []
+  ace_external_deps = [ "googletest:gmock" ]
   flutter_sources = []
   flutter_external_deps = []
-  ace_unittest_deps = [ "//third_party/googletest:gmock" ]
+  ace_unittest_deps = []
 
   # temporary support
   if (defined(invoker.external_deps)) {

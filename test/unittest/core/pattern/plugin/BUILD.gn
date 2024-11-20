@@ -128,12 +128,12 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",
