@@ -115,7 +115,11 @@ void CalendarMonthPattern::SetColRowSpace()
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
+    auto selfWidth = constraint.selfIdealSize.Width();
+    if (!selfWidth.has_value()) {
+        return;
+    }
+    auto width = selfWidth.value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
     auto paintProperty = GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
@@ -124,7 +128,11 @@ void CalendarMonthPattern::SetColRowSpace()
     if (IsLargeSize(theme)) {
         gregorianDayHeight = GetDaySize(theme).ConvertToPx();
     }
-    auto height = constraint.selfIdealSize.Height().value()
+    auto selfHeight = constraint.selfIdealSize.Height();
+    if (!selfHeight.has_value()) {
+        return;
+    }
+    auto height = selfHeight.value()
         - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() + gregorianDayHeight;
     auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
@@ -316,9 +324,13 @@ void CalendarMonthPattern::OnLanguageConfigurationUpdate()
         std::string weekContent { weekNumbers[column % CALENDAR_WEEK_DAYS] };
         auto textFrameNode = AceType::DynamicCast<NG::FrameNode>(textNode);
         CHECK_NULL_VOID(textFrameNode);
+        auto calendarPaintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(calendarPaintProperty);
+        auto fontSize = calendarPaintProperty->GetWeekFontSize().value_or(theme->GetCalendarTheme().weekFontSize);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(weekContent);
+        textLayoutProperty->UpdateFontSize(fontSize);
         ++column;
     }
 }

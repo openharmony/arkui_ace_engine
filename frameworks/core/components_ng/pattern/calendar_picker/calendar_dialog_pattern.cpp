@@ -134,6 +134,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
             auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(imageLayoutProperty);
             auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            CHECK_NULL_VOID(imageInfo);
             imageInfo->SetFillColor(theme->GetEntryArrowColor());
             imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
             imageNode->MarkModifyDone();
