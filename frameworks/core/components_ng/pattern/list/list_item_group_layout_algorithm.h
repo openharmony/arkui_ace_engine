@@ -298,6 +298,11 @@ public:
         return adjustReferenceDelta_;
     }
 
+    int32_t GetListItemCount() const
+    {
+        return static_cast<int32_t>(itemPosition_.size());
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

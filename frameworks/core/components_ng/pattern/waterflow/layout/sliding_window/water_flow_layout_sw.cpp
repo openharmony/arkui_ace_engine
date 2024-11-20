@@ -69,7 +69,10 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     }
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
-    const int32_t cacheCount = props->GetCachedCountValue(1);
+    const int32_t cacheCount = props->GetCachedCountValue(info_->defCachedCount_);
+    if (!props->HasCachedCount()) {
+        info_->UpdateDefaultCachedCount();
+    }
     info_->BeginCacheUpdate();
     RecoverCacheItems(cacheCount);
 
