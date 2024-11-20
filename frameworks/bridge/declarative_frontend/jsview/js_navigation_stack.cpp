@@ -837,15 +837,31 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     }
     // deal route config and execute route config builder
     auto container = Container::Current();
+    CHECK_NULL_RETURN(container, ERROR_CODE_INTERNAL_ERROR);
     auto navigationRoute = container->GetNavigationRoute();
-    if (!navigationRoute->HasLoaded(name)) {
-        int32_t res = navigationRoute->LoadPage(name);
-        if (res != 0) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
-            return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
-                : ERROR_CODE_DESTINATION_NOT_FOUND;
-        }
+    if (!navigationRoute) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation route is invalid");
+        return ERROR_CODE_INTERNAL_ERROR;
     }
+    if (!navigationRoute->HasLoaded(name) && navigationRoute->LoadPage(name) != 0) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
+        return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
+            : ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    int32_t result = ExecuteBuilderByConfig(name, customNode, param);
+    if (result != ERROR_CODE_NO_ERROR) {
+        return result;
+    }
+    node = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (!GetNavDestinationNodeInUINode(node, desNode)) {
+        return ERROR_CODE_DESTINATION_NOT_FOUND;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t JSNavigationStack::ExecuteBuilderByConfig(const std::string& name,
+    const WeakPtr<NG::UINode>& customNode, const JSRef<JSVal>& param)
+{
     auto parentCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
     CHECK_NULL_RETURN(parentCustomNode, ERROR_CODE_INTERNAL_ERROR);
     auto thisObjTmp = parentCustomNode->FireThisFunc();
@@ -874,10 +890,6 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     }
     auto builder = JSRef<JSFunc>::Cast(builderProp);
     builder->Call(thisObj, number, params);
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
-    if (!GetNavDestinationNodeInUINode(node, desNode)) {
-        return ERROR_CODE_DESTINATION_NOT_FOUND;
-    }
     return ERROR_CODE_NO_ERROR;
 }
 
