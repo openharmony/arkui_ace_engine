@@ -368,7 +368,6 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SetClickMenuItemId(host->GetId());
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -379,6 +378,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     CHECK_NULL_VOID(menuWrapper);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode_ == SubMenuExpandingMode::STACK) {
+        SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         menuPattern->SetSubMenuShow();
