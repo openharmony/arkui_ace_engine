@@ -239,12 +239,8 @@ void ErrorLayout(LayoutWrapper* layoutWrapper)
     auto isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto offSetX = offset.GetX();
     if (isRTL) {
-        if (textFieldPattern->GetResponseArea()) {
-            offSetX -= textFieldPattern->GetResponseArea()->GetAreaRect().Width();
-        }
-        if (textFieldPattern->GetCleanNodeResponseArea()) {
-            offSetX -= textFieldPattern->GetCleanNodeResponseArea()->GetAreaRect().Width();
-        }
+        auto textFieldContentRect = textFieldGeometryNode->GetContentRect();
+        offSetX += textFieldContentRect.Width() - textGeometryNode->GetFrameRect().Width();
     }
 
     textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));

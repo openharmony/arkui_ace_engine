@@ -6278,9 +6278,11 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
         textNodeLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textNodeLayoutProperty->UpdateIsAnimationNeeded(false);
         auto layoutProperty = host->GetLayoutProperty();
-        auto isRTL = false;
-        if (layoutProperty && (isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL)) {
+        auto isRTL = layoutProperty && (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL);
+        if (isRTL) {
             textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+        } else {
+            textNodeLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
         }
 
         auto accessibilityProperty = errorTextNode->GetAccessibilityProperty<AccessibilityProperty>();
