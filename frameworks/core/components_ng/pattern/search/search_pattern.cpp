@@ -50,8 +50,6 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
-constexpr double OPACITY_DISABLED = 0.4;
-constexpr double OPACITY_ENABLED = 1.0;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -150,13 +148,9 @@ void SearchPattern::UpdateEnable(bool needToenable)
     CHECK_NULL_VOID(searchButtonFrameNode);
     auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    auto searchButtonContext = searchButtonFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(searchButtonContext);
     if (needToenable) {
-        searchButtonContext->UpdateOpacity(OPACITY_ENABLED);
         buttonEventHub->SetEnabled(true);
     } else {
-        searchButtonContext->UpdateOpacity(OPACITY_DISABLED);
         buttonEventHub->SetEnabled(false);
     }
     isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
