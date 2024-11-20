@@ -321,5 +321,5 @@ if (ace_engine_feature_enable_nav_split_mode) {
 }
 
 if (ace_engine_feature_wearable) {
-  ace_common_defines += [ "WEARABLE_DEVICE_MODE" ]
+  ace_common_defines += [ "ARKUI_WEARABLE" ]
 }
