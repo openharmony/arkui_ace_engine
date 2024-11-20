@@ -14,14 +14,14 @@
  */
 
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
+
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
+using OHOS::Ace::V2::GridContainerUtils;
 const auto COLUMNS_DEFAULT_VALUE = 12;
 const auto DIRECTION_DEFAULT_VALUE = V2::GridRowDirection::Row;
 const auto ALIGN_ITEMS_DEFAULT_VALUE = FlexAlign::FLEX_START;
-
-using OHOS::Ace::V2::GridContainerUtils;
 
 std::string BreakPointsReferenceToStr(V2::BreakPointsReference reference)
 {
@@ -68,7 +68,6 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         return;
     }
     auto sizeType = GetSizeTypeValue(V2::GridSizeType::UNDEFINED);
-    std::string str;
 
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, GetGutterValue(V2::Gutter()));
     auto jsonGutter = JsonUtil::Create(false);
