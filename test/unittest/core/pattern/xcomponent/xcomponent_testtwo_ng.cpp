@@ -461,10 +461,12 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
     g_testProperty.libraryName = std::nullopt;
     int32_t onSurfaceCreatedSurfaceCount = 0;
     int32_t onSurfaceDestroyedSurfaceCount = 0;
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceCount](
-                                const std::string& surfaceId) { ++onSurfaceCreatedSurfaceCount; };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceCount](
-                                  const std::string& surfaceId) { ++onSurfaceDestroyedSurfaceCount; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceCount](const std::string& surfaceId, const std::string& xcId) {
+        ++onSurfaceCreatedSurfaceCount;
+    };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceCount](const std::string& surfaceId, const std::string& xcId) {
+        ++onSurfaceDestroyedSurfaceCount;
+    };
     g_testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
     g_testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(g_testProperty);

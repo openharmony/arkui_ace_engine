@@ -26,11 +26,11 @@
 
 namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
-using DestroyEvent = std::function<void()>;
+using DestroyEvent = std::function<void(const std::string&)>;
 using DetachCallback = std::function<void(const std::string&)>;
-using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&, const std::string&)>;
 using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
-using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
 class XComponentModel {
 public:
