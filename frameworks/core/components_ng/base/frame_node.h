@@ -1355,7 +1355,7 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
         RectF lastFrameRect;

@@ -3621,7 +3621,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, { .isShowBadge = true } });
+        { true, false, false, false, false, false, true, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
