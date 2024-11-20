@@ -1354,6 +1354,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest048, TestSize.Level1)
 
     geometryNode->SetFrameSize(FRAME_SIZE);
     frameNode->SetActive(true);
+    frameNode->onMainTree_ = true;
     frameNode->SetGeometryNode(geometryNode);
     std::unordered_set<int32_t> frameNodeList;
     frameNodeList.emplace(frameNode->GetId());
