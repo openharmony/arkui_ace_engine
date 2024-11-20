@@ -1548,8 +1548,8 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
     TestMagnifier(richEditorPattern, controller, localOffset);
 }
 
-void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
-    const OffsetF& localOffset)
+void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
+    const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {
     richEditorPattern->HandleTouchUp();
     EXPECT_FALSE(controller->GetShowMagnifier());
