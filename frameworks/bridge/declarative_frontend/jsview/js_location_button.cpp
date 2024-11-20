@@ -182,6 +182,9 @@ void JSLocationButton::JSBind(BindingTarget globalObj)
     JSClass<JSLocationButton>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSLocationButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSLocationButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSLocationButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSLocationButton>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSLocationButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSLocationButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
