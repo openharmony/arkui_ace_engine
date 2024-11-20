@@ -218,7 +218,7 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     }
 
     child->Measure(constraint);
-    SetItemInfo(itemIdx, row, col, itemSize);
+    SetItemInfo(child, row, col, itemSize);
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row.
@@ -354,14 +354,13 @@ int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
     return row;
 }
 
-void GridIrregularFiller::SetItemInfo(int32_t idx, int32_t row, int32_t col, GridItemSize size)
+void GridIrregularFiller::SetItemInfo(const RefPtr<LayoutWrapper>& item, int32_t row, int32_t col, GridItemSize size)
 {
+    CHECK_NULL_VOID(item);
     if (info_->axis_ == Axis::HORIZONTAL) {
         std::swap(row, col);
         std::swap(size.rows, size.columns);
     }
-    auto item = wrapper_->GetChildByIndex(idx);
-    CHECK_NULL_VOID(item);
     auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();

@@ -622,11 +622,11 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     std::list<GridPreloadItem> itemsToPreload;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
-        if (l >= 0 && !wrapper_->GetChildByIndex(l)) {
+        if (l >= 0 && !wrapper_->GetChildByIndex(l, true)) {
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r)) {
+        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
             itemsToPreload.emplace_back(r);
         }
     }
