@@ -372,6 +372,8 @@ private:
         MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResults(
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
+    bool DispatchMouseEventToCurResultsInLessAPI13(
+        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
