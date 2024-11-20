@@ -685,19 +685,42 @@ HWTEST_F(WebPatternTestNgSupplement, SetAccessibilityState001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
-    webPattern->accessibilityState_ = false;
-    webPattern->SetAccessibilityState(false);
-    EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->accessibilityState_ = true;
     webPattern->SetAccessibilityState(true);
     EXPECT_TRUE(webPattern->accessibilityState_);
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
-    webPattern->SetAccessibilityState(false);
-    EXPECT_TRUE(webPattern->accessibilityState_);
-    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     webPattern->inspectorAccessibilityEnable_ = false;
     webPattern->textBlurAccessibilityEnable_ = false;
     webPattern->SetAccessibilityState(false);
     EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = false;
+    webPattern->textBlurAccessibilityEnable_ = false;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = false;
+    webPattern->textBlurAccessibilityEnable_ = true;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = true;
+    webPattern->textBlurAccessibilityEnable_ = false;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = true;
+    webPattern->textBlurAccessibilityEnable_ = true;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_FALSE(webPattern->accessibilityState_);
+    webPattern->accessibilityState_ = true;
+    webPattern->inspectorAccessibilityEnable_ = false;
+    webPattern->textBlurAccessibilityEnable_ = true;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_TRUE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = true;
+    webPattern->textBlurAccessibilityEnable_ = false;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_TRUE(webPattern->accessibilityState_);
+    webPattern->inspectorAccessibilityEnable_ = true;
+    webPattern->textBlurAccessibilityEnable_ = true;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_TRUE(webPattern->accessibilityState_);
 #endif
 }
 
