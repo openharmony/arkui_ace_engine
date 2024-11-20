@@ -35,11 +35,8 @@ struct MockImageBitmapPeer : public ImageBitmapPeer {
 public:
     MockImageBitmapPeer() = default;
     ~MockImageBitmapPeer() override = default;
-    MOCK_METHOD(void, Close, ());
-    MOCK_METHOD(Ark_Int32, GetHeight, ());
-    MOCK_METHOD(Ark_Int32, GetWidth, ());
-    void SetHeight(int value) { height = value; }
-    void SetWidth(int value) { width = value; }
+    void SetHeightForTest(int value) { height = value; }
+    void SetWidthForTest(int value) { width = value; }
 };
 }
 
@@ -117,7 +114,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
     auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
     ASSERT_NE(peer_, nullptr);
-    peer_->SetHeight(DEFAULT_INT_VALUE);
+    peer_->SetHeightForTest(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
@@ -135,7 +132,7 @@ HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
     auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
     ASSERT_NE(peer_, nullptr);
-    peer_->SetWidth(DEFAULT_INT_VALUE);
+    peer_->SetWidthForTest(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
