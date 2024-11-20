@@ -1245,9 +1245,6 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSi
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::string previewTextValue = INIT_VALUE_1;
-    PreviewRange previewRange;
-
     std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
     testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
     testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
