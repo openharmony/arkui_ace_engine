@@ -15,12 +15,15 @@
 #include "richeditor_modifier_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
 static constexpr int TEST_OFFSET = 5;
@@ -33,6 +36,7 @@ static constexpr int TEST_INDEX_2 = 2;
 static constexpr int TEST_FONT_SIZE = 30;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
 static const std::string COLOR_TRANSPARENT = "#00000000";
+static constexpr int TEST_RESOURCE_ID = 1000;
 
 static const auto ATTRIBUTE_COPY_OPTIONS_NAME = "CopyOption";
 static const auto ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE = "CopyOptions.None";
@@ -62,6 +66,9 @@ static const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 static const auto ATTRIBUTE_BAR_STATE_NAME = "barState";
 static const auto ATTRIBUTE_BAR_STATE_DEFAULT = "BarState.Auto";
 static const auto ATTRIBUTE_BAR_STATE_VALUE = "BarState.On";
+static const auto ATTRIBUTE_CUSTOM_KB_NAME = "keyboardAvoidance";
+static const auto ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE = "false";
+static const auto ATTRIBUTE_CUSTOM_KB_VALUE = "true";
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
@@ -477,4 +484,101 @@ HWTEST_F(RichEditorModifierTest, setBarStateTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_VALUE);
 }
+
+static bool g_onBuilt = false;
+static bool g_onAppear = false;
+static bool g_onDisappear = false;
+
+/**
+ * @tc.name: setBindSelectionMenuTest
+ * @tc.desc: Check the functionality of setBindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    // Prepare callbacks
+    auto onBuiltCallback = [](const Ark_Int32 resourceId, const Callback_CustomObject_void continuation) {
+        g_onBuilt = true;
+    };
+    auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
+        g_onAppear = true;
+    };
+    auto onDisappearCallback = [](const Ark_Int32 resourceId) {
+        g_onDisappear = true;
+    };
+    // Prepare options
+    auto responseType = Converter::ArkUnion<Ark_Union_ResponseType_RichEditorResponseType, Ark_ResponseType>(
+        Ark_ResponseType::ARK_RESPONSE_TYPE_LONG_PRESS);
+    auto buildFunc = Converter::ArkValue<Callback_Any>(onBuiltCallback, TEST_RESOURCE_ID);
+    Ark_SelectionMenuOptions value;
+    value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
+    auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
+    value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
+    auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
+    value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
+
+    auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    modifier_->setBindSelectionMenu(node_,
+        Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT, &buildFunc, &responseType, &options);
+
+    // The testing part begins here:
+    EXPECT_FALSE(g_onBuilt);
+    EXPECT_FALSE(g_onAppear);
+    EXPECT_FALSE(g_onDisappear);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectedType(TextSpanType::TEXT); // Needed for logic of CopySelectionMenuParams()
+    SelectOverlayInfo selectInfo;
+    pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    selectInfo.menuInfo.menuBuilder();
+    EXPECT_TRUE(g_onBuilt);
+    selectInfo.menuCallback.onAppear();
+    EXPECT_TRUE(g_onAppear);
+    selectInfo.menuCallback.onDisappear();
+    EXPECT_TRUE(g_onDisappear);
+}
+
+static bool g_keyboardCallbackCalled = false;
+
+/**
+ * @tc.name: setCustomKeyboardTest
+ * @tc.desc: Check the functionality of setCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE);
+
+    auto onCallback = [](const Ark_Int32 resourceId, const Callback_CustomObject_void continuation) {
+        g_keyboardCallbackCalled = true;
+    };
+    auto keyboardBuilderCallback = Converter::ArkValue<Callback_Any>(onCallback, TEST_RESOURCE_ID);
+
+    Ark_KeyboardOptions keyboardOptions;
+    keyboardOptions.supportAvoidance = Converter::ArkValue<Opt_Boolean>(true);
+    auto options = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+
+    modifier_->setCustomKeyboard(node_, &keyboardBuilderCallback, &options);
+
+    // Testing callback
+    EXPECT_FALSE(g_keyboardCallbackCalled);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool built = pattern->RequestCustomKeyboard();
+    EXPECT_TRUE(built);
+    EXPECT_TRUE(g_keyboardCallbackCalled);
+
+    // Testing value
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_VALUE);
+}
+
 } // namespace OHOS::Ace::NG

@@ -748,6 +748,10 @@ public:
         return magnifierController_;
     }
 
+    void SetSelectedType(const std::optional<TextSpanType>& selectedType)
+    {
+        selectedType_ = selectedType;
+    }
 protected:
     int32_t GetClickedSpanPosition()
     {

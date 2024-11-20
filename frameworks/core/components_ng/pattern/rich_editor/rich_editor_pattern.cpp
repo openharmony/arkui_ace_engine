@@ -8971,6 +8971,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->Put("enterKeyType", TextInputEnumToString(action.value_or(TextInputAction::UNSPECIFIED)).c_str());
     json->Put("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false");
     json->Put("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false");
+    json->Put("keyboardAvoidance", keyboardAvoidance_ ? "true" : "false");
 }
 
 void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const

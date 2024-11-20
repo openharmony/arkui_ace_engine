@@ -539,6 +539,25 @@ void RichEditorModelNG::SetSupportPreviewText(FrameNode* frameNode, bool value)
     pattern->SetSupportPreviewText(value);
 }
 
+void RichEditorModelNG::SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
+    const std::optional<bool>& supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(func));
+        pattern->SetCustomKeyboardOption(supportAvoidance.value_or(false));
+    }
+}
+void RichEditorModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+    }
+}
 void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
     const OnMenuItemClickCallback&& onMenuItemClick)
 {
