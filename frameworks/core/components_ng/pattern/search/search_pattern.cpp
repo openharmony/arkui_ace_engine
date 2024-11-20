@@ -75,35 +75,12 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     CHECK_NULL_VOID(buttonHost);
     auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(imageHost);
-    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonRenderContext);
-    auto cancelImageRenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImageRenderContext);
-    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(cancelButtonEvent);
     if (style == ERROR) {
         auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
     }
-    if (IsEventEnabled(textValue, style)) {
-        cancelButtonRenderContext->UpdateOpacity(1.0);
-        cancelImageRenderContext->UpdateOpacity(1.0);
-        cancelButtonEvent->SetEnabled(true);
-    } else {
-        cancelButtonRenderContext->UpdateOpacity(0.0);
-        cancelImageRenderContext->UpdateOpacity(0.0);
-        cancelButtonEvent->SetEnabled(false);
-    }
-    if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
-        CHECK_NULL_VOID(imageEvent);
-        if (IsEventEnabled(textValue, style)) {
-            imageEvent->SetEnabled(true);
-        } else {
-            imageEvent->SetEnabled(false);
-        }
-    }
+    UpdateCancelButtonStatus(textValue, style);
     buttonHost->MarkModifyDone();
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -116,6 +93,45 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
         CHECK_NULL_VOID(textLayoutWrapper);
         ScopedLayout scope(frameNode->GetContext());
         textLayoutWrapper->Measure(layoutConstraint);
+    }
+}
+
+void SearchPattern::UpdateCancelButtonStatus(const std::string& textValue, int16_t style)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonHost);
+    auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(imageHost);
+    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    auto cancelImageRenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImageRenderContext);
+    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(cancelButtonEvent);
+    auto buttonLayoutProperty = buttonHost->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto imageLayoutProperty = imageHost->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    bool isEventEnabled = IsEventEnabled(textValue, style);
+    if (isEventEnabled) {
+        cancelButtonRenderContext->UpdateOpacity(1.0);
+        cancelImageRenderContext->UpdateOpacity(1.0);
+        cancelButtonEvent->SetEnabled(true);
+        buttonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        cancelButtonRenderContext->UpdateOpacity(0.0);
+        cancelImageRenderContext->UpdateOpacity(0.0);
+        cancelButtonEvent->SetEnabled(false);
+        buttonLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    }
+    if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
+        CHECK_NULL_VOID(imageEvent);
+        imageEvent->SetEnabled(isEventEnabled);
     }
 }
 
@@ -756,6 +772,7 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
+    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
