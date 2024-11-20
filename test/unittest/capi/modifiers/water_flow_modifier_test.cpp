@@ -27,8 +27,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
-namespace
-{
+namespace {
     struct EventsTracker {
         static inline GENERATED_ArkUIWaterFlowEventsReceiver waterFlowEventReceiver {};
         static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
@@ -73,9 +72,9 @@ HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    auto onReach = eventHub->GetOnReachStart(); //GetOnReachStart
-    ASSERT_NE(onReach, nullptr);
-    onReach();
+    auto onReachStart = eventHub->GetOnReachStart();
+    ASSERT_NE(onReachStart, nullptr);
+    onReachStart();
 
     ASSERT_TRUE(checkData.has_value());
     EXPECT_EQ(checkData.value(), CONTEXT_ID);
@@ -105,8 +104,8 @@ HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    auto onReach = eventHub->GetOnReachEnd();
-    onReach();
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    onReachEnd();
 
     ASSERT_TRUE(checkData.has_value());
     EXPECT_EQ(checkData.value(), CONTEXT_ID);
@@ -154,7 +153,6 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, Test
     // Trigger the scroll index change event with valid values
     auto onScrollIndx = eventHub->GetOnScrollIndex();
     onScrollIndx(10, 20);
-    //eventHub->FireOnScrollIndex(10, 20);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->firstIndex, 10);
@@ -164,7 +162,6 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, Test
     checkEvent.reset();
 
     // Trigger another scroll index change event with different values
-    //eventHub->FireOnScrollIndex(15, 25);
     onScrollIndx(15, 25);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
@@ -175,7 +172,6 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, Test
     checkEvent.reset();
 
     // Trigger event with zero values to test edge cases
-    //eventHub->FireOnScrollIndex(0, 0);
     onScrollIndx = eventHub->GetOnScrollIndex();
     onScrollIndx(0, 0);
     ASSERT_TRUE(checkEvent.has_value());
