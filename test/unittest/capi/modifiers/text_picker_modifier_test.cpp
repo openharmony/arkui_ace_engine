@@ -970,37 +970,33 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
     auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
     ASSERT_NE(textPickerEventHub, nullptr);
     static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
-    void (*developerCallback)(
-        const Ark_Int32 resourceId,
-        const Ark_Union_String_Array_String value, const Ark_Union_Number_Array_Number index) =
-        [](const Ark_Int32 resourceId,
-            const Ark_Union_String_Array_String values, const Ark_Union_Number_Array_Number selecteds) {
-            std::vector<std::string> stdValues;
-            if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
-                auto pickerValue = pickerValueOpt.value();
-                if (auto value = std::get_if<std::string>(&pickerValue); value) {
+    auto developerCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
+        const Ark_Union_Number_Array_Number selecteds) {
+        std::vector<std::string> stdValues;
+        if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
+            auto pickerValue = pickerValueOpt.value();
+            if (auto value = std::get_if<std::string>(&pickerValue); value) {
                     stdValues.push_back(*value);
-                } else {
-                    stdValues = std::move(std::get<std::vector<std::string>>(pickerValue));
-                }
+            } else {
+                stdValues = std::move(std::get<std::vector<std::string>>(pickerValue));
             }
-            std::vector<uint32_t> stdSelecteds;
-            std::vector<double> stdDoubleSelecteds;
-            if (auto pickerSelectedOpt = Converter::OptConvert<PickerSelectedType>(selecteds); pickerSelectedOpt) {
-                auto pickerSelected = pickerSelectedOpt.value();
-                if (auto selected = std::get_if<uint32_t>(&pickerSelected); selected) {
-                    stdSelecteds.push_back(*selected);
-                } else {
-                    stdSelecteds = std::move(std::get<std::vector<uint32_t>>(pickerSelected));
-                }
+        }
+        std::vector<uint32_t> stdSelecteds;
+        std::vector<double> stdDoubleSelecteds;
+        if (auto pickerSelectedOpt = Converter::OptConvert<PickerSelectedType>(selecteds); pickerSelectedOpt) {
+            auto pickerSelected = pickerSelectedOpt.value();
+            if (auto selected = std::get_if<uint32_t>(&pickerSelected); selected) {
+                stdSelecteds.push_back(*selected);
+            } else {
+                stdSelecteds = std::move(std::get<std::vector<uint32_t>>(pickerSelected));
             }
-            for (auto index: stdSelecteds) {
-                stdDoubleSelecteds.push_back(static_cast<double>(index));
-            }
-            checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
-        };
-    Type_TextPickerAttribute_onChange_callback func =
-        ArkValue<Type_TextPickerAttribute_onChange_callback>(developerCallback, CONTEXT_ID);
+        }
+        for (auto index: stdSelecteds) {
+            stdDoubleSelecteds.push_back(static_cast<double>(index));
+        }
+        checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
+    };
+    auto func = ArkValue<Type_TextPickerAttribute_onChange_callback>(developerCallback, CONTEXT_ID);
     textPickerEventHub->FireChangeEvent(values, indexes);
     ASSERT_FALSE(checkInvoke.has_value());
     modifier_->setOnChange(node_, &func);
