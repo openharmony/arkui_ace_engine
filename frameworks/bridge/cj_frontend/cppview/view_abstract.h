@@ -70,7 +70,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 };
 }
 
@@ -136,6 +137,7 @@ public:
 
     static bool ParseCjString(NativeResourceObject& obj, std::string& result);
     static bool ParseCjMedia(NativeResourceObject& obj, std::string& result);
+    static bool ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result);
     static bool ParseCjColor(NativeResourceObject& obj, Color& result);
     static bool ParseCjDimension(
         NativeResourceObject& obj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);

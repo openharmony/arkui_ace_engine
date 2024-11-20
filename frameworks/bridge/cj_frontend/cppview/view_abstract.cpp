@@ -308,6 +308,7 @@ bool ViewAbstract::ConvertResourceType(const std::string& typeName, ResourceType
         { "integer", ResourceType::INTEGER },
         { "strarray", ResourceType::STRARRAY },
         { "intarray", ResourceType::INTARRAY },
+        { "symbol", ResourceType::SYMBOL },
     };
     auto it = resTypeMap.find(typeName);
     if (it == resTypeMap.end()) {
@@ -452,6 +453,26 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
         return true;
     } else if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
         result = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        return true;
+    }
+    return false;
+}
+
+bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
+{
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
+    if (obj.type == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
+    auto resourceObject = GetResourceObjectByBundleAndModule(obj);
+    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
+        result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;

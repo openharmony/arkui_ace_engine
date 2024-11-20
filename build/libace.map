@@ -166,6 +166,7 @@
       OHOS::Ace::StepperModel::*;
       OHOS::Ace::StepperItemModel::*;
       OHOS::Ace::SwiperModel::*;
+      OHOS::Ace::SymbolSpanModel::*;
       OHOS::Ace::TabsModel::*;
       OHOS::Ace::TabContentModel::*;
       OHOS::Ace::TextClockModel::*;

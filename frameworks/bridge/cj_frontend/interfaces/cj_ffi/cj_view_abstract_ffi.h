@@ -395,6 +395,7 @@ CJ_EXPORT ExternalString FFIOHOSAceFrameworkGetResourcePluralStr(
 CJ_EXPORT RetDimension FFIOHOSAceFrameworkGetResourceDimension(int64_t id);
 CJ_EXPORT uint32_t FFIOHOSAceFrameworkGetResourceColor(int64_t id);
 CJ_EXPORT ExternalString FFIOHOSAceFrameworkGetResourceMedia(int64_t id, uint32_t type, const char* param);
+CJ_EXPORT uint32_t FFIGetResourceSymbolId(NativeResourceObject obj);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edges);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusable(bool isFocusable);
 CJ_EXPORT void FFIOHOSAceFrameworkTabIndex(int32_t index);

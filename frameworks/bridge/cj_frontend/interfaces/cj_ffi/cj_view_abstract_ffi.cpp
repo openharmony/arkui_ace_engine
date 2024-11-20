@@ -1671,6 +1671,15 @@ ExternalString FFIGetResourceMedia(NativeResourceObject obj)
     return ::Utils::MallocCString(result);
 }
 
+uint32_t FFIGetResourceSymbolId(NativeResourceObject obj)
+{
+    uint32_t symbolId;
+    if (!ViewAbstract::ParseCjSymbolId(obj, symbolId)) {
+        LOGE("Parse symbol id failed.");
+    }
+    return symbolId;
+}
+
 uint32_t FFIGetResourceColor(NativeResourceObject obj)
 {
     Color color;
