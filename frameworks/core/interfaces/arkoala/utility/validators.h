@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
+#include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace::NG {
 namespace Validator {
@@ -37,6 +38,7 @@ void ValidateNonPercent(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 void ValidateNonNegative(std::optional<int>& value);
 void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
+void ValidateNonNegative(std::optional<V2::GridContainerSize>& value);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 
