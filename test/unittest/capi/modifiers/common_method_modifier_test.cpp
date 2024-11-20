@@ -2496,5 +2496,4 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, Tes
 {
     // OnFinishEvent does not supported yet
 }
-
 } // namespace OHOS::Ace::NG
