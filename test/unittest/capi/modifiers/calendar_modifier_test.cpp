@@ -290,7 +290,7 @@ HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionInvalidValues, 
  */
 HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
 {
-    static constexpr auto CONTEXT_ID = 654321;
+    static constexpr auto contextId = 654321;
     static std::vector<Ark_CalendarSelectedDate> checkInvoke;
 
     modifier_->setCalendarOptions(node_, &calendarOptions);
@@ -310,10 +310,10 @@ HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
     }
 
     auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarSelectedDate event) {
-        EXPECT_EQ(resourceId, CONTEXT_ID);
+        EXPECT_EQ(resourceId, contextId);
         checkInvoke.emplace_back(std::move(event));
     };
-    auto arkCallback = Converter::ArkValue<Callback_CalendarSelectedDate_Void>(callback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_CalendarSelectedDate_Void>(callback, contextId);
     modifier_->setOnSelectChange(node_, &arkCallback);
     auto json = JsonUtil::Create(true);
     json->Put("day", 31);
@@ -340,7 +340,7 @@ HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
  */
 HWTEST_F(CalendarModifierTest, setOnRequestDataTest, TestSize.Level1)
 {
-    static constexpr auto CONTEXT_ID = 0xABCDEF;
+    static constexpr auto contextId = 0xABCDEF;
     static std::vector<Ark_CalendarRequestedData> checkInvoke;
 
     modifier_->setCalendarOptions(node_, &calendarOptions);
@@ -350,10 +350,10 @@ HWTEST_F(CalendarModifierTest, setOnRequestDataTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
 
     auto callback = [](const Ark_Int32 resourceId, const Ark_CalendarRequestedData event) {
-        EXPECT_EQ(resourceId, CONTEXT_ID);
+        EXPECT_EQ(resourceId, contextId);
         checkInvoke.emplace_back(std::move(event));
     };
-    auto arkCallback = Converter::ArkValue<Callback_CalendarRequestedData_Void>(callback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_CalendarRequestedData_Void>(callback, contextId);
     modifier_->setOnRequestData(node_, &arkCallback);
     auto json = JsonUtil::Create(true);
     json->Put("currentYear", 2000);
