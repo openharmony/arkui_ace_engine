@@ -1087,8 +1087,6 @@ frameworks/bridge/declarative_frontend/jsview/js_image_span.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_image_span.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_indexer.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_indexer.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_indicator.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_indicator.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_interactable_view.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp @arkuiabilitygroup
