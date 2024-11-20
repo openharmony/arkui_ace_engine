@@ -1426,6 +1426,8 @@ public:
         ViewAbstract::SetIlluminatedBorderWidth(value);
     }
 
+    static void SetBloom(FrameNode *frameNode, const std::optional<float>& value,
+        const RefPtr<ThemeConstants>& themeConstants);
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);
