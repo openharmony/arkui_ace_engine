@@ -34,8 +34,8 @@ public:
     void TearDown() override;
     static void TearDownTestSuite();
 private:
-    void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern, const RefPtr<MagnifierController>& controller,
-        const OffsetF& localOffset);
+    void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
+        const RefPtr<MagnifierController>& controller, const OffsetF& localOffset);
 };
 
 void RichEditorBaseTestNg::SetUp()
