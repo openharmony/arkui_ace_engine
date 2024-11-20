@@ -84,6 +84,7 @@ ace_unittest("capi_all_modifiers_test") {
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",
     "security_component_method_modifier_test.cpp",
+    "security_component_method_modifier_test_2.cpp",
     "select_modifier_test.cpp",
     "shape_modifier_test.cpp",
     "side_bar_container_modifier_test.cpp",
