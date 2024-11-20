@@ -832,12 +832,17 @@ void SetHasCustomRadius(
     }
 }
 
-void SetMenuFocusRule(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+void SetMenuFocusRule(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
     auto focusHub = menuNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetDirectionalKeyFocus(menuParam.enableDirectionalKeyFocus);
+
+    auto pipelineContext = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    focusHub->SetDirectionalKeyFocus(menuTheme->GetEnableDirectionalKeyFocus());
 }
 } // namespace
 
@@ -922,7 +927,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
-    SetMenuFocusRule(menuNode, menuParam);
+    SetMenuFocusRule(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
@@ -1086,7 +1091,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
-    SetMenuFocusRule(menuNode, menuParam);
+    SetMenuFocusRule(menuNode);
 
     SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
     // put custom node in a scroll to limit its height

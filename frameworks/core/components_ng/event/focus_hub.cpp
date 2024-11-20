@@ -939,7 +939,8 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && IsInFocusGroup()) {
         return false;
     }
-    if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
+    auto isDirectionalKeyFocus = keyEvent.IsDirectionalKey() || enableDirectionalKeyFocus_ ;
+    if ((keyEvent.IsKey({ KeyCode::KEY_TAB }) || isDirectionalKeyFocus) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
         return false;
     }
