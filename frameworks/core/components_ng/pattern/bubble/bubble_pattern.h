@@ -74,7 +74,6 @@ public:
         bubbleMethod->SetArrowWidth(arrowWidth_);
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
-        bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
@@ -310,7 +309,6 @@ private:
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     float arrowWidth_ = Dimension(16.0_vp).ConvertToPx();
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
-    Placement arrowBuildPlacement_ = Placement::BOTTOM;
 
     bool showArrow_ = false;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;

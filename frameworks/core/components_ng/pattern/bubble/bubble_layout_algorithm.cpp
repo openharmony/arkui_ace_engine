@@ -1581,7 +1581,6 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
     Placement arrowBuildplacement = Placement::NONE;
     if (enableArrow_ && showArrow_) {
         GetArrowBuildPlacement(arrowBuildplacement);
-        arrowBuildPlacement_ = arrowBuildplacement;
     }
     if ((arrowBuildplacement == Placement::TOP_LEFT) || (arrowBuildplacement == Placement::LEFT_TOP)) {
         path += MoveTo(childOffset_.GetX(), childOffset_.GetY());
