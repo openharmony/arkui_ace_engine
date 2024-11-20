@@ -41,6 +41,7 @@
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
+      OHOS::Ace::ActionSheetModel::*;
       OHOS::Ace::Animator::*;
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
