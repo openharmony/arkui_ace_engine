@@ -210,10 +210,10 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
@@ -703,6 +703,16 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 };
 globalThis.__viewPuStack__ = new Array();
+globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent) {
+    if (globalThis.__viewPuStack__ === undefined || globalThis.__viewPuStack__.length === 0) {
+        return false;
+    }
+    const _BuilderNodeView = globalThis.__viewPuStack__?.pop();
+    if (_BuilderNodeView) {
+        globalThis.__viewPuStack__?.push(_BuilderNodeView);
+    }
+    return (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
+};
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

@@ -4047,11 +4047,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             parent.addChild(this); // FIXME
         }
         this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
-        const _BuilderNodeView = globalThis.__viewPuStack__?.pop();
-        this.__isBlockRecycleOrReuse__ = (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
-        if (_BuilderNodeView) {
-            globalThis.__viewPuStack__?.push(_BuilderNodeView);
-        }
+        this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
