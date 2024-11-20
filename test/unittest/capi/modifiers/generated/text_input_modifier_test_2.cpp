@@ -440,7 +440,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
 {
     Ark_Number initValueMaxLines;
 
@@ -1273,7 +1273,7 @@ HWTEST_F(TextInputModifierTest, setSelectAllTestSelectAllValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1287,13 +1287,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueMinFontSize;
 
     // Initial setup
     initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](const std::string& input,
                           const Ark_Union_Number_String_Resource& value, const std::string& expectedStr) {
@@ -1307,13 +1307,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeValidValue
             << "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value), expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value), expected);
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -1321,13 +1323,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeValidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMinFontSizeTestMinFontSizeInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueMinFontSize;
 
     // Initial setup
     initValueMinFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMinFontSize](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
@@ -1342,7 +1344,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeInvalidVal
             << "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
 }
@@ -1352,7 +1362,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMinFontSizeTestMinFontSizeInvalidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1366,13 +1376,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueMaxFontSize;
 
     // Initial setup
     initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](const std::string& input,
                           const Ark_Union_Number_String_Resource& value, const std::string& expectedStr) {
@@ -1386,13 +1396,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeValidValue
             << "Input value is: " << input << ", method: setMaxFontSize, attribute: maxFontSize";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value), expected);
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value), expected);
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -1400,13 +1412,13 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeValidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setMaxFontSizeTestMaxFontSizeInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueMaxFontSize;
 
     // Initial setup
     initValueMaxFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMaxFontSize](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
@@ -1421,7 +1433,15 @@ HWTEST_F(TextInputModifierTest, DISABLED_setMaxFontSizeTestMaxFontSizeInvalidVal
             << "Input value is: " << input << ", method: setMaxFontSize, attribute: maxFontSize";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
 }

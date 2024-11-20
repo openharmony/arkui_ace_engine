@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/text_input_controller_peer.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/converter_union.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -28,11 +29,6 @@ namespace {
 constexpr int32_t MIN_THRESHOLD_PERCENTAGE = 1;
 constexpr int32_t MAX_THRESHOLD_PERCENTAGE = 100;
 
-struct TextInputOptions {
-    std::optional<std::string> placeholder;
-    std::optional<std::string> text;
-    std::optional<Ark_NativePointer> controller;
-};
 struct InputCounterOptions {
     std::optional<int> thresholdPercentage;
     std::optional<bool> highlightBorder;
@@ -40,16 +36,6 @@ struct InputCounterOptions {
 } // namespace
 
 namespace Converter {
-template<>
-TextInputOptions Convert(const Ark_TextInputOptions& src)
-{
-    TextInputOptions options;
-    options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
-    options.text = Converter::OptConvert<std::string>(src.text);
-    options.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
-    return options;
-}
-
 template<>
 InputCounterOptions Convert(const Ark_InputCounterOptions& src)
 {
@@ -93,14 +79,23 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = value ? Converter::OptConvert<TextInputOptions>(*value) : std::nullopt;
-    if (options) {
-        TextFieldModelNG::SetTextFieldText(frameNode, options->text);
-        TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, options->placeholder);
-        auto internalController = TextFieldModelNG::GetOrCreateController(frameNode);
-        CHECK_NULL_VOID(options->controller);
+    CHECK_NULL_VOID(value);
+    std::optional<std::string> placeholder;
+    std::optional<std::string> text;
+    TextInputControllerPeer* peerPtr = nullptr;
+    auto textInputOptions = Converter::OptConvert<Ark_TextInputOptions>(*value);
+    if (textInputOptions) {
+        placeholder = Converter::OptConvert<std::string>(textInputOptions.value().placeholder);
+        text = Converter::OptConvert<std::string>(textInputOptions.value().text);
+        auto controller = Converter::OptConvert<Ark_TextInputController>(textInputOptions.value().controller);
+        if (controller.has_value()) {
+            peerPtr = reinterpret_cast<TextInputControllerPeer*>(controller.value().ptr);
+        }
     }
-    LOGE("TextInputInterfaceModifier::SetTextInputOptionsImpl does not fully implemented");
+    auto controller = TextFieldModelNG::GetController(frameNode, placeholder, text);
+    if (peerPtr) {
+        peerPtr->SetController(controller);
+    }
 }
 } // TextInputInterfaceModifier
 namespace TextInputAttributeModifier {
@@ -529,6 +524,8 @@ void MinFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     TextFieldModelNG::SetAdaptMinFontSize(frameNode, convValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
@@ -538,6 +535,8 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, convValue);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,

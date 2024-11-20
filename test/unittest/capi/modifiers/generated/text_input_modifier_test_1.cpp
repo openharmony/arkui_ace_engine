@@ -1086,7 +1086,7 @@ HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Level1)
 {
     Ark_Length initValueFontSize;
 
@@ -1187,7 +1187,7 @@ HWTEST_F(TextInputModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1201,7 +1201,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
     Ark_Union_Number_FontWeight_String initValueFontWeight;
 
@@ -1224,10 +1224,10 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightValidValues,
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value), expected);
     }
 }
@@ -1237,7 +1237,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_FontWeight_String initValueFontWeight;
 
@@ -1258,6 +1258,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightInvalidValue
             << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+    }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
@@ -1270,7 +1276,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontWeightTestFontWeightInvalidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFamilyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontFamilyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1284,7 +1290,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontFamilyTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontFamilyTestFontFamilyValidValues, TestSize.Level1)
 {
     Ark_ResourceStr initValueFontFamily;
 
@@ -1317,7 +1323,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
     Ark_ResourceStr initValueFontFamily;
 
