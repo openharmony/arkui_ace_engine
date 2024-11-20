@@ -433,7 +433,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
         isShiftKeyPressed =
-            pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_SHIFT_RIGHT);
+            event.HasKey(KeyCode::KEY_SHIFT_LEFT) || event.HasKey(KeyCode::KEY_SHIFT_RIGHT);
         hasDifferentDirectionGesture = pipeline->HasDifferentDirectionGesture();
     }
     delta_ = event.ConvertToOffset(isShiftKeyPressed, hasDifferentDirectionGesture);

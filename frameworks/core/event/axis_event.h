@@ -189,6 +189,18 @@ struct AxisEvent final : public UIInputEvent {
     {
         return std::make_pair(event.horizontalAxis - horizontalAxis, event.verticalAxis - verticalAxis);
     }
+
+    bool HasKey(KeyCode expectCode) const
+    {
+        auto curPressedCode = pressedCodes.rbegin();
+        while (curPressedCode != pressedCodes.rend()) {
+            if (expectCode == *curPressedCode) {
+                return true;
+            }
+            ++curPressedCode;
+        }
+        return false;
+    }
 };
 
 class AxisInfo : public BaseEventInfo {
