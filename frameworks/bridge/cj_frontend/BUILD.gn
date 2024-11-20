@@ -175,6 +175,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_view_abstract_ffi.cpp",
       "interfaces/cj_ffi/cj_view_context_ffi.cpp",
       "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
+      "interfaces/cj_ffi/cj_water_flow_ffi.cpp",
       "interfaces/cj_ffi/component_snapshot/cj_component_snapshot_ffi.cpp",
       "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",

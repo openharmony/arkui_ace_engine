@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 using GetItemMainSizeByIndex = std::function<float(int32_t)>;
 
-class WaterFlowSections : public virtual AceType {
+class ACE_FORCE_EXPORT WaterFlowSections : public virtual AceType {
     DECLARE_ACE_TYPE(WaterFlowSections, AceType)
 public:
     struct Section {
@@ -76,12 +76,12 @@ public:
      * @param deleteCount number of sections to delete at index [start].
      * @param newSections to insert at index [start].
      */
-    void ChangeData(size_t start, size_t deleteCount, const std::vector<Section>& newSections);
+    ACE_FORCE_EXPORT void ChangeData(size_t start, size_t deleteCount, const std::vector<Section>& newSections);
 
     // replace all sections from start
-    void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
+    ACE_FORCE_EXPORT void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
 
-    const std::vector<Section>& GetSectionInfo() const
+    ACE_FORCE_EXPORT const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
     }
