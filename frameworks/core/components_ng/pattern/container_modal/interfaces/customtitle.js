@@ -186,14 +186,15 @@ const c1 = '8vp';
 const d1 = '12vp';
 const e1 = '10vp';
 const f1 = '16fp';
-const g1 = 600;
+const g1 = 1000;
 const f3 = 'arkui_custom_max_click';
 const r3 = 'arkui_custom_min_click';
 const s3 = 'arkui_custom_close_click';
 const u3 = 'arkui_custom_left_split_click';
 const v3 = 'arkui_custom_right_split_click';
 const e4 = 'arkui_custom_button_point_light_anim';
-const c5 = 'arkui_custom_button_rect_change';
+const f4 = 'arkui_custom_button_rect_change';
+const g4 = 'arkui_custom_menu_width_change';
 const x3 = 'arkui_color_configuration';
 const y3 = 'arkui_hide_split';
 const z3 = 'arkui_maximize_visibility';
@@ -201,6 +202,7 @@ const a4 = 'arkui_minimize_visibility';
 const b4 = 'arkui_close_visibility';
 const c4 = 'arkui_close_status';
 const d4 = 'arkui_maximize_is_recover';
+const h4 = 'arkui_menu_width_change';
 const h1 = {
     bundleName: '',
     moduleName: '',
@@ -351,6 +353,7 @@ class v1 extends ViewPU {
         this.a3 = new ObservedPropertyObjectPU(Color.Transparent, this, "leftSplitBackgroundColor");
         this.b3 = new ObservedPropertyObjectPU(Color.Transparent, this, "rightSplitBackgroundColor");
         this.c3 = new ObservedPropertySimplePU(1.0, this, "rowOpacity");
+        this.e3 = new ObservedPropertySimplePU('224vp', this, "menuWidth");
         this.isFocused = true;
         this.isDark = false;
         this.isHoverShowMenu = false;
@@ -438,6 +441,9 @@ class v1 extends ViewPU {
         if (params.rowOpacity !== undefined) {
             this.rowOpacity = params.rowOpacity;
         }
+        if (params.menuWidth !== undefined) {
+            this.menuWidth = params.menuWidth;
+        }
         if (params.isFocused !== undefined) {
             this.isFocused = params.isFocused;
         }
@@ -483,6 +489,7 @@ class v1 extends ViewPU {
         this.a3.purgeDependencyOnElmtId(rmElmtId);
         this.b3.purgeDependencyOnElmtId(rmElmtId);
         this.c3.purgeDependencyOnElmtId(rmElmtId);
+        this.e3.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.w1.aboutToBeDeleted();
@@ -511,6 +518,7 @@ class v1 extends ViewPU {
         this.a3.aboutToBeDeleted();
         this.b3.aboutToBeDeleted();
         this.c3.aboutToBeDeleted();
+        this.e3.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -670,6 +678,12 @@ class v1 extends ViewPU {
     set rowOpacity(newValue) {
         this.c3.set(newValue);
     }
+    get menuWidth() {
+        return this.e3.get();
+    }
+    set menuWidth(newValue) {
+        this.e3.set(newValue);
+    }
     onWindowFocused() {
         this.rowOpacity = 1.0;
         this.isFocused = true;
@@ -706,6 +720,9 @@ class v1 extends ViewPU {
         else if (eventName == d4) {
             this.setMaximizeIsRecover(this.parseBoolean(param));
         }
+        else if (eventName == h4) {
+            this.setMenuWidth(param);
+        }
     }
     onMaximizeButtonClick() {
         this.onCancelMenuTimer();
@@ -727,7 +744,10 @@ class v1 extends ViewPU {
         ContainerModal.callNative(e4);
     }
     onAreaChangeEvent(oldValue, newValue) {
-        ContainerModal.callNative(c5);
+        ContainerModal.callNative(f4);
+    }
+    onMenuWidthChange() {
+        ContainerModal.callNative(g4,"125833961");
     }
     setHideSplit(n3) {
         this.hideSplit = n3;
@@ -760,6 +780,9 @@ class v1 extends ViewPU {
         else {
             this.maximizeResource = h1;
         }
+    }
+    setMenuWidth(width) {
+        this.menuWidth = (80 + parseInt(width)) + 'vp';
     }
     setRowVisibility() {
         if (this.maximizeVisibility == Visibility.None && this.minimizeVisibility == Visibility.None &&
@@ -817,8 +840,7 @@ class v1 extends ViewPU {
     MenuBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width('224vp');
-            Column.height('83vp');
+            Column.width(this.menuWidth);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
@@ -958,6 +980,7 @@ class v1 extends ViewPU {
             GestureGroup.create(GestureMode.Exclusive);
             LongPressGesture.create({ repeat: false });
             LongPressGesture.onAction(() => {
+                this.onMenuWidthChange();
                 this.isShowMenu = true;
             });
             LongPressGesture.pop();
@@ -971,6 +994,7 @@ class v1 extends ViewPU {
             Button.onHover((isHover, event) => {
                 this.onHoverMaximizeButton(isHover);
                 if (isHover) {
+                    this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
                 }
                 else {

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
-
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
@@ -29,7 +28,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -967,4 +966,30 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
     }
     return true;
 }
+
+void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
+{
+    std::string text = "";
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        text = resAdapter->GetString(resId);
+    }
+    if (text.empty()) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "text is empty");
+        return;
+    }
+
+    MeasureContext textCtx;
+    textCtx.textContent = text;
+    textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
+    auto textSize = MeasureUtil::MeasureTextSize(textCtx);
+
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    CalcDimension widthDimension(textSize.Width(), DimensionUnit::PX);
+    auto width = widthDimension.ConvertToVp();
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "GetMenuWidth width = %{public}f", width);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
+}
+
 } // namespace OHOS::Ace::NG
