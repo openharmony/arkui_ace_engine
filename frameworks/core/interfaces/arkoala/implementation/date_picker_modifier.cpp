@@ -172,7 +172,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+    auto onChange = [frameNode](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
         CHECK_NULL_VOID(eventInfo);
@@ -192,14 +192,14 @@ void OnChangeImpl(Ark_NativePointer node,
             .month = Converter::ArkValue<Opt_Number>(month),
             .day = Converter::ArkValue<Opt_Number>(day),
         };
-         arkCallback.Invoke(result);
+        GetFullAPI()->getEventsAPI()->getDatePickerEventsReceiver()->onChange(
+            frameNode->GetId(), result);
     };
     DatePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnDateChangeImpl(Ark_NativePointer node,
                       const Callback_Date_Void* value)
 {
-
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
