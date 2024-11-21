@@ -415,6 +415,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
+    dragDropManager->SetIsDisableDefaultDropAnimation(false);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -558,6 +559,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->ResetDragging();
         }
         dragDropManager->SetIsDragNodeNeedClean(false);
+        dragDropManager->SetIsDisableDefaultDropAnimation(true);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             auto overlayManager = pipelineContext->GetOverlayManager();
