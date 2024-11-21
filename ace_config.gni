@@ -64,6 +64,9 @@ declare_args() {
 
   # Enable aps framework support
   ace_engine_feature_enable_aps = false
+
+  # Enable wearable product support
+  ace_engine_feature_wearable = false
 }
 
 enable_dump_drawcmd = false
@@ -315,4 +318,8 @@ if (ace_engine_feature_enable_split_mode) {
 
 if (ace_engine_feature_enable_nav_split_mode) {
   ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
+}
+
+if (ace_engine_feature_wearable) {
+  ace_common_defines += [ "ARKUI_WEARABLE" ]
 }
