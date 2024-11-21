@@ -17,6 +17,11 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <string_ex.h>
 #include <unordered_map>
 #include <vector>
@@ -37,6 +42,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
+#include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
@@ -318,6 +325,11 @@ const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
 const std::string STRING_LF = "\n";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
+#define GPU_ABNORMAL_VALUE (32 * 1024)
+#define GPU_SERIOUS_ABNORMAL_VALUE (32 * 1024 * 1024)
+#define SIZE_UNIT 1024
+#define FLOAT_UNIT 100.0F
+#define DECIMAL_POINTS 2
 
 class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
@@ -7178,5 +7190,28 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
         return delegate_->GetAccessibilityVisible(accessibilityId);
     }
     return true;
+}
+
+void WebPattern::DumpInfo()
+{
+    float totalSize = DumpGpuInfo();
+    if (totalSize > GPU_SERIOUS_ABNORMAL_VALUE) {
+        totalSize = totalSize / SIZE_UNIT / SIZE_UNIT; // 转换成MB
+    } else if (totalSize > GPU_ABNORMAL_VALUE) {
+        totalSize = totalSize / SIZE_UNIT;
+    }
+    totalSize = std::round(totalSize * FLOAT_UNIT) / FLOAT_UNIT; // 变为浮点数
+    // 使用ostringstream来格式化数字为字符串
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
+    std::string formattedSize = oss.str(); // 获取格式化后的字符串
+    DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
+    DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
+}
+
+float WebPattern::DumpGpuInfo()
+{
+    float totalSize = delegate_->GetNweb()->DumpGpuInfo();
+    return totalSize;
 }
 } // namespace OHOS::Ace::NG
