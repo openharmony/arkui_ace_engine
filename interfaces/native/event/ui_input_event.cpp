@@ -164,7 +164,7 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
             return touchEvent->timeStamp;
         }
         case TOUCH_EVENT_ID: {
-            const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+            const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
             if (!uiEvent) {
                 LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
                 return 0;
@@ -172,7 +172,7 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
             return uiEvent->time.time_since_epoch().count();
         }
         case AXIS_EVENT_ID: {
-            const auto* uiEvent = reinterpret_cast<const OHOS::Ace::UIInputEvent*>(event->inputEvent);
+            const auto* uiEvent = reinterpret_cast<const OHOS::Ace::PointerEvent*>(event->inputEvent);
             if (!uiEvent) {
                 LOGE("The parameter of OH_ArkUI_UIInputEvent_GetEventTime is invalid");
                 return 0;

@@ -15,7 +15,7 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
-AvgPoint ResampleAlgo::GetAvgPoint(const std::vector<UIInputEvent>&& events,
+AvgPoint ResampleAlgo::GetAvgPoint(const std::vector<PointerEvent>&& events,
     bool isScreen)
 {
     float avgX = 0.0f;
@@ -90,8 +90,8 @@ ResamplePoint ResampleAlgo::LinearInterpolation(const AvgPoint& history, const A
     return {};
 }
 
-ResamplePoint ResampleAlgo::GetResampleCoord(const std::vector<UIInputEvent>&& history,
-    const std::vector<UIInputEvent>&& current, uint64_t nanoTimeStamp,
+ResamplePoint ResampleAlgo::GetResampleCoord(const std::vector<PointerEvent>&& history,
+    const std::vector<PointerEvent>&& current, uint64_t nanoTimeStamp,
     bool isScreen)
 {
     if (history.empty() || current.empty()) {

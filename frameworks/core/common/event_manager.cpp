@@ -2347,10 +2347,10 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
 bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
     newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
     bool ret = false;
     if (newXy.x != 0 && newXy.y != 0) {
@@ -2403,10 +2403,10 @@ TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, 
 MouseEvent EventManager::GetResampleMouseEvent(
     const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
     MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
     if (newXy.x != 0 && newXy.y != 0) {
         newMouseEvent.x = newXy.x;
@@ -2451,12 +2451,12 @@ MouseEvent EventManager::GetMouseLatestPoint(const std::vector<MouseEvent>& curr
     return result;
 }
 
-PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-    const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp)
+DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPointerEvent>& history,
+    const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    PointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    DragPointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
 
     if (newXy.x != 0 && newXy.y != 0) {
         newPointerEvent.x = newXy.x;
@@ -2468,10 +2468,10 @@ PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEven
     return newPointerEvent;
 }
 
-PointerEvent EventManager::GetPointerLatestPoint(const std::vector<PointerEvent>& current,
+DragPointerEvent EventManager::GetPointerLatestPoint(const std::vector<DragPointerEvent>& current,
     uint64_t nanoTimeStamp)
 {
-    PointerEvent result;
+    DragPointerEvent result;
     uint64_t gap = UINT64_MAX;
     for (auto iter = current.begin(); iter != current.end(); iter++) {
         uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
