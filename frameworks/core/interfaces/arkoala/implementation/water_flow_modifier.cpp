@@ -193,7 +193,6 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
-
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
