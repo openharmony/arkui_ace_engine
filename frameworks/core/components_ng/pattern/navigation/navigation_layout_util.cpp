@@ -44,11 +44,14 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
 
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
-    columnInfo->GetParent()->BuildColumnWidth();
+    CHECK_NULL_RETURN(columnInfo, false);
+    auto columnInfoParent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(columnInfoParent, false);
+    columnInfoParent->BuildColumnWidth();
 
-    auto currentColumns = columnInfo->GetParent()->GetColumns();
+    auto currentColumns = columnInfoParent->GetColumns();
     float gridWidth = static_cast<float>(columnInfo->GetWidth(rotationLimitCount));
-    float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
+    float gutterWidth = columnInfoParent->GetGutterWidth().ConvertToPx();
     float hideLimitWidth = gridWidth + gutterWidth * 2;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (currentColumns >= static_cast<int32_t>(rotationLimitCount) &&
