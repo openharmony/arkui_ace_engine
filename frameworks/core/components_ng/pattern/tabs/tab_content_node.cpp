@@ -125,7 +125,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     font->Put("size", labelStyle.fontSize.value_or(Dimension(0)).ToString().c_str());
     font->Put("weight",
         V2::ConvertWrapFontWeightToStirng(labelStyle.fontWeight.value_or(FontWeight::NORMAL)).c_str());
-    std::vector<std::string> emptyFontFamily = { "" };
+    std::vector<std::string> emptyFontFamily = { "HarmonyOS Sans" };
     auto fontFamilyVector = labelStyle.fontFamily.value_or(emptyFontFamily);
     std::string fontFamily = fontFamilyVector.at(0);
     for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
