@@ -1177,10 +1177,10 @@ template<>
 void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src)
 {
     switch (src) {
-        case ARK_CHAIN_STYLE_PACKED: dst = ChainStyle::PACKED; break;
         case ARK_CHAIN_STYLE_SPREAD: dst = ChainStyle::SPREAD; break;
         case ARK_CHAIN_STYLE_SPREAD_INSIDE: dst = ChainStyle::SPREAD_INSIDE; break;
-    default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
+        case ARK_CHAIN_STYLE_PACKED: dst = ChainStyle::PACKED; break;
+        default: LOGE("Unexpected enum value in Ark_ChainStyle: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
