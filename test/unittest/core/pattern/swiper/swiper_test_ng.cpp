@@ -160,6 +160,18 @@ void SwiperTestNg::ChangeIndex(int32_t index)
     FlushLayoutTask(frameNode_);
 }
 
+void SwiperTestNg::SwipeTo(int32_t index)
+{
+    controller_->SwipeTo(index);
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::SwipeToWithoutAnimation(int32_t index)
+{
+    controller_->SwipeToWithoutAnimation(index);
+    FlushLayoutTask(frameNode_);
+}
+
 /**
  * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: OnDirtyLayoutWrapperSwap

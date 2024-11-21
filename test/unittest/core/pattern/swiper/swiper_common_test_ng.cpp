@@ -1051,4 +1051,35 @@ HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtStart());
     EXPECT_TRUE(pattern_->IsAtEnd());
 }
+
+/**
+ * @tc.name: SwiperIndicatorAccessibilityProperty001
+ * @tc.desc: check function about SwiperIndicatorAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperIndicatorAccessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. indicator type is DOT, indicator use mode is INNER
+     * @tc.expected: check function.
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto frameNode = accessibilityProperty->GetSwiperNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto currentIndex = accessibilityProperty->GetCurrentIndex();
+    EXPECT_EQ(currentIndex, 0);
+    auto beginIndex = accessibilityProperty->GetBeginIndex();
+    EXPECT_EQ(beginIndex, 0);
+    auto endIndex = accessibilityProperty->GetEndIndex();
+    EXPECT_EQ(endIndex, 0);
+    auto collectionItemCounts = accessibilityProperty->GetCollectionItemCounts();
+    EXPECT_EQ(collectionItemCounts, 4);
+    auto GetAccessibilityText = accessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(GetAccessibilityText, "");
+    auto accessibilityAction = accessibilityProperty->GetAccessibilityValue();
+    EXPECT_EQ(accessibilityAction.current, 0);
+}
 } // namespace OHOS::Ace::NG
