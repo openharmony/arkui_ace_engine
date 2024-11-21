@@ -1243,6 +1243,30 @@ void CalendarModelNG::SetWorkStateStyle(FrameNode* frameNode, const WorkStateSty
     }
 }
 
+void CalendarModelNG::SetOnSelectChange(FrameNode* frameNode,
+    std::function<void(const std::string&)>&& selectedChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode = frameNode->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        CHECK_NULL_VOID(calendarFrameNode);
+        auto pattern = calendarFrameNode->GetPattern<CalendarMonthPattern>();
+        auto calendarEventHub = pattern->GetEventHub<CalendarEventHub>();
+        CHECK_NULL_VOID(calendarEventHub);
+        calendarEventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
+    }
+}
+
+void CalendarModelNG::SetOnRequestData(FrameNode* frameNode, std::function<void(const std::string&)>&& requestData)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CalendarEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnRequestDataEvent(std::move(requestData));
+}
+
 void CalendarModelNG::SetCurrentData(const ObtainedMonth& currentData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
