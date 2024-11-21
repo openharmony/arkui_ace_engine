@@ -3769,9 +3769,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
             SearchElementInfoByAccessibilityIdNG(elementId, mode, infos, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
-            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-                "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-                infos.size(), elementId);
             SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
             return;
         }
@@ -3786,9 +3783,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
-        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-            "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-            infos.size(), elementId);
         SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
         return;
     }
@@ -3798,9 +3792,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     infos.push_back(nodeInfo);
     // cache parent/siblings/children infos
     UpdateCacheInfo(infos, mode, node, jsAccessibilityManager, jsAccessibilityManager->windowId_);
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
-        infos.size(), elementId);
+
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
 }
 
