@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -279,30 +279,30 @@ const std::string HUE_ROTATE = "80";
 const std::string FE_COLOR_MATRIX =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feColorMatrix in=\"SourceGraphic\" type=\"matrix\" values=\"R 0 0 0 0 0 G 0 0 0 0 0 B 0 0 0 0 0 A 0\" />"
-        "<feColorMatrix type=\"saturate\" values=\"10\"/>"
-        "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
-        "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
+    "<feColorMatrix in=\"SourceGraphic\" type=\"matrix\" values=\"R 0 0 0 0 0 G 0 0 0 0 0 B 0 0 0 0 0 A 0\" />"
+    "<feColorMatrix type=\"saturate\" values=\"10\"/>"
+    "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
+    "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
     "</filter>"
     "<g>"
-        "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
     "</g>"
     "<g filter=\"url(#colorMatrix)\">"
-        "<circle cx=\"80\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "<circle cx=\"80\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 const std::string FE_GAUSSIAN_BLUR =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feGaussianBlur stdDeviation=\"10 50\"/>"
-        "<feGaussianBlur stdDeviation=\"10\"/>"
-        "<feGaussianBlur stdDeviation=\"abc abc\"/>"
+    "<feGaussianBlur stdDeviation=\"10 50\"/>"
+    "<feGaussianBlur stdDeviation=\"10\"/>"
+    "<feGaussianBlur stdDeviation=\"abc abc\"/>"
     "</filter>"
     "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 constexpr uint32_t RED_COLOR = 0xffff0000;
 constexpr uint32_t GREEN_COLOR = 0xff008000;
@@ -319,18 +319,18 @@ const std::string FE_FLOOD_AND_COMPOSITE =
 const std::string FE_BLEND =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feBlend in=\"SourceGraphic\" in2=\"SourceAlpha\" mode=\"lighten\" />"
+    "<feBlend in=\"SourceGraphic\" in2=\"SourceAlpha\" mode=\"lighten\" />"
     "</filter>"
     "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 const std::string IMAGE_HREF = "test.png";
 const std::string IMAGE_LABEL =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<image id=\"image001\" x=\"150\" y=\"20\" width=\"100\" height=\"100\" href=\"test.png\" />"
-"</svg>";
+    "</svg>";
 
 constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
 constexpr float IMAGE_COMPONENT_HEIGHT = 100.0f;
@@ -1510,7 +1510,7 @@ HWTEST_F(ParseTestNg, ParseCircleTest002, TestSize.Level1)
      * @tc.expected: Execute CallBack Function
      */
     int testData = 0;
-    std::function<void()> callback = [&testData](){ testData = 1; };
+    std::function<void()> callback = [&testData]() { testData = 1; };
     svgAnimation->AddOnFinishCallBack(callback);
     RefPtr<Animator> animation = svgAnimation->animator_;
     animation->NotifyStopListener();
@@ -1563,10 +1563,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
      * @tc.expected: Execute function return value not is nullptr
      */
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    SvgFeIn in = {
-        .in = SvgFeInType::SOURCE_GRAPHIC,
-        .id = ""
-    };
+    SvgFeIn in = { .in = SvgFeInType::SOURCE_GRAPHIC, .id = "" };
     in.in = SvgFeInType::SOURCE_GRAPHIC;
     auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
@@ -1672,7 +1669,7 @@ HWTEST_F(ParseTestNg, ParseNodeTest002, TestSize.Level1)
     svgDom->root_->transform_ = "123";
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     svgDom->root_->transform_.clear();
-    svgDom->root_->animateTransform_["123"] = {0.1, 0.2};
+    svgDom->root_->animateTransform_["123"] = { 0.1, 0.2 };
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_FALSE(svgDom->root_->animateTransform_.empty());
 }
@@ -1954,7 +1951,7 @@ HWTEST_F(ParseTestNg, ParseNodeTest009, TestSize.Level1)
 
     svgNode->SetAttr("fill", "none");
     EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetColor(), Color(0x00000000));
-    
+
     svgNode->SetAttr("fillOpacity", "0.123");
     EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetOpacity().GetValue(), 0.123);
 
