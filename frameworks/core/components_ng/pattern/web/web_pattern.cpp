@@ -3162,7 +3162,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto rect = frameNode->GetGeometryNode()->GetFrameRect();
+    auto rect = frameNode->GetRenderContext()->GetPaintRectWithoutTransform();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
     // Scroll focused node into view when keyboard show.
@@ -4854,6 +4854,7 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     auto offsetY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    ScopedLayout scope(pipeline.GetRawPtr());
     if (GreatNotEqual(offsetX + textWidth, pipeline->GetCurrentRootWidth())) {
         offsetX = pipeline->GetCurrentRootWidth() - textWidth;
     }
