@@ -51,6 +51,7 @@ public:
     void GetGrid();
     GridModelNG CreateGrid();
     GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height
@@ -74,6 +75,7 @@ public:
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
 
     void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
+    RefPtr<FrameNode> GetItem(int32_t idx, bool asCache);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;

@@ -364,6 +364,7 @@ void GridIrregularFiller::SetItemInfo(const RefPtr<LayoutWrapper>& item, int32_t
     auto pattern = item->GetHostNode()->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     auto props = pattern->GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_VOID(props);
     props->UpdateMainIndex(row);
     props->UpdateCrossIndex(col);
 
