@@ -76,5 +76,8 @@ struct SymbolData {
 struct FontFamilies {
     std::vector<std::string> families;
 };
+
+using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
+using PickerValueType = std::variant<std::string, std::vector<std::string>>;
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

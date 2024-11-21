@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 
@@ -288,5 +289,6 @@ void GaugeModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optional
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
     }
+    ViewAbstract::SetPrivacySensitive(frameNode, flag);
 }
 } // namespace OHOS::Ace::NG

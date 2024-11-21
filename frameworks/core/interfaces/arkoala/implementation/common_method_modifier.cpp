@@ -247,28 +247,6 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 }
 
 template<>
-GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
-{
-    GradientColor gradientColor;
-    gradientColor.SetHasValue(false);
-
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.SetColor(colorOpt.value());
-        gradientColor.SetHasValue(true);
-    }
-
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    //  [0, 1] -> [0, 100.0];
-    gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
-
-    return gradientColor;
-}
-
-template<>
 Gradient Convert(const Ark_Type_CommonMethod_radialGradient_value& src)
 {
     NG::Gradient gradient;
@@ -1573,29 +1551,32 @@ void MotionBlurImpl(Ark_NativePointer node,
 void BrightnessImpl(Ark_NativePointer node,
                     const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBrightness(frameNode, convValue);
+    auto convValue = value
+        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetBrightness(frameNode, convValue);
 }
 void ContrastImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetContrast(frameNode, convValue);
+    auto convValue = value
+        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetContrast(frameNode, convValue);
 }
 void GrayscaleImpl(Ark_NativePointer node,
                    const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetGrayscale(frameNode, convValue);
+    auto convValue = value
+        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetGrayScale(frameNode, convValue);
 }
 void ColorBlendImpl(Ark_NativePointer node,
                     const Ark_Union_Color_String_Resource* value)
@@ -1609,20 +1590,22 @@ void ColorBlendImpl(Ark_NativePointer node,
 void SaturateImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSaturate(frameNode, convValue);
+    auto convValue = value
+        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetSaturate(frameNode, convValue);
 }
 void SepiaImpl(Ark_NativePointer node,
                const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSepia(frameNode, convValue);
+    auto convValue = value
+        ? std::optional(Dimension(Converter::Convert<float>(*value))) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetSepia(frameNode, convValue);
 }
 void InvertImpl(Ark_NativePointer node,
                 const Ark_Union_Number_InvertOptions* value)
@@ -1645,10 +1628,10 @@ void HueRotateImpl(Ark_NativePointer node,
 void UseShadowBatchingImpl(Ark_NativePointer node,
                            Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetUseShadowBatching(frameNode, convValue);
+    ViewAbstract::SetUseShadowBatching(frameNode, convValue);
 }
 void UseEffectImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -1656,7 +1639,7 @@ void UseEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetUseEffect(frameNode, convValue);
+    ViewAbstract::SetUseEffect(frameNode, convValue);
 }
 void RenderGroupImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -1664,15 +1647,15 @@ void RenderGroupImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetRenderGroup(frameNode, convValue);
+    ViewAbstract::SetRenderGroup(frameNode, convValue);
 }
 void FreezeImpl(Ark_NativePointer node,
                 Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetFreeze(frameNode, convValue);
+    // auto convValue = Converter::Convert<bool>(value);
+    // ViewAbstract::SetFreeze(frameNode, convValue);
 }
 void TranslateImpl(Ark_NativePointer node,
                    const Ark_TranslateOptions* value)

@@ -370,12 +370,18 @@ namespace Converter {
     template<> DimensionRect Convert(const Ark_Rectangle &src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> Gradient Convert(const Ark_LinearGradient& value);
+    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
+    template<> PickerValueType Convert(const Ark_String& src);
+    template<> PickerValueType Convert(const Array_String& src);
+    template<> PickerSelectedType Convert(const Ark_Number& src);
+    template<> PickerSelectedType Convert(const Array_Number& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
@@ -385,6 +391,7 @@ namespace Converter {
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
+    template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
@@ -450,6 +457,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);

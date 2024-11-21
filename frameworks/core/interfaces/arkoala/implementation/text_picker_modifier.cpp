@@ -23,10 +23,9 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 namespace OHOS::Ace::NG {
-using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
-using PickerValueType = std::variant<std::string, std::vector<std::string>>;
 using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>>>;
@@ -188,43 +187,6 @@ void ValidateSingleTextPickerOptions(TextPickerOptions& options)
 }
 
 namespace OHOS::Ace::NG::Converter {
-    template<>
-    PickerValueType Convert(const Ark_String& src)
-    {
-        auto str = Converter::Convert<std::string>(src);
-        return str;
-    }
-
-    template<>
-    PickerValueType Convert(const Array_String& src)
-    {
-        return Converter::Convert<std::vector<std::string>>(src);
-    }
-
-    template<>
-    PickerSelectedType Convert(const Ark_Number& src)
-    {
-        auto selected = Converter::Convert<int32_t>(src);
-        if (selected < 0) {
-            selected = 0;
-        }
-        return static_cast<uint32_t>(selected);
-    }
-
-    template<>
-    PickerSelectedType Convert(const Array_Number& src)
-    {
-        std::vector<uint32_t> dst;
-        std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
-        for (auto selected : tmp) {
-            if (selected < 0) {
-                selected = 0;
-            }
-            dst.push_back(static_cast<uint32_t>(selected));
-        }
-        return dst;
-    }
-
     template<>
     PickerRangeType Convert(const Array_String& src)
     {
@@ -560,7 +522,9 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::vector<std::string>& values, const std::vector<double>&selecteds) {
+    auto onChange =
+        [arkCallback = CallbackHelper(*value)](const std::vector<std::string>& values,
+                                               const std::vector<double>&selecteds) {
         Converter::ArkArrayHolder<Array_String> stringHolder(values);
         Array_String stringArrayValues = stringHolder.ArkValue();
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
@@ -572,7 +536,7 @@ void OnChangeImpl(Ark_NativePointer node,
         Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
         Array_Number intArrayValues = numberHolder.ArkValue();
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
-        GetFullAPI()->getEventsAPI()->getTextPickerEventsReceiver()->onChange(frameNode->GetId(), value, index);
+        arkCallback.Invoke(value, index);
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChange));
 }

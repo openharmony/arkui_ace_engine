@@ -60,6 +60,9 @@ const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
 const auto RES_NAME = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::COLOR);
 const auto RES_NAME1 = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::FLOAT);
 
+const auto FONT_SIZE_ATTR_DEFAULT_VALUE = "16.00fp";
+const auto TEXT_OVERFLOW_ATTR_DEFAULT_VALUE = "TextOverflow.Clip";
+
     struct EventsTracker {
         static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
 
@@ -121,7 +124,7 @@ HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
 
     modifier_->setFontSize(node_, &size3);
     auto checkVal3 = GetStringAttribute(node_, FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal3, "14.00px");
+    EXPECT_EQ(checkVal3, FONT_SIZE_ATTR_DEFAULT_VALUE);
 }
 
 HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
@@ -316,6 +319,22 @@ HWTEST_F(TextModifierTest, setTextOverflow, TestSize.Level1)
     modifier_->setTextOverflow(node_, &v4);
     auto checkVal4 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
     EXPECT_EQ(checkVal4, "TextOverflow.Marquee");
+}
+
+HWTEST_F(TextModifierTest, setTextOverflowTestDefaultValue, TestSize.Level1)
+{
+    auto checkVal1 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_EQ(checkVal1, TEXT_OVERFLOW_ATTR_DEFAULT_VALUE);
+}
+
+HWTEST_F(TextModifierTest, setTextOverflowTestInvalidValue, TestSize.Level1)
+{
+    Ark_TextOverflowOptions v1 = { .overflow = ARK_TEXT_OVERFLOW_NONE };
+    modifier_->setTextOverflow(node_, &v1);
+    Ark_TextOverflowOptions invalidValue = { .overflow = static_cast<Ark_TextOverflow>(-1) };
+    modifier_->setTextOverflow(node_, &invalidValue);
+    auto checkVal1 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_EQ(checkVal1, TEXT_OVERFLOW_ATTR_DEFAULT_VALUE);
 }
 
 HWTEST_F(TextModifierTest, setFontFamily, TestSize.Level1)

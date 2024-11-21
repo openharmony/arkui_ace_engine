@@ -214,6 +214,10 @@ extern std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::string>>
     testFixtureImageSpanVerticalAlignValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageSpanAlignment>> testFixtureImageSpanVerticalAlignInvalidValues;
 
+// Fixture 'ProgressType' for type 'Ark_ProgressType'
+extern std::vector<std::tuple<std::string, Ark_ProgressType, std::string>> testFixtureProgressTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgressTypeInvalidValues;
+
 // Fixture 'ColorsEnum' for type 'Ark_Color'
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues;
@@ -257,6 +261,9 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;
+
+// Fixture 'NumberFloatPositive' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatPositiveValidValues;
 
 // Fixture 'NumberIntFloor' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberIntFloorValidValues;

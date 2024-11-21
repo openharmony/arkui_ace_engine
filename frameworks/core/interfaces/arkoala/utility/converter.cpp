@@ -666,6 +666,87 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
+Gradient Convert(const Ark_LinearGradient& value)
+{
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+
+    // angle
+    auto linearGradient = gradient.GetLinearGradient();
+    linearGradient->angle = Converter::OptConvert<Dimension>(value.angle);
+
+    // direction
+    auto directionOpt = Converter::OptConvert<GradientDirection>(value.direction);
+    if (directionOpt) {
+        gradient.SetDirection(directionOpt.value());
+    }
+
+    // repeating
+    auto repeatingOpt = Converter::OptConvert<bool>(value.repeating);
+    if (repeatingOpt) {
+        gradient.SetRepeat(repeatingOpt.value());
+    }
+
+    auto gradientColors = Converter::Convert<std::vector<std::pair<Color, Dimension>>>(value.colors);
+
+    if (gradientColors.size() == 1) {
+        auto item = gradientColors.front();
+        GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(item.first));
+        gradientColor.SetDimension(item.second);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+    } else {
+        for (auto item : gradientColors) {
+            GradientColor gradientColor;
+            gradientColor.SetLinearColor(LinearColor(item.first));
+            gradientColor.SetDimension(item.second);
+            gradient.AddColor(gradientColor);
+        }
+    }
+
+    return gradient;
+}
+
+template<>
+GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
+{
+    GradientColor gradientColor;
+    gradientColor.SetHasValue(false);
+
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.SetColor(colorOpt.value());
+        gradientColor.SetHasValue(true);
+    }
+
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    //  [0, 1] -> [0, 100.0];
+    gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
+
+    return gradientColor;
+}
+
+template<>
+std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
+{
+    std::pair<Color, Dimension> gradientColor;
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.first = colorOpt.value();
+    }
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    gradientColor.second = Dimension(value, DimensionUnit::VP);
+    return gradientColor;
+}
+
+template<>
 CaretStyle Convert(const Ark_CaretStyle& src)
 {
     CaretStyle caretStyle;
@@ -1090,5 +1171,42 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
     dst->normal = Converter::OptConvert<Color>(src.normal);
     dst->error = Converter::OptConvert<Color>(src.error);
     dst->disable = Converter::OptConvert<Color>(src.disable);
+}
+
+template<>
+PickerValueType Convert(const Ark_String& src)
+{
+    auto str = Converter::Convert<std::string>(src);
+    return str;
+}
+
+template<>
+PickerValueType Convert(const Array_String& src)
+{
+    return Converter::Convert<std::vector<std::string>>(src);
+}
+
+template<>
+PickerSelectedType Convert(const Ark_Number& src)
+{
+    auto selected = Converter::Convert<int32_t>(src);
+    if (selected < 0) {
+        selected = 0;
+    }
+    return static_cast<uint32_t>(selected);
+}
+
+template<>
+PickerSelectedType Convert(const Array_Number& src)
+{
+    std::vector<uint32_t> dst;
+    std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
+    for (auto selected : tmp) {
+        if (selected < 0) {
+            selected = 0;
+        }
+        dst.push_back(static_cast<uint32_t>(selected));
+    }
+    return dst;
 }
 } // namespace OHOS::Ace::NG::Converter

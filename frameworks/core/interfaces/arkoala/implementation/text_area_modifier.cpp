@@ -23,22 +23,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 
-namespace {
-void resetNegative(std::optional<OHOS::Ace::Dimension> &dim)
-{
-    if (dim && dim.value().IsNegative()) {
-        dim.reset();
-    }
-}
-
-void resetPercent(std::optional<OHOS::Ace::Dimension> &dim)
-{
-    if (dim && dim.value().Unit() == OHOS::Ace::DimensionUnit::PERCENT) {
-        dim.reset();
-    }
-}
-} // namespace
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaInterfaceModifier {
 void SetTextAreaOptionsImpl(Ark_NativePointer node,
@@ -177,8 +161,8 @@ void CaretStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto caretStyle = Converter::Convert<Converter::CaretStyle>(*value);
     TextFieldModelNG::SetCaretColor(frameNode, caretStyle.color);
-    resetNegative(caretStyle.width);
-    resetPercent(caretStyle.width);
+    Validator::ValidateNonNegative(caretStyle.width);
+    Validator::ValidateNonPercent(caretStyle.width);
     CaretStyle caretStyleNative;
     caretStyleNative.caretWidth = caretStyle.width;
     TextFieldModelNG::SetCaretStyle(frameNode, caretStyleNative);
@@ -347,8 +331,8 @@ void MinFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
-    resetPercent(optValue);
+    Validator::ValidateNonNegative(optValue);
+    Validator::ValidateNonPercent(optValue);
     TextFieldModelNG::SetAdaptMinFontSize(frameNode, optValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
@@ -358,8 +342,8 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
-    resetPercent(optValue);
+    Validator::ValidateNonNegative(optValue);
+    Validator::ValidateNonPercent(optValue);
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
@@ -417,8 +401,8 @@ void LetterSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto spacing = Converter::OptConvert<Dimension>(*value);
-    resetNegative(spacing);
-    resetPercent(spacing);
+    Validator::ValidateNonNegative(spacing);
+    Validator::ValidateNonPercent(spacing);
     TextFieldModelNG::SetLetterSpacing(frameNode, spacing);
 }
 void LineSpacingImpl(Ark_NativePointer node,
@@ -438,7 +422,7 @@ void LineHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
+    Validator::ValidateNonNegative(optValue);
     TextFieldModelNG::SetLineHeight(frameNode, optValue);
 }
 void TypeImpl(Ark_NativePointer node,

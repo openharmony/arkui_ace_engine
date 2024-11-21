@@ -383,6 +383,29 @@ std::vector<std::tuple<std::string, Ark_OverScrollMode>> testFixtureEnumOverScro
     { "INT_MAX", static_cast<Ark_OverScrollMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_ProgressStatus, std::string>> testFixtureEnumProgressStatusValidValues = {
+    { "ARK_PROGRESS_STATUS_LOADING", ARK_PROGRESS_STATUS_LOADING, "ProgressStatus.LOADING" },
+    { "ARK_PROGRESS_STATUS_PROGRESSING", ARK_PROGRESS_STATUS_PROGRESSING, "ProgressStatus.PROGRESSING" },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStatus>> testFixtureEnumProgressStatusInvalidValues = {
+    { "-1", static_cast<Ark_ProgressStatus>(-1) },
+    { "INT_MAX", static_cast<Ark_ProgressStatus>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStyle, std::string>> testFixtureEnumProgressStyleValidValues = {
+    { "ARK_PROGRESS_STYLE_LINEAR", ARK_PROGRESS_STYLE_LINEAR, "ProgressStyle.Linear" },
+    { "ARK_PROGRESS_STYLE_RING", ARK_PROGRESS_STYLE_RING, "ProgressStyle.Ring" },
+    { "ARK_PROGRESS_STYLE_ECLIPSE", ARK_PROGRESS_STYLE_ECLIPSE, "ProgressStyle.Eclipse" },
+    { "ARK_PROGRESS_STYLE_SCALE_RING", ARK_PROGRESS_STYLE_SCALE_RING, "ProgressStyle.ScaleRing" },
+    { "ARK_PROGRESS_STYLE_CAPSULE", ARK_PROGRESS_STYLE_CAPSULE, "ProgressStyle.Capsule" },
+};
+
+std::vector<std::tuple<std::string, Ark_ProgressStyle>> testFixtureEnumProgressStyleInvalidValues = {
+    { "-1", static_cast<Ark_ProgressStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_ProgressStyle>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RadioIndicatorType, std::string>>
     testFixtureEnumRadioIndicatorTypeValidValues = {
         { "ARK_RADIO_INDICATOR_TYPE_TICK", ARK_RADIO_INDICATOR_TYPE_TICK, "RadioIndicatorType.TICK" },
@@ -640,17 +663,6 @@ std::vector<std::tuple<std::string, Ark_WebLayoutMode, std::string>> testFixture
 std::vector<std::tuple<std::string, Ark_WebLayoutMode>> testFixtureEnumWebLayoutModeInvalidValues = {
     { "-1", static_cast<Ark_WebLayoutMode>(-1) },
     { "INT_MAX", static_cast<Ark_WebLayoutMode>(INT_MAX) },
-};
-
-std::vector<std::tuple<std::string, Ark_WordBreak, std::string>> testFixtureEnumWordBreakValidValues = {
-    { "ARK_WORD_BREAK_NORMAL", ARK_WORD_BREAK_NORMAL, "WordBreak.NORMAL" },
-    { "ARK_WORD_BREAK_BREAK_ALL", ARK_WORD_BREAK_BREAK_ALL, "WordBreak.BREAK_ALL" },
-    { "ARK_WORD_BREAK_BREAK_WORD", ARK_WORD_BREAK_BREAK_WORD, "WordBreak.BREAK_WORD" },
-};
-
-std::vector<std::tuple<std::string, Ark_WordBreak>> testFixtureEnumWordBreakInvalidValues = {
-    { "-1", static_cast<Ark_WordBreak>(-1) },
-    { "INT_MAX", static_cast<Ark_WordBreak>(INT_MAX) },
 };
 
 } // namespace OHOS::Ace::NG::Fixtures

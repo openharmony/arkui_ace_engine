@@ -69,6 +69,12 @@ void ValidateGreatOrEqual(std::optional<float>& opt, const float& right)
         opt.reset();
     }
 }
+void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right)
+{
+    if (opt.has_value() && opt.value() < right) {
+        opt.reset();
+    }
+}
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right)
 {
     if (opt.has_value() && GreatNotEqual(opt.value(), right)) {
@@ -104,6 +110,17 @@ void ValidateNonNegative(std::optional<int>& value)
 {
     if (value.has_value() && Negative(value.value())) {
         value.reset();
+    }
+}
+void ValidateNonNegative(std::optional<V2::GridContainerSize>& value)
+{
+    if (value.has_value()) {
+        auto val = value.value();
+        bool fail = Negative(val.lg) || Negative(val.md) || Negative(val.sm) || Negative(val.xl)
+            || Negative(val.xs) || Negative(val.xxl);
+        if (fail) {
+            value.reset();
+        }
     }
 }
 } // namespace OHOS::Ace::NG::Validator

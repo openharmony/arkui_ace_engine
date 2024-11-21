@@ -449,6 +449,17 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 }
 
 template<>
+void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
+{
+    switch (src) {
+        case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
+        case ARK_ELLIPSIS_MODE_CENTER: dst = EllipsisMode::MIDDLE; break;
+        case ARK_ELLIPSIS_MODE_END: dst = EllipsisMode::TAIL; break;
+        default: LOGE("Unexpected enum value in Ark_EllipsisMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
 {
     switch (src) {

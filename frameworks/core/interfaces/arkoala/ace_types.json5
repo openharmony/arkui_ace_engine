@@ -277,6 +277,21 @@
             ]
         },
         {
+            "name": "ProgressType",
+            "type": "Ark_ProgressType",
+            "validValues": [
+                ["ARK_PROGRESS_TYPE_LINEAR", "ProgressStyle.Linear"],
+                ["ARK_PROGRESS_TYPE_RING", "ProgressStyle.Ring"],
+                ["ARK_PROGRESS_TYPE_ECLIPSE", "ProgressStyle.Eclipse"],
+                ["ARK_PROGRESS_TYPE_SCALE_RING", "ProgressStyle.ScaleRing"],
+                ["ARK_PROGRESS_TYPE_CAPSULE", "ProgressStyle.Capsule"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_ProgressType>(-1)",
+                "static_cast<Ark_ProgressType>(INT_MAX)"
+            ]
+        },
+        {
             "name": "ColorsEnum",
             "type": "Ark_Color",
             "validValues": [
@@ -463,6 +478,16 @@
                 ["-100", "-100.000000"],
                 ["12.34", "12.340000"],
                 ["-56.73", "-56.730000"],
+            ],
+        },
+
+        {
+            "name": "NumberFloatPositive",
+            "type": "Ark_Number",
+            "validValues": [
+                ["100", "100.000000"],
+                ["50", "50.000000"],
+                ["0", "0.000000"],
             ],
         },
         {
@@ -1238,6 +1263,16 @@
             "themes": ["TextFieldTheme"],
             "attributes": [
                 {
+                    "name": "minFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "maxFontSize",
+                    "default": "0.00px",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
                     "name": "fontColor",
                     "default": "#FF000000"
                 },
@@ -1251,7 +1286,8 @@
                 },
                 {
                     "name": "fontWeight",
-                    "default": "FontWeight.Normal"
+                    "default": "FontWeight.Normal",
+                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
                 },
                 {
                     "name": "fontFamily",
@@ -1537,9 +1573,6 @@
                 "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
-                "setFontFamilyTestDefaultValues",
-                "setFontFamilyTestFontFamilyValidValues",
-                "setFontFamilyTestFontFamilyInvalidValues",
                 "setTextInputOptionsTestDefaultValues",
                 "setTextInputOptionsTestValidValues",
                 "setTypeTestTypeValidValues",
@@ -1553,19 +1586,9 @@
                 "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
                 "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
                 "setPlaceholderFontTestPlaceholderFontStyleInvalidValues",
-                "setFontSizeTestFontSizeInvalidValues",
-                "setFontWeightTestDefaultValues",
-                "setFontWeightTestFontWeightValidValues",
-                "setFontWeightTestFontWeightInvalidValues",
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
-                "setMinFontSizeTestDefaultValues",
-                "setMinFontSizeTestMinFontSizeValidValues",
-                "setMinFontSizeTestMinFontSizeInvalidValues",
-                "setMaxFontSizeTestDefaultValues",
-                "setMaxFontSizeTestMaxFontSizeValidValues",
-                "setMaxFontSizeTestMaxFontSizeInvalidValues",
                 "setDecorationTestDefaultValues",
                 "setDecorationTestDecorationTypeValidValues",
                 "setDecorationTestDecorationTypeInvalidValues",
@@ -1582,8 +1605,42 @@
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
-                "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestDefaultValues"
+            ]
+        },
+        {
+            "name": "GridRow",
+            "includes": [],
+            "themes": [],
+            "remove" : ["setGridRowOptionsTestDefaultValues"],
+            "disable": [
+                "setGridRowOptionsTestValidValues",
+                "setAlignItemsTestDefaultValues",
+                "setAlignItemsTestAlignItemsValidValues",
+                "setAlignItemsTestAlignItemsInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "alignItems",
+                    "default": "ItemAlign.Start",
+                },
+                {
+                    "name": "gutter",
+                    "default": {"x": 0, "y":0}
+                },
+                {
+                    "name": "direction",
+                    "default": "GridRowDirection.Row"
+                },
+                {
+                    "name": "breakpoints",
+                    "default": {"value": ["320vp", "600vp", "840vp"], "reference": "BreakpointsReference.WindowSize"}
+                },
+                {
+                    "name": "columns",
+                    "default": "12",
+                    "fixtures": ["NumberNonNeg"]
+                }
             ]
         },
         {
@@ -2085,6 +2142,89 @@
             ]
         },
         {
+            "name": "Progress",
+            "includes": ["core/components/progress/progress_theme.h"],
+            "themes": ["ProgressTheme"],
+            "remove": [
+                "setStyleTestStyleLinearStyleOptionsStrokeRadiusValidValues",
+                "setStyleTestDefaultValues",
+            ],
+            "disable": [
+                "setProgressOptionsTestDefaultValues", // No value in json
+                "setProgressOptionsTestOptionsStyleValidValues", // No value in json
+                "setProgressOptionsTestOptionsStyleInvalidValues", // No value in json
+                "setColorTestDefaultValues", // No value in json
+                "setColorTestValidValues", // No value in json
+                "setStyleTestDefaultValues", // Other json structure
+                "setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues", // Incorrect json value
+                "setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues", // Incorrect json value
+                "setStyleTestStyleRingStyleOptionsShadowValidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsShadowInvalidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsStatusValidValues", // Other json structure
+                "setStyleTestStyleRingStyleOptionsStatusInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderColorValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderColorInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderWidthValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsBorderWidthInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsContentValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsContentInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontSizeValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontSizeInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontWeightValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontWeightInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontFamilyValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontFamilyInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontStyleValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontStyleInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontColorValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsFontColorInvalidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsShowDefaultPercentageValidValues", // Other json structure
+                "setStyleTestStyleCapsuleStyleOptionsShowDefaultPercentageInvalidValues", // Other json structure
+                "setStyleTestStyleProgressStyleOptionsStrokeWidthValidValues", // Incorrect json value
+                "setStyleTestStyleProgressStyleOptionsScaleWidthValidValues", // Incorrect json value
+                "setStyleTestStyleRingStyleOptionsStrokeWidthValidValues", // Incorrect json value
+            ],
+            "attributes": [
+                {
+                    "name": "value",
+                    "default": "0.000000",
+                    "fixtures": ["NumberFloatPositive"],
+                },
+                {
+                    "name": "total",
+                    "default": "100.000000",
+                    "fixtures": ["NumberFloatPositive"],
+                },
+                {
+                    "name": "type",
+                    "default": "ProgressStyle.Linear",
+                    "fixtures": ["ProgressType"],
+                },
+                {
+                    "name": "style",
+                    "attributes": [
+                        {
+                            "name": "strokeWidth",
+                            "default": "0.00px",
+                        },
+                        {
+                            "name": "scaleCount",
+                            "default": "0",
+                            "fixtures": ["NumberPosIntFloor"],
+                        },
+                        {
+                            "name": "scaleWidth",
+                            "default": "0.00px",
+                        },
+                    ],
+                },
+                {
+                    "name": "privacySensitive",
+                    "default": "false",
+                },
+            ],
+        },
+        {
             "name": "ScrollableCommonMethod",
             "includes": ["core/components/scroll/scroll_bar_theme.h"],
             "themes": ["ScrollBarTheme"],
@@ -2493,10 +2633,16 @@
         },
         {
             "name": "Text",
+            "includes": ["core/components/text/text_theme.h"],
+            "themes": ["TextTheme"],
             "attributes": [
                 {
                     "name": "draggable",
                     "default": "false",
+                },
+                {
+                    "name": "ellipsisMode",
+                    "default": "EllipsisMode.END",
                 },
                 {
                     "name": "enableDataDetector",
@@ -2507,8 +2653,29 @@
                     "default": "true",
                 },
                 {
+                    "name": "fontColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "fontSize",
+                    "default": "16.00fp",
+                    "fixtures": [
+                        "DimensionsNumNonNeg",
+                        "DimensionsStrNonNegNonPct",
+                        "DimensionsResNonNegNonPct"
+                    ]
+                },
+                {
+                    "name": "fontStyle",
+                    "default": "FontStyle.Normal"
+                },
+                {
                     "name": "halfLeading",
                     "default": "false",
+                },
+                {
+                    "name": "heightAdaptivePolicy",
+                    "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST",
                 },
                 {
                     "name": "privacySensitive",
@@ -2522,6 +2689,15 @@
                     "name": "textSelectable",
                     "default": "selectable-unfocusable",
                     "fixtures": ["TextSelectableMode"]
+                },
+                {
+                    "name": "textOverflow",
+                    "default": "TextOverflow.Clip",
+                },
+                {
+                    "name": "wordBreak",
+                    "default": "break-word",
+                    "fixtures": ["TextInputBreakWord"]
                 },
             ],
             "disable": [
@@ -2537,8 +2713,6 @@
                 "setDecorationTestDecorationStyleInvalidValues",
                 "setDecorationTestDecorationTypeInvalidValues",
                 "setDecorationTestDefaultValues",
-                "setEllipsisModeTestDefaultValues",
-                "setEllipsisModeTestEllipsisModeInvalidValues",
                 "setFont0TestDefaultValues",
                 "setFont0TestFontFamilyInvalidValues",
                 "setFont0TestFontFamilyValidValues",
@@ -2558,18 +2732,11 @@
                 "setFont1TestFontFontValueWeightValidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
-                "setFontColorTestDefaultValues",
-                "setFontColorTestFontColorInvalidValues",
                 "setFontFamilyTestDefaultValues",
                 "setFontFamilyTestFontFamilyInvalidValues",
                 "setFontFamilyTestFontFamilyValidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
-                "setFontSizeTestDefaultValues",
-                "setFontSizeTestFontSizeInvalidValues",
-                "setFontSizeTestFontSizeValidValues",
-                "setFontStyleTestDefaultValues",
-                "setFontStyleTestFontStyleInvalidValues",
                 "setFontWeight0TestDefaultValues",
                 "setFontWeight0TestFontWeightInvalidValues",
                 "setFontWeight0TestFontWeightValidValues",
@@ -2578,8 +2745,6 @@
                 "setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues",
                 "setFontWeight1TestFontWeightWeightInvalidValues",
                 "setFontWeight1TestFontWeightWeightValidValues",
-                "setHeightAdaptivePolicyTestDefaultValues",
-                "setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues",
                 "setLetterSpacingTestDefaultValues",
                 "setLetterSpacingTestLetterSpacingInvalidValues",
                 "setLetterSpacingTestLetterSpacingValidValues",
@@ -2613,9 +2778,6 @@
                 "setTextIndentTestTextIndentInvalidValues",
                 "setTextOptionsTestDefaultValues",
                 "setTextOptionsTestValidValues",
-                "setTextOverflowTestDefaultValues",
-                "setTextOverflowTestTextOverflowOverflowInvalidValues",
-                "setTextOverflowTestTextOverflowOverflowValidValues",
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowColorInvalidValues",
                 "setTextShadowTestTextShadowColorValidValues",
@@ -2629,9 +2791,11 @@
                 "setTextShadowTestTextShadowRadiusValidValues",
                 "setTextShadowTestTextShadowTypeInvalidValues",
                 "setTextShadowTestTextShadowTypeValidValues",
-                "setWordBreakTestDefaultValues",
-                "setWordBreakTestWordBreakInvalidValues",
-                "setWordBreakTestWordBreakValidValues",
+
+                // Generated tests do not match json structure
+                "setTextOverflowTestDefaultValues",
+                "setTextOverflowTestTextOverflowOverflowInvalidValues",
+                "setTextOverflowTestTextOverflowOverflowValidValues",
             ]
         },
         {
