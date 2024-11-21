@@ -14,10 +14,6 @@
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-
 using namespace testing;
 using namespace testing::ext;
 
