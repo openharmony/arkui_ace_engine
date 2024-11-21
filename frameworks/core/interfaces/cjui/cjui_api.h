@@ -1884,6 +1884,9 @@ struct CJUICheckboxModifier {
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
     void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
     void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
+    
+    ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
 };
 
 struct CJUICheckboxGroupModifier {
@@ -1904,6 +1907,15 @@ struct CJUICheckboxGroupModifier {
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
     void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
+
+    ArkUI_CharPtr (*getCheckboxGroupName)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCheckboxGroupSelectAll)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupUnSelectedColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getCheckboxGroupMarkColor)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckboxGroupMarkSize)(ArkUINodeHandle node);
+    ArkUI_Float64 (*getCheckboxGroupMarkWidth)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCheckboxGroupStyle)(ArkUINodeHandle node);
 };
 
 struct CJUIImageSpanModifier {
