@@ -591,9 +591,14 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
     event.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     // 2. get element from third
+    // cut tree id
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
+        thirdElementId, splitElementId, splitTreeId);
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        thirdElementId, 0, 0, infos);
+        splitElementId, 0, 0, infos);
     if ((!ret) || (infos.size() == 0)) {
         return -1;
     }
