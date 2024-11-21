@@ -514,6 +514,7 @@ public:
     RefPtr<FocusHub> GetParentFocusHub() const;
     RefPtr<FocusHub> GetParentFocusHubWithBoundary() const;
     RefPtr<FocusHub> GetRootFocusHub();
+    RefPtr<FocusHub> GetFocusLeaf();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
 

@@ -461,7 +461,7 @@ void FocusManager::WindowFocus(bool isFocus)
         if (!IsAutoFocusTransfer()) {
             SetFocusViewRootScope(curFocusView);
         } else {
-            auto lastViewFocusNode = curFocusView->GetFocusLeaf(curFocusViewHub);
+            auto lastViewFocusNode = curFocusViewHub->GetFocusLeaf();
             lastViewFocusNode->RequestFocusImmediatelyInner();
         }
     } else {

@@ -123,28 +123,6 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
     return focusViewHub;
 }
 
-RefPtr<FocusHub> FocusView::GetFocusLeaf(const RefPtr<FocusHub>& focusHub)
-{
-    auto viewRootScope = GetViewRootScope();
-    if (!viewRootScope || viewRootScope->focusDepend_ == FocusDependence::SELF) {
-        return focusHub;
-    }
-    CHECK_NULL_RETURN(focusHub, nullptr);
-    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
-    CHECK_NULL_RETURN(lastFocusNode, focusHub);
-    if (!lastFocusNode->IsFocusable()) {
-        return focusHub;
-    }
-    auto nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
-    CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
-    while (nextFocusNode && nextFocusNode->IsFocusable()) {
-        lastFocusNode = nextFocusNode;
-        nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
-        CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
-    }
-    return lastFocusNode;
-}
-
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -321,7 +299,7 @@ bool FocusView::RequestDefaultFocus()
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
-    auto lastViewFocusNode = GetFocusLeaf(focusViewHub);
+    auto lastViewFocusNode = focusViewHub->GetFocusLeaf();
     CHECK_NULL_RETURN(lastViewFocusNode, false);
     SetIsViewRootScopeFocused(false);
     bool ret = false;
