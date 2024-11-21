@@ -42,6 +42,7 @@ group("linux_core_unittest") {
     "animation:core_animation_unittest",
     "base:core_base_unittest",
     "common:common_test",
+    "event:axis_event_test_ng",
     "event:click_event_test_ng",
     "event:drag_event_test_ng",
     "event:event_hub_test_ng",
