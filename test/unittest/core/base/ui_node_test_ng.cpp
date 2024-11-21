@@ -2451,4 +2451,106 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData004, TestSize.Level1)
     child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
     child->UINode::GetPerformanceCheckData(nodeMap);
 }
+
+/**
+ * @tc.name: CollectRemovedChildren001
+ * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode1->AddChild(testNode3, 1, false);
+    testNode1->AddChild(testNode4, 1, false);
+    testNode2->AddChild(testNode5, 1, false);
+
+    /**
+     * @tc.steps: step3. set API12.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step4. test CollectRemovedChildren.
+     */
+    testNode2->isDisappearing_ = true;
+    std::list<int32_t> removedElmtId1;
+    testNode1->CollectRemovedChildren(testNode1->GetChildren(), removedElmtId1, true);
+    EXPECT_EQ(removedElmtId1.size(), 2);
+    testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId1, true);
+    EXPECT_EQ(removedElmtId1.size(), 3);
+
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: CollectRemovedChildren002
+ * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode1->AddChild(testNode3, 1, false);
+    testNode1->AddChild(testNode4, 1, false);
+    testNode2->AddChild(testNode5, 1, false);
+
+    /**
+     * @tc.steps: step3. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step4. test CollectRemovedChildren.
+     */
+    testNode2->isDisappearing_ = true;
+    std::list<int32_t> removedElmtId2;
+    testNode1->CollectRemovedChildren(testNode1->GetChildren(), removedElmtId2, true);
+    EXPECT_EQ(removedElmtId2.size(), 4);
+    testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId2, false);
+    EXPECT_EQ(removedElmtId2.size(), 5);
+    
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
 } // namespace OHOS::Ace::NG
