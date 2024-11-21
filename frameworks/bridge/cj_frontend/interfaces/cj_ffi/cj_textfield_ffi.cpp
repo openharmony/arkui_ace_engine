@@ -41,10 +41,115 @@ const std::function<void(std::string)> FormatCharFunction(void (*callback)(const
                                                         const std::string& value) -> void { lambda(value.c_str()); };
     return result;
 }
-constexpr uint32_t MINI_VAILD_VALUE = 1;
-constexpr uint32_t MAX_VAILD_VALUE = 100;
-constexpr uint32_t ILLEGAL_VALUE = 0;
-constexpr uint32_t DEFAULTMAXLINES = 3;
+
+struct MenuActions {
+    std::function<void(const std::string&)> copy = [](const std::string&) {};
+    std::function<void(const std::string&)> selectAll = [](const std::string&) {};
+    std::function<void(const std::string&)> cut = [](const std::string&) {};
+    std::function<void(const std::string&)> paste = [](const std::string&) {};
+    std::function<void(const std::string&)> aiWrite = [](const std::string&) {};
+};
+
+void HandleDefaultActions(const std::string& id,
+    const std::function<void(const std::string&)>& action,
+    MenuActions& actions)
+{
+    if (id == "OH_DEFAULT_COPY") {
+        actions.copy = action;
+    } else if (id == "OH_DEFAULT_SELECT_ALL") {
+        actions.selectAll = action;
+    } else if (id == "OH_DEFAULT_CUT") {
+        actions.cut = action;
+    } else if (id == "OH_DEFAULT_PASTE") {
+        actions.paste = action;
+    } else if (id == "OH_DEFAULT_AI_WRITE") {
+        actions.aiWrite = action;
+    }
+}
+
+FfiTextFieldMenuItem ConvertToFfiMenuItem(const NG::MenuItemParam& menuItem)
+{
+    FfiTextFieldMenuItem result;
+    result.content = menuItem.menuOptionsParam.content.has_value() ?
+        const_cast<char*>(menuItem.menuOptionsParam.content.value().c_str()) : nullptr;
+    result.icon = menuItem.menuOptionsParam.icon.has_value() ?
+        const_cast<char*>(menuItem.menuOptionsParam.icon.value().c_str()) : nullptr;
+    result.id = const_cast<char*>(menuItem.menuOptionsParam.id.c_str());
+    return result;
+}
+
+NG::MenuOptionsParam ConvertToMenuOptionsParam(const FfiTextFieldMenuItem& menuItem, const MenuActions& actions)
+{
+    NG::MenuOptionsParam result;
+    result.content = menuItem.content ? std::make_optional<std::string>(menuItem.content) : std::nullopt;
+    result.icon = menuItem.icon ? std::make_optional<std::string>(menuItem.icon) : std::nullopt;
+    result.id = menuItem.id;
+
+    if (result.id == "OH_DEFAULT_COPY") {
+        result.action = actions.copy;
+    } else if (result.id == "OH_DEFAULT_SELECT_ALL") {
+        result.action = actions.selectAll;
+    } else if (result.id == "OH_DEFAULT_CUT") {
+        result.action = actions.cut;
+    } else if (result.id == "OH_DEFAULT_PASTE") {
+        result.action = actions.paste;
+    } else if (result.id == "OH_DEFAULT_AI_WRITE") {
+        result.action = actions.aiWrite;
+    } else {
+        result.action = [](const std::string& arg) {};
+    }
+    return result;
+}
+
+std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> TextFieldCreatMenu(
+    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem))
+{
+    return [ffiOnAction = CJLambda::Create(callbackOnCreateMenu)](
+        const std::vector<NG::MenuItemParam>& menuItem) -> std::vector<NG::MenuOptionsParam> {
+        MenuActions actions;
+        std::vector<FfiTextFieldMenuItem> arr;
+        arr.resize(menuItem.size());
+        for (size_t i = 0; i < menuItem.size(); ++i) {
+            arr[i] = ConvertToFfiMenuItem(menuItem[i]);
+            HandleDefaultActions(menuItem[i].menuOptionsParam.id,
+                menuItem[i].menuOptionsParam.action,
+                actions);
+        }
+        VectorTextFieldMenuItemHandle vectorHandle = &arr;
+        auto newHandle = ffiOnAction(vectorHandle);
+        auto newTextFieldMenuItem = *reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(newHandle);
+
+        std::vector<NG::MenuOptionsParam> result;
+        result.resize(newTextFieldMenuItem.size());
+        for (size_t i = 0; i < newTextFieldMenuItem.size(); ++i) {
+            result[i] = ConvertToMenuOptionsParam(newTextFieldMenuItem[i], actions);
+        }
+        return result;
+    };
+}
+
+std::function<bool(const NG::MenuItemParam& menuItemParam)> TextFieldMenuClick(
+    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
+{
+    std::function<bool(const NG::MenuItemParam& menuItemParam)> result =
+        [ffiOnAction = CJLambda::Create(callbackOnMenuItemClick)](const NG::MenuItemParam& menuItemParam) -> bool {
+        auto menuItem =
+            FfiTextFieldMenuItem { menuItemParam.menuOptionsParam.content.has_value()
+                                  ? const_cast<char*>(menuItemParam.menuOptionsParam.content.value().c_str())
+                                  : nullptr,
+                menuItemParam.menuOptionsParam.icon.has_value()
+                    ? const_cast<char*>(menuItemParam.menuOptionsParam.icon.value().c_str())
+                    : nullptr,
+                const_cast<char*>(menuItemParam.menuOptionsParam.id.c_str()) };
+        return ffiOnAction(menuItem, menuItemParam.start, menuItemParam.end);
+    };
+    return result;
+}
+
+constexpr int32_t MINI_VAILD_VALUE = 1;
+constexpr int32_t MAX_VAILD_VALUE = 100;
+constexpr int32_t ILLEGAL_VALUE = 0;
+constexpr int32_t DEFAULTMAXLINES = 3;
 
 } // namespace
 
@@ -417,7 +522,7 @@ void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value)
     if (value <= 0) {
         value = DEFAULTMAXLINES;
     }
-    TextFieldModel::GetInstance()->SetMaxLines(value);
+    TextFieldModel::GetInstance()->SetMaxViewLines(static_cast<uint32_t>(value));
 }
 
 void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value)
@@ -712,14 +817,79 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
-void FfiOHOSAceFrameworkTextFieldonSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent))
+void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
+    auto task = [func = CJLambda::Create(callback), node = targetNode](
+                int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
-        CJSubmitEvent submitEvent(event.GetText(), event.IsKeepEditable());
-        func(key, submitEvent);
+        auto submitEvent = std::make_unique<CJSubmitEvent>();
+        if (submitEvent == nullptr) {
+            return;
+        }
+        std::string text = event.GetText();
+        size_t len = text.length() + 1;
+        submitEvent->text = (char*)malloc(len);
+        submitEvent->keepEditable = event.IsKeepEditable();
+        if (submitEvent->text) {
+            const char* src = text.c_str();
+            char* dest = submitEvent->text;
+            for (size_t i = 0; i < len - 1; ++i) {
+                dest[i] = src[i];
+            }
+            dest[len - 1] = '\0';
+            func(key, *submitEvent);
+            free(submitEvent->text);
+        } else {
+            func(key, *submitEvent);
+        }
     };
     TextFieldModel::GetInstance()->SetOnSubmit(task);
+}
+
+void FfiOHOSAceFrameworkTextFieldEditMenuOptions(
+    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem),
+    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
+{
+    auto onCreateMenu = [func = TextFieldCreatMenu(callbackOnCreateMenu)](
+                            const std::vector<NG::MenuItemParam>& val) -> std::vector<NG::MenuOptionsParam> {
+        return func(val);
+    };
+    auto onMenuItemClick = [func = TextFieldMenuClick(callbackOnMenuItemClick)](
+                               const NG::MenuItemParam& val) -> bool { return func(val); };
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenu), std::move(onMenuItemClick));
+}
+
+VectorTextFieldMenuItemHandle FfiCJCreateVectorFfiTextFieldMenuItem(int64_t size)
+{
+    LOGI("Create FfiTextFieldMenuItem Vector");
+    return new std::vector<FfiTextFieldMenuItem>(size);
+}
+
+void FfiCJVectorFfiTextFieldMenuItemDelete(VectorTextFieldMenuItemHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    delete actualVec;
+}
+
+void FfiCJVectorFfiTextFieldMenuItemSetElement(VectorTextFieldMenuItemHandle vec,
+    int64_t index, FfiTextFieldMenuItem textFieldMenuItem)
+{
+    LOGI("FfiTextFieldMenuItem Vector Set Element");
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    (*actualVec)[index] = textFieldMenuItem;
+    LOGI("FfiTextFieldMenuItem Vector Set Element Success");
+}
+
+FfiTextFieldMenuItem FfiCJVectorFfiTextFieldMenuItemGetElement(VectorTextFieldMenuItemHandle vec, int64_t index)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    return (*actualVec)[index];
+}
+
+int64_t FfiCJVectorFfiTextFieldMenuItemGetSize(VectorTextFieldMenuItemHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    return (*actualVec).size();
 }
 }

@@ -23,12 +23,26 @@
 
 extern "C" {
 struct CJSubmitEvent {
-    std::string text;
+    char* text;
     bool keepEditable;
-    CJSubmitEvent() : text(""), keepEditable(false) {}
-    CJSubmitEvent(const std::string& text, bool keepEditable) : text(text), keepEditable(keepEditable) {}
 };
 
+struct FfiTextFieldMenuItem {
+    char* content;
+    char* icon;
+    char* id;
+};
+
+using VectorTextFieldMenuItemHandle = void*;
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldEditMenuOptions(void* (*callbackOnCreateMenu)(void* vecTextFieldMenuItem),
+    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end));
+CJ_EXPORT VectorTextFieldMenuItemHandle FfiCJCreateVectorFfiTextFieldMenuItem(int64_t size);
+CJ_EXPORT void FfiCJVectorFfiTextFieldMenuItemDelete(VectorTextFieldMenuItemHandle vec);
+CJ_EXPORT void FfiCJVectorFfiTextFieldMenuItemSetElement(
+    VectorTextFieldMenuItemHandle vec, int64_t index, FfiTextFieldMenuItem textFieldMenuItem);
+CJ_EXPORT FfiTextFieldMenuItem FfiCJVectorFfiTextFieldMenuItemGetElement(VectorTextFieldMenuItemHandle vec,
+                                                                         int64_t index);
+CJ_EXPORT int64_t FfiCJVectorFfiTextFieldMenuItemGetSize(VectorTextFieldMenuItemHandle vec);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetHeight(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSize(
     double width, uint32_t widthUnit, double height, uint32_t heightUnit);
