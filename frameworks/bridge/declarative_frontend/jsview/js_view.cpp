@@ -638,6 +638,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         jsView->jsViewFunction_->ExecuteSetActive(active);
     };
 
