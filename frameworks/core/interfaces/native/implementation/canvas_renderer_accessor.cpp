@@ -692,9 +692,7 @@ void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
     auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
     CHECK_NULL_VOID(bitmapPeer);
 #ifdef PIXEL_MAP_SUPPORTED
-    auto pixelMap = bitmapPeer->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    peerImpl->TriggerTransferFromImageBitmapImpl(pixelMap);
+    LOGE("ARKOALA CanvasRendererAccessor::TransferFromImageBitmapImpl not implemented for PixelMap.");
 #else
     auto imageData = bitmapPeer->GetImageData();
     CHECK_NULL_VOID(imageData);
