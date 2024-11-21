@@ -300,9 +300,6 @@ void CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl(double offsetY)
     }
     pattern_->UpdateShadowOffsetY(offsetY);
 }
-
-
-
 void CanvasRendererPeerImpl::TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path)
 {
     if (!pattern_) {
@@ -312,6 +309,7 @@ void CanvasRendererPeerImpl::TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path
     }
     pattern_->Stroke(path);
 }
+#ifdef PIXEL_MAP_SUPPORTED
 void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap)
 {
     if (!pattern_) {
@@ -321,6 +319,7 @@ void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const RefPtr<Pix
     }
     pattern_->TransferFromImageBitmap(pixelMap);
 }
+#else
 void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData)
 {
     if (!pattern_) {
@@ -330,6 +329,7 @@ void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const Ace::Image
     }
     pattern_->TransferFromImageBitmap(imageData);
 }
+#endif
 void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const Color& color)
 {
     if (!pattern_) {
@@ -384,7 +384,7 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
     }
     pattern_->UpdateStrokePattern(pattern);
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontWeight(FontWeight weight)
+void CanvasRendererPeerImpl::TriggerUpdateFontWeight(Ace::FontWeight weight)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontWeight pattern "
@@ -393,7 +393,7 @@ void CanvasRendererPeerImpl::TriggerUpdateFontWeight(FontWeight weight)
     }
     pattern_->UpdateFontWeight(weight);
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontStyle(FontStyle style)
+void CanvasRendererPeerImpl::TriggerUpdateFontStyle(Ace::FontStyle style)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern "
@@ -418,6 +418,7 @@ void CanvasRendererPeerImpl::TriggerUpdateFontSize(const Dimension& size)
              "not bound to component.");
         return;
     }
+
     pattern_->UpdateFontSize(size);
 }
 

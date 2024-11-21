@@ -17,7 +17,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
-#include "canvas_patternh_peer.h"
+#include "canvas_pattern_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {

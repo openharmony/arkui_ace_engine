@@ -274,6 +274,14 @@ void CanvasPattern::Stroke()
 
 void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->path = path;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke(path);
@@ -558,6 +566,14 @@ void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 #ifdef PIXEL_MAP_SUPPORTED
 void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->pixelMap = pixelMap;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
         paintMethod.TransferFromImageBitmap(pixelMap);
@@ -570,6 +586,14 @@ void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 #else
 void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->imageData = std::make_shared<Ace::ImageData>(imageData);
+        return;
+    }
+
 #ifndef ACE_UNITTEST
 #ifndef USE_FAST_TASKPOOL
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
@@ -886,6 +910,14 @@ void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& grad
 
 void CanvasPattern::UpdateFontWeight(FontWeight weight)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled2 = true;
+        holder->fontWeight = weight;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [weight](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontWeight(weight);
@@ -898,6 +930,14 @@ void CanvasPattern::UpdateFontWeight(FontWeight weight)
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->fontStyle = style;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [style](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontStyle(style);
@@ -910,6 +950,14 @@ void CanvasPattern::UpdateFontStyle(FontStyle style)
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled4 = true;
+        holder->fontFamilies = families;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [families](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontFamilies(families);
@@ -922,6 +970,14 @@ void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled3 = true;
+        holder->fontSize = size;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [size](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontSize(size);

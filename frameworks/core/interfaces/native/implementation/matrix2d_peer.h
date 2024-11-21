@@ -15,22 +15,20 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 
-#include "arkoala_api.h"
-#include "arkoala_api_generated.h"
 #include "core/components/common/properties/paint_state.h"
 
 struct Matrix2DPeer {
 public:
-    const OHOS::Ace::RefPtr<OHOS::Ace::TransformParam>& GetTransformParam() const
+    const std::shared_ptr<OHOS::Ace::TransformParam>& GetTransformParam() const
     {
         return param_;
     }
-    void SetTransformParam(const OHOS::Ace::RefPtr<OHOS::Ace::TransformParam>& param)
+    void SetTransformParam(const std::shared_ptr<OHOS::Ace::TransformParam>& param)
     {
         param_ = param;
     }
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::TransformParam> param_ = nullptr;
-};
 
+private:
+    std::shared_ptr<OHOS::Ace::TransformParam> param_ = nullptr;
+};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H

@@ -15,22 +15,20 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H
 
-#include "arkoala_api.h"
-#include "arkoala_api_generated.h"
 #include "core/components/common/properties/decoration.h"
 
 struct CanvasGradientPeer {
 public:
-    const OHOS::Ace::RefPtr<OHOS::Ace::Gradient>& GetGradient() const
+    const std::shared_ptr<OHOS::Ace::Gradient>& GetGradient() const
     {
         return gradient_;
     }
-    void SetController(const OHOS::Ace::RefPtr<OHOS::Ace::Gradient>& gradient)
+    void SetGradient(const std::shared_ptr<OHOS::Ace::Gradient>& gradient)
     {
         gradient_ = gradient;
     }
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::Gradient> gradient_ = nullptr;
-};
 
+private:
+    std::shared_ptr<OHOS::Ace::Gradient> gradient_ = nullptr;
+};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_GRADIENT_PEER_IMPL_H

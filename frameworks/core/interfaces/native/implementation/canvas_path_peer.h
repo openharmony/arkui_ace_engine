@@ -15,8 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATH_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATH_PEER_IMPL_H
 
-#include "arkoala_api.h"
-#include "arkoala_api_generated.h"
 #include "core/components/common/properties/decoration.h"
 
 struct CanvasPathPeer {
@@ -29,8 +27,8 @@ public:
     {
         path_ = path;
     }
+
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::CanvasPath2D> path_ = nullptr;
 };
-
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATH_PEER_IMPL_H

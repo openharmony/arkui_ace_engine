@@ -41,6 +41,9 @@ public:
         height = -1;
         counter = 0;
         isCalled = false;
+        isCalled2 = false;
+        isCalled3 = false;
+        isCalled4 = false;
         request = true;
         rect = Rect(-1, -1, -1, -1);
         value = -1;
@@ -56,6 +59,16 @@ public:
         composite = static_cast<CompositeOperation>(-1);
         enabled = false;
         color = Color::BLACK;
+        fontStyle = Ace::FontStyle::NONE;
+        fontWeight = Ace::FontWeight::REGULAR;
+        fontSize = Dimension(-1, DimensionUnit::NONE);
+        fontFamilies.clear();
+        path = nullptr;
+        gradient = nullptr;
+        pattern = nullptr;
+        imageData = nullptr;
+        pixelMap = nullptr;
+        param = nullptr;
     }
 
     void TearDown()
@@ -71,6 +84,9 @@ public:
     double height = -1;
     int counter = 0;
     bool isCalled = false;
+    bool isCalled2 = false;
+    bool isCalled3 = false;
+    bool isCalled4 = false;
     bool request = false;
     Rect rect = Rect(-1, -1, -1, 1);
     double value = -1;
@@ -86,6 +102,16 @@ public:
     CompositeOperation composite = static_cast<CompositeOperation>(-1);
     bool enabled = false;
     Color color = Color::BLACK;
+    Ace::FontStyle fontStyle = Ace::FontStyle::NONE;
+    Ace::FontWeight fontWeight = Ace::FontWeight::REGULAR;
+    Dimension fontSize = Dimension(-1, DimensionUnit::NONE);
+    std::vector<std::string> fontFamilies;
+    OHOS::Ace::RefPtr<OHOS::Ace::CanvasPath2D> path = nullptr;
+    std::shared_ptr<OHOS::Ace::Pattern> pattern = nullptr;
+    std::shared_ptr<OHOS::Ace::Gradient> gradient = nullptr;
+    std::shared_ptr<OHOS::Ace::ImageData> imageData = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap = nullptr;
+    std::shared_ptr<OHOS::Ace::TransformParam> param = nullptr;
 };
 
 } // namespace OHOS::Ace::NG
