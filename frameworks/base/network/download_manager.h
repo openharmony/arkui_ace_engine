@@ -60,6 +60,12 @@ public:
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId);
 
+    // use preload module to download the url
+    virtual bool DownloadAsyncWithPreload(
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+    virtual bool DownloadSyncWithPreload(
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+
 private:
     static std::unique_ptr<DownloadManager> instance_;
     static std::mutex mutex_;
