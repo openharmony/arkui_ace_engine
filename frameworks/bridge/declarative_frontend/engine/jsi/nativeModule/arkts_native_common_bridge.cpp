@@ -916,13 +916,16 @@ void ParseOuterBorderWidth(
 
     ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
     ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
-    ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
-    ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
     if (needLocalized) {
         Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
         Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
         ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
         ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+    } else {
+        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
     }
 
     if (startDim.has_value() || endDim.has_value()) {
