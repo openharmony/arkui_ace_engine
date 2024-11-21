@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_PAINT_PROPERTY_CPP
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_PAINT_PROPERTY_CPP
-
 #include "core/components_ng/render/paint_property.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -32,5 +29,9 @@ RefPtr<FrameNode> PaintProperty::GetHost() const
     return host_.Upgrade();
 }
 
+void PaintProperty::UpdatePaintPropertyHost(const PaintProperty* renderProperty)
+{
+    host_ = renderProperty->host_;
+}
+
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_PAINT_PROPERTY_CPP

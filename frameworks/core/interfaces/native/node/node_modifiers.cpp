@@ -100,6 +100,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
@@ -252,6 +253,7 @@ const ArkUINodeModifiers impl = {
 
     NodeModifier::GetContainerSpanModifier,
     NodeModifier::GetLinearIndicatorModifier,
+    NodeModifier::GetThemeModifier,
 };
 } // namespace
 
