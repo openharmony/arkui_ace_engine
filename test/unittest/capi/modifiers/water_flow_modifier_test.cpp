@@ -56,14 +56,14 @@ public:
 HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnReachStart, nullptr);
-    const int32_t CONTEXT_ID = 123;
+    const int32_t contextId = 123;
 
     static std::optional<int32_t> checkData;
     auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
     modifier_->setOnReachStart(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -76,7 +76,7 @@ HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
     onReachStart();
 
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+    EXPECT_EQ(checkData.value(), contextId);
 }
 
 /*
@@ -87,14 +87,14 @@ HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
 HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnReachEnd, nullptr);
-    const int32_t CONTEXT_ID = 123;
+    const int32_t contextId = 123;
 
     static std::optional<int32_t> checkData;
     auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
     modifier_->setOnReachEnd(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -106,7 +106,7 @@ HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
     onReachEnd();
 
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+    EXPECT_EQ(checkData.value(), contextId);
 }
 
 
