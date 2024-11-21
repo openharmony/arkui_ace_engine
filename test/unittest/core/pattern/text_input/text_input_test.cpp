@@ -1029,6 +1029,29 @@ HWTEST_F(TextFieldUXTest, CopyOption004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CopyOption005
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption005, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is not vaild
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(static_cast<CopyOptions>(99));
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
+}
+
+/**
  * @tc.name: enableAutoFill001
  * @tc.desc: test testInput enableAutoFill
  * @tc.type: FUNC
@@ -2189,10 +2212,10 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
         pattern->scrollBar_->isScrollable_ = true;
     };
 
-    // /**
-    //  * @tc.steps: step2. Test HandleClickEvent.
-    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
-    //  */
+    /**
+    * @tc.steps: step2. Test HandleClickEvent.
+    * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    */
     pattern_->hasMousePressed_ = true;
     pattern_->HandleClickEvent(info);
     Point point(info.localLocation_.GetX(), info.localLocation_.GetY());

@@ -424,4 +424,38 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch001, TestSize.Level1)
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
 }
+
+/**
+ * @tc.name: GridGetChildrenExpandedSize001
+ * @tc.desc: Test Grid GetChildrenExpandedSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItem and initialize related properties.
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH, ITEM_HEIGHT * 5 + 10 * 4));
+
+    auto padding = 10.f;
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH - padding, ITEM_HEIGHT * 5 + 10 * 4));
+
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetLayoutDirection(FlexDirection::COLUMN);
+    model.SetRowsTemplate("1fr 1fr");
+    model.SetColumnsGap(Dimension(10));
+    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_WIDTH * 5 + 10 * 4, GRID_HEIGHT));
+
+    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_WIDTH * 5 + 10 * 4, GRID_HEIGHT - padding));
+}
 } // namespace OHOS::Ace::NG

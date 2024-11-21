@@ -211,6 +211,17 @@ void AddSetAppColorModeToResConfig(
         aceResCfg.SetColorModeIsSetByApp(true);
     }
 }
+
+std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    std::string res = "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&res](const auto& avoidArea) {
+        res =
+            res + "(" + std::to_string(static_cast<int32_t>(avoidArea.first)) + "," + avoidArea.second.ToString() + ")";
+    });
+    res = res + "]";
+    return res;
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -477,7 +488,8 @@ private:
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
                 "later avoid %{public}s %{public}f %{public}f",
                 lastRotation, keyboardRect.ToString().c_str(), positionY, height);
-            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+            NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
+            textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
         }
         return false;
@@ -869,8 +881,15 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return errorCode;
 }
 
-UIContentErrorCode UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+    {
+        std::string contentName = "";
+        return Initialize(window, content, storage, contentName);
+    }
+
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
@@ -879,7 +898,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
-        errorCode = Platform::AceContainer::RunPage(instanceId_, content, "");
+        errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
         CHECK_ERROR_CODE_RETURN(errorCode);
     } else {
         LOGE("Initialize failed, buffer is null");
@@ -2502,9 +2521,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
-        static_cast<uint32_t>(reason));
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
+         "rsTransaction nullptr %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
+        rsTransaction == nullptr);
+    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
+    TAG_LOGI(ACE_LAYOUT, "updateAvoidAreas size %{public}zu, %{public}s", avoidAreas.size(), stringifiedMap.c_str());
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -3023,13 +3045,29 @@ void UIContentImpl::SetAppWindowTitle(const std::string& title)
 
 void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
+    std::lock_guard<std::mutex> lock(setAppWindowIconMutex_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
     ContainerScope scope(instanceId_);
-    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [container, pixelMap]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    };
+
+    // Cancel the pending task
+    setAppWindowIconTask_.Cancel();
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        setAppWindowIconTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
+        taskExecutor->PostTask(setAppWindowIconTask_,
+            TaskExecutor::TaskType::UI, "ArkUISetAppWindowIcon");
+    }
 }
 
 void UIContentImpl::UpdateFormData(const std::string& data)

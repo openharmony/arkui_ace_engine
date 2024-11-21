@@ -493,7 +493,7 @@ void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
         auto index = host->GetChildFlatIndex(tabBarItemId).second;
-        tabBar->HandleClick(info, index);
+        tabBar->HandleClick(info.GetSourceDevice(), index);
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     clickEvents_[tabBarItemId] = clickEvent;
@@ -526,7 +526,7 @@ void TabBarPattern::AddMaskItemClickEvent()
             auto index = (maskIndex == 0) ? layoutProperty->GetSelectedMask().value_or(-1) :
                 layoutProperty->GetUnselectedMask().value_or(-1);
             if (index >= 0) {
-                tabBar->HandleClick(info, index);
+                tabBar->HandleClick(info.GetSourceDevice(), index);
             }
         };
         auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
@@ -556,6 +556,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!dragEvent_);
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
         auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
@@ -1387,7 +1388,7 @@ void TabBarPattern::InitLongPressAndDragEvent()
 void TabBarPattern::HandleLongPressEvent(const GestureEvent& info)
 {
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    HandleClick(info, index);
+    HandleClick(info.GetSourceDevice(), index);
     ShowDialogWithNode(index);
 }
 
@@ -1428,9 +1429,9 @@ void TabBarPattern::CloseDialog()
     dialogNode_.Reset();
 }
 
-void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
+void TabBarPattern::HandleClick(SourceType type, int32_t index)
 {
-    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+    if (type == SourceType::KEYBOARD) {
         return;
     }
     auto host = GetHost();
@@ -1895,8 +1896,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
-        TabBarClickEvent(index);
-        ClickTo(host, index);
+        HandleClick(info.GetSourceDevice(), index);
         CloseDialog();
     }
 
@@ -2200,7 +2200,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
             textLayoutProperty->UpdateTextColor(
                 labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
             !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
@@ -2406,8 +2406,7 @@ bool TabBarPattern::IsContainsBuilder()
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
 {
     auto weak = AceType::WeakClaim(this);
-    const auto& pattern = weak.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
 
     currentOffset_ = 0.0f;
     host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
@@ -3178,7 +3177,8 @@ void TabBarPattern::InitTurnPageRateEvent()
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 auto pattern = weak.Upgrade();
-                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                CHECK_NULL_VOID(pattern);
+                if (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f)) {
                     pattern->isTouchingSwiper_ = false;
                 }
                 pattern->SetMaskAnimationExecuted(false);

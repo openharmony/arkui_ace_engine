@@ -31,6 +31,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+    CHECK_NULL_VOID(overlayMod);
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());

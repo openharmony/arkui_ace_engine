@@ -65,6 +65,7 @@ RefPtr<StepperComponent> StepperComposedElement::GetStepperComponent() const
 void StepperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
     auto stepperComponent = GetStepperComponent();
+    CHECK_NULL_VOID(stepperComponent);
     stepperComponent->InsertChild(slot, newComponent);
     auto renderStepper = GetInspectorElement<RenderStepper>(StepperElement::TypeId());
     if (!renderStepper) {

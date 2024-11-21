@@ -87,6 +87,15 @@
             "https://gitee.com/chenjiadong0322",
             "https://gitee.com/smileJuliet",
             "https://gitee.com/bc_yx"
+        ],
+        "https://gitee.com/arkui_cj": [
+            "https://gitee.com/persisting",
+            "https://gitee.com/Eric_Ch96",
+            "https://gitee.com/Qu_DY",
+            "https://gitee.com/drose828",
+            "https://gitee.com/sdgszsd",
+            "https://gitee.com/kun641",
+            "https://gitee.com/ancrs"
         ]
     },
     "userInfos": {
@@ -345,6 +354,34 @@
         "https://gitee.com/bc_yx": {
             "info": "[web-性能优化 liurongliang]",
             "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/persisting": {
+            "info": "[cjfrontend liubinyu]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/Eric_Ch96": {
+            "info": "[cjfrontend chendewen]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/Qu_DY": {
+            "info": "[cjfrontend qudongyan]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/drose828": {
+            "info": "[cjfrontend zhanggengshun]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/sdgszsd": {
+            "info": "[cjfrontend gaosong]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/kun641": {
+            "info": "[cjfrontend chenkun]",
+            "group": "https://gitee.com/arkui_cj"
+        },
+        "https://gitee.com/ancrs": {
+            "info": "[cjfrontend cuitengfei]",
+            "group": "https://gitee.com/arkui_cj"
         }
     }
 }

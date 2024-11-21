@@ -272,7 +272,6 @@ public:
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
-    virtual void SetCapitalizationMode(AutoCapitalizationMode value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;

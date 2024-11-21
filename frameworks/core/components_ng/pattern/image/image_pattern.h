@@ -546,7 +546,8 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
-    ImageRotateOrientation finalOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
     float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;

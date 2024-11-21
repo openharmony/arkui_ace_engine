@@ -89,7 +89,8 @@ public:
      * those items out of cached range are removed from L1
      * requests idle task
      */
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
         RefPtr<FrameNode>& frameNode);

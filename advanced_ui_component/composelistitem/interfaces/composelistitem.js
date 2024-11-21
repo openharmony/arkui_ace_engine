@@ -17,6 +17,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const hilog = requireNapi('hilog');
 export var IconType;
 (function (a17) {
     a17[a17["BADGE"] = 1] = "BADGE";
@@ -70,24 +71,16 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - ${RIGHT_ONLY_ARROW_WIDTH})';
-const RIGHT_ONLY_IMAGE_WIDTH = '48vp';
-const LEFT_ONLY_IMAGE_WIDTH = 'calc(100% - ${RIGHT_ONLY_IMAGE_WIDTH})';
-const RIGHT_ONLY_ICON_WIDTH = '32vp';
-const LEFT_ONLY_ICON_WIDTH = 'calc(100% - ${RIGHT_ONLY_ICON_WIDTH})';
-const RIGHT_ICON_SUB_ICON_WIDTH = '72vp';
-const LEFT_ICON_SUB_ICON_WIDTH = 'calc(100% - ${RIGHT_ICON_SUB_ICON_WIDTH})';
-const RIGHT_ONLY_RADIO_WIDTH = '24vp';
-const LEFT_ONLY_RADIO_WIDTH = 'calc(100% - ${RIGHT_ONLY_RADIO_WIDTH})';
-const RIGHT_ONLY_CHECKBOX_WIDTH = '24vp';
-const LEFT_ONLY_CHECKBOX_WIDTH = 'calc(100% - ${RIGHT_ONLY_CHECKBOX_WIDTH})';
-const RIGHT_ONLY_SWITCH_WIDTH = '40vp';
-const LEFT_ONLY_SWITCH_WIDTH = 'calc(100% - ${RIGHT_ONLY_SWITCH_WIDTH})';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ICON_SIZE_MAP = new Map([
     [IconType.BADGE, BADGE_SIZE],
     [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -434,7 +427,6 @@ class ContentItemStruct extends ViewPU {
                 LengthMetrics.vp(16)
             });
             Flex.padding({ start: LengthMetrics.vp(LISTITEM_PADDING) });
-            Flex.width(this.isParentColumnDirection() ? undefined : this.leftWidth);
             Flex.flexShrink(this.isParentColumnDirection() ? 0 : 1);
         }, Flex);
         this.createIcon.bind(this)();
@@ -937,6 +929,7 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
+            Radio.flexShrink(0);
             Radio.onHover((t12) => {
                 this.parentCanHover = false;
                 if (t12 && this.parentFrontColor === this.hoveringColor) {
@@ -965,6 +958,7 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
+            Checkbox.flexShrink(0);
             Checkbox.onHover((p12) => {
                 this.parentCanHover = false;
                 if (p12 && this.parentFrontColor === this.hoveringColor) {
@@ -1246,6 +1240,13 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
+        this.callbackId = undefined;
+        this.envCallback = {
+            onConfigurationUpdated: (h) => {
+                this.fontSizeScale = this.decideFontSizeScale();
+            },
+            onMemoryLevel: (g) => { }
+        };
         this.setInitiallyProvidedValue(c11);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
@@ -1315,6 +1316,12 @@ export class ComposeListItem extends ViewPU {
         }
         if (a11.maxFontScale !== undefined) {
             this.maxFontScale = a11.maxFontScale;
+        }
+        if (a11.callbackId !== undefined) {
+            this.callbackId = a11.callbackId;
+        }
+        if (a11.envCallback !== undefined) {
+            this.envCallback = a11.envCallback;
         }
     }
     updateStateVars(z10) {
@@ -1520,65 +1527,52 @@ export class ComposeListItem extends ViewPU {
         }
     }
     aboutToAppear() {
+        this.fontSizeScale = this.decideFontSizeScale();
         this.onPropChange();
+        try {
+            this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+        }
+        catch (d) {
+            let e = d.code;
+            let f = d.message;
+            hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${e}, ${f}`);
+        }
     }
-    calculatedLeftWidth() {
-        if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-            return RIGHT_CONTENT_NULL_LEFTWIDTH;
-        }
-        else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_SWITCH_WIDTH;
-        }
-        else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_CHECKBOX_WIDTH;
-        }
-        else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_RADIO_WIDTH;
-        }
-        else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-            if (this.operateItem?.subIcon != null) {
-                return LEFT_ICON_SUB_ICON_WIDTH;
-            }
-            return LEFT_ONLY_ICON_WIDTH;
-        }
-        else if (this.operateItem?.image != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_IMAGE_WIDTH;
-        }
-        else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-            return LEFT_ONLY_ARROW_WIDTH;
-        }
-        else {
-            return LEFT_PART_WIDTH;
+    aboutToDisappear() {
+        if (this.callbackId) {
+            this.getUIContext()
+                .getHostContext()
+            ?.getApplicationContext()
+            ?.off('environment', this.callbackId);
+            this.callbackId = void (0);
         }
     }
     calculatedRightWidth() {
-        if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-            return RIGHT_CONTENT_NULL_RIGHTWIDTH;
+        if (this.operateItem?.text || this.operateItem?.button) {
+            return RIGHT_PART_WIDTH;
         }
-        else if (this.operateItem?.switch != null && this.operateItem?.text == null) {
+        if (this.operateItem?.switch) {
             return RIGHT_ONLY_SWITCH_WIDTH;
         }
-        else if (this.operateItem?.checkbox != null && this.operateItem?.text == null) {
+        else if (this.operateItem?.checkbox) {
             return RIGHT_ONLY_CHECKBOX_WIDTH;
         }
-        else if (this.operateItem?.radio != null && this.operateItem?.text == null) {
+        else if (this.operateItem?.radio) {
             return RIGHT_ONLY_RADIO_WIDTH;
         }
-        else if (this.operateItem?.icon != null && this.operateItem?.text == null) {
-            if (this.operateItem?.subIcon != null) {
+        else if (this.operateItem?.icon) {
+            if (this.operateItem?.subIcon) {
                 return RIGHT_ICON_SUB_ICON_WIDTH;
             }
             return RIGHT_ONLY_ICON_WIDTH;
         }
-        else if (this.operateItem?.image != null && this.operateItem?.text == null) {
+        else if (this.operateItem?.image) {
             return RIGHT_ONLY_IMAGE_WIDTH;
         }
-        else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
+        else if (this.operateItem?.arrow) {
             return RIGHT_ONLY_ARROW_WIDTH;
         }
-        else {
-            return RIGHT_PART_WIDTH;
-        }
+        return RIGHT_CONTENT_NULL_RIGHTWIDTH;
     }
     decideContentItemDirection() {
         if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 &&
@@ -1679,19 +1673,10 @@ export class ComposeListItem extends ViewPU {
         }
         return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
     }
-    onMeasureSize(x9, y9, z9) {
-        this.fontSizeScale = this.decideFontSizeScale();
-        let a10 = { height: 0, width: 0 };
-        y9.forEach((b10) => {
-            let c10 = b10.measure(z9);
-            a10.width = c10.width;
-            a10.height = c10.height;
-        });
-        return a10;
-    }
     initialRender() {
         this.observeComponentCreation2((v9, w9) => {
             Stack.create();
+            Stack.width('100%');
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING
@@ -1743,12 +1728,12 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((o9, p9) => {
                             if (p9) {
-                                let q9 = new ContentItemStruct(this, {}, undefined, o9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 916, col: 11 });
+                                let q9 = new ContentItemStruct(this, {}, undefined, o9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 903, col: 11 });
                                 ViewPU.create(q9);
-                                let r9 = () => {
+                                let c = () => {
                                     return {};
                                 };
-                                q9.paramsGenerator_ = r9;
+                                q9.paramsGenerator_ = c;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(o9, {});
@@ -1776,26 +1761,24 @@ export class ComposeListItem extends ViewPU {
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth(),
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, i9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 919, col: 11 });
+                                }, undefined, i9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 906, col: 11 });
                                 ViewPU.create(k9);
-                                let l9 = () => {
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
                                         primaryText: this.contentItem?.primaryText,
                                         secondaryText: this.contentItem?.secondaryText,
                                         description: this.contentItem?.description,
-                                        leftWidth: this.calculatedLeftWidth(),
                                         fontSizeScale: this.fontSizeScale,
                                         parentDirection: this.containerDirection,
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                k9.paramsGenerator_ = l9;
+                                k9.paramsGenerator_ = b;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(i9, {
@@ -1804,7 +1787,6 @@ export class ComposeListItem extends ViewPU {
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth(),
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection
@@ -1856,9 +1838,9 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
-                                }, undefined, a9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 932, col: 11 });
+                                }, undefined, a9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 918, col: 11 });
                                 ViewPU.create(c9);
-                                let d9 = () => {
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1879,7 +1861,7 @@ export class ComposeListItem extends ViewPU {
                                         parentDirection: this.containerDirection
                                     };
                                 };
-                                c9.paramsGenerator_ = d9;
+                                c9.paramsGenerator_ = a;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(a9, {

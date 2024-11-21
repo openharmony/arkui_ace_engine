@@ -383,6 +383,218 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ListOnScrollIndexModifier extends ModifierWithKey<(start: number, end: number, center: number) => void> {
+  constructor(value: (start: number, end: number, center: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnScrollIndex');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnScrollIndex(node);
+    } else {
+      getUINativeModule().list.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+
+class ListOnScrollVisibleContentChangeModifier extends ModifierWithKey<OnScrollVisibleContentChangeCallback> {
+  constructor(value: OnScrollVisibleContentChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnScrollVisibleContentChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnScrollVisibleContentChange(node);
+    } else {
+      getUINativeModule().list.setOnScrollVisibleContentChange(node, this.value);
+    }
+  }
+}
+
+class ListOnReachStartModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnReachStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnReachStart(node);
+    } else {
+      getUINativeModule().list.setOnReachStart(node, this.value);
+    }
+  }
+}
+
+class ListOnReachEndModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnReachEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnReachEnd(node);
+    } else {
+      getUINativeModule().list.setOnReachEnd(node, this.value);
+    }
+  }
+}
+
+class ListOnScrollStartModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnScrollStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnScrollStart(node);
+    } else {
+      getUINativeModule().list.setOnScrollStart(node, this.value);
+    }
+  }
+}
+
+class ListOnScrollStopModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnScrollStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().list.setOnScrollStop(node, this.value);
+    }
+  }
+}
+
+class ListOnItemMoveModifier extends ModifierWithKey<(from: number, to: number) => boolean> {
+  constructor(value: (from: number, to: number) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemMove(node);
+    } else {
+      getUINativeModule().list.setOnItemMove(node, this.value);
+    }
+  }
+}
+
+class ListOnItemDragStartModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void | (() => any)> {
+  constructor(value: (event: ItemDragInfo, itemIndex: number) => void | (() => any)) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemDragStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemDragStart(node);
+    } else {
+      getUINativeModule().list.setOnItemDragStart(node, this.value);
+    }
+  }
+}
+
+class ListOnItemDragEnterModifier extends ModifierWithKey<(event: ItemDragInfo) => void> {
+  constructor(value: (event: ItemDragInfo) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemDragEnter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemDragEnter(node);
+    } else {
+      getUINativeModule().list.setOnItemDragEnter(node, this.value);
+    }
+  }
+}
+
+class ListOnItemDragMoveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number) => void> {
+  constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemDragMove');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemDragMove(node);
+    } else {
+      getUINativeModule().list.setOnItemDragMove(node, this.value);
+    }
+  }
+}
+
+class ListOnItemDragLeaveModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number) => void> {
+  constructor(value: (event: ItemDragInfo, itemIndex: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemDragLeave');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemDragLeave(node);
+    } else {
+      getUINativeModule().list.setOnItemDragLeave(node, this.value);
+    }
+  }
+}
+
+class ListOnItemDropModifier extends ModifierWithKey<(event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void> {
+  constructor(value: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnItemDrop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnItemDrop(node);
+    } else {
+      getUINativeModule().list.setOnItemDrop(node, this.value);
+    }
+  }
+}
+
+class ListOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, state: ScrollState) => { offsetRemain: number }> {
+  constructor(value: (offset: number, state: ScrollState) => { offsetRemain: number; }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnScrollFrameBegin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().list.setOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+
+class ListOnWillScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number,
+  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult> {
+  constructor(value: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnWillScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnWillScroll(node);
+    } else {
+      getUINativeModule().list.setOnWillScroll(node, this.value);
+    }
+  }
+}
+
+class ListOnDidScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number, scrollState: ScrollState) => void> {
+  constructor(value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listOnDidScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetOnDidScroll(node);
+    } else {
+      getUINativeModule().list.setOnDidScroll(node, this.value);
+    }
+  }
+}
+
 class ListFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
   constructor(value: ArkFadingEdge) {
     super(value);
@@ -602,43 +814,68 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     throw new Error('Method not implemented.');
   }
   onScrollIndex(event: (start: number, end: number, center: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnScrollIndexModifier.identity, ListOnScrollIndexModifier, event);
+    return this;
   }
-  onReachStart(event: () => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onReachEnd(event: () => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onScrollStart(event: () => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onScrollStop(event: () => void): this {
-    throw new Error('Method not implemented.');
+  onScrollVisibleContentChange(callback: OnScrollVisibleContentChangeCallback): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnScrollVisibleContentChangeModifier.identity, ListOnScrollVisibleContentChangeModifier, callback);
+    return this;
   }
   onItemDelete(event: (index: number) => boolean): this {
     throw new Error('Method not implemented.');
   }
-  onItemMove(event: (from: number, to: number) => boolean): this {
-    throw new Error('Method not implemented.');
+  onItemMove(callback: (from: number, to: number) => boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnItemMoveModifier.identity, ListOnItemMoveModifier, callback);
+    return this;
   }
   onItemDragStart(event: (event: ItemDragInfo, itemIndex: number) => void | (() => any)): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnItemDragStartModifier.identity, ListOnItemDragStartModifier, event);
+    return this;
   }
   onItemDragEnter(event: (event: ItemDragInfo) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnItemDragEnterModifier.identity, ListOnItemDragEnterModifier, event);
+    return this;
   }
   onItemDragMove(event: (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnItemDragMoveModifier.identity, ListOnItemDragMoveModifier, event);
+    return this;
   }
   onItemDragLeave(event: (event: ItemDragInfo, itemIndex: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnItemDragLeaveModifier.identity, ListOnItemDragLeaveModifier, event);
+    return this;
   }
   onItemDrop(event: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListOnItemDropModifier.identity, ListOnItemDropModifier, event);
+    return this;
   }
-  onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
-    throw new Error('Method not implemented.');
+  onScrollFrameBegin(callback: (offset: number, state: ScrollState) => { offsetRemain: number }): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnScrollFrameBeginModifier.identity, ListOnScrollFrameBeginModifier, callback);
+    return this;
+  }
+  onWillScroll(callback: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnWillScrollModifier.identity, ListOnWillScrollModifier, callback);
+    return this;
+  }
+  onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnDidScrollModifier.identity, ListOnDidScrollModifier, callback);
+    return this;
+  }
+  onReachStart(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnReachStartModifier.identity, ListOnReachStartModifier, event);
+    return this;
+  }
+  onReachEnd(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnReachEndModifier.identity, ListOnReachEndModifier, event);
+    return this;
+  }
+  onScrollStart(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnScrollStartModifier.identity, ListOnScrollStartModifier, event);
+    return this;
+  }
+  onScrollStop(event: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, ListOnScrollStopModifier.identity, ListOnScrollStopModifier, event);
+    return this;
   }
   fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
     let fadingEdge: ArkFadingEdge = new ArkFadingEdge();

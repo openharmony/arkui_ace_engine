@@ -407,6 +407,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scroller_observer_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
@@ -666,8 +667,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   sources += [
@@ -695,6 +694,8 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "graphic_2d:librender_service_client",

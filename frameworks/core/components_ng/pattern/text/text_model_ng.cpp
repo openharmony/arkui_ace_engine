@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,6 +35,7 @@ constexpr float DEFAULT_OPACITY = 0.2;
 void TextModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
@@ -53,9 +55,15 @@ void TextModelNG::Create(const std::u16string& content)
     }
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
+}
+
+void TextModelNG::Create(const std::string& content)
+{
+    Create(UtfUtils::Str8ToStr16(content));
 }
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)

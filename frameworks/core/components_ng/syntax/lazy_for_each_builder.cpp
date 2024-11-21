@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG {
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
-                expiringItem_[itemInfo.first] = LazyForEachCacheChild(index, itemInfo.second);
+                expiringItem_.emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
                 cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
             } else {
                 cachedItems_[index] = itemInfo;
@@ -969,7 +969,7 @@ namespace OHOS::Ace::NG {
         if (count == 0) {
             return;
         }
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - endShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
                     startIndex_ > endIndex_ + i) {
@@ -983,7 +983,7 @@ namespace OHOS::Ace::NG {
                 }
             }
         }
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - startShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {

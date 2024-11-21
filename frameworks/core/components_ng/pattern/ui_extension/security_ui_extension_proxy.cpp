@@ -27,7 +27,9 @@ SecurityUIExtensionProxy::SecurityUIExtensionProxy(
 void SecurityUIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
+    auto paramsWrap = DynamicCast<WantParamsWrapOhos>(wantParams);
+    CHECK_NULL_VOID(paramsWrap);
+    auto params = paramsWrap->GetWantParams();
     sessionWrapper_->SendDataAsync(params);
 }
 

@@ -155,8 +155,8 @@ HWTEST_F(DragAndDropTest, DragAndDropTest004, TestSize.Level1)
      */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr });
-    auto areaNode = new ArkUI_Node({ ARKUI_NODE_TEXT_AREA, nullptr });
+    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr, true });
+    auto areaNode = new ArkUI_Node({ ARKUI_NODE_TEXT_AREA, nullptr, true });
 
     /**
      * @tc.expected: Return expected results.
@@ -254,7 +254,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest007, TestSize.Level1)
     /**
      * @tc.steps: step1.create DragEvent, related function is called.
      */
-    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr });
+    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr, true });
     auto ret1 = OH_ArkUI_SetNodeDraggable(textNode, true);
 
     /**
@@ -486,7 +486,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest016, TestSize.Level1)
     OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(dragPreviewOption, true);
     OH_ArkUI_DragPreviewOption_SetScaleMode(
         dragPreviewOption, ArkUI_DragPreviewScaleMode::ARKUI_DRAG_PREVIEW_SCALE_AUTO);
-    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr });
+    auto textNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr, true });
     auto ret1 = OH_ArkUI_SetNodeDragPreviewOption(textNode, dragPreviewOption);
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
 

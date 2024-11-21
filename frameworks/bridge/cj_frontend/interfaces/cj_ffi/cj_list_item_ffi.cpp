@@ -67,15 +67,22 @@ void FfiOHOSAceFrameworkListItemSetOnSelect(void (*callback)(bool flag))
     ListItemModel::GetInstance()->SetSelectCallback(CJLambda::Create(callback));
 }
 
-void FfiOHOSAceFrameworkListItemSetSwipeAction(void (*startBuilder)(), void (*endBuilder)(),
-    void (*onIndexChange)(int32_t index), int32_t edgeEffect)
+void FfiOHOSAceFrameworkListItemSetSwipeAction(void (*startBuilder)(), void (*endBuilder)(), int32_t edgeEffect)
 {
     if (!Utils::CheckParamsValid(edgeEffect, SWIPE_EDGE_EFFECT.size())) {
         LOGE("invalid value for font swipeEdgeAction");
         return;
     }
+
+    ListItemModel::GetInstance()->SetDeleteArea(
+        CJLambda::Create(endBuilder), nullptr, nullptr, nullptr, nullptr,
+        Dimension(0, DimensionUnit::VP), false, nullptr);
+
+    ListItemModel::GetInstance()->SetDeleteArea(
+        CJLambda::Create(startBuilder), nullptr, nullptr, nullptr, nullptr,
+        Dimension(0, DimensionUnit::VP), true, nullptr);
+
     ListItemModel::GetInstance()->SetSwiperAction(
-        CJLambda::Create(startBuilder), CJLambda::Create(endBuilder),
-        CJLambda::Create(onIndexChange), SWIPE_EDGE_EFFECT[edgeEffect]);
+        nullptr, nullptr, nullptr, SWIPE_EDGE_EFFECT[edgeEffect]);
 }
 }

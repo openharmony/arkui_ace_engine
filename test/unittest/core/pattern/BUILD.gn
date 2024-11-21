@@ -52,7 +52,6 @@ group("core_pattern_unittest") {
     "image:image_test_ng",
     "image_animator:image_animator_test_ng",
     "indexer:indexer_test_ng",
-    "linear_indicator:linear_indicator_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
     "list:list_test_ng",

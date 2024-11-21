@@ -418,6 +418,32 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent004, TestSize.Level1)
         << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 }
 
+HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
+{
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    std::vector<KeyCode> presscodes = {};
+    keyEvent.pressedCodes = presscodes;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_A);
+    keyEvent.code = KeyCode::KEY_A;
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->isFocusedBeforeClick_ = false;
+    GetFocus();
+    pattern_->needToRequestKeyboardOnFocus_  = false;
+    pattern_->needToRequestKeyboardInner_  = false;
+    auto ret = pattern_->OnKeyEvent(keyEvent);
+    pattern_->CalcCounterBoundHeight();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+}
+
 /**
  * @tc.name: KeyEvent005
  * @tc.desc: Test KeyEvent ctrl + x

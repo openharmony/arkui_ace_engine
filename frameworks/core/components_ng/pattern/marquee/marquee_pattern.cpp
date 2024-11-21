@@ -704,4 +704,25 @@ void MarqueePattern::ResumeAnimation()
     playStatus_ = true;
     AnimationUtils::ResumeAnimation(animation_);
 }
+
+void MarqueePattern::OnFontScaleConfigurationUpdate()
+{
+    if (!AnimationUtils::IsImplicitAnimationOpen()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterReloadAnimationTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+        pattern->StopMarqueeAnimation(playStatus);
+    });
+}
 } // namespace OHOS::Ace::NG

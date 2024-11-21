@@ -99,6 +99,8 @@ public:
 
     void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction);
 
+    void UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const;
+
     void UpdateShowArea(const RectF& area);
 
     void SetSelectRegionVisible(bool isSelectRegionVisible);

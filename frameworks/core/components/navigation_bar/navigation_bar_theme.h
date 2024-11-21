@@ -84,6 +84,7 @@ public:
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
                 theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
                 theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
+                theme->moreMessage_ = pattern->GetAttr<std::string>("navigation_general_more", "null");
             }
             ParsePattern(themeConstants, theme);
             return theme;
@@ -585,6 +586,10 @@ public:
     {
         return dividerGradientDarkBlue_;
     }
+    const std::string& GetMoreMessage() const
+    {
+        return moreMessage_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -647,6 +652,7 @@ private:
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
+    std::string moreMessage_ = "";
     uint32_t toolbarLimitGridCount_ = 8;
     uint32_t dividerShadowEnable_ = 0;
     Color navigationDividerColor_;

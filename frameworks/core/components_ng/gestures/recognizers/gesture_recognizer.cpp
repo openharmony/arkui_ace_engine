@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
 RefPtr<EventManager> GetCurrentEventManager()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
 
     return context->GetEventManager();
@@ -401,13 +401,14 @@ RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
 
 void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
-        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure, TransRefereeState(this->GetRefereeState()),
-            TransGestureDisposal(this->GetGestureDisposal()));
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure,
+        extraInfo_, TransRefereeState(this->GetRefereeState()),
+        TransGestureDisposal(this->GetGestureDisposal()));
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
@@ -416,13 +417,14 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     if (!recognizer) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
-        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
-            TransRefereeState(recognizer->GetRefereeState()), TransGestureDisposal(recognizer->GetGestureDisposal()));
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        point, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)

@@ -313,7 +313,8 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         backButtonLayoutProperty->UpdatePadding(padding);
     }
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         CreateSymbolBackButton(backButtonNode, titleBarNode);
     } else {
         CreateImageBackButton(backButtonNode, titleBarNode);
@@ -895,5 +896,39 @@ void NavDestinationModelNG::SetSystemTransitionType(FrameNode* frameNode, NG::Na
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelNG::SetScrollableProcessor(
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
+void NavDestinationModelNG::UpdateBindingWithScrollable(
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
 }
 } // namespace OHOS::Ace::NG

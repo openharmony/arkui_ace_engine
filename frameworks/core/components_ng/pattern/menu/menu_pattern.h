@@ -339,6 +339,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetOriginOffset(const OffsetF& offset)
     {
         originOffset_ = offset;
@@ -389,6 +394,26 @@ public:
     OffsetF GetPreviewOriginOffset() const
     {
         return previewOriginOffset_;
+    }
+
+    void SetPreviewRect(RectF rect)
+    {
+        previewRect_ = rect;
+    }
+
+    RectF GetPreviewRect() const
+    {
+        return previewRect_;
+    }
+
+    void SetPreviewIdealSize(SizeF size)
+    {
+        previewIdealSize_ = size;
+    }
+
+    SizeF GetPreviewIdealSize() const
+    {
+        return previewIdealSize_;
     }
 
     void SetHasLaid(bool hasLaid)
@@ -508,6 +533,16 @@ public:
         lastPosition_ = lastPosition;
     }
 
+    void UpdateLastArrowPlacement(std::optional<Placement> lastArrowPlacement)
+    {
+        lastArrowPlacement_ = lastArrowPlacement;
+    }
+
+    std::optional<Placement> GetLastArrowPlacement()
+    {
+        return lastArrowPlacement_;
+    }
+
     void SetIsEmbedded()
     {
         isEmbedded_ = true;
@@ -599,8 +634,12 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+    RefPtr<UINode> GetSyntaxNode(const RefPtr<UINode>& parent);
     RefPtr<UINode> GetForEachMenuItem(const RefPtr<UINode>& parent, bool next);
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
+    RefPtr<UINode> GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next);
+    void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
+    void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
@@ -634,10 +673,13 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
+    std::optional<Placement> lastArrowPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF disappearOffset_;
     OffsetF previewOriginOffset_;
+    RectF previewRect_;
+    SizeF previewIdealSize_;
     OffsetF statusOriginOffset_;
     std::optional<bool> enableFold_;
 

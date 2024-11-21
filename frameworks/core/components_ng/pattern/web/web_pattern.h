@@ -63,6 +63,8 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class WebAccessibilityChildTreeCallback;
+
 namespace {
 
 struct MouseClickInfo {
@@ -623,7 +625,7 @@ public:
         int32_t direction);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed = false);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
@@ -686,6 +688,8 @@ public:
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
+    void DumpInfo() override;
+    float DumpGpuInfo();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
@@ -980,6 +984,7 @@ private:
     bool IsDialogNested();
     void SelectCancel() const;
     bool IsSelectInfoValid();
+    std::optional<RectF> GetViewPort() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -1013,7 +1018,6 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
@@ -1074,6 +1078,7 @@ private:
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
+    bool isDragStartFromWeb_ = false;
 
     bool isNewDragStyle_ = false;
     std::map<std::pair<WebElementType, ResponseType>,
@@ -1169,7 +1174,7 @@ private:
     TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<int32_t, std::shared_ptr<AccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
+    std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;

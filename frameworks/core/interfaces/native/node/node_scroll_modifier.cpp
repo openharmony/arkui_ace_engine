@@ -558,8 +558,8 @@ void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
     auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     SizeF size = pattern->GetChildrenExpandedSize();
-    (*values)[0] = size.Width();
-    (*values)[1] = size.Height();
+    (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
+    (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
 }
 } // namespace
 

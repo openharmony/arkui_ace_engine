@@ -1383,4 +1383,193 @@ HWTEST_F(NavdestinationTestNg, SetSystemTransitionType001, TestSize.Level1)
     navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
     EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::CONTENT);
 }
+
+/**
+ * @tc.name: GetSwipeContext001
+ * @tc.desc: Test GetSwipeContext function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetSwipeContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSwipeContext with parameter true.
+     * @tc.expected: All fields of TitleContext has default value.
+     */
+    auto& titleContext = pattern->GetSwipeContext(true);
+    auto* titleContextPtr = &titleContext;
+    ASSERT_EQ(titleContextPtr, &pattern->titleBarSwipeContext_);
+    EXPECT_FALSE(titleContext.isBarShowing);
+    EXPECT_FALSE(titleContext.isBarHiding);
+    EXPECT_FALSE(titleContext.showBarTask);
+
+    /**
+     * @tc.steps: step3. call GetSwipeContext with parameter false.
+     * @tc.expected: All fields of ToolContext has default value.
+     */
+    auto& toolContext = pattern->GetSwipeContext(false);
+    auto* toolContextPtr = &toolContext;
+    ASSERT_EQ(toolContextPtr, &pattern->toolBarSwipeContext_);
+    EXPECT_FALSE(toolContext.isBarShowing);
+    EXPECT_FALSE(toolContext.isBarHiding);
+    EXPECT_FALSE(toolContext.showBarTask);
+}
+
+/**
+ * @tc.name: GetBarNode001
+ * @tc.desc: Test GetBarNode function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetBarNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetBarNode with parameter nullptr.
+     * @tc.expected: failed to get BarNode.
+     */
+    auto barNode = pattern->GetBarNode(nullptr, true);
+    ASSERT_EQ(barNode, nullptr);
+    barNode = pattern->GetBarNode(nullptr, false);
+    ASSERT_EQ(barNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call GetBarNode with node.
+     * @tc.expected: success to get titleBarNode.
+     */
+    barNode = pattern->GetBarNode(nodeBase, true);
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(node->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    ASSERT_EQ(barNode, titleBarNode);
+
+    /**
+     * @tc.steps: step4. Call GetBarNode with node.
+     * @tc.expected: success to get toolBarNode.
+     */
+    barNode = pattern->GetBarNode(nodeBase, false);
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(node->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    ASSERT_EQ(barNode, toolBarNode);
+}
+
+/**
+ * @tc.name: EnableTitleBarSwipe001
+ * @tc.desc: Test EnableTitleBarSwipe function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, EnableTitleBarSwipe001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.steps: step2. Call EnableTitleBarSwipe with parameter nullptr.
+     * @tc.expected: disable titleBarSwipe.
+     */
+    bool enable = pattern->EnableTitleBarSwipe(nullptr);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step3. Hide titlebar.
+     * @tc.expected: disable titleBarSwipe.
+     */
+    property->UpdateHideTitleBar(true);
+    enable = pattern->EnableTitleBarSwipe(nodeBase);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step4. Show titlebar.
+     * @tc.expected: enable titleBarSwipe.
+     */
+    property->UpdateHideTitleBar(false);
+    enable = pattern->EnableTitleBarSwipe(nodeBase);
+    ASSERT_TRUE(enable);
+}
+
+/**
+ * @tc.name: EnableToolBarSwipe001
+ * @tc.desc: Test EnableToolBarSwipe function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, EnableToolBarSwipe001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.steps: step2. Call EnableToolBarSwipe with parameter nullptr.
+     * @tc.expected: disable toolBarSwipe.
+     */
+    bool enable = pattern->EnableToolBarSwipe(nullptr);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step3. Hide toolbar.
+     * @tc.expected: disable toolBarSwipe.
+     */
+    property->UpdateHideToolBar(true);
+    enable = pattern->EnableToolBarSwipe(nodeBase);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step4. Show toolbar.
+     * @tc.expected: enable toolBarSwipe.
+     */
+    property->UpdateHideToolBar(false);
+    enable = pattern->EnableToolBarSwipe(nodeBase);
+    ASSERT_TRUE(enable);
+}
 } // namespace OHOS::Ace::NG

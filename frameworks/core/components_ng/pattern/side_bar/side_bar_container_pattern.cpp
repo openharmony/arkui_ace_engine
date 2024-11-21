@@ -61,10 +61,8 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 constexpr static int32_t SIDE_BAR_INDEX = 2;
 constexpr static int32_t CONTENT_INDEX = 3;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH_SMALL = 24.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL = 24.0_vp;
+Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
@@ -157,7 +155,8 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
         return;
     }
 
-    UpdateControlButtonImageSize();
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -211,7 +210,14 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
 void SideBarContainerPattern::GetControlImageSize(Dimension& width, Dimension& height)
 {
-    UpdateControlButtonImageSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
+        DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
+    }
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
     width = controlImageWidth_;
     height = controlImageHeight_;
 }
@@ -946,7 +952,6 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    UpdateControlButtonInfo();
     return paddingProperty != nullptr;
 }
 
@@ -1346,36 +1351,6 @@ void SideBarContainerPattern::SetAccessibilityEvent()
     CHECK_NULL_VOID(controlButton);
     // use TEXT_CHANGE event to report information update
     controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
-}
-
-void SideBarContainerPattern::UpdateControlButtonImageSize()
-{
-    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH_SMALL;
-        controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL;
-    }
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
-
-    // check whether control image size is customed
-    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
-        SetControlButtonSizeCustom(true);
-    } else {
-        SetControlButtonSizeCustom(false);
-    }
-}
-
-void SideBarContainerPattern::UpdateControlButtonInfo()
-{
-    if (updateCallBack_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        updateCallBack_(host);
-    }
 }
 
 void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,

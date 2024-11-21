@@ -216,9 +216,13 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg004, TestSize.Level1)
 
     auto renderContext = host->GetRenderContext();
     ASSERT_TRUE(renderContext);
-    renderContext->propBackgroundColor_ = Color::BLUE;
+    renderContext->propBackgroundColor_ = Color::TRANSPARENT;
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->handlingSurfaceRenderContext_->GetBackgroundColor(), Color::TRANSPARENT);
+
+    renderContext->propBackgroundColor_ = Color::BLUE;
+    pattern->OnModifyDone();
+    EXPECT_EQ(pattern->handlingSurfaceRenderContext_->GetBackgroundColor(), Color::BLUE);
 
     renderContext->propBackgroundColor_ = Color::BLACK;
     pattern->OnModifyDone();

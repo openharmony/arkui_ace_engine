@@ -15,117 +15,152 @@
 const pasteboard = requireNapi('pasteboard');
 const hilog = requireNapi('hilog');
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 
 const WITHOUT_BUILDER = -2;
+const MAX_FONT_STANDARD = 1.0
 const MAX_FONT_SCALE = 2.0;
 const defaultTheme = {
     imageSize: 24,
-    buttonSize: 48,
+    buttonSize: 40,
     menuSpacing: 8,
-    editorOptionMargin: 1,
-    expandedOptionPadding: 3,
-    defaultMenuWidth: 256,
+    expandedOptionPadding: 4,
+    defaultMenuWidth: 224,
+    menuItemPadding: {
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.padding_level1'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
     imageFillColor: {
-        "id": -1,
-        "type": 10001,
+        'id': -1,
+        'type': 10001,
         params: ['sys.color.ohos_id_color_primary'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     backGroundColor: {
-        "id": -1,
-        "type": 10001,
+        'id': -1,
+        'type': 10001,
         params: ['sys.color.ohos_id_color_dialog_bg'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     iconBorderRadius: {
-        "id": -1,
-        "type": 10002,
-        params: ['sys.float.ohos_id_corner_radius_default_m'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.corner_radius_level2'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     containerBorderRadius: {
-        "id": -1,
-        "type": 10002,
-        params: ['sys.float.ohos_id_corner_radius_card'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.corner_radius_level4'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
+    borderWidth: {
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_menu_inner_border_width'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
+    borderColor: {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_menu_inner_border_color'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
+    outlineWidth: {
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.ohos_id_menu_outer_border_width'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
+    outlineColor: {
+        'id': -1,
+        'type': 10001,
+        params: ['sys.color.ohos_id_menu_outer_border_color'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     cutIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_cut"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_cut'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     copyIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_copy"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_copy'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     pasteIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_paste"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_paste'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     selectAllIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_select_all"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_select_all'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     shareIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_share"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_share'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     translateIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_translate_c2e"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_translate_c2e'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     searchIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_search_filled"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_search_filled'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     arrowDownIcon: {
-        "id": -1,
-        "type": 20000,
-        params: ["sys.media.ohos_ic_public_arrow_down"],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ohos_ic_public_arrow_down'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
     aiWriteIcon: {
-        "id": -1,
-        "type": 20000,
+        'id': -1,
+        'type': 20000,
         params: ['sys.media.ic_public_ai_write'],
-        "bundleName": "__harDefaultBundleName__",
-        "moduleName": "__harDefaultModuleName__"
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
     },
-    iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_MD,
+    iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_SM,
 };
 
 class SelectionMenuComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
+        if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
         this.editorMenuOptions = undefined;
@@ -137,18 +172,18 @@ class SelectionMenuComponent extends ViewPU {
         this.onSelectAll = undefined;
         this.theme = defaultTheme;
         this.builder = this.CloserFun;
-        this.__showExpandedMenuOptions = new ObservedPropertySimplePU(false, this, "showExpandedMenuOptions");
-        this.__showCustomerIndex = new ObservedPropertySimplePU(-1, this, "showCustomerIndex");
-        this.__customerChange = new ObservedPropertySimplePU(false, this, "customerChange");
-        this.__cutAndCopyEnable = new ObservedPropertySimplePU(false, this, "cutAndCopyEnable");
-        this.__pasteEnable = new ObservedPropertySimplePU(false, this, "pasteEnable");
-        this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, "visibilityValue");
-        this.__fontScale = new ObservedPropertySimplePU(1, this, "fontScale");
-        this.__customMenuWidth = new ObservedPropertySimplePU(this.theme.defaultMenuWidth, this, "customMenuWidth");
-        this.__horizontalMenuHeight = new ObservedPropertySimplePU(0, this, "horizontalMenuHeight");
-        this.__horizontalMenuWidth = new ObservedPropertySimplePU(this.theme.defaultMenuWidth, this, "horizontalMenuWidth");
-        this.fontWeightTable = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium",
-            "regular"];
+        this.__showExpandedMenuOptions = new ObservedPropertySimplePU(false, this, 'showExpandedMenuOptions');
+        this.__showCustomerIndex = new ObservedPropertySimplePU(-1, this, 'showCustomerIndex');
+        this.__customerChange = new ObservedPropertySimplePU(false, this, 'customerChange');
+        this.__cutAndCopyEnable = new ObservedPropertySimplePU(false, this, 'cutAndCopyEnable');
+        this.__pasteEnable = new ObservedPropertySimplePU(false, this, 'pasteEnable');
+        this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, 'visibilityValue');
+        this.__fontScale = new ObservedPropertySimplePU(1, this, 'fontScale');
+        this.__customMenuWidth = new ObservedPropertySimplePU(this.theme.defaultMenuWidth, this, 'customMenuWidth');
+        this.__horizontalMenuHeight = new ObservedPropertySimplePU(0, this, 'horizontalMenuHeight');
+        this.__horizontalMenuWidth = new ObservedPropertySimplePU(this.theme.defaultMenuWidth, this, 'horizontalMenuWidth');
+        this.fontWeightTable = ['100', '200', '300', '400', '500', '600', '700', '800', '900', 'bold', 'normal', 'bolder', 'lighter', 'medium',
+            'regular'];
         this.isFollowingSystemFontScale = false;
         this.appMaxFontScale = 3.2;
         this.setInitiallyProvidedValue(params);
@@ -406,9 +441,9 @@ class SelectionMenuComponent extends ViewPU {
         }
         sysBoard.clearData();
         sysBoard.setData(pasteData).then(() => {
-            hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Succeeded in setting PasteData.');
+            hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
         }).catch((err) => {
-            hilog.info(0x3900, "Ace", 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
+            hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
         });
     }
     popDataFromPasteboard(richEditorSelection) {
@@ -431,9 +466,9 @@ class SelectionMenuComponent extends ViewPU {
                     fontSize: 16,
                     fontColor: Color.Black,
                     fontWeight: FontWeight.Normal,
-                    fontFamily: "HarmonyOS Sans",
+                    fontFamily: 'HarmonyOS Sans',
                     fontStyle: FontStyle.Normal,
-                    decoration: { type: TextDecorationType.None, color: "#FF000000" }
+                    decoration: { type: TextDecorationType.None, color: '#FF000000' }
                 };
                 if (data.getProperty() && data.getProperty().additions[i]) {
                     const tmp = data.getProperty().additions[i];
@@ -482,14 +517,12 @@ class SelectionMenuComponent extends ViewPU {
         let numOfBtnPerRow = 5;
         let width = this.fontScale > MAX_FONT_SCALE ? this.customMenuWidth : this.theme.defaultMenuWidth;
         if (this.editorMenuOptions && this.editorMenuOptions.length <= numOfBtnPerRow) {
-            return (width - this.theme.expandedOptionPadding * 2 -
-                this.theme.editorOptionMargin * 2 * this.editorMenuOptions.length) / this.editorMenuOptions.length;
+            return (width - this.theme.expandedOptionPadding * 2) / this.editorMenuOptions.length;
         }
-        if (this.fontScale > MAX_FONT_SCALE) {
-            return (width - this.theme.expandedOptionPadding * 2 -
-                this.theme.editorOptionMargin * 2 * numOfBtnPerRow) / numOfBtnPerRow;
-        }
-        return this.theme.buttonSize;
+        return (width - this.theme.expandedOptionPadding * 2) / numOfBtnPerRow;
+    }
+    measureFlexPadding() {
+        return Math.floor((this.theme.expandedOptionPadding - px2vp(2.0)) * 10) / 10;
     }
     getFontScale() {
         try {
@@ -528,11 +561,16 @@ class SelectionMenuComponent extends ViewPU {
             });
             Flex.clip(true);
             Flex.width(this.fontScale > MAX_FONT_SCALE ? this.customMenuWidth : this.theme.defaultMenuWidth);
-            Flex.padding(this.theme.expandedOptionPadding);
+            Flex.padding({ top: this.measureFlexPadding(), bottom: this.measureFlexPadding(),
+                left: this.measureFlexPadding() - 0.1, right: this.measureFlexPadding() - 0.1 });
             Flex.borderRadius(this.theme.containerBorderRadius);
             Flex.margin({ bottom: this.theme.menuSpacing });
             Flex.backgroundColor(this.theme.backGroundColor);
             Flex.shadow(this.theme.iconPanelShadowStyle);
+            Flex.border({ width: this.theme.borderWidth, color: this.theme.borderColor,
+                radius: this.theme.containerBorderRadius });
+            Flex.outline({ width: this.theme.outlineWidth, color: this.theme.outlineColor,
+                radius: this.theme.containerBorderRadius });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -546,7 +584,6 @@ class SelectionMenuComponent extends ViewPU {
                                 Button.createWithChild();
                                 Button.enabled(!(!item.action && !item.builder));
                                 Button.type(ButtonType.Normal);
-                                Button.margin(this.theme.editorOptionMargin);
                                 Button.backgroundColor(this.theme.backGroundColor);
                                 Button.onClick(() => {
                                     if (item.builder) {
@@ -596,6 +633,11 @@ class SelectionMenuComponent extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
+            Column.shadow(this.theme.iconPanelShadowStyle);
+            Column.border({ width: this.theme.borderWidth, color: this.theme.borderColor,
+                radius: this.theme.containerBorderRadius });
+            Column.outline({ width: this.theme.outlineWidth, color: this.theme.outlineColor,
+                radius: this.theme.containerBorderRadius });
             Column.constraintSize({
                 minWidth: this.theme.defaultMenuWidth
             });
@@ -645,8 +687,10 @@ class SelectionMenuComponent extends ViewPU {
                                     MenuItemGroup.create();
                                 }, MenuItemGroup);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ startIcon: this.theme.cutIcon, content: "剪切", labelInfo: "Ctrl+X" });
+                                    MenuItem.create({ startIcon: this.theme.cutIcon, content: '剪切', labelInfo: 'Ctrl+X' });
                                     MenuItem.enabled(this.cutAndCopyEnable);
+                                    MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                    MenuItem.borderRadius(this.theme.iconBorderRadius);
                                     MenuItem.onClick(() => {
                                         if (!this.controller) {
                                             return;
@@ -666,8 +710,11 @@ class SelectionMenuComponent extends ViewPU {
                                 }, MenuItem);
                                 MenuItem.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ startIcon: this.theme.copyIcon, content: "复制", labelInfo: "Ctrl+C" });
+                                    MenuItem.create({ startIcon: this.theme.copyIcon, content: '复制', labelInfo: 'Ctrl+C' });
                                     MenuItem.enabled(this.cutAndCopyEnable);
+                                    MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                    MenuItem.borderRadius(this.theme.iconBorderRadius);
+                                    MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
                                         if (!this.controller) {
                                             return;
@@ -684,8 +731,11 @@ class SelectionMenuComponent extends ViewPU {
                                 }, MenuItem);
                                 MenuItem.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ startIcon: this.theme.pasteIcon, content: "粘贴", labelInfo: "Ctrl+V" });
+                                    MenuItem.create({ startIcon: this.theme.pasteIcon, content: '粘贴', labelInfo: 'Ctrl+V' });
                                     MenuItem.enabled(this.pasteEnable);
+                                    MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                    MenuItem.borderRadius(this.theme.iconBorderRadius);
+                                    MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
                                         if (!this.controller) {
                                             return;
@@ -702,8 +752,11 @@ class SelectionMenuComponent extends ViewPU {
                                 }, MenuItem);
                                 MenuItem.pop();
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ startIcon: this.theme.selectAllIcon, content: "全选", labelInfo: "Ctrl+A" });
+                                    MenuItem.create({ startIcon: this.theme.selectAllIcon, content: '全选', labelInfo: 'Ctrl+A' });
                                     MenuItem.visibility(this.visibilityValue);
+                                    MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                    MenuItem.borderRadius(this.theme.iconBorderRadius);
+                                    MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
                                         if (!this.controller) {
                                             return;
@@ -735,7 +788,10 @@ class SelectionMenuComponent extends ViewPU {
                             this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    MenuItem.create({ content: "更多", endIcon: this.theme.arrowDownIcon });
+                                    MenuItem.create({ content: '更多', endIcon: this.theme.arrowDownIcon });
+                                    MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                    MenuItem.borderRadius(this.theme.iconBorderRadius);
+                                    MenuItem.margin({ top: this.theme.menuItemPadding });
                                     MenuItem.onClick(() => {
                                         this.showExpandedMenuOptions = true;
                                     });
@@ -757,6 +813,9 @@ class SelectionMenuComponent extends ViewPU {
                                                 labelInfo: expandedMenuOptionItem.labelInfo,
                                                 builder: expandedMenuOptionItem.builder
                                             });
+                                            MenuItem.height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize);
+                                            MenuItem.borderRadius(this.theme.iconBorderRadius);
+                                            MenuItem.margin({ top: this.theme.menuItemPadding });
                                             MenuItem.onClick(() => {
                                                 if (expandedMenuOptionItem.action) {
                                                     expandedMenuOptionItem.action();
@@ -827,7 +886,7 @@ export function SelectionMenu(options, parent = null) {
                     onCopy: options.onCopy,
                     onCut: options.onCut,
                     onSelectAll: options.onSelectAll
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/selectionmenu.ets", line: 517, col: 3 });
+                }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/selectionmenu.ets', line: 517, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -845,7 +904,7 @@ export function SelectionMenu(options, parent = null) {
             else {
                 (parent ? parent : this).updateStateVarsOfChildByElmtId(elmtId, {});
             }
-        }, { name: "SelectionMenuComponent" });
+        }, { name: 'SelectionMenuComponent' });
     }
 }
 export default { SelectionMenu };

@@ -770,7 +770,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
 
     node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
-    EXPECT_TRUE(layoutWrapper->AvoidKeyboard(false));
+    EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(node->GetFocusHub());
     EXPECT_TRUE(!node->GetFocusHub()->IsCurrentFocus());
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
@@ -969,7 +969,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
 
     node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
-    EXPECT_TRUE(layoutWrapper->AvoidKeyboard(false));
+    EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
 }
 

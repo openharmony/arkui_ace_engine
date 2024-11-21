@@ -17,6 +17,11 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <string_ex.h>
 #include <unordered_map>
 #include <vector>
@@ -37,6 +42,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/image/file_uri_helper.h"
+#include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
@@ -84,6 +91,7 @@ const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
 const std::string WEB_INFO_DEFAULT = "1";
+constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
@@ -161,6 +169,7 @@ constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
 
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr int32_t HALF = 2;
+constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -205,6 +214,7 @@ std::string ParseTextJsonValue(const std::string& textJson)
     return "";
 }
 
+const std::string NWEB_AUTOFILL_TYPE_OFF = "off";
 const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_3, AceAutoFillType::ACE_DISTRICT_ADDRESS},
@@ -315,6 +325,11 @@ const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
 const std::string STRING_LF = "\n";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
+#define GPU_ABNORMAL_VALUE (32 * 1024)
+#define GPU_SERIOUS_ABNORMAL_VALUE (32 * 1024 * 1024)
+#define SIZE_UNIT 1024
+#define FLOAT_UNIT 100.0F
+#define DECIMAL_POINTS 2
 
 class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
@@ -336,7 +351,8 @@ public:
         if (!pattern->OnAccessibilityChildTreeRegister()) {
             return false;
         }
-        pattern->SetAccessibilityState(true);
+        pattern->SetAccessibilityState(true, isDelayed_);
+        isDelayed_ = false;
         isReg_ = true;
         return true;
     }
@@ -382,8 +398,14 @@ public:
         isReg_ = false;
     }
 
+    void SetIsDelayed(bool isDelayed)
+    {
+        isDelayed_ = isDelayed;
+    }
+
 private:
     bool isReg_ = false;
+    bool isDelayed_ = false;
     WeakPtr<WebPattern> weakPattern_;
 };
 
@@ -393,17 +415,13 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
       sharedRenderProcessToken_(sharedRenderProcessToken)
-{
-    InitAiEngine();
-}
+{}
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
-{
-    InitAiEngine();
-}
+{}
 
 WebPattern::~WebPattern()
 {
@@ -1344,6 +1362,7 @@ void WebPattern::ResetDragAction()
 
     isDragging_ = false;
     isReceivedArkDrag_ = false;
+    isDragStartFromWeb_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1478,6 +1497,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
 {
     isDragging_ = true;
     isReceivedArkDrag_ = true;
+    isDragStartFromWeb_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -1825,6 +1845,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         gestureHub->ResetDragActionForWeb();
         isDragging_ = false;
         isReceivedArkDrag_ = false;
+        isDragStartFromWeb_ = false;
         // cancel drag action to avoid web kernel can't process other input event
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1921,6 +1942,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1979,6 +2001,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    isReceivedArkDrag_ = isDragStartFromWeb_ ? isReceivedArkDrag_ : false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
@@ -1997,6 +2020,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
 
     auto host = GetHost();
@@ -2024,6 +2048,7 @@ void WebPattern::HandleDragCancel()
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
@@ -2040,6 +2065,7 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetFragmentHtml(htmlContent);
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
+        delegate_->dragData_->ClearImageFileNames();
     }
 }
 
@@ -2084,12 +2110,12 @@ void WebPattern::HandleFocusEvent()
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d",
-        GetWebId(), selectPopupMenuShowing_, isReceivedArkDrag_);
+        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isDragStartFromWeb: %{public}d",
+        GetWebId(), selectPopupMenuShowing_, isDragStartFromWeb_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
 
-    if (isReceivedArkDrag_) {
+    if (isDragStartFromWeb_) {
         return;
     }
     if (!selectPopupMenuShowing_) {
@@ -2248,6 +2274,9 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     UpdateImagePreviewParam();
+    if (selectOverlayProxy_) {
+        selectOverlayProxy_->UpdateAncestorViewPort(GetViewPort());
+    }
     if (!config.contentSizeChange || isInWindowDrag_) {
         if (isLayoutModeChanged_) {
             isLayoutModeChanged_ = false;
@@ -2310,6 +2339,10 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         } else if (webData_) {
             delegate_->LoadDataWithRichText();
         }
+    }
+    
+    if (renderMode_ == RenderMode::SYNC_RENDER) {
+        return true;
     }
     return false;
 }
@@ -2408,7 +2441,9 @@ void WebPattern::OnAreaChangedInner()
             size.Height(), resizeOffset.GetY());
         areaChangeSize_ = size;
         drawSize_ = size;
-        drawSizeCache_ = drawSize_;
+        if (renderMode_ != RenderMode::SYNC_RENDER) {
+            drawSizeCache_ = drawSize_;
+        }
         TAG_LOGD(AceLogTag::ACE_WEB, "Safe area, drawsize_ : %{public}s", drawSize_.ToString().c_str());
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
         IsNeedResizeVisibleViewport();
@@ -3010,6 +3045,7 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetIsTexture(true);
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
+                renderContextForSurface_->SetOpacity(0.0f);
             } else {
                 renderSurface_->SetIsTexture(false);
                 renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
@@ -3299,7 +3335,13 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    UpdateLayoutAfterKeyboardShow(width, height, keyboard, drawSize_.Height());
+    lastKeyboardHeight_ = keyboard;
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
+        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
     return true;
 }
 
@@ -3347,7 +3389,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto rect = frameNode->GetGeometryNode()->GetFrameRect();
+    auto rect = frameNode->GetRenderContext()->GetPaintRectWithoutTransform();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
     // Scroll focused node into view when keyboard show.
@@ -3357,9 +3399,16 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     delegate_->ResizeVisibleViewport(visibleViewportSize_, isKeyboard);
 
     if (isUpdate) {
-        rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
-        frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        ACE_SCOPED_TRACE("WebPattern::UpdateWebLayoutSize rect: %s", rect.ToString().c_str());
+        if (renderMode_ == RenderMode::SYNC_RENDER) {
+            renderSurface_->SetIsNeedSyncGeometryProperties(true);
+            renderSurface_->SetKeyBoardAvoidRect(rect);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        } else {
+            rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
+            frameNode->GetRenderContext()->SyncGeometryProperties(rect);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 }
 
@@ -4031,6 +4080,22 @@ bool WebPattern::IsSelectInfoValid()
     return !info.empty() && info != STRING_LF;
 }
 
+std::optional<RectF> WebPattern::GetViewPort() const
+{
+    CHECK_NULL_RETURN(GetHost(), std::nullopt);
+    auto parentNode = GetHost()->GetAncestorNodeOfFrame(true);
+    while (parentNode) {
+        auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
+        auto geometryNode = parentNode->GetGeometryNode();
+        if (scrollablePattern && geometryNode) {
+            auto offsetRelativeToWindow = parentNode->GetOffsetRelativeToWindow();
+            return RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
+        }
+        parentNode = parentNode->GetAncestorNodeOfFrame(true);
+    }
+    return std::nullopt;
+}
+
 std::string WebPattern::GetSelectInfo() const
 {
     CHECK_NULL_RETURN(delegate_, std::string());
@@ -4186,9 +4251,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle, beginTouchHandle, endTouchHandle);
-    if (overlayType == INVALID_OVERLAY) {
-        return false;
-    }
+    if (overlayType == INVALID_OVERLAY) return false;
     if (params->GetIsLongPressActived()) {
         ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
@@ -4209,6 +4272,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     RegisterSelectOverlayEvent(selectInfo);
+    selectInfo.ancestorViewPort = GetViewPort();
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
@@ -4460,6 +4524,9 @@ void ParseViewDataString(const std::string& key,
 HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node)
 {
     HintToTypeWrap hintToTypeWrap;
+    if (NWEB_AUTOFILL_TYPE_OFF == attribute) {
+        return hintToTypeWrap;
+    }
     auto placeholder = node->GetPlaceholder();
     if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
         AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
@@ -5087,6 +5154,7 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     auto offsetY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    ScopedLayout scope(pipeline.GetRawPtr());
     if (GreatNotEqual(offsetX + textWidth, pipeline->GetCurrentRootWidth())) {
         offsetX = pipeline->GetCurrentRootWidth() - textWidth;
     }
@@ -5298,6 +5366,10 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
     if (chooser->GetHasSelected()) {
         timePickerProperty["selected"] = PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
+    } else {
+        auto timeOfNow = GetTimeOfNow();
+        timePickerProperty["selected"] =
+            PickerTime(timeOfNow.hour24_, timeOfNow.minute_, timeOfNow.second_);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -6378,7 +6450,7 @@ bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
     return delegate_->ExecuteAction(accessibilityId, action, actionArguments);
 }
 
-void WebPattern::SetAccessibilityState(bool state)
+void WebPattern::SetAccessibilityState(bool state, bool isDelayed)
 {
     CHECK_NULL_VOID(delegate_);
     focusedAccessibilityId_ = -1;
@@ -6387,13 +6459,13 @@ void WebPattern::SetAccessibilityState(bool state)
             return;
         }
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
         return;
     }
 
     if (accessibilityState_ != state) {
         accessibilityState_ = state;
-        delegate_->SetAccessibilityState(state);
+        delegate_->SetAccessibilityState(state, isDelayed);
     }
 }
 
@@ -6551,6 +6623,22 @@ void WebPattern::RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext>
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
+    // start sync task
+    std::future<std::vector<int8_t>> future = std::async(std::launch::async, [text, offset]() {
+        return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
+    });
+    // set timeout
+    auto status = future.wait_for(std::chrono::milliseconds(AI_TIMEOUT_LIMIT));
+    if (status == std::future_status::ready) {
+        return future.get();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::GetWordSelection timeout! return default");
+        return std::vector<int8_t> { -1, -1 };
+    }
+}
+
 bool WebPattern::CheckSafeAreaIsExpand()
 {
     auto host = GetHost();
@@ -6578,26 +6666,6 @@ bool WebPattern::CheckSafeAreaKeyBoard()
         return true;
     }
     return false;
-}
-
-std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
-{
-    if (!isAIEngineInit) {
-        auto context = PipelineContext::GetCurrentContextSafely();
-        std::vector<int8_t> defultSelection = { -1, -1 };
-        CHECK_NULL_RETURN(context, defultSelection);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        uiTaskExecutor.PostTask(
-            [&, instanceId = context->GetInstanceId()] {
-                ContainerScope scope(instanceId);
-                TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
-                DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
-            },
-            "ArkWebTextInitDataDetect");
-        isAIEngineInit = true;
-        return defultSelection;
-    }
-    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 
 bool WebPattern::Backward()
@@ -6985,18 +7053,6 @@ void WebPattern::UnRegisterTextBlurCallback()
     SetAccessibilityState(false);
 }
 
-void WebPattern::InitAiEngine()
-{
-    static bool isInit = false;
-    if (isInit) {
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    isInit = true;
-}
-
 void WebPattern::InitMagnifier()
 {
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -7020,6 +7076,7 @@ void WebPattern::InitializeAccessibility()
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId,
         accessibilityChildTreeCallback_[instanceId_]);
     if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_[instanceId_]->SetIsDelayed(true);
         accessibilityChildTreeCallback_[instanceId_]->OnRegister(pipeline->GetWindowId(),
             accessibilityManager->GetTreeId());
     }
@@ -7142,5 +7199,28 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
         return delegate_->GetAccessibilityVisible(accessibilityId);
     }
     return true;
+}
+
+void WebPattern::DumpInfo()
+{
+    float totalSize = DumpGpuInfo();
+    if (totalSize > GPU_SERIOUS_ABNORMAL_VALUE) {
+        totalSize = totalSize / SIZE_UNIT / SIZE_UNIT; // 转换成MB
+    } else if (totalSize > GPU_ABNORMAL_VALUE) {
+        totalSize = totalSize / SIZE_UNIT;
+    }
+    totalSize = std::round(totalSize * FLOAT_UNIT) / FLOAT_UNIT; // 变为浮点数
+    // 使用ostringstream来格式化数字为字符串
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
+    std::string formattedSize = oss.str(); // 获取格式化后的字符串
+    DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
+    DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
+}
+
+float WebPattern::DumpGpuInfo()
+{
+    float totalSize = delegate_->GetNweb()->DumpGpuInfo();
+    return totalSize;
 }
 } // namespace OHOS::Ace::NG

@@ -37,6 +37,8 @@ float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<Frame
     float contentStartOffset, float contentEndOffset)
 {
     constexpr float notMove = 0.0f;
+    CHECK_NULL_RETURN(parentFrameNode, notMove);
+    CHECK_NULL_RETURN(curFrameNode, notMove);
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(parentGeometryNode, notMove);
     auto parentFrameSize = parentGeometryNode->GetFrameSize();
@@ -159,6 +161,20 @@ RefPtr<FocusHub> FocusHub::GetRootFocusHub()
         parent = parent->GetParentFocusHub();
     }
     return parent;
+}
+
+RefPtr<FocusHub> FocusHub::GetFocusLeaf()
+{
+    auto leafFocusNode = AceType::Claim(this);
+    auto nextFocusNode = leafFocusNode;
+    while (nextFocusNode && nextFocusNode->IsFocusable()) {
+        if (nextFocusNode->focusDepend_ == FocusDependence::SELF) {
+            return nextFocusNode;
+        }
+        leafFocusNode = nextFocusNode;
+        nextFocusNode = nextFocusNode->GetLastWeakFocusNode().Upgrade();
+    }
+    return leafFocusNode;
 }
 
 std::string FocusHub::GetFrameName() const
@@ -353,16 +369,16 @@ void FocusHub::DumpFocusUie()
     }
 }
 
-bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediately()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d RequestFocusImmediately",
         GetFrameName().c_str(), GetFrameId());
-    return RequestFocusImmediatelyInner(isJudgeRootTree);
+    return RequestFocusImmediatelyInner();
 }
 
-bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
+bool FocusHub::RequestFocusImmediatelyInner()
 {
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto focusManager = context->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
@@ -379,11 +395,6 @@ bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
 
     if (!IsFocusableWholePath()) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
-        return false;
-    }
-
-    if (isJudgeRootTree && !IsOnRootTree()) {
-        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
         return false;
     }
 
@@ -787,7 +798,7 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
@@ -942,7 +953,8 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && IsInFocusGroup()) {
         return false;
     }
-    if (keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline->IsTabJustTriggerOnKeyEvent()) {
+    auto isDirectionalKeyFocus = keyEvent.IsDirectionalKey() || enableDirectionalKeyFocus_ ;
+    if ((keyEvent.IsKey({ KeyCode::KEY_TAB }) || isDirectionalKeyFocus) && pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
         return false;
     }
@@ -1070,7 +1082,7 @@ bool FocusHub::RequestNextFocusOfKeyEnter()
 {
     if (IsTabStop() && focusType_ == FocusType::SCOPE) {
         isSwitchByEnter_ = true;
-        OnFocusScope();
+        OnFocusScope(true);
         return true;
     }
     return false;
@@ -1082,7 +1094,7 @@ bool FocusHub::RequestNextFocusOfKeyEsc()
     CHECK_NULL_RETURN(curFocusView, false);
     auto curFocusViewHub = curFocusView->GetFocusHub();
     CHECK_NULL_RETURN(curFocusViewHub, false);
-    auto lastViewFocusHub = curFocusView->GetFocusLeaf(curFocusViewHub);
+    auto lastViewFocusHub = curFocusViewHub->GetFocusLeaf();
     CHECK_NULL_RETURN(lastViewFocusHub, false);
     auto viewRootScope = curFocusView->GetViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
@@ -1128,7 +1140,7 @@ void FocusHub::RequestFocus() const
             "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
             frameNode->GetTag().c_str(), frameNode->GetId());
     }
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
     context->AddDirtyFocus(GetFrameNode());
@@ -1573,17 +1585,20 @@ bool FocusHub::IsLeafFocusScope()
 {
     auto focusManager = GetFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
-    if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
-        focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
-        return true;
-    }
     if (IsTabStop()) {
         if (isSwitchByEnter_) {
+            if (focusDepend_ == FocusDependence::SELF) {
+                focusDepend_ = FocusDependence::AUTO;
+            }
             isSwitchByEnter_ = false;
             return false;
         }
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::TAB_STOP);
+        return true;
+    }
+    if (focusDepend_ == FocusDependence::SELF) {
+        lastWeakFocusNode_ = nullptr;
+        focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
     return false;
@@ -1592,7 +1607,9 @@ bool FocusHub::IsLeafFocusScope()
 void FocusHub::OnFocusScope(bool currentHasFocused)
 {
     if (IsLeafFocusScope()) {
-        OnFocusNode();
+        if (!currentHasFocused) {
+            OnFocusNode();
+        }
         return;
     }
 
@@ -1656,7 +1673,7 @@ void FocusHub::OnBlurScope()
 
 bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -1835,7 +1852,7 @@ bool FocusHub::PaintAllFocusState()
 
 bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
@@ -2128,19 +2145,6 @@ bool FocusHub::IsSelfFocusableWholePath()
     return IsFocusableNode();
 }
 
-bool FocusHub::IsOnRootTree() const
-{
-    auto parent = GetParentFocusHub();
-    while (parent) {
-        auto parentName = parent->GetFrameName();
-        if (parentName == V2::ROOT_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParentFocusHub();
-    }
-    return false;
-}
-
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
     if (GetTabIndex() > 0 && IsFocusableWholePath()) {
@@ -2316,7 +2320,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
         auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
@@ -2375,11 +2379,15 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const
 
 bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
 {
-    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
-        return false;
-    }
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
+    auto isDirectionKeyDown = GetDirectionalKeyFocus() && event.IsDirectionalKey() &&
+        event.action == KeyAction::DOWN;
+    auto isTabDown = event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN;
+    if (!isDirectionKeyDown && !isTabDown) {
+        return false;
+    }
+    
     auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;

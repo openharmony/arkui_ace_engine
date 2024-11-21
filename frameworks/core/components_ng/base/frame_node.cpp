@@ -296,11 +296,14 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
+        int32_t startIndex = showCache ? start - cacheStart : start;
+        int32_t endIndex = showCache ? end + cacheEnd : end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
-            if ((start <= end && index >= start && index <= end) || (start > end && (index <= end || start <= index))) {
+            if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
+                (startIndex > endIndex && (index <= endIndex || startIndex <= index))) {
                 itor++;
             } else {
                 itor = partFrameNodeChildren_.erase(itor);
@@ -308,7 +311,8 @@ public:
         }
         auto guard = GetGuard();
         for (const auto& child : children_) {
-            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd);
+            child.node->DoSetActiveChildRange(
+                start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd, showCache);
         }
     }
 
@@ -895,6 +899,9 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
             json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
         }
     }
+    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+        json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
+    }
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
         json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
     }
@@ -986,7 +993,7 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
     if (pattern_) {
-        DumpSimplifyInfo(json);
+        pattern_->DumpSimplifyInfo(json);
     }
     if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
@@ -1333,7 +1340,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     if (focusHub) {
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
-            focusView->FocusViewClose();
+            focusView->FocusViewClose(true);
         }
         focusHub->RemoveSelf();
     }
@@ -2586,11 +2593,13 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
             targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }
 
-        if (GetExposeInnerGestureFlag()) {
-            auto pattern = GetPattern();
-            if (pattern) {
+        auto pattern = GetPattern();
+        if (pattern) {
+            if (GetExposeInnerGestureFlag()) {
                 auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
                 pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            } else {
+                pattern->RecoverInnerOnGestureRecognizerJudgeBegin();
             }
         }
     }
@@ -3723,6 +3732,38 @@ RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
     return hitFrameNodes.rbegin()->second;
 }
 
+RefPtr<FrameNode> FrameNode::FindChildByPositionWithoutChildTransform(float x, float y)
+{
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthAllFrame(children);
+    auto parentOffset = GetPositionToWindowWithTransform();
+    for (const auto& child : children) {
+        if (!child->IsActive()) {
+            continue;
+        }
+        auto geometryNode = child->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
+        }
+
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        auto childOffset = child->GetGeometryNode()->GetFrameOffset();
+        childOffset += parentOffset;
+        globalFrameRect.SetOffset(childOffset);
+
+        if (globalFrameRect.IsInRegion(PointF(x, y))) {
+            hitFrameNodes.insert(std::make_pair(child->GetDepth(), child));
+        }
+    }
+
+    if (hitFrameNodes.empty()) {
+        return nullptr;
+    }
+
+    return hitFrameNodes.rbegin()->second;
+}
+
 RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const std::string& propertyName) const
 {
     auto iter = nodeAnimatablePropertyMap_.find(propertyName);
@@ -4458,12 +4499,7 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    if (showCached) {
-        frameProxy_->SetActiveChildRange(
-            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
-    } else {
-        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
-    }
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
 
 void FrameNode::SetActiveChildRange(
@@ -4605,8 +4641,12 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     SetActive(false);
 }
 
-void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+    }
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
@@ -5987,9 +6027,12 @@ RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
     CHECK_NULL_RETURN(pageNode, nullptr);
     auto jsView = pageNode->GetChildAtIndex(0);
     CHECK_NULL_RETURN(jsView, nullptr);
-    auto rootNode = jsView->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    return rootNode;
+    if (jsView->GetTag() == V2::JS_VIEW_ETS_TAG) {
+        auto rootNode = jsView->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        return rootNode;
+    }
+    return jsView;
 }
 
 std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()

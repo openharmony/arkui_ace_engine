@@ -20,8 +20,8 @@
 #include "ibuffer_consumer_listener.h"
 #include "iconsumer_surface.h"
 #include "surface.h"
-#include "surface_delegate.h"
 #include "surface/window.h"
+#include "surface_delegate.h"
 #include "transaction/rs_render_service_client.h"
 #endif
 
@@ -120,6 +120,17 @@ public:
     }
 
     bool CompareBufferSize(int32_t width, int32_t height, std::shared_ptr<SurfaceBufferNode> surfaceNode);
+
+    void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) override
+    {
+        isNeedSyncGeometryProperties_ = isNeedSyncGeometryProperties;
+    }
+
+    void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) override
+    {
+        keyBoardAvoidRect_ = keyBoardAvoidRect;
+    }
+
 #endif
 
     void ReleaseSurfaceBuffers() override;
@@ -144,12 +155,28 @@ public:
 
     void ReleaseSurfaceBufferById(uint32_t bufferId);
 
+#ifdef OHOS_PLATFORM
+    void ReleaseSurfaceBufferForRT(const Rosen::FinishCallbackRet& ret);
+#endif
+
     void RegisterBufferCallback() override;
 
-private:
+    void SetIsUniRender(bool isUniRender);
+
     void PostRenderOnlyTaskToUI();
 
+    void OnWindowStateChange(bool isShow) override;
+
+private:
+    void MarkDirtyIfNeeded();
+
+#ifdef OHOS_PLATFORM
+    void InsertSurfaceNode(const std::shared_ptr<SurfaceBufferNode>& surfaceNode);
+#endif
+
     std::mutex surfaceNodeMutex_;
+    bool isNeedSyncGeometryProperties_ = false;
+    RectF keyBoardAvoidRect_;
     OffsetF orgin_ { 0, 0 };
     std::string patternType_;
     int32_t queueSize_ = SURFACE_QUEUE_SIZE;
@@ -162,7 +189,8 @@ private:
     struct NativeWindow* nativeWindow_ = nullptr;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
     std::queue<std::shared_ptr<SurfaceBufferNode>> availableBuffers_;
-    std::list<std::shared_ptr<SurfaceBufferNode>> availableBufferList_;
+    std::list<std::shared_ptr<SurfaceBufferNode>> buffersToDraw_;
+    std::list<std::shared_ptr<SurfaceBufferNode>> buffersToRelease_;
     std::shared_ptr<Rosen::SurfaceBufferCallback> bufferCallback_;
     int32_t failTimes_ = 0;
 #endif
@@ -170,6 +198,10 @@ private:
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallbackInterface_ = nullptr;
     bool isTexture_ = false;
     int32_t instanceId_;
+
+    std::atomic_bool isShow_ = true;
+    std::atomic_bool isUniRender_ = true;
+    std::atomic_int32_t sendCount_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
 };
@@ -191,7 +223,8 @@ public:
         : renderSurface_(renderSurface)
     {}
     virtual ~XComponentSurfaceBufferCallback() = default;
-    void OnFinish(uint64_t uid, const std::vector<uint32_t>& surfaceBufferIds) override;
+    void OnFinish(const Rosen::FinishCallbackRet& ret) override;
+    void OnAfterAcquireBuffer(const Rosen::AfterAcquireBufferRet& ret) override {}
 
 private:
     WeakPtr<NG::RosenRenderSurface> renderSurface_;

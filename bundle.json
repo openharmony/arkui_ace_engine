@@ -29,7 +29,7 @@
             "ace_engine_feature_enable_nav_split_mode",
             "ace_engine_feature_asbng_path",
             "ace_engine_feature_sched_model",
-            "ace_engine_feature_enable_video"
+            "ace_engine_feature_wearable"
         ],
         "adapted_system_type": [
             "standard"
@@ -107,7 +107,8 @@
                 "libuv",
                 "resource_schedule_service",
                 "background_task_mgr",
-                "egl"
+                "egl",
+                "request"
             ],
             "third_party": []
         },
@@ -115,12 +116,14 @@
             "group_type": {
                 "base_group": [],
                 "fwk_group": [
-                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages"
+                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages",
+                    "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos"
                 ],
                 "service_group": [
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
                     "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.para.dac",
+                    "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.timepicker.ogg",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
                 ]
             },

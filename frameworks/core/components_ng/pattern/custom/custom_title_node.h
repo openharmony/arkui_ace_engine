@@ -27,6 +27,7 @@ const std::string EVENT_NAME_MINIMIZE_VISIBILITY = "arkui_minimize_visibility";
 const std::string EVENT_NAME_CLOSE_VISIBILITY = "arkui_close_visibility";
 const std::string EVENT_NAME_CLOSE_STATUS = "arkui_close_status";
 const std::string EVENT_NAME_MAXIMIZE_IS_RECOVER = "arkui_maximize_is_recover";
+const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_menu_width_change";
 
 namespace {
 inline std::string BoolToString(bool value)

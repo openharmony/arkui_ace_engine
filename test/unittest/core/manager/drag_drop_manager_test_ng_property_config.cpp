@@ -111,7 +111,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerPrintDragFrameNodeTest001, Tes
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    OHOS::Ace::PointerEvent point;
+    OHOS::Ace::DragPointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart
@@ -373,7 +373,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerOnDragMoveTest001, TestSize.Le
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    PointerEvent point;
+    DragPointerEvent point;
 
     /**
      * @tc.steps: step2. call OnDragStart
@@ -429,7 +429,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnDragEventTest001, TestSi
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    PointerEvent point;
+    DragPointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -485,7 +485,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest003, Te
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    PointerEvent point;
+    DragPointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -773,7 +773,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest002, TestSize.
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    PointerEvent point;
+    DragPointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -845,7 +845,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerGetItemIndexTest003, TestSize.
         onDropInfo = EXTRA_INFO;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    PointerEvent point;
+    DragPointerEvent point;
     TouchEvent event;
     event.x = 1.0f;
     event.y = 2.0f;
@@ -1180,7 +1180,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest043, TestSize.Level1)
      * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
      * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_TRUE(dragDropManager->IsNeedScaleDragPreview());
@@ -1304,7 +1304,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest047, TestSize.Level1)
      * @tc.steps: step2. call OnDragMoveOut with pointerEvent.
      * @tc.expected: container is null.
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     dragDropManager->OnDragMoveOut(pointerEvent);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
@@ -1354,6 +1354,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest048, TestSize.Level1)
 
     geometryNode->SetFrameSize(FRAME_SIZE);
     frameNode->SetActive(true);
+    frameNode->onMainTree_ = true;
     frameNode->SetGeometryNode(geometryNode);
     std::unordered_set<int32_t> frameNodeList;
     frameNodeList.emplace(frameNode->GetId());
@@ -1469,7 +1470,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest050, TestSize.Level1)
      * @tc.steps: step2. Construct frameNode and update the properties.
      * @tc.expected: frameNode and geometryNode are not null.
      */
-    PointerEvent point;
+    DragPointerEvent point;
     std::string extraInfo;
     dragDropManager->extraInfo_ = EXTRA_INFO;
     dragDropManager->isMouseDragged_ = true;
@@ -1520,7 +1521,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest051, TestSize.Level1)
      * @tc.expected: dragDropManager->isDragCancel_ is true.
      */
     std::string extraInfo;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     dragDropManager->SetIsDragCancel(true);
     dragDropManager->OnDragEnd(pointerEvent, extraInfo);
     EXPECT_TRUE(dragDropManager->isDragCancel_);
@@ -1766,7 +1767,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest061, TestSize.Level1)
      * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
      * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_TRUE(dragDropManager->IsNeedScaleDragPreview());
@@ -2006,7 +2007,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest068, TestSize.Level1)
      * @tc.steps: step1. construct a DragDropManager
      */
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    OHOS::Ace::PointerEvent point;
+    OHOS::Ace::DragPointerEvent point;
 
     /**
      * @tc.steps: step2. Invoke PrintDragFrameNode
@@ -2094,7 +2095,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest071, TestSize.Level1)
      * @tc.steps: step2. Invoke ReachMoveLimit
      * @tc.expected: isTimeLimited returns false and isDistanceLimited returns true
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     auto point = Point(1, 1);
     pointerEvent.sourceTool = SourceTool::MOUSE;
     auto moveLimit = dragDropManager->ReachMoveLimit(pointerEvent, point);
@@ -2159,7 +2160,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest073, TestSize.Level1)
     /**
      * @tc.steps: step1. Invoke DoDropAction
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     auto dragFrameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
@@ -2184,7 +2185,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest074, TestSize.Level1)
     /**
      * @tc.steps: step1. Invoke DoDropAction
      */
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
     auto dragFrameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);

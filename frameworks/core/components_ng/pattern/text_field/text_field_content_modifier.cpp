@@ -48,7 +48,7 @@ constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
-    return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 } // namespace
 
@@ -65,6 +65,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
+    CHECK_NULL_VOID(contentOffset_);
     auto contentOffset = contentOffset_->Get();
     auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;

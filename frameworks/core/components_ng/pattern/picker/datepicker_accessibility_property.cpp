@@ -20,6 +20,14 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int DOUBLE_DIGIT = 10;
+const std::string COLON = ":";
+const std::string AM = "上午";
+const std::string PM = "下午";
+const std::string ZERO = "0";
+} // namespace
+
 std::string DatePickerAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
@@ -29,13 +37,160 @@ std::string DatePickerAccessibilityProperty::GetText() const
 
     auto pickerDate = pattern->GetCurrentDate();
 
-    if (!pattern->IsShowLunar()) {
-        return std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
-               std::to_string(pickerDate.GetDay());
+    std::string result;
+    if (pattern->GetIsShowInDialog() && pattern->ShowMonthDays()) {
+        auto stackMonthDays = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+        CHECK_NULL_RETURN(stackMonthDays, "");
+        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+        CHECK_NULL_RETURN(blendMonthDays, "");
+        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+        CHECK_NULL_RETURN(monthDaysColumnNode, "");
+        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_RETURN(columnPattern, "");
+        auto index = columnPattern->GetCurrentIndex();
+        auto options = columnPattern->GetOptions();
+        auto it = options.find(monthDaysColumnNode);
+        if (it != options.end()) {
+            if (it->second.size() <= index) {
+                result = "";
+            }
+            auto date = it->second.at(index);
+            result = DatePickerPattern::GetFormatString(date);
+            result.append(" ");
+        } else {
+            result = "";
+        }
+        result.append(GetShowTimePickerText());
     } else {
-        auto lunarDate = pattern->SolarToLunar(pickerDate);
-        return std::to_string(lunarDate.year) + "-" + std::to_string(lunarDate.month) + "-" +
-               std::to_string(lunarDate.day);
+        if (!pattern->IsShowLunar()) {
+            result = std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
+                     std::to_string(pickerDate.GetDay());
+        } else {
+            result = GetLunarAllColumnsText(frameNode);
+        }
+    }
+    return result;
+}
+
+std::string DatePickerAccessibilityProperty::GetLunarAllColumnsText(const RefPtr<FrameNode>& frameNode) const
+{
+    std::string result = "";
+    for (const auto& child : frameNode->GetChildren()) {
+        auto stackMonthDays = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(stackMonthDays, "");
+        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+        CHECK_NULL_RETURN(blendMonthDays, "");
+        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+        CHECK_NULL_RETURN(monthDaysColumnNode, "");
+        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_RETURN(columnPattern, "");
+        auto index = columnPattern->GetCurrentIndex();
+        auto options = columnPattern->GetOptions();
+        auto it = options.find(monthDaysColumnNode);
+        if (it != options.end()) {
+            if (it->second.size() <= index) {
+                result.append("");
+            }
+            auto date = it->second.at(index);
+            result.append(DatePickerPattern::GetFormatString(date));
+        } else {
+            result.append("");
+        }
+    }
+    return result;
+}
+
+std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto parentNode = frameNode->GetParentFrameNode();
+    auto timeNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(1));
+    CHECK_NULL_RETURN(timeNode, "");
+    auto timePickerRowPattern = timeNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, "");
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    CHECK_NULL_RETURN(hourColumn, "");
+    auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(hourPickerColumnPattern, "");
+
+    std::string result;
+    auto hour = static_cast<int32_t>(hourPickerColumnPattern->GetCurrentIndex()); // + 1;
+    if (!timePickerRowPattern->GetHour24()) {
+        hour += 1;
+    }
+    std::string textHour = std::to_string(hour);
+    if (hour < DOUBLE_DIGIT) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textHour = ZERO + textHour;
+        } else if (timePickerRowPattern->GetHour24()) {
+            if (timePickerRowPattern->GetPrefixHour() != ZeroPrefixType::HIDE) {
+                textHour = ZERO + textHour;
+            }
+        } else {
+            if (timePickerRowPattern->GetPrefixHour() == ZeroPrefixType::SHOW) {
+                textHour = ZERO + textHour;
+            }
+        }
+    }
+    result += textHour;
+
+    GetMinuteText(timeNode, result);
+    GetSecondText(timeNode, result);
+    if (!timePickerRowPattern->GetHour24()) {
+        auto amPmColumn = allChildNode["amPm"].Upgrade();
+        CHECK_NULL_RETURN(amPmColumn, "");
+        auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+        if (amPmPickerColumnPattern->GetCurrentIndex() == 0) {
+            result = AM + result;
+        } else {
+            result = PM + result;
+        }
+    }
+    return result;
+}
+
+void DatePickerAccessibilityProperty::GetMinuteText(const RefPtr<FrameNode>& frameNode, std::string& result) const
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    CHECK_NULL_VOID(minuteColumn);
+
+    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(minutePickerColumnPattern);
+    int minute = static_cast<int>(minutePickerColumnPattern->GetCurrentIndex());
+    std::string textMinute = std::to_string(minute);
+    if (minute < DOUBLE_DIGIT) {
+        if (timePickerRowPattern->GetPrefixMinute() != ZeroPrefixType::HIDE) {
+            textMinute = ZERO + textMinute;
+        }
+    }
+    result += COLON + textMinute;
+}
+
+void DatePickerAccessibilityProperty::GetSecondText(const RefPtr<FrameNode>& frameNode, std::string& result) const
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    if (timePickerRowPattern->GetHasSecond()) {
+        auto allChildNode = timePickerRowPattern->GetAllChildNode();
+        auto secondColumn = allChildNode["second"].Upgrade();
+        CHECK_NULL_VOID(secondColumn);
+        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(secondPickerColumnPattern);
+        int second = static_cast<int>(secondPickerColumnPattern->GetCurrentIndex());
+        std::string textSecond = std::to_string(second);
+        if (second < DOUBLE_DIGIT) {
+            if (timePickerRowPattern->GetPrefixSecond() != ZeroPrefixType::HIDE) {
+                textSecond = ZERO + textSecond;
+            }
+        }
+        result += COLON + textSecond;
     }
 }
 } // namespace OHOS::Ace::NG

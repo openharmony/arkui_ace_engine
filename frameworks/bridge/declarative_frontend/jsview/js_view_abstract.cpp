@@ -486,12 +486,16 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
+    if (startVal->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
+        ParseJsLengthMetrics(startObj, start);
         edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
+    if (endVal->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
+        ParseJsLengthMetrics(endObj, end);
         edges.end = end;
         useLocalizedEdges = true;
     }
@@ -3786,8 +3790,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3802,8 +3804,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -6367,6 +6367,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
+        }
     }
 
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
@@ -7384,11 +7388,12 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(arg));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }

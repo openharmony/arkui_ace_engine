@@ -655,6 +655,8 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     caretInfo_.rect = caretRect;
     if (moveHandle) {
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+    } else {
+        AdjustHandleAtEdge(caretInfo_.rect);
     }
     UpdateCaretOriginalRect(caretMetrics.offset);
 }
@@ -891,7 +893,7 @@ void TextSelectController::SetCaretRectAtEmptyValue()
 
 void TextSelectController::UpdateCaretOriginalRect(const OffsetF& offset)
 {
-    caretInfo_.originalRect.SetOffset(offset);
+    caretInfo_.originalRect.SetOffset(OffsetF(offset.GetX(), caretInfo_.rect.Top()));
     caretInfo_.originalRect.SetHeight(caretInfo_.rect.Height());
     AdjustHandleAtEdge(caretInfo_.originalRect);
 }

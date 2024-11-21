@@ -112,6 +112,7 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
+    info.params = params;
 
 #if !defined(PREVIEW)
     auto container = Container::Current();
@@ -1163,12 +1164,12 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
         return;
     }
-    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->UpdateSrcPage();
                 pageRouterManager->PushOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1199,6 +1200,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 
     CleanPageOverlay();
+    UpdateSrcPage();
 
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1260,12 +1262,12 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (target.url.empty()) {
         return;
     }
-    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->UpdateSrcPage();
                 pageRouterManager->ReplaceOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1285,7 +1287,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         }
         return;
     }
-
+    UpdateSrcPage();
     DealReplacePage(info);
 }
 
@@ -1452,7 +1454,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     pageRouterStack_.emplace_back(pageNode);
 
     if (target.content && !target.content->empty()) {
-        loadJsByBuffer_(target.content, target.errorCallback);
+        loadJsByBuffer_(target.content, target.errorCallback, target.params);
     } else {
         loadJs_(target.path, target.errorCallback);
     }

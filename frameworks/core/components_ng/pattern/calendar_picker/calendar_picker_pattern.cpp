@@ -143,6 +143,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(imageLayoutProperty);
             auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            CHECK_NULL_VOID(imageInfo);
             imageInfo->SetFillColor(theme->GetEntryArrowColor());
             imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
             imageNode->MarkModifyDone();
@@ -1139,6 +1140,15 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void CalendarPickerPattern::OnColorConfigurationUpdate()
+{
+    if (IsDialogShow()) {
+        return;
+    }
+    selected_ = CalendarPickerSelectedType::OTHER;
+    ResetTextState();
 }
 
 std::string CalendarPickerPattern::GetEntryDateInfo()

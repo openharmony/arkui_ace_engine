@@ -236,7 +236,7 @@ public:
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
-    bool RemoveAllModalInOverlay();
+    bool RemoveAllModalInOverlay(bool isRouterTransition = true);
     bool RemoveAllModalInOverlayByStack();
     bool RemoveAllModalInOverlayByList();
     bool OnRemoveAllModalInOverlayByList();
@@ -806,6 +806,7 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
+    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

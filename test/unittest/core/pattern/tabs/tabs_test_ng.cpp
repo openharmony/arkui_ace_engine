@@ -210,7 +210,7 @@ void TabsTestNg::HandleClick(Offset offset, int32_t index)
 {
     GestureEvent info;
     info.SetLocalLocation(offset);
-    tabBarPattern_->HandleClick(info, index);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
 }
@@ -632,7 +632,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info, 0);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), 0);
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_TRUE(swiperPattern_->customAnimationToIndex_.has_value());
 

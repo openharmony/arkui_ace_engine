@@ -166,12 +166,19 @@ public:
     void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
-        scrollableEvent_->SetEnabled(enabled);
-        if (!enabled) {
-            scrollableEvent_->SetAxis(Axis::NONE);
-        } else {
-            scrollableEvent_->SetAxis(axis_);
+        bool bNest = false;
+        if (scrollBarProxy_) {
+            bNest = scrollBarProxy_->IsNestScroller();
         }
+
+        if (enabled || bNest) {
+            enabled = true;
+            scrollableEvent_->SetAxis(axis_);
+        } else {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        }
+        scrollableEvent_->SetEnabled(enabled);
+
         if (scrollBarProxy_) {
             scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
         }
@@ -217,7 +224,7 @@ public:
         return barOffset_;
     }
 
-    double GetScrollBarOutBoundaryExtent() const
+    float GetScrollBarOutBoundaryExtent() const
     {
         return scrollBarOutBoundaryExtent_;
     }
@@ -937,7 +944,7 @@ private:
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     bool isScrolling_ = false;
-    double scrollBarOutBoundaryExtent_ = 0.0;
+    float scrollBarOutBoundaryExtent_ = 0.f;
     std::optional<float> ratio_;
     double friction_ = -1.0;
     double maxFlingVelocity_ = MAX_VELOCITY;

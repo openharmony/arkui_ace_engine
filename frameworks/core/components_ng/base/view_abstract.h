@@ -283,7 +283,7 @@ public:
     static void SetTabStop(bool tabStop);
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
-    static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnKeyEvent(OnKeyConsumeFunc &&onKeyCallback);
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
@@ -643,7 +643,7 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
-    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -779,8 +779,8 @@ public:
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);
-    static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
-    static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
+    static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
+    static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
 
 private:
     static void AddDragFrameNodeToManager();

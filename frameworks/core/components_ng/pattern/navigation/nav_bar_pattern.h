@@ -59,8 +59,6 @@ public:
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
-    Dimension GetTitleBarHeightBeforeMeasure() override;
-
     float GetTitleBarHeightLessThanMaxBarHeight() const;
 
 protected:

@@ -36,6 +36,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+        info_->isDataValid_ = false;
         return;
     }
     CheckReset();
@@ -65,7 +66,7 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Lanes not initialized, can't perform layout");
         return;
     }
-    if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
+    if (!info_->isDataValid_) {
         return;
     }
     if (info_->targetIndex_) {
@@ -546,7 +547,7 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         info_->delta_ = -Infinity<float>();
     }
     jumpIdx = std::min(itemCnt_ - 1, jumpIdx);
-    overScroll_ = false;
+    SetCanOverScroll(false);
 
     bool inView = info_->ItemInView(jumpIdx);
     if (align == ScrollAlign::AUTO) {
@@ -636,7 +637,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         maxEnd += info_->footerHeight_;
     }
 
-    if (overScroll_) {
+    if (CanOverScroll()) {
         return;
     }
     maxEnd += info_->BotMargin();
@@ -670,6 +671,10 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane) const
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
+    if (cacheDeadline_) {
+        child->Layout();
+        child->SetActive(false);
+    }
     const float res = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     info_->CacheItemHeight(idx, res);
     return res;
@@ -698,7 +703,8 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            const bool isCache = item.idx < info_->startIndex_ || item.idx > info_->endIndex_;
+            const bool isCache = !props_->GetShowCachedItemsValue(false) &&
+                                 (item.idx < info_->startIndex_ || item.idx > info_->endIndex_);
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 mainPos += item.mainSize + mainGaps_[idx];
@@ -711,12 +717,15 @@ void WaterFlowLayoutSW::LayoutSection(
             }
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
+            mainPos += item.mainSize + mainGaps_[idx];
+            if (isCache) {
+                continue;
+            }
             if (child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
-            mainPos += item.mainSize + mainGaps_[idx];
         }
         if (!rtl) {
             crossPos += itemsCrossSize_[idx][i] + crossGaps_[idx];

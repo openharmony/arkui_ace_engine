@@ -548,6 +548,33 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
 
     auto datePickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
+
+    auto lunarDate = datePickerPattern->SolarToLunar(datePickerPattern->GetCurrentDate());
+    datePickerPattern->LunarColumnsBuilding(lunarDate);
+    std::string allColumnsText = "";
+    for (const auto& child : pickerFrameNode->GetChildren()) {
+        auto stackMonthDays = AceType::DynamicCast<FrameNode>(child);
+        ASSERT_NE(stackMonthDays, nullptr);
+        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+        ASSERT_NE(blendMonthDays, nullptr);
+        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+        ASSERT_NE(monthDaysColumnNode, nullptr);
+        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+        ASSERT_NE(columnPattern, nullptr);
+        auto index = columnPattern->GetCurrentIndex();
+        auto options = columnPattern->GetOptions();
+        auto it = options.find(monthDaysColumnNode);
+        if (it != options.end()) {
+            if (it->second.size() <= index) {
+                allColumnsText.append("");
+            }
+            auto date = it->second.at(index);
+            allColumnsText.append(DatePickerPattern::GetFormatString(date));
+        } else {
+            allColumnsText.append("");
+        }
+    }
+
     datePickerPattern->SetShowLunar(false);
 
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
@@ -558,10 +585,7 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
                                                     std::to_string(pickerDate.GetDay()));
 
     datePickerPattern->SetShowLunar(true);
-    auto lunarDate = datePickerPattern->SolarToLunar(datePickerPattern->GetCurrentDate());
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(lunarDate.year) + CONNECTER +
-                                                    std::to_string(lunarDate.month) + CONNECTER +
-                                                    std::to_string(lunarDate.day));
+    EXPECT_EQ(accessibilityProperty->GetText(), allColumnsText);
 }
 
 /**
@@ -588,9 +612,10 @@ HWTEST_F(DatePickerTestThree, DatePickerPaintTest001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    std::unique_ptr<PaintWrapper> paintWrapper =
+        std::make_unique<PaintWrapper>(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper.get());
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -622,9 +647,10 @@ HWTEST_F(DatePickerTestThree, DatePickerPaintTest002, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    std::unique_ptr<PaintWrapper> paintWrapper =
+        std::make_unique<PaintWrapper>(renderContext, geometryNode, pickerPaintProperty);
     ASSERT_NE(paintWrapper, nullptr);
-    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper.get());
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));

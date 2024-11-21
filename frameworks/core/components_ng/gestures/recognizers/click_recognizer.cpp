@@ -206,14 +206,15 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, click %{public}d down, ETF: %{public}d, CTP: %{public}d, state: %{public}d",
         event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
+    extraInfo_ = "ETF: " + std::to_string(equalsToFingers_) + " CFP: " + std::to_string(currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRender()) {
         touchDownTime_ = event.time;
     }
@@ -303,9 +304,10 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    extraInfo_ = "";
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
     if (pipeline && pipeline->IsFormRender() && IsFormRenderClickRejected(event)) {
@@ -353,6 +355,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    extraInfo_ = "";
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -362,7 +365,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     InitGlobalValue(event.sourceType);
     // In form scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRender()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
@@ -376,7 +379,8 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
+    extraInfo_ = "";
     if (IsRefereeFinished()) {
         return;
     }
@@ -393,7 +397,7 @@ void ClickRecognizer::HandleOverdueDeadline()
 
 void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {

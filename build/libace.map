@@ -47,7 +47,6 @@
       "OHOS::Ace::BaseId::BaseId()";
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
-      OHOS::Ace::CubicCurve::*;
       OHOS::Ace::Curves::*;
       OHOS::Ace::EngineHelper::*;
       OHOS::Ace::EventReport::*;
@@ -65,7 +64,6 @@
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
-      OHOS::Ace::SpringCurve::*;
       OHOS::Ace::SpringMotion::*;
       OHOS::Ace::SubwindowManager::*;
       "OHOS::Ace::SystemGridInfo::ToString() const";

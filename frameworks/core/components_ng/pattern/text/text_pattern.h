@@ -775,6 +775,7 @@ protected:
     void RecordClickEvent();
     void ActTextOnClick(GestureEvent& info);
     void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
+    RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,

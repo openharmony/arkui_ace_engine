@@ -311,7 +311,8 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
-    V2::ISOLATED_COMPONENT_ETS_TAG
+    V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::WEB_ETS_TAG,
 };
 
 static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
@@ -847,9 +848,8 @@ std::string AccessibilityProperty::GetTextType() const
 
 void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)
 {
-    if (accessibilityLevel == accessibilityLevel_.value_or("")) {
-        return;
-    }
+    auto backupLevel = accessibilityLevel_.value_or("");
+
     if (accessibilityLevel == Level::YES_STR ||
         accessibilityLevel == Level::NO_STR ||
         accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
@@ -857,7 +857,10 @@ void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibili
     } else {
         accessibilityLevel_ = Level::AUTO;
     }
-    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+
+    if (backupLevel != accessibilityLevel_.value_or("")) {
+        NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
 }
 
 void AccessibilityProperty::SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)

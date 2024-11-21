@@ -76,7 +76,9 @@ napi_value UdmfClientImpl::TransformUdmfUnifiedData(RefPtr<UnifiedData>& Unified
     CHECK_NULL_RETURN(engine, nullptr);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    auto unifiedData = AceType::DynamicCast<UnifiedDataImpl>(UnifiedData)->GetUnifiedData();
+    auto unifiedDataImpl = AceType::DynamicCast<UnifiedDataImpl>(UnifiedData);
+    CHECK_NULL_RETURN(unifiedDataImpl, nullptr);
+    auto unifiedData = unifiedDataImpl->GetUnifiedData();
     CHECK_NULL_RETURN(unifiedData, nullptr);
     napi_value dataVal = nullptr;
     UDMF::UnifiedDataNapi::NewInstance(env, unifiedData, dataVal);

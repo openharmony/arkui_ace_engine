@@ -294,9 +294,10 @@ void XComponentPattern::InitializeRenderContext()
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
                                                         : RenderContext::ContextType::HARDWARE_SURFACE;
-    RenderContext::ContextParam param = { contextType, GetId() + "Surface" };
+    RenderContext::ContextParam param = { contextType, GetId() + "Surface", RenderContext::PatternType::XCOM };
 #else
-    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                                          GetId() + "Surface", RenderContext::PatternType::XCOM };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -1791,9 +1792,12 @@ void XComponentPattern::NativeSurfaceHide()
 
 void XComponentPattern::OnWindowHide()
 {
-    if (!hasXComponentInit_ || hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(false);
     }
     NativeSurfaceHide();
     hasReleasedSurface_ = true;
@@ -1801,9 +1805,12 @@ void XComponentPattern::OnWindowHide()
 
 void XComponentPattern::OnWindowShow()
 {
-    if (!hasXComponentInit_ || !hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
+    }
+    if (renderSurface_) {
+        renderSurface_->OnWindowStateChange(true);
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;

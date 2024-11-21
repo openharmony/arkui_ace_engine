@@ -1916,6 +1916,41 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetEndOffset002
+ * @tc.desc: Test GetEndOffset with updated offset on old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetEndOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20, GridItemStyle::NONE);
+    model.SetLayoutOptions({});
+    CreateDone(frameNode_);
+
+    int32_t targetIndex = 19;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, false, align);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->info_;
+    info.prevOffset_ = info.currentOffset_;
+    info.currentOffset_ -= 799.0f;
+    info.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->GetScrollEdgeEffect()->ProcessScrollOver(-799.0f);
+    EXPECT_TRUE(info.synced_);
+    EXPECT_EQ(info.prevOffset_, -199.f);
+    EXPECT_EQ(info.currentOffset_, -199.f);
+    EXPECT_EQ(info.startIndex_, 18);
+    EXPECT_EQ(info.endIndex_, 19);
+    EXPECT_EQ(info.startMainLineIndex_, 9);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    EXPECT_EQ(pattern_->GetEndOffset(), 600.0f);
+}
+
+/**
  * @tc.name: MultiLineItemScroll001
  * @tc.desc: Test multiLine item in last line scroll end
  * @tc.type: FUNC

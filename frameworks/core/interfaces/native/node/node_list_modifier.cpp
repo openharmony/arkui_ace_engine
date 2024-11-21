@@ -550,6 +550,7 @@ void ResetInitialIndex(ArkUINodeHandle node)
 
 void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit)
 {
+    CHECK_NULL_VOID(option);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     for (uint32_t i = 0; i < option->mainSize.size(); i++) {
@@ -709,7 +710,14 @@ const ArkUIListModifier* GetListModifier()
         SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
         SetInitialScroller, ResetInitialScroller, SetListMaintainVisibleContentPosition,
         ResetListMaintainVisibleContentPosition, SetListFadingEdge, ResetListFadingEdge,
-        SetShowCached, ResetShowCached, GetShowCached };
+        SetShowCached, ResetShowCached, GetShowCached, SetOnListScrollIndexCallBack,
+        SetOnScrollVisibleContentChange, SetOnItemMove, SetOnItemDragStart, SetOnItemDragEnter, SetOnItemDragMove,
+        SetOnItemDragLeave, SetOnItemDrop, SetOnListScrollFrameBeginCallBack, SetOnListWillScrollCallBack,
+        SetOnListDidScrollCallBack, SetOnListReachStartCallBack, SetOnListReachEndCallBack,
+        SetOnListScrollStartCallBack, SetOnListScrollStopCallBack, ResetOnListScrollIndex, ResetOnListScrollStart,
+        ResetOnListScrollStop, ResetOnListScrollFrameBegin, ResetOnListWillScroll, ResetOnListDidScroll,
+        ResetOnListReachStart, ResetOnListReachEnd, ResetOnScrollVisibleContentChange, ResetOnItemMove,
+        ResetOnItemDragStart, ResetOnItemDragEnter, ResetOnItemDragMove, ResetOnItemDragLeave, ResetOnItemDrop };
     return &modifier;
 }
 
@@ -889,54 +897,291 @@ void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam)
     ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 
+void SetOnListScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollIndex = reinterpret_cast<OnScrollIndexEvent*>(extraParam);
+        ListModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
+    } else {
+        ListModelNG::SetOnScrollIndex(frameNode, nullptr);
+    }
+}
+
+void SetOnScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollVisibleContentChange = reinterpret_cast<OnScrollVisibleContentChangeEvent*>(extraParam);
+        ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(*onScrollVisibleContentChange));
+    } else {
+        ListModelNG::SetOnScrollVisibleContentChange(frameNode, nullptr);
+    }
+}
+
+void SetOnItemMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemMove = reinterpret_cast<OnItemMoveEvent*>(extraParam);
+        ListModelNG::SetOnItemMove(frameNode, std::move(*onItemMove));
+    } else {
+        ListModelNG::SetOnItemMove(frameNode, nullptr);
+    }
+}
+
+void SetOnItemDragStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragStart = reinterpret_cast<OnItemDragStartFunc*>(extraParam);
+        ListModelNG::SetOnItemDragStart(frameNode, std::move(*onItemDragStart));
+    } else {
+        ListModelNG::SetOnItemDragStart(frameNode, nullptr);
+    }
+}
+
+void SetOnItemDragEnter(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragEnter = reinterpret_cast<OnItemDragEnterFunc*>(extraParam);
+        ListModelNG::SetOnItemDragEnter(frameNode, std::move(*onItemDragEnter));
+    } else {
+        ListModelNG::SetOnItemDragEnter(frameNode, nullptr);
+    }
+}
+
+void SetOnItemDragMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragMove = reinterpret_cast<OnItemDragMoveFunc*>(extraParam);
+        ListModelNG::SetOnItemDragMove(frameNode, std::move(*onItemDragMove));
+    } else {
+        ListModelNG::SetOnItemDragMove(frameNode, nullptr);
+    }
+}
+
+void SetOnItemDragLeave(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragLeave = reinterpret_cast<OnItemDragLeaveFunc*>(extraParam);
+        ListModelNG::SetOnItemDragLeave(frameNode, std::move(*onItemDragLeave));
+    } else {
+        ListModelNG::SetOnItemDragLeave(frameNode, nullptr);
+    }
+}
+
+void SetOnItemDrop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDrop = reinterpret_cast<OnItemDropFunc*>(extraParam);
+        ListModelNG::SetOnItemDrop(frameNode, std::move(*onItemDrop));
+    } else {
+        ListModelNG::SetOnItemDrop(frameNode, nullptr);
+    }
+}
+
+void SetOnListScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollFrameBegin = reinterpret_cast<OnScrollFrameBeginEvent*>(extraParam);
+        ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(*onScrollFrameBegin));
+    } else {
+        ListModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+    }
+}
+
+void SetOnListWillScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onWillScroll = reinterpret_cast<OnWillScrollEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillScroll(frameNode, std::move(*onWillScroll));
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
+}
+
+void SetOnListDidScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onDidScroll = reinterpret_cast<OnScrollEvent*>(extraParam);
+        ScrollableModelNG::SetOnDidScroll(frameNode, std::move(*onDidScroll));
+    } else {
+        ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+    }
+}
+
+void SetOnListReachStartCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onReachStart = reinterpret_cast<OnReachEvent*>(extraParam);
+        ListModelNG::SetOnReachStart(frameNode, std::move(*onReachStart));
+    } else {
+        ListModelNG::SetOnReachStart(frameNode, nullptr);
+    }
+}
+
+void SetOnListReachEndCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onReachEnd = reinterpret_cast<OnReachEvent*>(extraParam);
+        ListModelNG::SetOnReachEnd(frameNode, std::move(*onReachEnd));
+    } else {
+        ListModelNG::SetOnReachEnd(frameNode, nullptr);
+    }
+}
+
+void SetOnListScrollStartCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollStart = reinterpret_cast<OnScrollStartEvent*>(extraParam);
+        ListModelNG::SetOnScrollStart(frameNode, std::move(*onScrollStart));
+    } else {
+        ListModelNG::SetOnScrollStart(frameNode, nullptr);
+    }
+}
+
+void SetOnListScrollStopCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollStop = reinterpret_cast<OnScrollStopEvent*>(extraParam);
+        ListModelNG::SetOnScrollStop(frameNode, std::move(*onScrollStop));
+    } else {
+        ListModelNG::SetOnScrollStop(frameNode, nullptr);
+    }
+}
+
 void ResetOnListScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnScroll(frameNode, nullptr);
 }
+
 void ResetOnListScrollIndex(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnScrollIndex(frameNode, nullptr);
 }
+
+void ResetOnScrollVisibleContentChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollVisibleContentChange(frameNode, nullptr);
+}
+
+void ResetOnItemMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemMove(frameNode, nullptr);
+}
+
+void ResetOnItemDragStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemDragStart(frameNode, nullptr);
+}
+
+void ResetOnItemDragEnter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemDragEnter(frameNode, nullptr);
+}
+
+void ResetOnItemDragMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemDragMove(frameNode, nullptr);
+}
+
+void ResetOnItemDragLeave(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemDragLeave(frameNode, nullptr);
+}
+
+void ResetOnItemDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnItemDrop(frameNode, nullptr);
+}
+
 void ResetOnListScrollStart(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnScrollStart(frameNode, nullptr);
 }
+
 void ResetOnListScrollStop(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnScrollStop(frameNode, nullptr);
 }
+
 void ResetOnListScrollFrameBegin(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
 }
+
 void ResetOnListWillScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
 }
+
 void ResetOnListDidScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
 }
+
 void ResetOnListReachStart(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetOnReachStart(frameNode, nullptr);
 }
+
 void ResetOnListReachEnd(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

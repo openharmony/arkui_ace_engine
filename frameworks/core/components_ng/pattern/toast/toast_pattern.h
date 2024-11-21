@@ -162,6 +162,7 @@ private:
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
 
     void AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight);
+    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

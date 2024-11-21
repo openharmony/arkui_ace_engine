@@ -113,6 +113,9 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     if (targetNode) {
         overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
+    if (mainContainerId_ == -1) {
+        mainContainerId_ = Container::CurrentId();
+    }
     Container::UpdateCurrent(mainContainerId_);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
@@ -280,7 +283,8 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
         [info, textFunc] {
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::InitTextDetect, start AI detect, length: %{public}zu",
+                info.text.size());
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
         "ArkUITextInitDataDetect");
@@ -345,6 +349,8 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::ParseAIResult, ResultLength: %{public}zu, id: %{public}i",
+        result.entity.size(), GetHost() ? GetHost()->GetId() : -1);
     auto entityJson = JsonUtil::ParseJsonString(result.entity);
     CHECK_NULL_VOID(entityJson);
     for (const auto& type : TEXT_DETECT_MAP) {
@@ -444,6 +450,8 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
     return [aiSpanMap, weak = WeakClaim(this)]() {
         auto dataDetectorAdapter = weak.Upgrade();
         CHECK_NULL_VOID(dataDetectorAdapter && !dataDetectorAdapter->textForAI_.empty());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter, delayed whole task executed, id: %{public}i",
+            dataDetectorAdapter->GetHost() ? dataDetectorAdapter->GetHost()->GetId() : -1);
         dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
         size_t detectTextIdx = 0;
         auto aiSpanMapIt = aiSpanMap.begin();
@@ -501,9 +509,8 @@ void DataDetectorAdapter::StartAITask()
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_) {
         aiSpanMapCopy = aiSpanMap_;
-    } else {
-        detectTexts_.clear();
     }
+    detectTexts_.clear();
     aiSpanMap_.clear();
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
@@ -513,6 +520,8 @@ void DataDetectorAdapter::StartAITask()
     CHECK_NULL_VOID(taskExecutor);
     aiDetectDelayTask_.Cancel();
     aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy));
+    TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::StartAITask, post whole task, id: %{public}i",
+        GetHost() ? GetHost()->GetId() : -1);
     taskExecutor->PostDelayedTask(
         aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }

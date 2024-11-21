@@ -360,20 +360,6 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
-void JSTextField::SetCapitalizationMode(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto jsValue = info[0];
-    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
-        TextFieldModel::GetInstance()->SetCapitalizationMode(AutoCapitalizationMode::NONE);
-        return;
-    }
-    AutoCapitalizationMode autoCapitalizationMode = CastToAutoCapitalizationMode(jsValue->ToNumber<int32_t>());
-    TextFieldModel::GetInstance()->SetCapitalizationMode(autoCapitalizationMode);
-}
-
 void JSTextField::SetTextAlign(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
@@ -1408,7 +1394,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             static_cast<uint32_t>(inputNumber) > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
-            TextFieldModel::GetInstance()->SetShowCounter(false);
+            TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
             return;
         }
         TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
@@ -1555,6 +1541,7 @@ static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 void JSTextField::SetCancelButton(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
+        ResetCancelIcon();
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
@@ -1612,6 +1599,14 @@ void JSTextField::SetCancelDefaultIcon()
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
     TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+}
+
+void JSTextField::ResetCancelIcon()
+{
+    TextFieldModel::GetInstance()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
+    TextFieldModel::GetInstance()->SetIsShowCancelButton(false);
     TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
     TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
 }

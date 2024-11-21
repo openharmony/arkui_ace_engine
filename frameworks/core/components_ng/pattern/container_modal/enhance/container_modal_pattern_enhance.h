@@ -66,7 +66,7 @@ public:
     void OnMinButtonClick();
     void OnCloseButtonClick();
     void AddPointLight();
-
+    void CallMenuWidthChange(int32_t resId);
 private:
     RefPtr<FrameNode> GetButtonRowByInspectorId()
     {
@@ -75,17 +75,17 @@ private:
 
     RefPtr<FrameNode> GetMaximizeButton()
     {
-        return NG::Inspector::GetFrameNodeByKey("containerModalMaximizeButtonId");
+        return NG::Inspector::GetFrameNodeByKey("EnhanceMaximizeBtn");
     }
 
     RefPtr<FrameNode> GetMinimizeButton()
     {
-        return NG::Inspector::GetFrameNodeByKey("containerModalMinimizeButtonId");
+        return NG::Inspector::GetFrameNodeByKey("EnhanceMinimizeBtn");
     }
 
     RefPtr<FrameNode> GetCloseButton()
     {
-        return NG::Inspector::GetFrameNodeByKey("containerModalCloseButtonId");
+        return NG::Inspector::GetFrameNodeByKey("EnhanceCloseBtn");
     }
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
     void ChangeFloatingTitle(bool isFocus) override;

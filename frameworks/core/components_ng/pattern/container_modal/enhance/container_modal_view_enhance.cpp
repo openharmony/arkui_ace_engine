@@ -84,8 +84,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance BuildTitle called");
     auto titleRow = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(titleRow, nullptr);
-    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
-    pattern->SetTapGestureEvent(titleRow);
     return titleRow;
 }
 
@@ -187,7 +185,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& 
     auto renderContext = gestureRow->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdatePosition(OffsetT<Dimension>());
-    pattern->SetTapGestureEvent(gestureRow);
     auto layoutProp = gestureRow->GetLayoutProperty();
     layoutProp->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

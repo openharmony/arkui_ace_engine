@@ -336,7 +336,7 @@ void PipelineContext::FlushTouchEvents() {}
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
 void PipelineContext::OnDragEvent(
-    const PointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
+    const DragPointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
 {}
 
 void PipelineContext::OnIdle(int64_t deadline)
@@ -426,8 +426,6 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
-
-void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
@@ -536,6 +534,11 @@ void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
     return false;
 }

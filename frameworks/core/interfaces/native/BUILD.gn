@@ -57,7 +57,6 @@ template("ace_core_interfaces_native_node") {
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
       "node/line_modifier.cpp",
-      "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",

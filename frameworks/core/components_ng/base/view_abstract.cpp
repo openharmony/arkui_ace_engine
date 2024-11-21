@@ -1199,7 +1199,7 @@ void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
-void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1992,13 +1992,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     CHECK_NULL_VOID(overlayManager);
 
     if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        bool isShown = SubwindowManager::GetInstance()->GetShown();
-        if (!isShown) {
-            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
-        } else {
-            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
-        }
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
         return;
     }
 
@@ -3944,7 +3938,7 @@ void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFu
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
-void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -3996,19 +3990,22 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto instanceId = context->GetInstanceId();
-    ContainerScope scope(instanceId);
     if (value) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->RequestFocus();
     } else {
-        if (!frameNode->IsOnMainTree()) {
+        auto context = frameNode->GetAttachedContext();
+        if (!context) {
             TAG_LOGW(AceLogTag::ACE_FOCUS,
-                "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
+                "Can't find Node %{public}s/%{public}d attachedContext, please check the timing of the function call.",
                 frameNode->GetTag().c_str(), frameNode->GetId());
             return;
         }
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->LostFocusToViewRoot();
     }
 }
@@ -4449,7 +4446,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    Dimension value = Dimension(0.0f);
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -4466,7 +4463,7 @@ Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(0.0f);
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -5142,13 +5139,13 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 
-void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->AddCustomProperty(key, value);
 }
 
-void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& key)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->RemoveCustomProperty(key);
