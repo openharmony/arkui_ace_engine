@@ -2574,6 +2574,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     frameRect.SetRect(RectF(lineWidth, lineWidth, noGreenBorderHeight, noGreenBorderWidth));
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
+        RectT<int32_t> containerRect;
+        containerRect.SetRect(0, 0, bounds.z_, bounds.w_);
+        localRect = localRect.Constrain(containerRect);
         RectF globalRect = frameRect.GetRect();
         auto localRectWidth = localRect.Width() - 2 * lineWidth;
         auto localRectHeight = localRect.Height() - 2 * lineWidth;
@@ -2585,7 +2588,6 @@ void RosenRenderContext::PaintAccessibilityFocus()
         }
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
             localRectWidth, localRectHeight);
-        globalRect = globalRect.Constrain(frameRect.GetRect());
         if (globalRect.IsEmpty()) {
             ClearAccessibilityFocus();
             return;
