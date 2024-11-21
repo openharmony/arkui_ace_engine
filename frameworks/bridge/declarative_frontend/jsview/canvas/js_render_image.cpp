@@ -35,7 +35,10 @@ void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_
 {
     std::string funcName(name);
     napi_value result = nullptr;
-    napi_create_function(env, funcName.c_str(), funcName.length(), func, nullptr, &result);
+    napi_status status = napi_create_function(env, funcName.c_str(), funcName.length(), func, nullptr, &result);
+    if (status != napi_ok) {
+        return;
+    }
     napi_set_named_property(env, object, name, result);
 }
 
@@ -115,7 +118,10 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         return thisVar;
     }
     napi_value argv[2] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_status status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (status != napi_ok) {
+        return nullptr;
+    }
     if (argc == 2) {  // 2: args count
         int32_t unit = 0;
         napi_get_value_int32(env, argv[1], &unit);
@@ -124,7 +130,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         }
     }
     size_t textLen = 0;
-    auto status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
+    status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
     if (status == napi_ok) {
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(context, nullptr);
