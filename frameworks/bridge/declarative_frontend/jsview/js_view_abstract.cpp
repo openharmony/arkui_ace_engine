@@ -486,12 +486,16 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
+    if (startVal->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
+        ParseJsLengthMetrics(startObj, start);
         edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
+    if (endVal->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
+        ParseJsLengthMetrics(endObj, end);
         edges.end = end;
         useLocalizedEdges = true;
     }
