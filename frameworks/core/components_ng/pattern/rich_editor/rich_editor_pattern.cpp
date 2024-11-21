@@ -5089,7 +5089,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
         CreateTextSpanNode(targetSpanNode, info, insertValue, isIME);
         return;
     }
-    if (typingStyle_.has_value() && !HasSameTypingStyle(targetSpanNode) && operationType != OperationType::DRAG) {
+    if (typingStyle_.has_value() && !HasSameTypingStyle(targetSpanNode)) {
         InsertDiffStyleValueInSpan(targetSpanNode, info, insertValue, isIME);
         return;
     }
@@ -5107,6 +5107,28 @@ void RichEditorPattern::DeleteSelectOperation(OperationRecord* const record)
     ResetSelection();
 }
 
+TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
+{
+    auto theme = GetTheme<RichEditorTheme>();
+    auto ret = theme ? theme->GetTextStyle() : TextStyle();
+    CHECK_NULL_RETURN(typingStyle_.has_value() && typingTextStyle_.has_value(), ret);
+    const auto& updateSpanStyle = typingStyle_.value();
+    const auto& textStyle = typingTextStyle_.value();
+    IF_TRUE(updateSpanStyle.updateFontFeature, ret.SetFontFeatures(textStyle.GetFontFeatures()));
+    IF_TRUE(updateSpanStyle.updateTextColor, ret.SetTextColor(textStyle.GetTextColor()));
+    IF_TRUE(updateSpanStyle.updateLineHeight, ret.SetLineHeight(textStyle.GetLineHeight()));
+    IF_TRUE(updateSpanStyle.updateLetterSpacing, ret.SetLetterSpacing(textStyle.GetLetterSpacing()));
+    IF_TRUE(updateSpanStyle.updateFontSize, ret.SetFontSize(textStyle.GetFontSize()));
+    IF_TRUE(updateSpanStyle.updateItalicFontStyle, ret.SetFontStyle(textStyle.GetFontStyle()));
+    IF_TRUE(updateSpanStyle.updateFontWeight, ret.SetFontWeight(textStyle.GetFontWeight()));
+    IF_TRUE(updateSpanStyle.updateFontFamily, ret.SetFontFamilies(textStyle.GetFontFamilies()));
+    IF_TRUE(updateSpanStyle.updateTextShadows, ret.SetTextShadows(textStyle.GetTextShadows()));
+    IF_TRUE(updateSpanStyle.updateTextDecoration, ret.SetTextDecoration(textStyle.GetTextDecoration()));
+    IF_TRUE(updateSpanStyle.updateTextDecorationColor, ret.SetTextDecorationColor(textStyle.GetTextDecorationColor()));
+    IF_TRUE(updateSpanStyle.updateTextDecorationStyle, ret.SetTextDecorationStyle(textStyle.GetTextDecorationStyle()));
+    return ret;
+}
+
 void RichEditorPattern::InsertDiffStyleValueInSpan(
     RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME)
 {
@@ -5115,15 +5137,11 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     TextSpanOptions options;
     options.value = insertValue;
     options.offset = caretPosition_;
-    auto theme = GetTheme<RichEditorTheme>();
-    options.style = theme ? theme->GetTextStyle() : TextStyle();
+    options.style = CreateTextStyleByTypingStyle();
     options.useThemeFontColor = typingStyle_->useThemeFontColor;
     options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
     auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        UpdateTextStyle(newSpanNode, typingStyle_.value(), typingTextStyle_.value());
-    }
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
     AfterInsertValue(newSpanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
 }

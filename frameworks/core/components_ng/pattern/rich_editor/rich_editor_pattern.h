@@ -1059,6 +1059,7 @@ private:
     void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
+    TextStyle CreateTextStyleByTypingStyle();
     void InitTouchEvent();
     void InitPanEvent();
     bool SelectOverlayIsOn();
