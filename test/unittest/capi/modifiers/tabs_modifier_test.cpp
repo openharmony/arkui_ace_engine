@@ -453,7 +453,7 @@ HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode1
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setBarMode1Test, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
 {
     const std::string PROP_NAME("barMode");
     ASSERT_NE(modifier_->setBarMode0, nullptr);
@@ -466,8 +466,8 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarMode1Test, TestSize.Level1)
     typedef std::pair<Ark_BarMode, std::string> BarMode0TestStep;
     const std::vector<BarMode0TestStep> BarMode1TestPlan = {
         { ARK_BAR_MODE_SCROLLABLE, scrollableMode },
-        { ARK_BAR_MODE_FIXED, scrollableMode },
-        { static_cast<Ark_BarMode>(25), scrollableMode }
+        { ARK_BAR_MODE_FIXED, "BarMode.Fixed" },
+        { static_cast<Ark_BarMode>(25), "BarMode.Fixed" }
     };
 
     for (const auto& [value, expectVal] : BarMode1TestPlan) {
@@ -498,7 +498,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarMode1Test, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarMode2
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setBarMode2Test, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
 {
     const std::string PROP_NAME("barMode");
     ASSERT_NE(modifier_->setBarModeBarMode_SCROLLABLE, nullptr);
