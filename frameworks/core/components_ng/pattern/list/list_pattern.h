@@ -404,7 +404,7 @@ private:
     bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
-        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
+        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
