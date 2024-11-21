@@ -357,7 +357,23 @@ public:
         return resAdapter_;
     }
 
-    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName);
+    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
+    {
+        if (!currentThemeStyle_) {
+            TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+            return nullptr;
+        }
+        currentThemeStyle_->CheckThemeStyleLoaded(patternName);
+        auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+        if (!patternStyle && resAdapter_) {
+            patternStyle = resAdapter_->GetPatternByName(patternName);
+            ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+                .value = patternStyle };
+            currentThemeStyle_->SetAttr(patternName, value);
+        }
+        return patternStyle;
+    }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
