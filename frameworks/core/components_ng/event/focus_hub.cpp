@@ -1082,7 +1082,7 @@ bool FocusHub::RequestNextFocusOfKeyEnter()
 {
     if (IsTabStop() && focusType_ == FocusType::SCOPE) {
         isSwitchByEnter_ = true;
-        OnFocusScope();
+        OnFocusScope(true);
         return true;
     }
     return false;
@@ -1585,17 +1585,20 @@ bool FocusHub::IsLeafFocusScope()
 {
     auto focusManager = GetFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
-    if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
-        focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
-        return true;
-    }
     if (IsTabStop()) {
         if (isSwitchByEnter_) {
+            if (focusDepend_ == FocusDependence::SELF) {
+                focusDepend_ = FocusDependence::AUTO;
+            }
             isSwitchByEnter_ = false;
             return false;
         }
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::TAB_STOP);
+        return true;
+    }
+    if (focusDepend_ == FocusDependence::SELF) {
+        lastWeakFocusNode_ = nullptr;
+        focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
     return false;
@@ -1604,7 +1607,9 @@ bool FocusHub::IsLeafFocusScope()
 void FocusHub::OnFocusScope(bool currentHasFocused)
 {
     if (IsLeafFocusScope()) {
-        OnFocusNode();
+        if (!currentHasFocused) {
+            OnFocusNode();
+        }
         return;
     }
 
