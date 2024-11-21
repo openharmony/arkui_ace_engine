@@ -140,6 +140,7 @@ constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
 
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr int32_t HALF = 2;
+constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -363,17 +364,13 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
       sharedRenderProcessToken_(sharedRenderProcessToken)
-{
-    InitAiEngine();
-}
+{}
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
-{
-    InitAiEngine();
-}
+{}
 
 WebPattern::~WebPattern()
 {
@@ -6387,7 +6384,18 @@ void WebPattern::RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext>
 
 std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
 {
-    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
+    // start sync task
+    std::future<std::vector<int8_t>> future = std::async(std::launch::async, [text, offset]() {
+        return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
+    });
+    // set timeout
+    auto status = future.wait_for(std::chrono::milliseconds(AI_TIMEOUT_LIMIT));
+    if (status == std::future_status::ready) {
+        return future.get();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::GetWordSelection timeout! return default");
+        return std::vector<int8_t> { -1, -1 };
+    }
 }
 
 bool WebPattern::CheckSafeAreaIsExpand()
@@ -6642,25 +6650,6 @@ void WebPattern::UnRegisterTextBlurCallback()
     textBlurCallback_ = nullptr;
     textBlurAccessibilityEnable_ = false;
     SetAccessibilityState(false);
-}
-
-void WebPattern::InitAiEngine()
-{
-    static bool isInit = false;
-    if (isInit) {
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask(
-        [&, instanceId = context->GetInstanceId()] {
-            ContainerScope scope(instanceId);
-            TAG_LOGI(AceLogTag::ACE_WEB, "ArkWeb init data detector.");
-            DataDetectorMgr::GetInstance().GetWordSelection("ArkWeb", 0);
-        },
-        "ArkWebTextInitDataDetect");
-    isInit = true;
 }
 
 void WebPattern::InitMagnifier()
