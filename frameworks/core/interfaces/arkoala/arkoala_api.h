@@ -1116,10 +1116,10 @@ struct ArkUIKeyEvent {
     ArkUI_CharPtr keyText;
     ArkUI_Int32 keySource;
     ArkUI_Int64 deviceId;
-    ArkUI_Int32 metaKey;
     ArkUI_Uint32 unicode;
     ArkUI_Float64 timestamp;
-    ArkUI_Uint32 getModifierKeyState;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
 
     // user input.

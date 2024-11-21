@@ -74,45 +74,6 @@ ArkUI_KeySourceType OH_ArkUI_KeyEvent_GetKeySource(const ArkUI_UIInputEvent *eve
     return result;
 }
 
-int32_t OH_ArkUI_KeyEvent_GetDeviceId(const ArkUI_UIInputEvent *event)
-{
-    if (!event) {
-        return -1;
-    }
-    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return -1;
-    }
-    auto result = static_cast<int32_t>(keyEvent->deviceId);
-    return result;
-}
-
-int32_t OH_ArkUI_KeyEvent_GetMetaKey(const ArkUI_UIInputEvent *event)
-{
-    if (!event) {
-        return -1;
-    }
-    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return -1;
-    }
-    auto result = static_cast<int32_t>(keyEvent->metaKey);
-    return result;
-}
-
-uint64_t OH_ArkUI_KeyEvent_GetTimestamp(const ArkUI_UIInputEvent *event)
-{
-    if (!event) {
-        return 0.0;
-    }
-    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return 0.0;
-    }
-    auto result = static_cast<uint64_t>(keyEvent->timestamp);
-    return result;
-}
-
 void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool stopPropagation)
 {
     if (!event) {
@@ -123,18 +84,6 @@ void OH_ArkUI_KeyEvent_StopPropagation(const ArkUI_UIInputEvent *event, bool sto
         return;
     }
     keyEvent->stopPropagation = stopPropagation;
-}
-
-bool OH_ArkUI_KeyEvent_GetModifierKeyState(const ArkUI_UIInputEvent *event, uint32_t modifierKeys)
-{
-    if (!event) {
-        return false;
-    }
-    const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return false;
-    }
-    return modifierKeys == keyEvent->getModifierKeyState;
 }
 
 ArkUI_KeyIntension OH_ArkUI_KeyEvent_GetKeyIntensionCode(const ArkUI_UIInputEvent *event)

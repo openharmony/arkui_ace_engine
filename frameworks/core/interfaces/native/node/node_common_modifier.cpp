@@ -6618,10 +6618,16 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.keyText = info.GetKeyText();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
-        event.keyEvent.metaKey = info.GetMetaKey();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-        event.keyEvent.getModifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = pressedKeyCodes.size();
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -6648,10 +6654,16 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         event.keyEvent.keyText = info.GetKeyText();
         event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
         event.keyEvent.deviceId = info.GetDeviceId();
-        event.keyEvent.metaKey = info.GetMetaKey();
         event.keyEvent.unicode = info.GetUnicode();
         event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-        event.keyEvent.getModifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = pressedKeyCodes.size();
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
