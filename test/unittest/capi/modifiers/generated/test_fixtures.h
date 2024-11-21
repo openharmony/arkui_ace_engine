@@ -237,6 +237,10 @@ extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegI
 // Fixture 'LengthAny' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthAnyValidValues;
 
+// Fixture 'LengthMetricsNonNeg' for type 'Ark_LengthMetrics'
+extern std::vector<std::tuple<std::string, Ark_LengthMetrics, std::string>> testFixtureLengthMetricsNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_LengthMetrics>> testFixtureLengthMetricsNonNegInvalidValues;
+
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;

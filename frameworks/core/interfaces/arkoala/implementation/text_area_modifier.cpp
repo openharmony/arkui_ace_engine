@@ -411,9 +411,9 @@ void LineSpacingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextAreaModelNG::SetLineSpacing(frameNode, convValue);
-    LOGE("ARKOALA TextAreaAttributeModifier.LineSpacingImpl -> Method is not implemented.");
+    auto lineSpacing = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(lineSpacing);
+    TextFieldModelNG::SetLineSpacing(frameNode, lineSpacing);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String_Resource* value)
@@ -544,8 +544,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //TextAreaModelNG::SetEnableHapticFeedback(frameNode, convValue);
-    LOGE("ARKOALA TextAreaAttributeModifier.EnableHapticFeedbackImpl -> Method is not implemented.");
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

@@ -129,7 +129,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, const std::optional<TextOverflow>& valueOpt);

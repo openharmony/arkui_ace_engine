@@ -170,6 +170,20 @@ namespace OHOS::Ace::NG::Converter {
         AssignArkValue(dst, value);
     }
 
+    inline void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
+    {
+        AssignArkValue(dst.value, src.Value());
+        switch (src.Unit()) {
+            case DimensionUnit::PX: dst.unit = ARK_LENGTH_UNIT_PX; break;
+            case DimensionUnit::VP: dst.unit = ARK_LENGTH_UNIT_VP; break;
+            case DimensionUnit::FP: dst.unit = ARK_LENGTH_UNIT_FP; break;
+            case DimensionUnit::PERCENT: dst.unit = ARK_LENGTH_UNIT_PERCENT; break;
+            case DimensionUnit::LPX: dst.unit = ARK_LENGTH_UNIT_LPX; break;
+            default:
+                AssignArkValue(dst.value, 0.0); dst.unit = ARK_LENGTH_UNIT_VP;
+        }
+    }
+
     inline void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
     {
         dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));

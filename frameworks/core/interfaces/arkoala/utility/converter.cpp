@@ -894,9 +894,6 @@ Dimension Convert(const Ark_LengthMetrics& src)
 {
     auto unit = OptConvert<DimensionUnit>(src.unit).value_or(DimensionUnit::VP);
     auto value = Convert<float>(src.value);
-    if (unit == DimensionUnit::PERCENT) {
-        value /= 100.0f; // percent is normalized [0..1]
-    }
     return Dimension(value, unit);
 }
 
