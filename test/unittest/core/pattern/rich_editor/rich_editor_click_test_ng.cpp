@@ -1229,6 +1229,6 @@ HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
     EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
 
     richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_R);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
+    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::NORMAL);
 }
 } // namespace OHOS::Ace::NG
