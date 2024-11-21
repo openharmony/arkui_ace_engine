@@ -1329,8 +1329,10 @@ void DialogPattern::UpdateButtonsProperty()
             UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
             ++btnIndex;
         }
-    } else if (menuNode_.Upgrade()) {
-        for (const auto& rowNode : menuNode_.Upgrade()->GetChildren()) {
+    } else {
+        auto upgradedMenuNode = menuNode_.Upgrade();
+        CHECK_NULL_VOID(upgradedMenuNode);
+        for (const auto& rowNode : upgradedMenuNode->GetChildren()) {
             if (rowNode->GetTag() != V2::ROW_ETS_TAG) {
                 continue;
             }
