@@ -19,24 +19,28 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 
-using ImageBitmapPeerCanvasImageRefPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage>;
-
 struct ImageBitmapPeer {
 public:
     ImageBitmapPeer();
     virtual ~ImageBitmapPeer() = default;
     
     void Close();
-    Ark_Int32 GetHeight();
-    Ark_Int32 GetWidth();
+    double GetHeight();
+    double GetWidth();
 
     void LoadImage(const std::string& src);
     void SetCloseCallback(std::function<void()>&& callback);
 
-    const ImageBitmapPeerCanvasImageRefPtr& GetCanvasImage() const
+    std::shared_ptr<OHOS::Ace::ImageData> GetImageData() const
     {
-        return canvasImage_;
+        return imageData_;
     }
+
+    void SetImageData(const std::shared_ptr<OHOS::Ace::ImageData>& imageData)
+    {
+        imageData_ = imageData;
+    }
+
     const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& GetPixelMap() const
     {
         return pixelMap_;
@@ -50,6 +54,10 @@ private:
     void OnImageLoadFail(const std::string& errorMsg);
 
 protected:
+    void SetHeight(double value) { height = value; }
+    void SetWidth(double value) { width = value; }
+
+private:
     std::string src_;
     double width;
     double height;
@@ -57,11 +65,12 @@ protected:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
 
-    ImageBitmapPeerCanvasImageRefPtr canvasImage_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> canvasImage_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageObject> imageObj_;
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> svgDom_;
     OHOS::Ace::ImageFit imageFit_;
     OHOS::Ace::NG::SizeF imageSize_;
     size_t bindingSize_;
+    std::shared_ptr<OHOS::Ace::ImageData> imageData_;
 };

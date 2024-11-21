@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "core/interfaces/arkoala/implementation/image_bitmap_peer_impl.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::NG::Converter;
@@ -51,14 +50,14 @@ void ImageBitmapPeer::Close()
     svgDom_ = nullptr;
 }
 
-Ark_Int32 ImageBitmapPeer::GetHeight()
+double ImageBitmapPeer::GetHeight()
 {
-    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height));
+    return height;
 }
 
-Ark_Int32 ImageBitmapPeer::GetWidth()
+double ImageBitmapPeer::GetWidth()
 {
-    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
+    return width;
 }
 
 void ImageBitmapPeer::SetCloseCallback(std::function<void()>&& callback)

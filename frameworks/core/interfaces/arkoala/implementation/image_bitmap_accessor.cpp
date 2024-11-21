@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/implementation/image_bitmap_peer_impl.h"
 
@@ -48,12 +49,14 @@ void CloseImpl(ImageBitmapPeer* peer)
 Ark_Int32 GetHeightImpl(ImageBitmapPeer* peer)
 {
     CHECK_NULL_RETURN(peer, 0);
-    return peer->GetHeight();
+    auto height = peer->GetHeight();
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(height));
 }
 Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer)
 {
     CHECK_NULL_RETURN(peer, 0);
-    return peer->GetWidth();
+    double width = peer->GetWidth();
+    return NG::Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(width));
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()

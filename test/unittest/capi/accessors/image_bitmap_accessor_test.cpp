@@ -35,8 +35,8 @@ struct MockImageBitmapPeer : public ImageBitmapPeer {
 public:
     MockImageBitmapPeer() = default;
     ~MockImageBitmapPeer() override = default;
-    void SetHeightForTest(int value) { height = value; }
-    void SetWidthForTest(int value) { width = value; }
+    void SetHeightForTest(int value) { SetHeight(value); }
+    void SetWidthForTest(int value) { SetWidth(value); }
 };
 }
 
