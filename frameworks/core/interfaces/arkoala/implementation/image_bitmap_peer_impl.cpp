@@ -16,18 +16,11 @@
 #include "core/interfaces/arkoala/implementation/image_bitmap_peer_impl.h"
 
 using namespace OHOS::Ace;
-using namespace OHOS::Ace::NG::Converter;
 
 ImageBitmapPeer::ImageBitmapPeer()
     : width(0),
       height(0),
-      loadingCtx_(nullptr),
-      canvasImage_(nullptr),
-      imageObj_(nullptr),
-      pixelMap_(nullptr),
-      svgDom_(nullptr),
-      imageFit_(ImageFit::NONE),
-      bindingSize_(0)
+      loadingCtx_(nullptr)
 {
 }
 
@@ -44,10 +37,6 @@ void ImageBitmapPeer::Close()
     height = 0;
 
     loadingCtx_ = nullptr;
-    canvasImage_ = nullptr;
-    imageObj_ = nullptr;
-    pixelMap_ = nullptr;
-    svgDom_ = nullptr;
 }
 
 double ImageBitmapPeer::GetHeight()
@@ -67,9 +56,7 @@ void ImageBitmapPeer::SetCloseCallback(std::function<void()>&& callback)
 
 void ImageBitmapPeer::LoadImage(const std::string& src)
 {
-    src_ = src;
     auto sourceInfo = ImageSourceInfo(src);
-    sourceInfo_ = sourceInfo;
     LoadImage(sourceInfo);
 }
 
@@ -80,8 +67,6 @@ void ImageBitmapPeer::LoadImage(const ImageSourceInfo& sourceInfo)
         loader->OnImageDataReady();
     };
     auto loadSuccessCallback = [loader = this](const ImageSourceInfo& sourceInfo) {
-        CHECK_NULL_VOID(loader);
-        loader->OnImageLoadSuccess();
     };
     auto loadFailCallback = [loader = this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         CHECK_NULL_VOID(loader);
@@ -97,27 +82,10 @@ void ImageBitmapPeer::OnImageDataReady()
     CHECK_NULL_VOID(loadingCtx_);
     width = loadingCtx_->GetImageSize().Width();
     height = loadingCtx_->GetImageSize().Height();
-    loadingCtx_->MakeCanvasImageIfNeed(loadingCtx_->GetImageSize(), true, ImageFit::NONE);
-}
-
-void ImageBitmapPeer::OnImageLoadSuccess()
-{
-    CHECK_NULL_VOID(loadingCtx_);
-    canvasImage_ = loadingCtx_->MoveCanvasImage();
-    CHECK_NULL_VOID(canvasImage_);
-    imageObj_ = loadingCtx_->MoveImageObject();
-    CHECK_NULL_VOID(imageObj_);
-    pixelMap_ = canvasImage_->GetPixelMap();
-    svgDom_ = imageObj_->GetSVGDom();
-    imageFit_ = loadingCtx_->GetImageFit();
-    imageSize_ = loadingCtx_->GetImageSize();
-    bindingSize_ = pixelMap_ ? static_cast<size_t>(pixelMap_->GetByteCount()) : 0;
 }
 
 void ImageBitmapPeer::OnImageLoadFail(const std::string& errorMsg)
 {
     width = 0;
     height = 0;
-    pixelMap_ = nullptr;
-    svgDom_ = nullptr;
 }

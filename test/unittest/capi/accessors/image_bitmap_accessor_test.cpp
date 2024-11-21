@@ -29,14 +29,16 @@ using namespace testing::ext;
 
 const std::string DEFAULT_STRING_VALUE = "text";
 const int DEFAULT_INT_VALUE = 100;
-
+const Ark_Int32 DEFAULT_HEIGHT_VALUE = 0;
+const Ark_Int32 DEFAULT_WIDTH_VALUE = 0;
 namespace {
 struct MockImageBitmapPeer : public ImageBitmapPeer {
 public:
     MockImageBitmapPeer() = default;
     ~MockImageBitmapPeer() override = default;
-    void SetHeightForTest(int value) { SetHeight(value); }
-    void SetWidthForTest(int value) { SetWidth(value); }
+    using ImageBitmapPeer::SetHeight;
+    using ImageBitmapPeer::SetWidth;
+    using ImageBitmapPeer::SetCloseCallback;
 };
 }
 
@@ -114,7 +116,7 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
     auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
     ASSERT_NE(peer_, nullptr);
-    peer_->SetHeightForTest(DEFAULT_INT_VALUE);
+    peer_->SetHeight(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
@@ -132,7 +134,7 @@ HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
     auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
     ASSERT_NE(peer_, nullptr);
-    peer_->SetWidthForTest(DEFAULT_INT_VALUE);
+    peer_->SetWidth(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
     auto custValue = Converter::ArkValue<Ark_Int32>(DEFAULT_INT_VALUE);
 
@@ -161,7 +163,8 @@ HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getHeight, nullptr);
 
-    accessor_->getHeight(nullptr);
+    auto result = accessor_->getHeight(nullptr);
+    EXPECT_EQ(result, DEFAULT_HEIGHT_VALUE);
 }
 
 /**
@@ -173,6 +176,7 @@ HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWidth, nullptr);
 
-    accessor_->getWidth(nullptr);
+    auto result = accessor_->getWidth(nullptr);
+    EXPECT_EQ(result, DEFAULT_WIDTH_VALUE);
 }
 } // namespace OHOS::Ace::NG

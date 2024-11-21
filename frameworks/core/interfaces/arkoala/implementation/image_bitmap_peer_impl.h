@@ -16,8 +16,8 @@
 
 #include "base/utils/utils.h"
 #include "base/memory/referenced.h"
-#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components/common/properties/paint_state.h"
 
 struct ImageBitmapPeer {
 public:
@@ -29,7 +29,6 @@ public:
     double GetWidth();
 
     void LoadImage(const std::string& src);
-    void SetCloseCallback(std::function<void()>&& callback);
 
     std::shared_ptr<OHOS::Ace::ImageData> GetImageData() const
     {
@@ -41,36 +40,21 @@ public:
         imageData_ = imageData;
     }
 
-    const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& GetPixelMap() const
-    {
-        return pixelMap_;
-    }
-
 private:
     void LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo);
 
     void OnImageDataReady();
-    void OnImageLoadSuccess();
     void OnImageLoadFail(const std::string& errorMsg);
 
 protected:
     void SetHeight(double value) { height = value; }
     void SetWidth(double value) { width = value; }
+    void SetCloseCallback(std::function<void()>&& callback);
 
 private:
-    std::string src_;
     double width;
     double height;
-    OHOS::Ace::ImageSourceInfo sourceInfo_;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
-
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> canvasImage_;
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageObject> imageObj_;
-    OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap_;
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> svgDom_;
-    OHOS::Ace::ImageFit imageFit_;
-    OHOS::Ace::NG::SizeF imageSize_;
-    size_t bindingSize_;
     std::shared_ptr<OHOS::Ace::ImageData> imageData_;
 };
