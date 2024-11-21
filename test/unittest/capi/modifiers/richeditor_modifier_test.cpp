@@ -20,6 +20,7 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 
 namespace OHOS::Ace::NG {
 static constexpr int TEST_OFFSET = 5;
@@ -31,6 +32,7 @@ static const auto TEST_VALUE_2 = "test value 2";
 static constexpr int TEST_INDEX_2 = 2;
 static constexpr int TEST_FONT_SIZE = 30;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
+static const std::string COLOR_TRANSPARENT = "#00000000";
 
 static const auto ATTRIBUTE_COPY_OPTIONS_NAME = "CopyOption";
 static const auto ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE = "CopyOptions.None";
@@ -50,6 +52,24 @@ static const auto ATTRIBUTE_PLACEHOLDER_FONT_SIZE = "30.00px";
 static const auto ATTRIBUTE_PLACEHOLDER_WEIGHT_NAME = "weight";
 static const auto ATTRIBUTE_PLACEHOLDER_WEIGHT_NAME_VALUE = "FontWeight.Normal";
 static const auto ATTRIBUTE_PLACEHOLDER_STYLE_VALUE = "FontStyle.Normal";
+static const auto ATTRIBUTE_ENTER_KEY_TYPE_NAME = "enterKeyType";
+static const auto ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE = "EnterKeyType.Begin";
+static const auto ATTRIBUTE_ENTER_KEY_TYPE_NEWLINE_VALUE = "EnterKeyType.NEW_LINE";
+static const auto ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME = "enableKeyboardOnFocus";
+static const auto ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE = "true";
+static const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
+static const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
+static const auto ATTRIBUTE_BAR_STATE_NAME = "barState";
+static const auto ATTRIBUTE_BAR_STATE_DEFAULT = "BarState.Auto";
+static const auto ATTRIBUTE_BAR_STATE_VALUE = "BarState.On";
+
+typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
+static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" }};
 
 namespace Converter {
 void AssignArkValue(Ark_RichEditorTextSpanOptions& dst, const OHOS::Ace::TextSpanOptions& src)
@@ -334,5 +354,127 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(fontValue, ATTRIBUTE_PLACEHOLDER_STYLE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_STYLE_VALUE);
+}
+
+/**
+ * @tc.name: setCaretColorTest
+ * @tc.desc: Check the functionality of setCaretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setCaretColorTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setCaretColor, nullptr);
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        modifier_->setCaretColor(node_, &value);
+        auto checkVal = GetAttrValue<std::string>(node_, "caretColor");
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setSelectedBackgroundColorTest
+ * @tc.desc: Check the functionality of setSelectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+        modifier_->setSelectedBackgroundColor(node_, &value);
+        auto checkVal = GetAttrValue<std::string>(node_, "selectedBackgroundColor");
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setEnterKeyTypeTest
+ * @tc.desc: Check the functionality of setEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnterKeyType, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE);
+
+    modifier_->setEnterKeyType(node_, Ark_EnterKeyType::ARK_ENTER_KEY_TYPE_NEW_LINE);
+
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_NEWLINE_VALUE);
+}
+
+/**
+ * @tc.name: setEnableKeyboardOnFocusTest
+ * @tc.desc: Check the functionality of setEnableKeyboardOnFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE);
+
+    modifier_->setEnableKeyboardOnFocus(node_, false);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
+    EXPECT_EQ(resultStr, "false");
+
+    modifier_->setEnableKeyboardOnFocus(node_, true);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
+    EXPECT_EQ(resultStr, "true");
+}
+
+/**
+ * @tc.name: setEnableHapticFeedbackTest
+ * @tc.desc: Check the functionality of setEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+
+    modifier_->setEnableHapticFeedback(node_, false);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, "false");
+
+    modifier_->setEnableHapticFeedback(node_, true);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, "true");
+}
+
+/**
+ * @tc.name: setBarStateTest
+ * @tc.desc: Check the functionality of setBarState
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setBarStateTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBarState, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetLayoutJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT);
+
+    modifier_->setBarState(node_, Ark_BarState::ARK_BAR_STATE_ON);
+
+    jsonValue = GetLayoutJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_VALUE);
 }
 } // namespace OHOS::Ace::NG

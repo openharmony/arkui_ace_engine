@@ -1878,6 +1878,72 @@
                 }
             ],
         },
+	{
+            "name": "RichEditor",
+            "includes": ["core/components_ng/pattern/rich_editor/rich_editor_theme.h"],
+            "themes": ["RichEditorTheme"],
+            "disable": [
+                "setRichEditorOptions0TestDefaultValues",
+                "setRichEditorOptions0TestValidValues",
+                "setRichEditorOptions1TestDefaultValues",
+                "setRichEditorOptions1TestValidValues",
+                "setCopyOptionsTestDefaultValues",
+                "setCopyOptionsTestCopyOptionsValidValues",
+                "setCopyOptionsTestCopyOptionsInvalidValues",
+                "setEnablePreviewTextTestDefaultValues",
+                "setEnablePreviewTextTestEnablePreviewTextValidValues",
+                "setDataDetectorConfigTestDefaultValues",
+                "setDataDetectorConfigTestValidValues",
+                "setPlaceholderTestDefaultValues",
+                "setPlaceholderTestPlaceholderValueValidValues",
+                "setPlaceholderTestPlaceholderValueInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontSizeValidValues",
+                "setPlaceholderTestPlaceholderStyleFontWeightInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontFamilyValidValues",
+                "setPlaceholderTestPlaceholderStyleFontSizeInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontWeightValidValues",
+                "setPlaceholderTestPlaceholderStyleFontFamilyInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontStyleInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontColorValidValues",
+                "setPlaceholderTestPlaceholderStyleFontColorInvalidValues",
+                "setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues",
+                "setPlaceholderTestPlaceholderStyleFontStyleValidValues",
+                "setBarStateTestDefaultValues",
+                "setBarStateTestBarStateValidValues",
+                "setBarStateTestBarStateInvalidValues",
+            ],
+            "attributes": [
+                {
+                    "name": "enterKeyType",
+                    "default": "EnterKeyType.Begin"
+                },
+                {
+                    "name": "enableKeyboardOnFocus",
+                    "default": "true"
+                },
+                {
+                    "name": "enableHapticFeedback",
+                    "default": "true"
+                },
+                {
+                    "name": "enableDataDetector",
+                    "default": "false"
+                },
+                {
+                    "name": "textPreviewSupported",
+                    "default": "true"
+                },
+                {
+                    "name": "caretColor",
+                    "default": "#FF000000"
+                },
+                {
+                    "name": "selectedBackgroundColor",
+                    "default": "#FF000000"
+                }
+
+            ],
+        },
         {
             "name": "QRCode",
             "includes": [

@@ -72,7 +72,12 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpan
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src)
 {
     CHECK_NULL_VOID(src.empty());
-    LOGW("RichEditor modifier :: fontFeature conversion is not implemented yet.");
+    JsonValue jsonValue;
+    for (auto it = src.begin(); it != src.end(); it++) {
+        jsonValue.Put((it->first.c_str()), it->second);
+    }
+    static std::string list = jsonValue.ToString();
+    dst = Converter::ArkValue<Ark_String>(list);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src)
@@ -399,8 +404,8 @@ void CaretColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichEditorModelNG::SetCaretColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    RichEditorModelNG::SetCaretColor(frameNode, convValue);
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Ark_ResourceColor* value)
@@ -408,8 +413,8 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichEditorModelNG::SetSelectedBackgroundColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    RichEditorModelNG::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void OnEditingChangeImpl(Ark_NativePointer node,
                          const Callback_Boolean_Void* value)
@@ -428,9 +433,8 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetEnterKeyType(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextInputAction>(value);
+    RichEditorModelNG::SetEnterKeyType(frameNode, convValue);
 }
 void OnSubmitImpl(Ark_NativePointer node,
                   const SubmitCallback* value)
@@ -509,6 +513,7 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
+    LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
                                Ark_Boolean value)
@@ -516,7 +521,7 @@ void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //RichEditorModelNG::SetEnableKeyboardOnFocus(frameNode, convValue);
+    RichEditorModelNG::SetRequestKeyboardOnFocus(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -524,16 +529,15 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //RichEditorModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    RichEditorModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 void BarStateImpl(Ark_NativePointer node,
                   Ark_BarState value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetBarState(frameNode, convValue);
+    auto convValue = Converter::OptConvert<DisplayMode>(value);
+    RichEditorModelNG::SetBarState(frameNode, convValue);
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,

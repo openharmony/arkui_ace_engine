@@ -16,7 +16,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperInterfaceModifier {
@@ -41,8 +43,8 @@ void OnFinishImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //StepperModelNG::SetOnFinish(frameNode, convValue);
+    auto onFinish = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
+    StepperModelNG::SetOnFinish(frameNode, std::move(onFinish));
 }
 void OnSkipImpl(Ark_NativePointer node,
                 const Callback_Void* value)
@@ -50,8 +52,8 @@ void OnSkipImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //StepperModelNG::SetOnSkip(frameNode, convValue);
+    auto onSkip = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
+    StepperModelNG::SetOnSkip(frameNode, std::move(onSkip));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Number_Number_Void* value)
@@ -59,8 +61,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //StepperModelNG::SetOnChange(frameNode, convValue);
+    auto onChange = [arkCallback = CallbackHelper(*value)](int32_t prevIndex, int32_t index) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(prevIndex), Converter::ArkValue<Ark_Number>(index));
+    };
+    StepperModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnNextImpl(Ark_NativePointer node,
                 const Callback_Number_Number_Void* value)
@@ -68,8 +72,10 @@ void OnNextImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //StepperModelNG::SetOnNext(frameNode, convValue);
+    auto onNext = [arkCallback = CallbackHelper(*value)](int32_t index, int32_t pendingIndex) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
+    };
+    StepperModelNG::SetOnNext(frameNode, std::move(onNext));
 }
 void OnPreviousImpl(Ark_NativePointer node,
                     const Callback_Number_Number_Void* value)
@@ -77,8 +83,10 @@ void OnPreviousImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //StepperModelNG::SetOnPrevious(frameNode, convValue);
+    auto onPrevious = [arkCallback = CallbackHelper(*value)](int32_t index, int32_t pendingIndex) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index), Converter::ArkValue<Ark_Number>(pendingIndex));
+    };
+    StepperModelNG::SetOnPrevious(frameNode, std::move(onPrevious));
 }
 } // StepperAttributeModifier
 const GENERATED_ArkUIStepperModifier* GetStepperModifier()

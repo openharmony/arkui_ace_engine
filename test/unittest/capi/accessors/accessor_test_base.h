@@ -87,5 +87,19 @@ public:
     }
 };
 
+template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
+class AccessorTestCtorBase : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
+public:
+    virtual void SetUp(void)
+    {
+        ASSERT_NE(this->accessor_->ctor, nullptr);
+        this->peer_ = CreatePeerInstance();
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
+    }
+
+    virtual PeerType* CreatePeerInstance() = 0;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H

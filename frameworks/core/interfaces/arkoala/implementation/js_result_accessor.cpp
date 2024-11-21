@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/js_result_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,21 +22,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsResultAccessor {
 JsResultPeer* CtorImpl()
 {
-    return nullptr;
+    return new JsResultPeer();
+}
+static void DestroyPeer(JsResultPeer *peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->result = nullptr;
+    delete peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
 }
 void HandleCancelImpl(JsResultPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->result);
+    peer->result->Cancel();
 }
 void HandleConfirmImpl(JsResultPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->result);
+    peer->result->Confirm();
 }
 void HandlePromptConfirmImpl(JsResultPeer* peer,
                              const Ark_String* result)
 {
+    CHECK_NULL_VOID(peer && peer->result);
+    CHECK_NULL_VOID(result);
+    peer->result->Confirm(
+        Converter::Convert<std::string>(*result)
+    );
 }
 } // JsResultAccessor
 const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()

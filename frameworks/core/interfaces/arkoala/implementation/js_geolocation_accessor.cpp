@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/implementation/js_geolocation_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,17 +22,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsGeolocationAccessor {
 JsGeolocationPeer* CtorImpl()
 {
-    return nullptr;
+    return new JsGeolocationPeer();
+}
+static void DestroyPeer(JsGeolocationPeer *peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->webGeolocation = nullptr;
+    delete peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
 }
 void InvokeImpl(JsGeolocationPeer* peer,
                 const Ark_String* origin,
                 Ark_Boolean allow,
                 Ark_Boolean retain)
 {
+    CHECK_NULL_VOID(peer && peer->webGeolocation);
+    CHECK_NULL_VOID(origin);
+    peer->webGeolocation->Invoke(
+        Converter::Convert<std::string>(*origin),
+        Converter::Convert<bool>(allow),
+        Converter::Convert<bool>(retain)
+    );
 }
 } // JsGeolocationAccessor
 const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
