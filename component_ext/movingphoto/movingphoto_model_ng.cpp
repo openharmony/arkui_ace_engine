@@ -56,7 +56,7 @@ void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
 
 void MovingPhotoModelNG::SetImageSrc(const std::string& value)
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto SetImageSrc.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhoto SetImageSrc.%{public}s", value.c_str());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());

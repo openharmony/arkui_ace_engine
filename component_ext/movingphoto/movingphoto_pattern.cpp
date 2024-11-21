@@ -518,7 +518,11 @@ void MovingPhotoPattern::UpdatePlayMode()
         if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
             SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
         }
-        MediaResetToPlay();
+        if (autoAndRepeatLevel_ == PlaybackMode::AUTO && currentPlayStatus_ == PlaybackStatus::PREPARED) {
+            ResetMediaPlayer();
+        } else {
+            MediaResetToPlay();
+        }
         isChangePlayMode_ = false;
     }
 }
@@ -880,9 +884,7 @@ void MovingPhotoPattern::OnMediaPlayerPrepared()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     UpdateMediaPlayerSpeed();
     UpdateMediaPlayerMuted();
-    if (!isRefreshMovingPhoto_) {
-        VisiblePlayback();
-    }
+    VisiblePlayback();
 }
 
 void MovingPhotoPattern::OnMediaPlayerStoped()
@@ -1049,14 +1051,6 @@ void MovingPhotoPattern::RefreshMovingPhoto()
 {
     if (uri_ == "") {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
-        return;
-    }
-    if (autoAndRepeatLevel_ != PlaybackMode::NONE) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto autoAndRepeatLevel_ is not none.");
-        return;
-    }
-    if (currentPlayStatus_ == PlaybackStatus::STARTED) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto currentPlayStatus_ is STARTED.");
         return;
     }
     auto host = GetHost();
