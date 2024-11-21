@@ -2265,6 +2265,9 @@ void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     UpdateImagePreviewParam();
+    if (selectOverlayProxy_) {
+        selectOverlayProxy_->UpdateAncestorViewPort(GetViewPort());
+    }
     if (!config.contentSizeChange || isInWindowDrag_) {
         if (isLayoutModeChanged_) {
             isLayoutModeChanged_ = false;

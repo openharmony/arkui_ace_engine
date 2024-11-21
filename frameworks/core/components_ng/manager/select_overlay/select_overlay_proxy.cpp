@@ -68,6 +68,13 @@ void SelectOverlayProxy::UpdateSelectMenuInfo(std::function<void(SelectMenuInfo&
     pattern->UpdateSelectMenuInfo(updateAction);
 }
 
+void SelectOverlayProxy::UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAncestorViewPort(ancestorViewPort);
+}
+
 void SelectOverlayProxy::UpdateShowArea(const RectF& area) const
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
