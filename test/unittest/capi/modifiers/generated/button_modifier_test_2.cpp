@@ -56,8 +56,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontSizeInvalidValues, T
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -96,8 +96,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontWeightValidValues, T
     WriteTo(initValueLabelStyle.font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueLabelStyle](const std::string& input,
-                          const Opt_Union_FontWeight_Number_String& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_FontWeight_Number_String& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         WriteTo(inputValueLabelStyle.font).weight = value;
@@ -106,18 +106,18 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontWeightValidValues, T
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
     }
 }
 
@@ -161,8 +161,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontWeightInvalidValues,
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
@@ -209,8 +209,8 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontFamilyValid
     WriteTo(initValueLabelStyle.font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_Union_String_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_String_Resource& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         WriteTo(inputValueLabelStyle.font).family = value;
@@ -219,15 +219,15 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontFamilyValid
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
 }
 
@@ -270,8 +270,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontFamilyInvalidValues,
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
@@ -316,7 +316,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleValidValues, Te
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
-                          const std::string& input, const Opt_FontStyle& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         WriteTo(inputValueLabelStyle.font).style = value;
@@ -325,12 +325,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleValidValues, Te
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, ArkValue<Opt_FontStyle>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -373,8 +373,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleInvalidValues, 
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {

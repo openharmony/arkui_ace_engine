@@ -60,6 +60,7 @@ cp ../../../../.clang-format ${OUT_DIR}
 pushd ${OUT_DIR}/unittest/capi/modifiers/generated/ >/dev/null
 ${OHOS_DIR}/prebuilts/build-tools/linux-x86/bin/gn format modifiers.gni
 ${OHOS_DIR}/prebuilts/clang/ohos/linux-x86_64/llvm/bin/clang-format -i *.cpp *.h
+for f in ./*.cpp; do sed -i -E 'N;s/(.*)\n(\s*)<< (.*)/\1 <<\n\2\3/;t;P;D;' $f; done
 popd >/dev/null
 rm ${OUT_DIR}/.clang-format
 # Copy only changed files

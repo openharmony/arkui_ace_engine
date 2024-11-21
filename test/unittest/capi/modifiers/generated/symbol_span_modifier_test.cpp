@@ -107,26 +107,26 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeValidValues, TestSize.Le
     initValueFontSize = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueFontSize](const std::string& input,
-                          const Ark_Union_Number_String_Resource& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueFontSize](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_String_Resource& value) {
         Ark_Union_Number_String_Resource inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
     }
 }
 
@@ -152,8 +152,8 @@ HWTEST_F(SymbolSpanModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
@@ -220,26 +220,26 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightValidValues, TestSiz
     initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
-    auto checkValue = [this, &initValueFontWeight](const std::string& input,
-                          const Ark_Union_Number_FontWeight_String& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_FontWeight_String& value) {
         Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
 
@@ -265,8 +265,8 @@ HWTEST_F(SymbolSpanModifierTest, setFontWeightTestFontWeightInvalidValues, TestS
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
@@ -308,20 +308,20 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyValidValues,
     // Initial setup
     initValueEffectStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolEffectStrategyValidValues[0]);
 
-    auto checkValue = [this, &initValueEffectStrategy](const std::string& input, const Ark_SymbolEffectStrategy& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueEffectStrategy](const std::string& input, const std::string& expectedStr,
+                          const Ark_SymbolEffectStrategy& value) {
         Ark_SymbolEffectStrategy inputValueEffectStrategy = initValueEffectStrategy;
 
         inputValueEffectStrategy = value;
         modifier_->setEffectStrategy(node_, inputValueEffectStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEffectStrategy, attribute: effectStrategy";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEffectStrategy, attribute: effectStrategy";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumSymbolEffectStrategyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -346,8 +346,8 @@ HWTEST_F(SymbolSpanModifierTest, setEffectStrategyTestEffectStrategyInvalidValue
         modifier_->setEffectStrategy(node_, inputValueEffectStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setEffectStrategy, attribute: effectStrategy";
+        EXPECT_EQ(resultStr, ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEffectStrategy, attribute: effectStrategy";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumSymbolEffectStrategyInvalidValues) {
@@ -366,8 +366,8 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestDefaultValues, TestSize
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE)
-        << "Default value for attribute 'renderingStrategy'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE) <<
+        "Default value for attribute 'renderingStrategy'";
 }
 
 /*
@@ -382,20 +382,20 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyValidV
     // Initial setup
     initValueRenderingStrategy = std::get<1>(Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues[0]);
 
-    auto checkValue = [this, &initValueRenderingStrategy](const std::string& input,
-                          const Ark_SymbolRenderingStrategy& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueRenderingStrategy](const std::string& input, const std::string& expectedStr,
+                          const Ark_SymbolRenderingStrategy& value) {
         Ark_SymbolRenderingStrategy inputValueRenderingStrategy = initValueRenderingStrategy;
 
         inputValueRenderingStrategy = value;
         modifier_->setRenderingStrategy(node_, inputValueRenderingStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRenderingStrategy, attribute: renderingStrategy";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRenderingStrategy, attribute: renderingStrategy";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumSymbolRenderingStrategyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -420,8 +420,8 @@ HWTEST_F(SymbolSpanModifierTest, setRenderingStrategyTestRenderingStrategyInvali
         modifier_->setRenderingStrategy(node_, inputValueRenderingStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRenderingStrategy, attribute: renderingStrategy";
+        EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setRenderingStrategy, attribute: renderingStrategy";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumSymbolRenderingStrategyInvalidValues) {

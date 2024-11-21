@@ -137,19 +137,19 @@ HWTEST_F(WaterFlowModifierTest, setColumnsTemplateTestColumnsTemplateValidValues
     initValueColumnsTemplate = std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]);
 
     auto checkValue = [this, &initValueColumnsTemplate](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueColumnsTemplate = initValueColumnsTemplate;
 
         inputValueColumnsTemplate = value;
         modifier_->setColumnsTemplate(node_, &inputValueColumnsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setColumnsTemplate, attribute: columnsTemplate";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setColumnsTemplate, attribute: columnsTemplate";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -166,20 +166,20 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setItemConstraintSizeTestDefaultValues,
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE)
-        << "Default value for attribute 'itemConstraintSize.minWidth'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE) <<
+        "Default value for attribute 'itemConstraintSize.minWidth'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE)
-        << "Default value for attribute 'itemConstraintSize.maxWidth'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE) <<
+        "Default value for attribute 'itemConstraintSize.maxWidth'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'itemConstraintSize.minHeight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'itemConstraintSize.minHeight'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'itemConstraintSize.maxHeight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'itemConstraintSize.maxHeight'";
 }
 
 /*
@@ -202,7 +202,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
 
         inputValueItemConstraintSize.minWidth = value;
@@ -212,12 +212,12 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -251,8 +251,8 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -282,7 +282,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
 
         inputValueItemConstraintSize.maxWidth = value;
@@ -292,12 +292,12 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -331,8 +331,8 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -362,7 +362,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
 
         inputValueItemConstraintSize.minHeight = value;
@@ -372,12 +372,12 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                          << ", method: setItemConstraintSize, attribute: itemConstraintSize.minHeight";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setItemConstraintSize, attribute: itemConstraintSize.minHeight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -411,8 +411,8 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input
             << ", method: setItemConstraintSize, attribute: itemConstraintSize.minHeight";
     };
 
@@ -443,7 +443,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
 
         inputValueItemConstraintSize.maxHeight = value;
@@ -453,12 +453,12 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                          << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxHeight";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setItemConstraintSize, attribute: itemConstraintSize.maxHeight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -492,8 +492,8 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input
             << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxHeight";
     };
 
@@ -531,19 +531,19 @@ HWTEST_F(WaterFlowModifierTest, setRowsTemplateTestRowsTemplateValidValues, Test
     initValueRowsTemplate = std::get<1>(Fixtures::testFixtureStringNoEmptyValidValues[0]);
 
     auto checkValue = [this, &initValueRowsTemplate](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueRowsTemplate = initValueRowsTemplate;
 
         inputValueRowsTemplate = value;
         modifier_->setRowsTemplate(node_, &inputValueRowsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setRowsTemplate, attribute: rowsTemplate";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setRowsTemplate, attribute: rowsTemplate";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -574,19 +574,19 @@ HWTEST_F(WaterFlowModifierTest, setColumnsGapTestColumnsGapValidValues, TestSize
     initValueColumnsGap = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
 
     auto checkValue = [this, &initValueColumnsGap](
-                          const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
         Ark_Length inputValueColumnsGap = initValueColumnsGap;
 
         inputValueColumnsGap = value;
         modifier_->setColumnsGap(node_, &inputValueColumnsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_GAP_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -610,8 +610,8 @@ HWTEST_F(WaterFlowModifierTest, setColumnsGapTestColumnsGapInvalidValues, TestSi
         modifier_->setColumnsGap(node_, &inputValueColumnsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_GAP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -646,7 +646,7 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapValidValues, TestSize.Level
     initValueRowsGap = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
 
     auto checkValue = [this, &initValueRowsGap](
-                          const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
         Ark_Length inputValueRowsGap = initValueRowsGap;
 
         inputValueRowsGap = value;
@@ -657,7 +657,7 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapValidValues, TestSize.Level
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -681,8 +681,8 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapInvalidValues, TestSize.Lev
         modifier_->setRowsGap(node_, &inputValueRowsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_GAP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRowsGap, attribute: rowsGap";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setRowsGap, attribute: rowsGap";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -717,19 +717,19 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestLayoutDirectionVa
     initValueLayoutDirection = std::get<1>(Fixtures::testFixtureEnumFlexDirectionValidValues[0]);
 
     auto checkValue = [this, &initValueLayoutDirection](
-                          const std::string& input, const Ark_FlexDirection& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_FlexDirection& value) {
         Ark_FlexDirection inputValueLayoutDirection = initValueLayoutDirection;
 
         inputValueLayoutDirection = value;
         modifier_->setLayoutDirection(node_, inputValueLayoutDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFlexDirectionValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -753,8 +753,8 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestLayoutDirectionIn
         modifier_->setLayoutDirection(node_, inputValueLayoutDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFlexDirectionInvalidValues) {
@@ -775,12 +775,12 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestDefaultValues, TestSize.Level
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll.scrollForward'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.scrollForward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll.scrollBackward'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.scrollBackward'";
 }
 
 /*
@@ -797,7 +797,7 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollForwardVali
     initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Ark_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
         Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
         inputValueNestedScroll.scrollForward = value;
@@ -805,12 +805,12 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollForwardVali
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -836,8 +836,8 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollForwardInva
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -859,7 +859,7 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollBackwardVal
     initValueNestedScroll.scrollBackward = std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Ark_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
         Ark_NestedScrollOptions inputValueNestedScroll = initValueNestedScroll;
 
         inputValueNestedScroll.scrollBackward = value;
@@ -867,12 +867,12 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollBackwardVal
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -898,8 +898,8 @@ HWTEST_F(WaterFlowModifierTest, setNestedScrollTestNestedScrollScrollBackwardInv
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -918,8 +918,8 @@ HWTEST_F(WaterFlowModifierTest, setEnableScrollInteractionTestDefaultValues, Tes
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE)
-        << "Default value for attribute 'enableScrollInteraction'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableScrollInteraction'";
 }
 
 /*
@@ -935,19 +935,19 @@ HWTEST_F(WaterFlowModifierTest, setEnableScrollInteractionTestEnableScrollIntera
     initValueEnableScrollInteraction = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableScrollInteraction](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableScrollInteraction = initValueEnableScrollInteraction;
 
         inputValueEnableScrollInteraction = value;
         modifier_->setEnableScrollInteraction(node_, inputValueEnableScrollInteraction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                          << ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -978,23 +978,23 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setFrictionTestFrictionValidValues, Tes
     initValueFriction = ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFrictionResourceValidValues[0]));
 
-    auto checkValue = [this, &initValueFriction](const std::string& input, const Ark_Union_Number_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueFriction](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueFriction = initValueFriction;
 
         inputValueFriction = value;
         modifier_->setFriction(node_, &inputValueFriction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFriction, attribute: friction";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFriction, attribute: friction";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFrictionResourceValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
     }
 }
 
@@ -1019,8 +1019,8 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setFrictionTestFrictionInvalidValues, T
         modifier_->setFriction(node_, &inputValueFriction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFriction, attribute: friction";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFriction, attribute: friction";
     };
 
     // Check invalid union
@@ -1054,19 +1054,19 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountValidValues, TestSi
     initValueCachedCount = std::get<1>(Fixtures::testFixtureNumberNonNegIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueCachedCount](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueCachedCount = initValueCachedCount;
 
         inputValueCachedCount = value;
         modifier_->setCachedCount(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1090,8 +1090,8 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountInvalidValues, Test
         modifier_->setCachedCount(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {

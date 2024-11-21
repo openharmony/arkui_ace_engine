@@ -39,6 +39,19 @@ std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvali
     { "INT_MAX", static_cast<Ark_BarState>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_BreakpointsReference, std::string>>
+    testFixtureEnumBreakpointsReferenceValidValues = {
+        { "ARK_BREAKPOINTS_REFERENCE_WINDOW_SIZE", ARK_BREAKPOINTS_REFERENCE_WINDOW_SIZE,
+            "BreakpointsReference.WindowSize" },
+        { "ARK_BREAKPOINTS_REFERENCE_COMPONENT_SIZE", ARK_BREAKPOINTS_REFERENCE_COMPONENT_SIZE,
+            "BreakpointsReference.ComponentSize" },
+    };
+
+std::vector<std::tuple<std::string, Ark_BreakpointsReference>> testFixtureEnumBreakpointsReferenceInvalidValues = {
+    { "-1", static_cast<Ark_BreakpointsReference>(-1) },
+    { "INT_MAX", static_cast<Ark_BreakpointsReference>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_ButtonRole, std::string>> testFixtureEnumButtonRoleValidValues = {
     { "ARK_BUTTON_ROLE_NORMAL", ARK_BUTTON_ROLE_NORMAL, "ButtonRole.NORMAL" },
     { "ARK_BUTTON_ROLE_ERROR", ARK_BUTTON_ROLE_ERROR, "ButtonRole.ERROR" },
@@ -238,6 +251,16 @@ std::vector<std::tuple<std::string, Ark_GradientDirection>> testFixtureEnumGradi
     { "INT_MAX", static_cast<Ark_GradientDirection>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_GridRowDirection, std::string>> testFixtureEnumGridRowDirectionValidValues = {
+    { "ARK_GRID_ROW_DIRECTION_ROW", ARK_GRID_ROW_DIRECTION_ROW, "GridRowDirection.Row" },
+    { "ARK_GRID_ROW_DIRECTION_ROW_REVERSE", ARK_GRID_ROW_DIRECTION_ROW_REVERSE, "GridRowDirection.RowReverse" },
+};
+
+std::vector<std::tuple<std::string, Ark_GridRowDirection>> testFixtureEnumGridRowDirectionInvalidValues = {
+    { "-1", static_cast<Ark_GridRowDirection>(-1) },
+    { "INT_MAX", static_cast<Ark_GridRowDirection>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_IlluminatedType, std::string>> testFixtureEnumIlluminatedTypeValidValues = {
     { "ARK_ILLUMINATED_TYPE_NONE", ARK_ILLUMINATED_TYPE_NONE, "IlluminatedType.NONE" },
     { "ARK_ILLUMINATED_TYPE_BORDER", ARK_ILLUMINATED_TYPE_BORDER, "IlluminatedType.BORDER" },
@@ -337,6 +360,20 @@ std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnum
 std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues = {
     { "-1", static_cast<Ark_InputType>(-1) },
     { "INT_MAX", static_cast<Ark_InputType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues = {
+    { "ARK_ITEM_ALIGN_AUTO", ARK_ITEM_ALIGN_AUTO, "ItemAlign.Auto" },
+    { "ARK_ITEM_ALIGN_START", ARK_ITEM_ALIGN_START, "ItemAlign.Start" },
+    { "ARK_ITEM_ALIGN_CENTER", ARK_ITEM_ALIGN_CENTER, "ItemAlign.Center" },
+    { "ARK_ITEM_ALIGN_END", ARK_ITEM_ALIGN_END, "ItemAlign.End" },
+    { "ARK_ITEM_ALIGN_BASELINE", ARK_ITEM_ALIGN_BASELINE, "ItemAlign.Baseline" },
+    { "ARK_ITEM_ALIGN_STRETCH", ARK_ITEM_ALIGN_STRETCH, "ItemAlign.Stretch" },
+};
+
+std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues = {
+    { "-1", static_cast<Ark_ItemAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_ItemAlign>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>> testFixtureEnumLineBreakStrategyValidValues = {

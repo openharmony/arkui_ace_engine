@@ -75,8 +75,8 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
     initValueMin = ArkUnion<Opt_Union_Number_String, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueMin](const std::string& input, const Opt_Union_Number_String& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueMin](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_String& value) {
         Opt_Union_Number_String inputValueMin = initValueMin;
 
         // Re-create node for 'options' attribute
@@ -90,10 +90,10 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
     }
 }
 
@@ -120,8 +120,8 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinInvalidValues, TestSize.Level1
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setBlankOptions, attribute: min";
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBlankOptions, attribute: min";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
@@ -163,7 +163,7 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
     initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueColor = initValueColor;
 
         inputValueColor = value;
@@ -174,16 +174,16 @@ HWTEST_F(BlankModifierTest, setColorTestColorValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -207,8 +207,8 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {

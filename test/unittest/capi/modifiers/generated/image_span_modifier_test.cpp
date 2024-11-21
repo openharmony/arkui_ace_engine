@@ -79,8 +79,8 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues
     initValueValue = ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(
         ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
 
-    auto checkValue = [this, &initValueValue](const std::string& input, const Ark_Union_ResourceStr_PixelMap& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueValue](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_ResourceStr_PixelMap& value) {
         Ark_Union_ResourceStr_PixelMap inputValueValue = initValueValue;
 
         // Re-create node for 'options' attribute
@@ -90,21 +90,18 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input,
-            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input,
-            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_CustomObject";
 }
 
 /*
@@ -130,13 +127,12 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueInvalidValu
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
+        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
     };
 
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_Empty>(nullptr));
-    ADD_FAILURE() << "No fixture is defined for type Ark_CustomObject";
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_Empty>(nullptr));
 }
@@ -167,20 +163,20 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignValidValues, Te
     // Initial setup
     initValueVerticalAlign = std::get<1>(Fixtures::testFixtureImageSpanVerticalAlignValidValues[0]);
 
-    auto checkValue = [this, &initValueVerticalAlign](const std::string& input, const Ark_ImageSpanAlignment& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueVerticalAlign](const std::string& input, const std::string& expectedStr,
+                          const Ark_ImageSpanAlignment& value) {
         Ark_ImageSpanAlignment inputValueVerticalAlign = initValueVerticalAlign;
 
         inputValueVerticalAlign = value;
         modifier_->setVerticalAlign(node_, inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureImageSpanVerticalAlignValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -204,8 +200,8 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, 
         modifier_->setVerticalAlign(node_, inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
+        EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureImageSpanVerticalAlignInvalidValues) {
@@ -264,19 +260,19 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitValidValues, TestSize.L
     initValueObjectFit = std::get<1>(Fixtures::testFixtureEnumImageFitValidValues[0]);
 
     auto checkValue = [this, &initValueObjectFit](
-                          const std::string& input, const Ark_ImageFit& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ImageFit& value) {
         Ark_ImageFit inputValueObjectFit = initValueObjectFit;
 
         inputValueObjectFit = value;
         modifier_->setObjectFit(node_, inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumImageFitValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -300,8 +296,8 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize
         modifier_->setObjectFit(node_, inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
+        EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumImageFitInvalidValues) {

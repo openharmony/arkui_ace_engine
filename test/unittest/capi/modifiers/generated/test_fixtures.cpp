@@ -66,12 +66,12 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { FRICTION_RESOURCE_5_ID, FRICTION_RESOURCE_5_STR, 100.0f },
     { FRICTION_RESOURCE_6_ID, FRICTION_RESOURCE_6_STR, -100.0f },
     { FRICTION_RESOURCE_7_ID, FRICTION_RESOURCE_7_STR, 1.1f },
-    { SHADOW_RADUIS_RES_0_ID, SHADOW_RADUIS_RES_0_STR, 0.1f },
-    { SHADOW_RADUIS_RES_1_ID, SHADOW_RADUIS_RES_1_STR, 3.0f },
-    { SHADOW_RADUIS_RES_2_ID, SHADOW_RADUIS_RES_2_STR, 0.9f },
-    { SHADOW_RADUIS_RES_3_ID, SHADOW_RADUIS_RES_3_STR, 100.0f },
-    { SHADOW_RADUIS_RES_4_ID, SHADOW_RADUIS_RES_4_STR, 1.1f },
-    { SHADOW_RADUIS_RES_5_ID, SHADOW_RADUIS_RES_5_STR, -1 },
+    { SHADOW_RADIUS_RES_0_ID, SHADOW_RADIUS_RES_0_STR, 0.1f },
+    { SHADOW_RADIUS_RES_1_ID, SHADOW_RADIUS_RES_1_STR, 3.0f },
+    { SHADOW_RADIUS_RES_2_ID, SHADOW_RADIUS_RES_2_STR, 0.9f },
+    { SHADOW_RADIUS_RES_3_ID, SHADOW_RADIUS_RES_3_STR, 100.0f },
+    { SHADOW_RADIUS_RES_4_ID, SHADOW_RADIUS_RES_4_STR, 1.1f },
+    { SHADOW_RADIUS_RES_5_ID, SHADOW_RADIUS_RES_5_STR, -1 },
     { SHADOW_OFFSET_RES_0_ID, SHADOW_OFFSET_RES_0_STR, 0.1f },
     { SHADOW_OFFSET_RES_1_ID, SHADOW_OFFSET_RES_1_STR, 3.0f },
     { SHADOW_OFFSET_RES_2_ID, SHADOW_OFFSET_RES_2_STR, 0.9f },
@@ -993,44 +993,44 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInp
     { "\"        \"", Converter::ArkValue<Ark_String>("        "), "Just_only_for_test_data_generation" },
 };
 
-// Fixture 'ShadowRaduisNumber' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureShadowRaduisNumberValidValues = {
+// Fixture 'ShadowRadiusNumber' for type 'Ark_Number'
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureShadowRadiusNumberValidValues = {
     { "123", Converter::ArkValue<Ark_Number>(123), "123.000000" },
     { "0", Converter::ArkValue<Ark_Number>(0), "0.000000" },
     { "1.23", Converter::ArkValue<Ark_Number>(1.23), "1.230000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Number>> testFixtureShadowRaduisNumberInvalidValues = {
+std::vector<std::tuple<std::string, Ark_Number>> testFixtureShadowRadiusNumberInvalidValues = {
     { "-1", Converter::ArkValue<Ark_Number>(-1) },
 };
 
-// Fixture 'ShadowRaduisRes' for type 'Ark_Resource'
-std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureShadowRaduisResValidValues = {
-    { "ResId:SHADOW_RADUIS_RES_0_ID", CreateResource(SHADOW_RADUIS_RES_0_ID, NodeModifier::ResourceType::FLOAT),
+// Fixture 'ShadowRadiusRes' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureShadowRadiusResValidValues = {
+    { "ResId:SHADOW_RADIUS_RES_0_ID", CreateResource(SHADOW_RADIUS_RES_0_ID, NodeModifier::ResourceType::FLOAT),
         "0.100000" },
-    { "ResName:SHADOW_RADUIS_RES_0_STR", CreateResource(SHADOW_RADUIS_RES_0_STR, NodeModifier::ResourceType::FLOAT),
+    { "ResName:SHADOW_RADIUS_RES_0_STR", CreateResource(SHADOW_RADIUS_RES_0_STR, NodeModifier::ResourceType::FLOAT),
         "0.100000" },
-    { "ResId:SHADOW_RADUIS_RES_1_ID", CreateResource(SHADOW_RADUIS_RES_1_ID, NodeModifier::ResourceType::FLOAT),
+    { "ResId:SHADOW_RADIUS_RES_1_ID", CreateResource(SHADOW_RADIUS_RES_1_ID, NodeModifier::ResourceType::FLOAT),
         "3.000000" },
-    { "ResName:SHADOW_RADUIS_RES_1_STR", CreateResource(SHADOW_RADUIS_RES_1_STR, NodeModifier::ResourceType::FLOAT),
+    { "ResName:SHADOW_RADIUS_RES_1_STR", CreateResource(SHADOW_RADIUS_RES_1_STR, NodeModifier::ResourceType::FLOAT),
         "3.000000" },
-    { "ResId:SHADOW_RADUIS_RES_2_ID", CreateResource(SHADOW_RADUIS_RES_2_ID, NodeModifier::ResourceType::FLOAT),
+    { "ResId:SHADOW_RADIUS_RES_2_ID", CreateResource(SHADOW_RADIUS_RES_2_ID, NodeModifier::ResourceType::FLOAT),
         "0.900000" },
-    { "ResName:SHADOW_RADUIS_RES_2_STR", CreateResource(SHADOW_RADUIS_RES_2_STR, NodeModifier::ResourceType::FLOAT),
+    { "ResName:SHADOW_RADIUS_RES_2_STR", CreateResource(SHADOW_RADIUS_RES_2_STR, NodeModifier::ResourceType::FLOAT),
         "0.900000" },
-    { "ResId:SHADOW_RADUIS_RES_3_ID", CreateResource(SHADOW_RADUIS_RES_3_ID, NodeModifier::ResourceType::FLOAT),
+    { "ResId:SHADOW_RADIUS_RES_3_ID", CreateResource(SHADOW_RADIUS_RES_3_ID, NodeModifier::ResourceType::FLOAT),
         "100.000000" },
-    { "ResName:SHADOW_RADUIS_RES_3_STR", CreateResource(SHADOW_RADUIS_RES_3_STR, NodeModifier::ResourceType::FLOAT),
+    { "ResName:SHADOW_RADIUS_RES_3_STR", CreateResource(SHADOW_RADIUS_RES_3_STR, NodeModifier::ResourceType::FLOAT),
         "100.000000" },
-    { "ResId:SHADOW_RADUIS_RES_4_ID", CreateResource(SHADOW_RADUIS_RES_4_ID, NodeModifier::ResourceType::FLOAT),
+    { "ResId:SHADOW_RADIUS_RES_4_ID", CreateResource(SHADOW_RADIUS_RES_4_ID, NodeModifier::ResourceType::FLOAT),
         "1.100000" },
-    { "ResName:SHADOW_RADUIS_RES_4_STR", CreateResource(SHADOW_RADUIS_RES_4_STR, NodeModifier::ResourceType::FLOAT),
+    { "ResName:SHADOW_RADIUS_RES_4_STR", CreateResource(SHADOW_RADIUS_RES_4_STR, NodeModifier::ResourceType::FLOAT),
         "1.100000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Resource>> testFixtureShadowRaduisResInvalidValues = {
-    { "ResId:SHADOW_RADUIS_RES_5_ID", CreateResource(SHADOW_RADUIS_RES_5_ID, NodeModifier::ResourceType::FLOAT) },
-    { "ResName:SHADOW_RADUIS_RES_5_STR", CreateResource(SHADOW_RADUIS_RES_5_STR, NodeModifier::ResourceType::FLOAT) },
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureShadowRadiusResInvalidValues = {
+    { "ResId:SHADOW_RADIUS_RES_5_ID", CreateResource(SHADOW_RADIUS_RES_5_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:SHADOW_RADIUS_RES_5_STR", CreateResource(SHADOW_RADIUS_RES_5_STR, NodeModifier::ResourceType::FLOAT) },
 };
 
 // Fixture 'ShadowOffsetNumber' for type 'Ark_Number'

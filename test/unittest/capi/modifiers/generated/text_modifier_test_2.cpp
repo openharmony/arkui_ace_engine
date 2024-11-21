@@ -18,6 +18,40 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::Text;
 /*
+ * @tc.name: setDecorationTestDecorationStyleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setDecorationTestDecorationStyleInvalidValues, TestSize.Level1)
+{
+    Ark_DecorationStyleInterface initValueDecoration;
+
+    // Initial setup
+    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    initValueDecoration.color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueDecoration.style =
+        ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
+
+    auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_TextDecorationStyle& value) {
+        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+
+        modifier_->setDecoration(node_, &inputValueDecoration);
+        inputValueDecoration.style = value;
+        modifier_->setDecoration(node_, &inputValueDecoration);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_STYLE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setDecoration, attribute: decoration.style";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumTextDecorationStyleInvalidValues) {
+        checkValue(input, ArkValue<Opt_TextDecorationStyle>(value));
+    }
+}
+
+/*
  * @tc.name: setLetterSpacingTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -44,23 +78,23 @@ HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestLetterSpacingValidValues
     initValueLetterSpacing =
         ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const Ark_Union_Number_String& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_String& value) {
         Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
 
         inputValueLetterSpacing = value;
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
     }
 }
 
@@ -85,8 +119,8 @@ HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestLetterSpacingInvalidValu
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
     };
 
     // Check invalid union
@@ -120,19 +154,19 @@ HWTEST_F(TextModifierTest, setTextCaseTestTextCaseValidValues, TestSize.Level1)
     initValueTextCase = std::get<1>(Fixtures::testFixtureEnumTextCaseValidValues[0]);
 
     auto checkValue = [this, &initValueTextCase](
-                          const std::string& input, const Ark_TextCase& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_TextCase& value) {
         Ark_TextCase inputValueTextCase = initValueTextCase;
 
         inputValueTextCase = value;
         modifier_->setTextCase(node_, inputValueTextCase);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextCase, attribute: textCase";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextCase, attribute: textCase";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextCaseValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -156,8 +190,8 @@ HWTEST_F(TextModifierTest, setTextCaseTestTextCaseInvalidValues, TestSize.Level1
         modifier_->setTextCase(node_, inputValueTextCase);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_CASE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextCase, attribute: textCase";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_CASE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextCase, attribute: textCase";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextCaseInvalidValues) {
@@ -192,23 +226,23 @@ HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetValidValu
     initValueBaselineOffset =
         ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueBaselineOffset](const std::string& input, const Ark_Union_Number_String& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueBaselineOffset](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_String& value) {
         Ark_Union_Number_String inputValueBaselineOffset = initValueBaselineOffset;
 
         inputValueBaselineOffset = value;
         modifier_->setBaselineOffset(node_, &inputValueBaselineOffset);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BASELINE_OFFSET_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setBaselineOffset, attribute: baselineOffset";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBaselineOffset, attribute: baselineOffset";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
     }
 }
 
@@ -233,8 +267,8 @@ HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetInvalidVa
         modifier_->setBaselineOffset(node_, &inputValueBaselineOffset);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BASELINE_OFFSET_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BASELINE_OFFSET_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setBaselineOffset, attribute: baselineOffset";
+        EXPECT_EQ(resultStr, ATTRIBUTE_BASELINE_OFFSET_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBaselineOffset, attribute: baselineOffset";
     };
 
     // Check invalid union
@@ -268,19 +302,19 @@ HWTEST_F(TextModifierTest, DISABLED_setCopyOptionTestCopyOptionValidValues, Test
     initValueCopyOption = std::get<1>(Fixtures::testFixtureEnumCopyOptionsValidValues[0]);
 
     auto checkValue = [this, &initValueCopyOption](
-                          const std::string& input, const Ark_CopyOptions& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_CopyOptions& value) {
         Ark_CopyOptions inputValueCopyOption = initValueCopyOption;
 
         inputValueCopyOption = value;
         modifier_->setCopyOption(node_, inputValueCopyOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCopyOptionsValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -304,8 +338,8 @@ HWTEST_F(TextModifierTest, DISABLED_setCopyOptionTestCopyOptionInvalidValues, Te
         modifier_->setCopyOption(node_, inputValueCopyOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCopyOptionsInvalidValues) {
@@ -340,19 +374,19 @@ HWTEST_F(TextModifierTest, setDraggableTestDraggableValidValues, TestSize.Level1
     initValueDraggable = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueDraggable](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueDraggable = initValueDraggable;
 
         inputValueDraggable = value;
         modifier_->setDraggable(node_, inputValueDraggable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDraggable, attribute: draggable";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDraggable, attribute: draggable";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -369,36 +403,36 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestDefaultValues, TestSize.Lev
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..radius'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.radius'";
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_TYPE_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..type'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_TYPE_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.type'";
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_COLOR_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..color'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.color'";
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..offsetX'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.offsetX'";
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..offsetY'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.offsetY'";
 
     resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE)
-        << "Default value for attribute 'textShadow..fill'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE) <<
+        "Default value for attribute 'textShadow.ShadowOptions.fill'";
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowRadiusValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsRadiusValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadiusValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -417,8 +451,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusValidValues
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Ark_Union_Number_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).radius = value;
@@ -426,22 +460,22 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusValidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..radius";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.radius";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowRadiusInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -469,8 +503,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusInvalidValu
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..radius";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.radius";
     };
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
@@ -479,11 +513,11 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowRadiusInvalidValu
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowTypeValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsTypeValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -503,7 +537,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeValidValues, 
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
-                          const std::string& input, const Opt_ShadowType& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ShadowType& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).type = value;
@@ -511,21 +545,21 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..type";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumShadowTypeValidValues) {
-        checkValue(input, ArkValue<Opt_ShadowType>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ShadowType>(value));
     }
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowTypeInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsTypeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsTypeInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -553,8 +587,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..type";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.type";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumShadowTypeInvalidValues) {
@@ -563,11 +597,11 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowTypeInvalidValues
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowColorValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColorValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -586,9 +620,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorValidValues,
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input,
-                          const Opt_Union_Color_String_Resource_ColoringStrategy& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).color = value;
@@ -596,29 +629,29 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorValidValues,
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..color";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumColorValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumColoringStrategyValidValues) {
         checkValue(
-            input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(value), expected);
+            input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowColorInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsColorInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -647,8 +680,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorInvalidValue
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..color";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumColorInvalidValues) {
@@ -665,11 +698,11 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowColorInvalidValue
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowOffsetXValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsOffsetXValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetXValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -688,8 +721,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXValidValue
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetX = value;
@@ -697,22 +730,22 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXValidValue
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetX";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.offsetX";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowOffsetXInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -740,8 +773,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXInvalidVal
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetX";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.offsetX";
     };
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
@@ -752,11 +785,11 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetXInvalidVal
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowOffsetYValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsOffsetYValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetYValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -775,8 +808,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYValidValue
     WriteToUnion<Ark_ShadowOptions>(initValueTextShadow).fill =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueTextShadow](const std::string& input, const Opt_Union_Number_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).offsetY = value;
@@ -784,22 +817,22 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYValidValue
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetY";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.offsetY";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowOffsetYInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -827,8 +860,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYInvalidVal
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..offsetY";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.offsetY";
     };
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
@@ -839,11 +872,11 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowOffsetYInvalidVal
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowFillValidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsFillValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsFillValidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -863,7 +896,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillValidValues, 
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueTextShadow](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow = initValueTextShadow;
 
         WriteToUnion<Ark_ShadowOptions>(inputValueTextShadow).fill = value;
@@ -871,21 +904,21 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..fill";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.fill";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
 /*
- * @tc.name: setTextShadowTestTextShadowFillInvalidValues
+ * @tc.name: setTextShadowTestTextShadowShadowOptionsFillInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowShadowOptionsFillInvalidValues, TestSize.Level1)
 {
     Ark_Union_ShadowOptions_Array_ShadowOptions initValueTextShadow;
 
@@ -913,8 +946,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextShadowTestTextShadowFillInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultTextShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTextShadow, ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextShadow, attribute: textShadow..fill";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextShadow, attribute: textShadow.ShadowOptions.fill";
     };
 
     // Check empty optional
@@ -932,8 +965,8 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)
-        << "Default value for attribute 'heightAdaptivePolicy'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+        "Default value for attribute 'heightAdaptivePolicy'";
 }
 
 /*
@@ -948,20 +981,20 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyValidV
     // Initial setup
     initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
 
-    auto checkValue = [this, &initValueHeightAdaptivePolicy](const std::string& input,
-                          const Ark_TextHeightAdaptivePolicy& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueHeightAdaptivePolicy](const std::string& input, const std::string& expectedStr,
+                          const Ark_TextHeightAdaptivePolicy& value) {
         Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
 
         inputValueHeightAdaptivePolicy = value;
         modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -986,8 +1019,8 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvali
         modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+        EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
@@ -1022,19 +1055,19 @@ HWTEST_F(TextModifierTest, setTextIndentTestTextIndentValidValues, TestSize.Leve
     initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
 
     auto checkValue = [this, &initValueTextIndent](
-                          const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
         Ark_Length inputValueTextIndent = initValueTextIndent;
 
         inputValueTextIndent = value;
         modifier_->setTextIndent(node_, &inputValueTextIndent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_INDENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1058,8 +1091,8 @@ HWTEST_F(TextModifierTest, DISABLED_setTextIndentTestTextIndentInvalidValues, Te
         modifier_->setTextIndent(node_, &inputValueTextIndent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_INDENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1094,19 +1127,19 @@ HWTEST_F(TextModifierTest, setWordBreakTestWordBreakValidValues, TestSize.Level1
     initValueWordBreak = std::get<1>(Fixtures::testFixtureTextInputBreakWordValidValues[0]);
 
     auto checkValue = [this, &initValueWordBreak](
-                          const std::string& input, const Ark_WordBreak& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_WordBreak& value) {
         Ark_WordBreak inputValueWordBreak = initValueWordBreak;
 
         inputValueWordBreak = value;
         modifier_->setWordBreak(node_, inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputBreakWordValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1130,8 +1163,8 @@ HWTEST_F(TextModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize.Leve
         modifier_->setWordBreak(node_, inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
+        EXPECT_EQ(resultStr, ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputBreakWordInvalidValues) {
@@ -1150,8 +1183,8 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestDefaultValues, TestS
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE)
-        << "Default value for attribute 'lineBreakStrategy'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE) <<
+        "Default value for attribute 'lineBreakStrategy'";
 }
 
 /*
@@ -1166,20 +1199,20 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyVal
     // Initial setup
     initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureEnumLineBreakStrategyValidValues[0]);
 
-    auto checkValue = [this, &initValueLineBreakStrategy](const std::string& input, const Ark_LineBreakStrategy& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLineBreakStrategy](const std::string& input, const std::string& expectedStr,
+                          const Ark_LineBreakStrategy& value) {
         Ark_LineBreakStrategy inputValueLineBreakStrategy = initValueLineBreakStrategy;
 
         inputValueLineBreakStrategy = value;
         modifier_->setLineBreakStrategy(node_, inputValueLineBreakStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumLineBreakStrategyValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1204,99 +1237,12 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyInv
         modifier_->setLineBreakStrategy(node_, inputValueLineBreakStrategy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_BREAK_STRATEGY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_BREAK_STRATEGY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumLineBreakStrategyInvalidValues) {
         checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setSelectionTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setSelectionTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSelection =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_START_DEFAULT_VALUE)
-        << "Default value for attribute 'selection.selectionStart'";
-
-    resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_END_DEFAULT_VALUE)
-        << "Default value for attribute 'selection.selectionEnd'";
-}
-
-/*
- * @tc.name: setSelectionTestSelectionSelectionStartValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionStartValidValues, TestSize.Level1)
-{
-    Ark_Number initValueSelectionStart;
-    Ark_Number initValueSelectionEnd;
-
-    // Initial setup
-    initValueSelectionStart = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSelectionEnd = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSelectionStart, &initValueSelectionEnd](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueSelectionStart = initValueSelectionStart;
-        Ark_Number inputValueSelectionEnd = initValueSelectionEnd;
-
-        inputValueSelectionStart = value;
-        modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelection, attribute: selection.selectionStart";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setSelectionTestSelectionSelectionEndValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionEndValidValues, TestSize.Level1)
-{
-    Ark_Number initValueSelectionStart;
-    Ark_Number initValueSelectionEnd;
-
-    // Initial setup
-    initValueSelectionStart = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSelectionEnd = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSelectionStart, &initValueSelectionEnd](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Number inputValueSelectionStart = initValueSelectionStart;
-        Ark_Number inputValueSelectionEnd = initValueSelectionEnd;
-
-        inputValueSelectionEnd = value;
-        modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setSelection, attribute: selection.selectionEnd";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, value, expected);
     }
 }
 
@@ -1327,19 +1273,19 @@ HWTEST_F(TextModifierTest, setEllipsisModeTestEllipsisModeValidValues, TestSize.
     initValueEllipsisMode = std::get<1>(Fixtures::testFixtureEnumEllipsisModeValidValues[0]);
 
     auto checkValue = [this, &initValueEllipsisMode](
-                          const std::string& input, const Ark_EllipsisMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_EllipsisMode& value) {
         Ark_EllipsisMode inputValueEllipsisMode = initValueEllipsisMode;
 
         inputValueEllipsisMode = value;
         modifier_->setEllipsisMode(node_, inputValueEllipsisMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumEllipsisModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1363,8 +1309,8 @@ HWTEST_F(TextModifierTest, setEllipsisModeTestEllipsisModeInvalidValues, TestSiz
         modifier_->setEllipsisMode(node_, inputValueEllipsisMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumEllipsisModeInvalidValues) {
@@ -1383,8 +1329,8 @@ HWTEST_F(TextModifierTest, setEnableDataDetectorTestDefaultValues, TestSize.Leve
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE)
-        << "Default value for attribute 'enableDataDetector'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableDataDetector'";
 }
 
 /*
@@ -1400,19 +1346,19 @@ HWTEST_F(TextModifierTest, setEnableDataDetectorTestEnableDataDetectorValidValue
     initValueEnableDataDetector = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableDataDetector](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableDataDetector = initValueEnableDataDetector;
 
         inputValueEnableDataDetector = value;
         modifier_->setEnableDataDetector(node_, inputValueEnableDataDetector);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableDataDetector, attribute: enableDataDetector";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableDataDetector, attribute: enableDataDetector";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1431,24 +1377,24 @@ HWTEST_F(TextModifierTest, DISABLED_setDataDetectorConfigTestDefaultValues, Test
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_DEFAULT_VALUE)
-        << "Default value for attribute 'dataDetectorConfig.types'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_DEFAULT_VALUE) <<
+        "Default value for attribute 'dataDetectorConfig.types'";
 
     resultStr = GetAttrValue<std::string>(resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_DEFAULT_VALUE)
-        << "Default value for attribute 'dataDetectorConfig.color'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'dataDetectorConfig.color'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_DEFAULT_VALUE)
-        << "Default value for attribute 'dataDetectorConfig.decoration.type'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_DEFAULT_VALUE) <<
+        "Default value for attribute 'dataDetectorConfig.decoration.type'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_DEFAULT_VALUE)
-        << "Default value for attribute 'dataDetectorConfig.decoration.color'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'dataDetectorConfig.decoration.color'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_DEFAULT_VALUE)
-        << "Default value for attribute 'dataDetectorConfig.decoration.style'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'dataDetectorConfig.decoration.style'";
 }
 
 /*
@@ -1488,19 +1434,19 @@ HWTEST_F(TextModifierTest, DISABLED_setFontFeatureTestFontFeatureValidValues, Te
     initValueFontFeature = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueFontFeature](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueFontFeature = initValueFontFeature;
 
         inputValueFontFeature = value;
         modifier_->setFontFeature(node_, &inputValueFontFeature);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1531,19 +1477,19 @@ HWTEST_F(TextModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, T
     initValuePrivacySensitive = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValuePrivacySensitive](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValuePrivacySensitive = initValuePrivacySensitive;
 
         inputValuePrivacySensitive = value;
         modifier_->setPrivacySensitive(node_, inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1573,20 +1519,20 @@ HWTEST_F(TextModifierTest, setTextSelectableTestTextSelectableValidValues, TestS
     // Initial setup
     initValueTextSelectable = std::get<1>(Fixtures::testFixtureTextSelectableModeValidValues[0]);
 
-    auto checkValue = [this, &initValueTextSelectable](const std::string& input, const Ark_TextSelectableMode& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueTextSelectable](const std::string& input, const std::string& expectedStr,
+                          const Ark_TextSelectableMode& value) {
         Ark_TextSelectableMode inputValueTextSelectable = initValueTextSelectable;
 
         inputValueTextSelectable = value;
         modifier_->setTextSelectable(node_, inputValueTextSelectable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_SELECTABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextSelectable, attribute: textSelectable";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextSelectable, attribute: textSelectable";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextSelectableModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1610,8 +1556,8 @@ HWTEST_F(TextModifierTest, setTextSelectableTestTextSelectableInvalidValues, Tes
         modifier_->setTextSelectable(node_, inputValueTextSelectable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_SELECTABLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SELECTABLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextSelectable, attribute: textSelectable";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_SELECTABLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextSelectable, attribute: textSelectable";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextSelectableModeInvalidValues) {
@@ -1646,19 +1592,19 @@ HWTEST_F(TextModifierTest, setHalfLeadingTestHalfLeadingValidValues, TestSize.Le
     initValueHalfLeading = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueHalfLeading](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueHalfLeading = initValueHalfLeading;
 
         inputValueHalfLeading = value;
         modifier_->setHalfLeading(node_, inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1673,8 +1619,8 @@ HWTEST_F(TextModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)
-        << "Default value for attribute 'enableHapticFeedback'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
 }
 
 /*
@@ -1690,19 +1636,106 @@ HWTEST_F(TextModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidV
     initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableHapticFeedback](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
 
         inputValueEnableHapticFeedback = value;
         modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setSelectionTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectionTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultSelection =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_START_DEFAULT_VALUE) <<
+        "Default value for attribute 'selection.selectionStart'";
+
+    resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_END_DEFAULT_VALUE) <<
+        "Default value for attribute 'selection.selectionEnd'";
+}
+
+/*
+ * @tc.name: setSelectionTestSelectionSelectionStartValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionStartValidValues, TestSize.Level1)
+{
+    Ark_Number initValueSelectionStart;
+    Ark_Number initValueSelectionEnd;
+
+    // Initial setup
+    initValueSelectionStart = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueSelectionEnd = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+
+    auto checkValue = [this, &initValueSelectionStart, &initValueSelectionEnd](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_Number inputValueSelectionStart = initValueSelectionStart;
+        Ark_Number inputValueSelectionEnd = initValueSelectionEnd;
+
+        inputValueSelectionStart = value;
+        modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setSelection, attribute: selection.selectionStart";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setSelectionTestSelectionSelectionEndValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionEndValidValues, TestSize.Level1)
+{
+    Ark_Number initValueSelectionStart;
+    Ark_Number initValueSelectionEnd;
+
+    // Initial setup
+    initValueSelectionStart = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueSelectionEnd = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+
+    auto checkValue = [this, &initValueSelectionStart, &initValueSelectionEnd](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_Number inputValueSelectionStart = initValueSelectionStart;
+        Ark_Number inputValueSelectionEnd = initValueSelectionEnd;
+
+        inputValueSelectionEnd = value;
+        modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setSelection, attribute: selection.selectionEnd";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, value);
     }
 }
 } // namespace OHOS::Ace::NG

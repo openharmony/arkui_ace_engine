@@ -63,7 +63,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsTypeValidValues, TestSi
     initValueOptions.role = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ButtonType& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonType& value) {
         Ark_ButtonOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -73,12 +73,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsTypeValidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.type";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonTypeValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonType>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonType>(value));
     }
 }
 
@@ -110,8 +110,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsTypeInvalidValues, Test
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.type";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.type";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonTypeInvalidValues) {
@@ -138,7 +138,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsStateEffectValidValues,
     initValueOptions.role = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_ButtonOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -148,12 +148,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsStateEffectValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.stateEffect";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.stateEffect";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -185,8 +185,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsStateEffectInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.stateEffect";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.stateEffect";
     };
 
     // Check empty optional
@@ -212,7 +212,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsButtonStyleValidValues,
     initValueOptions.role = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ButtonStyleMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonStyleMode& value) {
         Ark_ButtonOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -222,12 +222,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsButtonStyleValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.buttonStyle";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.buttonStyle";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonStyleModeValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonStyleMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonStyleMode>(value));
     }
 }
 
@@ -259,8 +259,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsButtonStyleInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.buttonStyle";
+        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.buttonStyle";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonStyleModeInvalidValues) {
@@ -287,7 +287,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsControlSizeValidValues,
     initValueOptions.role = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ControlSize& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ControlSize& value) {
         Ark_ButtonOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -297,12 +297,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsControlSizeValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.controlSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.controlSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumControlSizeValidValues) {
-        checkValue(input, ArkValue<Opt_ControlSize>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ControlSize>(value));
     }
 }
 
@@ -334,8 +334,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsControlSizeInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.controlSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.controlSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumControlSizeInvalidValues) {
@@ -362,7 +362,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsRoleValidValues, TestSi
     initValueOptions.role = ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ButtonRole& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonRole& value) {
         Ark_ButtonOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -372,12 +372,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsRoleValidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.role";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.role";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonRoleValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonRole>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonRole>(value));
     }
 }
 
@@ -409,8 +409,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions1TestOptionsRoleInvalidValues, Test
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions1, attribute: options.role";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions1, attribute: options.role";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonRoleInvalidValues) {
@@ -471,7 +471,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestLabelValidValues, TestSize.Lev
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Ark_ResourceStr& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceStr& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -482,15 +482,15 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestLabelValidValues, TestSize.Lev
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: label";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: label";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceStr, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceStr, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_Resource>(value));
     }
 }
 
@@ -529,8 +529,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestLabelInvalidValues, TestSize.L
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: label";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: label";
     };
 
     // Check invalid union
@@ -561,7 +561,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsTypeValidValues, TestSi
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Opt_ButtonType& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonType& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -572,12 +572,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsTypeValidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.type";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonTypeValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonType>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonType>(value));
     }
 }
 
@@ -616,8 +616,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsTypeInvalidValues, Test
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.type";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.type";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonTypeInvalidValues) {
@@ -649,7 +649,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsStateEffectValidValues,
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -660,12 +660,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsStateEffectValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.stateEffect";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.stateEffect";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -703,8 +703,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsStateEffectInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.stateEffect";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.stateEffect";
     };
 
     // Check empty optional
@@ -735,7 +735,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsButtonStyleValidValues,
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Opt_ButtonStyleMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonStyleMode& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -746,12 +746,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsButtonStyleValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.buttonStyle";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.buttonStyle";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonStyleModeValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonStyleMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonStyleMode>(value));
     }
 }
 
@@ -790,8 +790,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsButtonStyleInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.buttonStyle";
+        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.buttonStyle";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonStyleModeInvalidValues) {
@@ -823,7 +823,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsControlSizeValidValues,
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Opt_ControlSize& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ControlSize& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -834,12 +834,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsControlSizeValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.controlSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.controlSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumControlSizeValidValues) {
-        checkValue(input, ArkValue<Opt_ControlSize>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ControlSize>(value));
     }
 }
 
@@ -878,8 +878,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsControlSizeInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.controlSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.controlSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumControlSizeInvalidValues) {
@@ -911,7 +911,7 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsRoleValidValues, TestSi
         ArkValue<Opt_ButtonRole>(std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]));
 
     auto checkValue = [this, &initValueLabel, &initValueOptions](
-                          const std::string& input, const Opt_ButtonRole& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ButtonRole& value) {
         Ark_ResourceStr inputValueLabel = initValueLabel;
         Opt_ButtonOptions inputValueOptions = initValueOptions;
 
@@ -922,12 +922,12 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsRoleValidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.role";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.role";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonRoleValidValues) {
-        checkValue(input, ArkValue<Opt_ButtonRole>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ButtonRole>(value));
     }
 }
 
@@ -966,8 +966,8 @@ HWTEST_F(ButtonModifierTest, setButtonOptions2TestOptionsRoleInvalidValues, Test
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonOptions2, attribute: options.role";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonOptions2, attribute: options.role";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonRoleInvalidValues) {
@@ -1002,7 +1002,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestTypeValidValues, TestSize.Level1)
     initValueType = std::get<1>(Fixtures::testFixtureEnumButtonTypeValidValues[0]);
 
     auto checkValue = [this, &initValueType](
-                          const std::string& input, const Ark_ButtonType& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ButtonType& value) {
         Ark_ButtonType inputValueType = initValueType;
 
         inputValueType = value;
@@ -1013,7 +1013,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestTypeValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonTypeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1037,8 +1037,8 @@ HWTEST_F(ButtonModifierTest, setTypeTestTypeInvalidValues, TestSize.Level1)
         modifier_->setType(node_, inputValueType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setType, attribute: type";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setType, attribute: type";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonTypeInvalidValues) {
@@ -1073,19 +1073,19 @@ HWTEST_F(ButtonModifierTest, setStateEffectTestStateEffectValidValues, TestSize.
     initValueStateEffect = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueStateEffect](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueStateEffect = initValueStateEffect;
 
         inputValueStateEffect = value;
         modifier_->setStateEffect(node_, inputValueStateEffect);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStateEffect, attribute: stateEffect";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStateEffect, attribute: stateEffect";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1116,19 +1116,19 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleValidValues, TestSize.
     initValueButtonStyle = std::get<1>(Fixtures::testFixtureEnumButtonStyleModeValidValues[0]);
 
     auto checkValue = [this, &initValueButtonStyle](
-                          const std::string& input, const Ark_ButtonStyleMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ButtonStyleMode& value) {
         Ark_ButtonStyleMode inputValueButtonStyle = initValueButtonStyle;
 
         inputValueButtonStyle = value;
         modifier_->setButtonStyle(node_, inputValueButtonStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setButtonStyle, attribute: buttonStyle";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setButtonStyle, attribute: buttonStyle";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonStyleModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1152,8 +1152,8 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestButtonStyleInvalidValues, TestSiz
         modifier_->setButtonStyle(node_, inputValueButtonStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setButtonStyle, attribute: buttonStyle";
+        EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setButtonStyle, attribute: buttonStyle";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonStyleModeInvalidValues) {
@@ -1188,19 +1188,19 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeValidValues, TestSize.
     initValueControlSize = std::get<1>(Fixtures::testFixtureEnumControlSizeValidValues[0]);
 
     auto checkValue = [this, &initValueControlSize](
-                          const std::string& input, const Ark_ControlSize& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ControlSize& value) {
         Ark_ControlSize inputValueControlSize = initValueControlSize;
 
         inputValueControlSize = value;
         modifier_->setControlSize(node_, inputValueControlSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setControlSize, attribute: controlSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setControlSize, attribute: controlSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumControlSizeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1224,8 +1224,8 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestControlSizeInvalidValues, TestSiz
         modifier_->setControlSize(node_, inputValueControlSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setControlSize, attribute: controlSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setControlSize, attribute: controlSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumControlSizeInvalidValues) {
@@ -1260,7 +1260,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestRoleValidValues, TestSize.Level1)
     initValueRole = std::get<1>(Fixtures::testFixtureEnumButtonRoleValidValues[0]);
 
     auto checkValue = [this, &initValueRole](
-                          const std::string& input, const Ark_ButtonRole& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ButtonRole& value) {
         Ark_ButtonRole inputValueRole = initValueRole;
 
         inputValueRole = value;
@@ -1271,7 +1271,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestRoleValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumButtonRoleValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1295,8 +1295,8 @@ HWTEST_F(ButtonModifierTest, setRoleTestRoleInvalidValues, TestSize.Level1)
         modifier_->setRole(node_, inputValueRole);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setRole, attribute: role";
+        EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setRole, attribute: role";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumButtonRoleInvalidValues) {
@@ -1332,28 +1332,28 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorValidValues, TestSize.Leve
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueFontColor = initValueFontColor;
 
         inputValueFontColor = value;
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -1378,8 +1378,8 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1419,19 +1419,19 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, TestSi
     initValueFontSize = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
 
     auto checkValue = [this, &initValueFontSize](
-                          const std::string& input, const Ark_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
         Ark_Length inputValueFontSize = initValueFontSize;
 
         inputValueFontSize = value;
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1455,8 +1455,8 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestFontSizeInvalidValues, TestSize.Leve
         modifier_->setFontSize(node_, &inputValueFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontSize, attribute: fontSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1491,26 +1491,26 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Le
     initValueFontWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
-    auto checkValue = [this, &initValueFontWeight](const std::string& input,
-                          const Ark_Union_Number_FontWeight_String& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_FontWeight_String& value) {
         Ark_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
 
@@ -1536,8 +1536,8 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontWeight, attribute: fontWeight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
@@ -1580,19 +1580,19 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleValidValues, TestSize.Leve
     initValueFontStyle = std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]);
 
     auto checkValue = [this, &initValueFontStyle](
-                          const std::string& input, const Ark_FontStyle& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_FontStyle& value) {
         Ark_FontStyle inputValueFontStyle = initValueFontStyle;
 
         inputValueFontStyle = value;
         modifier_->setFontStyle(node_, inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontStyle, attribute: fontStyle";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontStyle, attribute: fontStyle";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1616,8 +1616,8 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Le
         modifier_->setFontStyle(node_, inputValueFontStyle);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontStyle, attribute: fontStyle";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontStyle, attribute: fontStyle";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {
@@ -1652,23 +1652,23 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontFamilyTestFontFamilyValidValues, Te
     initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
 
-    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Ark_Union_String_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueFontFamily](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_String_Resource& value) {
         Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
 
         inputValueFontFamily = value;
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFontFamily, attribute: fontFamily";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFamily, attribute: fontFamily";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
     }
 }
 
@@ -1693,8 +1693,8 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.
         modifier_->setFontFamily(node_, &inputValueFontFamily);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setFontFamily, attribute: fontFamily";
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontFamily, attribute: fontFamily";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
@@ -1722,40 +1722,40 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestDefaultValues, TestSize.L
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.overflow'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.overflow'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.maxLines'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.maxLines'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.minFontSize'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.minFontSize'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.maxFontSize'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.maxFontSize'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.heightAdaptivePolicy'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.heightAdaptivePolicy'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.font.size'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.font.size'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.font.weight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.font.weight'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.font.family'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.font.family'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)
-        << "Default value for attribute 'labelStyle.font.style'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'labelStyle.font.style'";
 }
 
 /*
@@ -1788,7 +1788,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowValidVa
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
-                          const std::string& input, const Opt_TextOverflow& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_TextOverflow& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         inputValueLabelStyle.overflow = value;
@@ -1796,12 +1796,12 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowValidVa
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.overflow";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.overflow";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextOverflowValidValues) {
-        checkValue(input, ArkValue<Opt_TextOverflow>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_TextOverflow>(value));
     }
 }
 
@@ -1843,8 +1843,8 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleOverflowInvalid
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.overflow";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_OVERFLOW_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.overflow";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextOverflowInvalidValues) {
@@ -1882,7 +1882,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesValidValues, Tes
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         inputValueLabelStyle.maxLines = value;
@@ -1890,12 +1890,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesValidValues, Tes
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxLines";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxLines";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
-        checkValue(input, ArkValue<Opt_Number>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -1937,8 +1937,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxLinesInvalidValues, T
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxLines";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_LINES_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxLines";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
@@ -1977,8 +1977,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeValidValues, 
     WriteTo(initValueLabelStyle.font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_Union_Number_ResourceStr& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_ResourceStr& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         inputValueLabelStyle.minFontSize = value;
@@ -1986,22 +1986,20 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.minFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.minFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
 }
 
@@ -2044,8 +2042,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMinFontSizeInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.minFontSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MIN_FONT_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.minFontSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
@@ -2094,8 +2092,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeValidValues, 
     WriteTo(initValueLabelStyle.font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_Union_Number_ResourceStr& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_ResourceStr& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         inputValueLabelStyle.maxFontSize = value;
@@ -2103,22 +2101,20 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_ResourceStr, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input,
-            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)),
-            expected);
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_ResourceStr, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
 }
 
@@ -2161,8 +2157,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleMaxFontSizeInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxFontSize";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_MAX_FONT_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.maxFontSize";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
@@ -2211,8 +2207,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyVali
     WriteTo(initValueLabelStyle.font).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
-    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const Opt_TextHeightAdaptivePolicy& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueLabelStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_TextHeightAdaptivePolicy& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         inputValueLabelStyle.heightAdaptivePolicy = value;
@@ -2221,12 +2217,12 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyVali
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.heightAdaptivePolicy";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.heightAdaptivePolicy";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues) {
-        checkValue(input, ArkValue<Opt_TextHeightAdaptivePolicy>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_TextHeightAdaptivePolicy>(value));
     }
 }
 
@@ -2270,8 +2266,8 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleHeightAdaptivePolicyInva
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.heightAdaptivePolicy";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.heightAdaptivePolicy";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
@@ -2309,7 +2305,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontSizeValidVa
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueLabelStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_LabelStyle inputValueLabelStyle = initValueLabelStyle;
 
         WriteTo(inputValueLabelStyle.font).size = value;
@@ -2318,12 +2314,12 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontSizeValidVa
         auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 

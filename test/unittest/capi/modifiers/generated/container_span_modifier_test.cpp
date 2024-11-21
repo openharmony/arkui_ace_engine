@@ -72,24 +72,24 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestDefaultValues, Tes
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE)
-        << "Default value for attribute 'textBackgroundStyle.color'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'textBackgroundStyle.color'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE)
-        << "Default value for attribute 'textBackgroundStyle.radius..topLeft'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE) <<
+        "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.topLeft'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'textBackgroundStyle.radius..topRight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.topRight'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE)
-        << "Default value for attribute 'textBackgroundStyle.radius..bottomLeft'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE) <<
+        "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.bottomLeft'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'textBackgroundStyle.radius..bottomRight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.bottomRight'";
 }
 
 /*
@@ -114,7 +114,7 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
-                          const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
         Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         inputValueTextBackgroundStyle.color = value;
@@ -124,21 +124,21 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.color";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -174,8 +174,8 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.color";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -191,12 +191,12 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusTopLeftValidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusTopLeftValidValues, TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftValidValues,
+    TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -213,7 +213,7 @@ HWTEST_F(
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topLeft = value;
@@ -225,23 +225,23 @@ HWTEST_F(
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..topLeft";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topLeft";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusTopLeftInvalidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusTopLeftInvalidValues, TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopLeftInvalidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -270,9 +270,9 @@ HWTEST_F(
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..topLeft";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topLeft";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -283,12 +283,12 @@ HWTEST_F(
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusTopRightValidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(
-    ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusTopRightValidValues, TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightValidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -305,7 +305,7 @@ HWTEST_F(
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).topRight = value;
@@ -317,23 +317,23 @@ HWTEST_F(
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..topRight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topRight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusTopRightInvalidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusTopRightInvalidValues,
-    TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesTopRightInvalidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -362,9 +362,9 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..topRight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.topRight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -375,12 +375,12 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomLeftValidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomLeftValidValues,
-    TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftValidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -397,7 +397,7 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomLeft = value;
@@ -409,23 +409,23 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..bottomLeft";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomLeft";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomLeftInvalidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomLeftInvalidValues,
-    TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomLeftInvalidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -454,9 +454,9 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..bottomLeft";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomLeft";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -467,12 +467,12 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomRightValidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomRightValidValues,
-    TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightValidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -489,7 +489,7 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueTextBackgroundStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_TextBackgroundStyle inputValueTextBackgroundStyle = initValueTextBackgroundStyle;
 
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(inputValueTextBackgroundStyle.radius)).bottomRight = value;
@@ -501,23 +501,23 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..bottomRight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomRight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
 /*
- * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomRightInvalidValues
+ * @tc.name: setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadiusBottomRightInvalidValues,
-    TestSize.Level1)
+HWTEST_F(ContainerSpanModifierTest,
+    setTextBackgroundStyleTestTextBackgroundStyleRadiusBorderRadiusesBottomRightInvalidValues, TestSize.Level1)
 {
     Ark_TextBackgroundStyle initValueTextBackgroundStyle;
 
@@ -546,9 +546,9 @@ HWTEST_F(ContainerSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyl
             resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input
-            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius..bottomRight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setTextBackgroundStyle, attribute: textBackgroundStyle.radius.BorderRadiuses.bottomRight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
