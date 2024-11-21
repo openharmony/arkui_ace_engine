@@ -893,7 +893,7 @@ void TextSelectController::SetCaretRectAtEmptyValue()
 
 void TextSelectController::UpdateCaretOriginalRect(const OffsetF& offset)
 {
-    caretInfo_.originalRect.SetOffset(offset);
+    caretInfo_.originalRect.SetOffset(OffsetF(offset.GetX(), caretInfo_.rect.Top()));
     caretInfo_.originalRect.SetHeight(caretInfo_.rect.Height());
     AdjustHandleAtEdge(caretInfo_.originalRect);
 }
