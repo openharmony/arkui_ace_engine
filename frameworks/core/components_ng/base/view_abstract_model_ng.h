@@ -955,14 +955,14 @@ public:
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override

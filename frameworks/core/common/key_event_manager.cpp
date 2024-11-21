@@ -452,23 +452,22 @@ bool KeyEventManager::DispatchKeyboardShortcut(const KeyEvent& event)
     return false;
 }
 
-// lyc TODO not-used
-// void KeyEventManager::DelKeyboardShortcutNode(int32_t nodeId)
-// {
-//     auto iter = keyboardShortcutNode_.begin();
-//     while (iter != keyboardShortcutNode_.end()) {
-//         auto frameNode = (*iter).Upgrade();
-//         if (!frameNode) {
-//             keyboardShortcutNode_.erase(iter++);
-//             continue;
-//         }
-//         if (frameNode->GetId() == nodeId) {
-//             keyboardShortcutNode_.erase(iter);
-//             break;
-//         }
-//         ++iter;
-//     }
-// }
+void KeyEventManager::DelKeyboardShortcutNode(int32_t nodeId)
+{
+    auto iter = keyboardShortcutNode_.begin();
+    while (iter != keyboardShortcutNode_.end()) {
+        auto frameNode = (*iter).Upgrade();
+        if (!frameNode) {
+            keyboardShortcutNode_.erase(iter++);
+            continue;
+        }
+        if (frameNode->GetId() == nodeId) {
+            keyboardShortcutNode_.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+}
 
 bool KeyEventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<FrameNode>& mainView)
 {
@@ -500,7 +499,7 @@ bool KeyEventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<Fra
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
-    if (focusNodeHub->HandleKeyEvent(event)) {
+    if (focusNodeHub->HandleEvent(event)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
             event.code, event.action);
         return true;
@@ -606,10 +605,16 @@ bool KeyEventManager::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
     auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
     auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
     auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
+    bool isDPADDown = false;
+    if (event.action == KeyAction::DOWN && event.IsDirectionalKey() &&
+        curEntryFocusViewFrame && curEntryFocusViewFrame->GetFocusHub() &&
+        curEntryFocusViewFrame->GetFocusHub()->GetDirectionalKeyFocus()) {
+        isDPADDown = true;
+    }
     auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
     bool isTabJustTriggerOnKeyEvent = false;
 
-    if (isKeyTabDown && isViewRootScopeFocused && curFocusView) {
+    if ((isKeyTabDown || isDPADDown) && isViewRootScopeFocused && curFocusView) {
         // Current focused on the view root scope. Tab key used to extend focus.
         // If return true. This tab key will just trigger onKeyEvent process.
         isTabJustTriggerOnKeyEvent = curFocusView->TriggerFocusMove();
@@ -619,7 +624,7 @@ bool KeyEventManager::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
     CHECK_NULL_RETURN(pipeline, false);
     // Tab key set focus state from inactive to active.
     // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = isKeyTabDown && pipeline->SetIsFocusActive(true);
+    bool isHandleFocusActive = (isKeyTabDown || isDPADDown) && pipeline->SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent || isHandleFocusActive;
     if (DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
