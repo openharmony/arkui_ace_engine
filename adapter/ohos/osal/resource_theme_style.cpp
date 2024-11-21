@@ -39,7 +39,7 @@ constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/
 #endif
 
 const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
-
+constexpr int32_t WAIT_FOR_TIME = 50;
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",
@@ -94,19 +94,31 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
+    "text_show_handle",
+    "textfield_show_password_button",
+    "textfield_hide_password_button",
+    "textfield_has_showed_password",
+    "textfield_has_hidden_password",
+    "calendar_picker_mon",
+    "calendar_picker_tue",
+    "calendar_picker_wed",
+    "calendar_picker_thu",
+    "calendar_picker_fri",
+    "calendar_picker_sat",
+    "calendar_picker_sun",
+    "slider_accessibility_selected",
+    "slider_accessibility_unselected",
+    "slider_accessibility_unselectedDesc",
+    "pass_point",
+    "slider_accessibility_disabledDesc",
+    "textfield_accessibility_clear",
     "textfield_writting_bundle_name",
     "textfield_writting_ability_name",
     "rich_editor_writting_bundle_name",
     "rich_editor_writting_ability_name",
     "textfield_writting_is_support",
     "rich_editor_writting_is_support",
-    "ai_write_menu_name",
-    "text_show_handle",
-    "textfield_show_password_button",
-    "textfield_hide_password_button",
-    "textfield_has_showed_password",
-    "textfield_has_hidden_password",
-    "textfield_accessibility_clear"
+    "ai_write_menu_name"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
@@ -215,5 +227,15 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         mediaPath = std::string(RES_TAG) + attrValue.substr(pos + 1);
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
+}
+
+void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
+{
+    if (!CheckThemeStyle(patternName)) {
+        return;
+    }
+    if (future_.valid()) {
+        future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
+    }
 }
 } // namespace OHOS::Ace

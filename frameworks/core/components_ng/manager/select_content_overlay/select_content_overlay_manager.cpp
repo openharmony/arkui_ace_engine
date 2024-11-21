@@ -59,7 +59,7 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
     const RefPtr<SelectOverlayHolder>& holder)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto overlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);
@@ -187,11 +187,12 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
     if (!callback->IsRegisterHandleCallback()) {
         return;
     }
-    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isFirst) {
-        auto overlayCallback = weakCallback.Upgrade();
-        CHECK_NULL_VOID(overlayCallback);
-        overlayCallback->OnHandleMoveStart(isFirst);
-    };
+    info.onHandleMoveStart =
+        [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isFirst) {
+            auto overlayCallback = weakCallback.Upgrade();
+            CHECK_NULL_VOID(overlayCallback);
+            overlayCallback->OnHandleMoveStart(event, isFirst);
+        };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
@@ -241,6 +242,11 @@ void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
         auto callback = weakCallback.Upgrade();
         CHECK_NULL_VOID(callback);
         callback->OnOverlayClick(event, isClickCaret);
+    };
+    info.onMouseEvent = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const MouseInfo& event) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        callback->OnHandleMouseEvent(event);
     };
 }
 
@@ -446,7 +452,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     menuNode_ = menuNode;
     auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
     handleNode_ = handleNode;
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), menuNode, handleNode, mode] {
@@ -505,13 +511,6 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
             node->ShowSelectOverlay(animation);
         }
     }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-    });
 }
 
 std::list<RefPtr<UINode>>::const_iterator SelectContentOverlayManager::FindSelectOverlaySlot(
@@ -676,21 +675,6 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();
     parentNode->RebuildRenderContextTree();
-    auto rootNode = GetSelectOverlayRoot();
-    if (rootNode != DynamicCast<FrameNode>(parentNode)) {
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(parentNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        if (AceType::InstanceOf<FrameNode>(hostNode)) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
-            CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-        }
-    });
 }
 
 void SelectContentOverlayManager::ClearAllStatus()
@@ -1039,5 +1023,14 @@ void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->SetIsHandleLineShow(isShow);
+}
+
+void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
 }
 } // namespace OHOS::Ace::NG

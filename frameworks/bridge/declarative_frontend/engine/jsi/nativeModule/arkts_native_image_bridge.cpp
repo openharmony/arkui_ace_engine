@@ -28,8 +28,10 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_event.h"
+#include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDEX_0 = 0;      // Arg Index
@@ -38,6 +40,48 @@ constexpr int32_t INDEX_2 = 2;      // Arg Index
 constexpr int32_t INDEX_3 = 3;      // Arg Index
 constexpr int32_t INDEX_4 = 4;      // Arg Index
 constexpr int32_t SIZE_OF_FOUR = 4; // Border Radius array size
+constexpr int32_t BORDER_RADIUS_INDEX_1 = 2;
+constexpr int32_t BORDER_RADIUS_INDEX_2 = 3;
+constexpr int32_t BORDER_RADIUS_INDEX_3 = 4;
+constexpr int32_t BORDER_RADIUS_INDEX_4 = 4;
+constexpr int32_t BORDER_RADIUS_VALUE = 0;
+
+void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(BORDER_RADIUS_VALUE);
+        options.push_back(BORDER_RADIUS_VALUE);
+    }
+}
+
+void ParseOuterBorderRadius(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(BORDER_RADIUS_INDEX_1);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(BORDER_RADIUS_INDEX_2);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(BORDER_RADIUS_INDEX_3);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(BORDER_RADIUS_INDEX_4);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    PushOuterBorderDimensionVector(topLeftOptional, values);
+    PushOuterBorderDimensionVector(topRightOptional, values);
+    PushOuterBorderDimensionVector(bottomLeftOptional, values);
+    PushOuterBorderDimensionVector(bottomRightOptional, values);
+}
+
 const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
     1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
 };
@@ -787,7 +831,13 @@ ArkUINativeModuleValue ImageBridge::SetImageBorder(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getImageModifier()->setImageBorder(nativeNode);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        GetArkUINodeModifiers()->getImageModifier()->setImageBorder(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<ArkUI_Float32> options;
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options); // Border Radius args start index
+    GetArkUINodeModifiers()->getImageModifier()->setImageBorderWithValues(nativeNode, options.data(), options.size());
     return panda::JSValueRef::Undefined(vm);
 }
 

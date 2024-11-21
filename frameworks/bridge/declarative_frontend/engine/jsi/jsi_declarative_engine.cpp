@@ -1390,6 +1390,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
+        LocalScope scope(obj_.GetEcmaVM());
         Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
@@ -1591,7 +1592,8 @@ bool JsiDeclarativeEngine::LoadPageSource(
 
 bool JsiDeclarativeEngine::LoadPageSource(
     const std::shared_ptr<std::vector<uint8_t>>& content,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback,
+    const std::string& contentName)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("LoadJs by buffer");
@@ -1600,7 +1602,7 @@ bool JsiDeclarativeEngine::LoadPageSource(
     CHECK_NULL_RETURN(container, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (!arkRuntime->EvaluateJsCode(content->data(), content->size())) {
+    if (!arkRuntime->EvaluateJsCode(content->data(), content->size(), contentName)) {
         return false;
     }
     return true;
@@ -1908,6 +1910,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponentImpl);
 
         nativeXComponentImpl->SetXComponentId(componentId);
+
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
         xcPattern->OnFrameEventInit();
@@ -1923,7 +1926,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
-
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1934,6 +1936,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
         }
+
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
@@ -2253,6 +2256,20 @@ std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
     return "";
 }
 
+std::optional<std::string> JsiDeclarativeEngine::GetRouteNameByUrl(
+    const std::string& url, const std::string& bundleName, const std::string& moduleName)
+{
+    auto iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
+        [&bundleName, &moduleName, &url](const auto& item) {
+            return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
+                    item.second.pagePath == url;
+        });
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->first;
+    }
+    return std::nullopt;
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
 #ifdef USE_ARK_ENGINE
@@ -2447,7 +2464,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
         CHECK_NULL_VOID(executor);
         executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
     };
-    
+
     LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
 #endif
 }
@@ -2549,7 +2566,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif

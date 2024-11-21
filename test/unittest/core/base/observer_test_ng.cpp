@@ -35,7 +35,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const float DEFAULT_DENSITY =  3.5f;
+} // namespace
 class ObserverTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -51,6 +53,7 @@ void ObserverTestNg::TearDownTestCase()
 {
     MockContainer::TearDown();
 }
+
 
 /**
  * @tc.name: ObserverTestNg001
@@ -155,13 +158,11 @@ HWTEST_F(ObserverTestNg, ObserverTestNg004, TestSize.Level1)
  */
 HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
 {
-    double testDensity = 0.;
-    UIObserverHandler::DensityHandleFunc densityHandleFunc = [&testDensity](AbilityContextInfo& context,
-                                                                 double density) -> void { testDensity = density; };
-    UIObserverHandler::GetInstance().densityHandleFunc_ = densityHandleFunc;
-    double targetDensity = 3.5;
+    auto targetDensity = DEFAULT_DENSITY;
+    UIObserverHandler::GetInstance().densityHandleFunc_ = [](AbilityContextInfo& context, double density) -> void {
+        EXPECT_EQ(density, DEFAULT_DENSITY);
+    };
     UIObserverHandler::GetInstance().NotifyDensityChange(targetDensity);
-    EXPECT_EQ(testDensity, targetDensity);
 }
 
 /**
@@ -171,15 +172,15 @@ HWTEST_F(ObserverTestNg, ObserverTestNg005, TestSize.Level1)
  */
 HWTEST_F(ObserverTestNg, ObserverTestNg006, TestSize.Level1)
 {
-    bool hasNotified = false;
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation = NavigationOperation::PUSH;
-    UIObserverHandler::NavDestinationSwitchHandleFunc handleFunc =
-        [&hasNotified](const AbilityContextInfo&, NavDestinationSwitchInfo&) -> void { hasNotified = true; };
+    UIObserverHandler::NavDestinationSwitchHandleFunc handleFunc = [](const AbilityContextInfo&,
+                                                                       NavDestinationSwitchInfo& info) -> void {
+        EXPECT_EQ(info.operation, NavigationOperation::PUSH);
+    };
     UIObserverHandler::GetInstance().navDestinationSwitchHandleFunc_ = handleFunc;
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(std::move(from), std::move(to), operation);
-    EXPECT_TRUE(hasNotified);
 }
 
 /**

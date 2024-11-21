@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
+#include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -73,17 +76,33 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    CHECK_NULL_VOID(!layoutWrapper->GetAllChildrenWithBuild().empty());
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    // init align center left, and get user defined alignment
-    auto align = Alignment::CENTER_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+    // init align, and get user defined alignment
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MarqueePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(marqueeLayoutProperty);
+    auto content = marqueeLayoutProperty->GetSrc().value_or("");
+    auto direction = layoutProperty->GetLayoutDirection();
+    auto textDirection = pattern->GetTextDirection(content, direction);
+    auto align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
+
+    auto textGeoNode = child->GetGeometryNode();
+    CHECK_NULL_VOID(textGeoNode);
+    auto minusLen = frameSize.Width() - textGeoNode->GetMarginFrameSize().Width();
+    if (layoutProperty->GetPositionProperty() && GreatOrEqual(minusLen, 0.0f)) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     OffsetF translate;
-    translate.SetX((1.0 + align.GetHorizontal()) *
-                   (frameSize.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);
+    translate.SetX((1.0 + align.GetHorizontal()) * minusLen / MULTIPLE);
     translate.SetY(0.0f);
-    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    textGeoNode->SetMarginFrameOffset(translate);
     child->Layout();
 }
 } // namespace OHOS::Ace::NG

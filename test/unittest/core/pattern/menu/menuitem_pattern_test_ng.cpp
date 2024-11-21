@@ -1122,7 +1122,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg010, TestSize.Level1)
      * @tc.cases: case1. the hierarchicalParameter is true.
      * @tc.expected: algorithm is not null and sub menu show correctly.
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     subMenuPattern->SetParentMenuItem(menuItemNode);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
@@ -1192,7 +1192,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg011, TestSize.Level1)
      * @tc.cases: case1. the hierarchicalParameter is false.
      * @tc.expected: algorithm is not null and sub menu show correctly.
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     subMenuPattern->SetParentMenuItem(menuItemNode);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));

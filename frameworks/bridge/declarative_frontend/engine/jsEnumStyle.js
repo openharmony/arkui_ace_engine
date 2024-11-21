@@ -899,6 +899,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
 
+let HoverModeAreaType;
+(function (HoverModeAreaType) {
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
+})(HoverModeAreaType || (HoverModeAreaType = {}));
+
 var DialogButtonStyle;
 (function (DialogButtonStyle) {
   DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";
@@ -1059,8 +1065,8 @@ var RichEditorResponseType;
 
 let MenuType;
 (function (MenuType) {
-  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
-  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+  MenuType[MenuType.SELECTION_MENU = 0] = 'SELECTION_MENU';
+  MenuType[MenuType.PREVIEW_MENU = 1] = 'PREVIEW_MENU';
 })(MenuType || (MenuType = {}));
 
 var MenuPreviewMode;
@@ -1444,19 +1450,6 @@ var BlurStyle;
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
-var BlurStyleActivePolicy;
-(function (BlurStyleActivePolicy) {
-  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
-})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
-
-var BlurType;
-(function (BlurType) {
-  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
-  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
-})(BlurType || (BlurType = {}));
-
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
@@ -1621,6 +1614,14 @@ var ScrollSizeMode;
   ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
+
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['NONE'] = 0] = 'NONE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_RESIZE'] = 1] = 'TRANSLATE_AND_RESIZE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['RESIZE_ONLY'] = 2] = 'RESIZE_ONLY';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_SCROLL'] = 3] = 'TRANSLATE_AND_SCROLL';
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -3262,11 +3263,11 @@ var StyledStringKey;
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let MenuPolicy;
@@ -3278,12 +3279,12 @@ let MenuPolicy;
 
 let DataOperationType;
 (function (DataOperationType) {
-  DataOperationType['ADD'] = "add";
-  DataOperationType['DELETE'] = "delete";
-  DataOperationType['CHANGE'] = "change";
-  DataOperationType['MOVE'] = "move";
-  DataOperationType['EXCHANGE'] = "exchange";
-  DataOperationType['RELOAD'] = "reload";
+  DataOperationType['ADD'] = 'add';
+  DataOperationType['DELETE'] = 'delete';
+  DataOperationType['CHANGE'] = 'change';
+  DataOperationType['MOVE'] = 'move';
+  DataOperationType['EXCHANGE'] = 'exchange';
+  DataOperationType['RELOAD'] = 'reload';
 })(DataOperationType || (DataOperationType = {}));
 
 let PreDragStatus;
@@ -3346,6 +3347,32 @@ var AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
   AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
+
+let WidthBreakpoint;
+(function (WidthBreakpoint) {
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XS'] = 0] = 'WIDTH_XS';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_SM'] = 1] = 'WIDTH_SM';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_MD'] = 2] = 'WIDTH_MD';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_LG'] = 3] = 'WIDTH_LG';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XL'] = 4] = 'WIDTH_XL';
+})(WidthBreakpoint || (WidthBreakpoint = {}));
+
+let HeightBreakpoint;
+(function (HeightBreakpoint) {
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_SM'] = 0] = 'HEIGHT_SM';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_MD'] = 1] = 'HEIGHT_MD';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
+})(HeightBreakpoint || (HeightBreakpoint = {}));
+
+let WebElementType;
+(function (WebElementType) {
+  WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
+})(WebElementType || (WebElementType = {}));
+
+let WebResponseType;
+(function (WebResponseType) {
+  WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+})(WebResponseType || (WebResponseType = {}));
 
 class ImageAnalyzerController {
   constructor() {

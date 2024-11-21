@@ -412,7 +412,7 @@ public:
 
     void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
     {
-        actionEnd_ = std::move(actionEnd);
+        AddPanActionEndEvent(std::move(actionEnd));
     }
 
     bool GetIsDragging() const
@@ -447,7 +447,7 @@ public:
     }
 
     void StopFrictionAnimation();
-    void StopSpringAnimation();
+    void StopSpringAnimation(bool reachFinalPosition = false);
     void StopSnapAnimation();
 
     RefPtr<NodeAnimatablePropertyFloat> GetFrictionProperty();
@@ -468,6 +468,11 @@ public:
     bool GetNestedScrolling() const
     {
         return nestedScrolling_;
+    }
+
+    void AddPanActionEndEvent(GestureEventFunc&& event)
+    {
+        panActionEndEvents_.emplace_back(event);
     }
 
 private:
@@ -564,7 +569,7 @@ private:
     bool needScrollSnapChange_ = false;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
-    GestureEventFunc actionEnd_;
+    std::list<GestureEventFunc> panActionEndEvents_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
 

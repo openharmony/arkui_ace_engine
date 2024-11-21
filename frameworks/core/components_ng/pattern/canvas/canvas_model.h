@@ -33,6 +33,7 @@ public:
     virtual void SetOnReady(std::function<void()>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};
     virtual void SetImageAIOptions(void* options) {};
+    virtual void DetachRenderContext() {};
 
 private:
     static std::unique_ptr<CanvasModel> instance_;

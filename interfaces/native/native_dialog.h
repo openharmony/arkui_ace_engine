@@ -16,6 +16,7 @@
 #ifndef ARKUI_NATIVE_DIALOG_H
 #define ARKUI_NATIVE_DIALOG_H
 
+#include <stdbool.h>
 #include "native_type.h"
 
 #ifdef __cplusplus
@@ -267,8 +268,8 @@ void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
  *         {@link DIALOG_DISMISS_SLIDE_DOWN}: sliding down.
  * @since 12
  */
-int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
 
+int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
 #ifdef __cplusplus
 };
 #endif

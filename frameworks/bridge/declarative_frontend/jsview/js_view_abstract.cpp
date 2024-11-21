@@ -203,52 +203,6 @@ constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
 
-bool CheckJSCallbackInfo(
-    const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes)
-{
-    bool typeVerified = false;
-    std::string unrecognizedType;
-    for (const auto& infoType : infoTypes) {
-        switch (infoType) {
-            case JSCallbackInfoType::STRING:
-                if (tmpInfo->IsString()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "string|";
-                }
-                break;
-            case JSCallbackInfoType::NUMBER:
-                if (tmpInfo->IsNumber()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "number|";
-                }
-                break;
-            case JSCallbackInfoType::OBJECT:
-                if (tmpInfo->IsObject()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "object|";
-                }
-                break;
-            case JSCallbackInfoType::FUNCTION:
-                if (tmpInfo->IsFunction()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "Function|";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    if (!typeVerified) {
-        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
-            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
-    }
-    return typeVerified || infoTypes.size() == 0;
-}
-
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
 {
@@ -989,6 +943,11 @@ void ParsePopupCommonParam(
     auto enableArrowValue = popupObj->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
+    auto followTransformOfTargetValue = popupObj->GetProperty("followTransformOfTarget");
+    if (followTransformOfTargetValue->IsBoolean()) {
+        popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
     }
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
@@ -1967,9 +1926,11 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
     }
     auto obj = JSRef<JSObject>::Cast(arg);
     auto transitionVal = obj->GetProperty("transition");
+
     if (!transitionVal->IsObject()) {
         return nullptr;
     }
+
     auto transitionObj = JSRef<JSObject>::Cast(transitionVal);
     auto chainedEffect = ParseChainedTransition(transitionObj, info.GetExecutionContext());
     return chainedEffect;
@@ -2451,6 +2412,51 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
 
+void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>& align,
+    std::optional<CalcDimension>& offsetX, std::optional<CalcDimension>& offsetY)
+{
+    if (info[0]->IsString()) {
+        std::string text = info[0]->ToString();
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            text, nullptr, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> overlayObject = JSRef<JSObject>::Cast(info[0]);
+        auto builder = overlayObject->GetProperty("builder");
+        if (builder->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                              node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Overlay");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+            ViewAbstractModel::GetInstance()->SetOverlay(
+                "", std::move(buildFunc), nullptr, align, offsetX, offsetY, NG::OverlayType::BUILDER);
+            return;
+        }
+
+        JSRef<JSVal> builderNode = overlayObject->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            return;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            return;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, contentNode, align, offsetX, offsetY, NG::OverlayType::COMPONENT_CONTENT);
+    }
+}
+
 void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
 {
     if (info.Length() > 0 && (info[0]->IsUndefined())) {
@@ -2489,46 +2495,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
         }
     }
 
-    if (info[0]->IsString()) {
-        std::string text = info[0]->ToString();
-        ViewAbstractModel::GetInstance()->SetOverlay(
-            text, nullptr, nullptr, align, offsetX, offsetY, NG::OverlayType::TEXT);
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> overlayObject = JSRef<JSObject>::Cast(info[0]);
-        auto builder = overlayObject->GetProperty("builder");
-        if (builder->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-            CHECK_NULL_VOID(builderFunc);
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                 node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("Overlay");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute();
-            };
-            ViewAbstractModel::GetInstance()->SetOverlay(
-                "", std::move(buildFunc), nullptr, align, offsetX, offsetY, NG::OverlayType::BUILDER);
-            return;
-        }
-
-        JSRef<JSVal> builderNode = overlayObject->GetProperty("builderNode_");
-        if (!builderNode->IsObject()) {
-            return;
-        }
-        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
-        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
-        if (nodePtr.IsEmpty()) {
-            return;
-        }
-        const auto* vm = nodePtr->GetEcmaVM();
-        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
-        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        RefPtr<NG::FrameNode> contentNode = AceType::Claim(frameNode);
-        ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, contentNode, align, offsetX, offsetY, NG::OverlayType::COMPONENT_CONTENT);
-    }
+    ParseOverlayFirstParam(info, align, offsetX, offsetY);
 }
 
 Alignment JSViewAbstract::ParseAlignment(int32_t align)
@@ -2843,56 +2810,6 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
-void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
-{
-    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-    ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
-    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
-        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
-        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
-    }
-    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
-    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
-    }
-
-    // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
-    ParseJsInt32(jsOption->GetProperty("policy"), policy);
-    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
-        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
-    }
-
-    // blurType
-    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
-    ParseJsInt32(jsOption->GetProperty("type"), blurType);
-    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
-        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
-        styleOption.blurType = static_cast<BlurType>(blurType);
-    }
-
-    // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
-        styleOption.isValidColor = true;
-    }
-
-    // scale
-    if (jsOption->GetProperty("scale")->IsNumber()) {
-        double scale = jsOption->GetProperty("scale")->ToNumber<double>();
-        styleOption.scale = std::clamp(scale, 0.0, 1.0);
-    }
-
-    if (jsOption->GetProperty("blurOptions")->IsObject()) {
-        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
-        BlurOption blurOption;
-        ParseBlurOption(jsBlurOption, blurOption);
-        styleOption.blurOption = blurOption;
-    }
-}
-
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -2908,7 +2825,29 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-        ParseBlurStyleOption(jsOption, styleOption);
+        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+
+        if (jsOption->GetProperty("blurOptions")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
+        }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
@@ -2969,24 +2908,20 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
-    effectOption.radius = radius;
-
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
-    effectOption.saturation = saturation;
-
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
-    effectOption.brightness = brightness;
-
-    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
-
+    Color color = Color::TRANSPARENT;
+    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
     ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
@@ -2994,35 +2929,13 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
-    effectOption.adaptiveColor = adaptiveColor;
-
-    // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
-    ParseJsInt32(jsOption->GetProperty("policy"), policy);
-    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
-        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
-    }
-
-    // blurType
-    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
-    ParseJsInt32(jsOption->GetProperty("type"), blurType);
-    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
-        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
-        effectOption.blurType = static_cast<BlurType>(blurType);
-    }
-
-    // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
-        effectOption.isValidColor = true;
-    }
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
-        effectOption.blurOption = blurOption;
     }
+    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
@@ -3209,6 +3122,18 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImageSize(bgImgSize);
 }
 
+void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
+{
+    if (align > 8 || align < 0) {
+        return;
+    }
+    std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
+        { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
+        { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
+    SetBgImgPosition(
+                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
+}
+
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -3222,41 +3147,7 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     if (jsVal->IsNumber()) {
         int32_t align = jsVal->ToNumber<int32_t>();
         bgImgPosition.SetIsAlign(true);
-        switch (align) {
-            case 0:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
-                break;
-            case 1:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, 0.0, bgImgPosition);
-                break;
-            case 2:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, 0.0, bgImgPosition);
-                break;
-            case 3:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 4:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 5:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 6:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, FULL_DIMENSION, bgImgPosition);
-                break;
-            case 7:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, FULL_DIMENSION, bgImgPosition);
-                break;
-            case 8:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, FULL_DIMENSION, bgImgPosition);
-                break;
-            default:
-                break;
-        }
+        SetBgImgPositionWithAlign(bgImgPosition, align);
     } else {
         CalcDimension x;
         CalcDimension y;
@@ -3470,6 +3361,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     auto backgroundBlurStyle = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_BLUR_STYLE));
+    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -3509,7 +3401,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         RefPtr<JsFunction> jsAboutToAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToAppearValue));
         auto aboutToAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToAppearFunc),
-                                 node = frameNode]() {
+                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToAppear");
             PipelineContext::SetCallBackNode(node);
@@ -3523,7 +3415,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         RefPtr<JsFunction> jsAboutToDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToDisAppearValue));
         auto aboutToDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToDisAppearFunc),
-                                    node = frameNode]() {
+                               node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToDisappear");
             PipelineContext::SetCallBackNode(node);
@@ -3635,8 +3527,6 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
-        } else if (preview->ToNumber<int32_t>() == 0) {
-            menuParam.isSetPreviewNone = true;
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -3716,6 +3606,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             }
         }
     }
+
     if (info[builderIndex]->IsArray()) {
         std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
@@ -3767,15 +3658,25 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     if (jsVal->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
-        ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
             if (isMargin) {
-                ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetMargins(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             } else {
-                ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3887,7 +3788,7 @@ void JSViewAbstract::ParseLocalizedMarginOrLocalizedPaddingCorner(
     }
 }
 
-void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
+bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
     const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
@@ -3898,10 +3799,11 @@ void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
         commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
         commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        return true;
     }
     ParseMarginOrPaddingCorner(object, commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
         commonCalcDimension.right);
+    return false;
 }
 
 void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
@@ -4047,7 +3949,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
-
     ParseBorderWidth(jsVal);
 }
 
@@ -4180,31 +4081,27 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(jsVal);
-    if (object->IsEmpty()) {
-        return;
-    }
+    CHECK_NULL_VOID(!object->IsEmpty());
 
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
     uint8_t imageBorderBitsets = 0;
 
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
-    if (!valueSource->IsString() && !valueSource->IsObject()) {
-        return;
-    }
+    CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
-    if (valueSource->IsString()) {
-        srcResult = valueSource->ToString();
-        if (!srcResult.empty()) {
-            borderImage->SetSrc(srcResult);
-            imageBorderBitsets |= BorderImage::SOURCE_BIT;
-        }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(valueSource, bundleName, moduleName);
+    borderImage->SetBundleName(bundleName);
+    borderImage->SetModuleName(moduleName);
+    if (valueSource->IsString() && !valueSource->ToString().empty()) {
+        borderImage->SetSrc(valueSource->ToString());
+        imageBorderBitsets |= BorderImage::SOURCE_BIT;
+    } else if (valueSource->IsObject() && ParseJsMedia(valueSource, srcResult)) {
+        borderImage->SetSrc(srcResult);
+        imageBorderBitsets |= BorderImage::SOURCE_BIT;
     } else if (valueSource->IsObject()) {
-        if (ParseJsMedia(valueSource, srcResult)) {
-            borderImage->SetSrc(srcResult);
-            imageBorderBitsets |= BorderImage::SOURCE_BIT;
-        } else {
-            ParseBorderImageLinearGradient(valueSource, imageBorderBitsets);
-        }
+        ParseBorderImageLinearGradient(valueSource, imageBorderBitsets);
     }
     auto valueOutset = object->GetProperty("outset");
     if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
@@ -4311,29 +4208,54 @@ void JSViewAbstract::ParseBorderImageLengthMetrics(
     }
 }
 
-void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
+bool JSViewAbstract::CheckJSCallbackInfo(
+    const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes)
 {
-    if (!args->IsObject()) {
-        return;
+    bool typeVerified = false;
+    std::string unrecognizedType;
+    for (const auto& infoType : infoTypes) {
+        switch (infoType) {
+            case JSCallbackInfoType::STRING:
+                if (tmpInfo->IsString()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "string|";
+                }
+                break;
+            case JSCallbackInfoType::NUMBER:
+                if (tmpInfo->IsNumber()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "number|";
+                }
+                break;
+            case JSCallbackInfoType::OBJECT:
+                if (tmpInfo->IsObject()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "object|";
+                }
+                break;
+            case JSCallbackInfoType::FUNCTION:
+                if (tmpInfo->IsFunction()) {
+                    typeVerified = true;
+                } else {
+                    unrecognizedType += "Function|";
+                }
+                break;
+            default:
+                break;
+        }
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args);
-    NG::Gradient lineGradient;
-    lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    // angle
-    std::optional<float> degree;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree);
-    } else {
-        GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree, 180.0f);
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
     }
-    if (degree) {
-        lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
-        degree.reset();
-    }
-    // direction
-    auto direction = static_cast<NG::GradientDirection>(
-        jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::DIRECTION),
-        static_cast<int32_t>(NG::GradientDirection::NONE)));
+    return typeVerified || infoTypes.size() == 0;
+}
+
+void JSViewAbstract::UpdateGradientWithDirection(NG::Gradient& lineGradient, NG::GradientDirection direction)
+{
     switch (direction) {
         case NG::GradientDirection::LEFT:
             lineGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -4369,6 +4291,32 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, ui
         default:
             break;
     }
+}
+
+void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset)
+{
+    if (!args->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args);
+    NG::Gradient lineGradient;
+    lineGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    // angle
+    std::optional<float> degree;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree);
+    } else {
+        GetJsAngleWithDefault(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, degree, 180.0f);
+    }
+    if (degree) {
+        lineGradient.GetLinearGradient()->angle = CalcDimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // direction
+    auto direction = static_cast<NG::GradientDirection>(
+        jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::DIRECTION),
+        static_cast<int32_t>(NG::GradientDirection::NONE)));
+    UpdateGradientWithDirection(lineGradient, direction);
     auto repeating = jsObj->GetPropertyValue<bool>(static_cast<int32_t>(ArkUIIndex::REPEATING), false);
     lineGradient.SetRepeat(repeating);
     NewGetJsGradientColorStops(lineGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
@@ -5146,10 +5094,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
             return true;
         }
 
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (type->IsNull() || !type->IsNumber()) {
-            return false;
-        }
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
@@ -5532,6 +5476,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
+        result.SetResourceId(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -5901,9 +5846,9 @@ void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabB
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
         auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                           modifierNormal = std::move(modifierNormalObj),
-                           modifierSelected = std::move(modifierSelectedObj)](
-                           WeakPtr<NG::FrameNode> frameNode, std::string type) {
+                            modifierNormal = std::move(modifierNormalObj),
+                            modifierSelected = std::move(modifierSelectedObj)](
+                            WeakPtr<NG::FrameNode> frameNode, std::string type) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto node = frameNode.Upgrade();
             CHECK_NULL_VOID(node);
@@ -6320,19 +6265,7 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         }
     }
 
-    auto numberBadge = obj->GetProperty("numberBadge");
-    if (!numberBadge->IsEmpty()) {
-        if (numberBadge->IsNumber()) {
-            previewOption.isNumber = true;
-            previewOption.badgeNumber = numberBadge->ToNumber<int>();
-        } else if (numberBadge->IsBoolean()) {
-            previewOption.isNumber = false;
-            previewOption.isShowBadge = numberBadge->ToBoolean();
-        }
-    } else {
-        previewOption.isNumber = false;
-        previewOption.isShowBadge = true;
-    }
+    JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
@@ -6343,6 +6276,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+        }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
         }
     }
 
@@ -6559,7 +6496,7 @@ void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSizeChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnSizeChangeFunction),
-                             node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
+                            node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onSizeChange");
         PipelineContext::SetCallBackNode(node);
@@ -6931,7 +6868,7 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
     if (ParseMotionPath(jsVal, motionPathOption)) {
         ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
     } else {
-        LOGI("Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Parse animation motionPath failed. %{public}s", jsVal->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetMotionPath(MotionPathOption());
     }
 }
@@ -7636,6 +7573,38 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsAccessibilitySelected(const JSCallbackInfo& info)
+{
+    bool selected = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        selected = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilitySelected(selected, resetValue);
+}
+
+void JSViewAbstract::JsAccessibilityChecked(const JSCallbackInfo& info)
+{
+    bool checked = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        checked = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked, resetValue);
+}
+
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -7664,17 +7633,6 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
         alignment = ParseAlignment(value);
     }
     ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
-}
-
-void UpdatePreviewModeForDraggableTarget(const WeakPtr<NG::FrameNode>& target, NG::MenuParam& menuParam)
-{
-    CHECK_NULL_VOID(menuParam.previewMode == MenuPreviewMode::NONE && !menuParam.isSetPreviewNone);
-    auto targetNode = target.Upgrade();
-    CHECK_NULL_VOID(targetNode);
-    if (NG::GestureEventHub::IsAllowedDrag(targetNode)) {
-        menuParam.previewMode = MenuPreviewMode::IMAGE;
-        TAG_LOGI(AceLogTag::ACE_MENU, "targetNode is draggable, use image for preview");
-    }
 }
 
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
@@ -7716,12 +7674,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-    UpdatePreviewModeForDraggableTarget(frameNode, menuParam);
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = NG::MenuBindingType::RIGHT_CLICK;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -7738,6 +7695,7 @@ bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "ContentCover get isShow is: %{public}d", isShow);
     return isShow;
 }
 
@@ -7905,6 +7863,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
+    auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
@@ -7966,6 +7925,17 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(sheetScrollSizeMode);
         }
     }
+
+    if (keyboardAvoidMode->IsNull() || keyboardAvoidMode->IsUndefined()) {
+        sheetStyle.sheetKeyboardAvoidMode.reset();
+    } else if (keyboardAvoidMode->IsNumber()) {
+        auto sheetKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (sheetKeyboardAvoidMode >= static_cast<int>(NG::SheetKeyboardAvoidMode::NONE) &&
+            sheetKeyboardAvoidMode <= static_cast<int>(NG::SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL)) {
+            sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
+        }
+    }
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
@@ -8215,7 +8185,8 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
     std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
     std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
     std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
-    std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
+    std::function<void(const float)>& onDetentsDidChange,
+    std::function<void(const float)>& onWidthDidChange,
     std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack)
 {
     auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
@@ -8574,11 +8545,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundImageResizable", &JSViewAbstract::JsBackgroundImageResizable);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("backgroundEffect", &JSViewAbstract::JsBackgroundEffect);
-    JSClass<JSViewAbstract>::StaticMethod("backgroundImageResizable", &JSViewAbstract::JsBackgroundImageResizable);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
@@ -8624,7 +8595,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBrightness", &JSViewAbstract::JsBackgroundBrightness);
-    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightnessInternal", &JSViewAbstract::JsBackgroundBrightnessInternal);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightnessInternal",
+        &JSViewAbstract::JsBackgroundBrightnessInternal);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBrightness", &JSViewAbstract::JsForegroundBrightness);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
@@ -8718,6 +8690,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilitySelected", &JSViewAbstract::JsAccessibilitySelected);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityChecked", &JSViewAbstract::JsAccessibilityChecked);
+
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
@@ -8862,7 +8837,6 @@ void JSViewAbstract::JsOnPreDrag(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsOnPreDrag", jsVal, checkList)) {
         return;
     }
-
     RefPtr<JsDragFunction> jsDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onPreDrag = [execCtx = info.GetExecutionContext(), func = std::move(jsDragFunc), node = frameNode](
@@ -9776,7 +9750,6 @@ void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
         ACE_SCORING_EVENT("onGestureJudgeBegin");
-        PipelineContext::SetCallBackNode(node);
         return func->Execute(gestureInfo, info);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
@@ -9790,7 +9763,7 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
     }
 
     auto jsOnTouchInterceptFunc = AceType::MakeRefPtr<JsTouchInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTouchInterceptfunc = [execCtx = info.GetExecutionContext(), func = jsOnTouchInterceptFunc, node = frameNode](
                                     TouchEventInfo& info) -> NG::HitTestMode {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::HitTestMode::HTMDEFAULT);
@@ -9827,7 +9800,7 @@ void JSViewAbstract::JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo&
 void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
-        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr);
+        ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(nullptr, false);
         return;
     }
 
@@ -9842,7 +9815,13 @@ void JSViewAbstract::JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         return func->Execute(info, current, others);
     };
-    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(std::move(onGestureRecognizerJudgefunc));
+
+    bool exposeInnerGestureFlag = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        exposeInnerGestureFlag = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetOnGestureRecognizerJudgeBegin(
+        std::move(onGestureRecognizerJudgefunc), exposeInnerGestureFlag);
 }
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
@@ -10181,6 +10160,59 @@ bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
     return false;
 }
 
+std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+                                                                         NG::DrawingContext& context) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
+
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+
+        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
+}
+
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
@@ -10386,14 +10418,41 @@ void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::D
                                modifier = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto node = frameNode.Upgrade();
-                JSRef<JSVal> params[SECOND_INDEX];
+                JSRef<JSVal> params[PARAMETER_LENGTH_SECOND];
                 params[0] = modifier;
                 params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
                 PipelineContext::SetCallBackNode(node);
-                func->ExecuteJS(SECOND_INDEX, params);
+                func->ExecuteJS(PARAMETER_LENGTH_SECOND, params);
             };
             option.onApply = onApply;
         }
+    }
+}
+
+void JSViewAbstract::SetDragNumberBadge(const JSCallbackInfo& info, NG::DragPreviewOption& option)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto numberBadge = obj->GetProperty("numberBadge");
+    if (!numberBadge->IsEmpty()) {
+        if (numberBadge->IsNumber()) {
+            int64_t number = numberBadge->ToNumber<int64_t>();
+            if (number < 0 || number > INT_MAX) {
+                option.isNumber = false;
+                option.isShowBadge = true;
+            } else {
+                option.isNumber = true;
+                option.badgeNumber = numberBadge->ToNumber<int>();
+            }
+        } else if (numberBadge->IsBoolean()) {
+            option.isNumber = false;
+            option.isShowBadge = numberBadge->ToBoolean();
+        }
+    } else {
+        option.isNumber = false;
+        option.isShowBadge = true;
     }
 }
 
@@ -10443,59 +10502,6 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     if (ParseJsDimensionVpNG(heightValue, height, true)) {
         properties.height = height;
     }
-}
-
-std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
-    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
-{
-    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
-                                                                         NG::DrawingContext& context) -> void {
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-        objectTemplate->SetInternalFieldCount(1);
-        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-        contextObj->SetPropertyObject("size", sizeObj);
-
-        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
-        sizeInPxObj->SetProperty<float>("height", context.height);
-        sizeInPxObj->SetProperty<float>("width", context.height);
-        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
-
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        ScopeRAII scope(env);
-
-        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
-        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-        if (unwrapCanvas) {
-            unwrapCanvas->SaveCanvas();
-            unwrapCanvas->ClipCanvas(context.width, context.height);
-        }
-        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-        contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-        auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-        if (unwrapCanvas) {
-            unwrapCanvas->RestoreCanvas();
-            unwrapCanvas->ResetCanvas();
-        }
-    };
-    return drawCallback;
 }
 
 std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
@@ -10683,36 +10689,6 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
-void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
-    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
-{
-    auto vm = info.GetVm();
-    auto globalObj = JSNApi::GetGlobalObject(vm);
-    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
-    JsiValue jsiValue(globalFunc);
-    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
-    if (globalFuncRef->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        if (!modifierObj->IsObject()) {
-            symbolApply = nullptr;
-        } else {
-            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto node = frameNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                JSRef<JSVal> params[2];
-                params[0] = modifierParam;
-                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
-                PipelineContext::SetCallBackNode(node);
-                func->ExecuteJS(2, params);
-            };
-            symbolApply = onApply;
-        }
-    }
-}
-
 int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
 {
     int32_t resId = 0;
@@ -10761,6 +10737,7 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
+
 void JSViewAbstract::ParseOnCreateMenu(
     const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback)
 {
@@ -10778,6 +10755,7 @@ void JSViewAbstract::ParseOnCreateMenu(
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, menuParams);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, menuParams);
+
         pipelineContext->UpdateCurrentActiveNode(node);
         auto menuItem = func->ExecuteWithValue(systemMenuItems);
         if (!menuItem->IsArray()) {
@@ -10979,5 +10957,35 @@ void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
         func->ExecuteJS(2, params);
     };
     textStyleApply = onApply;
+}
+
+void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        if (!modifierObj->IsObject()) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                JSRef<JSVal> params[2];
+                params[0] = modifierParam;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(2, params);
+            };
+            symbolApply = onApply;
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

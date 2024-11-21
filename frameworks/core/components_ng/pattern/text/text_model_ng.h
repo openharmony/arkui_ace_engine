@@ -73,7 +73,6 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetDraggable(bool draggable) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
@@ -108,7 +107,6 @@ public:
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);

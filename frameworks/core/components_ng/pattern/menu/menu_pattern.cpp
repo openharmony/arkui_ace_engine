@@ -193,7 +193,7 @@ void MenuPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
     InitTheme(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
@@ -215,6 +215,34 @@ void MenuPattern::OnAttachToFrameNode()
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
+    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->SetHasFoldModeChangedTransition(true);
+    };
+    foldDisplayModeChangedCallbackId_ =
+        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+}
+
+void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
+
+    if (foldDisplayModeChangedCallbackId_.has_value()) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void MenuPattern::OnModifyDone()
@@ -488,7 +516,9 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemGroupPattern>();
+            auto childItemNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(childItemNode);
+            auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->ModifyDivider();
             auto itemGroupNode = AceType::DynamicCast<UINode>(child);
@@ -496,6 +526,10 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             isNeedDivider_ = false;
             UpdateMenuItemChildren(itemGroupNode);
             isNeedDivider_ = false;
+            auto accessibilityProperty =
+                childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
@@ -556,13 +590,13 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto rootMenuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     CHECK_NULL_VOID(rootMenuPattern);
     // copy menu pattern properties to rootMenu
@@ -647,7 +681,9 @@ void MenuPattern::HideStackMenu() const
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(wrapper)), subMenuWk = WeakClaim(RawPtr(host))] {
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto subMenu = subMenuWk.Upgrade();
+            CHECK_NULL_VOID(subMenu);
+            auto pipeline = subMenu->GetContextWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -909,10 +945,10 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
 
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -938,6 +974,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
+    CHECK_NULL_VOID(host);
     MenuPattern::InitTheme(host);
     // inner menu applies shadow in OnModifyDone(), where it can determine if it's a DesktopMenu or a regular menu
 
@@ -946,7 +983,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         // if user defined padding exists, skip applying default padding
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     // apply default padding from theme on inner menu
@@ -1044,8 +1081,9 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
     CHECK_NULL_VOID(previewGeometryNode);
     auto previewPosition = previewGeometryNode->GetFrameOffset();
     OffsetF previewOriginPosition = GetPreviewOriginOffset();
-
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1073,17 +1111,18 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
 void MenuPattern::ShowPreviewMenuAnimation()
 {
     CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
-    ShowPreviewMenuScaleAnimation();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::CalcHoverScaleInfo(host);
+    ShowPreviewMenuScaleAnimation();
+
     MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
     auto menuPosition = host->GetPaintRectOffset();
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -1222,17 +1261,16 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
 MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
-    auto menuItem = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(menuItem, menuItemInfo);
-    if (menuItem->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+    CHECK_NULL_RETURN(child, menuItemInfo);
+    if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
         menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (menuItem->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto groupChildren = menuItem->GetChildren();
+    } else {
+        const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
-            menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
+            menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
                 return menuItemInfo;
             }
@@ -1320,12 +1358,11 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
     option.SetCurve(MENU_ANIMATION_CURVE);
     auto subImageNode = GetImageNode(subMenuNode);
-    CHECK_NULL_VOID(subImageNode);
-    auto subImageContext = subImageNode->GetRenderContext();
-    AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
+    AnimationUtils::Animate(option, [subImageNode]() {
+        CHECK_NULL_VOID(subImageNode);
+        auto subImageContext = subImageNode->GetRenderContext();
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     });
 
     option.SetCurve(Curves::FRICTION);
@@ -1377,7 +1414,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -1407,7 +1444,9 @@ BorderRadiusProperty MenuPattern::CalcIdealBorderRadius(const BorderRadiusProper
 {
     Dimension defaultDimension(0);
     BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, radius);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, radius);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, radius);
@@ -1532,7 +1571,8 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
 void MenuPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     auto menuTheme = pipeline->GetTheme<SelectTheme>();

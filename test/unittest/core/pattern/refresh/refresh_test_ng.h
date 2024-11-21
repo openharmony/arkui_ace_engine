@@ -27,15 +27,15 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float CUSTOM_NODE_WIDTH = 100.f;
-constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 constexpr float REFRESH_HEIGHT = 400.f;
-
-constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
-constexpr float PERCENT = 0.01; // Percent
-constexpr float RADIO = DEFAULT_FRICTION_RATIO * PERCENT;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
+constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
+constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
+constexpr float PERCENT = 0.01;
+constexpr float RATIO = DEFAULT_FRICTION_RATIO * PERCENT;
+constexpr float CUSTOM_NODE_WIDTH = 100.f;
+constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 
 class RefreshTestNg : public TestNG {
 public:
@@ -43,21 +43,14 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
+    void GetRefresh();
 
-    void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
-    void CreateRefresh(const std::function<void(RefreshModelNG)>& callback = nullptr);
-    void CreateNestedSwiper();
-    void CreateScroll();
-    static RefPtr<FrameNode> CreateCustomNode();
-    void VersionElevenHandleDragEnd(float speed, float targetOffsetY);
+    RefreshModelNG CreateRefresh();
+    void CreateText();
+    RefPtr<FrameNode> CreateCustomNode();
 
     RefPtr<FrameNode> frameNode_;
-    RefPtr<FrameNode> swiper_;
-    RefPtr<FrameNode> scroll_;
     RefPtr<RefreshPattern> pattern_;
-    RefPtr<SwiperPattern> swiperPattern_;
-    RefPtr<ScrollPattern> scrollPattern_;
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;

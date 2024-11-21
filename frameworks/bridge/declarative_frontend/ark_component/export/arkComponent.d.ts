@@ -1029,7 +1029,7 @@ declare class ArkCheckboxComponent extends ArkComponent implements CheckboxAttri
 }
 declare class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    title(value: any): this;
+    title(value: any, options?: NavigationTitleOptions): this;
     hideTitleBar(value: boolean): this;
     onShown(callback: () => void): this;
     onHidden(callback: () => void): this;
@@ -1082,7 +1082,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     mode(value: number): NavigationAttribute;
     backButtonIcon(value: any): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
-    title(value: any): NavigationAttribute;
+    title(value: any, options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;

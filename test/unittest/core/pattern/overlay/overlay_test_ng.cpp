@@ -1448,6 +1448,72 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastTest007
+ * @tc.desc: Test ToastPattern::CreateAccessibilityProperty function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast and get toastNode.
+     */
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastNode, nullptr);
+    toastNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. get ToastAccessibilityProperty.
+     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
+     */
+    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+}
+
+/**
+ * @tc.name: ToastTest008
+ * @tc.desc: Test ToastAccessibilityProperty::SetSelectStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast and get toastNode.
+     */
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastNode, nullptr);
+    toastNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
+     */
+    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. set showedSelectStatus OFF.
+     * @tc.expected: step3 get showedSelectStatus OFF.
+     */
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
+    auto showedSelectStatus = toastProperty->GetSelectStatus();
+    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::OFF);
+
+    /**
+     * @tc.steps: step4. set showedSelectStatus ON.
+     * @tc.expected: step4 get showedSelectStatus ON.
+     */
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
+    showedSelectStatus = toastProperty->GetSelectStatus();
+    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::ON);
+}
+
+/**
  * @tc.name: DialogTest001
  * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
  * @tc.type: FUNC

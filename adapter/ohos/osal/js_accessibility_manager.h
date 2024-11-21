@@ -211,6 +211,8 @@ public:
     bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
+    void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
 #endif //WEB_SUPPORTED
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
@@ -221,6 +223,11 @@ public:
         int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback> &callback) override;
 
     void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override;
+
+    void RegisterAccessibilitySAObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) override;
+
+    void DeregisterAccessibilitySAObserverCallback(int64_t elementId) override;
 
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
@@ -462,7 +469,7 @@ private:
         const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateAccessibilityVisible(
-        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+        const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
     void UpdateVirtualNodeInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
         Accessibility::AccessibilityElementInfo& nodeInfo,
@@ -518,6 +525,13 @@ private:
         const RefPtr<NG::PipelineContext>& context,
         int64_t elementId);
 
+    void NotifyAccessibilitySAStateChange(bool state);
+
+    void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
+    void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
+    int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
@@ -531,9 +545,12 @@ private:
     NG::SizeF oldGeometrySize_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
+    mutable std::mutex componentSACallbackMutex_;
+    std::unordered_map<int64_t, std::shared_ptr<AccessibilitySAObserverCallback>> componentSACallbackMap_;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
+    uint32_t parentWebWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 

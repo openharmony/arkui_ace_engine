@@ -50,31 +50,65 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
 
 std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t index, bool allowFetch)
 {
-    auto it = key4index_.find(index);
-    if (it == key4index_.end()) {
-        // request more keys from TS key gen
-        if (!allowFetch || !FetchMoreKeysTTypes(index, index)) {
-            return std::nullopt;
-        }
+    if (key4index_.find(index) != key4index_.end()) {
+        return key4index_[index];
     }
-    return key4index_[index];
+
+    if (!allowFetch) {
+        return std::nullopt;
+    }
+
+    // need to rebuild L1 after fetch ?
+    const bool rebuildL1 =
+        key4index_.size() == 0 && HasOverlapWithLastActiveRange(index, index);
+
+    // allow to fetch extended range of keys if rebuildL1 is needed
+    FetchMoreKeysTTypes(index, index, rebuildL1 == true);
+
+    if (rebuildL1) {
+        // check for each L1 entry if its key is includes in newly received keys
+        // only keep these in L1
+        RebuildL1WithKey([&](const std::string &key) { return index4Key_.find(key) != index4Key_.end(); });
+    }
+
+    return GetKey4Index(index, false);
+}
+
+/**
+ * does given range overlap the last active range?
+ */
+bool RepeatVirtualScrollCaches::HasOverlapWithLastActiveRange(uint32_t from, uint32_t to)
+{
+    const auto lastFrom = lastActiveRanges_[0].first;
+    const auto lastTo = lastActiveRanges_[0].second;
+    if (lastFrom <= lastTo) {
+        return to >= lastFrom && from <= lastTo;
+    } else {
+        return to <= lastTo || to >= lastFrom || from <= lastTo || from >= lastFrom;
+    }
 }
 
 /**
  * get more index -> key and index -> ttype from TS side
  */
-bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
+bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore)
 {
     if (from > to) {
         return false;
     }
 
-    const bool isRebuildingKeyCaches =
-        ((key4index_.size() == 0) && (to >= lastActiveRanges_[0].first) && (from <= lastActiveRanges_[0].second));
-
-    if (isRebuildingKeyCaches) {
+    if (allowFetchMore) {
         // following a key4index_/ttype4index_ purge fetch the whole range
-        to = (to < lastActiveRanges_[0].second) ? lastActiveRanges_[0].second : to;
+        const auto rangeStart = lastActiveRanges_[0].first;
+        const auto rangeEnd = lastActiveRanges_[0].second;
+
+        if (rangeStart <= rangeEnd) {
+            return FetchMoreKeysTTypes(from, std::max(to, rangeEnd), false);
+        } else {
+            const bool v1 = FetchMoreKeysTTypes(0, rangeEnd, false);
+            const bool v2 = FetchMoreKeysTTypes(rangeStart, std::numeric_limits<int>::max(), false);
+            return v1 || v2;
+        }
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "from:%{public}d, to:%{public}d",
@@ -105,7 +139,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
         const auto cacheItemIter = node4key_.find(key);
         if (cacheItemIter != node4key_.end()) {
             // TS onGetKeys4Range_ has made any needed updates for this key -> UINode
-            cacheItemIter->second.isValid=true;
+            cacheItemIter->second.isValid = true;
         }
         from1++;
     }
@@ -118,12 +152,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
         from1++;
     }
 
-    if (isRebuildingKeyCaches) {
-        // check for each L1 entry if its key is includes in newly received keys
-        // only keep these in L1
-        RebuildL1WithKey([&](const std::string &key) { return index4Key_.find(key) != index4Key_.end(); });
-    }
-
     // false when nothing was fetched
     return from1 > from;
 }
@@ -133,8 +161,8 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d", static_cast<int32_t>(index));
 
-    const auto& key = GetKey4Index(index, false);
-    const auto& node4Key = GetCachedNode4Key(key);
+    const auto key = GetKey4Index(index, false);
+    const auto node4Key = GetCachedNode4Key(key);
     const auto& ttype = GetTType4Index(index);
 
     if (!key.has_value() || !ttype.has_value() || !node4Key.has_value()) {
@@ -173,6 +201,82 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
     }
 
     return node4Key.value().item;
+}
+
+void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
+{
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "AddKeyToL1 key:%{public}s", key.c_str());
+    activeNodeKeysInL1_.emplace(key);
+
+    if (!shouldTriggerReuse) {
+        return;
+    }
+
+    RefPtr<UINode> child;
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        child = it->second.item->GetFrameChildByIndex(0, false);
+    }
+    CHECK_NULL_VOID(child);
+
+    // if node is already reused, do nothing
+    if (reusedNodeIds_.emplace(child->GetId()).second == false) {
+        return;
+    }
+
+    // fire OnReuse to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnReuse() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnReuse();
+}
+
+void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index,
+    bool shouldTriggerRecycle)
+{
+    onUpdateNode_(key, index);
+    AddKeyToL1(key, shouldTriggerRecycle);
+}
+
+ void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
+ {
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1 key:%{public}s", key.c_str());
+    activeNodeKeysInL1_.erase(key);
+
+    if (!shouldTriggerRecycle) {
+        return;
+    }
+
+    RefPtr<UINode> child;
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        child = it->second.item->GetFrameChildByIndex(0, false);
+    }
+    CHECK_NULL_VOID(child);
+
+    // if node is not reused currently, do nothing
+    if (reusedNodeIds_.erase(child->GetId()) == 0) {
+        return;
+    }
+
+    // fire OnRecycle to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnRecycle() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnRecycle();
+}
+
+bool RepeatVirtualScrollCaches::CheckTTypeChanged(uint32_t index)
+{
+    std::string oldTType;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        oldTType = iter->second;
+    }
+
+    FetchMoreKeysTTypes(index, index, false);
+
+    std::string newTType;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        newTType = iter->second;
+    }
+
+    return oldTType != newTType;
 }
 
 /** scenario:
@@ -223,13 +327,13 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no ttype for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const auto& ttype = iterTType->second;
+    const auto ttype = iterTType->second;
     const auto iterNewKey = key4index_.find(forIndex);
     if (iterNewKey == key4index_.end()) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no key for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const std::string& forKey = iterNewKey->second;
+    const std::string forKey = iterNewKey->second;
 
     const auto& oldKey = GetL2KeyToUpdate(ttype);
     if (!oldKey) {
@@ -355,7 +459,8 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
         ACE_SCOPED_TRACE(
             "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
 
-        activeNodeKeysInL1_.erase(keyIter->second);
+        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
+        RemoveKeyFromL1(keyIter->second, false);
     }
 }
 
@@ -378,8 +483,9 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         const auto& cacheItem = node4key_[key];
         int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }
@@ -393,8 +499,9 @@ bool RepeatVirtualScrollCaches::RebuildL1WithKey(const std::function<bool(const 
     bool modified = false;
     for (const auto& key : l1Copy) {
         if (cbFunc(key)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }

@@ -125,7 +125,6 @@ public:
 
     void InitializeParam();
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
-    void DrawTouchAndHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float GetSwitchWidth(const SizeF& contentSize) const;
     float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);
 

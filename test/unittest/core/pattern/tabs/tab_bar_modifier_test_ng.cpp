@@ -17,9 +17,6 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabBarModifierTestNg : public TabsTestNg {
 public:
 };

@@ -127,7 +127,13 @@ public:
         return false;
     }
 
-    GridLayoutInfo GetGridLayoutInfo() const
+    const GridLayoutInfo& GetGridLayoutInfo() const
+    {
+        return gridLayoutInfo_;
+    }
+
+    /* caution when using mutable reference */
+    GridLayoutInfo& GetMutableLayoutInfo()
     {
         return gridLayoutInfo_;
     }
@@ -201,8 +207,8 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
         std::optional<float> extraOffset = std::nullopt) override;
-    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    void AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
+    bool AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
@@ -223,12 +229,12 @@ public:
         return true;
     }
 
-    const std::list<int32_t>& GetPreloadItemList() const
+    const std::list<GridPreloadItem>& GetPreloadItemList() const
     {
         return preloadItemList_;
     }
 
-    void SetPreloadItemList(std::list<int32_t>&& list)
+    void SetPreloadItemList(std::list<GridPreloadItem>&& list)
     {
         preloadItemList_ = std::move(list);
     }
@@ -244,6 +250,11 @@ public:
     Axis GetAxis() const override
     {
         return gridLayoutInfo_.axis_;
+    }
+
+    int32_t GetDefaultCachedCount() const
+    {
+        return gridLayoutInfo_.defCachedCount_;
     }
 
 private:
@@ -294,6 +305,9 @@ private:
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     inline bool UseIrregularLayout() const;
 
@@ -326,7 +340,7 @@ private:
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
-    std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+    std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

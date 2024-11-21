@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
+#include <stdint.h>
 
 namespace OHOS::Ace {
 class RenderingContext2DModel : public AceType {
@@ -129,19 +130,25 @@ class CanvasRenderingContext2DModel : public RenderingContext2DModel {
 public:
     CanvasRenderingContext2DModel() = default;
     virtual ~CanvasRenderingContext2DModel() = default;
-    virtual void GetWidth(RefPtr<AceType>& canvasPattern, double& width) = 0;
-    virtual void GetHeight(RefPtr<AceType>& canvasPattern, double& height) = 0;
-    virtual void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern) {};
+    virtual int32_t GetId() { return -1; };
+    virtual void Release() {};
+    virtual void SetOnAttach(std::function<void()>&& callback) {};
+    virtual void SetOnDetach(std::function<void()>&& callback) {};
+    virtual void GetWidth(double& width) = 0;
+    virtual void GetHeight(double& height) = 0;
+    virtual void SetTransferFromImageBitmap(RefPtr<AceType> offscreenCPattern) {};
 #ifdef PIXEL_MAP_SUPPORTED
-    virtual void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) {};
+    virtual void TransferFromImageBitmap(const RefPtr<AceType>& pixelMap) {};
 #else
-    virtual void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
+    virtual void TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData) {};
 #endif
-    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) {};
-    virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
+    virtual void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) {};
+    virtual void StopImageAnalyzer() {};
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModel);
+protected:
+    std::function<void()> onContext2DAttach_;
+    std::function<void()> onContext2DDetach_;
 };
 
 class OffscreenCanvasRenderingContext2DModel : public RenderingContext2DModel {

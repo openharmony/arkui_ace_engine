@@ -83,9 +83,7 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
             auto scrollBarProxy = jsScroller->GetScrollBarProxy();
             proxyFlag = true;
             proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);
-            if (!proxy) {
-                jsScroller->SetScrollBarProxy(proxy);
-            }
+            jsScroller->SetScrollBarProxy(proxy);
         }
 
         auto directionValue = obj->GetProperty("direction");

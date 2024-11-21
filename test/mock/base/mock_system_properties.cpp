@@ -73,6 +73,7 @@ bool SystemProperties::imageFileCacheConvertAstc_ = true;
 bool SystemProperties::imageFrameworkEnable_ = true;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
@@ -189,5 +190,10 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
 }
 } // namespace OHOS::Ace

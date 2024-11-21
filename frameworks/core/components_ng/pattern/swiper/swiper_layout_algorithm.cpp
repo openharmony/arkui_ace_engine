@@ -133,6 +133,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
+    if (!measured_) {
+        if (targetIndex_.has_value()) {
+            currentTargetIndex_ = targetIndex_.value();
+        }
+        if (jumpIndex_.has_value()) {
+            currentJumpIndex_ = jumpIndex_.value();
+        }
+    }
     if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
         MeasureTabsCustomAnimation(layoutWrapper);
         return;
@@ -157,7 +165,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
         if (!layoutWrapper->IsConstraintNoChanged()) {
             mainSizeIsMeasured_ = false;
-            jumpIndex_ = currentIndex_;
+            jumpIndex_ = jumpIndex_.value_or(currentIndex_);
         }
     }
 
@@ -229,7 +237,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
         startIndex = startIndex < realTotalCount_ ? startIndex : 0;
         endIndex = std::min(endIndex, realTotalCount_ - 1);
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
+        if (!isLoop_) {
+            layoutWrapper->SetActiveChildRange(startIndex, endIndex, std::min(cachedCount_, startIndex),
+                std::min(cachedCount_, totalItemCount_ - 1 - endIndex));
+        } else {
+            layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
+        }
     } else {
         int32_t startIndex = std::min(GetLoopIndex(itemPositionInAnimation_.begin()->first), realTotalCount_ - 1);
         int32_t endIndex = std::min(GetLoopIndex(itemPositionInAnimation_.rbegin()->first), realTotalCount_ - 1);
@@ -242,7 +255,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             endIndex--;
         }
         CheckCachedItem(endIndex, startIndex, layoutWrapper);
-        layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        if (!isLoop_) {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, std::min(cachedCount_, endIndex),
+                std::min(cachedCount_, totalItemCount_ - 1 - startIndex));
+        } else {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        }
     }
 
     contentIdealSize.SetMainSize(contentMainSize_, axis);
@@ -263,9 +281,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     IndicatorAndArrowMeasure(layoutWrapper, contentIdealSize);
     CaptureMeasure(layoutWrapper, childLayoutConstraint);
 
-    if (swiperLayoutProperty->GetFlexItemProperty()) {
-        measured_ = true;
-    }
+    measured_ = true;
 }
 
 void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
@@ -412,14 +428,15 @@ void SwiperLayoutAlgorithm::AdjustStartInfoOnSwipeByGroup(
 void SwiperLayoutAlgorithm::MeasureSwiper(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    if (layoutWrapper->GetLayoutProperty()->GetFlexItemProperty() && measured_) {
+    if (measured_) {
         // flex property causes Swiper to be measured twice, and itemPosition_ would
         // reset after the first measure. Restore to that on second measure.
         itemPosition_ = prevItemPosition_;
         // targetIndex_ has also been reset during the first measure.
         targetIndex_ = currentTargetIndex_;
-    } else if (targetIndex_.has_value()) {
-        currentTargetIndex_ = targetIndex_.value();
+        if (duringInteraction_ || NearEqual(oldContentMainSize_, contentMainSize_)) {
+            jumpIndex_ = currentJumpIndex_;
+        }
     }
     int32_t startIndex = 0;
     int32_t endIndex = 0;
@@ -457,7 +474,7 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         placeItemWidth_ = prevItemPosition_.begin()->second.endPos - prevItemPosition_.begin()->second.startPos;
     }
 
-    if (jumpIndex_) {
+    if (jumpIndex_.has_value()) {
         needUnmountIndexs_.clear();
         itemPositionInAnimation_.clear();
         startPos = (jumpIndex_.value() == 0) && Negative(startMainPos_) ? startMainPos_ : 0;
@@ -473,34 +490,26 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         }
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {
-        if (targetIndex_.has_value()) {
-            auto firstItemIndex = prevItemPosition_.begin()->first;
-            // Swipe to the left, layout forward from (targetIndex - 1)
-            if (targetIndex_.value() > firstItemIndex) {
-                LayoutForward(layoutWrapper, layoutConstraint, axis, targetIndex_.value() - 1,
-                    prevItemPosition_[targetIndex_.value() - 1].startPos);
-                // Swipe to the right, layout backward from (endIndex - 1)
-            } else if (targetIndex_.value() < firstItemIndex) {
-                auto basicItem = ++prevItemPosition_.rbegin();
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, basicItem->first, basicItem->second.endPos);
-                // captures need not to be updated
-            } else {
-                itemPosition_ = prevItemPosition_;
+        for (auto it = prevItemPosition_.rbegin(); it != prevItemPosition_.rend(); ++it) {
+            auto pos = Positive(prevMargin_) ? it->second.startPos + prevMargin_ : it->second.startPos;
+            // search for last item in visible window as endIndex
+            if (LessNotEqual(pos, contentMainSize_)) {
+                endIndex = it->first;
+                endPos = it->second.endPos;
+                break;
             }
-            // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
-            if (itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
-                isCaptureReverse_ = !isCaptureReverse_;
-            }
+        }
+        if ((targetIndex_.has_value() && targetIndex_.value() >= startIndexInVisibleWindow)
+            || (!targetIndex_.has_value() && Negative(currentOffset_))) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
         } else {
-            if (NonNegative(currentOffset_)) {
-                // Swipe to the left
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
-                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
-            } else {
-                // Swipe to the right
-                LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
-            }
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        }
+        // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
+        if (targetIndex_.has_value() && itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
+            isCaptureReverse_ = !isCaptureReverse_;
         }
     } else if (targetIndex_.has_value()) {
         // isMeasureOneMoreItem_ param is used to ensure item continuity when play property animation.
@@ -538,7 +547,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         bool overScrollTop = startIndexInVisibleWindow == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_ - prevMargin_ - spaceWidth_)) {
+            auto adjustStartMainPos =
+                startMainPos_ - prevMargin_ - spaceWidth_ - (Positive(ignoreBlankOffset_) ? ignoreBlankOffset_ : 0.0f);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), adjustStartMainPos)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
@@ -647,7 +658,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper, A
                 endPos = iter->second.endPos;
             }
         }
-
+        endPos += ignoreBlankOffset_;
         if (GreatNotEqual(endPos, prevMargin_ != 0.0f ? startMainPos_ - prevMargin_ - spaceWidth_ : startMainPos_)) {
             break;
         }
@@ -808,7 +819,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper, 
                 startPos = iter->second.startPos;
             }
         }
-
+        startPos += ignoreBlankOffset_;
         if (LessNotEqual(startPos, nextMargin_ != 0.0f ? endMainPos_ + nextMargin_ + spaceWidth_ : endMainPos_)) {
             break;
         }
@@ -835,6 +846,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+    float adjustStartMainPos = 0.0f;
     do {
         currentEndPos = currentStartPos;
         auto result =
@@ -850,9 +862,10 @@ void SwiperLayoutAlgorithm::LayoutBackward(
             startMainPos = currentStartPos;
             targetIndex_.reset();
         }
-    } while (
-        GreatNotEqual(currentStartPos, prevMargin_ != 0.0f ? startMainPos - prevMargin_ - spaceWidth_ : startMainPos) ||
-        (!SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_ && currentIndex > targetIndex_.value()));
+        adjustStartMainPos = startMainPos - (Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f) -
+                             (Positive(ignoreBlankOffset_) ? ignoreBlankOffset_ : 0.0f);
+    } while (GreatNotEqual(currentStartPos, adjustStartMainPos) ||
+             (!SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_ && currentIndex > targetIndex_.value()));
 
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow swiper scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {

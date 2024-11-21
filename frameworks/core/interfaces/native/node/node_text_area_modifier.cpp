@@ -59,6 +59,7 @@ constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
@@ -1652,6 +1653,20 @@ void ResetTextAreaWidth(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ClearWidth(frameNode);
 }
+
+void SetTextAreaEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextAreaEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1680,27 +1695,21 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
         ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
         GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight, GetgetTextAreaMaxLines,
-        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature,
-        SetTextAreaOnChange, ResetTextAreaOnChange,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature, SetTextAreaOnChange, ResetTextAreaOnChange,
         SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
-        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange,
-        SetTextAreaOnContentScroll, ResetTextAreaOnContentScroll,
-        SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
-        SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
-        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy,
-        SetTextAreaOnSubmitWithEvent, ResetTextAreaOnSubmitWithEvent,
-        SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill, ResetTextAreaEnableAutoFill,
-        SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
-        SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
-        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin,
-        GetTextAreaMargin, SetTextAreaCaret,
-        SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
-        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
-        SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
-        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete,
-        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText, GetTextAreaPadding,
-        SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions,
-        SetTextAreaWidth, ResetTextAreaWidth };
+        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange, SetTextAreaOnContentScroll,
+        ResetTextAreaOnContentScroll, SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy,
+        ResetTextAreaOnCopy, SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
+        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy, SetTextAreaOnSubmitWithEvent,
+        ResetTextAreaOnSubmitWithEvent, SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill,
+        ResetTextAreaEnableAutoFill, SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth,
+        ResetTextAreaBorderWidth, SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle,
+        ResetTextAreaBorderStyle, SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin,
+        ResetTextAreaMargin, GetTextAreaMargin, SetTextAreaCaret, SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
+        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
+        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions, SetTextAreaWidth,
+        ResetTextAreaWidth, SetTextAreaEnableHapticFeedback, ResetTextAreaEnableHapticFeedback };
     return &modifier;
 }
 

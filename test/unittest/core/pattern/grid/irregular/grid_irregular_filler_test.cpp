@@ -250,7 +250,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem001, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureItem(params, 0, 0, 0);
+    filler.MeasureItem(params, 0, 0, 0, false);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
@@ -289,7 +289,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem002, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureItem(params, 0, 0, 0);
+    filler.MeasureItem(params, 0, 0, 0, false);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) == info.lineHeightMap_.end());

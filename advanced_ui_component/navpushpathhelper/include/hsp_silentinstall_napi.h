@@ -26,6 +26,7 @@ class HspSilentInstallNapi {
     public:
         static napi_value SilentInstall(napi_env env, napi_callback_info info);
         static napi_value IsHspExist(napi_env env, napi_callback_info info);
+        static napi_value InitRouteMap(napi_env env, napi_callback_info info);
 
     private:
         struct CallbackData {

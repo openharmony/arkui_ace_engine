@@ -44,7 +44,7 @@ public:
     static void SetDialogDateChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogDateAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
-    static void SetDialogSwitchEvent(std::function<bool()> switchEvent);
+    static void SetDialogSwitchEvent(std::function<bool()> switchEvent, const RefPtr<FrameNode>& pickerStack);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -152,7 +152,7 @@ private:
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static void SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,
         const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<FrameNode>& dateNode,
+    static std::function<void()> CloseDialogEvent(const RefPtr<FrameNode>& dateNode,
         const RefPtr<FrameNode>& dialogNode);
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
@@ -163,6 +163,9 @@ private:
     static void GetUserSettingLimit();
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
+    static void SwitchFocusStatus(
+        const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;

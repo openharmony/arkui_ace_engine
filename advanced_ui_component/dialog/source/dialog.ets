@@ -65,6 +65,8 @@ const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
 const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
 // 'sys.float.alert_button_horizontal_space'
 const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
+// 'sys.float.padding_level4'
+const CHECK_BOX_MARGIN_END: number = getNumberByResourceId(125830923, 8);
 // 'sys.float.Body_L'
 const BODY_L = getNumberByResourceId(125830970, 16);
 // 'sys.float.Body_M'
@@ -171,7 +173,7 @@ export struct TipsDialog {
             }
           })
           .accessibilityLevel('yes')
-          .margin({ right: $r('sys.float.padding_level4') })
+          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
         Text(this.checkTips)
           .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
@@ -216,7 +218,7 @@ export struct TipsDialog {
           Row() {
             Text(this.title)
               .fontSize(`${TITLE_S}fp`)
-              .fontWeight(FontWeight.Medium)
+              .fontWeight(FontWeight.Bold)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
               .maxLines(CONTENT_MAX_LINES)
@@ -246,10 +248,10 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ right: $r('sys.float.padding_level8') })
+      .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
     }
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ right: `${this.marginOffset}vp` })
+    .margin({ end: LengthMetrics.vp(this.marginOffset) })
   }
 
   aboutToAppear() {
@@ -673,10 +675,10 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ right: $r('sys.float.padding_level8') })
+        .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ right: `${this.marginOffset}vp` })
+      .margin({ end: LengthMetrics.vp(this.marginOffset) })
     }
   }
 
@@ -692,7 +694,7 @@ export struct ConfirmDialog {
         })
         .hitTestBehavior(HitTestMode.Block)
         .accessibilityLevel('yes')
-        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
+        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
 
       Text(this.checkTips)
         .fontSize(`${BODY_M}fp`)
@@ -813,7 +815,7 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ right: $r('sys.float.padding_level8'), })
+          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -828,7 +830,7 @@ export struct AlertDialog {
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
-    .margin({ right: `${this.getMargin()}vp`, })
+    .margin({ end: LengthMetrics.vp(this.getMargin()) })
   }
 
   aboutToAppear(): void {
@@ -1047,9 +1049,9 @@ struct CustomDialogContentComponent {
         .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
-          left: $r('sys.float.ohos_id_dialog_margin_start'),
-          right: $r('sys.float.ohos_id_dialog_margin_end'),
-          bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
+          start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
+          end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
+          bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
@@ -1315,26 +1317,26 @@ struct CustomDialogContentComponent {
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1456,18 +1458,42 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDialogController) {
+function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
+  controller?: CustomDialogController) {
   .onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();
     }
     controller?.close();
   })
-  .defaultFocus(true)
+  .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.Normal)
   .borderRadius($r('sys.float.corner_radius_level10'))
+}
+
+/**
+ * is button list has default focus
+ *
+ * @param buttonList button list
+ * @returns boolean
+ */
+function isHasDefaultFocus(buttonList?: ButtonOptions[]): boolean {
+  try {
+    let isHasDefaultFocus: boolean = false;
+    buttonList?.forEach((button) => {
+      if (button.defaultFocus) {
+        isHasDefaultFocus = true;
+      }
+    })
+    return isHasDefaultFocus;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
+    return false;
+  }
 }
 
 /**
@@ -1639,11 +1665,21 @@ export struct LoadingDialog {
 }
 
 @Component
-export struct PopupDialog {
-  @Link show: boolean;
-  @Prop popup: PopupDialogOptions;
+export struct PopoverDialog {
+  @Link visible: boolean;
+  @Prop popover: PopoverDialogOptions;
   @BuilderParam targetBuilder: Callback<void>;
-  @State dialogWidth: Dimension | undefined = this.popup.width;
+  @State dialogWidth: Dimension | undefined = this.popover.width;
+
+  @Builder
+  emptyBuilder() {
+  }
+
+  aboutToAppear(): void {
+    if (this.targetBuilder === undefined || this.targetBuilder === null) {
+      this.targetBuilder = this.emptyBuilder;
+    }
+  }
 
   build() {
     Column() {
@@ -1653,40 +1689,40 @@ export struct PopupDialog {
       let screenSize: display.Display = display.getDefaultDisplaySync();
       let screenWidth: number = px2vp(screenSize.width);
       if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-        this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
       } else {
-        this.popup.width = this.dialogWidth;
+        this.popover.width = this.dialogWidth;
       }
-      this.show = !this.show;
+      this.visible = !this.visible;
     })
-    .bindPopup(this.show, {
-      builder: this.popup?.builder,
-      placement: this.popup?.placement ?? Placement.Bottom,
-      popupColor: this.popup?.popupColor,
-      enableArrow: this.popup?.enableArrow ?? true,
-      autoCancel: this.popup?.autoCancel,
-      onStateChange: this.popup?.onStateChange ?? ((e) => {
+    .bindPopup(this.visible, {
+      builder: this.popover?.builder,
+      placement: this.popover?.placement ?? Placement.Bottom,
+      popupColor: this.popover?.popupColor,
+      enableArrow: this.popover?.enableArrow ?? true,
+      autoCancel: this.popover?.autoCancel,
+      onStateChange: this.popover?.onStateChange ?? ((e) => {
         if (!e.isVisible) {
-          this.show = false
+          this.visible = false
         }
       }),
-      arrowOffset: this.popup?.arrowOffset,
-      showInSubWindow: this.popup?.showInSubWindow,
-      mask: this.popup?.mask,
-      targetSpace: this.popup?.targetSpace,
-      offset: this.popup?.offset,
-      width: this.popup?.width,
-      arrowPointPosition: this.popup?.arrowPointPosition,
-      arrowWidth: this.popup?.arrowWidth,
-      arrowHeight: this.popup?.arrowHeight,
-      radius: this.popup?.radius ?? $r('sys.float.corner_radius_level16'),
-      shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-      backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-      focusable: this.popup?.focusable,
-      transition: this.popup?.transition,
-      onWillDismiss: this.popup?.onWillDismiss
+      arrowOffset: this.popover?.arrowOffset,
+      showInSubWindow: this.popover?.showInSubWindow,
+      mask: this.popover?.mask,
+      targetSpace: this.popover?.targetSpace,
+      offset: this.popover?.offset,
+      width: this.popover?.width,
+      arrowPointPosition: this.popover?.arrowPointPosition,
+      arrowWidth: this.popover?.arrowWidth,
+      arrowHeight: this.popover?.arrowHeight,
+      radius: this.popover?.radius ?? $r('sys.float.corner_radius_level16'),
+      shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+      backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+      focusable: this.popover?.focusable,
+      transition: this.popover?.transition,
+      onWillDismiss: this.popover?.onWillDismiss
     })
   }
 }
 
-export declare interface PopupDialogOptions extends CustomPopupOptions {}
+export declare interface PopoverDialogOptions extends CustomPopupOptions {}

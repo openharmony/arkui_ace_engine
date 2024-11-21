@@ -137,6 +137,10 @@ public:
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
     bool CheckHostWindowStatus() const override;
+    bool IsFreeMultiWindow() const override;
+    void OnFreeMultiWindowSwitch(bool enable) override;
+    int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
+    void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -211,6 +215,9 @@ private:
     bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
+    int32_t callbackId_ = 0;
+    sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
 };
 
 } // namespace OHOS::Ace

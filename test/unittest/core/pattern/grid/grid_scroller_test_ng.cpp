@@ -330,7 +330,7 @@ HWTEST_F(GridScrollerTestNg, DISABLED_ScrollToIndex011, TestSize.Level1)
 HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: Each test scroll the correct distance
      */
     GridModelNG model = CreateGrid();
@@ -341,7 +341,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
     int32_t index = 5;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT));
     /**
-     * @tc.cases: use ScrollTo to make item 10 in the last line, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.cases: use ScrollTo to make item 5 in the last line, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: scrollToIndex don't change grid offset
      */
     auto autoPosition = ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT + ITEM_HEIGHT;
@@ -811,15 +811,22 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
-     * @tc.expected: Verify return value.
+     * @tc.expected: Verify return value. Animation should be stopped
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
+
+    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
 
     /**

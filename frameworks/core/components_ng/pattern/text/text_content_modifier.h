@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,17 +42,16 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetFontFamilies(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle);
-    void SetFontWeight(const FontWeight& value);
-    void SetTextColor(const Color& value);
+    void SetFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetFontWeight(const FontWeight& value, bool isReset = false);
+    void SetTextColor(const Color& value, bool isReset = false);
     void SetTextShadow(const std::vector<Shadow>& value);
-    void SetTextDecoration(const TextDecoration& value);
-    void SetTextDecorationStyle(const TextDecorationStyle value);
-    void SetTextDecorationColor(const Color& value);
-    void SetBaselineOffset(const Dimension& value);
+    void SetTextDecoration(const TextDecoration& value, bool isReset = false);
+    void SetTextDecorationColor(const Color& value, bool isReset = false);
+    void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
+    void SetLineHeight(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 
@@ -71,14 +69,9 @@ public:
         paintOffset_ = paintOffset;
     }
 
-    void SetObscured(const std::vector<ObscuredReasons>& reasons)
+    void SetIfPaintObscuration(bool value)
     {
-        obscuredReasons_ = reasons;
-    }
-
-    void SetIfHaveSpanItemChildren(bool value)
-    {
-        ifHaveSpanItemChildren_ = value;
+        ifPaintObscuration_ = value;
     }
 
     void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
@@ -115,7 +108,7 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
-
+    void SetDefaultLineHeight(const TextStyle& textStyle);
     float GetTextRacePercent();
     TextDirection GetTextRaceDirection() const;
 
@@ -127,6 +120,7 @@ private:
     void ModifyTextShadowsInTextStyle(TextStyle& textStyle);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void ModifyBaselineOffsetInTextStyle(TextStyle& textStyle);
+    void ModifyLineHeightInTextStyle(TextStyle& textStyle);
 
     void UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag);
     void UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag);
@@ -136,6 +130,7 @@ private:
     void UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
+    void UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
     void UpdateImageNodeVisible(const VisibleType visible);
@@ -148,6 +143,7 @@ private:
     {
         return marqueeState_ == state;
     }
+    int32_t GetDuration() const;
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;
@@ -155,18 +151,22 @@ private:
 
     std::optional<Dimension> adaptMinFontSize_;
     RefPtr<AnimatablePropertyFloat> adaptMinFontSizeFloat_;
+    float lastMinFontSize_ = 0.0f;
 
     std::optional<Dimension> adaptMaxFontSize_;
     RefPtr<AnimatablePropertyFloat> adaptMaxFontSizeFloat_;
+    float lastMaxFontSize_ = 0.0f;
 
     std::optional<FontWeight> fontWeight_;
     RefPtr<AnimatablePropertyFloat> fontWeightFloat_;
+    float lastFontWeight_ = 0.0f;
 
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
+    Color lastTextColor_;
 
     struct ShadowProp {
-        Shadow shadow; // final shadow configuration of the animation
+        Shadow lastShadow;
         RefPtr<AnimatablePropertyFloat> blurRadius;
         RefPtr<AnimatablePropertyFloat> offsetX;
         RefPtr<AnimatablePropertyFloat> offsetY;
@@ -174,15 +174,20 @@ private:
     };
     std::vector<ShadowProp> shadows_;
 
-    float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
-    std::optional<TextDecorationStyle> textDecorationStyle_;
     std::optional<Color> textDecorationColor_;
+    Color lastTextDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
+    float lastTextDecorationColorAlpha_ = 0.0f;
     bool textDecorationAnimatable_ { false };
 
     std::optional<Dimension> baselineOffset_;
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
+    float lastBaselineOffsetFloat_ = 0.0f;
+
+    std::optional<Dimension> lineHeight_;
+    RefPtr<AnimatablePropertyFloat> lineHeightFloat_;
+    float lastLineHeight_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
@@ -192,14 +197,12 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyInt> contentChange_;
     RefPtr<PropertyBool> clip_;
-    RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyBool> dragStatus_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 
-    std::vector<ObscuredReasons> obscuredReasons_;
-    bool ifHaveSpanItemChildren_ = false;
+    bool ifPaintObscuration_ = false;
     std::vector<RectF> drawObscuredRects_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     MarqueeState marqueeState_ = MarqueeState::IDLE;

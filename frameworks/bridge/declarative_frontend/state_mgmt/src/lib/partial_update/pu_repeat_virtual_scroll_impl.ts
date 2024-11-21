@@ -213,14 +213,24 @@ class __RepeatVirtualScrollImpl<T> {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onSetActiveRange(${from}, ${to})`);
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array<{item: T, ttype: string}>(this.arr_.length);
-            from = Math.min(this.arr_.length - 1, from);
-            to = Math.min(this.arr_.length - 1, to);
-            from = Math.max(0, from);
-            to = Math.max(0, to);
-            for (let i = from; i <= to && i < this.arr_.length; i++) {
-                const item = this.arr_[i];
-                const ttype = this.typeGenFunc_(this.arr_[i], i);
-                this.lastActiveRangeData_[i] = { item, ttype };
+
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            } else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
             }
         };
 
@@ -239,7 +249,9 @@ class __RepeatVirtualScrollImpl<T> {
 
     private reRender(): void {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
-        if (this.hasVisibleItemsChanged()) {
+
+        // When this.totalCount_ == 0 need render to clear visible items
+        if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
             this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender - done.`);
@@ -258,8 +270,6 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private hasVisibleItemsChanged(): boolean {
-        let lastActiveRangeIndex = 0;
-
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -278,7 +288,6 @@ class __RepeatVirtualScrollImpl<T> {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} ttype changed => true`);
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() => false`);
@@ -297,7 +306,7 @@ class __RepeatVirtualScrollImpl<T> {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
                 stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);

@@ -136,6 +136,8 @@ public:
         return measureType_.value_or(defaultType);
     }
 
+    void LocalizedPaddingOrMarginChange(const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding);
+
     void UpdatePadding(const PaddingProperty& value);
 
     void UpdateMargin(const MarginProperty& value);
@@ -328,7 +330,9 @@ public:
 
     static void UpdateAllGeometryTransition(const RefPtr<UINode>& parent);
 
-    std::pair<bool, bool> GetPercentSensitive();
+    // the returned value represents whether to compare percent reference when comparing old and new layout constrains.
+    // the first of returned value represents width, and the second of returned value represents height.
+    virtual std::pair<bool, bool> GetPercentSensitive();
     std::pair<bool, bool> UpdatePercentSensitive(bool width, bool height);
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
@@ -368,6 +372,8 @@ public:
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
     void CheckLocalizedBorderRadiuses(const TextDirection& direction);
     void CheckLocalizedOuterBorderColor(const TextDirection& direction);
+    void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
     void CheckLocalizedEdgeColors(const TextDirection& direction);
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);

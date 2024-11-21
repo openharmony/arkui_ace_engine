@@ -51,6 +51,7 @@ template("ace_core_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -90,6 +91,7 @@ template("ace_core_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
@@ -453,10 +455,9 @@ template("ace_core_source_set") {
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_arkui_x) {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
-        include_dirs += [
-          "//foundation/graphic/graphic_2d/utils/color_manager/export",
-          "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+        deps += [
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
+          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
         ]
       } else {
         if (ace_use_rosen_drawing) {
@@ -552,8 +553,6 @@ template("ace_core_source_set") {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
-        "//foundation/graphic/graphic_2d/utils/color_manager/export",
-        "//foundation/multimedia/image_framework/interfaces/innerkits/include",
       ]
     }
     if (!is_wearable_product) {
@@ -634,6 +633,7 @@ template("ace_core_ng_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -670,6 +670,7 @@ template("ace_core_ng_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
@@ -840,6 +841,7 @@ template("ace_core_ng_source_set") {
       sources -= [ "components/declaration/common/declaration.cpp" ]
       sources += [
         "animation/card_transition_controller.cpp",
+        "common/platformview/platform_view_proxy.cpp",
         "components/common/properties/animatable_path.cpp",
         "components/common/properties/border_image_edge.cpp",
         "components/common/properties/color_factory.cpp",
@@ -905,9 +907,6 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
-    if (is_arkui_x) {
-      deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
-    }
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
@@ -947,8 +946,6 @@ template("ace_core_ng_source_set") {
           "webview:libnweb",
           "window_manager:libwm",
         ]
-      } else {
-        deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
       }
     }
 
@@ -971,10 +968,7 @@ template("ace_core_ng_source_set") {
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_arkui_x) {
-        deps += [
-          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform",
-          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
-        ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
         external_deps += [ "graphic_2d:librender_service_client" ]
         if (ace_use_rosen_drawing) {

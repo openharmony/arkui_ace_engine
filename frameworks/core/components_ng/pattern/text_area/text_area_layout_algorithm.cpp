@@ -78,7 +78,9 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.}
     if (isInlineStyle) {
-        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
+        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto paragraphData = CreateParagraphData { false, fontSize };
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);
@@ -185,8 +187,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
-    auto offsetBase = OffsetF(
-        pattern->GetPaddingLeft() + pattern->GetBorderLeft(), pattern->GetPaddingTop() + pattern->GetBorderTop());
+    auto border = pattern->GetBorderWidthProperty();
+    auto offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
+        pattern->GetPaddingTop() + pattern->GetBorderTop(border));
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -220,10 +223,12 @@ bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, cons
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto isInlineStyle = pattern->IsNormalInlineState();
+    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto paragraphData = CreateParagraphData { false, fontSize };
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), content, false);
+        CreateParagraph(textStyle, pattern->GetDragContents(), content, false, paragraphData);
     } else {
-        CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition());
+        CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition(), paragraphData);
     }
     return true;
 }

@@ -45,6 +45,7 @@ using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
+using ActionExecSubComponentImpl = std::function<bool(int32_t spanId)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
@@ -149,6 +150,13 @@ public:
     {
         return false;
     }
+
+    virtual bool HasSubComponent() const
+    {
+        return false;
+    }
+
+    virtual void GetSubComponentInfo(std::vector<SubComponentInfo>& subComponentInfos) const {}
 
     virtual AccessibilityValue GetAccessibilityValue() const
     {
@@ -263,6 +271,19 @@ public:
         if (actionSetCursorIndexImpl_) {
             actionSetCursorIndexImpl_(index);
             return true;
+        }
+        return false;
+    }
+
+    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
+    {
+        actionExecSubComponentImpl_ = actionExecSubComponentImpl;
+    }
+
+    bool ActActionExecSubComponent(int32_t spanId)
+    {
+        if (actionExecSubComponentImpl_) {
+            return actionExecSubComponentImpl_(spanId);
         }
         return false;
     }
@@ -510,6 +531,8 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextWithEvent(const std::string& text);
+
     void SetAccessibilityTextHint(const std::string& text)
     {
         textTypeHint_ = text;
@@ -519,6 +542,8 @@ public:
     {
         accessibilityDescription_ = accessibilityDescription;
     }
+
+    void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
     bool IsAccessibilityGroup() const
     {
@@ -630,6 +655,8 @@ public:
     */
     static bool IsAccessibilityFocusableTag(const std::string &tag);
 
+    static bool IsTagInCrossProcessComponent(const std::string& tag);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
@@ -665,10 +692,12 @@ public:
     void SetUserSelected(const bool& isSelected);
     bool HasUserSelected();
     bool IsUserSelected();
+    void ResetUserSelected();
 
     void SetUserCheckedType(const int32_t& checkedType);
     bool HasUserCheckedType();
     int32_t GetUserCheckedType();
+    void ResetUserCheckedType();
 
     void SetUserMinValue(const int32_t& minValue);
     bool HasUserMinValue();
@@ -685,6 +714,11 @@ public:
     void SetUserTextValue(const std::string& textValue);
     bool HasUserTextValue();
     std::string GetUserTextValue();
+
+    void SetUserCheckable(const bool& checkable);
+    bool HasUserCheckable();
+    bool IsUserCheckable();
+    void ResetUserCheckable();
 
 private:
     // node should be not-null
@@ -740,12 +774,13 @@ protected:
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
     ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
+    ActionExecSubComponentImpl actionExecSubComponentImpl_;
     ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
-    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
@@ -762,6 +797,7 @@ protected:
     std::optional<bool> isDisabled_;
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
+    std::optional<bool> isUserCheckable_;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;

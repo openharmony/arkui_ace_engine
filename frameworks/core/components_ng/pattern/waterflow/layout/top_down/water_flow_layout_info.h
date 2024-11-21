@@ -81,7 +81,7 @@ public:
     void ClearCacheAfterIndex(int32_t currentIndex);
 
     bool ReachStart(float prevOffset, bool firstLayout) const override;
-    bool ReachEnd(float prevOffset) const override;
+    bool ReachEnd(float prevOffset, bool firstLayout) const override;
     bool OutOfBounds() const override;
 
     OverScrollOffset GetOverScrolledDelta(float delta) const override;
@@ -176,9 +176,16 @@ public:
      */
     void Sync(float mainSize, bool overScroll);
 
+    /**
+     * @brief Obtain index of last item recorded in Original layout.
+     * @note in segmented layout, use itemInfos_ instead.
+     */
+    int32_t GetLastItem() const;
+
     void NotifyDataChange(int32_t index, int32_t count) override {};
     void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
-        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override {};
+        const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override
+    {}
 
     int32_t childrenCount_ = 0;
 

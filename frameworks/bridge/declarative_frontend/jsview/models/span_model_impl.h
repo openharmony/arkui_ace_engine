@@ -43,6 +43,9 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override {};
     void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
     void ClearOnClick() override {};
+    void SetAccessibilityText(const std::string& text) override {};
+    void SetAccessibilityDescription(const std::string& description) override {};
+    void SetAccessibilityImportance(const std::string& importance) override {};
 
 private:
     static RefPtr<TextSpanComponent> GetComponent();

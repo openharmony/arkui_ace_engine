@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 import("common.gni")
 
 form_components_support = true
@@ -28,6 +29,6 @@ platform_deps = [
 
 libace_target = "//foundation/arkui/ace_engine/build:libace"
 
-if (is_asan) {
+if (is_asan || !ace_engine_feature_enable_libace) {
   libace_target = "//foundation/arkui/ace_engine/build:libace_compatible"
 }

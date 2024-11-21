@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 template("napi_componentutils_static") {
   forward_variables_from(invoker, "*")
@@ -24,7 +25,7 @@ template("napi_componentutils_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [ "js_component_utils.cpp" ]
-    if (platform != "ohos" || is_asan) {
+    if (platform != "ohos" || is_asan || !ace_engine_feature_enable_libace) {
       sources += [ "$ace_root/frameworks/base/geometry/matrix4.cpp" ]
     }
     deps = []

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_base.h"
+#include <cstdint>
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -24,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     selectOverlayManager->SetSelectedNodeByMouse(info);
@@ -40,8 +41,7 @@ int32_t TextBase::GetGraphemeClusterLength(
         }
     } else {
         if (static_cast<size_t>(extend) <= (text.length())) {
-            aroundChar =
-                text[std::min(static_cast<int32_t>(text.length() ? text.length() - 1 : 0), extend)];
+            aroundChar = text[std::min(text.length() ? static_cast<int32_t>(text.length()) - 1 : 0, extend)];
         }
     }
     return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
@@ -87,12 +87,20 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::UP) {
-        EndGestureSelection();
-        return;
-    }
-    if (touchType == TouchType::MOVE) {
-        DoTextSelectionTouchMove(info);
+    switch (touchType) {
+        case TouchType::UP:
+            EndGestureSelection();
+            break;
+        case TouchType::MOVE:
+            DoTextSelectionTouchMove(info);
+            break;
+        case TouchType::CANCEL:
+            DoTextSelectionTouchCancel();
+            isStarted_ = false;
+            isSelecting_ = false;
+            break;
+        default:
+            break;
     }
 }
 

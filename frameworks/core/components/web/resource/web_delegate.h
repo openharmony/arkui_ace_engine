@@ -273,6 +273,7 @@ public:
     int GetMediaType() const override;
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
+    void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -674,6 +675,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -683,6 +685,7 @@ public:
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
+    void UpdateLayoutMode(WebLayoutMode mode);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -794,10 +797,10 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -856,6 +859,7 @@ public:
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsDragging();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     std::string tempDir_;
@@ -910,6 +914,7 @@ public:
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool CloseImageOverlaySelection();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -985,7 +990,6 @@ public:
     void OnTextSelected();
     void OnDestroyImageAnalyzerOverlay();
 
-    void StartVibraFeedback(const std::string& vibratorType);
     void SetSurfaceId(const std::string& surfaceId);
 
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
@@ -1015,6 +1019,10 @@ public:
     {
         return instanceId_;
     }
+
+    void StartVibraFeedback(const std::string& vibratorType);
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     void InitWebEvent();
@@ -1101,6 +1109,7 @@ private:
     void RegisterAvoidAreaChangeListener();
     void UnregisterAvoidAreaChangeListener();
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1225,6 +1234,7 @@ private:
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 } // namespace OHOS::Ace

@@ -286,14 +286,6 @@ public:
         return static_cast<Orientation>(static_cast<uint32_t>(dmOrientation));
     }
 
-    RefPtr<DisplayInfo> GetDisplayInfo() override;
-
-    void InitIsFoldable() override;
-
-    bool IsFoldable() const override;
-
-    FoldStatus GetCurrentFoldStatus() override;
-
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(
@@ -320,8 +312,6 @@ public:
     void ForceFullGC() override;
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
-
-    bool ParseThemeConfig(const std::string& themeConfig);
 
     void CheckAndSetFontFamily();
 
@@ -387,6 +377,14 @@ public:
     float GetWindowScale() const override
     {
         return windowScale_;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 1.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
     int32_t GetParentId() const
@@ -545,6 +543,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -668,7 +668,7 @@ public:
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
     bool NeedFullUpdate(uint32_t limitKey);
-    void NotifyDensityUpdate();
+    void NotifyDensityUpdate(double density);
     void NotifyDirectionUpdate();
 
     void SetRegisterComponents(const std::vector<std::string>& registerComponents)
@@ -683,6 +683,13 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -714,7 +721,6 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
     std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 

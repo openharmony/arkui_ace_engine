@@ -44,6 +44,7 @@ public:
     void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
+    void HasUserDefinedOpacity() override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);

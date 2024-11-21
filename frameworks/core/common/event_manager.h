@@ -126,12 +126,15 @@ public:
     void AccessibilityHoverTest(
         const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
     void UpdateAccessibilityHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
+    void PenHoverTest(const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void UpdatePenHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
     void DispatchHoverEffectEvent(const MouseEvent& event);
     void DispatchAccessibilityHoverEventNG(const TouchEvent& event);
+    void DispatchPenHoverEventNG(const TouchEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -221,14 +224,20 @@ public:
         return isLastMoveBeforeUp_;
     }
 
-    NG::EventTreeRecord& GetEventTreeRecord()
+    NG::EventTreeRecord& GetEventTreeRecord(NG::EventTreeType treeType)
     {
-        return eventTree_;
+        switch (treeType) {
+            case NG::EventTreeType::TOUCH :
+                return eventTree_;
+            case NG::EventTreeType::POST_EVENT :
+                return postEventTree_;
+        }
     }
 
-    void DumpEvent() const;
+    void DumpEvent(NG::EventTreeType type);
 
-    void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target);
+    void AddGestureSnapshot(
+        int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
     RefPtr<NG::ResponseCtrl> GetResponseCtrl()
     {
@@ -303,14 +312,26 @@ private:
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent);
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
+    void DoSingleMouseActionRelease(MouseButton button);
+    bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
+    bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
+    void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
+        MouseTestResult& handledResults, bool& isStopPropagation);
+    bool DispatchMouseEventToCurResults(
+        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
+    // used less than API13
     MouseTestResult pressMouseTestResults_;
+    // used great or equal API13
+    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;
     HoverTestResult lastAccessibilityHoverResults_;
+    HoverTestResult curPenHoverResults_;
+    HoverTestResult lastPenHoverResults_;
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
@@ -323,6 +344,7 @@ private:
     int32_t instanceId_ = 0;
     uint32_t lastHoverDispatchLength_ = 0;
     uint32_t lastAccessibilityHoverDispatchLength_ = 0;
+    uint32_t lastPenHoverDispatchLength_ = 0;
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;
@@ -333,6 +355,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;
+    NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;

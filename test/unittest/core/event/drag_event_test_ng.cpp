@@ -550,10 +550,10 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
      */
     SystemProperties::debugEnabled_ = true;
     GestureEvent info = GestureEvent();
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     SystemProperties::debugEnabled_ = false;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     /**
      * @tc.steps: step5. Invoke longPressUpdate callback.
@@ -715,6 +715,8 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     /**
      * @tc.steps: step4. Invoke onActionCancel callback, when gestureHub->GetTextDraggable() is true.
@@ -744,7 +746,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     EXPECT_EQ(dragEventActuator->GetIsBindOverlayValue(dragEventActuator), true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     /**
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
@@ -752,12 +754,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 
     gestureEventHub->SetTextDraggable(false);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 
 /**
@@ -840,7 +842,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     auto imageContext = imageNode->GetRenderContext();
     auto clickEffectInfo = imageContext->GetClickEffectLevelValue();
     EXPECT_EQ(clickEffectInfo.level, ClickEffectLevel::LIGHT);
@@ -1033,7 +1035,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
     auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, childSize, DEFALUT_DRAG_PPIXELMAP_SCALE, false);
@@ -1102,7 +1104,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     gestureHub->SetPixelMap(pixelMap);
     EXPECT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
 
     /**

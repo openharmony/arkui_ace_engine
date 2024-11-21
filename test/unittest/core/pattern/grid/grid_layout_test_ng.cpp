@@ -18,7 +18,6 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -390,35 +389,6 @@ HWTEST_F(GridLayoutTestNg, GetAverageHeight001, TestSize.Level1)
     CreateFixedItems(20);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetAverageHeight(), 50);
-}
-
-/**
- * @tc.name: GridItemDisableEventTest001
- * @tc.desc: GridItem disable event test.
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
-
-    /**
-     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
-     * @tc.expected: Related function is called.
-     */
-    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
-    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
-    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto renderContext = gridItemFrameNode->renderContext_;
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
-    gridItemEventHub->SetEnabled(false);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
-    gridItemEventHub->SetEnabled(true);
-    gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
 }
 
 /**
@@ -1679,7 +1649,7 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch003, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
@@ -1693,7 +1663,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_FALSE(frameNode_->GetChildByIndex(i));
     }
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList) {
@@ -1703,7 +1673,7 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     // preload next line
     const std::list<int32_t> preloadList2 = { 15, 16, 17 };
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    CheckPreloadListEqual(preloadList2);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
     for (const int32_t i : preloadList2) {
@@ -1987,4 +1957,30 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
     EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
 }
 
+/**
+ * @tc.name: MarginPadding001
+ * @tc.desc: Test margin/padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, MarginPadding001, TestSize.Level1)
+{
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    auto colNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(4);
+    CreateDone(colNode);
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdateMargin(margin);
+    layoutProperty_->UpdatePadding(padding);
+    auto itemLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 2);
+    itemLayoutProperty->UpdateMargin(margin);
+    itemLayoutProperty->UpdatePadding(padding);
+    FlushLayoutTask(colNode, true);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 211, 233, 200)));
+}
 } // namespace OHOS::Ace::NG

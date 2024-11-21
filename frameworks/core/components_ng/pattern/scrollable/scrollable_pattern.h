@@ -47,11 +47,12 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
-constexpr double MAX_VELOCITY = 12000.0;
+constexpr double MAX_VELOCITY = 9000.0;
 #else
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
+constexpr float SPRING_ACCURACY = 0.1f;
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
     SHEET_SCROLL = 1,
@@ -128,6 +129,8 @@ public:
         return false;
     }
 
+    virtual void OnTouchDown(const TouchEventInfo& info);
+
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
@@ -136,6 +139,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -442,7 +447,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    std::optional<float> GetExtraOffset() const
+    const std::optional<float>& GetExtraOffset() const
     {
         return extraOffset_;
     }
@@ -556,6 +561,7 @@ public:
         return children;
     }
     void InitScrollBarGestureEvent();
+
     void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
 
@@ -658,6 +664,14 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
+    void FireObserverOnTouch(const TouchEventInfo& info);
+    void FireObserverOnPanActionEnd(GestureEvent& info);
+    void FireObserverOnReachStart();
+    void FireObserverOnReachEnd();
+    void FireObserverOnScrollStart();
+    void FireObserverOnScrollStop();
+    void FireObserverOnDidScroll(float finalOffset);
+
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     float FireOnWillScroll(float offset) const;
@@ -714,6 +728,19 @@ protected:
 
     void Register2DragDropManager();
 
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
+
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
     void CheckScrollBarOff();
 
 private:
@@ -768,12 +795,15 @@ private:
     {
         return OutBoundaryCallback();
     }
+    void UpdateNestedScrollVelocity(float offset, NestedState state);
+    float GetNestedScrollVelocity();
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
-    void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
+    void OnScrollStartRecursiveInner(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f);
     void OnScrollDragEndRecursive() override;
+    void StopScrollAnimation() override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
@@ -783,9 +813,6 @@ private:
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
@@ -892,6 +919,11 @@ private:
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    Offset locationInfo_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
+    float nestedScrollVelocity_ = 0.0f;
+    uint64_t nestedScrollTimestamp_ = 0;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

@@ -20,6 +20,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/text/text_base.h"
 
@@ -57,7 +58,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
 
     void UpdateHandleGlobalOffset()
     {
@@ -75,6 +76,9 @@ public:
         return true;
     }
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void TriggerScrollableParentToScroll(
+        const RefPtr<ScrollablePattern> scrollableParent, const Offset& globalOffset, bool isStopAutoScroll);
+    const RefPtr<ScrollablePattern> FindScrollableParent();
 
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
@@ -90,7 +94,10 @@ protected:
     bool selectTextUseTopHandle = false;
 
 private:
+    OffsetF GetHotPaintOffset();
     OffsetF handleGlobalOffset_;
+    bool isDraggingFirstHandle_ = true;
+    OffsetF hostPaintOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

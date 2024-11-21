@@ -48,7 +48,7 @@ ExtTexture::~ExtTexture()
             auto resRegister = weak.Upgrade();
             CHECK_NULL_VOID(resRegister);
             resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoExtTextureUnregisterEvent");
+        });
     }
 }
 
@@ -63,7 +63,7 @@ void ExtTexture::Create(const std::function<void(int64_t)>& onCreate)
         if (texture) {
             texture->CreateTexture(onCreate);
         }
-    }, "ArkUIVideoCreateExtTexture");
+    });
 }
 
 void ExtTexture::CreateTexture(const std::function<void(int64_t)>& onCreate)

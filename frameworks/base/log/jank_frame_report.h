@@ -42,6 +42,7 @@ public:
     void RecordFrameUpdate();
     void ReportJSAnimation();
     void JsAnimationToRsRecord();
+    void RecordAnimateEnd();
 
 private:
     void ClearFrameJankRecord();

@@ -68,8 +68,15 @@ napi_value ExtNapiUtils::CreateInt32(napi_env env, int32_t code)
 
 int32_t ExtNapiUtils::GetCInt32(napi_env env, napi_value value)
 {
-    int32_t num;
+    int32_t num = 0;
     napi_get_value_int32(env, value, &num);
+    return num;
+}
+
+int64_t ExtNapiUtils::GetCInt64(napi_env env, napi_value value)
+{
+    int64_t num = 0;
+    napi_get_value_int64(env, value, &num);
     return num;
 }
 

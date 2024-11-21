@@ -31,6 +31,7 @@ using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
+using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -127,6 +128,11 @@ public:
     void SetSetSystemBarStyleCallBack(SetSystemBarStyleCallback&& callback)
     {
         setSystemBarStyleCallback_ = std::move(callback);
+    }
+
+    void SetGetFreeMultiWindowModeEnabledStateCallback(GetFreeMultiWindowModeEnabledStateCallback&& callback)
+    {
+        getFreeMultiWindowModeEnabledStateCallback_ = std::move(callback);
     }
 
     void WindowMinimize() const
@@ -235,6 +241,14 @@ public:
         }
     }
 
+    bool GetFreeMultiWindowModeEnabledState() const
+    {
+        if (getFreeMultiWindowModeEnabledStateCallback_) {
+            return getFreeMultiWindowModeEnabledStateCallback_();
+        }
+        return false;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -253,6 +267,7 @@ private:
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
+    GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
 };
 
 } // namespace OHOS::Ace

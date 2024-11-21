@@ -130,6 +130,13 @@ public:
         return host->GetTag() == V2::SYMBOL_ETS_TAG;
     }
 
+    bool IsTextNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        return host->GetTag() == V2::TEXT_ETS_TAG;
+    }
+
     bool DefaultSupportDrag() override
     {
         return true;
@@ -660,7 +667,7 @@ public:
 
     void DumpRecord(const std::string& record)
     {
-        frameRecord_.append(record);
+        frameRecord_ = record;
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
@@ -668,8 +675,19 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
+
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
+
+    void OnTextOverflowChanged();
+
+    void MarkDirtyNodeRender();
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
+
     uint64_t GetSystemTimestamp()
     {
         return static_cast<uint64_t>(
@@ -677,12 +695,23 @@ public:
                 .count());
     }
 
-    void OnTextOverflowChanged();
-
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    void RegisterAfterLayoutCallback(std::function<void()> callback)
+    {
+        afterLayoutCallback_ = callback;
+    }
+
+    void UnRegisterAfterLayoutCallback()
+    {
+        afterLayoutCallback_ = std::nullopt;
+    }
+
+    void DoTextSelectionTouchCancel() override;
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -741,11 +770,22 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
-    bool IsEnabled();
+
+    bool SetActionExecSubComponent();
+    void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
+    void GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& subComponentInfos);
+    bool ExecSubComponent(int32_t spanId);
+    void AddSubComponentInfosByDataDetectorForSpan(std::vector<SubComponentInfo>& subComponentInfos,
+        const RefPtr<SpanItem>& span);
+    void AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const AISpan& aiSpan);
+    void AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
+        const RefPtr<SpanItem>& span);
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -789,7 +829,14 @@ protected:
 
     OffsetF parentGlobalOffset_;
     std::optional<TextResponseType> textResponseType_;
+    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
 
+    struct SubComponentInfoEx {
+        std::optional<AISpan> aiSpan;
+        WeakPtr<SpanItem> span;
+    };
+    std::vector<SubComponentInfoEx> subComponentInfos_;
+    
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
@@ -845,6 +892,7 @@ private:
     void ProcessMarqueeVisibleAreaCallback();
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
+    virtual void ResetAfterTextChange();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -853,6 +901,7 @@ private:
     bool blockPress_ = false;
     bool isDoubleClick_ = false;
     bool isSensitive_ = false;
+    bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
     bool isEnableHapticFeedback_ = true;
 
@@ -882,7 +931,9 @@ private:
     bool isUserSetResponseRegion_ = false;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
+    std::optional<std::function<void()>> afterLayoutCallback_;
 };
 } // namespace OHOS::Ace::NG
 

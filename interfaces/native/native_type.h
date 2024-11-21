@@ -36,7 +36,11 @@
 #ifndef ARKUI_NATIVE_TYPE_H
 #define ARKUI_NATIVE_TYPE_H
 
+#ifdef __cplusplus
 #include <cstdint>
+#else
+#include <stdint.h>
+#endif
 
 #include "drawable_descriptor.h"
 
@@ -853,7 +857,7 @@ typedef enum {
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_ONLY = 0,
     /** The component scrolls first, and when it hits the boundary, the parent component scrolls.
-    * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
+     * When the parent component hits the boundary, its edge effect is displayed. If no edge effect is specified for
      * the parent component, the edge effect of the child component is displayed instead.
      */
     ARKUI_SCROLL_NESTED_MODE_SELF_FIRST,
@@ -3638,7 +3642,7 @@ float OH_ArkUI_ListChildrenMainSizeOption_GetMainSize(ArkUI_ListChildrenMainSize
  * @return CustomSpanMeasureInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create();
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件测量信息。
@@ -3662,7 +3666,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
  * @return CustomSpanMetrics实例。
  * @since 12
 */
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create();
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void);
 
 /**
  * @brief 销毁自定义段落组件度量信息。
@@ -3701,7 +3705,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
  * @return CustomSpanDrawInfo实例。
  * @since 12
 */
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create();
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void);
 
 /**
  * @brief 销毁自定义段落组件绘制信息。

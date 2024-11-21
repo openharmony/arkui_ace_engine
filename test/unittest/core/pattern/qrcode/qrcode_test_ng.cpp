@@ -367,7 +367,8 @@ HWTEST_F(QRCodeTestNg, QRCodeModelSetContentOpacity001, TestSize.Level1)
     ASSERT_NE(frameNode1, nullptr);
     auto qrcodePaintProperty1 = frameNode1->GetPaintProperty<QRCodePaintProperty>();
     ASSERT_NE(qrcodePaintProperty1, nullptr);
-    EXPECT_EQ(qrcodePaintProperty1->GetOpacityValue(), 0.1);
+    EXPECT_EQ(
+        qrcodePaintProperty1->GetOpacityValue(), 0.1);
 
     qrCodeModelNG.Create(CREATE_VALUE);
     qrCodeModelNG.SetQRCodeColor(qrCodeTheme->GetQrcodeColor());

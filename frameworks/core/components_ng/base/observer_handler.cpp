@@ -272,7 +272,7 @@ void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
     routerPageHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
+void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
 }

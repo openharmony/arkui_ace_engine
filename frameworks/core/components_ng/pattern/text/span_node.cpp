@@ -226,6 +226,10 @@ void SpanNode::DumpInfo()
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
     dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    if (spanItem_ && spanItem_->fontStyle) {
+        dumpLog.AddDesc(std::string("SpanTextColor: ")
+                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
+    }
     dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
     dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
@@ -249,7 +253,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
@@ -257,9 +262,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
-    if (frameNode) {
-        FontRegisterCallback(frameNode, textStyle);
-    }
+    FontRegisterCallback(frameNode, textStyle);
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
@@ -288,10 +291,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
 void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder)
 {
     CHECK_NULL_VOID(builder);
+    CHECK_NULL_VOID(frameNode);
     std::optional<TextStyle> textStyle;
     auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
@@ -439,7 +443,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
         auto displayContent = StringUtils::Str8ToStr16(content);
         auto contentLength = static_cast<int32_t>(displayContent.length());
         if (selStart > 0) {
-            auto beforeSelectedText = displayContent.substr(0, selectedStart);
+            auto beforeSelectedText = displayContent.substr(0, selStart);
             UpdateContentTextStyle(StringUtils::Str16ToStr8(beforeSelectedText), builder, textStyle);
         }
         auto finalSelStart = selStart;
@@ -454,7 +458,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             finalSelEnd = contentLength;
         }
         if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
@@ -487,8 +491,8 @@ void SpanItem::UpdateContentTextStyle(
 std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
 {
     std::string data;
-    if (needRemoveNewLine) {
-        data = rawContent.substr(0, rawContent.length() - 1);
+    if (needRemoveNewLine && !rawContent.empty()) {
+        data = rawContent.substr(0, static_cast<int32_t>(rawContent.length()) - 1);
     } else {
         data = rawContent;
     }
@@ -570,7 +574,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode)
 {
     TextStyle textStyle;
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, textStyle);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, textStyle);
@@ -1013,6 +1017,27 @@ ResultObject CustomSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.isInit = true;
     }
     return resultObject;
+}
+
+bool SpanItem::UpdateSpanTextColor(Color color)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto paragraphManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(paragraphManager, false);
+    auto paragraphInfos = paragraphManager->GetParagraphs();
+    if (paragraphIndex != 0 || paragraphInfos.size() != 1) {
+        return false;
+    }
+    auto iter = paragraphInfos.begin();
+    auto paragraphInfo = *iter;
+    auto paragraph = paragraphInfo.paragraph;
+    CHECK_NULL_RETURN(paragraph, false);
+    paragraph->UpdateColor(position - length, position, color);
+    textPattern->MarkDirtyNodeRender();
+    return true;
 }
 
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const

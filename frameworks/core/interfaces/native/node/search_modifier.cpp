@@ -46,6 +46,7 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -840,6 +841,20 @@ void ResetSearchInspectorId(ArkUINodeHandle node)
     SearchModelNG::SetId(frameNode, "");
 }
 
+void SetSearchEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -863,9 +878,9 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon, SetSearchOnWillInsert, ResetSearchOnWillInsert,
         SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete, ResetSearchOnWillDelete,
         SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
-        SetSearchCaretPosition, ResetSearchCaretPosition,
-        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
-        SetSearchInspectorId, ResetSearchInspectorId };
+        SetSearchCaretPosition, ResetSearchCaretPosition, SetSearchSelectionMenuOptions,
+        ResetSearchSelectionMenuOptions, SetSearchInspectorId, ResetSearchInspectorId, SetSearchEnableHapticFeedback,
+        ResetSearchEnableHapticFeedback };
     return &modifier;
 }
 

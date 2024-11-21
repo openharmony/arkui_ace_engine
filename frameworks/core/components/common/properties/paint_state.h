@@ -90,7 +90,7 @@ struct ImageData {
     int32_t dirtyY = 0;
     int32_t dirtyWidth = 0;
     int32_t dirtyHeight = 0;
-    std::vector<Color> data;
+    std::vector<uint32_t> data;
 };
 
 struct CanvasImage {

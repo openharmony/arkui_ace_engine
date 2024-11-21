@@ -1858,7 +1858,7 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
         auto hostNode = node.Upgrade();
         CHECK_NULL_VOID(hostNode);
         hostNode->MarkModifyDone();
-        hostNode->MarkDirtyNode();
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });
     context->GetTaskExecutor()->PostDelayedTask(
         delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");

@@ -88,7 +88,10 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
     Rosen::RSSurfaceNodeConfig config;
     config.SurfaceNodeName = "WindowScene_" + name + std::to_string(session_->GetPersistentId());
-    return Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    CHECK_NULL_RETURN(surfaceNode, nullptr);
+    surfaceNode->SetLeashPersistentId(static_cast<int64_t>(session_->GetPersistentId()));
+    return surfaceNode;
 }
 
 void WindowScene::OnAttachToFrameNode()
@@ -559,6 +562,22 @@ void WindowScene::OnDrawingCompleted()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnRemoveBlank()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->blankWindow_) {
+            self->BufferAvailableCallbackForBlank(true);
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::IsWindowSizeEqual(bool allowEmpty)

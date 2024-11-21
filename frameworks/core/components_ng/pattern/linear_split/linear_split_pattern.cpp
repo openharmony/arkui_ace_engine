@@ -175,10 +175,10 @@ float LinearSplitPattern::GetMaxPosFromIndex(std::size_t index)
 {
     auto curMin = childrenConstrains_[index + 1];
     auto max = Infinity<float>();
-    if (index + SPLIT_INDEX_INC_TWO < childrenDragPos_.size() - 1) {
+    if (index + SPLIT_INDEX_INC_TWO < static_cast<int32_t>(childrenDragPos_.size()) - 1) {
         max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - curMin;
     }
-    if (index + SPLIT_INDEX_INC_TWO == childrenDragPos_.size() - 1) {
+    if (index + SPLIT_INDEX_INC_TWO == static_cast<int32_t>(childrenDragPos_.size()) - 1) {
         max = childrenDragPos_[index + SPLIT_INDEX_INC_TWO] - curMin;
     }
     return max;
@@ -355,11 +355,11 @@ void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
         auto gestureOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
         GetdragedSplitIndexOrIsMoving(Point(gestureOffsetX, gestureOffsetY));
         if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto frame = GetHost();
-            CHECK_NULL_VOID(frame);
-            auto frameId = frame->GetId();
+            auto frameId = host->GetId();
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
             pipeline->FreeMouseStyleHoldNode(frameId);
         }
@@ -399,12 +399,11 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     if (!resizable_) {
         return;
     }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
+    auto frameId = host->GetId();
     pipeline->SetMouseStyleHoldNode(frameId);
 
     if (isDraged_) {
@@ -447,11 +446,11 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
 
 void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto frame = GetHost();
-    CHECK_NULL_VOID(frame);
-    auto frameId = frame->GetId();
+    auto frameId = host->GetId();
 
     if (!isHovered && !isDraged_) {
         pipeline->SetMouseStyleHoldNode(frameId);

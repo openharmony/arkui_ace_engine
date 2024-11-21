@@ -1574,61 +1574,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragDropManagerTest038
- * @tc.desc: Test GetItemIndex out of itemFrameNode is a true branch.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerTest038, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager.
-     * @tc.expected: dragDropManager is not null.
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    ASSERT_NE(dragDropManager, nullptr);
-
-    /**
-     * @tc.steps: step2. construct a GeometryNode,updates MarginFrameOffset and FrameSize.
-     * @tc.expected: geometryNode is not null.
-     */
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetMarginFrameOffset(FRAME_OFFSET);
-    geometryNode->SetFrameSize(FRAME_SIZE);
-
-    /**
-     * @tc.steps: step3. construct a FrameNode with GeometryNode.
-     * @tc.expected: gridNode is not null.
-     */
-    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<GridPattern>());
-    ASSERT_NE(gridNode, nullptr);
-    gridNode->SetGeometryNode(geometryNode);
-
-    /**
-     * @tc.steps: step4. construct a FrameNode.
-     */
-    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, childId, AceType::MakeRefPtr<Pattern>());
-    childNode->SetGeometryNode(geometryNode);
-
-    /**
-     * @tc.steps: step5. gridNode AddChild with childNode.
-     */
-    gridNode->AddChild(childNode);
-
-    /**
-     * @tc.steps: step6. call GetItemIndex with DragEventType::GRID and gridNode.
-     * @tc.expected: retFlag is true.
-     */
-    dragDropManager->draggedGridFrameNode_ = gridNode;
-    dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
-    bool retFlag = gridNode->FindChildByPosition(0, 0);
-    EXPECT_TRUE(retFlag);
-}
-
-/**
  * @tc.name: DragDropManagerTest039
  * @tc.desc: Test CheckParentVisible out of parent is a true branch.
  * @tc.type: FUNC

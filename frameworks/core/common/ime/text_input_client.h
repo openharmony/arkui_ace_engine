@@ -118,7 +118,6 @@ public:
         return value;
     };
 #endif
-    virtual void UpdateInputFilterErrorText(const std::string& errorText) {};
     virtual void ResetTouchAtLeftOffsetFlag() {}
 
     // Requests that this client Y point.
@@ -161,6 +160,8 @@ public:
 
     virtual void HandleSelect(CaretMoveIntent direction) {}
 
+    virtual void HandleSelectFontStyle(KeyCode code) {}
+
     virtual void HandleOnSelectAll() {}
 
     virtual void HandleOnEnter() {}
@@ -178,6 +179,11 @@ public:
     virtual void HandleOnRedoAction() {}
 
     virtual void HandleOnDelete(bool backward) {}
+
+    virtual bool HandleOnDeleteComb(bool backward)
+    {
+        return false;
+    }
 
     virtual int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range)
     {

@@ -246,7 +246,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -270,7 +270,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest003, TestSize.Level1)
     NavDestinationModelNG NavDestinationModelNG;
     auto builderFunc = []() {};
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -291,7 +291,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
     auto builderFunc = []() {};
     auto onBackPressed = []() -> bool { return true; };
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     NavDestinationModelNG.SetOnShown(std::move(builderFunc));
@@ -389,7 +389,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationOnLanguageConfigurationUpdateTest00
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -529,111 +529,6 @@ HWTEST_F(NavdestinationTestNg, NavdestinationMirrorLayoutTest003, TestSize.Level
 }
 
 /**
- * @tc.name: NavDestinationPatternHandleLongPressTest001
- * @tc.desc: test 1.75 scale of NavDestinationPattern
- * @tc.type: FUNC
- */
-HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set platform version to VERSION_NINE, mock theme and set font scale to 1.75.
-     */
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->fontScale_ = 1.75f;
-    /**
-     * @tc.steps: step2. create NavDestination and initialize children component.
-     */
-    UIComponents ui;
-    InitChildrenComponent(ui);
-    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    /**
-     * @tc.steps: step2. call HandleLongPress.
-     * @tc.expected: dialog_ != nullptr
-     */
-    navDestinationPattern->HandleLongPress();
-    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
-    /**
-     * @tc.steps: step3. call HandleLongPressActionEnd.
-     * @tc.expected: dialog_ == nullptr
-     */
-    navDestinationPattern->HandleLongPressActionEnd();
-    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
-}
-
-/**
- * @tc.name: NavDestinationPatternHandleLongPressTest002
- * @tc.desc: test 2 scale of NavDestinationPattern
- * @tc.type: FUNC
- */
-HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 2.
-     */
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->fontScale_ = 2.0f;
-    /**
-     * @tc.steps: step2. create NavDestination and initialize children component.
-     */
-    UIComponents ui;
-    InitChildrenComponent(ui);
-    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    /**
-     * @tc.steps: step2. call HandleLongPress.
-     * @tc.expected: dialog_ != nullptr
-     */
-    navDestinationPattern->HandleLongPress();
-    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
-    /**
-     * @tc.steps: step3. call HandleLongPressActionEnd.
-     * @tc.expected: dialog_ == nullptr
-     */
-    navDestinationPattern->HandleLongPressActionEnd();
-    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
-}
-
-/**
- * @tc.name: NavDestinationPatternHandleLongPressTest003
- * @tc.desc: test 3.2 scale of NavDestinationPattern
- * @tc.type: FUNC
- */
-HWTEST_F(NavdestinationTestNg, NavDestinationPatternHandleLongPressTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set platform version to VERSION_NINE and set font scale to 3.2.
-     */
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->fontScale_ = 3.2f;
-    /**
-     * @tc.steps: step2. create NavDestination and initialize children component.
-     */
-    UIComponents ui;
-    InitChildrenComponent(ui);
-    auto navDestinationPattern = ui.navDestinationGroupNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    /**
-     * @tc.steps: step2. call HandleLongPress.
-     * @tc.expected: dialog_ != nullptr
-     */
-    navDestinationPattern->HandleLongPress();
-    EXPECT_NE(navDestinationPattern->dialogNode_, nullptr);
-    /**
-     * @tc.steps: step3. call HandleLongPressActionEnd.
-     * @tc.expected: dialog_ == nullptr
-     */
-    navDestinationPattern->HandleLongPressActionEnd();
-    EXPECT_EQ(navDestinationPattern->dialogNode_, nullptr);
-}
-
-/**
  * @tc.name: NavigationTitleUtilHandleLongPressTest001
  * @tc.desc: test 1.75 scale of NavigationTitleUtil
  * @tc.type: FUNC
@@ -655,8 +550,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -697,8 +594,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -740,8 +639,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**

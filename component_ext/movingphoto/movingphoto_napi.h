@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 napi_value JsCreate(napi_env env, napi_callback_info info);
 napi_value JsMuted(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
+napi_value JsOnComplete(napi_env env, napi_callback_info info);
 napi_value JsOnStart(napi_env env, napi_callback_info info);
 napi_value JsOnStop(napi_env env, napi_callback_info info);
 napi_value JsOnPause(napi_env env, napi_callback_info info);
@@ -30,6 +31,9 @@ napi_value JsOnFinish(napi_env env, napi_callback_info info);
 napi_value JsOnError(napi_env env, napi_callback_info info);
 napi_value StartPlayback(napi_env env, napi_callback_info info);
 napi_value StopPlayback(napi_env env, napi_callback_info info);
+napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info);
+napi_value JsAutoPlay(napi_env env, napi_callback_info info);
+napi_value JsRepeatPlay(napi_env env, napi_callback_info info);
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info);
 } // namespace OHOS::Ace
 #endif // COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_NAPI_H

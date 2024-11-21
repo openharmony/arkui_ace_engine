@@ -19,14 +19,11 @@
 #include <mutex>
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -34,11 +31,7 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/skia_image.h"
-#else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#endif
 #include "core/image/image_loader.h"
 #include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -131,10 +124,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
             ctx->FailCallback(errorMsg);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadFailTask = [ctx, errorMsg] {
-                ctx->FailCallback(errorMsg);
-            };
-
+            auto notifyLoadFailTask = [ctx, errorMsg] { ctx->FailCallback(errorMsg); };
             ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
     }
@@ -203,9 +193,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             ctx->DataReadyCallback(imageObj);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyDataReadyTask = [ctx, imageObj, src] {
-                ctx->DataReadyCallback(imageObj);
-            };
+            auto notifyDataReadyTask = [ctx, imageObj, src] { ctx->DataReadyCallback(imageObj); };
             ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
     }
@@ -248,11 +236,10 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
-        bool canceled = it->second.bgTask_.Cancel();
-        if (canceled) {
-            tasks_.erase(it);
-            return;
-        }
+        // task should be deleted regardless of whether the cancellation is successful or not
+        it->second.bgTask_.Cancel();
+        tasks_.erase(it);
+        return;
     }
     // other LoadingContext still waiting for this task, remove ctx from set
     it->second.ctxs_.erase(ctx);
@@ -293,15 +280,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return PixelMapImageObject::Create(src, data);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, nullptr);
-    auto [size, frameCount] = skiaImageData->Parse();
-#else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto [size, frameCount] = rosenImageData->Parse();
-#endif
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
@@ -332,9 +313,8 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([key, obj, size, imageDecoderOptions] {
-            MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
-        });
+        task.Reset(
+            [key, obj, size, imageDecoderOptions] { MakeCanvasImageHelper(obj, size, key, imageDecoderOptions); });
         tasks_[key].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
@@ -347,14 +327,11 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
 {
     ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
     RefPtr<CanvasImage> image;
+    // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
         image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed);
     } else {
-#ifndef USE_ROSEN_DRAWING
-        image = decoder.MakeSkiaImage();
-#else
         image = decoder.MakeDrawingImage();
-#endif
     }
 
     if (image) {

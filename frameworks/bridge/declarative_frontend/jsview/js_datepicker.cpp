@@ -275,6 +275,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSDatePicker>::StaticMethod("opacity", &JSDatePicker::JsOpacity);
     // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -459,6 +460,12 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
+void JSDatePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+}
+
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -596,8 +603,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                           const BaseEventInfo* info) {
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                           node = targetNode, isDatePicker](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
@@ -608,7 +615,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
             return;
         }
 
-        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson);
+        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson, isDatePicker);
         PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(1, &dateObj);
     };
@@ -832,7 +839,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
     return dateAcceptEvent;
 }
 
-JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson)
+JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
     std::tm dateTime = { 0 };
     auto year = selectedJson->GetValue("year");
@@ -854,6 +861,15 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     auto minute = selectedJson->GetValue("minute");
     if (minute && minute->IsNumber()) {
         dateTime.tm_min = minute->GetInt();
+    }
+    auto second = selectedJson->GetValue("second");
+    if (second && second->IsNumber()) {
+        dateTime.tm_sec = second->GetInt();
+    }
+    if (!isDatePicker) {
+        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+        auto dateObj = JSDate::New(milliseconds);
+        return dateObj;
     }
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
@@ -1302,6 +1318,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
+    JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1312,6 +1329,12 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
     CreateTimePicker(info, paramObject);
+}
+
+void JSTimePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TimePickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 void JSTimePicker::Loop(const JSCallbackInfo& info)

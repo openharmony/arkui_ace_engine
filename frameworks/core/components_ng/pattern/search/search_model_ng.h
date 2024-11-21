@@ -89,6 +89,7 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetEnableHapticFeedback(bool state) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -156,7 +157,7 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetId(FrameNode* frameNode, const std::string& key);
-    void SetEnableHapticFeedback(bool state) override;
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
@@ -168,7 +169,6 @@ private:
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
-    static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };

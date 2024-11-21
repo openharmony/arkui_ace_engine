@@ -22,6 +22,8 @@
 #include <string>
 #include "securec.h"
 #include "drawable_descriptor.h"
+#include <cstdlib>
+
 #include "frame_information.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -331,7 +333,16 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
         constexpr int colorNumFormat = 16;
-        auto value = stoul(colorStr, nullptr, colorNumFormat);
+        errno = 0;
+        char* end = nullptr;
+        unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
+        if (errno == ERANGE) {
+            LOGE("%{public}s is out of range.", colorStr.c_str());
+        }
+        if (value == 0 && end == colorStr.c_str()) {
+            LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
+        }
+    
         return value;
     }
     return defaultValue;
@@ -1329,7 +1340,7 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     for (int i = 0; i < size; i++) {
         colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
         colors[i * NUM_3 + NUM_1].i32 = true;
-        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i] < 0 ? 0 : colorStop->stops[i];
     }
 
     auto isCustomDirection = item->value[NUM_1].i32 == static_cast<ArkUI_Int32>(ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM);
@@ -2129,12 +2140,12 @@ const ArkUI_AttributeItem* GetCustomShadow(ArkUI_NodeHandle node)
 {
     ArkUICustomShadowOptions options;
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getCustomShadow(node->uiNodeHandle, &options);
-    g_numberValues[NUM_0].i32 = options.radius;
-    g_numberValues[NUM_1].f32 = options.offsetX;
-    g_numberValues[NUM_2].f32 = options.offsetY;
-    g_numberValues[NUM_3].i32 = options.shadowType;
-    g_numberValues[NUM_4].u32 = options.color;
-    g_numberValues[NUM_5].i32 = options.colorStrategy;
+    g_numberValues[NUM_0].f32 = options.radius;
+    g_numberValues[NUM_1].i32 = options.colorStrategy;
+    g_numberValues[NUM_2].f32 = options.offsetX;
+    g_numberValues[NUM_3].f32 = options.offsetY;
+    g_numberValues[NUM_4].i32 = options.shadowType;
+    g_numberValues[NUM_5].u32 = options.color;
     g_numberValues[NUM_6].i32 = options.fill;
     return &g_attributeItem;
 }
@@ -2814,11 +2825,6 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
         default:
             return nullptr;
     }
-    if (!InRegion(static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_RECTANGLE),
-        static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH), g_numberValues[NUM_3].i32)) {
-        return nullptr;
-    }
-
     return &g_attributeItem;
 }
 
@@ -4045,8 +4051,8 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit, item->value[NUM_0].u32);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
+        node->uiNodeHandle, item->value[NUM_0].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4611,8 +4617,12 @@ void ResetTextInputContentType(ArkUI_NodeHandle node)
 int32_t SetTextInputPasswordRules(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if(!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPasswordRules(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4692,8 +4702,12 @@ void ResetTextInputCaretOffset(ArkUI_NodeHandle node)
 int32_t SetInputFilter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
+    ArkUI_CharPtr itemString = item->string;
+    if(!itemString) {
+        itemString = "";
+    }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputInputFilter(
-        node->uiNodeHandle, item->string);
+        node->uiNodeHandle, itemString);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7387,8 +7401,13 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
 const ArkUI_AttributeItem* GetTextFontFamily(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
-    g_attributeItem.string = resultValue;
+    if (node->type == ARKUI_NODE_SPAN) {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getSpanModifier()->getSpanFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    } else {
+        auto resultValue = GetFullImpl()->getNodeModifiers()->getTextModifier()->getFontFamily(node->uiNodeHandle);
+        g_attributeItem.string = resultValue;
+    }
     g_attributeItem.size = 0;
     return &g_attributeItem;
 }
@@ -9769,6 +9788,38 @@ int32_t SetImageSpanSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else {
         return SetImageSrc(node, item);
     }
+}
+
+int32_t SetImageSpanBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetImageSpanBaselineOffset(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->
+        resetImageSpanBaselineOffset(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetImageSpanBaselineOffset(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_FP);
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getImageSpanModifier()->
+        getImageSpanBaselineOffset(node->uiNodeHandle, unit);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
 }
 
 int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -12974,7 +13025,7 @@ void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt };
+    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt, SetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12984,7 +13035,7 @@ int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 
 const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt };
+    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt, GetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -12994,7 +13045,7 @@ const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t 
 
 void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt };
+    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt, ResetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

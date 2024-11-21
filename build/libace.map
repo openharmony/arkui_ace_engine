@@ -79,7 +79,6 @@
       OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
-      OHOS::Ace::DynamicColor::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
@@ -327,6 +326,7 @@
       OHOS::Ace::Recorder::EventRecorder::*;
       OHOS::Ace::Recorder::EventParamsBuilder::*;
       "OHOS::Ace::PipelineBase::GetCurrentContext()";
+      OHOS::Ace::V2::ANALOGCLOCK_ETS_TAG;
       OHOS::Ace::V2::COLUMN_ETS_TAG;
       OHOS::Ace::V2::IMAGE_ETS_TAG;
       OHOS::Ace::V2::MOVING_PHOTO_ETS_TAG;
@@ -354,6 +354,8 @@
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
+
+      "OHOS::Ace::TimeEventProxy::GetInstance()";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;

@@ -307,7 +307,7 @@ void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
     richEditorPattern->SetTextDetectEnable(value);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -316,14 +316,14 @@ void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedC
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const DynamicColor& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
+void RichEditorModelNG::SetCaretColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -332,7 +332,7 @@ void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
     pattern->SetCaretColor(color);
 }
 
-void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const DynamicColor& color)
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -446,7 +446,6 @@ void RichEditorModelNG::SetSelectionMenuOptions(
 
 void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
 {
-    CHECK_NULL_VOID(!isStyledStringMode_);
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
@@ -460,6 +459,10 @@ void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool nee
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
 }
 
+void RichEditorModelNG::SetBarState(DisplayMode mode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode);
+}
 void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -474,5 +477,12 @@ void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
+
+void RichEditorModelNG::SetEnableHapticFeedback(bool isEnabled)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetEnableHapticFeedback(isEnabled);
 }
 } // namespace OHOS::Ace::NG

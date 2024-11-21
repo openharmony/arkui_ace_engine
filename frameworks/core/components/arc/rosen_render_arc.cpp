@@ -35,7 +35,12 @@ void RosenRenderArc::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    auto contextPointer = AceType::DynamicCast<RosenRenderContext>(&context);
+    if (contextPointer == nullptr) {
+        LOGE("ContextPointer is null");
+        return;
+    }
+    auto canvas = contextPointer->GetCanvas();
     if (canvas == nullptr) {
         LOGE("Paint canvas is null");
         return;

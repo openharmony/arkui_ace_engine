@@ -94,13 +94,14 @@ bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
-bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
+float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
@@ -266,14 +267,14 @@ int32_t SystemProperties::GetJankFrameThreshold()
     return 0;
 }
 
-std::string SystemProperties::GetCustomTitleFilePath()
-{
-    return UNDEFINED_PARAM;
-}
-
 bool SystemProperties::Is24HourClock()
 {
     return false;
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return UNDEFINED_PARAM;
 }
 
 bool SystemProperties::GetDisplaySyncSkipEnabled()
@@ -286,14 +287,9 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
-bool SystemProperties::GetGridCacheEnabled()
+bool SystemProperties::GetSideBarContainerBlurEnable()
 {
-    return gridCacheEnabled_;
-}
-
-bool SystemProperties::GetGridIrregularLayoutEnabled()
-{
-    return false;
+    return sideBarContainerBlurEnable_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
@@ -301,9 +297,14 @@ bool SystemProperties::WaterFlowUseSegmentedLayout()
     return false;
 }
 
-bool SystemProperties::GetSideBarContainerBlurEnable()
+bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return sideBarContainerBlurEnable_;
+    return false;
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
 }
 
 float SystemProperties::GetDefaultResolution()
@@ -324,5 +325,10 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
 }
 } // namespace OHOS::Ace

@@ -60,42 +60,6 @@ HWTEST_F(TextTestThreeNg, TextModelSetFont001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextModelGetFontInJson001
- * @tc.desc: Test if GetFontInJson is successful
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, TextModelGetFontInJson001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize textModelNG and FrameNode
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. not set and Gets the relevant properties of the Font
-     * @tc.expected: step2. Check the font value
-     */
-    EXPECT_EQ(pattern->GetFontInJson(), TEXT_DEFAULT_VALUE);
-
-    /**
-     * @tc.steps: step2. call SetFont and Gets the relevant properties of the Font
-     * @tc.expected: step2. Check the font value
-     */
-    Font font;
-    font.fontSize = FONT_SIZE_VALUE;
-    font.fontWeight = FontWeight::BOLD;
-    font.fontFamilies = FONT_FAMILY_VALUE;
-    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    textModelNG.SetFont(font);
-    EXPECT_EQ(pattern->GetFontInJson(), TEXT_EQUALS_VALUE);
-}
-
-/**
  * @tc.name: BetweenSelectedPosition001
  * @tc.desc: test text_pattern.cpp BetweenSelectedPosition function
  * @tc.type: FUNC
@@ -246,32 +210,6 @@ HWTEST_F(TextTestThreeNg, ApplyIndents003, TestSize.Level1)
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
     EXPECT_NE(rowLayoutAlgorithm->paragraphManager_->GetParagraphs().front().paragraph.rawPtr_, nullptr);
-}
-
-/**
- * @tc.name: SetDraggable001
- * @tc.desc: test text_model_ng.cpp SetDraggable function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, SetDraggable001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-
-    /**
-     * @tc.steps: step3. construct 2 groups cases and corresponding expected results.
-     * @tc.expected: Running SetDraggable function and check the result with expected results.
-     */
-    std::vector<bool> cases = { true, false };
-    std::vector<bool> expectResult = { true, false };
-    for (uint32_t turn = 0; turn < cases.size(); ++turn) {
-        textModelNG.SetDraggable(cases[turn]);
-        EXPECT_EQ(frameNode->IsDraggable(), expectResult[turn]);
-    }
 }
 
 /**
@@ -1304,6 +1242,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     host->AddChild(placeholderSpanNode);
+    placeholderSpanNode->SetParent(host);
 
     auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId());
@@ -1666,6 +1605,48 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateNodePaintMethod001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(3.f); // 3.f means BlurRadius.
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    textModelNG.SetTextShadow({ textShadow });
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
+    frameNode->Measure(layoutConstraintF);
+    frameNode->Layout();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
+    pattern->pManager_->Reset();
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+
+    /**
+     * @tc.steps: step2. test CreateNodePaintMethod.
+     * @tc.expect: expect overlayModifier BoundsRect width std::max(frameWith, paragraph->GetLongestLine),
+     *     GestureHub ResponseRegion list not empty.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+    pattern->CreateNodePaintMethod();
+    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
+    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+    pattern->pManager_->Reset();
+}
+
+/**
  * @tc.name: CreateNodePaintMethod002
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
  * @tc.type: FUNC
@@ -1813,7 +1794,6 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty002, TestSize.Level1)
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     auto node = frameNode.rawPtr_;
     TextModelNG::SetAdaptMinFontSize(node, ADAPT_MIN_FONT_SIZE_VALUE);
-    TextModelNG::SetDraggable(node, true);
     TextModelNG::SetAdaptMaxFontSize(node, ADAPT_MAX_FONT_SIZE_VALUE);
     TextModelNG::SetFontFamily(node, FONT_FAMILY_VALUE);
     TextModelNG::SetCopyOption(node, CopyOptions::Distributed);

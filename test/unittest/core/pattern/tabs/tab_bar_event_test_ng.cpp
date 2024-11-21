@@ -14,7 +14,9 @@
  */
 
 #include "tabs_test_ng.h"
+
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -697,8 +699,9 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step1. Long press on barItem(index:0)
      * @tc.expected: Show dialog
      */
-    MouseTo(MouseAction::MOVE, firstItemPoint, true);
-    TouchTo(TouchType::DOWN, firstItemPoint);
+    HandleMouseEvent(MouseAction::MOVE, firstItemPoint);
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, firstItemPoint);
     LongPress(firstItemPoint);
     EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
 
@@ -730,7 +733,7 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step5. Release press
      * @tc.expected: Hide dialog
      */
-    TouchTo(TouchType::UP, outOfTabBarPoint);
+    HandleTouchEvent(TouchType::UP, outOfTabBarPoint);
     EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
     pipeline->fontScale_ = 1.f;
 }
@@ -791,7 +794,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make tabBar scrollable
-    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
     ViewAbstract::SetWidth(CalcLength(tabsWidth));
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
@@ -816,8 +819,8 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
      */
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->visibleItemPosition_[1] = { -outOffset, -outOffset + BARITEM_SIZE };
-    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] =
-        { -outOffset + BARITEM_SIZE * 2, -outOffset + tabsWidth };
+    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] = { -outOffset + BARITEM_SIZE * 2,
+        -outOffset + tabsWidth };
     dragOffset = -100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
     EXPECT_LT(tabBarPattern_->currentDelta_, 0.0f);
@@ -867,5 +870,197 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
+}
+
+/**
+ * @tc.name: TabBarItemClickEventTest001
+ * @tc.desc: Test AddTabBarItemClickEvent and verify the click event callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarItemClickEventTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents();
+    CreateTabsDone(model);
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    EXPECT_EQ(tabBarItem->GetTag(), "Column");
+    /**
+     * @tc.steps: step1. tabBarItem1 click and expect index eq 1
+     */
+    GestureEvent info;
+    info.SetLocalLocation(Offset(200.f, 30.f));
+    auto eventHub = tabBarItem->GetOrCreateGestureEventHub();
+    (*eventHub->clickEventActuator_->clickEvents_.front())(info);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 1);
+}
+
+/**
+ * @tc.name: HandleSubTabBarClick003
+ * @tc.desc: test CanScroll without visibleItemPosition_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    bool finishCalled = false;
+    AnimationOption option;
+    auto finishCallback = [&finishCalled]() { finishCalled = true; };
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
+    tabBarPattern_->animationDuration_ = 3;
+    tabBarPattern_->indicatorAnimationIsRunning_ = true;
+    tabBarPattern_->translateAnimationIsRunning_ = true;
+    tabBarPattern_->tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, finishCallback);
+    /**
+     * @tc.steps: step1. handle HandleSubTabBarClick and TriggerTranslateAnimation method.
+     */
+    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+    EXPECT_FALSE(tabBarPattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(tabBarPattern_->targetIndex_.value_or(0), 0);
+    EXPECT_EQ(tabBarPattern_->jumpIndex_.value_or(0), 0);
+    EXPECT_EQ(tabBarPattern_->animationTargetIndex_, 1);
+    EXPECT_TRUE(finishCalled);
+}
+
+/**
+ * @tc.name: HandleSubTabBarClick004
+ * @tc.desc: test HandleSubTabBarClick with tabsPattern->GetIsCustomAnimation() && indicator == index
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern_->changeByClick_ = false;
+    pattern_->isCustomAnimation_ = false;
+    tabBarLayoutProperty_->UpdateIndicator(1);
+    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
+    EXPECT_FALSE(tabBarPattern_->changeByClick_);
+}
+
+/**
+ * @tc.name: HandleSubTabBarClick005
+ * @tc.desc: test HandleSubTabBarClick with tabsPattern->IsCustomAnimation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick005, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->changeByClick_ = false;
+    tabBarPattern_->isAnimating_ = false;
+    pattern_->isCustomAnimation_ = true;
+    swiperPattern_->currentIndex_ = 0;
+    swiperPattern_->customAnimationToIndex_ = 0;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->animationDuration_ = 3;
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE,
+        TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE };
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    /**
+     * @tc.steps: step1. call method in tabsPattern->GetIsCustomAnimation() and TriggerTranslateAnimation.
+     */
+    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
+    EXPECT_EQ(swiperPattern_->customAnimationToIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->isAnimating_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: HandleTouchEvent004
+ * @tc.desc: Test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    /**
+     * @tc.steps: step1. call callback method in InitTouch and hadlemouse events with tabBarType_ second is true
+     */
+    TouchEventInfo info = TouchEventInfo("touch");
+    TouchLocationInfo touchLocationInfo = TouchLocationInfo(1);
+    touchLocationInfo.SetLocalLocation(Offset(200.0, 30.0));
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfo));
+    auto eventHub = tabBarNode_->GetOrCreateGestureEventHub();
+    auto actuator = eventHub->touchEventActuator_;
+    auto events = actuator->touchEvents_;
+    events.front()->callback_(info);
+    tabBarPattern_->tabBarType_ = { { 0, false }, { 1, true } };
+    tabBarPattern_->HandleHoverEvent(true);
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation(Offset(200.0, 30.0));
+    tabBarPattern_->HandleMouseEvent(mouseInfo);
+    tabBarPattern_->isTouchingSwiper_ = true;
+    EXPECT_EQ(tabBarPattern_->touchingIndex_.value(), 1);
+    EXPECT_EQ(tabBarPattern_->hoverIndex_.value_or(0), 0);
+    EXPECT_FALSE(tabBarPattern_->isHover_);
+    swiperController_->surfaceChangeCallback_();
+    EXPECT_FALSE(tabBarPattern_->isTouchingSwiper_);
+}
+
+/**
+ * @tc.name: TabBarPatternCanScroll001
+ * @tc.desc: test TabBarPatternCanScroll without visibleItemPosition_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternCanScroll001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    /**
+     * @tc.steps: step1. trigger CanScroll without visibleItemPosition_.
+     */
+    EXPECT_NE(tabBarLayoutProperty_->GetTabBarModeValue(TabBarMode::FIXED), TabBarMode::FIXED);
+    EXPECT_FALSE(tabBarPattern_->CanScroll());
+}
+
+/**
+ * @tc.name: TabBarPatternOnKeyEvent001
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabsDone(model);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->isFocusActive_ = true;
+    /**
+     * @tc.steps: step1. call OnKeyEvent use Axis::HORIZONTAL and KeyCode::KEY_TAB and isCustomAnimation_ is true
+     */
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
+    pattern_->isCustomAnimation_ = true;
+    EXPECT_TRUE(tabBarPattern_->OnKeyEvent(event));
+    EXPECT_EQ(swiperPattern_->customAnimationToIndex_, 1);
+    /**
+     * @tc.steps: step2. call OnKeyEvent use other code
+     */
+    event.code = KeyCode::KEY_9;
+    EXPECT_FALSE(tabBarPattern_->OnKeyEvent(event));
 }
 } // namespace OHOS::Ace::NG

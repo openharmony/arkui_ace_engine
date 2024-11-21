@@ -329,6 +329,7 @@ private:
     void DumpAdvanceInfo() override;
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void NativeXComponentOffset(double x, double y);
 
@@ -379,6 +380,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -443,6 +445,7 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
+    bool isEnableSecure_ = false;
 };
 } // namespace OHOS::Ace::NG
 

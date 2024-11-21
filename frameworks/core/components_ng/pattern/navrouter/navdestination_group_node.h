@@ -21,6 +21,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
@@ -32,38 +33,20 @@ class NavigationTransitionProxy;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
-class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavDestinationGroupNode, GroupNode)
+class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
+    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : GroupNode(tag, nodeId, pattern)
-    {}
+        : NavDestinationNodeBase(tag, nodeId, pattern)
+    {
+        isNewToolbar_ = true;
+    }
     ~NavDestinationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
-    void SetTitleBarNode(const RefPtr<UINode>& title)
-    {
-        titleBarNode_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitleBarNode() const
-    {
-        return titleBarNode_;
-    }
-
-    void SetContentNode(const RefPtr<UINode>& contentNode)
-    {
-        contentNode_ = contentNode;
-    }
-
-    const RefPtr<UINode>& GetContentNode() const
-    {
-        return contentNode_;
-    }
 
     void SetNavDestinationBackButtonEvent(const NavDestinationBackButtonEvent& backButtonEvent)
     {
@@ -75,20 +58,11 @@ public:
         return backButtonEvent_;
     }
 
-    // custom node checking
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
-    void OnPrevTitleIsCustomUpdate(bool value) {}
-
     void OnAttachToMainTree(bool recursive) override;
 
     void OnOffscreenProcess(bool recursive) override;
 
     void ProcessShallowBuilder();
-
-    void SetTransitionType(PageTransitionType type)
-    {
-        transitionType_ = type;
-    }
 
     void SetIsOnAnimation(bool isOnAnimation)
     {
@@ -98,11 +72,6 @@ public:
     bool IsOnAnimation() const
     {
         return isOnAnimation_;
-    }
-
-    PageTransitionType GetTransitionType() const
-    {
-        return transitionType_;
     }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
@@ -180,11 +149,6 @@ public:
         return needRemoveInPush_;
     }
 
-    float GetLanguageDirection()
-    {
-        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
-    }
-
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
     void SystemTransitionPushCallback(bool transitionIn);
@@ -192,20 +156,18 @@ public:
     void StartSystemTransitionPop(bool transitionIn);
     bool SystemTransitionPopCallback(bool transitionIn);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
     void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();
-    void CollectTextNodeAsRenderGroup();
+    void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
 private:
-    RefPtr<UINode> titleBarNode_;
-    RefPtr<UINode> contentNode_;
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
     int32_t index_ = -1;
-    PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
     bool isAnimated_ = true;

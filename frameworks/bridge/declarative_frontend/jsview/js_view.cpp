@@ -129,18 +129,27 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceIdStack_.emplace_back(Container::CurrentId());
+    if (primaryStackSize_ >= PRIMARY_ID_STACK_SIZE) {
+        restoreInstanceIdStack_.emplace_back(Container::CurrentId());
+    } else {
+        primaryIdStack_[primaryStackSize_++] = Container::CurrentId();
+    }
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
 void JSView::RestoreInstanceId()
 {
-    if (restoreInstanceIdStack_.empty()) {
+    if (primaryStackSize_ >= PRIMARY_ID_STACK_SIZE && !restoreInstanceIdStack_.empty()) {
+        // Checking primaryStackSize_ is necessary, because the pointer in restoreInstanceIdStack_ may be corrupted.
+        ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
+        restoreInstanceIdStack_.pop_back();
+        return;
+    }
+    if (primaryStackSize_ == 0) {
         ContainerScope::UpdateCurrent(-1);
         return;
     }
-    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.back());
-    restoreInstanceIdStack_.pop_back();
+    ContainerScope::UpdateCurrent(primaryIdStack_[--primaryStackSize_]);
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
@@ -963,7 +972,9 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationMgr);
@@ -1010,7 +1021,9 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     return;
 #else
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!LayoutInspector::GetStateProfilerStatus()) {
         return;

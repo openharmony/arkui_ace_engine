@@ -219,7 +219,7 @@ void JankFrameReport::ResetFrameJankClock()
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
     ResetFrameJankClock();
-    pageUrl_ = pageUrl;
+    pageUrl_ = ParsePageUrl(pageUrl);
 }
 
 void JankFrameReport::FlushRecord()
@@ -243,5 +243,10 @@ void JankFrameReport::ReportJSAnimation()
     if (animatorEndTime_ != 0) {
         hasJsAnimation_ = true;
     }
+}
+
+void JankFrameReport::RecordAnimateEnd()
+{
+    prevEndTimeStamp_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
 }
 } // namespace OHOS::Ace

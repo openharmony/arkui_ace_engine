@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_MEDIA_PLAYER_H
 
-#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "player.h"
 #include "surface.h"
 #include "window.h"
 
@@ -56,6 +56,7 @@ public:
     int32_t Pause() override;
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
+    int32_t SetPlayRange(int64_t startTime, int64_t endTime) override;
 
 private:
     // Interim programme

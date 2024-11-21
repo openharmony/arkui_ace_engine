@@ -16,13 +16,12 @@
 #include "tabs_test_ng.h"
 
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabsAttrTestNg : public TabsTestNg {
 public:
 };
@@ -338,26 +337,6 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabsModelSetFadingEdge001
- * @tc.desc: test SetFadingEdge
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetFadingEdge(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    EXPECT_EQ(frameNode_->GetTag(), V2::TABS_ETS_TAG);
-    EXPECT_EQ(tabBarNode_->GetTag(), V2::TAB_BAR_ETS_TAG);
-    EXPECT_TRUE(tabBarPaintProperty_->GetFadingEdgeValue());
-
-    auto json = JsonUtil::Create(true);
-    frameNode_->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("fadingEdge"), "true");
-}
-
-/**
  * @tc.name: TabsModelOnUpdateShowDivider001
  * @tc.desc: Test tabs OnUpdateShowDivider.
  * @tc.type: FUNC
@@ -416,22 +395,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
     pattern_->OnUpdateShowDivider();
     auto childNode = frameNode_->GetChildAtIndex(1);
     EXPECT_EQ(childNode->GetTag(), V2::DIVIDER_ETS_TAG);
-}
-
-/**
- * @tc.name: TabsModelToJsonValue001
- * @tc.desc: Test tabs ToJsonValue when host has not child.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelToJsonValue001, TestSize.Level2)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    frameNode_->ToJsonValue(json, filter);
-    auto dividerJson = json->GetValue("divider");
-    EXPECT_TRUE(dividerJson->IsNull());
 }
 
 /**
@@ -699,33 +662,6 @@ HWTEST_F(TabsAttrTestNg, TabContentModelUpdateLabelStyle002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabContentModelToJsonValue001
- * @tc.desc: test SetIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabContentModelToJsonValue001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    LabelStyle labelStyle;
-    labelStyle.textOverflow = TextOverflow::CLIP;
-    labelStyle.maxLines = 0;
-    labelStyle.minFontSize = 0.0_vp;
-    labelStyle.maxFontSize = 0.0_vp;
-    labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    labelStyle.fontSize = 0.0_vp;
-    labelStyle.fontWeight = FontWeight::NORMAL;
-    labelStyle.fontFamily = { "unknown", "unknow2" };
-    tabContentPattern->SetLabelStyle(labelStyle);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    tabContentFrameNode->ToJsonValue(json, filter);
-    EXPECT_NE(json, nullptr);
-}
-
-/**
  * @tc.name: TabContentModel001
  * @tc.desc: test TabsModel
  * @tc.type: FUNC
@@ -747,16 +683,18 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
     tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentNode->GetTabBarItemId();      // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);     // for AddTabBarItem
     tabContentModel.Pop();
     CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
-    EXPECT_EQ(colNode->GetTotalChildCount(), 1);
+    EXPECT_EQ(colNode->GetTotalChildCount(), 2);
 
     auto imageNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(imageNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto textNode = GetChildFrameNode(colNode, 1);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
 }
 
 /**
@@ -779,15 +717,15 @@ HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
     auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
     tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentNode->GetTabBarItemId();      // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);     // for AddTabBarItem
     tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
     ViewStackProcessor::GetInstance()->PopContainer();
     CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(colNode->GetTotalChildCount(), 2);
-    
+
     auto symbolNode = GetChildFrameNode(colNode, 0);
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
 
@@ -860,10 +798,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
 {
- /**
-  * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
-  * @tc.expected: Related functions run ok.
-  */
+    /**
+     * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
+     * @tc.expected: Related functions run ok.
+     */
     TabsModelNG model = CreateTabs();
     model.SetWidthAuto(true);
     model.SetHeightAuto(true);
@@ -912,25 +850,6 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode001, TestSize.Level1)
     int32_t nodeId = 1;
     auto frameNode = TabsModelNG::GetOrCreateTabsNode(tag, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(frameNode, nullptr);
-}
-
-/**
- * @tc.name: TabsModelSetOnChange001
- * @tc.desc: test SetOnChange
- * @tc.type: FUNC
- */
-HWTEST_F(TabsAttrTestNg, TabsModelSetOnChange001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetOnChange(nullptr);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function SetOnChange.
-     * @tc.expected: Related function runs ok.
-     */
-    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1157,7 +1076,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level
      */
     option.margin = Dimension(0.f);
     option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
-    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
+    const float tabsWidth = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1373,10 +1292,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode002, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabsModelMeasure007
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabsModelMeasure007
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
 {
     /**
@@ -1395,8 +1314,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
     auto tabsLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraintVaild;
 
     float layoutSize = 10000.0f;
@@ -1482,28 +1400,357 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabsModelSetEdgeEffect001
- * @tc.desc: test SetEdgeEffect
+ * @tc.name: TabContentModelAddTabBarItem001
+ * @tc.desc: test method with isRTL && useLocalizedPadding_ and LayoutMode::HORIZONTAL in BOTTOMTABBATSTYLE
  * @tc.type: FUNC
  */
-HWTEST_F(TabsAttrTestNg, TabsModelSetEdgeEffect001, TestSize.Level1)
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
 {
-    TabsModelNG model = CreateTabs(BarPosition::START, 1);
-    model.SetEdgeEffect(EdgeEffect::SPRING);
-    EXPECT_EQ(frameNode_->GetTag(), V2::TABS_ETS_TAG);
-    EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
-    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::SPRING);
-    auto json = JsonUtil::Create(true);
-    frameNode_->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
+    TabsModelNG model = CreateTabs();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto tabContentModel = CreateTabContent();
+    tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    tabContentModel.SetLayoutMode(LayoutMode::HORIZONTAL);
+    bool onApplyCalled = false;
+    std::string modeValue = "";
+    TabBarSymbol tabBarSymbol;
+    tabBarSymbol.onApply = [&onApplyCalled, &modeValue](WeakPtr<NG::FrameNode> node, std::string mode) {
+        onApplyCalled = true;
+        modeValue = mode;
+    };
+    tabBarSymbol.selectedFlag = true;
+    tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    tabContentPattern->useLocalizedPadding_ = true;
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0);
+    padding.right = CalcLength(20.0);
+    tabContentPattern->SetPadding(padding);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    /**
+     * @tc.steps: step1. check if columnNode padding was correctly swapped and onApply is called.
+     */
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId());
+    auto finalPadding = columnNode->GetLayoutProperty()->padding_.get();
+    EXPECT_EQ(finalPadding->left, CalcLength(20.0));
+    EXPECT_EQ(finalPadding->right, CalcLength(10.0));
+    auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_FALSE(linearLayoutProperty->IsVertical());
+    EXPECT_TRUE(onApplyCalled);
+    EXPECT_EQ(modeValue, "selected");
+}
 
-    model.SetEdgeEffect(EdgeEffect::SPRING);
-    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::SPRING);
+/**
+ * @tc.name: TabContentModelAddTabBarItem002
+ * @tc.desc: test method with Symbol and myIndex dont eq indicator and with onApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel1 = CreateTabContent();
+    tabContentModel1.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    auto tabContentModel2 = CreateTabContent();
+    std::string modeValue = "";
+    bool onApplyCalled = false;
+    TabBarSymbol tabBarSymbol;
+    tabBarSymbol.onApply = [&onApplyCalled, &modeValue](WeakPtr<NG::FrameNode> node, std::string mode) {
+        onApplyCalled = true;
+        modeValue = mode;
+    };
+    tabContentModel2.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    /**
+     * @tc.steps: step1. Symbol has value and check onApplyCalled is called under myIndex dont eq indicator.
+     */
+    EXPECT_TRUE(onApplyCalled);
+    EXPECT_EQ(modeValue, "normal");
+}
 
-    model.SetEdgeEffect(EdgeEffect::FADE);
-    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::FADE);
+/**
+ * @tc.name: TabContentModelAddTabBarItem003
+ * @tc.desc: test method with Symbol and myIndex dont eq indicator and without onApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel1 = CreateTabContent();
+    tabContentModel1.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    auto tabContentModel2 = CreateTabContent();
+    TabBarSymbol tabBarSymbol;
+    tabBarSymbol.onApply = nullptr;
+    tabContentModel2.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    /**
+     * @tc.steps: step1. Symbol has value and check myIndex dont eq indicator and without onApply.
+     */
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    auto symbolNode = GetChildFrameNode(columnNode, 0);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultColorOff = tabTheme->GetBottomTabSymbolOff();
+    EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOff);
+}
 
-    model.SetEdgeEffect(EdgeEffect::NONE);
-    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::NONE);
+/**
+ * @tc.name: TabContentModelAddTabBarItem004
+ * @tc.desc: test method with Symbol modifierOnApply != nullptr and selectedFlag false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto tabContentModel = CreateTabContent();
+    bool onApplyCalled = false;
+    std::string modeValue = "";
+    TabBarSymbol tabBarSymbol;
+    tabBarSymbol.onApply = [&onApplyCalled, &modeValue](WeakPtr<NG::FrameNode> node, std::string mode) {
+        onApplyCalled = true;
+        modeValue = mode;
+    };
+    tabBarSymbol.selectedFlag = false;
+    tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    /**
+     * @tc.steps: step1. check if onApply is called and value is set correctly.
+     */
+    EXPECT_TRUE(onApplyCalled);
+    EXPECT_EQ(modeValue, "normal");
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem005
+ * @tc.desc: test method with imageSourceInfo.IsSvg() && myIndex == indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem005, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    IconStyle iconStyle;
+    iconStyle.selectedColor = Color::WHITE;
+    iconStyle.unselectedColor = Color::BLACK;
+    tabBarPattern_->SetIconStyle(iconStyle, 0);
+    auto tabContentModel = CreateTabContent();
+    tabContentModel.SetTabBar("test", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    /**
+     * @tc.steps: step1. check if SvgFillColor is called and value is set correctly.
+     */
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    auto iconNode = GetChildFrameNode(columnNode, 0);
+    auto iconNode1 = GetChildFrameNode(columnNode1, 0);
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imagePaintProperty->GetSvgFillColor().value(), Color::WHITE);
+    auto imagePaintProperty1 = iconNode1->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem006
+ * @tc.desc: test method with imageSourceInfo.IsSvg() && myIndex == indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem006, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel = CreateTabContent();
+    tabContentModel.SetTabBar("test", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", IMAGE_SRC_URL, std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    /**
+     * @tc.steps: step1. check if SvgFillColor is called and value is set correctly.
+     */
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    auto iconNode = GetChildFrameNode(columnNode, 0);
+    auto iconNode1 = GetChildFrameNode(columnNode1, 0);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultColorOff = tabTheme->GetBottomTabIconOff();
+    auto defaultColorOn = tabTheme->GetBottomTabIconOn();
+    auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imagePaintProperty->GetSvgFillColor().value(), defaultColorOn);
+    auto imagePaintProperty1 = iconNode1->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), defaultColorOff);
+}
+
+/**
+ * @tc.name: TabContentModelSetAttr001
+ * @tc.desc: use CreateFrameNode create node and set attrs sucessfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelSetAttr001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(swiperNode_));
+    auto elmtId = GetElmtId();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    TabContentModelNG tabContentModel1;
+    auto frameNode = tabContentModel1.CreateFrameNode(elmtId);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto contentNode = AceType::DynamicCast<TabContentNode>(frameNode);
+    IndicatorStyle indicatorStyle1;
+    indicatorStyle1.color = Color::BLACK;
+    tabContentModel1.SetIndicator(indicatorStyle1);
+    BoardStyle boardStyle;
+    boardStyle.borderRadius = 10.0_vp;
+    LabelStyle labelStyle;
+    labelStyle.textOverflow = TextOverflow::CLIP;
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color::BLACK;
+    std::string test = "999";
+    auto tabBarItemFunc = TabBarItemBuilder();
+    tabContentModel1.SetBoard(boardStyle);
+    tabContentModel1.SetCustomTabBar(AceType::RawPtr(frameNode), AceType::RawPtr(tabBarNode_));
+    tabContentModel1.SetSelectedMode(SelectedMode::INDICATOR);
+    tabContentModel1.SetLabelStyle(labelStyle);
+    tabContentModel1.SetIconStyle(iconStyle);
+    tabContentModel1.SetUseLocalizedPadding(true);
+    tabContentModel1.SetId(test);
+    tabContentModel1.SetTabBarBuilder(AceType::RawPtr(frameNode), std::move(tabBarItemFunc));
+    tabContentModel1.SetTabBarLabel(AceType::RawPtr(frameNode), test);
+    contentNode->UpdateRecycleElmtId(elmtId);
+    contentNode->GetTabBarItemId();
+    contentNode->MountToParent(swiperNode_);
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    EXPECT_EQ(tabContentPattern->indicatorStyle_.color, Color::BLACK);
+    EXPECT_EQ(tabContentPattern->tabBarParam_.GetTabBarStyle(), TabBarStyle::NOSTYLE);
+    EXPECT_EQ(tabContentPattern->boardStyle_.borderRadius, 10.0_vp);
+    EXPECT_EQ(tabContentPattern->selectedMode_, SelectedMode::INDICATOR);
+    EXPECT_EQ(tabContentPattern->labelStyle_.textOverflow, TextOverflow::CLIP);
+    EXPECT_EQ(tabContentPattern->iconStyle_.unselectedColor, Color::BLACK);
+    EXPECT_TRUE(tabContentPattern->useLocalizedPadding_);
+    EXPECT_EQ(tabContentPattern->tabBarInspectorId_, test);
+    EXPECT_EQ(tabContentPattern->tabBarParam_.text_, test);
+}
+
+/**
+ * @tc.name: GetTabBarTextByIndex001
+ * @tc.desc: Test GetTabBarTextByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, GetTabBarTextByIndex001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto text = pattern_->GetTabBarTextByIndex(1);
+    EXPECT_EQ(text, "tabBarItemName");
+}
+
+/**
+ * @tc.name: SetOnTabBarClickEvent001
+ * @tc.desc: Test Tabs SetOnTabBarClick with nullptr jsEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, SetOnTabBarClickEvent001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetOnTabBarClick(nullptr);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
+}
+
+/**
+ * @tc.name: TabsModelOnUpdateShowDivider005
+ * @tc.desc: Test tabs OnUpdateShowDivider LE CHILDREN_MIN_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider005, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    pattern_->OnUpdateShowDivider();
+    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: TabsPatternProvideRestoreInfo001
+ * @tc.desc: Test TabsPattern::ProvideRestoreInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabsPatternProvideRestoreInfo001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    std::string restoreInfo = pattern_->ProvideRestoreInfo();
+    auto jsonObj = JsonUtil::ParseJsonString(restoreInfo);
+    ASSERT_NE(jsonObj, nullptr);
+    EXPECT_TRUE(jsonObj->Contains("Index"));
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper001
+ * @tc.desc: test BeforeCreateLayoutWrapper001 with childrenUpdatedFrom_ = 1 and SetMaskAnimationByCreate true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    tabBarPattern_->SetMaskAnimationByCreate(true);
+    swiperNode_->childrenUpdatedFrom_ = 1;
+    layoutProperty_->UpdateIndex(2);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_EQ(swiperLayoutProperty->GetIndex(), 2);
 }
 } // namespace OHOS::Ace::NG

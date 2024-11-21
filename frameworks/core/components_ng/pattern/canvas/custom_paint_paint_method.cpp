@@ -135,7 +135,7 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
             return std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|vp|rem)?)|(^$))");
+            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem))|(^$))");
             return std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
@@ -360,6 +360,29 @@ void CustomPaintPaintMethod::InitPaintBlend(RSPen& pen)
         state_.globalState.GetType(), DRAWING_BLEND_MODE_TABLE, BLEND_MODE_SIZE, RSBlendMode::SRC_OVER));
 }
 
+void CustomPaintPaintMethod::GetFillPaint(RSBrush& brush, RSSamplingOptions& options)
+{
+    InitImagePaint(nullptr, &brush, options);
+    brush.SetAntiAlias(antiAlias_);
+    if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+        brush.SetColor(state_.fillState.GetColor().GetValue());
+    }
+    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
+    }
+    if (state_.fillState.GetPatternValue().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(state_.fillState.GetPatternValue(), nullptr, &brush);
+    }
+    if (state_.globalState.HasGlobalAlpha()) {
+        if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(state_.globalState.GetAlpha() *
+                            static_cast<double>(state_.fillState.GetColor().GetAlpha()) / MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(state_.globalState.GetAlpha());
+        }
+    }
+}
+
 void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& options)
 {
     static const LinearEnumMapNode<LineJoinStyle, RSPen::JoinStyle> skLineJoinTable[] = {
@@ -376,6 +399,14 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
     if (state_.strokeState.GetPaintStyle() == PaintStyle::Color) {
         pen.SetColor(state_.strokeState.GetColor().GetValue());
     }
+    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
+        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
+    }
+    if (state_.strokeState.GetPatternValue().IsValid() &&
+        state_.strokeState.GetPaintStyle() == PaintStyle::ImagePattern) {
+        UpdatePaintShader(state_.strokeState.GetPatternValue(), &pen, nullptr);
+    }
+    pen.SetAntiAlias(antiAlias_);
     pen.SetJoinStyle(ConvertEnumToDrawingEnum(
         state_.strokeState.GetLineJoin(), skLineJoinTable, ArraySize(skLineJoinTable), RSPen::JoinStyle::MITER_JOIN));
     pen.SetCapStyle(ConvertEnumToDrawingEnum(
@@ -425,30 +456,6 @@ void CustomPaintPaintMethod::InitImagePaint(RSPen* pen, RSBrush* brush, RSSampli
     SetPaintImage(pen, brush);
 }
 
-void CustomPaintPaintMethod::InitImageCallbacks()
-{
-#ifndef ACE_UNITTEST
-    imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                   ImageSourceInfo info, const RefPtr<Ace::ImageObject>& imageObj) {
-        auto paintMethod = weak.Upgrade();
-        if (paintMethod->loadingSource_ == info) {
-            paintMethod->ImageObjReady(imageObj);
-            return;
-        }
-    };
-
-    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg = "") {
-        auto paintMethod = weak.Upgrade();
-        paintMethod->ImageObjFailed();
-    };
-
-    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
-
-    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
-#endif
-}
-
 void CustomPaintPaintMethod::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit)
 {
@@ -494,12 +501,14 @@ void CustomPaintPaintMethod::DrawSvgImage(
 void CustomPaintPaintMethod::DrawImageInternal(
     const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(slo);
     }
+    imageBrush_.SetAntiAlias(antiAlias_);
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (state_.globalState.HasGlobalAlpha()) {
         imageBrush_.SetAlphaF(state_.globalState.GetAlpha());
@@ -568,6 +577,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 
 void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if (imageData.data.empty()) {
         return;
     }
@@ -584,27 +594,11 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 
 void CustomPaintPaintMethod::FillRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
-    InitImagePaint(nullptr, &brush, options);
-    brush.SetAntiAlias(antiAlias_);
-    if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-        brush.SetColor(state_.fillState.GetColor().GetValue());
-    }
+    GetFillPaint(brush, options);
     RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), +rect.Bottom());
-    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
-    }
-    if (state_.fillState.GetPatternValue().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.fillState.GetPatternValue(), nullptr, &brush);
-    }
-    if (state_.globalState.HasGlobalAlpha()) {
-        double alpha = 1.0;
-        if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-            alpha = static_cast<double>(state_.fillState.GetColor().GetAlpha()) / MAX_GRAYSCALE;
-        }
-        brush.SetAlphaF(state_.globalState.GetAlpha() * alpha);
-    }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             RSRecordingPath path;
@@ -633,19 +627,11 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
 
 void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
-    pen.SetAntiAlias(antiAlias_);
     RSRect rsRect(rect.Left(), rect.Top(), rect.Right(), +rect.Bottom());
-
-    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-    }
-    if (state_.strokeState.GetPatternValue().IsValid() &&
-        state_.strokeState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.strokeState.GetPatternValue(), &pen, nullptr);
-    }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             RSRecordingPath path;
@@ -674,6 +660,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 
 void CustomPaintPaintMethod::ClearRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     InitImagePaint(nullptr, &brush, options);
@@ -705,27 +692,10 @@ void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 
 void CustomPaintPaintMethod::Fill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
-    InitImagePaint(nullptr, &brush, options);
-    brush.SetAntiAlias(antiAlias_);
-    if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-        brush.SetColor(state_.fillState.GetColor().GetValue());
-    }
-    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
-    }
-    if (state_.fillState.GetPatternValue().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.fillState.GetPatternValue(), nullptr, &brush);
-    }
-    if (state_.globalState.HasGlobalAlpha()) {
-        if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-            brush.SetAlphaF(state_.globalState.GetAlpha() *
-                            static_cast<double>(state_.fillState.GetColor().GetAlpha()) / MAX_GRAYSCALE);
-        } else {
-            brush.SetAlphaF(state_.globalState.GetAlpha());
-        }
-    }
+    GetFillPaint(brush, options);
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             PaintShadow(rsPath_, state_.shadow, &brush, nullptr);
@@ -758,27 +728,10 @@ void CustomPaintPaintMethod::Fill(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DFill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
-    InitImagePaint(nullptr, &brush, options);
-    brush.SetAntiAlias(antiAlias_);
-    if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-        brush.SetColor(state_.fillState.GetColor().GetValue());
-    }
-    if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
-    }
-    if (state_.fillState.GetPatternValue().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.fillState.GetPatternValue(), nullptr, &brush);
-    }
-    if (state_.globalState.HasGlobalAlpha()) {
-        if (state_.fillState.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
-            brush.SetAlphaF(state_.globalState.GetAlpha() *
-                            static_cast<double>(state_.fillState.GetColor().GetAlpha()) / MAX_GRAYSCALE);
-        } else {
-            brush.SetAlphaF(state_.globalState.GetAlpha());
-        }
-    }
+    GetFillPaint(brush, options);
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             PaintShadow(rsPath2d_, state_.shadow, &brush, nullptr);
@@ -803,17 +756,10 @@ void CustomPaintPaintMethod::Path2DFill()
 
 void CustomPaintPaintMethod::Stroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
-    pen.SetAntiAlias(antiAlias_);
-    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-    }
-    if (state_.strokeState.GetPatternValue().IsValid() &&
-        state_.strokeState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.strokeState.GetPatternValue(), &pen, nullptr);
-    }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             PaintShadow(rsPath_, state_.shadow, nullptr, &pen);
@@ -846,17 +792,10 @@ void CustomPaintPaintMethod::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DStroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
-    pen.SetAntiAlias(antiAlias_);
-    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-    }
-    if (state_.strokeState.GetPatternValue().IsValid() &&
-        state_.strokeState.GetPaintStyle() == PaintStyle::ImagePattern) {
-        UpdatePaintShader(state_.strokeState.GetPatternValue(), &pen, nullptr);
-    }
     if (state_.globalState.GetType() == CompositeOperation::SOURCE_OVER) {
         if (HasShadow()) {
             PaintShadow(rsPath2d_, state_.shadow, nullptr, &pen);
@@ -881,6 +820,7 @@ void CustomPaintPaintMethod::Path2DStroke()
 
 void CustomPaintPaintMethod::Clip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath_, RSClipOp::INTERSECT);
 }
 
@@ -894,6 +834,7 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DClip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath2d_, RSClipOp::INTERSECT);
 }
 
@@ -1198,6 +1139,7 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 
 void CustomPaintPaintMethod::Save()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     saveStates_.push_back(state_);
     saveColorFilter_.push_back(colorFilter_);
     saveBlurFilter_.push_back(blurFilter_);
@@ -1206,6 +1148,7 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
         (!saveBlurFilter_.empty())) {
         state_ = saveStates_.back();
@@ -1220,21 +1163,25 @@ void CustomPaintPaintMethod::Restore()
 
 void CustomPaintPaintMethod::Scale(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Scale(x, y);
 }
 
 void CustomPaintPaintMethod::Rotate(double angle)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Rotate(angle * 180 / M_PI);
 }
 
 void CustomPaintPaintMethod::ResetTransform()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ResetMatrix();
 }
 
 void CustomPaintPaintMethod::Transform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix matrix;
     matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     rsCanvas_->ConcatMatrix(matrix);
@@ -1242,26 +1189,29 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Translate(x, y);
 }
 
 void CustomPaintPaintMethod::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto success = UpdateParagraph(text, false, HasShadow());
+    auto success = UpdateFillParagraph(text);
     CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, false, HasShadow());
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, false);
 }
 
 void CustomPaintPaintMethod::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    auto success = UpdateParagraph(text, true, HasShadow());
+    auto success = UpdateStrokeParagraph(text);
     CHECK_NULL_VOID(success);
-    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, HasShadow());
+    PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
 }
 
-void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
-    std::optional<double> maxWidth, bool isStroke, bool hasShadow)
+void CustomPaintPaintMethod::PaintText(
+    const float width, double x, double y, std::optional<double> maxWidth, bool isStroke)
 {
+    CHECK_NULL_VOID(rsCanvas_);
+    CHECK_NULL_VOID(paragraph_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
@@ -1282,20 +1232,16 @@ void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
     double dy = y + GetBaselineOffset(baseline, paragraph_);
 
     std::optional<double> scale = CalcTextScale(paragraph_->GetMaxIntrinsicWidth(), maxWidth);
-    if (hasShadow) {
-        rsCanvas_->Save();
-        auto shadowOffsetX = state_.shadow.GetOffset().GetX();
-        auto shadowOffsetY = state_.shadow.GetOffset().GetY();
-        if (scale.has_value()) {
-            if (!NearZero(scale.value())) {
-                dx /= scale.value();
-                shadowOffsetX /= scale.value();
-            }
-            rsCanvas_->Scale(scale.value(), 1.0);
+    RSBrush compositeOperationpBrush;
+    InitPaintBlend(compositeOperationpBrush);
+    RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->SaveLayer(slo);
         }
-        paragraph_->Paint(rsCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
-        rsCanvas_->Restore();
-        return;
+    }
+    if (isStroke && shadowParagraph_ != nullptr && HasShadow()) {
+        PaintStrokeTextShadow(width, dx, dy, scale, &slo);
     }
     if (scale.has_value()) {
         if (!NearZero(scale.value())) {
@@ -1307,6 +1253,49 @@ void CustomPaintPaintMethod::PaintText(const float width, double x, double y,
         rsCanvas_->Restore();
     } else {
         paragraph_->Paint(rsCanvas_.get(), dx, dy);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->Restore();
+        }
+    }
+}
+
+void CustomPaintPaintMethod::PaintStrokeTextShadow(
+    const float width, const double dx, const double dy, const std::optional<double> scale, RSSaveLayerOps* slo)
+{
+    CHECK_NULL_VOID(rsCanvas_);
+    CHECK_NULL_VOID(shadowParagraph_);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->SaveLayer(*slo);
+        }
+    }
+    double finalDx = dx;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        shadowParagraph_->Layout(FLT_MAX);
+    } else {
+        shadowParagraph_->Layout(width);
+    }
+    if (width > shadowParagraph_->GetMaxIntrinsicWidth()) {
+        shadowParagraph_->Layout(std::ceil(shadowParagraph_->GetMaxIntrinsicWidth()));
+    }
+    rsCanvas_->Save();
+    auto shadowOffsetX = state_.shadow.GetOffset().GetX();
+    auto shadowOffsetY = state_.shadow.GetOffset().GetY();
+    if (scale.has_value()) {
+        if (!NearZero(scale.value())) {
+            finalDx /= scale.value();
+            shadowOffsetX /= scale.value();
+        }
+        rsCanvas_->Scale(scale.value(), 1.0);
+    }
+    shadowParagraph_->Paint(rsCanvas_.get(), finalDx + shadowOffsetX, dy + shadowOffsetY);
+    rsCanvas_->Restore();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+            rsCanvas_->Restore();
+        }
     }
 }
 
@@ -1862,12 +1851,6 @@ FilterType CustomPaintPaintMethod::FilterStrToFilterType(const std::string& filt
     return ConvertStrToEnum(filterStr.c_str(), filterTypeTable, ArraySize(filterTypeTable), FilterType::NONE);
 }
 
-bool CustomPaintPaintMethod::HasImageShadow() const
-{
-    return !(NearZero(imageShadow_->GetOffset().GetX()) && NearZero(imageShadow_->GetOffset().GetY()) &&
-             NearZero(imageShadow_->GetBlurRadius()));
-}
-
 std::optional<double> CustomPaintPaintMethod::CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth)
 {
     std::optional<double> scale;
@@ -1896,22 +1879,33 @@ TransformParam CustomPaintPaintMethod::GetTransform() const
     return param;
 }
 
-void CustomPaintPaintMethod::SaveMatrix()
+void CustomPaintPaintMethod::SaveProperties()
 {
     matrixStates_.push_back(matrix_);
+    lineDashStates_.push_back(lineDash_);
 }
 
-void CustomPaintPaintMethod::RestoreMatrix()
+void CustomPaintPaintMethod::RestoreProperties()
 {
     if (!matrixStates_.empty()) {
         matrix_ = matrixStates_.back();
         matrixStates_.pop_back();
+    }
+    if (!lineDashStates_.empty()) {
+        lineDash_ = lineDashStates_.back();
+        lineDashStates_.pop_back();
     }
 }
 
 void CustomPaintPaintMethod::ResetTransformMatrix()
 {
     matrix_.Reset();
+}
+
+void CustomPaintPaintMethod::ResetLineDash()
+{
+    std::vector<double>().swap(lineDash_.lineDash);
+    lineDash_.dashOffset = 0.0;
 }
 
 void CustomPaintPaintMethod::RotateMatrix(double angle)
@@ -1950,6 +1944,7 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
 
 void CustomPaintPaintMethod::SaveLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
@@ -1958,6 +1953,7 @@ void CustomPaintPaintMethod::SaveLayer()
 
 void CustomPaintPaintMethod::RestoreLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Restore();
 }
 
@@ -1976,6 +1972,7 @@ void CustomPaintPaintMethod::ResetStates()
     rsPath2d_.Reset();
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<RSMatrix>().swap(matrixStates_);
+    std::vector<LineDashParam>().swap(lineDashStates_);
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
     colorMatrix_ = RSColorMatrix();
@@ -2018,6 +2015,7 @@ void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
 
 void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix rsMatrix;
     rsMatrix.SetMatrix(
         param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
@@ -2074,19 +2072,20 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
 #endif
 }
 
-bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow)
+bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
 {
 #ifndef ACE_UNITTEST
     RSParagraphStyle style;
-    TextAlign textAlign = (isStroke ? state_.strokeState.GetTextAlign() : state_.fillState.GetTextAlign());
+    TextAlign textAlign = state_.fillState.GetTextAlign();
     style.textAlign = Constants::ConvertTxtTextAlign(textAlign);
     style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
     style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
+    CHECK_NULL_RETURN(builder, false);
     RSTextStyle txtStyle;
-    if (!isStroke && hasShadow) {
+    if (HasShadow()) {
         Rosen::TextShadow txtShadow;
         txtShadow.color = state_.shadow.GetColor().GetValue();
         txtShadow.offset.SetX(state_.shadow.GetOffset().GetX());
@@ -2096,8 +2095,17 @@ bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStr
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateFontFamilies();
-    isStroke ? UpdateStrokeTextStyleForeground(txtStyle, hasShadow)
-             : UpdateFillTextStyleForeground(txtStyle, hasShadow);
+    txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
+    ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        RSBrush brush;
+        RSSamplingOptions options;
+        GetFillPaint(brush, options);
+        InitPaintBlend(brush);
+        txtStyle.foregroundBrush = brush;
+    } else {
+        UpdateFillTxtStyle(txtStyle);
+    }
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->CreateTypography();
@@ -2107,42 +2115,14 @@ bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStr
 #endif
 }
 
-void CustomPaintPaintMethod::UpdateStrokeTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow)
+void CustomPaintPaintMethod::UpdateFillTxtStyle(RSTextStyle& txtStyle)
 {
 #ifndef ACE_UNITTEST
-    // use foreground to draw stroke
-    txtStyle.foregroundPen = std::nullopt;
-    RSPen pen;
-    RSSamplingOptions options;
-    GetStrokePaint(pen, options);
-    InitPaintBlend(pen);
-    ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
-    if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-        UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-    }
-    if (hasShadow) {
-        pen.SetColor(state_.shadow.GetColor().GetValue());
-        RSFilter filter;
-        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
-            RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
-        pen.SetFilter(filter);
-    }
-    txtStyle.foregroundPen = pen;
-#endif
-}
-
-void CustomPaintPaintMethod::UpdateFillTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow)
-{
-#ifndef ACE_UNITTEST
-    txtStyle.foregroundPen = std::nullopt;
     txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
-    txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
-    ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
+    RSBrush brush;
+    RSSamplingOptions options;
+    InitImagePaint(nullptr, &brush, options);
     if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
-        RSBrush brush;
-        RSSamplingOptions options;
-        InitImagePaint(nullptr, &brush, options);
         UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
         txtStyle.foregroundBrush = brush;
     }
@@ -2151,15 +2131,86 @@ void CustomPaintPaintMethod::UpdateFillTextStyleForeground(RSTextStyle& txtStyle
             txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
             txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
         } else {
-            RSBrush brush;
-            RSSamplingOptions options;
-            InitImagePaint(nullptr, &brush, options);
             brush.SetColor(state_.fillState.GetColor().GetValue());
             brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
             InitPaintBlend(brush);
             txtStyle.foregroundBrush = brush;
         }
     }
+#endif
+}
+
+bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
+{
+#ifndef ACE_UNITTEST
+    RSParagraphStyle style;
+    TextAlign textAlign = state_.strokeState.GetTextAlign();
+    style.textAlign = Constants::ConvertTxtTextAlign(textAlign);
+    style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
+    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    CHECK_NULL_RETURN(fontCollection, false);
+    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
+    CHECK_NULL_RETURN(builder, false);
+    RSTextStyle txtStyle;
+    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
+    RSPen pen;
+    RSSamplingOptions options;
+    GetStrokePaint(pen, options);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        InitPaintBlend(pen);
+    }
+    ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
+    txtStyle.foregroundPen = pen;
+    builder->PushStyle(txtStyle);
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->CreateTypography();
+    if (HasShadow()) {
+        UpdateStrokeShadowParagraph(text, &pen, style);
+    }
+    return true;
+#else
+    return false;
+#endif
+}
+
+void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
+    const std::string& text, const RSPen* pen, const RSParagraphStyle& style)
+{
+#ifndef ACE_UNITTEST
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    CHECK_NULL_VOID(fontCollection);
+    RSTextStyle shadowStyle;
+    shadowStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
+    ConvertTxtStyle(state_.strokeState.GetTextStyle(), shadowStyle);
+    shadowStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
+    RSPen shadowPen;
+    shadowPen.SetColor(state_.shadow.GetColor().GetValue());
+    shadowPen.SetAntiAlias(true);
+    shadowPen.SetWidth(pen->GetWidth());
+    shadowPen.SetMiterLimit(pen->GetMiterLimit());
+    shadowPen.SetCapStyle(pen->GetCapStyle());
+    shadowPen.SetJoinStyle(pen->GetJoinStyle());
+    if (state_.globalState.HasGlobalAlpha()) {
+        shadowPen.SetAlphaF(
+            state_.globalState.GetAlpha() * static_cast<double>(state_.shadow.GetColor().GetValue()) / MAX_GRAYSCALE);
+    }
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+        RSBlurType::NORMAL, RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
+    shadowPen.SetFilter(filter);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        InitPaintBlend(shadowPen);
+    }
+    shadowStyle.foregroundPen = shadowPen;
+    std::unique_ptr<RSParagraphBuilder> shadowBuilder = RSParagraphBuilder::Create(style, fontCollection);
+    CHECK_NULL_VOID(shadowBuilder);
+    shadowBuilder->PushStyle(shadowStyle);
+    shadowBuilder->AppendText(StringUtils::Str8ToStr16(text));
+    shadowParagraph_ = shadowBuilder->CreateTypography();
 #endif
 }
 } // namespace OHOS::Ace::NG

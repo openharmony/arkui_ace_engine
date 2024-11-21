@@ -211,6 +211,8 @@ private:
     void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
     void SnapshotSurfaceNode();
     bool CheckFormBundleForbidden(const std::string &bundleName);
+    void DelayResetManuallyClickFlag();
+    void RemoveDelayResetManuallyClickFlagTask();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -241,6 +243,7 @@ private:
     bool isJsCard_ = true;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
+    bool isManuallyClick_ = false;
 };
 } // namespace NG
 } // namespace Ace

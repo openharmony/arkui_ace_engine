@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -232,7 +233,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
         CHECK_NULL_VOID(navBarPattern);
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
@@ -283,9 +286,14 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
     // update menu
     BuildMenu(navBarNode, titleBarNode);
 }
+} // namespace
 
-void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
+void NavBarPattern::MountTitleBar(
+    const RefPtr<FrameNode>& host, bool& needRunTitleBarAnimation)
 {
+    needRunTitleBarAnimation = false;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(host);
+    CHECK_NULL_VOID(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -305,53 +313,21 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
     BuildTitleBar(hostNode, titleBarNode);
-    if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetJSViewActive(false);
-    } else {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetJSViewActive(true);
-
-        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
+    bool hideTitleBar = navBarLayoutProperty->GetHideTitleBarValue(false);
+    // At the initial state, animation is not required.
+    if (!currHideTitleBar_.has_value() ||
+        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false)) {
+        currHideTitleBar_ = hideTitleBar;
+        HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
+        return;
     }
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode();
+
+    // Animation is needed only when the status changed.
+    needRunTitleBarAnimation = currHideTitleBar_.value() != hideTitleBar;
+    currHideTitleBar_ = hideTitleBar;
 }
-
-void MountToolBar(const RefPtr<NavBarNode>& hostNode)
-{
-    CHECK_NULL_VOID(hostNode->GetToolBarNode());
-    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(toolBarLayoutProperty);
-
-    if (hostNode->GetToolBarNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        hostNode->RemoveChild(hostNode->GetPreToolBarNode());
-        hostNode->AddChild(hostNode->GetToolBarNode());
-    }
-
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        toolBarNode->SetActive(false);
-    } else {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        toolBarNode->SetActive(true);
-
-        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
-    }
-    toolBarNode->MarkModifyDone();
-    toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-}
-} // namespace
 
 OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
 {
@@ -395,41 +371,6 @@ void NavBarPattern::OnAttachToFrameNode()
             .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
-}
-
-void NavBarPattern::HandleOnDragStart(float offset)
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetCanOverDrag(false);
-    titlePattern->SetTitleScaleChange(true);
-    titlePattern->ProcessTitleDragStart(offset);
-}
-
-void NavBarPattern::HandleOnDragUpdate(float offset)
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTitleDragUpdate(offset);
-}
-
-void NavBarPattern::HandleOnDragEnd()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTitleDragEnd();
 }
 
 void NavBarPattern::OnCoordScrollStart()
@@ -486,21 +427,24 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarRenderContext);
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
-    MountTitleBar(hostNode);
-    MountToolBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    MountTitleBar(hostNode, needRunTitleBarAnimation);
+    bool needRunToolBarAnimation = false;
+    NavigationToolbarUtil::MountToolBar(hostNode, needRunToolBarAnimation);
+    HandleTitleBarAndToolBarAnimation(
+        hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-
-    auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-    auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
-    if (opts && navBarContentNode) {
-        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navBarContentNode->MarkModifyDone();
-    }
 
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
+    auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && navBarContentNode) {
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navBarContentNode->MarkModifyDone();
+    }
 
     auto parent = hostNode->GetParent();
     CHECK_NULL_VOID(parent);
@@ -511,6 +455,10 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (preWidth_.has_value() && preWidth_.value() != width) {
+        AbortBarAnimation();
+    }
+    preWidth_ = width;
     // change menu num in landscape and orientation
     do {
         if (navBarNode->GetPrevMenuIsCustomValue(false)) {

@@ -48,6 +48,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
+    ACE_SCOPED_TRACE(
+        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
@@ -80,7 +82,9 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto manager = pipeline->GetSafeAreaManager();
     bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
@@ -121,7 +125,7 @@ bool LayoutWrapper::CheckValidSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_RETURN(host, false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
@@ -200,7 +204,7 @@ void LayoutWrapper::AdjustNotExpandNode()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -222,7 +226,7 @@ void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -275,7 +279,9 @@ void LayoutWrapper::ExpandSafeArea()
 void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
 {
     CHECK_NULL_VOID(opts);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
     if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
@@ -350,7 +356,9 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, b
 
 void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -386,18 +394,22 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     return OffsetF(0.0f, -pipeline->GetSafeAreaManager()->GetKeyboardOffset());
 }
 
 float LayoutWrapper::GetPageCurrentOffset()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_RETURN(stageManager, 0.0f);
-    auto pageNode = stageManager->GetLastPageWithTransition();
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
     CHECK_NULL_RETURN(pageNode, 0.0f);
     auto pageRenderContext = pageNode->GetRenderContext();
     CHECK_NULL_RETURN(pageRenderContext, 0.0f);

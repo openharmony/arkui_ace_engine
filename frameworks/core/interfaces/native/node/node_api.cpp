@@ -26,6 +26,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -225,6 +226,13 @@ ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32
 {
     auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNodeWithParams(type, peerId, params));
     return node;
+}
+
+ArkUINodeHandle GetNodeByViewStack()
+{
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    node->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -1622,6 +1630,7 @@ const ArkUIBasicAPI* GetBasicAPI()
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
         CreateNodeWithParams,
+        GetNodeByViewStack,
         DisposeNode,
         GetName,
         DumpTreeNode,

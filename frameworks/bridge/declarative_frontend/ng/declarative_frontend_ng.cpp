@@ -102,12 +102,13 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
 
     auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                         const std::shared_ptr<std::vector<uint8_t>>& content,
-                                        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                        const std::function<void(const std::string&, int32_t)>& errorCallback,
+                                        const std::string& contentName) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
         }
-        return jsEngine->LoadPageSource(content, errorCallback);
+        return jsEngine->LoadPageSource(content, errorCallback, contentName);
     };
 
     auto mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -401,15 +402,6 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(
         return UIContentErrorCode::NO_ERRORS;
     }
 
-    return UIContentErrorCode::NULL_POINTER;
-}
-
-UIContentErrorCode DeclarativeFrontendNG::RunPageByNamedRouter(const std::string& name)
-{
-    if (delegate_) {
-        delegate_->RunPage(name, "", pageProfile_, true);
-        return UIContentErrorCode::NO_ERRORS;
-    }
     return UIContentErrorCode::NULL_POINTER;
 }
 

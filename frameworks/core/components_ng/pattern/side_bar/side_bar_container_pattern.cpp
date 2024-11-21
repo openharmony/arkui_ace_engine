@@ -105,7 +105,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
@@ -609,6 +609,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     auto butttonRadius = sideBarTheme->GetControlButtonRadius();
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
+    buttonLayoutProperty->UpdateCreateWithLabel(false);
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -653,6 +654,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     GetControlImageSize(imageWidth, imageHeight);
     CalcSize imageCalcSize((CalcLength(imageWidth)), CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    InitImageErrorCallback(sideBarTheme, imgNode);
     return imgNode;
 }
 
@@ -1391,5 +1393,35 @@ void SideBarContainerPattern::SetAccessibilityEvent()
     CHECK_NULL_VOID(controlButton);
     // use TEXT_CHANGE event to report information update
     controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
+}
+
+void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,
+    const RefPtr<FrameNode>& imgNode)
+{
+    auto eventHub = imgNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto errorCallback = [weakPattern = WeakClaim(this), weakNode = WeakClaim(RawPtr(imgNode)),
+        weakTheme = WeakClaim(RawPtr(sideBarTheme))] (const LoadImageFailEvent& info) {
+        auto imgNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imgNode);
+        auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+        if (!imageSourceInfo.has_value()) {
+            return;
+        }
+        auto infoValue = imageSourceInfo.value();
+        infoValue.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        auto sideBarTheme = weakTheme.Upgrade();
+        CHECK_NULL_VOID(sideBarTheme);
+        auto controlButtonColor = sideBarTheme->GetControlImageColor();
+        infoValue.SetFillColor(controlButtonColor);
+        imageLayoutProperty->UpdateImageSourceInfo(infoValue);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageInfo(infoValue);
+        imgNode->MarkModifyDone();
+    };
+    eventHub->SetOnError(errorCallback);
 }
 } // namespace OHOS::Ace::NG

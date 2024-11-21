@@ -55,7 +55,7 @@ constexpr int32_t SQUARE_NUMBER = 2;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
-constexpr float MIN_SPRING_RESPONSE = 0.002f;
+constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 } // namespace
@@ -670,6 +670,7 @@ void DragDropManager::HandleOnDragMove(const PointerEvent& pointerEvent, const s
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
+    RequireSummaryIfNecessary(pointerEvent);
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -723,8 +724,7 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     }
     InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     NotifyDragFrameNode(point, DragEventType::DROP, dragDropRet.result);
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
 
@@ -748,6 +748,19 @@ void DragDropManager::DoDragReset()
     badgeNumber_ = -1;
     isDragWithContextMenu_ = false;
     dampingOverflowCount_ = 0;
+    isDragNodeNeedClean_ = false;
+}
+
+void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    if (IsDraggingPressed(touchPoint.id)) {
+        SetDraggingPressedState(false);
+    }
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+        OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+            "");
+    }
 }
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
@@ -981,8 +994,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     });
     NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
     dragFrameNode->MarkDirtyNode();
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     pipeline->RequestFrame();
 }
@@ -1040,8 +1052,7 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
 void DragDropManager::ClearSummary()
 {
     previewRect_ = Rect(-1, -1, -1, -1);
-    summaryMap_.clear();
-    parentHitNodes_.clear();
+    ResetPullId();
     ResetRecordSize();
 }
 
@@ -1624,6 +1635,8 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     dragPreviewInfo.width = static_cast<double>(width);
     dragPreviewInfo.maxWidth = maxWidth;
     dragPreviewInfo.imageNode = imageNode;
+    dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
+    dragPreviewInfo.originScale = imageNode->GetTransformScale();
     return true;
 }
 
@@ -1683,10 +1696,11 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
 Offset DragDropManager::CalcDragMoveOffset(
     const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
 {
-    CHECK_NULL_RETURN(info.imageNode, Offset(0.0f, 0.0f));
-    auto originPoint = info.imageNode->GetOffsetRelativeToWindow();
-    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.width / 2.0f);
-    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() + (1 - info.scale) * info.height / 2.0f);
+    auto originPoint = info.originOffset;
+    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() +
+        (info.originScale.x - info.scale) * info.width / 2.0f);
+    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY() +
+        (info.originScale.y - info.scale) * info.height / 2.0f);
     auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
     Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };
     return newOffset;
@@ -2052,6 +2066,7 @@ void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
 {
     DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
     HideDragPreviewOverlay();
+    ClearVelocityInfo();
     ResetDragDropStatus(point, dragDropRet, windowId);
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
@@ -2138,8 +2153,13 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DRAG_PANEL);
         auto gridContainer = columnInfo->GetParent();
         if (gridContainer) {
+            auto rootWidth = context->GetRootWidth();
+            if (LessOrEqual(rootWidth, 0.0)) {
+                auto mainPipeline = PipelineContext::GetMainPipelineContext();
+                rootWidth = GridSystemManager::GetInstance().GetScreenWidth(mainPipeline);
+            }
             // cannot handle multi-screen
-            gridContainer->BuildColumnWidth(context->GetRootWidth());
+            gridContainer->BuildColumnWidth(rootWidth);
         }
         dragDropMgr->columnInfo_ = columnInfo;
     }
@@ -2219,5 +2239,18 @@ bool DragDropManager::IsAllAnimationFinished()
 {
     currentAnimationCnt_--;
     return currentAnimationCnt_ == 0;
+}
+
+bool DragDropManager::CheckIsNewDrag(const PointerEvent& pointerEvent) const
+{
+    return (pointerEvent.pullId != -1) && (pointerEvent.pullId != currentPullId_);
+}
+
+void DragDropManager::RequireSummaryIfNecessary(const PointerEvent& pointerEvent)
+{
+    if (CheckIsNewDrag(pointerEvent)) {
+        currentPullId_ = pointerEvent.pullId;
+        RequireSummary();
+    }
 }
 } // namespace OHOS::Ace::NG

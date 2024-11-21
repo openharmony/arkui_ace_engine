@@ -270,9 +270,10 @@ public:
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void SaveMatrix();
-    void RestoreMatrix();
+    void SaveProperties();
+    void RestoreProperties();
     void ResetTransformMatrix();
+    void ResetLineDash();
     void RotateMatrix(double angle);
     void ScaleMatrix(double x, double y);
     void SetTransformMatrix(const TransformParam& param);
@@ -295,9 +296,10 @@ protected:
     void UpdateLineDash(RSPen& pen);
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
-    bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateStrokeTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
-    void UpdateFillTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
+    bool UpdateFillParagraph(const std::string& text);
+    void UpdateFillTxtStyle(RSTextStyle& txtStyle);
+    bool UpdateStrokeParagraph(const std::string& text);
+    void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
@@ -336,7 +338,7 @@ protected:
     bool CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result);
     void InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options);
     void GetStrokePaint(RSPen& pen, RSSamplingOptions& options);
-    void InitImageCallbacks();
+    void GetFillPaint(RSBrush& brush, RSSamplingOptions& options);
 
     void SetPaintImage(RSPen* pen, RSBrush* brush);
     void ClearPaintImage(RSPen* pen, RSBrush* brush);
@@ -344,17 +346,15 @@ protected:
     bool CheckFilterProperty(FilterType filterType, const std::string& filterParam);
     bool ParseFilter(std::string& filter, std::vector<FilterProperty>& filters);
     FilterType FilterStrToFilterType(const std::string& filterStr);
-    bool HasImageShadow() const;
 
-    virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
-    virtual void ImageObjFailed() = 0;
     std::shared_ptr<RSImage> GetImage(const std::string& src);
     void PaintShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
     void PaintImageShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
-    void PaintText(const float width, double x, double y,
-        std::optional<double> maxWidth, bool isStroke, bool hasShadow = false);
+    void PaintText(const float width, double x, double y, std::optional<double> maxWidth, bool isStroke);
+    void PaintStrokeTextShadow(
+        const float width, const double dx, const double dy, const std::optional<double> scale, RSSaveLayerOps* slo);
     double GetAlignOffset(TextAlign align, double width);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
@@ -372,11 +372,13 @@ protected:
     LineDashParam lineDash_;
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
+    std::vector<LineDashParam> lineDashStates_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     std::unique_ptr<RSParagraph> paragraph_;
+    std::unique_ptr<RSParagraph> shadowParagraph_;
 
     WeakPtr<PipelineBase> context_;
 
@@ -395,10 +397,6 @@ protected:
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     ImageSourceInfo currentSource_;
     ImageSourceInfo loadingSource_;
-    ImageObjSuccessCallback imageObjSuccessCallback_;
-    UploadSuccessCallback uploadSuccessCallback_;
-    OnPostBackgroundTask onPostBackgroundTask_;
-    FailedCallback failedCallback_;
 #endif
 
     RefPtr<CanvasModifier> contentModifier_;

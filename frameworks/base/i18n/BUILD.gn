@@ -57,6 +57,10 @@ template("ace_base_i18n") {
       ]
     }
 
+    if (!is_arkui_x) {
+      external_deps += [ "i18n:intl_util" ]
+    }
+
     # add base source file here
     sources = [
       "date_time_sequence.cpp",

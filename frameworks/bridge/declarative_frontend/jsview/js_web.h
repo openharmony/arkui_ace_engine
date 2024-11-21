@@ -90,6 +90,7 @@ public:
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnScreenCaptureRequest(const JSCallbackInfo& args);
+    static void BindSelectionMenu(const JSCallbackInfo& info);
     static void OnContextMenuHide(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
@@ -156,10 +157,10 @@ public:
     static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
-    static void SelectionMenuOptions(const JSCallbackInfo& args);
     static void OnViewportFitChanged(const JSCallbackInfo& args);
-    static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
+    static void SelectionMenuOptions(const JSCallbackInfo& args);
     static void OnAdsBlocked(const JSCallbackInfo& args);
+    static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);

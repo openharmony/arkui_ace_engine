@@ -121,7 +121,7 @@ void DialogPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     InitHostWindowRect();
@@ -216,12 +216,12 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (host->IsRemoving()) {
         return;
     }
@@ -1254,6 +1254,15 @@ void DialogPattern::UpdateButtonsProperty()
     }
 }
 
+PipelineContext* DialogPattern::GetDialogContext()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context;
+}
+
 void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons)
 {
     isSuitableForElderly_ = false;
@@ -1261,7 +1270,11 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
-    if (GreatOrEqual(pipeline->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
+    CHECK_NULL_VOID(windowManager);
+    auto dialogContext = GetDialogContext();
+    CHECK_NULL_VOID(dialogContext);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog GetContext fontScale : %{public}f", dialogContext->GetFontScale());
+    if (GreatOrEqual(dialogContext->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
         if (pipeline->GetRootHeight() < dialogTheme_->GetDialogLandscapeHeightBoundary().ConvertToPx() &&
             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
             notAdapationAging_ = true;
@@ -1272,7 +1285,7 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
             notAdapationAging_ = true;
             return;
         }
-        fontScaleForElderly_ = pipeline->GetFontScale();
+        fontScaleForElderly_ = dialogContext->GetFontScale();
         isSuitableForElderly_ = true;
         notAdapationAging_ = false;
     }
@@ -1311,9 +1324,9 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
-            auto pipeline = GetContext();
-            CHECK_NULL_RETURN(pipeline, false);
-            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+            auto dialogContext = GetDialogContext();
+            CHECK_NULL_RETURN(dialogContext, false);
+            if (isSuitableForElderly_ && dialogContext->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
                 SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
                 measureContext.fontSize =
                     Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
@@ -1358,8 +1371,6 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
 {
     if (deviceOrientation_ != deviceOrientation) {
         CHECK_NULL_VOID(buttonContainer_);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1453,15 +1464,15 @@ void DialogPattern::UpdateTextFontScale()
 
 void DialogPattern::UpdateFontScale()
 {
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+    auto dialogContext = GetDialogContext();
+    CHECK_NULL_VOID(dialogContext);
+    if (dialogContext->GetFontScale() != fontScaleForElderly_) {
         OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        fontScaleForElderly_ = pipeline->GetFontScale();
+        fontScaleForElderly_ = dialogContext->GetFontScale();
     }
 }
 
@@ -1612,6 +1623,148 @@ void DialogPattern::InitHostWindowRect()
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    }
+}
+
+void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
+    if (!dialogProperties_.title.empty()) {
+        json->Put("Title", dialogProperties_.title.c_str());
+    }
+    if (!dialogProperties_.subtitle.empty()) {
+        json->Put("Subtitle", dialogProperties_.subtitle.c_str());
+    }
+    if (!dialogProperties_.content.empty()) {
+        json->Put("Content", dialogProperties_.content.c_str());
+    }
+    if (dialogProperties_.buttonDirection != DialogButtonDirection::AUTO) {
+        json->Put("ButtonDirection",
+            DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
+                dialogProperties_.buttonDirection).c_str());
+    }
+    if (dialogProperties_.backgroundBlurStyle.has_value() && dialogProperties_.backgroundBlurStyle.value() != 0) {
+        json->Put("BackgroundBlurStyle", std::to_string(dialogProperties_.backgroundBlurStyle.value()).c_str());
+    }
+    if (dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT) != Color::TRANSPARENT) {
+        json->Put("BackgroundColor", dialogProperties_.backgroundColor.value_or(Color::TRANSPARENT).ToString().c_str());
+    }
+    DumpSimplifySizeProperty(json);
+    DumpSimplifyBorderProperty(json);
+    DumpSimplifyBoolProperty(json);
+    DumpSimplifyObjectProperty(json);
+}
+
+void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)
+{
+    if (dialogProperties_.borderWidth.has_value()) {
+        auto border = dialogProperties_.borderWidth.value();
+        DimensionUnit unit = border.leftDimen.value_or(
+            border.topDimen.value_or(border.rightDimen.value_or(border.bottomDimen.value_or(Dimension())))).Unit();
+        Dimension defaultValue(0, unit);
+        BorderWidthProperty defaultBorder = { defaultValue, defaultValue, defaultValue, defaultValue };
+        if (!(border == defaultBorder)) {
+            json->Put("BorderWidth", border.ToString().c_str());
+        }
+    }
+    if (dialogProperties_.borderColor.has_value()) {
+        auto color = dialogProperties_.borderColor.value();
+        BorderColorProperty defaultValue = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
+        if (!(color == defaultValue)) {
+            json->Put("BorderColor", color.ToString().c_str());
+        }
+    }
+    if (dialogProperties_.borderRadius.has_value()) {
+        auto radius = dialogProperties_.borderRadius.value();
+        DimensionUnit unit = radius.radiusTopLeft.value_or(radius.radiusTopRight.value_or(
+            radius.radiusTopLeft.value_or(radius.radiusBottomLeft.value_or(
+                radius.radiusBottomRight.value_or(radius.radiusTopStart.value_or(radius.radiusTopEnd.value_or(
+                    radius.radiusBottomStart.value_or(radius.radiusBottomEnd.value_or(Dimension()))))))))).Unit();
+        Dimension defaultValue(0, unit);
+        BorderRadiusProperty defaultRadius(defaultValue);
+        if (!(radius == defaultRadius)) {
+            json->Put("BorderRadius", dialogProperties_.borderRadius.value().ToString().c_str());
+        }
+    }
+}
+
+void DialogPattern::DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json)
+{
+    if (dialogProperties_.width.has_value() || dialogProperties_.height.has_value()) {
+        DimensionUnit unit = dialogProperties_.width.has_value() ?
+            dialogProperties_.width.value().Unit() : dialogProperties_.height.value().Unit();
+        CalcDimension defaultCalcDimen(0, unit);
+        if (dialogProperties_.width.value_or(defaultCalcDimen) != defaultCalcDimen &&
+            dialogProperties_.height.value_or(defaultCalcDimen) != defaultCalcDimen) {
+            json->Put("Width", dialogProperties_.width.value_or(defaultCalcDimen).ToString().c_str());
+            json->Put("Height", dialogProperties_.height.value_or(defaultCalcDimen).ToString().c_str());
+        }
+    }
+}
+
+void DialogPattern::DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json)
+{
+    if (dialogProperties_.autoCancel) {
+        json->Put("AutoCancel", GetBoolStr(dialogProperties_.autoCancel).c_str());
+    }
+    if (dialogProperties_.customStyle) {
+        json->Put("CustomStyle", GetBoolStr(dialogProperties_.customStyle).c_str());
+    }
+    if (dialogProperties_.isMenu) {
+        json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
+    }
+    if (dialogProperties_.isMask) {
+        json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
+    }
+    if (dialogProperties_.isModal) {
+        json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
+    }
+    if (dialogProperties_.isScenceBoardDialog) {
+        json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    }
+    if (dialogProperties_.isSysBlurStyle) {
+        json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
+    }
+    if (dialogProperties_.isShowInSubWindow) {
+        json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
+    }
+}
+
+void DialogPattern::DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(dialogProperties_.alignment).c_str());
+    std::stringstream stream;
+    stream << dialogProperties_.offset.GetX().ToString() << "," << dialogProperties_.offset.GetY().ToString();
+    json->Put("Offset", stream.str().c_str());
+    if (!dialogProperties_.buttons.empty()) {
+        std::unique_ptr<JsonValue> buttons = JsonUtil::Create(true);
+        int32_t index = -1;
+        for (const auto& buttonInfo : dialogProperties_.buttons) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("Text", buttonInfo.text.c_str());
+            child->Put("Color", buttonInfo.textColor.c_str());
+            index++;
+            std::string key = "Button" + std::to_string(index);
+            buttons->PutRef(key.c_str(), std::move(child));
+        }
+        json->PutRef("Buttons", std::move(buttons));
+    }
+    if (dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+
+        child->Put("Radius", shadow.GetBlurRadius());
+        child->Put("Style", static_cast<int32_t>(shadow.GetStyle()));
+        child->Put("Type", static_cast<int32_t>(shadow.GetShadowType()));
+        child->Put("Fill", GetBoolStr(shadow.GetIsFilled()).c_str());
+        child->Put("Offset", shadow.GetOffset().ToString().c_str());
+        json->PutRef("Shadow", std::move(child));
+    }
+    if (dialogProperties_.maskColor.has_value()) {
+        json->Put("MaskColor", dialogProperties_.maskColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.maskRect.has_value()) {
+        json->Put("MaskRect", dialogProperties_.maskRect.value().ToString().c_str());
     }
 }
 } // namespace OHOS::Ace::NG

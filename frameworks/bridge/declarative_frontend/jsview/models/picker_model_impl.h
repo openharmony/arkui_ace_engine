@@ -42,6 +42,7 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override {};
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override {};
+    void HasUserDefinedOpacity() override {};
 };
 
 class DatePickerDialogModelImpl : public DatePickerDialogModel {

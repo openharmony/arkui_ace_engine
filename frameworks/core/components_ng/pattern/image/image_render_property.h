@@ -20,6 +20,7 @@
 #include "base/image/drawing_lattice.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
 
@@ -112,6 +113,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ImagePaintStyle, ImageResizableSlice, ImageResizableSlice, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);
 };
 

@@ -200,9 +200,10 @@ enum AceLogTag : uint8_t {
     ACE_APPBAR,               // C03952
     ACE_SELECT_OVERLAY,       // C03953
     ACE_CLIPBOARD,            // C03954
+    ACE_VISUAL_EFFECT,        // C03955
     ACE_SECURITY_COMPONENT,   // C03956
-    ACE_MEDIA_QUERY,          // C03957
-    ACE_LAYOUT_INSPECTOR,     // C03958
+    ACE_LAYOUT_INSPECTOR,     // C03957
+    ACE_MEDIA_QUERY,          // C03958
     ACE_LAYOUT,               // C03959
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add

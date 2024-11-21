@@ -31,6 +31,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t STRING_NEXT_POS = 1;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -43,10 +44,11 @@ constexpr int32_t MAX_LENGTH_OF_MILLIS = 3;
 constexpr int32_t SIZE_OF_AM_PM_STRING = 2;
 constexpr int32_t SIZE_OF_TIME_TEXT = 30;
 constexpr int32_t BOUNDARY_OF_AM_PM = 12;
-constexpr int32_t LOG_INTERVAL_TIME = 60 * 1000;
+constexpr int32_t LOG_INTERVAL_TIME = 59 * 1000;
 constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
+const char CHAR_SPACE = ' ';
 const std::string STR_0 = "0";
 const std::string STR_PREFIX_24H = " 0";
 const std::string STR_PREFIX_12H = " ";
@@ -213,7 +215,7 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto areaCallback = [weak = WeakClaim(this)](bool visible, double ratio) {
@@ -265,6 +267,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
         textContext->UpdateClipEdge(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         prevTime_ = currentTime;
         FireChangeEvent();
     }
@@ -372,6 +375,10 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = is24H_ ? "" : GetAmPm(hour);
     std::vector<std::string> curDateTime = ParseDateTimeValue(tempdateTimeValue);
+    auto spacePos = tempdateTimeValue.find(CHAR_SPACE);
+    if (spacePos != std::string::npos) {
+        tempdateTimeValue.insert(spacePos + STRING_NEXT_POS, strAmPm);
+    }
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;
 
     // parse week
@@ -404,7 +411,7 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
             formatElementMap_[2] = tempFormatElement;
             outputDateTime = SpliceDateTime(curDateTime);
         } else {
-            outputDateTime = dateTimeValue;
+            outputDateTime = tempdateTimeValue;
         }
     }
     return outputDateTime;

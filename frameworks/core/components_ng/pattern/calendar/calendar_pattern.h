@@ -170,6 +170,8 @@ private:
     void JumpTo(ObtainedMonth& obtainedMonth);
     void FlushDialogMonthData(ObtainedMonth& obtainedMonth);
     void InitSwiperChangeDoneEvent();
+    void ReadTitleNode();
+    void ClearChildrenFocus();
 
     std::optional<int32_t> titleId_;
     RefPtr<CalendarControllerNg> calendarControllerNg_;
@@ -183,7 +185,7 @@ private:
     int32_t goToCalendarYear_;
 
     int32_t currentMonthIndex_ = 1;
-
+    std::string selectedMonth_;
     ObtainedMonth currentMonth_;
     ObtainedMonth preMonth_;
     ObtainedMonth nextMonth_;

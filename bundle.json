@@ -24,8 +24,10 @@
             "ace_engine_feature_enable_atomic",
             "ace_engine_feature_enable_coverage",
             "ace_engine_feature_enable_point_light",
+            "ace_engine_feature_enable_split_mode",
             "ace_engine_feature_enable_nav_split_mode",
-            "ace_engine_feature_asbng_path"
+            "ace_engine_feature_asbng_path",
+            "ace_engine_feature_sched_model"
         ],
         "adapted_system_type": [
             "standard"
@@ -102,8 +104,7 @@
                 "skia",
                 "libuv",
                 "resource_schedule_service",
-                "background_task_mgr",
-                "egl"
+                "background_task_mgr"
             ],
             "third_party": []
         },
@@ -117,6 +118,7 @@
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
                     "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.para.dac",
+                    "//foundation/arkui/ace_engine/adapter/ohos/services/etc:ohos.timepicker.ogg",
                     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
                 ]
             },
@@ -186,14 +188,10 @@
                 },
                 {
                     "header": {
-                        "header_base": "//foundation/arkui/ace_engine/interfaces/native",
+                        "header_base": "//foundation/arkui/ace_engine/",
                         "header_files": [
-                            "node/native_drawable_descriptor.h",
-                            "native_interface_xcomponent.h",
-                            "native_node.h",
-                            "native_interface.h",
-                            "native_type.h",
-                            "native_node_napi.h"
+                            "interfaces/native/node/native_drawable_descriptor.h",
+                            "interfaces/native/native_interface_xcomponent.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/native:ace_ndk"

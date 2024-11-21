@@ -65,6 +65,9 @@ protected:
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
             }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
+            }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -106,6 +109,9 @@ protected:
                 TAG_LOGD(AceLogTag::ACE_IMAGE, "svg path:%{public}s, smoothEdge = %{public}f",
                     path_.ConvertToSVGString().c_str(), smoothEdge);
             }
+            if (!path_.IsValid()) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
+            }
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -141,7 +147,7 @@ protected:
     bool UpdateFillStyle(const std::optional<Color>& color, bool antiAlias = true);
     bool UpdateStrokeStyle(bool antiAlias = true);
     void SetStrokeGradientStyle(double opacity);
-    void SetGradientStyle(double opacity);
+    bool SetGradientStyle(double opacity);
     void UpdateLineDash();
     void SetLinearGradient(const Size& viewPort, Gradient& gradient);
     void SetRadialGradient(const Size& viewPort, Gradient& gradient);

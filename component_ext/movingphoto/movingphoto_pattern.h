@@ -20,6 +20,7 @@
 #include "movingphoto_layout_property.h"
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
+#include "movingphoto_utils.h"
 
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components/video/video_utils.h"
+#include "core/components/image/image_event.h"
 
 namespace OHOS::Ace::NG {
 class MovingPhotoPattern : public Pattern {
@@ -79,6 +81,12 @@ public:
 
     void OnAreaChangedInner() override;
 
+    void AutoPlayPeriod(int64_t startTime, int64_t endTime);
+
+    void AutoPlay(bool isAutoPlay);
+
+    void RepeatPlay(bool isRepeatPlay);
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, false };
@@ -109,8 +117,10 @@ private:
     void OnRebuildFrame() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnWindowHide() override;
+    void OnWindowShow() override;
     
     void RegisterVisibleAreaChange();
+    void VisibleAreaCallback(bool visible);
 
     void InitEvent();
     void HandleLongPress(GestureEvent& info);
@@ -118,6 +128,7 @@ private:
 
     void UpdateImageNode();
     void UpdateVideoNode();
+    void UpdatePlayMode();
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -132,8 +143,13 @@ private:
     void PrepareSurface();
     void RegisterMediaPlayerEvent();
     void PrintMediaPlayerStatus(PlaybackStatus status);
+    void RegisterImageEvent();
+    void HandleImageCompleteEvent(const LoadImageSuccessEvent& info);
+    void MediaResetToPlay();
 
+    void FireMediaPlayerImageComplete();
     void OnMediaPlayerStatusChanged(PlaybackStatus status);
+    void OnMediaPlayerInitialized();
     void OnMediaPlayerPrepared();
     void OnMediaPlayerStoped();
     void OnMediaPlayerCompletion();
@@ -152,10 +168,20 @@ private:
     void Stop();
     void Seek(int32_t position);
 
+    void VisiblePlayback();
+    void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
+    void CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video);
+    void RepeatStartAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopPlayback();
+    void PausePlayback();
     void StopAnimation();
+    void RepeatStopAnimation(const RefPtr<RenderContext>& videoRsContext);
+    void StopAnimationCallback();
+    void StartAutoPlay();
+    void StartRepeatPlay();
+    void SetAutoPlayPeriod(int64_t startTime, int64_t endTime);
 
     void UpdateMediaPlayerSpeed();
     void UpdateMediaPlayerMuted();
@@ -167,6 +193,8 @@ private:
     RefPtr<MovingPhotoController> controller_;
 
     int32_t fd_ = -1;
+    int64_t autoPlayPeriodStartTime_ = -1;
+    int64_t autoPlayPeriodEndTime_ = -1;
     std::string uri_ = "";
     bool startAnimationFlag_ = false;
     bool isPrepared_ = false;
@@ -174,7 +202,14 @@ private:
     bool isPlayByController_ = false;
     bool isFastKeyUp_ = false;
     bool hasVisibleChangeRegistered_ = false;
+    bool isFirstRepeatPlay_ = true;
+    bool isSetAutoPlayPeriod_ = false;
+    bool isVisible_ = false;
+    bool isChangePlayMode_ = false;
+    bool needUpdateImageNode_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
+    PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
+    PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     int64_t currentDateModified_ = -2;
 
     Rect lastBoundsRect_;

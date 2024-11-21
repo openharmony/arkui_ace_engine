@@ -256,6 +256,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",
+      "nativeModule/arkts_native_navigation_utils.cpp",
       "nativeModule/arkts_native_navigator_bridge.cpp",
       "nativeModule/arkts_native_node_adapter_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
@@ -379,6 +380,9 @@ template("declarative_js_engine_ark") {
     if (defined(vendor_configs.extra_view_register_sources)) {
       include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.extra_view_register_sources
+      if (platform == "ohos_ng") {
+        sources += vendor_configs.ace_engine_advanced_jsview
+      }
     } else {
       sources += [ "jsi_extra_view_register.cpp" ]
     }

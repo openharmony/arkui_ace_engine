@@ -38,6 +38,13 @@ enum class ResolutionType : int32_t {
     RESOLUTION_XXXHDPI = 640,
 };
 
+enum class FoldScreenType: int32_t {
+    UNKNOWN = 0,
+    BIG_FOLDER = 1,
+    SMALL_FOLDER = 2,
+    OUTER_FOLDER = 3,
+};
+
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
 
@@ -70,6 +77,11 @@ public:
      * Init device type according to system property.
      */
     static void InitDeviceTypeBySystemProperty();
+
+    /**
+     * Init fold screen type according to system property.
+     */
+    static void InitFoldScreenTypeBySystemProperty();
 
     /*
      * Get type of current device.
@@ -528,7 +540,6 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -556,12 +567,18 @@ public:
         return brightUpPercent_;
     }
 
+    static float GetPageCount()
+    {
+        return pageCount_;
+    }
+
     static bool IsOpIncEnable();
 
     static float GetDragStartDampingRatio();
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsSmallFoldProduct();
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -626,9 +643,11 @@ private:
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
+    static float pageCount_;
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static FoldScreenType foldScreenType_;
     static float fontScale_;
     static float fontWeightScale_;
 };

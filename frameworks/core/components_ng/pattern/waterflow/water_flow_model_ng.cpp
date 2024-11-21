@@ -65,7 +65,7 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
         footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     CHECK_NULL_VOID(footerNode);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
@@ -297,7 +297,11 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)
 int32_t WaterFlowModelNG::GetCachedCount(FrameNode* frameNode)
 {
     int32_t cachedCount = 1;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    CHECK_NULL_RETURN(frameNode, cachedCount);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    int32_t defCachedCount = pattern != nullptr ? pattern->GetDefaultCachedCount() : 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(WaterFlowLayoutProperty, CachedCount, cachedCount, frameNode,
+        defCachedCount);
     return cachedCount;
 }
 

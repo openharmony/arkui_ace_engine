@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
@@ -25,9 +25,9 @@
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
 protected:
-    void GetInstance() override
+    void GetWaterFlow() override
     {
-        WaterFlowTestNg::GetInstance();
+        WaterFlowTestNg::GetWaterFlow();
         info_ = AceType::DynamicCast<WaterFlowLayoutInfoSW>(pattern_->layoutInfo_);
         EXPECT_TRUE(info_);
     }
@@ -42,11 +42,12 @@ protected:
  */
 HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(400.0f));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(200.f));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->lanes_[0][0].items_.size(), 2);
     EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
@@ -67,12 +68,12 @@ HWTEST_F(WaterFlowSWTest, Regular001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetColumnsTemplate("1fr");
-        model.SetRowsGap(Dimension(5.0f));
-        CreateRandomItem(100);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    CreateRandomWaterFlowItems(100);
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     auto info = pattern_->layoutInfo_;
@@ -90,10 +91,11 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems();
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 0);
@@ -119,11 +121,12 @@ HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(100);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(100);
+    CreateWaterFlowItems();
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 99);
@@ -165,11 +168,12 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(400.0f));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(200.f));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
     pattern_->ScrollToIndex(8);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 5);
@@ -198,11 +202,12 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ChangeTemplate001, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(600.0f));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(600.0f));
+    ViewAbstract::SetHeight(CalcLength(200.f));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateWaterFlowItems();
+    CreateDone();
     UpdateCurrentOffset(-300.0f);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
@@ -228,15 +233,11 @@ HWTEST_F(WaterFlowSWTest, ChangeTemplate001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
-     * @tc.expected: pattern_->targetIndex_ is 20
-     */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(80);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(80);
+    CreateDone();
 
     pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
@@ -250,6 +251,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
     EXPECT_EQ(info_->startIndex_, 45);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f); // changed after refill
 
@@ -258,6 +260,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f); // doesn't affect current layout
     UpdateCurrentOffset(500.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill
@@ -288,16 +291,16 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(400.0f));
-        ViewAbstract::SetHeight(CalcLength(600.f));
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetRowsGap(Dimension(5.0f));
-        model.SetColumnsGap(Dimension(5.0f));
-        for (int i = 0; i < 30; ++i) {
-            CreateItemWithHeight(100.0f);
-        }
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetColumnsGap(Dimension(5.0f));
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
     AddItemsAtSlot(5, 100.0f, 3);
     frameNode_->ChildrenUpdatedFrom(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -313,19 +316,16 @@ HWTEST_F(WaterFlowSWTest, Order001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            for (int i = 0; i < 35; ++i) {
-                CreateItemWithHeight(100.0f);
-            }
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    for (int i = 0; i < 35; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_11);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
 
     /* Add 4 items at 3 */
@@ -373,12 +373,12 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(50);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     UpdateCurrentOffset(30000.0f);
     const float startPos = info_->StartPos();
@@ -407,12 +407,12 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        CreateItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(50);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -451,12 +451,12 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        model.SetRowsGap(Dimension(5.0f));
-        CreateRandomItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(5.0f));
+    CreateRandomWaterFlowItems(50);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     for (int i = 1; i <= 10; ++i) {
         info_->delta_ = 100.0f;
@@ -484,12 +484,12 @@ HWTEST_F(WaterFlowSWTest, OverScroll003, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        model.SetRowsGap(Dimension(5.0f));
-        CreateRandomItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(5.0f));
+    CreateRandomWaterFlowItems(50);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -497,12 +497,12 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
         info_->delta_ = -100.0f;
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         FlushLayoutTask(frameNode_);
-        EXPECT_EQ(info_->EndPos(), -100.0f * i + WATERFLOW_HEIGHT);
+        EXPECT_EQ(info_->EndPos(), -100.0f * i + WATER_FLOW_HEIGHT);
         EXPECT_TRUE(info_->offsetEnd_);
     }
     EXPECT_EQ(info_->startIndex_, 49);
     EXPECT_EQ(info_->endIndex_, 49);
-    EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 1000.0f);
+    EXPECT_EQ(info_->BottomFinalPos(WATER_FLOW_HEIGHT), 1000.0f);
     for (auto& lane : info_->lanes_[0]) {
         if (lane.items_.empty()) {
             EXPECT_EQ(lane.startPos, lane.endPos);
@@ -519,12 +519,12 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, OverScroll005, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(3);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(3);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     info_->UpdateOffset(200.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -537,7 +537,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 2), -100.0f);
     EXPECT_EQ(info_->maxHeight_, 250.0f);
-    EXPECT_EQ(info_->BottomFinalPos(WATERFLOW_HEIGHT), 100.0f);
+    EXPECT_EQ(info_->BottomFinalPos(WATER_FLOW_HEIGHT), 100.0f);
 }
 
 /**
@@ -547,11 +547,11 @@ HWTEST_F(WaterFlowSWTest, OverScroll005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        model.SetFooter(GetDefaultHeaderBuilder());
-        CreateItem(50);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(50);
+    CreateDone();
     EXPECT_FALSE(info_->IsMisaligned());
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -572,6 +572,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     EXPECT_EQ(info_->lanes_[0][0].startPos, -47.0f);
     EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->Offset(), -47.0f);
 }
 
 /**
@@ -581,20 +582,17 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            const std::vector<float> randomHeights = { 249, 228, 232, 171, 184, 168, 236, 167, 156, 163, 212, 50, 130,
-                225, 63, 106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103,
-                57, 189, 55, 127, 230, 51, 167, 166, 118, 107 };
-            for (const float& f : randomHeights) {
-                CreateItemWithHeight(f);
-            }
-        },
-        false);
+    CreateWaterFlow();
+    const std::vector<float> randomHeights = { 249, 228, 232, 171, 184, 168, 236, 167, 156, 163, 212, 50, 130, 225, 63,
+        106, 156, 213, 102, 93, 73, 184, 89, 156, 178, 163, 176, 187, 191, 118, 218, 212, 196, 52, 103, 57, 189, 55,
+        127, 230, 51, 167, 166, 118, 107 };
+    for (const float& f : randomHeights) {
+        CreateItemWithHeight(f);
+    }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     EXPECT_FALSE(info_->IsMisaligned());
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -636,10 +634,10 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     /**
      * @tc.steps: step1. Create List Item
      */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER * 2);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
     auto controller = pattern_->positionController_;
     /**
      * @tc.steps: step8. Test AnimateTo function
@@ -666,7 +664,7 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     };
 
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
-    pattern_->ScrollTo(ITEM_HEIGHT * 5);
+    pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
     EXPECT_FALSE(isOnWillScrollCallBack);
 }
 
@@ -677,12 +675,12 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetRowsGap(Dimension(5.0f));
-        CreateRandomItem(100);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    CreateRandomWaterFlowItems(100);
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     auto info = pattern_->layoutInfo_;
@@ -712,14 +710,13 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetFooter(GetDefaultHeaderBuilder());
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetRowsGap(Dimension(5.0f));
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-
-        CreateRandomItem(100);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateRandomWaterFlowItems(100);
+    CreateDone();
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
     std::vector<float> endPos = { info_->lanes_[0][0].endPos, info_->lanes_[0][1].endPos, info_->lanes_[0][2].endPos };
@@ -767,13 +764,12 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge004, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
 {
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        model.SetRowsGap(Dimension(5.0f));
-        model.SetEdgeEffect(EdgeEffect::SPRING, true);
-
-        CreateRandomItem(100);
-    });
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateRandomWaterFlowItems(100);
+    CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     info_->delta_ = 800.0f;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -804,17 +800,14 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge005, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info_->startIndex_, 3);
@@ -838,17 +831,14 @@ HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
+    CreateDone();
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info_->startIndex_, 3);
@@ -873,13 +863,11 @@ HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, NotifyDataChange001, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(60);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    CreateDone();
     UpdateCurrentOffset(-1000.0f);
     EXPECT_EQ(info_->startIndex_, 7);
     EXPECT_EQ(info_->endIndex_, 10);
@@ -914,22 +902,45 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateLanesIndex001
+ * @tc.desc: Test the limit of UpdateLanesIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, UpdateLanesIndex001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    CreateDone();
+
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_EQ(info_->endIndex_, 17);
+    info_->newStartIndex_ = 15;
+    info_->BeginUpdate();
+    info_->UpdateLanesIndex(17);
+    EXPECT_EQ(info_->StartIndex(), 15);
+    EXPECT_EQ(info_->EndIndex(), 19);
+    EXPECT_FALSE(info_->idxToLane_.count(13));
+}
+
+/**
  * @tc.name: NotifyDataChange002
  * @tc.desc: Test the return value of NotifyDataChange when updating the section in segment layout.
  * @tc.type: FUNC
  */
 HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
 {
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(45);
-        },
-        false);
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
 
     UpdateCurrentOffset(-1000.0f);
     EXPECT_EQ(info_->startIndex_, 11);
@@ -960,7 +971,6 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
     secObj->ChangeData(4, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -1);
-
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 13);
 
@@ -977,5 +987,54 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     newSections = { WaterFlowSections::Section { .itemsCount = 30, .crossCount = 5 } };
     secObj->ChangeData(6, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -2);
+}
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test cache item layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+
+    model.SetCachedCount(3);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    pattern_->ScrollToIndex(30);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 30);
+    EXPECT_EQ(info_->endIndex_, 40);
+    const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
+    EXPECT_EQ(pattern_->preloadItems_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
+    EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 41), 850.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 42), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 43), 960.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 27), -220.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 28), -210.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), -110.0f);
+    // test lanes_'s constraint
+    info_->BeginUpdate();
+    EXPECT_EQ(info_->StartIndex(), 30);
+    EXPECT_EQ(info_->EndIndex(), 40);
+
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info_->startIndex_, 25);
+    EXPECT_EQ(info_->endIndex_, 36);
+    // item in cache range shouldn't be created yet
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -440.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
 } // namespace OHOS::Ace::NG

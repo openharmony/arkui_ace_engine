@@ -239,17 +239,17 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true), 0);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(720.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2), 26);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true), 26);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3, true), 0);
 }
 
 /**
@@ -1080,6 +1080,41 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnScrollEndMenuVisibile001
+ * @tc.desc: Test textfield On Scroll End Menu Visibile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text field.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call OnScrollEndCallback
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->selectOverlay_->SetUsingMouse(false);
+    pattern_->isTextSelectionMenuShow_ = true;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::SHOW;
+    pattern_->SetSelectionFlag(5.0f, 5.0f, options);
+
+    pattern_->OnScrollEndCallback();
+    EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+
+    /**
+     * @tc.steps: step2. call CloseSelectOverlay
+     * tc.expected: step2. Check if the Menu Visibile.
+    */
+    pattern_->CloseSelectOverlay(true);
+    pattern_->OnScrollEndCallback();
+    EXPECT_FALSE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
+}
+
+/**
  * @tc.name: UpdateCaretPositionOnHandleMove001
  * @tc.desc: Test the caret position after handle move done in textarea.
  * @tc.type: FUNC
@@ -1097,17 +1132,17 @@ HWTEST_F(TextFieldModifyTest, UpdateCaretPositionOnHandleMove001, TestSize.Level
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(60.0f, 0.0f);
-    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2);
+    pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 0.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3), 0);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset3, true), 0);
 }
 
 /**

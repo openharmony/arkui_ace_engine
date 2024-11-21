@@ -30,6 +30,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
@@ -37,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -189,6 +191,8 @@ public:
     int32_t rangeStart = -1;
     int32_t position = -1;
     int32_t imageNodeId = -1;
+    int32_t paragraphIndex = -1;
+    uint32_t length = 0;
     std::string inspectId;
     std::string description;
     std::string content;
@@ -212,6 +216,7 @@ public:
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
+    RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
@@ -288,6 +293,13 @@ public:
 
     virtual bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
+
+    void SetTextPattern(const RefPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    bool UpdateSpanTextColor(Color color);
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -302,6 +314,7 @@ private:
     bool isParentText = false;
     bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
+    WeakPtr<Pattern> pattern_;
     uint32_t symbolId_ = 0;
 };
 
@@ -443,13 +456,13 @@ public:
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -518,6 +531,23 @@ public:
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+
+    void UpdateSpanTextColor(Color color)
+    {
+        if (!spanItem_->fontStyle) {
+            spanItem_->fontStyle = std::make_unique<FontStyle>();
+        }
+        if (spanItem_->fontStyle->CheckTextColor(color)) {
+            return;
+        }
+        spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
+        if (!spanItem_->UpdateSpanTextColor(color)) {
+            RequestTextFlushDirty();
+        }
+    }
 
 protected:
     void DumpInfo() override;

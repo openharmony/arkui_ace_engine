@@ -103,7 +103,7 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
@@ -423,19 +423,39 @@ RefPtr<FrameNode> SecurityComponentLayoutAlgorithm::GetSecCompChildNode(RefPtr<F
 void SecurityComponentLayoutAlgorithm::UpdateTextRectPoint()
 {
     if (isVertical_) {
-        double contextWidth = std::max(text_.width_, icon_.width_);
-        textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
-        textRightBottomPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_ +
-            text_.height_);
+        if (icon_.width_ > text_.width_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + text_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + text_.width_,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        }
     } else {
-        double contextHeight = std::max(text_.height_, icon_.height_);
-        textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + contextHeight);
-        textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_ +
-            contextHeight);
+        if (icon_.height_ > text_.height_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + text_.height_);
+        }
     }
 }
 

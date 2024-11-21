@@ -172,7 +172,7 @@ public:
 
     void ProcessFreezeNode();
 
-    void onFreezeStateChange() override;
+    void OnFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -245,6 +245,11 @@ public:
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
+    }
+
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -446,6 +451,10 @@ public:
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
 
+    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
+
+    RectF GetPaintRectToWindowWithTransform();
+
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -482,12 +491,14 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-
+    bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
@@ -897,6 +908,10 @@ public:
 
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool IsWindowBoundary() const
     {
         return isWindowBoundary_;
@@ -918,6 +933,7 @@ public:
 
     RectF GetRectWithRender();
     RectF GetRectWithFrame();
+
     void PaintDebugBoundary(bool flag) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
@@ -961,6 +977,8 @@ public:
     bool CheckAccessibilityLevelNo() const {
         return false;
     }
+
+    void UpdateAccessibilityNodeRect();
 
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
@@ -1081,8 +1099,25 @@ public:
 
     LayoutConstraintF GetLayoutConstraint() const;
 
+    WeakPtr<TargetComponent> GetTargetComponent() const
+    {
+        return targetComponent_;
+    }
+
+    void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
+    {
+        exposeInnerGestureFlag_ = exposeInnerGestureFlag;
+    }
+
+    bool GetExposeInnerGestureFlag() const
+    {
+        return exposeInnerGestureFlag_;
+    }
+
 protected:
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+
     std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
 
@@ -1129,6 +1164,13 @@ private:
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
     void DumpSafeAreaInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
@@ -1164,7 +1206,7 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1194,9 +1236,14 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
     bool AllowVisibleAreaCheck() const;
 
     void ResetPredictNodes();
+
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1293,9 +1340,13 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
+    bool exposeInnerGestureFlag_ = false;
+
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
+
+    std::unordered_map<std::string, std::string> customPropertyMap_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
@@ -1304,11 +1355,7 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
-
-    std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex customPropertyMapLock_;
-
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
         RectF lastFrameRect;

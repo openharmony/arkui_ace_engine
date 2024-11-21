@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -382,6 +382,18 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
     tabBarPattern->OnRestoreInfo(restoreInfo);
 }
 
+void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
+    CHECK_NULL_VOID(targetComponent);
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    targetComponent->SetInnerNodeGestureRecognizerJudge();
+}
+
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
 {
     auto property = GetLayoutProperty<TabsLayoutProperty>();
@@ -424,19 +436,25 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, nullptr);
     tabBarPattern->SetFirstFocus(true);
-
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabsLayoutProperty, nullptr);
+    auto isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
         ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::RIGHT) ||
+        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT)) ||
         (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+        (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)))) {
         return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
     }
     if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
         if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL && step == FocusStep::LEFT) ||
+            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)) ||
             (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL && step == FocusStep::RIGHT)) {
+            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
+            (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
             return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
         }
         if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
@@ -497,19 +515,17 @@ void TabsPattern::BeforeCreateLayoutWrapper()
  *
  * This function is responsible for updating the children of the TabsPattern component,
  * specifically the swiperNode and tabBarNode. It performs the following steps:
- * 1. Calls the ChildrenUpdatedFrom function on the swiperNode with -1 as the parameter.
- * 2. Creates a map of tabBarItems using the tabBarItemNodes from the tabBarNode.
- * 3. Traverses the tree of UINodes starting from the swiperNode using a stack.
- * 4. For each UINode, if it is an instance of TabContentNode, it retrieves the corresponding
+ * 1. Creates a map of tabBarItems using the tabBarItemNodes from the tabBarNode.
+ * 2. Traverses the tree of UINodes starting from the swiperNode using a stack.
+ * 3. For each UINode, if it is an instance of TabContentNode, it retrieves the corresponding
  *    tabBarItem from the tabBarItems map and moves it to position 0.
- * 5. Continues traversing the tree by pushing the children of the current UINode onto the stack.
+ * 4. Continues traversing the tree by pushing the children of the current UINode onto the stack.
  *
  * @param swiperNode The FrameNode representing the swiper component.
  * @param tabBarNode The FrameNode representing the tab bar component.
  */
 void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode)
 {
-    swiperNode->ChildrenUpdatedFrom(-1);
     std::map<int32_t, RefPtr<FrameNode>> tabBarItems;
     for (const auto& tabBarItemNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(tabBarItemNode);
@@ -552,6 +568,7 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();

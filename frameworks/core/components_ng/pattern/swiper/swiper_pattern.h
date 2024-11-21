@@ -103,8 +103,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
-    std::string GetDotIndicatorStyle() const;
-    std::string GetDigitIndicatorStyle() const;
 
     int32_t GetCurrentShownIndex() const
     {
@@ -593,6 +591,11 @@ public:
         return usePropertyAnimation_;
     }
 
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
@@ -603,12 +606,12 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -626,6 +629,7 @@ private:
     void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
@@ -683,7 +687,18 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
-    float CalculateVisibleSize() const;
+    float GetPrevMarginWithItemSpace() const
+    {
+        return Positive(GetPrevMargin()) ? GetPrevMargin() + GetItemSpace() : 0.0f;
+    }
+    float GetNextMarginWithItemSpace() const
+    {
+        return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
+    }
+    float CalculateVisibleSize() const
+    {
+        return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
+    }
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -702,6 +717,7 @@ private:
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
+    void HandleVisibleChange(bool visible);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false,
@@ -768,6 +784,14 @@ private:
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
     inline bool DuringTranslateAnimation() const;
+    /**
+     * @return true if any translate animation (switching page / spring) is running, ignore animation pause etc.
+     */
+    inline bool RunningTranslateAnimation() const;
+    /**
+     * @return true if fade animation is running, false otherwise.
+     */
+    inline bool DuringFadeAnimation() const;
 
     /**
      *  NestableScrollContainer implementations
@@ -800,7 +824,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollDragEndRecursive() override;
 
@@ -809,7 +833,7 @@ private:
      *
      * @param position The position where the scroll has started.
      */
-    void NotifyParentScrollStart(float position);
+    void NotifyParentScrollStart(WeakPtr<NestableScrollContainer> child, float position);
     /**
      * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
      */
@@ -829,6 +853,8 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void HandleTouchBottomLoop();
+    void HandleTouchBottomLoopOnRTL();
+    void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
@@ -910,10 +936,12 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+    void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
     bool IsItemOverlay() const;
+    void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
 
@@ -973,7 +1001,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isWindowShow_ = true;
     bool isCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
@@ -1002,6 +1030,7 @@ private:
     WeakPtr<FrameNode> lastWeakShowNode_;
 
     CancelableCallback<void()> translateTask_;
+    CancelableCallback<void()> resetLayoutTask_;
 
     std::optional<int32_t> indicatorId_;
     std::optional<int32_t> leftButtonId_;
@@ -1013,6 +1042,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 
@@ -1034,6 +1064,7 @@ private:
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
+    bool isTouchDownFadeAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;

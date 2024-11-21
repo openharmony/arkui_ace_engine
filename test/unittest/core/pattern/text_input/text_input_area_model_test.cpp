@@ -1029,4 +1029,81 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg009, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
 }
+
+/**
+ * @tc.name: accessibilityProperty001
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, accessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_TEXT);
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NUMBER);
+    layoutProperty->UpdateTextInputType(TextInputType::PHONE);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PHONENUMBER);
+    layoutProperty->UpdateTextInputType(TextInputType::DATETIME);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_DATE);
+    accessibilityProperty->GetText();
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_EMAIL);
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_PASSWORD);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_USER_NAME);
+    layoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_EQ(accessibilityProperty->GetTextInputType(), AceTextCategory::INPUT_TYPE_NEW_PASSWORD);
+    accessibilityProperty->GetText();
+    layoutProperty->UpdateTextInputType(TextInputType::BEGIN);
+    accessibilityProperty->GetTextInputType();
+}
+
+/**
+ * @tc.name: accessibilityProperty002
+ * @tc.desc: test testInput accessibilityProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, accessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set Action
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    textFieldModelNG.SetCopyOption(CopyOptions::InApp);
+    accessibilityProperty->SetSpecificSupportAction();
+
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    textFieldModelNG.SetCopyOption(CopyOptions::None);
+    accessibilityProperty->SetSpecificSupportAction();
+}
 } // namespace OHOS::Ace::NG

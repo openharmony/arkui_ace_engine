@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 import("//foundation/arkui/ace_engine/build/ace_lib.gni")
 
 # generate libace_engine and libace_debug targets
@@ -102,6 +103,10 @@ config("ace_engine_public_config") {
 
 config("lto_link_config") {
   ldflags = [ "-Wl,--lto-O2" ]
+  if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
+    ldflags +=
+        [ "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}" ]
+  }
 }
 
 ohos_shared_library("libace_compatible") {
@@ -136,7 +141,7 @@ ohos_shared_library("libace_compatible") {
   subsystem_name = ace_engine_subsystem
 }
 
-if (!is_asan) {
+if (!is_asan && ace_engine_feature_enable_libace) {
   ohos_shared_library("libace") {
     external_deps = []
     if (use_hilog) {

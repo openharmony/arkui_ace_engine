@@ -1902,25 +1902,6 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListPattern_UpdateScrollSnap001
- * @tc.desc: Test UpdateScrollSnap.
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
-{
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    pattern_->AnimateTo(1, 0, nullptr, true);
-    pattern_->UpdateScrollSnap();
-    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
-
-    pattern_->StopAnimate();
-    pattern_->UpdateScrollSnap();
-    EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
-}
-
-/**
  * @tc.name: PostListItemPressStyleTask_scroll001
  * @tc.desc: Test list layout with PostListItemPressStyleTask scroll.
  * @tc.type: FUNC

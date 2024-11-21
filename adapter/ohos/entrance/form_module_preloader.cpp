@@ -38,7 +38,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime, co
     std::unordered_set<std::string> formModuleList;
     auto hapPathMapPtr = reinterpret_cast<const std::map<std::string, std::string>*>(hapPathMap);
     if (!FormModulePreloader::CreateFormModuleList(std::string(bundleName), formModuleList, hapPathMapPtr)) {
-        LOGW("CreateFormModuleList failed, will load all modules later.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "CreateFormModuleList failed, will load all modules later.");
     }
     Framework::JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime, formModuleList);
 }
@@ -50,10 +50,10 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ReloadAceModuleCard(void* runtime, con
     auto hapPathMapPtr = reinterpret_cast<const std::map<std::string, std::string>*>(hapPathMap);
     bool ret = FormModulePreloader::GetNewFormModuleList(std::string(bundleName), formModuleList, hapPathMapPtr);
     if (ret && formModuleList.empty()) {
-        LOGI("There are no new components to load.");
+        TAG_LOGI(AceLogTag::ACE_FORM, "There are no new components to load.");
         return;
     } else if (!ret) {
-        LOGW("GetNewFormModuleList failed, will load all modules later.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "GetNewFormModuleList failed, will load all modules later.");
         formModuleList.clear(); // JsiDeclarativeEngineInstance will load all module if input list is empty.
     }
     Framework::JsiDeclarativeEngineInstance::ReloadAceModuleCard(runtime, formModuleList);
@@ -66,7 +66,7 @@ bool FormModulePreloader::CreateFormModuleList(const std::string& bundleName,
     if (ReadFormModuleList(bundleName, formModuleList, hapPathMap, false)) {
         std::lock_guard<std::mutex> lock(gMapLock_);
         gFormModuleMap_.emplace(bundleName, formModuleList);
-        LOGI("push formModuleList to map, bundleName: %{public}s.", bundleName.c_str());
+        TAG_LOGI(AceLogTag::ACE_FORM, "push formModuleList to map, bundleName: %{public}s.", bundleName.c_str());
         return true;
     }
     return false;
@@ -79,7 +79,7 @@ bool FormModulePreloader::GetNewFormModuleList(const std::string& bundleName,
         std::lock_guard<std::mutex> lock(gMapLock_);
         if (gFormModuleMap_.find(bundleName) == gFormModuleMap_.end()) {
             // This means that reading the list of components fails on preload
-            LOGW("All modules of bundle %{public}s have been loaded.", bundleName.c_str());
+            TAG_LOGW(AceLogTag::ACE_FORM, "All modules of bundle %{public}s have been loaded.", bundleName.c_str());
             return true;
         }
     }
@@ -101,18 +101,20 @@ bool FormModulePreloader::ReadFormModuleList(const std::string& bundleName, std:
         // Create HapAssetProvider
         RefPtr<AssetManager> assetManager = CreateAssetManager(hapPath);
         if (assetManager == nullptr) {
-            LOGE("CreateAssetManager failed, hapPath: %{private}s.", hapPath.c_str());
+            TAG_LOGW(AceLogTag::ACE_FORM, "CreateAssetManager failed, hapPath: %{private}s.", hapPath.c_str());
             continue;
         }
         // Read component_collection.json
         std::string content;
         if (!ReadFileFromAssetManager(assetManager, "component_collection.json", content)) {
-            LOGE("Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
+            TAG_LOGW(
+                AceLogTag::ACE_FORM, "Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             continue;
         }
         // Parse component_collection.json
         if (!ParseComponentCollectionJson(bundleName, content, formModuleList, isReloadCondition)) {
-            LOGE("Parse component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
+            TAG_LOGW(
+                AceLogTag::ACE_FORM, "Parse component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             continue;
         }
         readSuccess = true;
@@ -126,21 +128,22 @@ bool FormModulePreloader::ParseComponentCollectionJson(
 {
     auto collectionJson = JsonUtil::ParseJsonString(content);
     if (collectionJson == nullptr || collectionJson->IsNull()) {
-        LOGE("Parse component_collection.json failed");
+        TAG_LOGW(AceLogTag::ACE_FORM, "Parse component_collection.json failed");
         return false;
     }
     for (auto child = collectionJson->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
         std::string etsPath = child->GetKey();
         auto item = collectionJson->GetValue(etsPath);
         if (item == nullptr || !item->IsValid() || !item->IsArray()) {
-            LOGE("Parse component_collection.json failed, etsPath: %{private}s.", etsPath.c_str());
+            TAG_LOGW(
+                AceLogTag::ACE_FORM, "Parse component_collection.json failed, etsPath: %{private}s.", etsPath.c_str());
             return false;
         }
         int32_t len = item->GetArraySize();
         for (int32_t index = 0; index < len; ++index) {
             auto component = item->GetArrayItem(index);
             if (component == nullptr || !component->IsString()) {
-                LOGE("Read view failed, etsPath: %{private}s.", etsPath.c_str());
+                TAG_LOGW(AceLogTag::ACE_FORM, "Read view failed, etsPath: %{private}s.", etsPath.c_str());
                 return false;
             }
             std::string componentName = component->GetString();
@@ -163,18 +166,18 @@ bool FormModulePreloader::ReadFileFromAssetManager(
     const RefPtr<AssetManager>& assetManager, const std::string& fileName, std::string& content)
 {
     if (assetManager == nullptr) {
-        LOGE("assetManager is null.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "assetManager is null.");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(fileName);
     if (jsAsset == nullptr) {
-        LOGE("uri: %{private}s Asset is null", fileName.c_str());
+        TAG_LOGW(AceLogTag::ACE_FORM, "uri: %{private}s Asset is null", fileName.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
     auto buffer = jsAsset->GetData();
     if ((buffer == nullptr) || (bufLen <= 0)) {
-        LOGE("uri: %{private}s buffer is null", fileName.c_str());
+        TAG_LOGW(AceLogTag::ACE_FORM, "uri: %{private}s buffer is null", fileName.c_str());
         return false;
     }
     content.assign(buffer, buffer + bufLen);
@@ -190,12 +193,12 @@ RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& 
     basePaths.emplace_back("resources/base/profile/");
     RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();
     if (assetManager == nullptr) {
-        LOGE("Create AssetManagerImpl failed.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "Create AssetManagerImpl failed.");
         return nullptr;
     }
     auto assetProvider = CreateAssetProviderImpl(hapPath, basePaths, false);
     if (assetProvider == nullptr) {
-        LOGE("CreateAssetProvider failed.");
+        TAG_LOGW(AceLogTag::ACE_FORM, "CreateAssetProvider failed.");
         return nullptr;
     }
     assetManager->PushBack(std::move(assetProvider));

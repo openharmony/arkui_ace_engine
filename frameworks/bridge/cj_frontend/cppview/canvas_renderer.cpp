@@ -356,6 +356,9 @@ int64_t NativeCanvasRenderer::CreateLinearGradient(const double x0, const double
     gradient.SetEndOffset(endOffset);
 
     auto nativeCanvasGradient = FFIData::Create<NativeCanvasGradient>(gradient);
+    if (nativeCanvasGradient == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return nativeCanvasGradient->GetID();
 }
 
@@ -373,6 +376,9 @@ int64_t NativeCanvasRenderer::CreateRadialGradient(
     gradient.SetOuterRadius(r1);
 
     auto nativeCanvasGradient = FFIData::Create<NativeCanvasGradient>(gradient);
+    if (nativeCanvasGradient == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return nativeCanvasGradient->GetID();
 }
 
@@ -421,6 +427,9 @@ int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width,
     auto pixelmap = renderingContext2DModel_->GetPixelMap(imageSize);
     if (pixelmap) {
         auto ret = FFIData::Create<OHOS::Media::PixelMapImpl>(pixelmap->GetPixelMapSharedPtr());
+        if (ret == nullptr) {
+            return FFI_ERROR_CODE;
+        }
         return ret->GetID();
     } else {
         LOGE("NativeCanvasRenderer GetPixelMap failed");

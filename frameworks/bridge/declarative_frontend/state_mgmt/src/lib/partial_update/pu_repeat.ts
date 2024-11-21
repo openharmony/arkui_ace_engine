@@ -189,7 +189,7 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
-        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+        if (Number.isInteger(options?.totalCount)) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
         } else {
@@ -221,7 +221,6 @@ class __Repeat<T> implements RepeatAPI<T> {
         };
 
         this.config.typeGenFunc = typeGenFuncSafe;
-
         return this;
     }
 

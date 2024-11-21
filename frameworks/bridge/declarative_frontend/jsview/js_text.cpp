@@ -893,7 +893,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     if (!tmpInfo->IsBoolean()) {
         return;
     }
-    TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
+    ViewAbstractModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
@@ -1145,6 +1145,8 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     controller->SetStyledString(spanStringController);
+    auto thisObj = info.This();
+    thisObj->SetPropertyObject("STYLED_STRING_IN_CONTROLLER", info[0]);
 }
 
 void JSTextController::JSBind(BindingTarget globalObj)

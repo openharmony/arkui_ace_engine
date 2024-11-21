@@ -20,6 +20,9 @@
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr uint64_t MAX_WAITING_TIME = 1000; // 1000ms
+}
 RefPtr<ImageCache> ImageCache::Create()
 {
     return MakeRefPtr<ImageCache>();
@@ -100,7 +103,15 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     auto dataSize = imageData->GetSize();
     std::vector<CacheNode<RefPtr<NG::ImageData>>> needErase;
 
-    std::scoped_lock lock(dataCacheMutex_);
+    // Try to acquire the dataCacheMutex_ lock within MAX_WAITING_TIME milliseconds to avoid long blocking.
+    if (!dataCacheMutex_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cache access.",
+            MAX_WAITING_TIME);
+        return;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     bool inCache = (iter != imageDataCache_.end());
     bool largerHalfSize = dataSize > (dataSizeLimit_ >> 1);
@@ -154,7 +165,15 @@ bool ImageCache::ProcessImageDataCacheInner(size_t dataSize, std::vector<CacheNo
 RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
     ACE_SCOPED_TRACE("GetCacheImageData key:%s", key.c_str());
-    std::scoped_lock lock(dataCacheMutex_);
+    // Try to acquire the dataCacheMutex_ lock within MAX_WAITING_TIME milliseconds to avoid long blocking.
+    if (!dataCacheMutex_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME))) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cache access.",
+            MAX_WAITING_TIME);
+        return nullptr;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     if (iter != imageDataCache_.end()) {
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
@@ -177,7 +196,15 @@ void ImageCache::ClearCacheImage(const std::string& key)
     }
 
     {
-        std::scoped_lock lock(dataCacheMutex_);
+        // Try to acquire the dataCacheMutex_ lock within MAX_WAITING_TIME milliseconds to avoid long blocking.
+        if (!dataCacheMutex_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME))) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cache access.",
+                MAX_WAITING_TIME);
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, dataCacheMutex_);
         auto iter = imageDataCache_.find(key);
         if (iter != imageDataCache_.end()) {
             dataCacheList_.erase(iter->second);
@@ -195,7 +222,15 @@ void ImageCache::Clear()
         imageCache_.clear();
     }
     {
-        std::scoped_lock lock(dataCacheMutex_);
+        // Try to acquire the dataCacheMutex_ lock within MAX_WAITING_TIME milliseconds to avoid long blocking.
+        if (!dataCacheMutex_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME))) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cache access.",
+                MAX_WAITING_TIME);
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, dataCacheMutex_);
         dataCacheList_.clear();
         imageDataCache_.clear();
     }

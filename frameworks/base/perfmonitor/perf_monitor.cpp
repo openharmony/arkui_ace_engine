@@ -30,6 +30,23 @@ constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
+// Obtain the last three digits of the full path
+constexpr uint32_t PATH_DEPTH = 3;
+
+std::string ParsePageUrl(const std::string& pagePath)
+{
+    std::string res;
+    std::vector<std::string> paths;
+    StringUtils::StringSplitter(pagePath, '/', paths);
+    uint32_t pathSize = paths.size();
+    if (pathSize < PATH_DEPTH) {
+        return pagePath;
+    }
+    for (uint32_t i = pathSize - PATH_DEPTH; i < pathSize; i++) {
+        res = res + "/" + paths[i];
+    }
+    return res;
+}
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -229,6 +246,7 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
         || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE
         || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
@@ -266,6 +284,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
@@ -285,6 +307,10 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
     SceneRecord* record = GetRecord(sceneId);
     ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
@@ -366,7 +392,7 @@ void PerfMonitor::ReportJankFrameApp(double jank)
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl)
 {
-    baseInfo.pageUrl = pageUrl;
+    baseInfo.pageUrl = ParsePageUrl(pageUrl);
 }
 
 std::string PerfMonitor::GetPageUrl()
@@ -387,7 +413,8 @@ std::string PerfMonitor::GetPageName()
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
+    std::string parsePageUrl = ParsePageUrl(pageUrl);
+    EventReport::ReportPageShowMsg(parsePageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)
@@ -531,7 +558,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         PerfConstants::WINDOW_TITLE_BAR_MINIMIZED, PerfConstants::WINDOW_RECT_MOVE,
         PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED, PerfConstants::WINDOW_TITLE_BAR_RECOVER,
         PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER, PerfConstants::WINDOW_RECT_RESIZE,
-        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCHE_FROM_TRANSITION
+        PerfConstants::WINDOW_TITLE_BAR_MAXIMIZED, PerfConstants::LAUNCHER_APP_LAUNCH_FROM_TRANSITION
     };
     if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
@@ -631,8 +658,8 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
         sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
-            return true;
-        }
+        return true;
+    }
     return false;
 }
 
@@ -648,6 +675,11 @@ int32_t PerfMonitor::GetFilterType() const
     int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
         | (isExclusionWindow << 1) | isExceptAnimator;
     return filterType;
+}
+
+void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+{
+    apsMonitor_ = apsMonitor;
 }
 
 } // namespace OHOS::Ace

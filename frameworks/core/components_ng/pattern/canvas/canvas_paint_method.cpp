@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
@@ -43,7 +44,6 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     context_ = frameNode ? frameNode->GetContextRefPtr() : nullptr;
     imageShadow_ = std::make_unique<Shadow>();
     contentModifier_ = contentModifier;
-    InitImageCallbacks();
     // The initial value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
 }
@@ -51,7 +51,12 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
+    static constexpr uint32_t suggestSize = 100000;
     tasks_.emplace_back(task);
+    if (tasks_.size() >= suggestSize && tasks_.size() % suggestSize == 0) {
+        TAG_LOGI(AceLogTag::ACE_CANVAS, "[%{public}s] Canvas task size: %{public}zu", customNodeName_.c_str(),
+            tasks_.size());
+    }
     CHECK_EQUAL_VOID(needMarkDirty_, false);
     needMarkDirty_ = false;
     auto host = frameNode_.Upgrade();
@@ -72,7 +77,7 @@ bool CanvasPaintMethod::HasTask() const
 void CanvasPaintMethod::FlushTask()
 {
 #ifndef USE_FAST_TASKPOOL
-    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
+    ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
@@ -121,98 +126,78 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
     CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Save();
     FireRSCanvasCallback(width, height);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        ResetStates();
+    }
     needMarkDirty_ = true;
-}
-
-void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
-{
-#ifndef ACE_UNITTEST
-    imageObj_ = imageObj;
-    CHECK_EQUAL_VOID(imageObj_->IsSvg(), false);
-    skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
-    currentSource_ = loadingSource_;
-    Ace::CanvasImage canvasImage = canvasImage_;
-#ifndef USE_FAST_TASKPOOL
-    TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod) {
-        paintMethod.DrawImage(canvasImage, 0, 0);
-    };
-    PushTask(func);
-#else
-    PushTask<DrawImageOp>(canvasImage, 0, 0);
-#endif
-#endif
-}
-
-void CanvasPaintMethod::ImageObjFailed()
-{
-#ifndef ACE_UNITTEST
-    imageObj_ = nullptr;
-    skiaDom_ = nullptr;
-#endif
 }
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
 #ifndef ACE_UNITTEST
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
+    imageBrush_.SetAntiAlias(antiAlias_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps layerOps(nullptr, &compositeOperationpBrush);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(layerOps);
     }
+
     if (state_.globalState.HasGlobalAlpha()) {
         imageBrush_.SetAlphaF(state_.globalState.GetAlpha());
     }
 
     if (HasShadow()) {
-        RSRect rec = RSRect(canvasImage.dx, canvasImage.dy,
-            canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
+        RSRect rec = RSRect(
+            canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
         RSPath path;
         path.AddRect(rec);
         PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
             (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) ? &layerOps : nullptr);
     }
-    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
-    CHECK_NULL_VOID(recordingCanvas);
+    DrawPixelMapInternal(pixelMap, canvasImage);
+    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
+        rsCanvas_->Restore();
+    }
+#endif
+}
+
+void CanvasPaintMethod::DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
+{
+#ifndef ACE_UNITTEST
     const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
     CHECK_NULL_VOID(tempPixelMap);
+    RSRect srcRect;
+    RSRect dstRect;
     switch (canvasImage.flag) {
-        case 0: {
-            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
-            recordingCanvas->DetachBrush();
+        case DrawImageType::THREE_PARAMS: {
+            srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + tempPixelMap->GetWidth(),
+                canvasImage.dy + tempPixelMap->GetHeight());
             break;
         }
-        case 1: {
-            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
-            recordingCanvas->DetachBrush();
+        case DrawImageType::FIVE_PARAMS: {
+            srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth,
+                canvasImage.dy + canvasImage.dHeight);
             break;
         }
-        case 2: {
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
-                canvasImage.sx + canvasImage.sWidth, canvasImage.sy + canvasImage.sHeight);
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect,
-                sampleOptions_, RSSrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT);
-            recordingCanvas->DetachBrush();
+        case DrawImageType::NINE_PARAMS: {
+            srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sx + canvasImage.sWidth,
+                canvasImage.sy + canvasImage.sHeight);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth,
+                canvasImage.dy + canvasImage.dHeight);
             break;
         }
         default:
             break;
     }
-    if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
-        rsCanvas_->Restore();
-    }
+    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(recordingCanvas);
+    recordingCanvas->AttachBrush(imageBrush_);
+    recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+    recordingCanvas->DetachBrush();
 #endif
 }
 
@@ -268,7 +253,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         auto green = pixels[i + 1];
         auto red = pixels[i + 2];
         auto alpha = pixels[i + 3];
-        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
     }
     return imageData;
 }
@@ -443,5 +428,26 @@ std::string CanvasPaintMethod::GetDumpInfo()
     std::string skew = "SKEW: " + std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_X)) + ", " +
                        std::to_string(rsCanvas_->GetTotalMatrix().Get(RSMatrix::SKEW_Y)) + "; ";
     return trans.append(scale).append(skew);
+}
+
+void CanvasPaintMethod::SetHostCustomNodeName()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto customNode = frameNode->GetParentCustomNode();
+    CHECK_NULL_VOID(customNode);
+    customNodeName_ = customNode->GetJSViewName();
+}
+
+void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(rsCanvas_);
+    auto matrix = rsCanvas_->GetTotalMatrix();
+    json->Put("Trans",
+        (std::to_string(matrix.Get(RSMatrix::TRANS_X)) + "," + std::to_string(matrix.Get(RSMatrix::TRANS_Y))).c_str());
+    json->Put("Scale",
+        (std::to_string(matrix.Get(RSMatrix::SCALE_X)) + "," + std::to_string(matrix.Get(RSMatrix::SCALE_Y))).c_str());
+    json->Put("Skew",
+        (std::to_string(matrix.Get(RSMatrix::SKEW_X)) + "," + std::to_string(matrix.Get(RSMatrix::SKEW_Y))).c_str());
 }
 } // namespace OHOS::Ace::NG

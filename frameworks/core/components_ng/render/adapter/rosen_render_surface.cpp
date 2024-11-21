@@ -16,6 +16,7 @@
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "surface_utils.h"
+#include "transaction/rs_interfaces.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -34,6 +35,7 @@ const std::string SURFACE_HEIGHT = "surface_height";
 const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
+const int32_t WAIT_FENCE_TIME = 5000;
 
 GraphicTransformType ConvertRotation(uint32_t rotation)
 {
@@ -69,22 +71,38 @@ struct SurfaceBufferNode {
     sptr<SurfaceBuffer> buffer_;
     sptr<SyncFence> fence_;
     OffsetF orgin_ { 0, 0 };
+    uint32_t bufferId_ {};
+    uint32_t sendTimes_ = 0;
 };
 #endif
 RosenRenderSurface::~RosenRenderSurface()
 {
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         surfaceDelegate_->ReleaseSurface();
-    } else {
-        if (nativeWindow_) {
-            DestoryNativeWindow(nativeWindow_);
-            nativeWindow_ = nullptr;
-        }
-        UnregisterSurface();
+        return;
+    }
+    if (nativeWindow_) {
+        DestoryNativeWindow(nativeWindow_);
+        nativeWindow_ = nullptr;
+    }
+    UnregisterSurface();
+    if (isTexture_) {
+        Rosen::RSInterfaces::GetInstance().UnregisterSurfaceBufferCallback(getpid(), GetUniqueIdNum());
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         while (!availableBuffers_.empty()) {
             auto surfaceNode = availableBuffers_.front();
             availableBuffers_.pop();
-            consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            if (surfaceNode) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            }
+        }
+        auto iter = availableBufferList_.begin();
+        while (iter != availableBufferList_.end()) {
+            auto surfaceNode = *iter;
+            if (surfaceNode) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            }
+            iter = availableBufferList_.erase(iter);
         }
     }
 }
@@ -227,6 +245,14 @@ std::string RosenRenderSurface::GetUniqueId() const
     return std::to_string(producerSurface_->GetUniqueId());
 }
 
+uint64_t RosenRenderSurface::GetUniqueIdNum() const
+{
+    if (!producerSurface_) {
+        return 0;
+    }
+    return producerSurface_->GetUniqueId();
+}
+
 void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height)
 {
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
@@ -352,6 +378,9 @@ void RosenRenderSurface::ConsumeWebBuffer()
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
+    CHECK_NULL_VOID(fence);
+    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
+    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     PostRenderOnlyTaskToUI();
 
     int32_t bufferWidth = surfaceBuffer->GetSurfaceBufferWidth();
@@ -419,25 +448,27 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
     OHOS::Rect damage;
 
     SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
-    if (surfaceErr != SURFACE_ERROR_OK) {
+    if (surfaceErr != SURFACE_ERROR_OK || !surfaceBuffer) {
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
     PostRenderOnlyTaskToUI();
-
-    std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
+    auto surfaceNode = std::make_shared<SurfaceBufferNode>(surfaceBuffer, fence, orgin_);
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->bufferId_ = surfaceBuffer->GetSeqNum();
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-        if (availableBuffers_.size() >= MAX_BUFFER_SIZE) {
-            surfaceNode = availableBuffers_.front();
-            availableBuffers_.pop();
-            surfaceErr = consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
-            if (surfaceErr != SURFACE_ERROR_OK) {
-                TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent release buffer error = %{public}d", surfaceErr);
-            }
+        auto lastSurfaceNode = availableBufferList_.empty() ? nullptr : availableBufferList_.back();
+        if (lastSurfaceNode && lastSurfaceNode->sendTimes_ <= 0) {
+            ACE_SCOPED_TRACE("ReleaseXComponentBuffer[id:%u][sendTimes:%d]", lastSurfaceNode->bufferId_,
+                lastSurfaceNode->sendTimes_);
+            consumerSurface_->ReleaseBuffer(lastSurfaceNode->buffer_, SyncFence::INVALID_FENCE);
+            availableBufferList_.pop_back();
         }
-        availableBuffers_.push(std::make_shared<SurfaceBufferNode>(surfaceBuffer, fence, orgin_));
+        availableBufferList_.emplace_back(surfaceNode);
     }
+    ACE_SCOPED_TRACE("ConsumeXComponentBuffer[id:%u][sendTimes:%d][size:%u]", surfaceNode->bufferId_,
+        surfaceNode->sendTimes_, static_cast<uint32_t>(availableBufferList_.size()));
 #endif
 }
 
@@ -449,11 +480,15 @@ void RosenRenderSurface::ReleaseSurfaceBuffers()
     CHECK_NULL_VOID(consumerSurface_);
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-        while (availableBuffers_.size() > 1) {
-            auto surfaceNode = availableBuffers_.front();
-            availableBuffers_.pop();
-            if (surfaceNode) {
-                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+        if (!availableBufferList_.empty()) {
+            auto iter = availableBufferList_.begin();
+            auto lastIter = std::prev(availableBufferList_.end());
+            while (iter != lastIter) {
+                auto surfaceNode = *iter;
+                if (surfaceNode) {
+                    consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+                }
+                iter = availableBufferList_.erase(iter);
             }
         }
     }
@@ -471,15 +506,16 @@ void RosenRenderSurface::DrawBufferForXComponent(
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
 
-        if (!availableBuffers_.empty()) {
-            surfaceNode = availableBuffers_.back();
+        if (!availableBufferList_.empty()) {
+            surfaceNode = availableBufferList_.back();
         }
+        if (!surfaceNode) {
+            TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "surfaceNode is null");
+            return;
+        }
+        ++surfaceNode->sendTimes_;
     }
-    if (!surfaceNode) {
-        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "surfaceNode is null");
-        return;
-    }
-    ACE_SCOPED_TRACE("XComponent DrawBuffer");
+    ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d]", surfaceNode->bufferId_, surfaceNode->sendTimes_);
 #ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
@@ -493,10 +529,47 @@ void RosenRenderSurface::DrawBufferForXComponent(
 #else
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
-        static_cast<int32_t>(height) };
+        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->fence_ };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 #endif
+}
+
+void RosenRenderSurface::RegisterBufferCallback()
+{
+#ifdef OHOS_PLATFORM
+    CHECK_EQUAL_VOID(isTexture_, false);
+    auto pid = getpid();
+    auto uid = GetUniqueIdNum();
+    if (!bufferCallback_) {
+        bufferCallback_ = std::make_shared<XComponentSurfaceBufferCallback>(WeakClaim(this));
+    }
+    Rosen::RSInterfaces::GetInstance().RegisterSurfaceBufferCallback(pid, uid, bufferCallback_);
+#endif
+}
+
+void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    auto iter = availableBufferList_.begin();
+    while (iter != availableBufferList_.end()) {
+        auto surfaceNode = *iter;
+        if (!surfaceNode) {
+            iter = availableBufferList_.erase(iter);
+        } else if (surfaceNode->bufferId_ == bufferId) {
+            // at least reserve one buffer
+            auto isLast = (iter == std::prev(availableBufferList_.end()));
+            ACE_SCOPED_TRACE(
+                "ReleaseXComponentBuffer[id:%u][sendTimes:%d][isLast:%d]", bufferId, surfaceNode->sendTimes_, isLast);
+            if (--surfaceNode->sendTimes_ <= 0 && !isLast) {
+                consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
+                availableBufferList_.erase(iter);
+            }
+            return;
+        } else {
+            ++iter;
+        }
+    }
 }
 
 void DrawBufferListener::OnBufferAvailable()
@@ -509,6 +582,20 @@ void DrawBufferListener::OnBufferAvailable()
         renderSurface->ConsumeXComponentBuffer();
     }
 }
+
+#ifdef OHOS_PLATFORM
+void XComponentSurfaceBufferCallback::OnFinish(uint64_t uid, const std::vector<uint32_t>& surfaceBufferIds)
+{
+    auto renderSurface = renderSurface_.Upgrade();
+    CHECK_NULL_VOID(renderSurface);
+    if (uid != renderSurface->GetUniqueIdNum()) {
+        return;
+    }
+    for (const auto& bufferId : surfaceBufferIds) {
+        renderSurface->ReleaseSurfaceBufferById(bufferId);
+    }
+}
+#endif
 
 void ExtSurfaceCallback::OnSurfaceCreated(const sptr<Surface>& /* surface */)
 {

@@ -37,7 +37,7 @@ group("core_unittest") {
 group("linux_core_unittest") {
   testonly = true
   deps = [
-    "accessibility:core_accessibility_unittest",
+    "accessibility:core_accessibility_unittest_linux",
     "animation:core_animation_unittest",
     "base:core_base_unittest",
     "event:click_event_test_ng",
@@ -77,7 +77,6 @@ group("linux_core_unittest") {
     "pattern/flex:flex_test_ng",
     "pattern/gauge:gauge_test_ng",
     "pattern/grid:grid_test_ng",
-    "pattern/grid:grid_test_regular",
     "pattern/grid_col:grid_col_test_ng",
     "pattern/grid_container:grid_container_test_ng",
     "pattern/grid_row:grid_row_test_ng",
@@ -112,7 +111,6 @@ group("linux_core_unittest") {
     "pattern/refresh:refresh_test_ng",
     "pattern/relative_container:relative_container_test_ng",
     "pattern/rich_editor:rich_editor_test_ng",
-    "pattern/rich_editor_drag:rich_editor_drag_test_ng",
     "pattern/scroll:scroll_test_ng",
     "pattern/scroll_bar:scroll_bar_test_ng",
     "pattern/scrollable:scrollable_test_ng",

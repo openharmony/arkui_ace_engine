@@ -135,7 +135,35 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
     toastContext->UpdateBorderRadius(borderRadius);
     auto toastInfo = pattern->GetToastInfo();
-    toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
+    ToastView::UpdateToastNodeStyle(toastNode);
+}
+
+void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
+{
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(toastContext);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto toastInfo = pattern->GetToastInfo();
+    Shadow shadow;
+    if (toastInfo.shadow.has_value()) {
+        shadow = toastInfo.shadow.value();
+    } else {
+        shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
+    }
+    if (toastInfo.isTypeStyleShadow) {
+        auto colorMode = SystemProperties::GetColorMode();
+        auto shadowStyle = shadow.GetStyle();
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+    }
+    toastContext->UpdateBackShadow(shadow);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;

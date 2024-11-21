@@ -37,6 +37,7 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override {};
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(ChangeEvent&& onChange) override {};
+    void HasUserDefinedOpacity() override {};
 };
 
 class TimePickerDialogModelImpl : public TimePickerDialogModel {

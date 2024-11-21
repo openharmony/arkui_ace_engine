@@ -90,6 +90,7 @@ public:
     void UpdateViewPort();
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
+    void MarkHandleDirtyNode(PropertyChangeFlag flag);
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

@@ -35,6 +35,11 @@ public:
     void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;
     void SetBackBorder() override;
+    void SetBorderRadius(const Dimension& value) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) override;
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
     void SetMatchTextDirection(bool value) override;
@@ -97,6 +102,11 @@ public:
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);
+    static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight);
+    static void SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusProperty& borderRadius);
     static void ResetBackBorder(FrameNode *frameNode);
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);

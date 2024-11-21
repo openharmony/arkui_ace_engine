@@ -16,6 +16,7 @@
 #include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
@@ -281,7 +282,7 @@ OffsetF ImagePattern::GetParentGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     return host->GetPaintRectOffset() - rootOffset;
@@ -978,7 +979,7 @@ void ImagePattern::RegisterWindowStateChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
 }
@@ -987,7 +988,7 @@ void ImagePattern::UnregisterWindowStateChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(host->GetId());
 }
@@ -1195,7 +1196,7 @@ void ImagePattern::OpenSelectOverlay()
         }
     };
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
     isSelected_ = true;
@@ -1225,7 +1226,9 @@ void ImagePattern::HandleCopy()
 {
     CHECK_NULL_VOID(image_);
     if (!clipboard_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     }
@@ -1350,6 +1353,9 @@ void ImagePattern::DumpRenderInfo()
     auto needBorderRadius = renderProp->GetNeedBorderRadius().value_or(false);
     needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
                      : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
+
+    auto borderRadius = renderProp->GetBorderRadius().value_or(BorderRadiusProperty());
+    DumpLog::GetInstance().AddDesc(borderRadius.ToString());
 
     if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
         DumpLog::GetInstance().AddDesc(

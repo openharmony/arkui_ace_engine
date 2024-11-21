@@ -351,6 +351,9 @@ int64_t FfiOHOSAceFrameworkPanGestureOptionsCtor(int32_t fingers, uint32_t direc
     double distanceNum = Utils::CheckMin(0.0, DEFAULT_PAN_DISTANCE.Value(), distance);
 
     auto ret_ = FFIData::Create<NativePanGestureOption>(fingersNum, panDirection, distanceNum);
+    if (ret_ == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     return ret_->GetID();
 }
 

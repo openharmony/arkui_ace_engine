@@ -87,7 +87,7 @@ public:
      * @param prevPos previous layout position.
      * @return true if current position just reached content bottom.
      */
-    virtual bool ReachEnd(float prevPos) const = 0;
+    virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
     virtual bool OutOfBounds() const = 0;
 
@@ -163,6 +163,14 @@ public:
     }
 
     /**
+     * @brief obtain true total number of FlowItems by filtering out the footer node.
+     */
+    inline int32_t ItemCnt(int32_t childrenCount) const
+    {
+        return childrenCount - footerIndex_ - 1;
+    }
+
+    /**
      * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
      *
      * @param sections vector of Sections info.
@@ -175,6 +183,8 @@ public:
     virtual void NotifyDataChange(int32_t index, int32_t count) = 0;
     virtual void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) = 0;
+
+    void UpdateDefaultCachedCount();
 
     bool itemStart_ = false;
     /**
@@ -207,6 +217,8 @@ public:
     mutable std::unordered_map<int32_t, int32_t> segmentCache_;
     // margin of each segment
     std::vector<PaddingPropertyF> margins_;
+    // default cached count
+    int32_t defCachedCount_ = 1;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

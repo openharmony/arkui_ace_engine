@@ -62,6 +62,7 @@ ohos_source_set("preview_osal_source") {
       "advance/image_analyzer_manager.cpp",
       "advance/image_analyzer_mgr.cpp",
       "app_bar_helper_impl.cpp",
+      "display_info_utils.cpp",
       "download_manager_preview.cpp",
       "drawing_color_filter_preview.cpp",
       "drawing_lattice_preview.cpp",
@@ -111,6 +112,7 @@ ohos_source_set("preview_osal_source") {
     external_deps = [
       "curl:curl_shared",
       "hilog:libhilog",
+      "window_manager:previewer_window",
     ]
 
     if (ace_use_rosen_drawing) {

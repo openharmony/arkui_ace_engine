@@ -895,7 +895,6 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
     UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    EXPECT_TRUE(pattern_->dragFromSpring_);
 }
 
 /**
@@ -1623,5 +1622,70 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(item14->IsActive(), false);
     auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+}
+
+/**
+ * @tc.name: SetHeaderFooterComponent01
+ * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List group with ComponentContent
+     */
+    const int32_t groupNumber = 5;
+    const float contentStartOffset = 100;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetSticky(V2::StickyStyle::BOTH);
+    CreateGroupWithSettingWithComponentContent(groupNumber, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get the count of group
+     * @tc.expected: header and footer can be added successfully.
+     */
+    auto group0 = GetChildFrameNode(frameNode_, 0);
+    auto group1 = GetChildFrameNode(frameNode_, 1);
+    auto group0Children = group0->GetChildren();
+    auto group1Children = group1->GetChildren();
+    auto group0Pattern = group0->GetPattern<ListItemGroupPattern>();
+    EXPECT_EQ(group0Children.size(), 4);
+    EXPECT_EQ(group1Children.size(), 4);
+
+    /**
+     * @tc.steps: step3. Update header and footer
+     * @tc.expected: new header and footer can be set.
+     */
+    bool headerResult = false;
+    bool footerResult = false;
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    const char newFooter[] = "NewFooter";
+    const char newHeader[] = "NewHeader";
+    auto children = group0->GetChildren();
+    for (auto child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode->GetTag() == newHeader) {
+            headerResult = true;
+        }
+        if (childFrameNode->GetTag() == newFooter) {
+            footerResult = true;
+        }
+    }
+    EXPECT_TRUE(headerResult);
+    EXPECT_TRUE(footerResult);
+
+    /**
+     * @tc.steps: step4. Remove group0 header and footer
+     * @tc.expected: header and footer can be removed successfully.
+     */
+    group0Pattern->RemoveHeader();
+    group0Pattern->RemoveFooter();
+    group0Children = group0->GetChildren();
+    EXPECT_EQ(group0Children.size(), 2);
 }
 } // namespace OHOS::Ace::NG

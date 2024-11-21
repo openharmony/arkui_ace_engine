@@ -78,6 +78,7 @@ struct DragPreviewOption {
     bool isNumber = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
+    bool isDragPreviewEnabled = true;
     union {
         int32_t badgeNumber;
         bool isShowBadge;

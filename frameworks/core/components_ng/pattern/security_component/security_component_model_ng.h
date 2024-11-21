@@ -93,6 +93,7 @@ private:
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
     static bool IsArkuiComponent();
+    static void NotifyFontColorSet();
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,

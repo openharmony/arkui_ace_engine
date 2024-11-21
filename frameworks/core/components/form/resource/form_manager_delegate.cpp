@@ -219,6 +219,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        CheckWhetherSurfaceChangeFailed();
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
@@ -226,6 +227,28 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
+    }
+}
+
+void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
+{
+    float width = 0.0f;
+    float height = 0.0f;
+    float borderWidth = 0.0f;
+    bool needRedispatch = false;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (notifySurfaceChangeFailedRecord_.isfailed == true) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "redispatch surface change event");
+            needRedispatch = true;
+            notifySurfaceChangeFailedRecord_.isfailed = false;
+            width = notifySurfaceChangeFailedRecord_.expectedWidth;
+            height = notifySurfaceChangeFailedRecord_.expectedHeight;
+            borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+        }
+    }
+    if (needRedispatch) {
+        formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
     }
 }
 
@@ -274,6 +297,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -289,6 +313,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -309,6 +334,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -421,7 +447,9 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -439,6 +467,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - OnActionEventHandle ,formId: %{public}" PRId64,
+                    runningCardId_);
         actionEventHandle_(action);
     }
 }
@@ -531,7 +561,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - actionEventHandler");
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            return;
+        }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
@@ -716,9 +750,16 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
-    if (formRendererDispatcher_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
-        return;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (formRendererDispatcher_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
+            notifySurfaceChangeFailedRecord_.isfailed = true;
+            notifySurfaceChangeFailedRecord_.expectedWidth = width;
+            notifySurfaceChangeFailedRecord_.expectedHeight = height;
+            notifySurfaceChangeFailedRecord_.expectedBorderWidth = borderWidth;
+            return;
+        }
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
 }
@@ -771,6 +812,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }

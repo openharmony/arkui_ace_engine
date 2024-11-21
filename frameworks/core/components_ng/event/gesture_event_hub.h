@@ -135,8 +135,7 @@ struct BindMenuStatus {
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
     bool IsNotNeedShowPreview() const
     {
-        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
-            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
+        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
     }
 };
 
@@ -340,7 +339,8 @@ public:
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
 
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -546,7 +546,7 @@ public:
         }
     }
 
-    bool IsDragForbidden();
+    bool IsDragForbidden() const;
 
     void SetDragForbiddenForcely(bool isDragForbidden);
 
@@ -637,7 +637,7 @@ public:
 
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
-        bool isCalculateInSubwindow = false) const;
+        bool isCalculateInSubwindow = false, const RectF& innerRect = RectF()) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -647,7 +647,7 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
-    void StartLongPressActionForWeb();
+    void StartLongPressActionForWeb(bool isFloatImage = true);
     void CancelDragForWeb();
     void StartDragTaskForWeb();
     void ResetDragActionForWeb();
@@ -722,8 +722,6 @@ public:
     void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
         const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
-    static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
-
     void SetMenuPreviewScale(float menuPreviewScale)
     {
         menuPreviewScale_ = menuPreviewScale;
@@ -735,7 +733,7 @@ public:
     }
     
     void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
-    const BindMenuStatus& GetBindMenuStatus()
+    const BindMenuStatus& GetBindMenuStatus() const
     {
         return bindMenuStatus_;
     }
@@ -833,7 +831,8 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
-    bool isDragForbidden_ = false;
+    // disable drag for the node itself and its all children
+    bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

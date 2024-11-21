@@ -21,9 +21,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class TabBarTestNg : public TabsTestNg {
 public:
 };
@@ -459,126 +456,8 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
-    /**
-     * @tc.steps: step2. Test function InitClick.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        auto firstChildNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
-        tabBarPattern_->AddTabBarItemClickEvent(firstChildNode);
-        auto secondChildNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
-        tabBarPattern_->AddTabBarItemClickEvent(secondChildNode);
-    }
     auto info = GestureEvent();
     tabBarPattern_->clickEvents_.begin()->second->callback_(info);
-}
-
-/**
- * @tc.name: TabBarPatternInitScrollable001
- * @tc.desc: test InitScrollable
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->axis_ = Axis::HORIZONTAL;
-    tabBarPattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-
-    /**
-     * @tc.steps: step2. Test function InitScrollable.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            tabBarPattern_->InitScrollable(gestureHub);
-            tabBarPattern_->axis_ = Axis::VERTICAL;
-        }
-        tabBarPattern_->scrollableEvent_ = nullptr;
-    }
-}
-
-/**
- * @tc.name: TabBarPatternInitTouche001
- * @tc.desc: test InitTouch, InitHoverEvent and InitMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternInitTouche001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    tabBarPattern_->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>([](TouchEventInfo&) {});
-    tabBarPattern_->hoverEvent_ = AceType::MakeRefPtr<InputEvent>([](MouseInfo&) {});
-    tabBarPattern_->mouseEvent_ = AceType::MakeRefPtr<InputEvent>([](MouseInfo&) {});
-
-    /**
-     * @tc.steps: step2. Test function InitTouch, InitHoverEvent and InitMouseEvent.
-     * @tc.expected: Related functions run ok.
-     */
-    tabBarPattern_->InitTouch(gestureHub);
-    tabBarPattern_->InitHoverEvent();
-    tabBarPattern_->InitMouseEvent();
-}
-
-/**
- * @tc.name: TabBarPatternGetBottomTabBarImageSizeAndOffset001
- * @tc.desc: test GetBottomTabBarImageSizeAndOffset
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    std::vector<int32_t> selectedIndexes(1, 1);
-    float selectedImageSize = 1.0f;
-    float unselectedImageSize = 1.1f;
-    OffsetF originalSelectedMaskOffset(1.0f, 1.1f);
-    OffsetF originalUnselectedMaskOffset(0.0f, 1.0f);
-
-    /**
-     * @tc.steps: step2. Test function HandleMouseEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    int32_t maskIndex = 0;
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
-            unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
-        maskIndex = 1;
-    }
-
-    IconStyle iconStyle;
-    iconStyle.unselectedColor = Color::WHITE;
-    iconStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetIconStyle(iconStyle, 0);
-    maskIndex = 0;
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
-            unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
-        maskIndex = 1;
-    }
-
-    int32_t nodeId = 1;
-    for (int i = 0; i <= 2; i++) {
-        auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
-            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-        tabBarNode_->AddChild(frameNode_);
-    }
-    maskIndex = 0;
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            tabBarPattern_->GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize,
-                unselectedImageSize, originalSelectedMaskOffset, originalUnselectedMaskOffset);
-            maskIndex = 1;
-        }
-        tabBarNode_->Clean(false, false);
-    }
 }
 
 /**
@@ -1194,18 +1073,16 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     TabContentModelNG tabContentModel = CreateTabContent();
-    LabelStyle labelStyle;
-    tabContentModel.SetLabelStyle(labelStyle);
-    tabContentModel.Pop();
     CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
-    /**
-     * @tc.steps: step2. Invoke OnAttachToMainTree.
-     */
     tabContentFrameNode->OnAttachToMainTree(true);
     EXPECT_FALSE(tabContentFrameNode->useOffscreenProcess_);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
 /**
@@ -1306,6 +1183,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     indicator.width.SetValue(1.0);
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
+    EXPECT_EQ(indicator.width.Value(), 0);
+    auto targetPaintRect = tabBarLayoutProperty_->GetIndicatorRect(tabBarPattern_->indicator_);
+    tabBarPaintProperty_->UpdateIndicator(targetPaintRect);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(indicator.width.Value(), 10);
     tabBarPattern_->isTouchingSwiper_ = false;
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
@@ -1395,7 +1276,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Le
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.0f);
     tabBarPattern_->swiperStartIndex_ = -1;
     tabBarPattern_->ApplyTurnPageRateToIndicator(0.0f);
-    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, -1);
+    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 0);
 }
 
 /**
@@ -1562,36 +1443,54 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Divider001
+ * @tc.desc: Test Divider001, has style when items size more than 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, Divider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Has items
+     * @tc.expected: Has divider style
+     */
+    TabsItemDivider divider;
+    divider.color = Color::RED;
+    divider.strokeWidth = Dimension(10.f);
+    TabsModelNG model = CreateTabs();
+    model.SetDivider(divider);
+    CreateTabContents(2);
+    CreateTabsDone(model);
+    EXPECT_EQ(dividerRenderProperty_->GetDividerColor(), Color::RED);
+    auto dividerLayoutProperty = dividerNode_->GetLayoutProperty<DividerLayoutProperty>();
+    EXPECT_EQ(dividerLayoutProperty->GetStrokeWidth(), Dimension(10.f));
+}
+
+/**
  * @tc.name: TabBarBlurStyle001
  * @tc.desc: test TabBarBlurStyle
  * @tc.type: FUNC
  */
 HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 {
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     TabsModelNG model = CreateTabs();
+    model.SetBarBackgroundBlurStyle(BlurStyle::COMPONENT_THICK);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
 
     /**
      * @tc.steps: step2. update blurstyle
      * @tc.expected: step2. expect The blurstyle is COMPONENT_THICK.
      */
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
     auto tabBarRenderContext = tabBarNode_->GetRenderContext();
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
-    }
     EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
 }
 
 /**
-* @tc.name: SetTabBarStyle001
-* @tc.desc: test AddTabBarItem
-* @tc.type: FUNC
-*/
+ * @tc.name: SetTabBarStyle001
+ * @tc.desc: test AddTabBarItem
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -1601,10 +1500,10 @@ HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
     /**
-    * @tc.steps: step1. step1.SetTabBarStyle Set TabBarStyle to TabBarStyle: SUBTABBATSTYLE
-    * @tc.steps: sCall the GetTabBarStyle interface under the TabContentModelNG
-    * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
-    */
+     * @tc.steps: step1. step1.SetTabBarStyle Set TabBarStyle to TabBarStyle: SUBTABBATSTYLE
+     * @tc.steps: sCall the GetTabBarStyle interface under the TabContentModelNG
+     * @tc.expected: Equal to TabBarStyle: SUBTABBATSTYLE.
+     */
     const std::string text_test = "text_test";
     tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
@@ -1619,10 +1518,10 @@ HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabBarPatternProvideRestoreInfo003
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarPatternProvideRestoreInfo003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarTestNg, TabBarPatternProvideRestoreInfo003, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();

@@ -116,14 +116,12 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         layoutWrapper->SetActive(true);
     }
-
     if (!constraint->selfIdealSize.Height().has_value() && axis_ == Axis::HORIZONTAL) {
         defaultHeight_ = (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE &&
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE))
             ? static_cast<float>(tabTheme->GetBottomTabBarDefaultWidth().ConvertToPx())
             : static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx());
     }
-
     contentMainSize_ = GetContentMainSize(layoutWrapper, frameSize);
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
         MeasureFixedMode(layoutWrapper, frameSize);
@@ -135,7 +133,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         layoutWrapper->SetActiveChildRange(visibleItemPosition_.begin()->first, visibleItemPosition_.rbegin()->first);
     }
-
     if (defaultHeight_ || maxHeight_) {
         frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
     }
@@ -214,6 +211,22 @@ void TabBarLayoutAlgorithm::MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF
     }
 }
 
+void TabBarLayoutAlgorithm::UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID((tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) && (NeedAdaptForAging(host)
+        && (axis_ == Axis::VERTICAL)));
+    CHECK_NULL_VOID(layoutWrapper);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(childWrapper);
+    auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(textWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateMaxLines(TWO);
+}
+
 void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize)
 {
     auto childLayoutConstraint = GetChildConstraint(layoutWrapper, frameSize);
@@ -234,6 +247,8 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
                 HandleAlwaysAverageSplitLayoutStyle(layoutWrapper);
             } else if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
                 HandleSpaceBetweenOrCenterLayoutStyle(layoutWrapper);
+            } else {
+                useItemWidth_ = false;
             }
             scrollMargin_ = 0.0f;
         }
@@ -256,6 +271,40 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     }
 }
 
+bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetSubTabBarBigFontSizeScale())) {
+        return true;
+    }
+    return false;
+}
+
+bool TabBarLayoutAlgorithm::GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(defaultHeight_, false);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto isBarAdaptiveHeight = layoutProperty->GetBarAdaptiveHeight().value_or(false);
+
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, isBarAdaptiveHeight);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, isBarAdaptiveHeight);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, isBarAdaptiveHeight);
+    if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
+        GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
+        isBarAdaptiveHeight = true;
+    }
+    return isBarAdaptiveHeight;
+}
+
 LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layoutWrapper, SizeF& frameSize)
 {
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -266,7 +315,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     CHECK_NULL_RETURN(tabTheme, {});
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     if (axis_ == Axis::HORIZONTAL) {
-        isBarAdaptiveHeight_ = layoutProperty->GetBarAdaptiveHeight().value_or(false) && defaultHeight_;
+        isBarAdaptiveHeight_ = GetBarAdaptiveHeight(layoutWrapper);
         childLayoutConstraint.maxSize.SetWidth(Infinity<float>());
         if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
             childLayoutConstraint.minSize.SetWidth(tabTheme->GetSubTabBarMinWidth().ConvertToPx());
@@ -302,8 +351,12 @@ void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, La
     endMainPos_ = contentMainSize_;
 
     if (targetIndex_) {
+        targetIndex_ = targetIndex_.value() % childCount_;
         MeasureTargetIndex(layoutWrapper, childLayoutConstraint);
     } else if (jumpIndex_) {
+        if (jumpIndex_.value() >= childCount_) {
+            jumpIndex_ = 0;
+        }
         MeasureJumpIndex(layoutWrapper, childLayoutConstraint);
         if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
             jumpIndex_.reset();
@@ -347,8 +400,7 @@ void TabBarLayoutAlgorithm::MeasureJumpIndex(LayoutWrapper* layoutWrapper, Layou
     visibleItemPosition_.clear();
     MeasureItem(layoutWrapper, childLayoutConstraint, jumpIndex_.value());
     if (GreatOrEqual(visibleItemLength_[jumpIndex_.value()], endMainPos_ - startMainPos_)) {
-        visibleItemPosition_[jumpIndex_.value()] = { scrollMargin_,
-            visibleItemLength_[jumpIndex_.value()] + scrollMargin_ };
+        visibleItemPosition_[jumpIndex_.value()] = { 0.0f, visibleItemLength_[jumpIndex_.value()] };
         return;
     }
 
@@ -429,6 +481,10 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
     // 3.If target index exists, measure items from the end index to target index.
     while (endIndex < childCount_ && (endIndex == 0 || LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
         (targetIndex_ && endIndex <= targetIndex_.value()))) {
+        if (endIndex < 0) {
+            endIndex = 0;
+            continue;
+        }
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
         visibleItemPosition_[endIndex] = { endPos, endPos + visibleItemLength_[endIndex] };
         endPos += visibleItemLength_[endIndex];
@@ -450,6 +506,10 @@ void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutC
     // 3.If target index exists, measure items from the start index to target index.
     while (startIndex >= 0 && (startIndex == childCount_ - 1 || GreatNotEqual(startPos, startMainPos_) ||
         isBarAdaptiveHeight_ || (targetIndex_ && startIndex >= targetIndex_.value()))) {
+        if (startIndex >= childCount_) {
+            startIndex = childCount_ - 1;
+            continue;
+        }
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);
         visibleItemPosition_[startIndex] = { startPos - visibleItemLength_[startIndex], startPos };
         startPos -= visibleItemLength_[startIndex];
@@ -503,7 +563,8 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
             }
         }
     }
-
+    UpdateMaxLines(layoutWrapper, index);
+    SetTabBarMargin(childWrapper, index);
     childWrapper->Measure(childLayoutConstraint);
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -511,6 +572,32 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
     visibleChildrenMainSize_ += visibleItemLength_[index];
     if (isBarAdaptiveHeight_) {
         maxHeight_ = std::max(maxHeight_.value_or(0.0f), geometryNode->GetMarginFrameSize().MainSize(Axis::VERTICAL));
+    }
+}
+
+void TabBarLayoutAlgorithm::SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto tabBarPattern = host->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    CHECK_NULL_VOID(tabBarPattern->GetTabBarStyle(index) == TabBarStyle::SUBTABBATSTYLE);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID (childWrapper);
+
+    auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(textWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (NeedAdaptForAging(host)) {
+        textLayoutProperty->UpdateMargin({ CalcLength(tabTheme->GetSubTabBarLeftRightMargin()),
+            CalcLength(tabTheme->GetSubTabBarLeftRightMargin()), {}, {} });
+    } else {
+        textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
     }
 }
 
@@ -660,10 +747,6 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
             linearLayoutProperty->SetIsVertical(true);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabTextSize());
-            }
         } else {
             linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
             linearLayoutProperty->UpdateSpace(tabTheme->GetHorizontalBottomTabBarSpace());
@@ -671,10 +754,13 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(bottomTabBarStyle.verticalAlign);
             linearLayoutProperty->SetIsVertical(false);
             textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
-            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabHorizontalTextSize());
-            }
+        }
+        auto childNode = childWrapper->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        if (!tabBarPattern->GetBottomTabLabelStyle(childNode->GetId()).fontSize.has_value() &&
+            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateFontSize(
+                isVertical ? tabTheme->GetBottomTabTextSize() : tabTheme->GetBottomTabHorizontalTextSize());
         }
     }
 }
@@ -997,4 +1083,5 @@ void TabBarLayoutAlgorithm::UpdateHorizontalPadding(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(geometryNode);
     geometryNode->UpdatePaddingWithBorder({ horizontalPadding, horizontalPadding, 0.0f, 0.0f });
 }
+
 } // namespace OHOS::Ace::NG

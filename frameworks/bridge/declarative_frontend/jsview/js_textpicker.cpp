@@ -198,6 +198,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
     JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
+    JSClass<JSTextPicker>::StaticMethod("opacity", &JSTextPicker::JsOpacity);
 
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -227,6 +228,12 @@ void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+}
+
+void JSTextPicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
@@ -502,8 +509,9 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
     const std::vector<std::string>& values, std::vector<uint32_t>& selectedValues)
 {
     uint32_t selectedValue = 0;
+    auto sizeOfValues = values.size();
     for (uint32_t i = 0; i < options.size(); i++) {
-        if ((values.size() > 0 && values.size() < i + 1) || values[i].empty()) {
+        if ((sizeOfValues >= 0 && sizeOfValues < i + 1) || values[i].empty()) {
             selectedValues.emplace_back(0);
             continue;
         }

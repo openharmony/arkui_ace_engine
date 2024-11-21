@@ -59,7 +59,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/package/package_event_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -124,12 +123,12 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     CHECK_NULL_VOID(pattern);
     auto navBar = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBar);
-    auto contentNode = navBar->GetNavBarContentNode();
+    auto contentNode = navBar->GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        navBar->SetNavBarContentNode(contentNode);
+        navBar->SetContentNode(contentNode);
         navBar->AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -159,6 +158,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     // save preLastStandardIndex_ before update and check whether standard page changed
     preLastStandardIndex_ = lastStandardIndex_;
     UpdateLastStandardIndex();
+
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
     if (!ReorderNavDestination(navDestinationNodes, navigationContentNode, slot, hasChanged)) {
         return;
@@ -443,7 +443,7 @@ RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
     return topNavdestination;
 }
 
-bool NavigationGroupNode::CheckCanHandleBack()
+bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
@@ -472,13 +472,14 @@ bool NavigationGroupNode::CheckCanHandleBack()
     CHECK_NULL_RETURN(navDestinationContext, false);
     auto navPathInfo = navDestinationContext->GetNavPathInfo();
     CHECK_NULL_RETURN(navPathInfo, false);
-    auto isEntry = navPathInfo->GetIsEntry();
-    if (isEntry) {
+    auto isPathEntry = navPathInfo->GetIsEntry();
+    if (isPathEntry) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s is entry navDestination, do not consume backPressed event",
             navDestinationPattern->GetName().c_str());
         navPathInfo->SetIsEntry(false);
         auto index = navDestinationContext->GetIndex();
         navigationStack->SetIsEntryByIndex(index, false);
+        isEntry = true;
         return false;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
@@ -724,27 +725,25 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
                 bool needSetInvisible = false;
                 if (isNavBar) {
+                    auto navbar = AceType::DynamicCast<NavBarNode>(preNode);
+                    CHECK_NULL_VOID(navbar);
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
                         PageTransitionType::EXIT_PUSH;
                     // store this flag for navBar layout only
                     navigation->SetNeedSetInvisible(needSetInvisible);
+                    bool isInvisible = navbar->IsNodeInvisible(navigation);
+                    if (needSetInvisible && isInvisible) {
+                        navbar->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                        navbar->SetJSViewActive(false);
+                        navigation->NotifyPageHide();
+                    }
                 } else {
                     preDestination->SetIsOnAnimation(false);
                     needSetInvisible = preDestination->GetTransitionType() == PageTransitionType::EXIT_PUSH;
-                }
-                // for the case, the navBar form EXIT_PUSH to push during animation
-                if (needSetInvisible) {
-                    if (!isNavBar) {
-                        preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        preNode->SetJSViewActive(false);
-                    } else {
-                        // navigation mode could be transformed to split mode in the process of animation and
-                        // navBar will be invisible only under the stack mode
-                        if (navigation->GetNavigationMode() == NavigationMode::STACK) {
-                            preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                            preNode->SetJSViewActive(false);
-                            navigation->NotifyPageHide();
-                        }
+                    bool isInvisible = preDestination->IsNodeInvisible(navigation);
+                    if (needSetInvisible && isInvisible) {
+                        preDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                        preDestination->SetJSViewActive(false);
                     }
                 }
                 break;
@@ -766,6 +765,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             }
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->CheckContentNeedMeasure(navigation);
         };
 
     /* set initial status of animation */
@@ -1140,7 +1142,7 @@ NavigationMode NavigationGroupNode::GetNavigationMode()
     return navigationPattern->GetNavigationMode();
 }
 
-void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
+void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
@@ -1148,7 +1150,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
         pattern->RemoveFromDumpManager();
     }
 
-    GroupNode::OnDetachFromMainTree(recursive);
+    GroupNode::OnDetachFromMainTree(recursive, context);
 }
 
 bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)
@@ -1206,14 +1208,6 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
-    }
-    auto* eventProxy = PackageEventProxy::GetInstance();
-    if (eventProxy) {
-        auto container = OHOS::Ace::Container::CurrentSafely();
-        CHECK_NULL_VOID(container);
-        auto navigationRoute = container->GetNavigationRoute();
-        CHECK_NULL_VOID(navigationRoute);
-        eventProxy->Register(WeakClaim(AceType::RawPtr(navigationRoute)));
     }
 }
 
@@ -1470,13 +1464,13 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
 void NavigationGroupNode::PreNodeFinishCallback(const RefPtr<FrameNode>& preNode)
 {
     CHECK_NULL_VOID(preNode);
-    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG && GetNavigationMode() == NavigationMode::STACK) {
+    if (preNode->GetTag() == V2::NAVBAR_ETS_TAG) {
         auto preNavbar = AceType::DynamicCast<NavBarNode>(preNode);
         CHECK_NULL_VOID(preNavbar);
         preNavbar->SystemTransitionPushAction(false);
         bool needSetInvisible = preNavbar->GetTransitionType() == PageTransitionType::EXIT_PUSH;
         SetNeedSetInvisible(needSetInvisible);
-        if (needSetInvisible) {
+        if (needSetInvisible && GetNavigationMode() == NavigationMode::STACK) {
             auto property = preNavbar->GetLayoutProperty();
             CHECK_NULL_VOID(property);
             property->UpdateVisibility(VisibleType::INVISIBLE);

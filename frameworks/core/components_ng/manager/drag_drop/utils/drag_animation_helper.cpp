@@ -146,6 +146,7 @@ void DragAnimationHelper::PlayGatherNodeOpacityAnimation(const RefPtr<OverlayMan
 
 void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEventActuator>& actuator)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Play gather animation before lifting");
     CHECK_NULL_VOID(actuator);
     if (!actuator->IsNeedGather()) {
         return;
@@ -225,6 +226,7 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
 void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode,
     const RefPtr<OverlayManager>& overlayManager)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Play gather animation");
     CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     CHECK_NULL_VOID(overlayManager);
@@ -312,13 +314,18 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(menuPattern);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto badgeNumber = dragDropManager->GetBadgeNumber();
-    auto childSize = badgeNumber > 0 ? static_cast<size_t>(badgeNumber) :
+    auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(frameNode);
+    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Badge node number %{public}d, children count %{public}d",
+        badgeNumber.value_or(-1), static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()));
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();
@@ -377,6 +384,7 @@ void DragAnimationHelper::UpdateGatherNodeToTop()
 
 void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather animation with menu");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();

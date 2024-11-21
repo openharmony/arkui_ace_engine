@@ -131,6 +131,7 @@ public:
     void SetMenuIsShow(bool isShowMenu)
     {
         isShowMenu_ = isShowMenu;
+        originalMenuIsShow_ = isShowMenu;
     }
 
     bool IsShowMenu()
@@ -218,7 +219,7 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
-    void OnHandleMoveStart(bool isFirst) override
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {
         isHandleDragging_ = true;
     }
@@ -247,6 +248,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
 
+    void MarkOverlayDirty();
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -280,6 +282,11 @@ protected:
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     virtual void UpdateTransformFlag();
     bool CheckHasTransformAttr();
+    void UpdateOriginalMenuIsShow()
+    {
+        originalMenuIsShow_ = IsCurrentMenuVisibile();
+    }
+    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
     bool GetClipHandleViewPort(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
@@ -287,6 +294,7 @@ protected:
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -315,6 +323,7 @@ private:
     bool isChangeToOverlayModeAtEdge_ = true;
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
+    bool originalMenuIsShow_ = true;
 };
 
 } // namespace OHOS::Ace::NG

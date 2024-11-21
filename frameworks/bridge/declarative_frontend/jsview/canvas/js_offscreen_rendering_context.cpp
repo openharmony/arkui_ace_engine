@@ -29,7 +29,7 @@ uint32_t JSOffscreenRenderingContext::offscreenPatternCount_ = 0;
 
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 {
-    id = offscreenPatternCount_;
+    id_ = offscreenPatternCount_;
 #ifdef NG_BUILD
     renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
 #else
@@ -206,36 +206,22 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return;
-    }
-    napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
-    if (status != napi_ok) {
-        return;
-    }
     napi_value renderImage = nullptr;
     napi_create_object(env, &renderImage);
-    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
-    if (status != napi_ok) {
+    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id_));
+    CHECK_NULL_VOID(offscreenCanvasPattern);
+    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
+    if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return;
     }
     void* nativeObj = nullptr;
-    status = napi_unwrap(env, renderImage, &nativeObj);
+    napi_status status = napi_unwrap(env, renderImage, &nativeObj);
     if (status != napi_ok) {
         return;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_VOID(jsImage);
-    auto offscreenCanvasPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(GetOffscreenPattern(id));
-    CHECK_NULL_VOID(offscreenCanvasPattern);
-#ifdef PIXEL_MAP_SUPPORTED
-    auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
-    CHECK_NULL_VOID(pixelMap);
-    jsImage->SetPixelMap(pixelMap);
-#else
+#ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width_, height_);
     CHECK_NULL_VOID(imageData);
     jsImage->SetImageData(std::make_shared<Ace::ImageData>(*imageData));
@@ -245,5 +231,4 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     jsImage->SetHeight(GetHeight());
     info.SetReturnValue(JsConverter::ConvertNapiValueToJsVal(renderImage));
 }
-
 } // namespace OHOS::Ace::Framework

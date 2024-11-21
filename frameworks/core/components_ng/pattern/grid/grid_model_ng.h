@@ -73,6 +73,8 @@ public:
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 
+    DisplayMode GetDisplayMode() const override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
@@ -102,8 +104,6 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static int32_t GetCachedCount(FrameNode* frameNode);
-
-    DisplayMode GetDisplayMode() const override;
 
 private:
     void AddDragFrameNodeToManager() const;

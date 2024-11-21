@@ -21,6 +21,7 @@
 #include <shared_mutex>
 #include <string>
 #include <unistd.h>
+#include <regex>
 
 #include "locale_config.h"
 #include "dm_common.h"
@@ -48,6 +49,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
+constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
@@ -64,6 +66,7 @@ float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 std::shared_mutex mutex_;
+const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
@@ -363,6 +366,12 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t GetPageCountProp()
+{
+    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
+    return pageCount > 0.0f ? pageCount : 0.0f;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
@@ -384,6 +393,7 @@ ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM FoldScreenType SystemProperties::foldScreenType_ { FoldScreenType::UNKNOWN };
 ACE_WEAK_SYM bool SystemProperties::needAvoidWindow_ { false };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
@@ -420,6 +430,7 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
+float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
@@ -564,6 +575,7 @@ void SystemProperties::InitDeviceInfo(
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
+    rosenBackendEnabled_ = IsRosenBackendEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
@@ -808,5 +820,26 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
+}
+
+void SystemProperties::InitFoldScreenTypeBySystemProperty()
+{
+    if (foldScreenType_ != FoldScreenType::UNKNOWN) {
+        return;
+    }
+
+    auto foldTypeProp = system::GetParameter(PROPERTY_FOLD_TYPE, "0,0,0,0");
+    if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
+        auto index = foldTypeProp.find_first_of(',');
+        auto foldScreenTypeStr = foldTypeProp.substr(0, index);
+        auto type = std::stoi(foldScreenTypeStr);
+        foldScreenType_ = static_cast<FoldScreenType>(type);
+    }
 }
 } // namespace OHOS::Ace

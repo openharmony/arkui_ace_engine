@@ -1554,7 +1554,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     auto height = theme->GetDividerSpacing();
     auto width = frameNode->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
-    EXPECT_GT(width, defaultWidth);
+    EXPECT_LT(width, defaultWidth);
 
     for (const auto& child : children) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -1922,9 +1922,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
+    Dimension offset = 2.0_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
     EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,

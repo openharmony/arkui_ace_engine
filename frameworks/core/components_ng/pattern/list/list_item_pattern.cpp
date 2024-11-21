@@ -702,13 +702,13 @@ void ListItemPattern::FireSwipeActionOffsetChange(float oldOffset, float newOffs
 
 void ListItemPattern::FireSwipeActionStateChange(ListItemSwipeIndex newSwiperIndex)
 {
-    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem swiperIndex origin:%{public}d, new:%{public}d, curPos:%{public}f",
-        swiperIndex_, newSwiperIndex, curOffset_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem:%{public}d swiperIndex origin:%{public}d, new:%{public}d, "
+        "curPos:%{public}f", host->GetId(), swiperIndex_, newSwiperIndex, curOffset_);
     if (newSwiperIndex == swiperIndex_) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(listItemEventHub);
 
@@ -744,15 +744,18 @@ void ListItemPattern::UpdateClickJudgeCallback()
     auto scrollableEvent = listPattern->GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
     if (swipeActionState_ == SwipeActionState::COLLAPSED) {
-        TAG_LOGI(AceLogTag::ACE_LIST, "RemoveClickJudgeCallback");
+        TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d RemoveClickJudgeCallback", frameNode->GetId());
         scrollableEvent->SetClickJudgeCallback(nullptr);
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
             auto item = weak.Upgrade();
             CHECK_NULL_RETURN(item, false);
+            if (item->swipeActionState_ == SwipeActionState::COLLAPSED) {
+                return false;
+            }
             return item->ClickJudge(localPoint);
         };
-        TAG_LOGI(AceLogTag::ACE_LIST, "AddClickJudgeCallback");
+        TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d AddClickJudgeCallback", frameNode->GetId());
         scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
@@ -781,8 +784,8 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     bool reachLeftSpeed = -velocity > SWIPER_SPEED_TH;
     isDragging_ = false;
 
-    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
-        velocity, curOffset_);
+    TAG_LOGI(AceLogTag::ACE_LIST, "ListItem:%{public}d HandleDragEnd, velocity:%{public}f, curPos:%{public}f",
+        host->GetId(), velocity, curOffset_);
     if (swiperIndex_ != ListItemSwipeIndex::SWIPER_ACTION && hasStartDeleteArea_ && !HasStartNode() && startOnDelete &&
         GreatOrEqual(curOffset_, startDeleteAreaDistance_) && swiperIndex_ != ListItemSwipeIndex::SWIPER_END) {
         DoDeleteAnimation(true);
@@ -897,6 +900,7 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
 void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
+    json->PutExtAttr("selected", isSelected_, filter);
 }
 
 void ListItemPattern::SetAccessibilityAction()
@@ -1210,6 +1214,19 @@ void ListItemPattern::OnDetachFromMainTree()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+    swipeActionState_ = SwipeActionState::COLLAPSED;
+}
+
+bool ListItemPattern::RenderCustomChild(int64_t deadline)
+{
+    if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+        if (GetSysTimestamp() > deadline) {
+            return false;
+        }
+        shallowBuilder_->ExecuteDeepRender();
+        shallowBuilder_.Reset();
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
 

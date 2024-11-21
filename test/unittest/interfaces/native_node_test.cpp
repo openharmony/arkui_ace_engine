@@ -1460,6 +1460,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_TEXT_FONT, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_FONT_FAMILY, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_CONTENT, &fontItem);
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem);
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_HALF_LEADING, &item);
     decoration[2].i32 = -1;
@@ -1627,13 +1628,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT, &item);
     item.string = "test";
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SRC, &item);
+    value[0].f32 = 10.0f;
+    nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET, &item);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_ALT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_SRC), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_ALT), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 

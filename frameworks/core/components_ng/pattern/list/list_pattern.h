@@ -128,7 +128,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
-    bool OutBoundaryCallback() override;
+    void OnTouchDown(const TouchEventInfo& info) override;
     OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
@@ -339,7 +339,9 @@ private:
     }
 
     void OnScrollEndCallback() override;
-
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void OnModifyDone() override;
     void ChangeAxis(RefPtr<UINode> node);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -358,15 +360,15 @@ private:
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
-    void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationCallback();
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
@@ -404,6 +406,8 @@ private:
     int32_t centerIndex_ = -1;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
+    float prevStartOffset_ = 0.f;
+    float prevEndOffset_ = 0.f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
@@ -461,7 +465,7 @@ private:
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
-
+    bool startIndexChanged_ = false;
     bool endIndexChanged_ = false;
 
     ListItemIndex startInfo_ = {-1, -1, -1};

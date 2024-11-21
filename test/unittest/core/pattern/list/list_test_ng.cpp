@@ -52,6 +52,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::Enable(true);
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -59,7 +60,10 @@ void ListTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void ListTestNg::TearDown()
 {
@@ -551,5 +555,29 @@ void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
         predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;
     }
+}
+
+void ListTestNg::CreateGroupWithSettingWithComponentContent(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetHeaderComponent(CreateCustomNode("Header"));
+        groupModel.SetFooterComponent(CreateCustomNode("Footer"));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(LIST_WIDTH), CalcLength(LIST_HEIGHT)));
+    return frameNode;
 }
 } // namespace OHOS::Ace::NG

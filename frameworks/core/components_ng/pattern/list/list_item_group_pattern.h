@@ -102,10 +102,13 @@ public:
         CHECK_NULL_VOID(host);
         auto prevHeader = header_.Upgrade();
         if (!prevHeader) {
-            host->AddChild(header);
-        } else {
-            host->ReplaceChild(prevHeader, header);
+            host->AddChild(header, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        } else {
+            if (header != prevHeader) {
+                host->ReplaceChild(prevHeader, header);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         header_ = header;
     }
@@ -115,13 +118,47 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto prevFooter = footer_.Upgrade();
+        auto prevHeader = header_.Upgrade();
         if (!prevFooter) {
-            host->AddChild(footer);
-        } else {
-            host->ReplaceChild(prevFooter, footer);
+            if (prevHeader) {
+                host->AddChildAfter(footer, prevHeader);
+            } else {
+                host->AddChild(footer, 0);
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        } else {
+            if (footer != prevFooter) {
+                host->ReplaceChild(prevFooter, footer);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         footer_ = footer;
+    }
+
+    void RemoveHeader()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevHeader = header_.Upgrade();
+        if (prevHeader && isHeaderComponentContentExist_) {
+            host->RemoveChild(prevHeader);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            header_ = nullptr;
+            isHeaderComponentContentExist_ = false;
+        }
+    }
+
+    void RemoveFooter()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevFooter = footer_.Upgrade();
+        if (prevFooter && isFooterComponentContentExist_) {
+            host->RemoveChild(prevFooter);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            footer_ = nullptr;
+            isFooterComponentContentExist_ = false;
+        }
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
@@ -132,6 +169,16 @@ public:
     void SetIndexInList(int32_t index)
     {
         indexInList_ = index;
+    }
+
+    void SetHeaderComponentContentExist(bool isHeaderComponentContentExist)
+    {
+        isHeaderComponentContentExist_ = isHeaderComponentContentExist;
+    }
+
+    void SetFooterComponentContentExist(bool isFooterComponentContentExist)
+    {
+        isFooterComponentContentExist_ = isFooterComponentContentExist;
     }
 
     int32_t GetIndexInList() const
@@ -240,6 +287,10 @@ private:
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     float GetPaddingAndMargin() const;
+    float GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const;
+    bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
@@ -249,6 +300,8 @@ private:
 
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
+    bool isHeaderComponentContentExist_ = false;
+    bool isFooterComponentContentExist_ = false;
     int32_t itemStartIndex_ = 0;
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

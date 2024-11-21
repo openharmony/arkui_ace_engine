@@ -137,10 +137,13 @@ public:
      */
     RefPtr<UINode> GetCachedNode4Index(uint32_t forIndex);
 
-    void AddKeyToL1(const std::string& key)
-    {
-        activeNodeKeysInL1_.emplace(key);
-    }
+    void AddKeyToL1(const std::string& key, bool shouldTriggerReuse = true);
+
+    void AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index, bool shouldTriggerRecycle);
+
+    void RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle = true);
+
+    bool CheckTTypeChanged(uint32_t index);
 
     bool IsInL1Cache(const std::string& key) const
     {
@@ -254,9 +257,15 @@ private:
         const std::unordered_map<std::string, RefPtr<UINode>>& uiNode4Key) const;
 
     /**
-     * get more index -> key and index -> ttype from TS side
+     * does given range overlap the last active range?
      */
-    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to);
+    bool HasOverlapWithLastActiveRange(uint32_t from, uint32_t to);
+
+    /**
+     * get more index -> key and index -> ttype from TS side
+     * may request additional keys if allowFetchMore is true
+     */
+    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore = true);
 
     // Map ttype -> cacheSize. Each ttype incl default has own L2 size
     std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype_;
@@ -303,6 +312,9 @@ private:
 
     // Map Map key -> UINode
     std::unordered_map<std::string, CacheItem> node4key_;
+
+    // for tracking reused/recycled nodes
+    std::unordered_set<int32_t> reusedNodeIds_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

@@ -46,18 +46,12 @@ public:
     {
         return height_;
     }
-    bool IsSucceed()
-    {
-        return isSucceed_;
-    }
     size_t GetBitmapSize()
     {
         return bitmapSize_;
     }
 private:
     void InitBitmap();
-    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
-    void ImageObjFailed() override;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif
@@ -66,7 +60,6 @@ private:
 
     int32_t width_;
     int32_t height_;
-    bool isSucceed_ = true;
     size_t bitmapSize_ = 0;
 };
 } // namespace OHOS::Ace::NG

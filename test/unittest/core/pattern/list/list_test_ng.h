@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -61,6 +62,7 @@ class ListTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag);
     void SetUp() override;
     void TearDown() override;
     void GetList();
@@ -75,6 +77,8 @@ public:
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
     void CreateGroupWithSetting(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithSettingWithComponentContent(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,

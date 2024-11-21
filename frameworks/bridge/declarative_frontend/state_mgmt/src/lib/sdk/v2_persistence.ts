@@ -227,7 +227,7 @@ class PersistenceV2Impl extends StorageHelper {
 
   constructor() {
     super();
-    this.map_ = new Proxy(new Map<string, any>(), ObserveV2.arraySetMapProxy);
+    this.map_ = new Proxy(new Map<string, any>(), new SetMapProxyHandler());
     this.keysArr_ = new Set<string>();
     this.idToKey_ = new Map<number, string>();
   }

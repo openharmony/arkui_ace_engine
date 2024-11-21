@@ -359,18 +359,6 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
     }
 }
 
-void SvgNode::PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback)
-{
-    for (auto& child : children_) {
-        auto svgAnimate = DynamicCast<SvgAnimation>(child);
-        if (svgAnimate) {
-            svgAnimate->AddOnFinishCallBack(onFinishCallback);
-        } else {
-            child->PushAnimatorOnFinishCallback(onFinishCallback);
-        }
-    }
-}
-
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     if (!OnCanvas(canvas)) {

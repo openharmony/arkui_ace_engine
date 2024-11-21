@@ -158,6 +158,15 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
     scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_VP);
     EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::VP);
+    /**
+     * @tc.steps: step5. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarWidth
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarWidth().Value(), scrollBarTheme->GetNormalWidth().Value());
+    EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), scrollBarTheme->GetNormalWidth().Unit());
 }
 
 /**
@@ -189,6 +198,14 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarColorTest001, TestSize.Level1)
     ScrollableModelNG::SetScrollBarColor(&(*scroll_), SCROLLBAR_COLOR_BLUE);
     scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(scrollablePn->GetBarColor(), Color::FromString(SCROLLBAR_COLOR_BLUE));
+    /**
+     * @tc.steps: step4. Set propScrollBarProperty_ nullptr in ScrollablePaintProperty and use defaultScrollBarColor
+     */
+    scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    scrollablePn->propScrollBarProperty_ = nullptr;
+    EXPECT_EQ(scrollablePn->GetBarColor(), scrollBarTheme->GetForegroundColor());
 }
 
 /**
@@ -222,6 +239,12 @@ HWTEST_F(ScrollableCoverTestNg, ToJsonValueTest001, TestSize.Level1)
     EXPECT_EQ(json->GetString("scrollBar"), BAR_STATE_AUTO);
     EXPECT_EQ(json->GetString("scrollBarColor"), SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(json->GetString("scrollBarWidth"), SCROLLBAR_WIDTH_PX);
+    /**
+     * @tc.steps: step5. call tojson when filter.IsFastFilter() true
+     */
+    filter.AddFilterAttr("id");
+    scrollablePn->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
 }
 
 /**
@@ -307,9 +330,9 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
-    RefPtr<Container> conainer = Container::Current();
-    ASSERT_NE(conainer, nullptr);
-    conainer->SetUseNewPipeline();
+    RefPtr<Container> container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetUseNewPipeline();
     EXPECT_EQ(Container::IsCurrentUseNewPipeline(), true);
     scrollable->Initialize(MockPipelineContext::GetCurrent());
 
@@ -1019,7 +1042,7 @@ HWTEST_F(ScrollableCoverTestNg, RemainVelocityToChild001, TestSize.Level1)
     scrollPn->scrollAbort_ = false;
     ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
     scrollPn->scrollableEvent_->scrollable_ = scrollable;
-    float remainVelocity = 0.0f;
+    float remainVelocity = 150.0f;
     /**
      * @tc.steps: step2. Test RemainVelocityToChild
      * @tc.expected: Verify the scrollAbort_ status
@@ -1081,7 +1104,7 @@ HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step2. Test ScrollPage
      * @tc.expected: Verify the scrollAbort_ status
      */
-    scrollPn->ScrollPage(false, false, AccessibilityScrollType::SCROLL_HALF);
+    scrollPn->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
 
@@ -1111,7 +1134,7 @@ HWTEST_F(ScrollableCoverTestNg, Fling001, TestSize.Level1)
      * @tc.steps: step2. Test Fling
      * @tc.expected: Verify the scrollAbort_ status
      */
-    double flingVelocity = 10.0;
+    double flingVelocity = 150.0;
     controller->Fling(flingVelocity);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
@@ -1235,7 +1258,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
      * @tc.steps: step2. Trigger actionCancel and onActionEnd without dragCancelCallback_ and actionEnd_.
      * @tc.expected: Verify that actionCancel and onActionEnd is executed.
      */
-    scrollable->actionEnd_ = nullptr;
+    scrollable->panActionEndEvents_.clear();
     scrollable->dragCancelCallback_ = nullptr;
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
     (*panRecognizerNG->onActionCancel_)();
@@ -1246,7 +1269,8 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
      * @tc.expected: Verify that actionCancel and onActionEnd is executed.
      */
     scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
-    scrollable->actionEnd_ = [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; };
+    scrollable->panActionEndEvents_.emplace_back(
+        [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; });
     (*panRecognizerNG->onActionCancel_)();
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
     EXPECT_TRUE(isDragCancelCalled);

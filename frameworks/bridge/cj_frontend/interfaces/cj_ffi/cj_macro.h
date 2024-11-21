@@ -24,4 +24,6 @@
 #endif
 #endif
 
+constexpr int FFI_ERROR_CODE = -1;
+
 #endif // OHOS_ACE_FRAMEWORK_CJ_MACRO_H

@@ -139,6 +139,77 @@ VectorToCFFIArray FfiOHOSAceFrameworkViewSetIdArray(int64_t elmtId, VectorCJStri
     return res;
 }
 
+VectorToCFFIArray HandleFFIArray(const std::vector<size_t>& vec)
+{
+    VectorToCFFIArray ffiArray;
+    ffiArray.size = vec.size();
+    ffiArray.buffer = new int64_t[ffiArray.size];
+    for (size_t i = 0; i < vec.size(); ++i) {
+        ffiArray.buffer[i] = static_cast<int64_t>(vec[i]);
+    }
+    ffiArray.free = reinterpret_cast<void (*)(int64_t*)>(free);
+    return ffiArray;
+}
+
+SetIdResultFFI AssambleSetIdResult(
+    const std::vector<size_t>& diffIds, const std::vector<size_t>& dupIds, const std::vector<size_t>& remIds)
+{
+    VectorToCFFIArray diffArray = HandleFFIArray(diffIds);
+    VectorToCFFIArray dupArray = HandleFFIArray(dupIds);
+    VectorToCFFIArray remArray = HandleFFIArray(remIds);
+    SetIdResultFFI result {
+        .diffIndexArrayPtr = diffArray, .duplicateIdsPtr = dupArray, .removedChildElmtIdsPtr = remArray
+    };
+    return result;
+}
+
+SetIdResultFFI FfiOHOSAceFrameworkViewSetIdArrayReturnStruct(int64_t elmtId, VectorCJStringHandle newIdArray)
+{
+    std::list<std::string> cjArr;
+    std::vector<size_t> diffIds;
+    std::vector<size_t> dupIds;
+    std::vector<size_t> remIds;
+    std::list<std::string> newIdArr;
+
+    auto cjRectangleVec = reinterpret_cast<std::vector<std::string>*>(newIdArray);
+    for (const auto& value : *cjRectangleVec) {
+        cjArr.emplace_back(value);
+    }
+    // Get old IDs. New ID are set in the end of this function.
+    const std::list<std::string>& previousIDList = ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
+    std::unordered_set<std::string> oldIdsSet(previousIDList.begin(), previousIDList.end());
+    std::unordered_set<std::string> newIds;
+
+    size_t index = 0;
+    for (const auto& strId : cjArr) {
+        // Save return value of insert to know was it duplicate...
+        std::pair<std::unordered_set<std::string>::iterator, bool> ret = newIds.insert(strId);
+        // Duplicate Id detected. Will return index of those to caller.
+        if (!ret.second) {
+            dupIds.push_back(index);
+        } else {
+            // ID was not duplicate. Accept it.
+            newIdArr.emplace_back(*ret.first);
+            // Check was ID previously available or totally new one.
+            if (oldIdsSet.find(*ret.first) == oldIdsSet.end()) {
+                // Populate output diff array with this index that was not in old array.
+                diffIds.push_back(index);
+            }
+        }
+        index++;
+    }
+
+    ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
+    std::list<int32_t> removedElmtIds;
+    ForEachModel::GetInstance()->SetRemovedElmtIds(removedElmtIds);
+    if (removedElmtIds.size()) {
+        for (const auto& rmElmtId : removedElmtIds) {
+            remIds.emplace_back(rmElmtId);
+        }
+    }
+    return AssambleSetIdResult(diffIds, dupIds, remIds);
+}
+
 void FfiOHOSAceFrameworkViewCreateNewChildStart(char* elmtId)
 {
     LOGD("Start create child with array id %{public}s.", elmtId);

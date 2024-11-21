@@ -20,7 +20,7 @@ class RatingStarsModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStars');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().rating.resetStars(node);
     } else {
@@ -34,7 +34,7 @@ class RatingStepSizeModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStepSize');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().rating.resetStepSize(node);
     } else {
@@ -68,7 +68,7 @@ class RatingContentModifier extends ModifierWithKey<ContentModifier<RatingConfig
     super(value);
   }
   static identity: Symbol = Symbol('ratingContentModifier');
-  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent): void {
     let ratingComponent = component as ArkRatingComponent;
     ratingComponent.setContentModifier(this.value);
   }

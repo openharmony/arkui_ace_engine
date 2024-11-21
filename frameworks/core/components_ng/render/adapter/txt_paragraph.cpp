@@ -104,7 +104,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     Rosen::TextStyle txtStyle;
 #endif
     textAlign_ = style.GetTextAlign();
-    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContextSafely(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -222,13 +222,13 @@ float TxtParagraph::GetTextWidth()
 #ifndef USE_GRAPHIC_TEXT_GINE
         return std::max(paragrah->GetLongestLine(), paragrah->GetMaxIntrinsicWidth());
 #else
-        return std::max(paragrah->GetActualWidth(), paragrah->GetMaxIntrinsicWidth());
+        return std::max(paragrah->GetLongestLineWithIndent(), paragrah->GetMaxIntrinsicWidth());
 #endif
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
     return paragrah->GetLongestLine();
 #else
-    return paragrah->GetActualWidth();
+    return paragrah->GetLongestLineWithIndent();
 #endif
 }
 
@@ -327,24 +327,38 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
     paragrah->Paint(&canvas, x, y);
 #endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
-        auto size = paraStyle_.leadingMargin->size;
-        CaretMetricsF metrics;
-        auto flag = ComputeOffsetForCaretUpstream(0, metrics) || ComputeOffsetForCaretDownstream(0, metrics);
-        if (flag) {
-            x += metrics.offset.GetX() - size.Width().ConvertToPx();
-            auto sizeRect = SizeF(size.Width().ConvertToPx(), size.Height().ConvertToPx());
-            y += Alignment::GetAlignPosition(
-                SizeF(sizeRect.Width(), metrics.height), sizeRect, paraStyle_.leadingMarginAlign)
-                    .GetY();
-        }
+        CalculateLeadingMarginOffest(x, y);
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
-        auto width = size.Width().ConvertToPx();
-        auto height = size.Height().ConvertToPx();
+        auto size = paraStyle_.leadingMargin->size;
+        auto width = static_cast<float>(size.Width().ConvertToPx());
+        auto height = static_cast<float>(size.Height().ConvertToPx());
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
     }
+}
+
+void TxtParagraph::CalculateLeadingMarginOffest(float& x, float& y)
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+    auto lineCount = static_cast<int32_t>(GetLineCount());
+    CHECK_NULL_VOID(lineCount);
+    auto firstLineMetrics = GetLineMetrics(0);
+    auto size = paraStyle_.leadingMargin->size;
+    auto start = x;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        x += static_cast<float>(firstLineMetrics.x + firstLineMetrics.width);
+    } else {
+        x += static_cast<float>(firstLineMetrics.x - size.Width().ConvertToPx());
+    }
+    x = std::max(start, x);
+    auto sizeRect =
+        SizeF(static_cast<float>(size.Width().ConvertToPx()), static_cast<float>(size.Height().ConvertToPx()));
+    y += Alignment::GetAlignPosition(
+        SizeF(sizeRect.Width(), static_cast<float>(firstLineMetrics.height)), sizeRect, paraStyle_.leadingMarginAlign)
+             .GetY();
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -672,7 +686,7 @@ void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector
     for (const auto& box : boxes) {
         auto rect = Constants::ConvertSkRect(box.rect);
         RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
-            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
+            static_cast<float>(std::abs(rect.Width())), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
 }
@@ -839,13 +853,40 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
 
     result.offset.Reset();
-    result.height = paragrah->GetHeight();
-    auto lineHeight = paraStyle_.lineHeight;
-    if (lineHeight.IsValid()) {
-        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto boxes = paragrah->GetRectsForRange(0, 1, txt::Paragraph::RectHeightStyle::kMax,
+        txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragrah->GetTextRectsByBoundary(0, 1, Rosen::TextRectHeightStyle::TIGHT,
+        Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    if (boxes.empty()) {
+        result.height = paragrah->GetHeight();
+        auto lineHeight = paraStyle_.lineHeight;
+        if (lineHeight.IsValid()) {
+            result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+        }
+    } else {
+        const auto& textBox = boxes.back();
+#ifndef USE_GRAPHIC_TEXT_GINE
+        result.height = textBox.rect.fBottom - textBox.rect.fTop;
+        result.offset.SetY(textBox.rect.fTop);
+#else
+        result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+        result.offset.SetY(textBox.rect.GetTop());
+#endif
     }
-    if (paraStyle_.align != TextAlign::START) {
-        HandleTextAlign(result, paraStyle_.align);
+
+    auto textAlign = paraStyle_.align;
+    if (paraStyle_.direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+    if (textAlign != TextAlign::START) {
+        HandleTextAlign(result, textAlign);
     } else {
         if (paraStyle_.leadingMargin) {
             HandleLeadingMargin(result, *(paraStyle_.leadingMargin));

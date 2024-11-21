@@ -35,8 +35,11 @@ extern const char* _binary_multimedia_movingphotoview_abc_end;
 
 namespace OHOS::Ace {
 namespace {
-static constexpr const size_t MAX_ARG_NUM = 10;
-static constexpr const int32_t ARG_NUM_1 = 1;
+static constexpr size_t MAX_ARG_NUM = 10;
+static constexpr int32_t ARG_NUM_ONE = 1;
+static constexpr int32_t ARG_NUM_TWO = 2;
+static constexpr int32_t PARAM_INDEX_ZERO = 0;
+static constexpr int32_t PARAM_INDEX_ONE = 1;
 } // namespace
 
 std::unique_ptr<NG::MovingPhotoModelNG> NG::MovingPhotoModelNG::instance_ = nullptr;
@@ -58,7 +61,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_object)) {
         return ExtNapiUtils::CreateNull(env);
@@ -96,7 +99,7 @@ napi_value JsMuted(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     bool muted = false;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
@@ -112,7 +115,7 @@ napi_value JsObjectFit(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
 
     auto objectFit = ImageFit::COVER;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
@@ -120,6 +123,24 @@ napi_value JsObjectFit(napi_env env, napi_callback_info info)
     }
     NG::MovingPhotoModelNG::GetInstance()->SetObjectFit(objectFit);
 
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsOnComplete(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value thisVal = nullptr;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
+    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_function)) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
+    auto onComplete = [asyncEvent]() {
+        asyncEvent->Call(0, nullptr);
+    };
+    NG::MovingPhotoModelNG::GetInstance()->SetOnComplete(std::move(onComplete));
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -219,11 +240,15 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("create", JsCreate),
         DECLARE_NAPI_FUNCTION("muted", JsMuted),
         DECLARE_NAPI_FUNCTION("objectFit", JsObjectFit),
+        DECLARE_NAPI_FUNCTION("onComplete", JsOnComplete),
         DECLARE_NAPI_FUNCTION("onStart", JsOnStart),
         DECLARE_NAPI_FUNCTION("onStop", JsOnStop),
         DECLARE_NAPI_FUNCTION("onPause", JsOnPause),
         DECLARE_NAPI_FUNCTION("onFinish", JsOnFinish),
         DECLARE_NAPI_FUNCTION("onError", JsOnError),
+        DECLARE_NAPI_FUNCTION("autoPlayPeriod", JsAutoPlayPeriod),
+        DECLARE_NAPI_FUNCTION("autoPlay", JsAutoPlay),
+        DECLARE_NAPI_FUNCTION("repeatPlay", JsRepeatPlay),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -293,6 +318,58 @@ napi_value ExportMovingPhoto(napi_env env, napi_value exports)
     InitView(env, exports);
     InitController(env, exports);
     return exports;
+}
+
+napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_TWO, "Wrong number of arguments");
+
+    int64_t startTime = 0;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
+        startTime = ExtNapiUtils::GetCInt64(env, argv[PARAM_INDEX_ZERO]);
+    }
+    int64_t endTime = 0;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ONE], napi_number)) {
+        endTime = ExtNapiUtils::GetCInt64(env, argv[PARAM_INDEX_ONE]);
+    }
+    NG::MovingPhotoModelNG::GetInstance()->AutoPlayPeriod(startTime, endTime);
+
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsAutoPlay(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+
+    bool isAutoPlay = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
+        isAutoPlay = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
+    }
+    NG::MovingPhotoModelNG::GetInstance()->AutoPlay(isAutoPlay);
+
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsRepeatPlay(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+
+    bool isRepeatPlay = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
+        isRepeatPlay = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
+    }
+    NG::MovingPhotoModelNG::GetInstance()->RepeatPlay(isRepeatPlay);
+
+    return ExtNapiUtils::CreateNull(env);
 }
 
 } // namespace OHOS::Ace

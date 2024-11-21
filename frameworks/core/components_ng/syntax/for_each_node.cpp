@@ -245,7 +245,7 @@ void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
         if (parentNode) {
             InitAllChildrenDragManager(true);
         } else {
-            auto piplineContext = PipelineContext::GetCurrentContext();
+            auto piplineContext = GetContext();
             CHECK_NULL_VOID(piplineContext);
             auto taskExecutor = piplineContext->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);

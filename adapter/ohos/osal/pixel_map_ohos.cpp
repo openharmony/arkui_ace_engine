@@ -33,6 +33,8 @@ PixelFormat PixelMapOhos::PixelFormatConverter(Media::PixelFormat pixelFormat)
             return PixelFormat::RGB_565;
         case Media::PixelFormat::RGBA_8888:
             return PixelFormat::RGBA_8888;
+        case Media::PixelFormat::RGBA_1010102:
+            return PixelFormat::RGBA_1010102;
         case Media::PixelFormat::BGRA_8888:
             return PixelFormat::BGRA_8888;
         case Media::PixelFormat::ALPHA_8:

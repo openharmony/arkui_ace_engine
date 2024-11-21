@@ -26,8 +26,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
-    : pManager_(paragraphs)
+RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+    std::optional<TextStyle> typingTextStyle)
+    : pManager_(paragraphs), typingTextStyle_(typingTextStyle)
 {
     allSpans_ = spans;
     // split spans into groups by \newline
@@ -77,6 +78,12 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 
 void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target)
 {
+    if (typingTextStyle_.has_value()) {
+        auto typingTextStyle = typingTextStyle_.value();
+        target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
+        target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
+        return;
+    }
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }
@@ -96,59 +103,59 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
     }
 }
 
+std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureEmptyContentSize(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, {});
+    auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
+    auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, {});
+    auto presetParagraph = pattern->GetPresetParagraph();
+    if (!presetParagraph) {
+        pattern->PreferredParagraph();
+    }
+    auto contentHeight = defaultCaretHeight;
+    presetParagraph = pattern->GetPresetParagraph();
+    if (presetParagraph) {
+        contentHeight = presetParagraph->GetHeight();
+    }
+    return SizeF(width, static_cast<float>(contentHeight));
+}
+
+std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, {});
+    TextStyle textStyle;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
+    CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper), {});
+    pManager_->SetParagraphs(GetParagraphs());
+    return SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     ACE_SCOPED_TRACE("RichEditorMeasureContent");
     pManager_->Reset();
     SetPlaceholder(layoutWrapper);
-    if (spans_.empty()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, std::nullopt);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
-        CHECK_NULL_RETURN(richEditorTheme, std::nullopt);
-        auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_RETURN(host, std::nullopt);
-        auto pattern = host->GetPattern<RichEditorPattern>();
-        CHECK_NULL_RETURN(pattern, std::nullopt);
-        auto presetParagraph = pattern->GetPresetParagraph();
-        if (!presetParagraph) {
-            pattern->PreferredParagraph();
-        }
-        auto contentHeight = defaultCaretHeight;
-        presetParagraph = pattern->GetPresetParagraph();
-        if (presetParagraph) {
-            contentHeight = presetParagraph->GetHeight();
-        }
-        return SizeF(width, static_cast<float>(contentHeight));
-    }
-
-    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
-    TextStyle textStyle;
-    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
-    if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
-        return std::nullopt;
-    }
-    pManager_->SetParagraphs(GetParagraphs());
-    SizeF res;
-    float textHeight = 0.0f;
-    textHeight = pManager_->GetHeight();
-    res.SetWidth(pManager_->GetMaxWidth());
-    res.SetHeight(textHeight);
-    res.AddHeight(shadowOffset_);
-    if (Negative(res.Height()) || Negative(res.Width())) {
-        return std::nullopt;
-    }
-    UpdateRichTextRect(res, textHeight, layoutWrapper);
-    auto contentHeight = res.Height();
-    if (contentConstraint.selfIdealSize.Height().has_value()) {
-        contentHeight = std::min(contentHeight, contentConstraint.selfIdealSize.Height().value());
-    } else {
-        contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
-    }
+    auto optionalTextSize = spans_.empty()
+        ? MeasureEmptyContentSize(contentConstraint, layoutWrapper)
+        : MeasureContentSize(contentConstraint, layoutWrapper);
+    CHECK_NULL_RETURN(optionalTextSize, {});
+    SizeF res = optionalTextSize.value();
+    res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
+    CHECK_NULL_RETURN(res.IsNonNegative(), {});
+    UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
+    auto maxHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto contentHeight = std::min(res.Height(), maxHeight);
     return SizeF(res.Width(), contentHeight);
 }
 
@@ -186,27 +193,26 @@ bool RichEditorLayoutAlgorithm::CreateParagraph(
     return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
 }
 
-void RichEditorLayoutAlgorithm::UpdateRichTextRect(
-    const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper)
+RefPtr<RichEditorPattern> RichEditorLayoutAlgorithm::GetRichEditorPattern(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
     auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->IsShowPlaceholder()) {
-        richTextRect_.SetSize(SizeF(0.0f, 0.0f));
-    } else {
-        richTextRect_.SetSize(SizeF(res.Width(), textHeight));
-    }
+    CHECK_NULL_RETURN(host, nullptr);
+    return host->GetPattern<RichEditorPattern>();
 }
 
-void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
+void RichEditorLayoutAlgorithm::UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<RichEditorPattern>();
+    auto pattern = GetRichEditorPattern(layoutWrapper);
     CHECK_NULL_VOID(pattern);
-    pattern->SetPlaceholder(spans_);
+    richTextRect_.SetSize(pattern->IsShowPlaceholder() ? SizeF() : textSize);
+}
+
+bool RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
+{
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->SetPlaceholder(spans_);
 }
 
 float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)

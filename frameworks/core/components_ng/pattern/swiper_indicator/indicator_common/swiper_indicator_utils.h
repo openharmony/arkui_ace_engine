@@ -128,6 +128,19 @@ public:
         return loopIndex;
     }
 
+    static int32_t CalcLoopCount(int32_t index, int32_t totalCount)
+    {
+        if (totalCount <= 0) {
+            return 0;
+        }
+
+        if (index < 0) {
+            index++;
+        }
+
+        return std::abs(index / totalCount);
+    }
+
 private:
     static float CalcIndicatrOffSetX(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
                                     float swiperPaddingLeft, float swiperPaddingRight,

@@ -220,11 +220,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
     int32_t instanceID = context->GetInstanceId();
     auto textFunc = [weak = WeakClaim(this), instanceID, startPos, info](const TextDataDetectResult result) {
         ContainerScope scope(instanceID);
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        auto host = dataDetectorAdapter->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
@@ -347,7 +343,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         if (dataDetectorAdapter->textForAI_.empty()) {
             return;
         }
-
+        dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
         size_t detectTextIdx = 0;
         auto aiSpanMapIt = aiSpanMap.begin();
         int32_t startPos = 0;
@@ -405,7 +401,6 @@ void DataDetectorAdapter::StartAITask()
     }
     aiSpanMap_.clear();
     typeChanged_ = false;
-    lastTextForAI_ = textForAI_;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);

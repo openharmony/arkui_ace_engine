@@ -55,13 +55,13 @@ public:
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
-    virtual void SetHideTitleBar(bool hideTitleBar) = 0;
+    virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList);
     virtual void SetHideBackButton(bool hideBackButton) = 0;
-    virtual void SetHideToolBar(bool hideToolBar) = 0;
+    virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;

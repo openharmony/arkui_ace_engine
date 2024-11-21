@@ -263,14 +263,14 @@ void ArkJSRuntime::RunGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_);
+    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::SEMI_GC);
 }
 
 void ArkJSRuntime::RunFullGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)
@@ -355,8 +355,16 @@ void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);
+    std::weak_ptr<ArkJSRuntime> weakThis = shared_from_this();
     JSNApi::RegisterUncatchableErrorHandler(vm_,
-        std::bind(&ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine, this, std::placeholders::_1, nullptr));
+        [weakThis](auto& tryCatch) {
+            auto sharedThis = weakThis.lock();
+            if (sharedThis) {
+                sharedThis->HandleUncaughtExceptionWithoutNativeEngine(tryCatch, nullptr);
+            } else {
+                LOGE("ArkJSRuntime has been destructed.");
+            }
+        });
     uncaughtErrorHandler_ = callback;
 }
 

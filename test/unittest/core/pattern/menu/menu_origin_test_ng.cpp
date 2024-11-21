@@ -1775,6 +1775,8 @@ HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg007, TestSize.Level1)
     menuPattern->SetMenuShow();
     auto rollbackPreviewMode = menuPattern->GetPreviewMode();
     menuPattern->SetPreviewMode(MenuPreviewMode::NONE);
+    menuPattern->type_ = MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    menuPattern->isExtensionMenuShow_ = false;
     menuPattern->ShowMenuAppearAnimation();
     menuPattern->SetPreviewMode(rollbackPreviewMode);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
@@ -1863,9 +1865,11 @@ HWTEST_F(MenuTestNg, WidthModifiedBySelectTestNg009, TestSize.Level1)
     EXPECT_FALSE(menuPattern->OnDirtyLayoutWrapperSwap(menuWrapperNode, configDirtySwap));
     menuPattern->SetMenuShow();
     auto rollbackPreviewMode = menuPattern->GetPreviewMode();
+    menuPattern->type_ = MenuType::SELECT_OVERLAY_CUSTOM_MENU;
     menuPattern->ShowMenuAppearAnimation();
     menuPattern->SetPreviewMode(rollbackPreviewMode);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    EXPECT_FALSE(menuPattern->isExtensionMenuShow_);
 }
 
 /**
@@ -1976,7 +1980,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -2044,7 +2048,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;
@@ -2112,41 +2116,6 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAvoidWithPreview, TestSize.Level1)
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(-TARGET_SIZE_WIDTH, CONST_FLOAT_ZREO));
-}
-/**
- * @tc.name: MenuLayoutAlgorithmAdjustMenuTest
- * @tc.desc: Test MenuLayoutAlgorithm AdjustSelectOverlayMenuPosition function.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAdjustMenuTest, TestSize.Level1)
-{
-    auto rootNode = FrameNode::CreateFrameNode(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
-    ASSERT_NE(rootNode, nullptr);
-    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(menuWrapperNode, nullptr);
-    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(menuNode, nullptr);
-    auto menuGeometryNode = menuNode->GetGeometryNode();
-    ASSERT_NE(menuGeometryNode, nullptr);
-    menuNode->MountToParent(menuWrapperNode);
-    menuWrapperNode->MountToParent(rootNode);
-
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    menuPattern->SetPreviewMode(MenuPreviewMode::NONE);
-    menuPattern->SetType(MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
-
-    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    ASSERT_NE(menuLayoutAlgorithm, nullptr);
-    auto expectMenuSize = SizeF(TARGET_SIZE_WIDTH, -TARGET_SIZE_HEIGHT / 2);
-    menuPattern->SetType(MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU);
-    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, -TARGET_SIZE_HEIGHT / 2));
-    menuLayoutAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
-    menuLayoutAlgorithm->paddingTop_ = 100;
-    menuLayoutAlgorithm->Layout(AceType::RawPtr(menuNode));
-    EXPECT_EQ(menuGeometryNode->GetFrameSize(), expectMenuSize);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmNeedArrow

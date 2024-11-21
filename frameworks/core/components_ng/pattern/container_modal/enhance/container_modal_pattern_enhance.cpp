@@ -148,6 +148,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
+        ContainerModalPattern::SetIsHoveredMenu(false);
         ContainerModalPattern::OnWindowUnfocused();
     }
 }

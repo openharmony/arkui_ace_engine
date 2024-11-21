@@ -131,6 +131,9 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
 
 void JSList::SetDirection(int32_t direction)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && direction != 0 && direction != 1) {
+        direction = 0;
+    }
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 

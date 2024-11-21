@@ -1370,8 +1370,16 @@ bool ParsePreviewOptions(
         napi_get_named_property(asyncCtx->env, previewOptionsNApi, "numberBadge", &numberBadgeNApi);
         napi_typeof(asyncCtx->env, numberBadgeNApi, &valueType);
         if (valueType == napi_number) {
-            asyncCtx->dragPreviewOption.isNumber = true;
-            napi_get_value_int32(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.badgeNumber);
+            int64_t number = 0;
+            napi_get_value_int64(asyncCtx->env, numberBadgeNApi, &number);
+            if (number < 0 || number > INT_MAX) {
+                asyncCtx->dragPreviewOption.isNumber = false;
+                asyncCtx->dragPreviewOption.isShowBadge = true;
+            } else {
+                asyncCtx->dragPreviewOption.isNumber = true;
+                asyncCtx->dragPreviewOption.isShowBadge = false;
+                asyncCtx->dragPreviewOption.badgeNumber = number;
+            }
         } else if (valueType == napi_boolean) {
             asyncCtx->dragPreviewOption.isNumber = false;
             napi_get_value_bool(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.isShowBadge);

@@ -626,7 +626,11 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
      */
     pattern_->StopAnimate();
 
-    pattern_->OnScrollCallback(850.f, SCROLL_FROM_START);
+    TouchLocationInfo touch(0);
+    touch.SetLocalLocation(Offset(0, 850));
+    TouchEventInfo info("");
+    info.AddTouchLocationInfo(std::move(touch));
+    pattern_->OnTouchDown(info);
     EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 4);
     pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);

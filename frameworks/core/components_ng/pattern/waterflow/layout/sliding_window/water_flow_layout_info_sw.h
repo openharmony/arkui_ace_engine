@@ -63,7 +63,7 @@ public:
 
     bool ReachStart(float prevPos, bool firstLayout) const override;
 
-    bool ReachEnd(float prevPos) const override;
+    bool ReachEnd(float prevPos, bool firstLayout) const override;
 
     bool OutOfBounds() const override;
 
@@ -118,6 +118,16 @@ public:
      * @param mainGap main-axis gap between items.
      */
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
+
+    /**
+     * @brief Mark beginning of cache item layout and save current lanes_ state.
+     *
+     */
+    void BeginCacheUpdate();
+    /**
+     * @brief mark synced and restore lanes_ after cache item layout
+     */
+    void EndCacheUpdate();
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
@@ -196,8 +206,15 @@ public:
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
 
     struct Lane;
-    std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
-    // mapping of all items previously or currently in lanes_.
+    /**
+     * @brief lanes in multiple sections.
+     * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
+     */
+    std::vector<std::vector<Lane>> lanes_;
+    /**
+     * @brief mapping of all items previously or currently in lanes_.
+     * REQUIRES: All items in lanes_ are in idxToLane_.
+     */
     std::unordered_map<int32_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
@@ -239,6 +256,13 @@ private:
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
 
     void ClearData();
+
+    /**
+     * @brief Sync state when there has no items in lanes.
+     */
+    void SyncOnEmptyLanes();
+
+    std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
     
     /* cache */
     float startPos_ = 0.0f;

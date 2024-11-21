@@ -28,7 +28,7 @@ public:
     TitleBarNode(const std::string& tag, int32_t nodeId);
     TitleBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern) {}
-    ~TitleBarNode() override = default;
+    ~TitleBarNode() override;
     static RefPtr<TitleBarNode> GetOrCreateTitleBarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -77,21 +77,6 @@ public:
         return menu_;
     }
 
-    void SetPrevMenu(const RefPtr<UINode>& prevMenu)
-    {
-        prevMenu_ = prevMenu;
-    }
-
-    const RefPtr<UINode>& GetPrevMenu() const
-    {
-        return prevMenu_;
-    }
-
-    void SetMoreMenuNode(const RefPtr<UINode>& moreMenuNode)
-    {
-        moreMenuNode_ = moreMenuNode;
-    }
-
     void SetInnerParentId(const std::string& id)
     {
         innerChildId_ = id;
@@ -107,20 +92,11 @@ public:
 
     void MarkIsInitialTitle(bool isInitialTitle);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
-    void OnPrevMenuIsCustomUpdate(bool value) {}
-
-    // node operation related
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
-    void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
-
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
-    RefPtr<UINode> prevMenu_;
-    RefPtr<UINode> moreMenuNode_;
     std::string innerChildId_;
 };
 

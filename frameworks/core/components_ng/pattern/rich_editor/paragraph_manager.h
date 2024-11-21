@@ -50,7 +50,7 @@ public:
 
     std::vector<RectF> GetRects(int32_t start, int32_t end,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
-    std::vector<std::vector<RectF>> GetParagraphsRects(
+    std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false,
@@ -78,6 +78,7 @@ public:
     float GetMaxWidth() const;
     float GetTextWidth() const;
     float GetTextWidthIncludeIndent() const;
+    float GetLongestLineWithIndent() const;
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
     TextLineMetrics GetLineMetrics(size_t lineNumber);

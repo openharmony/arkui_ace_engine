@@ -44,6 +44,7 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         AceAction::ACTION_SET_SELECTION,
         AceAction::ACTION_CLEAR_SELECTION,
         AceAction::ACTION_SET_CURSOR_POSITION,
+        AceAction::ACTION_EXEC_SUB_COMPONENT,
     };
 
     std::unordered_set<AceAction> supportActions;
@@ -204,8 +205,8 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
         auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
         CHECK_NULL_RETURN(frameNode, false);
 
-        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint,
-            frameNode, path, debugInfo, recursiveParam.ancestorGroupFlag)) {
+        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, frameNode, path, debugInfo,
+            recursiveParam.ancestorGroupFlag)) {
             return true;
         }
     } else {
@@ -288,6 +289,22 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
     }
 }
 
+static const std::set<std::string> TAGS_CROSS_PROCESS_COMPONENT = {
+    V2::XCOMPONENT_ETS_TAG,
+    V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+    V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::FORM_ETS_TAG,
+    V2::ISOLATED_COMPONENT_ETS_TAG
+};
+
+bool AccessibilityProperty::IsTagInCrossProcessComponent(const std::string& tag)
+{
+    if (TAGS_CROSS_PROCESS_COMPONENT.find(tag) != TAGS_CROSS_PROCESS_COMPONENT.end()) {
+        return true;
+    }
+    return false;
+}
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -295,7 +312,6 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
     bool shouldSearchChildren = true;
     bool currentGroupFlag = false;
     auto level = AccessibilityProperty::Level::AUTO;
-
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
@@ -331,7 +347,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             shouldSearchChildren = true;
         }
     } while (0);
-
+    shouldSearchSelf = IsTagInCrossProcessComponent(node->GetTag()) ? true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -459,6 +475,9 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
+    if (IsTagInCrossProcessComponent(node->GetTag())) {
+        focusable = true;
+    }
     return focusable;
 }
 
@@ -564,6 +583,11 @@ bool AccessibilityProperty::IsUserSelected()
     return isSelected_.value_or(false);
 }
 
+void AccessibilityProperty::ResetUserSelected()
+{
+    isSelected_.reset();
+}
+
 void AccessibilityProperty::SetUserCheckedType(const int32_t& checkedType)
 {
     checkedType_ = checkedType;
@@ -577,6 +601,31 @@ bool AccessibilityProperty::HasUserCheckedType()
 int32_t AccessibilityProperty::GetUserCheckedType()
 {
     return checkedType_.value_or(0);
+}
+
+void AccessibilityProperty::ResetUserCheckedType()
+{
+    checkedType_.reset();
+}
+
+void AccessibilityProperty::SetUserCheckable(const bool& checkable)
+{
+    isUserCheckable_ = checkable;
+}
+
+bool AccessibilityProperty::HasUserCheckable()
+{
+    return isUserCheckable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserCheckable()
+{
+    return isUserCheckable_.value_or(false);
+}
+
+void AccessibilityProperty::ResetUserCheckable()
+{
+    isUserCheckable_.reset();
 }
 
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
@@ -637,5 +686,29 @@ bool AccessibilityProperty::HasUserTextValue()
 std::string AccessibilityProperty::GetUserTextValue()
 {
     return textValue_.value_or("");
+}
+
+void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
+{
+    auto backupStr = accessibilityText_.value_or("");
+    if (text == backupStr) {
+        return;
+    }
+    accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, text);
+}
+
+void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription)
+{
+    auto backupStr = accessibilityDescription_.value_or("");
+    if (accessibilityDescription == backupStr) {
+        return;
+    }
+    accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, backupStr, accessibilityDescription);
 }
 } // namespace OHOS::Ace::NG

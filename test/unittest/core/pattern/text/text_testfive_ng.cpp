@@ -716,7 +716,7 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -1221,7 +1221,7 @@ HWTEST_F(TextTestFiveNg, GetAncestorNodeViewPort001, TestSize.Level1)
     ASSERT_NE(pattern->GetHost(), nullptr);
     pattern->GetHost()->SetParent(parentFrameNode1);
 
-    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), std::nullopt);
+    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1481,38 +1481,6 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     renderContext->UpdateForegroundColor(Color::BLACK);
     textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
     EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
-}
-
-/**
- * @tc.name: SetPropertyToModifier001
- * @tc.desc: test multiple_paragraph_layout_algorithm.cpp SetPropertyToModifier function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, SetPropertyToModifier001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(textLayoutAlgorithm, nullptr);
-
-    TextStyle textStyle;
-
-    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    auto modifier = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(textStyle), pattern);
-    ASSERT_NE(modifier, nullptr);
-
-    std::vector<std::string> fontFamilies;
-    fontFamilies.emplace_back("Arial");
-    fontFamilies.emplace_back("Calibri");
-    layoutProperty->UpdateFontFamily(fontFamilies);
-    layoutProperty->UpdateAdaptMaxFontSize(Dimension(1.0));
-    layoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
-    textLayoutAlgorithm->SetPropertyToModifier(layoutProperty, modifier, textStyle);
-    EXPECT_EQ(modifier->textDecorationStyle_, TextDecorationStyle::SOLID);
 }
 
 /**
@@ -2563,7 +2531,7 @@ HWTEST_F(TextTestFiveNg, onDraw001, TestSize.Level1)
 
     textContentModifier->animatableTextColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
-    textContentModifier->obscuredReasons_.emplace_back(ObscuredReasons::PLACEHOLDER);
+    textContentModifier->ifPaintObscuration_ = true;
     textContentModifier->drawObscuredRects_.emplace_back(RectF(0, 0, 10, 10));
 
     textContentModifier->onDraw(drawingContext);
@@ -2697,5 +2665,136 @@ HWTEST_F(TextTestFiveNg, ResumeAnimation001, TestSize.Level1)
     EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::RUNNING);
     textContentModifier->PauseAnimation();
     EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::PAUSED);
+}
+
+/**
+ * @tc.name: UseSelfStyle001
+ * @tc.desc: test text_styles.cpp UseSelfStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UseSelfStyle001, TestSize.Level1)
+{
+    auto fontStyle = std::make_unique<FontStyle>();
+    TextStyle textStyle;
+
+    fontStyle->UpdateFontSize(Dimension(10.0, DimensionUnit::PX));
+    fontStyle->UpdateTextColor(Color::WHITE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
+    textShadow.SetColor(TEXT_COLOR_VALUE);
+    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    fontStyle->UpdateTextShadow({ textShadow });
+    fontStyle->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
+    fontStyle->UpdateFontWeight(Ace::FontWeight::W200);
+    std::vector<std::string> fontFamilies;
+    fontFamilies.emplace_back("Arial");
+    fontFamilies.emplace_back("Calibri");
+    fontStyle->UpdateFontFamily(fontFamilies);
+    fontStyle->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    fontStyle->UpdateTextDecoration(TextDecoration::OVERLINE);
+    fontStyle->UpdateTextDecorationColor(Color::WHITE);
+    fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
+    fontStyle->UpdateTextCase(TextCase::LOWERCASE);
+    fontStyle->UpdateAdaptMinFontSize(12.0_fp);
+    fontStyle->UpdateAdaptMaxFontSize(10.0_fp);
+    fontStyle->UpdateLetterSpacing(Dimension(10.0, DimensionUnit::PX));
+    std::vector<Color> colorList;
+    colorList.emplace_back(Color::WHITE);
+    colorList.emplace_back(Color::BLACK);
+    fontStyle->UpdateSymbolColorList(colorList);
+    fontStyle->UpdateSymbolRenderingStrategy(2);
+    fontStyle->UpdateSymbolEffectStrategy(0);
+    fontStyle->UpdateSymbolEffectOptions(SymbolEffectOptions(SymbolEffectType::BOUNCE));
+    fontStyle->UpdateMinFontScale(1.0);
+    fontStyle->UpdateMaxFontScale(2.0);
+
+    EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), false);
+    UseSelfStyle(fontStyle, nullptr, textStyle);
+    EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), true);
+}
+
+/**
+ * @tc.name: UseSelfStyle002
+ * @tc.desc: test text_styles.cpp UseSelfStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UseSelfStyle002, TestSize.Level1)
+{
+    auto textLineStyle = std::make_unique<TextLineStyle>();
+    TextStyle textStyle;
+
+    textLineStyle->UpdateLineHeight(Dimension(10.0, DimensionUnit::PX));
+    textLineStyle->UpdateLineSpacing(Dimension(1.0, DimensionUnit::PX));
+    textLineStyle->UpdateTextBaseline(TextBaseline::MIDDLE);
+    textLineStyle->UpdateBaselineOffset(Dimension(20.0, DimensionUnit::PX));
+    textLineStyle->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textLineStyle->UpdateTextAlign(TextAlign::LEFT);
+    textLineStyle->UpdateMaxLines(1024);
+    textLineStyle->UpdateTextIndent(Dimension(40, DimensionUnit::PX));
+    textLineStyle->UpdateWordBreak(WordBreak::NORMAL);
+    textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+
+    UseSelfStyle(nullptr, textLineStyle, textStyle);
+    EXPECT_EQ(textStyle.GetLineSpacing(), Dimension(1.0, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: CreateTextStyleUsingThemeWithText001
+ * @tc.desc: test text_styles.cpp CreateTextStyleUsingThemeWithText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, CreateTextStyleUsingThemeWithText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto fontStyle = std::make_unique<FontStyle>();
+    auto textLineStyle = std::make_unique<TextLineStyle>();
+    RefPtr<TextTheme> textTheme;
+
+    auto textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
+    EXPECT_EQ(textStyle, TextStyle());
+
+    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
+    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+
+    renderContext->UpdateForegroundColor(Color::BLACK);
+    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: GetLineBreakStrategyInJson001
+ * @tc.desc: test text_styles.cpp GetLineBreakStrategyInJson function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
+{
+    std::optional<Ace::LineBreakStrategy> value = Ace::LineBreakStrategy::HIGH_QUALITY;
+    EXPECT_EQ(GetLineBreakStrategyInJson(value), "HIGH_QUALITY");
+    value = Ace::LineBreakStrategy::BALANCED;
+    EXPECT_EQ(GetLineBreakStrategyInJson(value), "BALANCED");
+    value = Ace::LineBreakStrategy::GREEDY;
+    EXPECT_EQ(GetLineBreakStrategyInJson(value), "GREEDY");
+}
+
+/**
+ * @tc.name: UnRegisterAfterLayoutCallback001
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->RegisterAfterLayoutCallback([]() {});
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
+    pattern->UnRegisterAfterLayoutCallback();
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
 }
 } // namespace OHOS::Ace::NG

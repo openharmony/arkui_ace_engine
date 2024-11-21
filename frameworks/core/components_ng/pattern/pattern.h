@@ -384,6 +384,7 @@ public:
     }
 
     virtual void DumpInfo() {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -599,6 +600,8 @@ public:
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
+        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
         layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
         layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
@@ -610,11 +613,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
-
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -625,18 +623,31 @@ public:
         return RectF();
     }
 
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
+    }
+
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
+
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
 
     virtual bool TriggerAutoSaveWhenInvisible()
     {
         return false;
     }
 
-    virtual uint32_t GetWindowPatternType() const
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+
+    virtual bool RenderCustomChild(int64_t deadline)
     {
-        return 0;
+        return true;
     }
-    
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

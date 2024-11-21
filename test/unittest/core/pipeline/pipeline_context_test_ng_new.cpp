@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "test/mock/core/common/mock_container.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -739,7 +740,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
     context_->AddNavigationNode(nodeId, AceType::WeakClaim(AceType::RawPtr(node)));
     context_->RemoveNavigationNode(nodeId, nodeId);
     context_->FirePageChanged(nodeId, false);
-    EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node), nullptr);
+    bool isEntry = false;
+    EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node, isEntry), nullptr);
 }
 
 /**
@@ -1434,9 +1436,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::FULL_TO_FLOATING);
     pipeline->AvoidanceLogic(0.0);
     EXPECT_EQ(pipeline->finishFunctions_.size(), 0);
-    auto listenerWrapper = [](const std::vector<std::string>& params) {};
-    pipeline->RegisterDumpInfoListener(listenerWrapper);
-    EXPECT_EQ(pipeline->dumpListeners_.size(), 1);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     EXPECT_FALSE(pipeline->DumpPageViewData(nullptr, viewDataWrap));
     EXPECT_FALSE(pipeline->DumpPageViewData(frameNode, viewDataWrap));
@@ -1819,6 +1818,30 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg099, TestSize.Level1)
     context_->RemoveFrameNodeChangeListener(frameNode);
     context_->FlushNodeChangeFlag();
     EXPECT_EQ(context_->changeInfoListeners_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg100
+ * @tc.desc: Test the function UpdateHalfFoldHoverStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg100, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetWidth(DEFAULT_INT10);
+    displayInfo->SetHeight(DEFAULT_INT10);
+    displayInfo->SetIsFoldable(true);
+    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
+    displayInfo->SetRotation(Rotation::ROTATION_90);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+    context_->UpdateHalfFoldHoverStatus(DEFAULT_INT10, DEFAULT_INT10);
+    ASSERT_EQ(context_->isHalfFoldHoverStatus_, true);
 }
 } // namespace NG
 } // namespace OHOS::Ace

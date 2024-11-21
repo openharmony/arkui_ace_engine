@@ -15,11 +15,11 @@
 
 #include "list_test_ng.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
-#include "test/mock/core/common/mock_container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
@@ -932,6 +932,43 @@ HWTEST_F(ListCommonTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(listItemPattern->IsSelected());
     listItemAccessibilityProperty->ActActionClearSelection();
     EXPECT_FALSE(listItemPattern->IsSelected());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: List Accessibility PerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. When list is not Scrollable
+     * @tc.expected: can not scrollpage
+     */
+    CreateList();
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    accessibilityProperty_->ActActionScrollForward();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    accessibilityProperty_->ActActionScrollBackward();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+
+    /**
+     * @tc.steps: step2. When list is Scrollable
+     * @tc.expected: can scrollpage
+     */
+    ClearOldNodes();
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
+    accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 /**

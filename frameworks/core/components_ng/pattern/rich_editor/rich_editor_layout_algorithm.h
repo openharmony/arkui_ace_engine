@@ -25,7 +25,8 @@ class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgor
 
 public:
     RichEditorLayoutAlgorithm() = delete;
-    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs);
+    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+        std::optional<TextStyle> typingTextStyle);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -56,12 +57,15 @@ private:
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
     RefPtr<SpanItem> GetFirstTextSpanItem() const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
-    void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
+    void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
+    RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
 
-    void SetPlaceholder(LayoutWrapper* layoutWrapper);
+    bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
+    std::optional<SizeF> MeasureContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> MeasureEmptyContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
     {
@@ -72,7 +76,7 @@ private:
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
-
+    std::optional<TextStyle> typingTextStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

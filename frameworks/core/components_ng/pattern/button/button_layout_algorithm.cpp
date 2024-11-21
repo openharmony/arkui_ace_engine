@@ -227,8 +227,10 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
                 auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
                 CHECK_NULL_VOID(layoutContraint);
                 auto maxHeight = layoutContraint->maxSize.Height();
+                auto minHeight = layoutContraint->minSize.Height();
                 auto actualHeight = static_cast<float>(childSize_.Height() + topPadding + bottomPadding);
                 actualHeight = std::min(actualHeight, maxHeight);
+                actualHeight = std::max(actualHeight, minHeight);
                 frameSize.SetHeight(maxHeight > defaultHeight ? std::max(defaultHeight, actualHeight) : maxHeight);
             }
         }

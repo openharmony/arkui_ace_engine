@@ -41,7 +41,6 @@ struct ComposeTitleBar {
   menuItems?: Array<ComposeTitleBarMenuItem> = [];
 
   @State titleMaxWidth: number = 0
-  @State backActive: boolean = false
   @State fontSize: number = 1;
 
   private static readonly totalHeight = 56
@@ -58,13 +57,10 @@ struct ComposeTitleBar {
       alignItems: ItemAlign.Stretch
     }) {
       Row() {
-        Navigator()
-          .active(this.backActive)
-
         ImageMenuItem({ item: {
           value: PUBLIC_BACK,
           isEnabled: true,
-          action: () => this.backActive = true
+          action: () => this.getUIContext()?.getRouter()?.back()
         }, index: -1 })
 
         if (this.item !== undefined) {

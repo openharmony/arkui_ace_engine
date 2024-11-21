@@ -420,6 +420,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
         } else {
             height = sheetStyle_.height->ConvertToPx();
         }
+
         maxHeight = SheetInSplitWindow()
             ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));
         if (LessNotEqual(height, 0.0f)) {

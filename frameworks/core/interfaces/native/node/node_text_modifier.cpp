@@ -423,14 +423,14 @@ void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, static_cast<bool>(draggable));
+    ViewAbstract::SetDraggable(frameNode, static_cast<bool>(draggable));
 }
 
 void ResetTextDraggable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+    ViewAbstract::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
 void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)

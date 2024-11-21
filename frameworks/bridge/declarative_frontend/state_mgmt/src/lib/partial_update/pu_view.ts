@@ -501,7 +501,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore_.size) {
+    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
@@ -528,6 +528,12 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     } // for all ownStateLinkProps_
+
+    for (let elementId of this.elmtIdsDelayedUpdate) {
+      this.dirtDescendantElementIds_.add(elementId);
+    }
+    this.elmtIdsDelayedUpdate.clear();
+
     this.restoreInstanceId();
 
     if (this.dirtDescendantElementIds_.size) {
@@ -901,6 +907,10 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.resetRecycleCustomNode();
     }
+  }
+
+  public isRecycled() : boolean {
+    return this.hasBeenRecycled_;
   }
 
   public UpdateLazyForEachElements(elmtIds: Array<number>): void {

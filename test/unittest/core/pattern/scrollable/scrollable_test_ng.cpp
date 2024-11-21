@@ -15,10 +15,11 @@
 
 #include "scrollable_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
-
 #define protected public
 #define private public
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
@@ -768,7 +769,7 @@ HWTEST_F(ScrollableTestNg, OnScrollStart001, TestSize.Level1)
     EXPECT_CALL(*mockPn, GetAxis).Times(1);
 
     EXPECT_CALL(*mockPn, OnScrollStartRecursive).Times(1);
-    scrollPn->OnScrollStartRecursive(5.0f);
+    scrollPn->OnScrollStartRecursive(scrollPn, 5.0f);
 }
 
 /**
@@ -1771,7 +1772,7 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
      * @tc.expected: Pointer is not nullptr
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-
+    
     /**
      * @tc.steps: step2. Call the Fling method and the flingVelocity is 3000
      * @tc.expected: The values of finalPosition_ and finalPosition are the same

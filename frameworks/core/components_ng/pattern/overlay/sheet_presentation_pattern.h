@@ -56,12 +56,7 @@ public:
         callback_ = std::move(callback);
     }
 
-    ~SheetPresentationPattern()
-    {
-        DeleteOverlay();
-    }
-
-    void DeleteOverlay();
+    ~SheetPresentationPattern() override = default;
 
     bool IsMeasureBoundary() const override
     {
@@ -419,6 +414,7 @@ public:
     SheetType GetSheetType();
     bool IsPhoneInLandScape();
     ScrollSizeMode GetScrollSizeMode();
+    void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
 
@@ -445,7 +441,7 @@ public:
     {
         return sheetKey_;
     }
-    
+
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -540,24 +536,31 @@ public:
         return sheetMaskColor_;
     }
 
-    void SetFoldStatusChanged(bool isFoldStatusChanged)
+    void InitFoldState()
     {
-        isFoldStatusChanged_ = isFoldStatusChanged;
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        container->InitIsFoldable();
+        if (container->IsFoldable()) {
+            currentFoldStatus_ = container->GetCurrentFoldStatus();
+        }
     }
 
-    bool IsFoldStatusChanged() const
+    bool IsFoldStatusChanged()
     {
-        return isFoldStatusChanged_;
-    }
-
-    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
-    {
-        foldDisplayModeChangedCallbackId_ = id;
-    }
-
-    bool HasFoldDisplayModeChangedCallbackId()
-    {
-        return foldDisplayModeChangedCallbackId_.has_value();
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if (!container->IsFoldable()) {
+            return false;
+        }
+        auto foldStatus = container->GetCurrentFoldStatus();
+        TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+            static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+        if (foldStatus != currentFoldStatus_) {
+            currentFoldStatus_ = foldStatus;
+            return true;
+        }
+        return false;
     }
 
     // Get ScrollHeight before avoid keyboard
@@ -582,7 +585,9 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
+    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
 
+    RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
@@ -591,6 +596,9 @@ public:
     {
         return detentsFinalIndex_;
     }
+
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
 
     bool IsSheetBottomStyle()
     {
@@ -610,12 +618,13 @@ public:
     }
     ScrollResult HandleScroll(float scrollOffset, int32_t source,
         NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
-    void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
+    void OnScrollStartRecursive(
+        WeakPtr<NestableScrollContainer> child, float position, float dragVelocity = 0.0f) override;
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 protected:
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
     void OnModifyDone() override;
@@ -646,6 +655,8 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
+        uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -654,6 +665,12 @@ private:
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
+    void AvoidKeyboardBySheetMode();
+    bool AvoidKeyboardBeforeTranslate();
+    void AvoidKeyboardAfterTranslate(float height);
+    void DecreaseScrollHeightInSheet(float decreaseHeight);
+    bool IsResizeWhenAvoidKeyboard();
+
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -723,7 +740,7 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
-    bool isFoldStatusChanged_ = false;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
@@ -737,7 +754,10 @@ private:
     float preDetentsHeight_ = 0.0f;
     std::optional<SizeT<int32_t>> windowSize_;
     float scale_ = 1.0;
+
     Color sheetMaskColor_ = Color::TRANSPARENT;
+    SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    float resizeDecreasedHeight_ = 0.f;
 };
 } // namespace OHOS::Ace::NG
 

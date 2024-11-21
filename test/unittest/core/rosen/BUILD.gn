@@ -1,0 +1,267 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+config("rosen_render_context_config") {
+  visibility = [ "./*" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/arkui/framework",
+  ]
+
+  cflags_cc = [
+    "-Wno-unused-private-field",
+    "-Wno-thread-safety-attributes",
+    "-Wno-thread-safety-analysis",
+    "-Wno-non-c-typedef-for-linkage",
+    "-fvisibility-inlines-hidden",
+  ]
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-g",
+  ]
+
+  ldflags = [ "-Wl,--gc-sections,--as-needed" ]
+
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+
+  defines = [
+    "OHOS_STANDARD_SYSTEM",
+    "ENABLE_ROSEN_BACKEND",
+  ]
+}
+
+ohos_source_set("rosen_render_context_test_mock") {
+  testonly = true
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  sources = [
+    "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_animated_image.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_pixmap_image.cpp",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}
+
+ohos_unittest("arkui_rosen_render_context_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/animation/native_curve_helper.cpp",
+    "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/components/common/painter/debug_boundary_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_state_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/particle/particle_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/component_snapshot.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen/drawing_decoration_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen/drawing_image.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_transition_effect.cpp",
+    "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/circle_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/debug_boundary_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/render/ellipse_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/line_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/render/polygon_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
+    "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
+    "$ace_root/test/mock/base/mock_pixel_map.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
+    "$ace_root/test/mock/core/common/mock_clipboard.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_font_loader_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
+    "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
+    "rosen_render_context_test.cpp",
+    "rosen_render_context_test_new.cpp",
+  ]
+
+  configs = [ ":rosen_render_context_config" ]
+
+  deps = [
+    ":rosen_render_context_test_mock",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "skia:skia_canvaskit",
+  ]
+  if (defined(use_rosen_drawing) && use_rosen_drawing) {
+    defines = [ "USE_ROSEN_DRAWING" ]
+  }
+}
+
+ohos_unittest("gradient_style_modifier_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/animation/native_curve_helper.cpp",
+    "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/components/common/painter/debug_boundary_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_state_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/particle/particle_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/component_snapshot.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen/drawing_decoration_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen/drawing_image.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_transition_effect.cpp",
+    "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/circle_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/debug_boundary_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/render/ellipse_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/line_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/render/polygon_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
+    "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
+    "$ace_root/test/mock/base/mock_pixel_map.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
+    "$ace_root/test/mock/core/common/mock_clipboard.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_font_loader_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
+    "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
+    "gradient_style_modifier_test.cpp",
+  ]
+
+  configs = [ ":rosen_render_context_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "skia:skia_canvaskit",
+  ]
+  if (defined(use_rosen_drawing) && use_rosen_drawing) {
+    defines = [ "USE_ROSEN_DRAWING" ]
+  }
+}

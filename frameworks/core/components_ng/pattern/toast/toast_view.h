@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ToastView {
 public:
     static RefPtr<FrameNode> CreateToastNode(const ToastInfo& toastInfo);
+    static void UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode);
 
 private:
     static void UpdateTextLayoutProperty(

@@ -20,6 +20,7 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #define protected public
 #define private public
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -50,7 +51,7 @@ public:
     void TearDown() override;
     void GetGrid();
     GridModelNG CreateGrid();
-    GridModelNG CreateRepeatGrid(int32_t itemNumber, float itemHeight);
+    GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height
@@ -72,6 +73,8 @@ public:
     void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+
+    void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;

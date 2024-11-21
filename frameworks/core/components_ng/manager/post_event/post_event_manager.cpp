@@ -69,10 +69,12 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     auto eventManager = pipelineContext->GetEventManager();
     CHECK_NULL_RETURN(eventManager, false);
     auto scalePoint = touchEvent.CreateScalePoint(pipelineContext->GetViewScale());
+    eventManager->GetEventTreeRecord(EventTreeType::POST_EVENT).AddTouchPoint(scalePoint);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = touchEvent.sourceType;
     touchRestrict.touchEvent = touchEvent;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    touchRestrict.touchTestType = EventTreeType::POST_EVENT;
     auto result = eventManager->PostEventTouchTest(scalePoint, targetNode, touchRestrict);
     if (!result) {
         return false;
@@ -116,6 +118,9 @@ void PostEventManager::HandlePostEvent(const RefPtr<NG::UINode>& targetNode, con
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto eventManager = pipelineContext->GetEventManager();
+    if (touchEvent.type != TouchType::DOWN && touchEvent.type != TouchType::MOVE) {
+        eventManager->GetEventTreeRecord(EventTreeType::POST_EVENT).AddTouchPoint(touchEvent);
+    }
     eventManager->PostEventFlushTouchEventEnd(touchEvent);
     eventManager->PostEventDispatchTouchEvent(touchEvent);
     // when receive UP event, clear DispatchAction which is same targetNode and same id

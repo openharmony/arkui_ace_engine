@@ -67,13 +67,13 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t TABBAR_DEFAULT_WIDTH = 56.f;
 constexpr int32_t TABBAR_DEFAULT_HEIGHT = 56.f;
-const InspectorFilter filter;
 constexpr float BARITEM_SIZE = 10.f;
 constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
 constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr double BIG_DIALOG_WIDTH = 216.0;
 constexpr double MAX_DIALOG_WIDTH = 256.0;
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 
 class TabsTestNg : public TestNG {
 public:
@@ -91,9 +91,10 @@ public:
     void CreateTabContentTabBarStyle(TabBarStyle tabBarStyle);
     void CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle);
     void SwipeToWithoutAnimation(int32_t index);
-    void ClickTo(Offset offset, int32_t index);
-    void MouseTo(MouseAction action, Offset location, bool isHover);
-    void TouchTo(TouchType type, Offset location);
+    void HandleClick(Offset offset, int32_t index);
+    void HandleMouseEvent(MouseAction action, Offset location);
+    void HandleHoverEvent(bool isHover);
+    void HandleTouchEvent(TouchType type, Offset location);
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

@@ -15,6 +15,7 @@
 
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -41,6 +42,11 @@ int32_t Container::SafelyId()
 }
 
 int32_t Container::CurrentIdSafely()
+{
+    return g_id;
+}
+
+int32_t Container::CurrentIdSafelyWithCheck()
 {
     return g_id;
 }
@@ -109,5 +115,39 @@ RefPtr<MockContainer> MockContainer::Current()
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return MockContainer::Current();
+}
+
+void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)
+{
+    displayInfo_ = displayInfo;
+}
+
+RefPtr<DisplayInfo> Container::GetDisplayInfo()
+{
+    return MockContainer::Current()->GetMockDisplayInfo();
+}
+
+void Container::InitIsFoldable() {}
+
+bool Container::IsFoldable()
+{
+    return MockContainer::Current()->GetMockDisplayInfo()->GetIsFoldable();
+}
+
+FoldStatus Container::GetCurrentFoldStatus()
+{
+    return MockContainer::Current()->GetMockDisplayInfo()->GetFoldStatus();
+}
+
+RefPtr<Container> Container::GetFoucsed()
+{
+    RefPtr<Container> foucsContainer;
+    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->IsWindowFocused()) {
+            foucsContainer = container;
+        }
+    });
+    return foucsContainer;
 }
 } // namespace OHOS::Ace

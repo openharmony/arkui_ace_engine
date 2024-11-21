@@ -380,4 +380,10 @@ void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
     CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
     ImageAnalyzerMgr::GetInstance().UpdateOverlayActiveStatus(&overlayData_, status);
 }
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(
+    OnNotifySelectedStatusCallback&& callback)
+{
+    analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
+}
 } // namespace OHOS::Ace

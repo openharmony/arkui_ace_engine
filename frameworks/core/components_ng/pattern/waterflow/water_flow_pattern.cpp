@@ -125,6 +125,28 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
+void WaterFlowPattern::BeforeCreateLayoutWrapper()
+{
+    for (const auto& start : sectionChangeStartPos_) {
+        OnSectionChanged(start);
+    }
+    sectionChangeStartPos_.clear();
+
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
+    
+    if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
+        return;
+    }
+    auto footer = footer_.Upgrade();
+    if (footer && footer->FrameCount() > 0) {
+        layoutInfo_->footerIndex_ = 0;
+    } else {
+        layoutInfo_->footerIndex_ = -1;
+    }
+}
+
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 {
     if (targetIndex_.has_value()) {
@@ -136,15 +158,6 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     } else {
-        int32_t footerIndex = -1;
-        auto footer = footer_.Upgrade();
-        if (footer) {
-            int32_t count = footer->FrameCount();
-            if (count > 0) {
-                footerIndex = 0;
-            }
-        }
-        layoutInfo_->footerIndex_ = footerIndex;
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
@@ -172,6 +185,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 
 void WaterFlowPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     // SetAxis for scroll event
@@ -218,6 +232,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
 
+    FireObserverOnDidScroll(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -227,22 +242,47 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
         FireOnScroll(delta, onDidScroll);
     }
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
-    if (indexChanged) {
-        auto onScrollIndex = eventHub->GetOnScrollIndex();
-        itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
-        if (onScrollIndex) {
-            onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
-        }
-    }
+    auto onScrollIndex = eventHub->GetOnScrollIndex();
+    FireOnScrollIndex(indexChanged, onScrollIndex);
     auto onReachStart = eventHub->GetOnReachStart();
-    if (onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_)) {
-        onReachStart();
-    }
+    FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    if (onReachEnd && layoutInfo_->ReachEnd(prevOffset_)) {
-        onReachEnd();
-    }
+    FireOnReachEnd(onReachEnd);
     OnScrollStop(eventHub->GetOnScrollStop());
+}
+
+void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    FireObserverOnReachStart();
+    CHECK_NULL_VOID(onReachStart);
+    ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+    onReachStart();
+    AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+}
+
+void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
+        FireObserverOnReachEnd();
+    }
+}
+
+void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
+{
+    CHECK_NULL_VOID(indexChanged);
+    itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
+    CHECK_NULL_VOID(onScrollIndex);
+    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -314,7 +354,7 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
     CHECK_NULL_RETURN(host, false);
     auto childCount = host->GetTotalChildCount();
     layoutInfo_->jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
-    //if target index is footer, fix align because it will jump after fillViewport.
+    // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
     }
@@ -356,6 +396,7 @@ void WaterFlowPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollTy
         distance = distance / 2.f;
     }
     UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -447,7 +488,9 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();
-    if (index > EMPTY_JUMP_INDEX && index < GetChildrenCount()) {
+    auto footer = footer_.Upgrade();
+    const int32_t itemCnt = footer ? GetChildrenCount() - footer->FrameCount() : GetChildrenCount();
+    if (index > EMPTY_JUMP_INDEX && index < itemCnt) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
@@ -588,10 +631,6 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
         MarkDirtyNodeSelf();
-    }
-    // footer index only set during first AddFooter call
-    if (footer_.Upgrade()) {
-        layoutInfo_->footerIndex_ = 0;
     }
 }
 
@@ -747,13 +786,5 @@ void WaterFlowPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
-}
-
-void WaterFlowPattern::BeforeCreateLayoutWrapper()
-{
-    for (const auto& start : sectionChangeStartPos_) {
-        OnSectionChanged(start);
-    }
-    sectionChangeStartPos_.clear();
 }
 } // namespace OHOS::Ace::NG

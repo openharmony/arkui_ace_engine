@@ -61,6 +61,8 @@ public:
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
     UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content,
+        napi_value storage, const std::string& contentName) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
@@ -84,7 +86,8 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
-    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -103,6 +106,7 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
@@ -363,6 +367,7 @@ private:
     static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void UnregisterDisplayManagerCallback();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -408,6 +413,9 @@ private:
     bool isUIExtensionAbilityHost_ = false;
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
+
+    SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace

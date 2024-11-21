@@ -48,6 +48,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    clickRecognizer_->SetDistanceThreshold(distanceThreshold_);
     auto sysJudgeFunc = GetSysJudgeFunc();
     if (sysJudgeFunc.has_value()) {
         clickRecognizer_->SetSysGestureJudge(sysJudgeFunc.value());

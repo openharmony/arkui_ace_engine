@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
@@ -52,6 +53,8 @@ enum class TouchType : size_t {
     HOVER_MOVE,
     HOVER_EXIT,
     HOVER_CANCEL,
+    PROXIMITY_IN,
+    PROXIMITY_OUT,
     UNKNOWN,
 };
 
@@ -451,6 +454,12 @@ struct TouchEvent final : public UIInputEvent {
         event.pointers.emplace_back(std::move(point));
         return event;
     }
+
+    bool IsPenHoverEvent() const
+    {
+        return sourceTool == SourceTool::PEN && (type == TouchType::PROXIMITY_IN ||
+        type == TouchType::PROXIMITY_OUT || (type == TouchType::MOVE && NearZero(force)));
+    }
 };
 
 namespace Platform {
@@ -487,6 +496,9 @@ struct TouchRestrict final {
     TouchEvent touchEvent;
 
     std::list<std::string> childTouchTestList;
+
+    // use to dump event tree
+    NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

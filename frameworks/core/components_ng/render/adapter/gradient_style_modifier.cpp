@@ -30,13 +30,14 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
 {
     CHECK_NULL_VOID(colors_);
     CHECK_NULL_VOID(colorStops_);
+    CHECK_NULL_VOID(sizeF_);
 #ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
-    SizeF contentSize(context.width, context.height);
+    SizeF contentSize(sizeF_->Get()[0], sizeF_->Get()[1]);
     PaintGradient(*skCanvas, contentSize);
 #else
     CHECK_NULL_VOID(context.canvas);
-    SizeF contentSize(context.width, context.height);
+    SizeF contentSize(sizeF_->Get()[0], sizeF_->Get()[1]);
     PaintGradient(*context.canvas, contentSize);
 #endif
 }
@@ -50,6 +51,10 @@ void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSi
     auto shader = SkiaDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+    if (!shader) {
+        renderContext->SetBackgroundShader(nullptr);
+        return;
+    }
     renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #else
@@ -61,6 +66,10 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
     auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+    if (!shader) {
+        renderContext->SetBackgroundShader(nullptr);
+        return;
+    }
     renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #endif
@@ -96,20 +105,59 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
             ColorAnimatableArithmetic(gradient));
         AttachProperty(colors_);
     } else {
-        colors_->Set(ColorAnimatableArithmetic(gradient));
+        auto colors = ColorAnimatableArithmetic(gradient);
+        PaddingColors(colors, gradient.GetRepeat());
+        colors_->Set(colors);
     }
     if (!colorStops_) {
         colorStops_ = std::make_shared<Rosen::RSAnimatableProperty<ColorStopAnimatableArithmetic>>(
             ColorStopAnimatableArithmetic(gradient));
         AttachProperty(colorStops_);
     } else {
-        colorStops_->Set(ColorStopAnimatableArithmetic(gradient));
+        auto colorStops = ColorStopAnimatableArithmetic(gradient);
+        PaddingColorStops(colorStops, gradient.GetRepeat());
+        colorStops_->Set(colorStops);
     }
     if (!gradient_) {
         gradient_ = std::make_shared<Rosen::RSProperty<Gradient>>(gradient);
         AttachProperty(gradient_);
     } else {
         gradient_->Set(gradient);
+    }
+}
+
+void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors, bool repeat)
+{
+    if (repeat) {
+        return;
+    }
+    if (colors_->Get().GetColors().size() <= colors.GetColors().size()) {
+        return;
+    }
+    size_t paddingSize = colors_->Get().GetColors().size() - colors.GetColors().size();
+    colors.PaddingColors(paddingSize, Color::TRANSPARENT);
+}
+
+void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat)
+{
+    if (repeat) {
+        return;
+    }
+    if (colorStops_->Get().GetColorStops().size() <= colorStops.GetColorStops().size()) {
+        return;
+    }
+    size_t paddingSize = colorStops_->Get().GetColorStops().size() - colorStops.GetColorStops().size();
+    colorStops.PaddingColorStops(paddingSize, Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT));
+}
+
+void GradientStyleModifier::SetSizeF(const SizeF& size)
+{
+    if (!sizeF_) {
+        sizeF_ = std::make_shared<Rosen::RSAnimatableProperty<Rosen::Vector2f>>(
+            Rosen::Vector2f(size.Width(), size.Height()));
+        AttachProperty(sizeF_);
+    } else {
+        sizeF_->Set(Rosen::Vector2f(size.Width(), size.Height()));
     }
 }
 

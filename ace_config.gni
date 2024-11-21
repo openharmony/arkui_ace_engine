@@ -26,6 +26,9 @@ declare_args() {
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
 
+  # Enable build for new ng pipeline, also will use new flutter
+  enable_ng_build = false
+
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
@@ -37,6 +40,9 @@ declare_args() {
 
   # Enable atomic for building.
   ace_engine_feature_enable_atomic = false
+
+  # Set Instruction Sched Model
+  ace_engine_feature_sched_model = ""
 
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
@@ -55,9 +61,6 @@ declare_args() {
 
   # Enable when build for text engine adapter
   enable_graphic_text_gine = true
-
-  # Don't use currentIdSafely in some function
-  use_origin_scope = false
 
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
@@ -94,6 +97,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+checking_function_root = "//third_party/bounds_checking_function"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
@@ -117,13 +121,7 @@ if ("${current_os}_${current_cpu}" == "mac_arm64") {
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
 if (is_ohos_standard_system) {
-  if (host_cpu == "arm64") {
-    objcopy_default =
-        "//prebuilts/clang/ohos/linux-aarch64/llvm/bin/llvm-objcopy"
-  } else {
-    objcopy_default =
-        "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
-  }
+  objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
 } else if (is_arkui_x) {
   if (host_os == "mac") {
     objcopy_default = objcopy_clang
@@ -196,6 +194,10 @@ if (enable_graphic_text_gine) {
   ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
 }
 
+if (enable_ng_build) {
+  ace_common_defines += [ "NG_BUILD" ]
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.account_os_account)) {
   os_account_exists = true
@@ -247,6 +249,14 @@ if (!defined(global_parts_info) ||
   security_component_enable = false
 }
 
+if (defined(global_parts_info) &&
+    defined(global_parts_info.resourceschedule_ffrt)) {
+  ace_common_defines += [ "FFRT_EXISTS" ]
+  resourceschedule_ffrt_support = true
+} else {
+  resourceschedule_ffrt_support = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.ability_form_fwk)) {
   form_fwk_enable = true
@@ -259,6 +269,14 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = true
 } else {
   uiservice_xcollie_enable = false
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.graphic_graphic_2d_ext)) {
+  aps_enable = true
+  ace_common_defines += [ "APS_ENABLE" ]
+} else {
+  aps_enable = false
 }
 
 if (ace_engine_feature_asbng_path == "") {
@@ -298,11 +316,6 @@ foreach(item, ace_platforms) {
       (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
     current_platform = item
   }
-}
-
-if ((defined(use_origin_scope) && use_origin_scope) ||
-    (defined(force_scope) && force_scope)) {
-  ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
 
 if (ace_engine_feature_enable_split_mode) {

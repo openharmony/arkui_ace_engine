@@ -294,8 +294,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationTestNg003, TestSize.Level1)
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
     auto navBar = AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode());
-    navBar->SetNavBarContentNode(navBarNode);
-    auto contentNode = navBar->GetNavBarContentNode();
+    navBar->SetContentNode(navBarNode);
+    auto contentNode = navBar->GetContentNode();
     ASSERT_NE(navBar, nullptr);
     auto child = NavBarNode::GetOrCreateNavBarNode(
         V2::NAVBAR_ETS_TAG, TEST_DATA, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
@@ -350,7 +350,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationModel.SetHideTitleBar(false);
+    navigationModel.SetHideTitleBar(false, false);
     EXPECT_EQ(navBarLayoutProperty->GetHideTitleBar().value_or(false), false);
 }
 

@@ -25,12 +25,12 @@ namespace {} // namespace
 
 class TabsCommonTestNg : public TabsTestNg {
 public:
-    AssertionResult IsEqualNextFocusNode(FocusStep step,
-        const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
+    AssertionResult IsEqualNextFocusNode(
+        FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
 };
 
-AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
-    const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
+AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(
+    FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
 {
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
@@ -290,10 +290,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabBarAccessibilityProperty007
-* @tc.desc: test SetSpecificSupportAction
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarAccessibilityProperty007
+ * @tc.desc: test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
 {
     /**
@@ -348,10 +348,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabBarAccessibilityProperty009
-* @tc.desc: test SetSpecificSupportAction
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarAccessibilityProperty009
+ * @tc.desc: test SetSpecificSupportAction
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
 {
     /**
@@ -467,6 +467,7 @@ HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty001, TestSize.Level1)
     auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
     auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
     auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
     accessibilityProperty->ToJsonValue(json, filter);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
@@ -503,6 +504,7 @@ HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty002, TestSize.Level1)
     auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
     auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
     auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
     accessibilityProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("label"), textTest);
 }

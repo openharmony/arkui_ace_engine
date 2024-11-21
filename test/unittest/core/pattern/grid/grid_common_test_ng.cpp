@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1264,6 +1265,49 @@ HWTEST_F(GridCommonTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(gridItemPattern->IsSelected());
     gridItemAccessibilityProperty->ActActionClearSelection();
     EXPECT_FALSE(gridItemPattern->IsSelected());
+}
+
+/**
+ * @tc.name: PerformActionTest002
+ * @tc.desc: Grid AccessibilityPerformAction test ScrollForward and ScrollBackward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. When grid is not Scrollable
+     * @tc.expected: can not scrollpage
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+    accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
+    accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
+
+    /**
+     * @tc.steps: step2. When grid is Scrollable
+     * @tc.expected: can scrollpage
+     */
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(40);
+    CreateDone(frameNode_);
+    accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, -GRID_HEIGHT);
+    accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
 }
 
 /**

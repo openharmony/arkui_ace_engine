@@ -18,106 +18,79 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
-std::list<int32_t> WaterFlowLayoutBase::LayoutCachedItem(
-    LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount)
+void WaterFlowLayoutBase::PreloadItems(
+    LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount)
 {
-    std::list<int32_t> predictBuildList;
-    auto currIndex = info->NodeIdx(info->endIndex_ + 1);
-    auto totalCount = layoutWrapper->GetTotalChildCount();
-    for (int32_t i = 0; i < cacheCount && currIndex + i < totalCount; ++i) {
-        int32_t index = currIndex + i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
-        if (!wrapper) {
-            predictBuildList.emplace_back(index);
-            continue;
-        }
-        wrapper->SetActive(false);
+    if (cacheCount <= 0) {
+        return;
     }
-
-    currIndex = info->NodeIdx(info->FirstIdx() - 1);
-    for (int32_t i = 0; i < cacheCount && currIndex - i >= info->NodeIdx(0); ++i) {
-        int32_t index = currIndex - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
-        if (!wrapper) {
-            predictBuildList.emplace_back(index);
-            continue;
-        }
-        wrapper->SetActive(false);
-    }
-    return predictBuildList;
-}
-
-void WaterFlowLayoutBase::PreBuildItems(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info,
-    const LayoutConstraintF& constraint, int32_t cachedCount)
-{
-    if (cachedCount > 0) {
-        auto items = LayoutCachedItem(layoutWrapper, info, cachedCount);
-        if (!items.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { items, constraint });
-        } else {
-            auto host = layoutWrapper->GetHostNode();
-            CHECK_NULL_VOID(host);
-            auto pattern = host->GetPattern<WaterFlowPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetPredictLayoutParam(std::nullopt);
-        }
-    }
-}
-
-bool WaterFlowLayoutBase::PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint)
-{
-    CHECK_NULL_RETURN(wrapper, false);
-    wrapper->SetActive(false);
-
-    auto frameNode = wrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-    FrameNode::ProcessOffscreenNode(frameNode);
-    return true;
-}
-
-void WaterFlowLayoutBase::PostIdleTask(RefPtr<FrameNode> frameNode, const PredictLayoutParam& param)
-{
+    auto frameNode = host->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetPredictLayoutParam()) {
-        pattern->SetPredictLayoutParam(param);
+    const bool taskRegistered = !pattern->PreloadListEmpty();
+    pattern->SetPreloadList(GeneratePreloadList(info, host, cacheCount));
+    if (pattern->PreloadListEmpty()) {
         return;
     }
-    pattern->SetPredictLayoutParam(param);
+
+    pattern->SetCacheLayoutAlgo(Claim(this));
+    if (taskRegistered) {
+        return;
+    }
+    PostIdleTask(frameNode);
+}
+
+std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
+    const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount)
+{
+    std::list<int32_t> preloadList;
+    const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
+    for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
+        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+            preloadList.emplace_back(i);
+        }
+    }
+
+    const int32_t startBound = std::max(0, info->startIndex_ - cacheCount);
+    for (int32_t i = info->FirstIdx() - 1; i >= startBound; --i) {
+        if (!host->GetChildByIndex(info->NodeIdx(i), true)) {
+            preloadList.emplace_back(i);
+        }
+    }
+    return preloadList;
+}
+
+void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
+{
     auto* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ACE_SCOPED_TRACE("WaterFlow predict");
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    context->AddPredictTask([weak = WeakPtr(frameNode)](int64_t deadline, bool canUseLongPredictTask) {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern<WaterFlowPattern>();
         CHECK_NULL_VOID(pattern);
-        if (!pattern->GetPredictLayoutParam().has_value()) {
-            return;
-        }
+
+        auto&& algo = pattern->GetCacheLayoutAlgo();
+        CHECK_NULL_VOID(algo);
+        algo->StartCacheLayout();
+
         bool needMarkDirty = false;
-        auto param = pattern->GetPredictLayoutParam().value();
-        for (auto it = param.items.begin(); it != param.items.end();) {
+        auto items = pattern->MovePreloadList();
+        for (auto it = items.begin(); it != items.end(); ++it) {
             if (GetSysTimestamp() > deadline) {
+                pattern->SetPreloadList(std::list<int32_t>(it, items.end()));
+                PostIdleTask(host);
                 break;
             }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
-            if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
-                break;
-            }
-            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
-            param.items.erase(it++);
+            ACE_SCOPED_TRACE("Preload FlowItem %d", *it);
+            ScopedLayout scope(host->GetContext());
+            needMarkDirty |= algo->AppendCacheItem(RawPtr(host), *it, deadline);
         }
         if (needMarkDirty) {
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
-        pattern->SetPredictLayoutParam(std::nullopt);
-        if (!param.items.empty()) {
-            WaterFlowLayoutBase::PostIdleTask(frameNode, param);
-            pattern->SetPredictLayoutParam(param);
-        }
+        algo->EndCacheLayout();
     });
 }
 

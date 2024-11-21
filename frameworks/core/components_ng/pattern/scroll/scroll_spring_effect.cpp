@@ -42,6 +42,9 @@ void ScrollSpringEffect::ProcessScrollOver(double velocity)
         !initTrailingCallback_ || !scrollable_) {
         return;
     }
+    if (onWillStartSpringCallback_) {
+        onWillStartSpringCallback_();
+    }
     double position = currentPositionCallback_();
     double minExtent = leadingCallback_();
     double maxExtent = trailingCallback_();
@@ -59,6 +62,9 @@ void ScrollSpringEffect::ProcessSpringUpdate()
     if (!currentPositionCallback_ || !leadingCallback_ || !trailingCallback_ || !initLeadingCallback_ ||
         !initTrailingCallback_ || !scrollable_) {
         return;
+    }
+    if (onWillStartSpringCallback_) {
+        onWillStartSpringCallback_();
     }
     double position = currentPositionCallback_();
     double minExtent = leadingCallback_();

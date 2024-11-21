@@ -15,6 +15,9 @@
 
 class RefInfo {
   private static obj2ref: WeakMap<object, object> = new WeakMap();
+  private static setMapProxy: SetMapProxyHandler = new SetMapProxyHandler(true);
+  private static arrayProxy: ArrayProxyHandler = new ArrayProxyHandler(true);
+  private static objectProxy: ObjectProxyHandler = new ObjectProxyHandler(true);
 
   static get(target: Object): any {
     if (!target || typeof target !== 'object') {
@@ -29,13 +32,12 @@ class RefInfo {
     let ret = RefInfo.obj2ref.get(target);
     if (!ret) {
       if (Array.isArray(target) || SendableType.isArray(target)) {
-        ret = { proxy: new Proxy(target, ObserveV2.arrayHandlerDeepObserved) };
-      } else if (target instanceof Set || SendableType.isSet(target) || target instanceof Map || SendableType.isMap(target)) {
-        ret = { proxy: new Proxy(target, ObserveV2.setMapHandlerDeepObserved) };
-      } else if (target instanceof Date) {
-        ret = { proxy: new Proxy(target, ObserveV2.dateHandlerDeepObserved) };
+        ret = { proxy: new Proxy(target, RefInfo.arrayProxy) };
+      } else if (target instanceof Set || SendableType.isSet(target) || 
+                 target instanceof Map || SendableType.isMap(target)) {
+        ret = { proxy: new Proxy(target, RefInfo.setMapProxy) };
       } else {
-        ret = { proxy: new Proxy(target, ObserveV2.normalObjectHandlerDeepObserved) };
+        ret = { proxy: new Proxy(target, RefInfo.objectProxy) };
       }
       RefInfo.obj2ref.set(target, ret);
     }

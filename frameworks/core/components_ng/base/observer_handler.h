@@ -163,7 +163,7 @@ public:
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
-    using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
+    using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
@@ -173,8 +173,8 @@ public:
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
-    using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
-    void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
+    using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
+    void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -189,8 +189,8 @@ private:
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
-    DensityHandleFunc densityHandleFunc_;
-    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
+    DensityHandleFunc densityHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;

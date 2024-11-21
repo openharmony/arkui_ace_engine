@@ -973,4 +973,68 @@ HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
     auto testRangeInfo = styledStringController->GetSelection();
     ASSERT_EQ(testRangeInfo.start_, 0);
 }
+
+/**
+ * @tc.name: InsertValueInStyledString001
+ * @tc.desc: test RichEditorPattern InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextStyle style;
+    style.SetLineHeight(LINE_HEIGHT_VALUE);
+    style.SetLetterSpacing(LETTER_SPACING);
+    style.SetFontFeatures(TEXT_FONTFEATURE);
+
+    UpdateSpanStyle updateSpanStyle;
+
+    std::string content = "TEST123";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = std::nullopt;
+    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->InsertValueInStyledString("abc");
+
+    ASSERT_EQ(richEditorPattern->typingTextStyle_.has_value(), true);
+}
+
+/**
+ * @tc.name: DeleteValueInStyledString001
+ * @tc.desc: test RichEditorPattern DeleteValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->DeleteValueInStyledString(0, 10, true);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->DeleteValueInStyledString(0, 10, true);
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->DeleteValueInStyledString(0, 10, false);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->DeleteValueInStyledString(0, 10, false);
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+}
 } // namespace OHOS::Ace::NG

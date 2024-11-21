@@ -67,6 +67,8 @@ public:
         overScroll_ = value;
     }
 
+    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.
@@ -74,6 +76,13 @@ private:
      * @param frameSize of WaterFlow component.
      */
     void Init(const SizeF& frameSize);
+
+    /**
+     * @brief check if any items in view have changed height.
+     *
+     * @return index of the first dirty item. -1 if no dirty item found.
+     */
+    int32_t CheckDirtyItem() const;
 
     /**
      * @brief init regular WaterFlow with a single segment.
@@ -108,8 +117,10 @@ private:
      * If user has defined a size for any FlowItem, use that size instead of calling child->Measure.
      *
      * @param targetIdx index of the last FlowItem to measure.
+     * @param cacheDeadline when called during a cache layout, always measure the items and return early if deadline is
+     * reached.
      */
-    void MeasureToTarget(int32_t targetIdx);
+    void MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline);
 
     /**
      * @brief Helper to measure a single FlowItems.
@@ -120,8 +131,8 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(
-        const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const;
+    RefPtr<LayoutWrapper> MeasureItem(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx,
+        float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -156,7 +167,7 @@ private:
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    float postJumpOffset_ = 0.0f;
+    std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 

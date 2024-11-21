@@ -61,7 +61,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetLongestLine() > paintWrapper->GetContentSize().Width()) {
+        if (pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
             textContentModifier_->StartTextRace();
         } else {
             textContentModifier_->StopTextRace();
@@ -69,19 +69,40 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         textContentModifier_->StopTextRace();
     }
+
+    // Privacy masking.
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-    textContentModifier_->SetObscured(reasons);
-    auto spanItemChildren = pattern->GetSpanItemChildren();
-    textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
-    auto wideTextLength = pattern->GetDisplayWideTextLength();
-    std::vector<RectF> drawObscuredRects;
-    if (wideTextLength != 0) {
-        drawObscuredRects = pManager->GetRects(0, wideTextLength);
+    bool ifPaintObscuration = std::any_of(reasons.begin(), reasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (ifPaintObscuration) {
+        UpdateObscuredRects();
+    } else {
+        textContentModifier_->SetIfPaintObscuration(false);
     }
-    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
+
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
+}
+
+void TextPaintMethod::UpdateObscuredRects()
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto pManager = pattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+
+    auto spanItemChildren = pattern->GetSpanItemChildren();
+    auto ifPaintObscuration = spanItemChildren.empty();
+    textContentModifier_->SetIfPaintObscuration(ifPaintObscuration);
+    CHECK_NULL_VOID(ifPaintObscuration);
+
+    auto wideTextLength = pattern->GetDisplayWideTextLength();
+    std::vector<RectF> drawObscuredRects;
+    if (wideTextLength != 0 && ifPaintObscuration) {
+        drawObscuredRects = pManager->GetRects(0, wideTextLength);
+    }
+    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
 }
 
 RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
@@ -111,13 +132,12 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     std::vector<RectF> selectedRects;
     if (selection.GetTextStart() != selection.GetTextEnd()) {
         auto rects = pManager->GetParagraphsRects(selection.GetTextStart(), selection.GetTextEnd());
-        auto paragraphInfos = pManager->GetParagraphs();
-        selectedRects = CalculateSelectedRect(rects, paragraphInfos, contentRect.Width());
+        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
     }
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
     textOverlayModifier_->SetSelectedRects(selectedRects);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -132,17 +152,13 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     }
 }
 
-std::vector<RectF> TextPaintMethod::CalculateSelectedRect(const std::vector<std::vector<RectF>>& selectedRects,
-    const std::list<ParagraphManager::ParagraphInfo>& paragraphInfos, float contentWidth)
+std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
+    const std::vector<std::pair<std::vector<RectF>, TextDirection>>& selectedRects, float contentWidth)
 {
     std::vector<RectF> result;
-    if (paragraphInfos.size() != selectedRects.size()) {
-        return result;
-    }
-    int32_t index = 0;
-    for (const auto& info : paragraphInfos) {
-        std::vector<RectF> rects = selectedRects[index];
-        TextBase::CalculateSelectedRect(rects, contentWidth, info.paragraphStyle.direction);
+    for (const auto& info : selectedRects) {
+        auto rects = info.first;
+        TextBase::CalculateSelectedRect(rects, contentWidth, info.second);
         result.insert(result.end(), rects.begin(), rects.end());
     }
     return result;

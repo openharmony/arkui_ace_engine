@@ -51,12 +51,12 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto contentNode = GetNavBarContentNode();
+    auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        SetNavBarContentNode(contentNode);
+        SetContentNode(contentNode);
         AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -67,54 +67,6 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
         }
     }
     contentNode->AddChild(child);
-}
-
-std::string NavBarNode::GetBarItemsString(bool isMenu) const
-{
-    auto jsonValue = JsonUtil::Create(true);
-    auto parentNodeOfBarItems = isMenu ? DynamicCast<FrameNode>(GetMenu()) : DynamicCast<FrameNode>(GetToolBarNode());
-    CHECK_NULL_RETURN(parentNodeOfBarItems, "");
-    if (!parentNodeOfBarItems->GetChildren().empty()) {
-        auto jsonOptions = JsonUtil::CreateArray(true);
-        int32_t i = 0;
-        for (auto iter = parentNodeOfBarItems->GetChildren().begin(); iter != parentNodeOfBarItems->GetChildren().end();
-             ++iter, i++) {
-            auto jsonToolBarItem = JsonUtil::CreateArray(true);
-            auto barItemNode = DynamicCast<BarItemNode>(*iter);
-            if (!barItemNode) {
-                jsonToolBarItem->Put("value", "");
-                jsonToolBarItem->Put("icon", "");
-                continue;
-            }
-            auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
-            if (iconNode) {
-                auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-                if (!imageLayoutProperty || !imageLayoutProperty->HasImageSourceInfo()) {
-                    jsonToolBarItem->Put("icon", "");
-                } else {
-                    jsonToolBarItem->Put("icon", imageLayoutProperty->GetImageSourceInfoValue().GetSrc().c_str());
-                }
-            } else {
-                jsonToolBarItem->Put("icon", "");
-            }
-            auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
-            if (textNode) {
-                auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-                if (!textLayoutProperty) {
-                    jsonToolBarItem->Put("value", "");
-                } else {
-                    jsonToolBarItem->Put("value", textLayoutProperty->GetContentValue("").c_str());
-                }
-            } else {
-                jsonToolBarItem->Put("value", "");
-            }
-            auto index_ = std::to_string(i);
-            jsonOptions->Put(index_.c_str(), jsonToolBarItem);
-        }
-        jsonValue->Put("items", jsonOptions);
-        return jsonValue->ToString();
-    }
-    return "";
 }
 
 void NavBarNode::InitSystemTransitionPop()
@@ -165,5 +117,14 @@ void NavBarNode::StartSystemTransitionPop()
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigation = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigation, false);
+    auto lastStandardIndex = navigation->GetLastStandardIndex();
+    bool isInvisible = navigation->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0;
+    return isInvisible;
 }
 } // namespace OHOS::Ace::NG

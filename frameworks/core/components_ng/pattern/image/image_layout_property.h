@@ -150,10 +150,10 @@ public:
         UpdateBaselineOffset(Dimension(json->GetDouble("baselineOffset")));
         /* register image frame node to pipeline context to receive memory level notification and window state change
          * notification */
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddNodesToNotifyMemoryLevel(frameNode->GetId());
         pipeline->AddWindowStateChangedCallback(frameNode->GetId());
         LayoutProperty::FromJson(json);

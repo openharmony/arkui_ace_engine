@@ -119,29 +119,29 @@ void RichEditorCommonTestNg::ClearSpan()
 void RichEditorCommonTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
 {
     EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
-        .WillRepeatedly([](const std::string& text, int8_t offset) -> int8_t {
-            if (text.empty()) {
-                return DEFAULT_RETURN_VALUE;
-            }
-            if (text.length() <= WORD_LIMIT_LEN) {
-                return WORD_LIMIT_RETURN;
-            } else {
-                return BEYOND_LIMIT_RETURN;
-            }
-        });
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
+                if (text.empty()) {
+                    return DEFAULT_RETURN_VALUE;
+                }
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return WORD_LIMIT_RETURN;
+                } else {
+                    return BEYOND_LIMIT_RETURN;
+                }
+            });
 
     EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
-        .WillRepeatedly([](const std::string& text, int8_t offset) -> std::vector<int8_t> {
-            if (text.empty()) {
-                return std::vector<int8_t> { -1, -1 };
-            }
+            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
+                if (text.empty()) {
+                    return std::vector<int8_t> { -1, -1 };
+                }
 
-            if (text.length() <= WORD_LIMIT_LEN) {
-                return std::vector<int8_t> { 2, 3 };
-            } else {
-                return std::vector<int8_t> { 0, 2 };
-            }
-        });
+                if (text.length() <= WORD_LIMIT_LEN) {
+                    return std::vector<int8_t> { 2, 3 };
+                } else {
+                    return std::vector<int8_t> { 0, 2 };
+                }
+            });
 }
 
 void RichEditorCommonTestNg::RequestFocus()
@@ -172,7 +172,8 @@ void RichEditorCommonTestNg::OnDrawVerify(
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
+    auto contentRect = richEditorNode_->GetGeometryNode()->GetContentRect();
+    richEditorNode_->GetGeometryNode()->SetContentSize({100, 100});
     if (SelectSpanType::TYPESPAN == type) {
         AddSpan(text);
     } else if (SelectSpanType::TYPEIMAGE == type) {
@@ -247,5 +248,6 @@ void RichEditorCommonTestNg::OnDrawVerify(
      */
     ret = controller->GetShowMagnifier();
     EXPECT_FALSE(ret);
+    richEditorNode_->GetGeometryNode()->SetContentSize(contentRect.GetSize());
 }
 } // namespace OHOS::Ace::NG

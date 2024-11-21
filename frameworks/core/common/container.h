@@ -37,6 +37,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 #include "core/common/display_info.h"
+#include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
@@ -186,22 +187,13 @@ public:
         return Orientation::UNSPECIFIED;
     }
 
-    virtual RefPtr<DisplayInfo> GetDisplayInfo()
-    {
-        return MakeRefPtr<DisplayInfo>();
-    }
+    virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
-    virtual void InitIsFoldable() {}
+    virtual void InitIsFoldable();
 
-    virtual bool IsFoldable() const
-    {
-        return false;
-    }
+    virtual bool IsFoldable();
 
-    virtual FoldStatus GetCurrentFoldStatus()
-    {
-        return FoldStatus::UNKNOWN;
-    }
+    virtual FoldStatus GetCurrentFoldStatus();
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()
     {
@@ -599,6 +591,11 @@ public:
     void SetUIContentType(UIContentType uIContentType)
     {
         uIContentType_ = uIContentType;
+    }
+
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
     }
 
 private:

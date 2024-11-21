@@ -630,6 +630,20 @@ class UIContext {
         return windowName
     }
 
+    getWindowWidthBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint;
+    }
+
+    getWindowHeightBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowHeightBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint;
+    }
+
     postFrameCallback(frameCallback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().common.postFrameCallback(frameCallback, 0);
@@ -656,7 +670,7 @@ class UIContext {
         if (dynamicSceneInfo.tag == 'Swiper') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
-            return SwiperDynamicSyncScene.Create(nodeRef);
+            return SwiperDynamicSyncScene.createInstances(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
@@ -675,14 +689,38 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return maxFontScale;
     }
+
+    bindTabsToScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    bindTabsToNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
  
 class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
      * initialize with instanceId.
-     * @param nodeRef obtained on the c++ side.
-     * @param frameRateRange frameRateRange
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {Object} frameRateRange - frameRateRange
      * @since 12
      */
     constructor(nodeRef, frameRateRange) {
@@ -692,23 +730,40 @@ class DynamicSyncScene {
             this.nodePtr = this.nodeRef.getNativeHandle();
         }
     }
- 
+
+    /**
+     * Get the frame rate range.
+     * @returns {Object} The frame rate range.
+     */
     getFrameRateRange() {
         return this.frameRateRange;
     }
 }
  
 class SwiperDynamicSyncScene extends DynamicSyncScene {
-    static Create(nodeRef) {
-        let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
-        return swiperDynamicSyncScene;
+    /**
+     * Create instances of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @returns {SwiperDynamicSyncScene[]} Array of SwiperDynamicSyncScene instances.
+     */
+    static createInstances(nodeRef) {
+        return [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
     }
 
+    /**
+     * Construct new instance of SwiperDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @param {number} type - type of the scenes.
+     */
     constructor(nodeRef, type) {
         super(nodeRef, { min: 0, max: 120, expected: 120 });
         this.type = type;
     }
 
+    /**
+     * Set the frame rate range.
+     * @param {Object} frameRateRange - The new frame rate range.
+     */
     setFrameRateRange(frameRateRange) {
         this.frameRateRange = { ...frameRateRange };
         getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
@@ -727,12 +782,18 @@ class FocusController {
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
     }
     clearFocus() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.clearFocus();
         __JSScopeUtil__.restoreInstanceId();
     }
 
     requestFocus(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();

@@ -107,7 +107,7 @@ const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         return;
@@ -151,7 +151,7 @@ RefPtr<FrameNode> BuildPasteButton(
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, pasteButton);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, pasteButton);
@@ -219,7 +219,7 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
             menuItem.end = end;
             result = onCreateCallback.onMenuItemClick(menuItem);
         }
-        if (!result) {
+        if (!result && onPaste) {
             onPaste();
         }
     };
@@ -239,7 +239,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     CHECK_NULL_RETURN(textLayoutProperty, button);
     textLayoutProperty->UpdateContent(data);
     text->MountToParent(button);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, button);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, button);
@@ -278,7 +278,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-                auto pipeline = PipelineContext::GetCurrentContext();
+                auto pipeline = PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -306,7 +306,7 @@ void BindButtonClickEvent(const RefPtr<FrameNode>& button, const MenuOptionsPara
 {
     auto callback = menuOption.action;
     button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId](GestureEvent& /*info*/) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -337,7 +337,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     auto data = menuOption.content.value_or("");
     textLayoutProperty->UpdateContent(data);
     text->MountToParent(button);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, button);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, button);
@@ -379,7 +379,7 @@ void BindCreateMenuItemClickEvent(const RefPtr<FrameNode>& button, const MenuOpt
 {
     button->GetOrCreateGestureEventHub()->SetUserOnClick(
         [menuOptionsParam, systemCallback, onCreateCallback, overlayId](GestureEvent& /*info*/) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetSelectOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -420,7 +420,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     const std::function<void()>& systemCallback, const OnMenuItemCallback& menuItemCallback, int32_t overlayId,
     float& remainderWidth)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, nullptr);
@@ -477,7 +477,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, button);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, button);
@@ -515,7 +515,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
         buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
     }
     button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId, isMoreButton](GestureEvent& /*info*/) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -532,7 +532,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
 
 OffsetF GetPageOffset()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_RETURN(stageManager, OffsetF());
@@ -571,7 +571,7 @@ bool IsSystemMenuItemEnabled(const std::shared_ptr<SelectOverlayInfo>& info, con
 
 std::string GetSystemIconPath(const std::string& id, const std::string& iconPath)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, iconPath);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, iconPath);
@@ -595,7 +595,7 @@ std::string GetSystemIconPath(const std::string& id, const std::string& iconPath
 
 std::string GetItemContent(const std::string& id, const std::string& content)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, content);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, content);
@@ -637,7 +637,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
             systemEvent = clickCallback->second;
         }
         auto callback = [onCreateCallback = info->onCreateCallback, systemEvent, item]() {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetSelectOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -913,6 +913,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
     selectMenu_->MarkModifyDone();
 }
 
+
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
 {
     CHECK_NULL_VOID(!isDoingAnimation_);
@@ -948,7 +949,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     auto modifier = pattern->GetOverlayModifier();
     CHECK_NULL_VOID(modifier);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
 
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -957,7 +958,6 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -1009,6 +1009,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 void SelectOverlayNode::BackAnimation(bool noAnimation)
@@ -1034,13 +1035,12 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     auto modifier = pattern->GetOverlayModifier();
     CHECK_NULL_VOID(modifier);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
 
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
 
-    isDoingAnimation_ = true;
     isExtensionMenu_ = false;
     auto menuWidth = pattern->GetMenuWidth();
 
@@ -1101,13 +1101,14 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
+    isDoingAnimation_ = true;
 }
 
 std::function<void()> SelectOverlayNode::GetDefaultOptionCallback()
 {
     auto id = GetId();
     auto defaultOptionCallback = [overlayId = id]() {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -1120,7 +1121,7 @@ std::function<void()> SelectOverlayNode::GetDefaultOptionCallback()
 std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<OptionParam> params;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, params);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto defaultOptionCallback = GetDefaultOptionCallback();
@@ -1185,7 +1186,7 @@ void SelectOverlayNode::addMenuOptionItemsParams(
     for (auto item : info->menuOptionItems) {
         if (itemNum >= index) {
             auto callback = [overlayId = id, func = std::move(item.action)]() {
-                auto pipeline = PipelineContext::GetCurrentContext();
+                auto pipeline = PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -1215,7 +1216,7 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
 {
     CHECK_NULL_VOID(!params.empty());
     CHECK_NULL_VOID(backButton_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto buttonId = backButton_->GetId();
     MenuParam menuParam;
@@ -1272,7 +1273,7 @@ std::function<void()> SelectOverlayNode::CreateExtensionMenuOptionCallback(int32
     const OnMenuItemCallback& onCreateCallback, const std::function<void()>& systemEvent, const MenuOptionsParam& item)
 {
     auto callback = [overlayId = id, onCreateCallback = onCreateCallback, systemEvent, item]() {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -1360,7 +1361,7 @@ void SelectOverlayNode::CreateToolBar()
 
 void SelectOverlayNode::SelectMenuAndInnerInitProperty()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
@@ -1431,11 +1432,16 @@ void SelectOverlayNode::InitSelectMenuStatus(
 
 void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 
@@ -1472,6 +1478,7 @@ void SelectOverlayNode::ShowCut(float maxWidth, float& allocatedSize, std::share
         float buttonWidth = 0.0f;
         auto button = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId(), buttonWidth);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1492,6 +1499,7 @@ void SelectOverlayNode::ShowCopy(float maxWidth, float& allocatedSize, std::shar
         float buttonWidth = 0.0f;
         auto button = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId(), buttonWidth);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1516,6 +1524,7 @@ void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::sha
         auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
             info->menuCallback.onPaste, GetId(), buttonWidth);
 #endif
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1536,6 +1545,7 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
         float buttonWidth = 0.0f;
         auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
             info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1559,6 +1569,7 @@ void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::s
         auto theme = pipeline->GetTheme<TextOverlayTheme>();
         CHECK_NULL_VOID(theme);
         auto button = BuildButton(theme->GetAIWrite(), info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1583,6 +1594,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         float buttonWidth = 0.0f;
         auto buttonShare = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonShare);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonShare->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1594,6 +1606,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         auto buttonTranslase = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonTranslase);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonTranslase->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1605,6 +1618,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         auto buttonSearch = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), nullptr, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(buttonSearch);
         if (maxWidth - allocatedSize >= buttonWidth) {
             buttonSearch->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1625,12 +1639,13 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
     if (info->menuInfo.showCameraInput) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextOverlayTheme>();
         CHECK_NULL_VOID(theme);
         auto button =
             BuildButton(theme->GetCameraInput(), info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
+        CHECK_NULL_VOID(button);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1662,6 +1677,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     }
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(moreButton);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
@@ -1689,6 +1705,9 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
 #ifdef OHOS_PLATFORM
             float buttonWidth = 0.0f;
             button = CreatePasteButtonForCreateMenu(info, id, item, buttonWidth);
+            if (!button) {
+                continue;
+            }
             if (remainderWidth >= buttonWidth) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
@@ -1727,26 +1746,27 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<MenuItemParam> systemItemParams;
-    {
+    if (info->menuInfo.showCopy || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, BUTTON_COPY);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showPaste || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, BUTTON_PASTE);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showCut || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, BUTTON_CUT);
         systemItemParams.emplace_back(param);
     }
 
-    {
+    if (info->menuInfo.showCopyAll || info->isUsingMouse) {
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, systemItemParams);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, systemItemParams);
@@ -1878,6 +1898,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
         auto backButton = BuildMoreOrBackButton(GetId(), true);
+        CHECK_NULL_VOID(backButton);
         backButton->MountToParent(selectMenuInner_);
         // add back button
         if (!backButton_) {
@@ -1894,7 +1915,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
 void SelectOverlayNode::SetSelectMenuInnerSize()
 {
     CHECK_NULL_VOID(selectMenuInner_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
@@ -1917,6 +1938,7 @@ void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOption
         }
         float extensionOptionWidth = 0.0f;
         auto button = BuildButton(item, GetId(), extensionOptionWidth);
+        CHECK_NULL_VOID(button);
         allocatedSize += extensionOptionWidth;
         if (allocatedSize > maxWidth) {
             button.Reset();
@@ -1970,7 +1992,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     OffsetF pageOffset;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
@@ -2275,7 +2297,7 @@ void SelectOverlayNode::SetBackButtonOpacity(float value)
 
 void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -2286,7 +2308,7 @@ void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged)
 
 void SelectOverlayNode::SwitchToOverlayMode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_VOID(overlayManager);

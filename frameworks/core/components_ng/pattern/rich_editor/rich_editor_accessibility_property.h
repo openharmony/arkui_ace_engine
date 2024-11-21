@@ -29,6 +29,8 @@ public:
 
     bool IsEditable() const override;
 
+    std::string GetHintText() const override;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

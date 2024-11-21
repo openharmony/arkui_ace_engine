@@ -337,28 +337,6 @@ HWTEST_F(WebPatternFocusTestNg, UnRegisterTextBlurCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitAiEngine
- * @tc.desc: InitAiEngine.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternFocusTestNg, InitAiEngine, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->InitAiEngine();
-#endif
-}
-
-/**
  * @tc.name: InitializeAccessibility
  * @tc.desc: InitializeAccessibility.
  * @tc.type: FUNC
@@ -378,7 +356,7 @@ HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->InitializeAccessibility();
-    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 
@@ -402,7 +380,7 @@ HWTEST_F(WebPatternFocusTestNg, UninitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->UninitializeAccessibility();
-    ASSERT_NE(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 
@@ -1663,4 +1641,4 @@ HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest002, Tes
     EXPECT_TRUE(webPattern->scrollableParentInfo_.hasParent);
 #endif
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

@@ -468,8 +468,7 @@ RefPtr<Ace::PixelMap> CanvasRenderingContext2DModelImpl::GetPixelMap(const Image
     for (uint32_t i = 0; i < finalHeight; i++) {
         for (uint32_t j = 0; j < finalWidth; j++) {
             uint32_t idx = i * finalWidth + j;
-            Color pixel = canvasData->data[idx];
-            data[idx] = pixel.GetValue();
+            data[idx] = canvasData->data[idx];
         }
     }
 
@@ -496,10 +495,11 @@ void CanvasRenderingContext2DModelImpl::GetImageDataModel(const ImageSize& image
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+            Color color = Color(data->data[idx]);
+            buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+            buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+            buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+            buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
         }
     }
 }
@@ -510,27 +510,23 @@ TextMetrics CanvasRenderingContext2DModelImpl::GetMeasureTextMetrics(const Paint
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.
-void CanvasRenderingContext2DModelImpl::GetWidth(RefPtr<AceType>& canvasPattern, double& width)
+void CanvasRenderingContext2DModelImpl::GetWidth(double& width)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
-    width = pool->GetWidth();
+    CHECK_NULL_VOID(pattern_);
+    width = pattern_->GetWidth();
 }
 
-void CanvasRenderingContext2DModelImpl::GetHeight(RefPtr<AceType>& canvasPattern, double& height)
+void CanvasRenderingContext2DModelImpl::GetHeight(double& height)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
-    height = pool->GetHeight();
+    CHECK_NULL_VOID(pattern_);
+    height = pattern_->GetHeight();
 }
 
-void CanvasRenderingContext2DModelImpl::SetTransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern)
+void CanvasRenderingContext2DModelImpl::SetTransferFromImageBitmap(RefPtr<AceType> offscreenCPattern)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
+    CHECK_NULL_VOID(pattern_);
     auto offscreenCanvas = AceType::DynamicCast<OffscreenCanvas>(offscreenCPattern);
     CHECK_NULL_VOID(offscreenCanvas);
-    pool->TransferFromImageBitmap(offscreenCanvas);
+    pattern_->TransferFromImageBitmap(offscreenCanvas);
 }
 } // namespace OHOS::Ace::Framework

@@ -37,7 +37,7 @@ class ChainAnimationNode : public AceType {
 public:
     ChainAnimationNode(
         int32_t index, float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty);
-    void SetDelta(float delta, float duration);
+    void SetDelta(float delta, float spaceDelta, float duration);
     float GetDelta() const;
     float GetDeltaPredict(float delta, float duration);
     bool TickAnimation(float duration);
@@ -59,6 +59,7 @@ private:
     float space_;
     float maxSpace_;
     float minSpace_;
+    float spaceDelta_ = 0.0f;
     float curPosition_ = 0.0f;
     float curVelocity_ = 0.0f;
 };
@@ -68,7 +69,7 @@ class ChainAnimation : public AceType {
 
 public:
     ChainAnimation(float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty);
-    void SetDelta(float delta, bool isOverDrag);
+    void SetDelta(float delta, float overOffset);
     float GetValue(int32_t index);
     float GetValuePredict(int32_t index, float delta);
     float SetControlIndex(int32_t index);
@@ -105,11 +106,10 @@ public:
     {
         return space_;
     }
-    void SetOverDrag(bool isOverDrag);
 
     static constexpr float DEFAULT_CONDUCTIVITY = 0.7f;
     static constexpr float DEFAULT_INTENSITY = 0.3f;
-    static constexpr float DEFAULT_EDGE_EFFECT_INTENSITY = 0.3f;
+    static constexpr float DEFAULT_EDGE_EFFECT_INTENSITY = 0.04f;
 
 private:
     void TickAnimation();
@@ -127,7 +127,6 @@ private:
     float conductivity_ = DEFAULT_CONDUCTIVITY;
     float intensity_ = DEFAULT_INTENSITY;
     float edgeEffectIntensity_ = DEFAULT_EDGE_EFFECT_INTENSITY;
-    bool isOverDrag_ = false;
     ChainEdgeEffect edgeEffect_ = ChainEdgeEffect::DEFAULT;
 };
 } // namespace OHOS::Ace

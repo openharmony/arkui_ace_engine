@@ -67,7 +67,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     GetColumnSize(layoutProperty, pickerTheme, dialogTheme, frameSize, pickerNode);
 
-    textPickerPattern->CheckAndUpdateColumnSize(frameSize);
+    textPickerPattern->CheckAndUpdateColumnSize(frameSize, NeedAdaptForAging());
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
@@ -118,6 +118,8 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
         auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
         if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
             isDefaultPickerItemHeight_ = false;
+        } else {
+            UpdateDefaultPickerItemHeightLPX(pickerNode, defaultPickerItemHeightValue);
         }
     }
 
@@ -164,6 +166,18 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
 
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);
+}
+
+void TextPickerLayoutAlgorithm::UpdateDefaultPickerItemHeightLPX(
+    const RefPtr<FrameNode>& pickerNode, const Dimension& defaultPickerItemHeightValue)
+{
+    if (defaultPickerItemHeight_ != defaultPickerItemHeightValue.Value() &&
+        defaultPickerItemHeightValue.Unit() == DimensionUnit::LPX) {
+        CHECK_NULL_VOID(pickerNode);
+        auto context = pickerNode->GetContext();
+        CHECK_NULL_VOID(context);
+        defaultPickerItemHeight_ = context->NormalizeToPx(defaultPickerItemHeightValue);
+    }
 }
 
 void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
@@ -260,7 +274,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     int32_t i = 0;
     int32_t showCount = static_cast<int32_t>(pickerTheme->GetShowOptionCount()) + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
-        if (i >= showCount) {
+        if (i >= showCount || i >= static_cast<int32_t>(currentOffset_.size())) {
             break;
         }
         auto childGeometryNode = child->GetGeometryNode();

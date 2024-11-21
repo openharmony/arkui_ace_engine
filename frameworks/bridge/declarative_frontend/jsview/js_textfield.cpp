@@ -48,8 +48,9 @@
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 

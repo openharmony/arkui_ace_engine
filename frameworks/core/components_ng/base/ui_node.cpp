@@ -527,6 +527,19 @@ RefPtr<FrameNode> UINode::GetParentFrameNode() const
     return nullptr;
 }
 
+RefPtr<CustomNode> UINode::GetParentCustomNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto customNode = AceType::DynamicCast<CustomNode>(parent);
+        if (customNode) {
+            return customNode;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
@@ -617,6 +630,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
+    // the context should not be nullptr.
     AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
@@ -629,8 +643,9 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
-    if (isFreeze_) {
+    if (context && context->IsOpenInvisibleFreeze()) {
         auto parent = GetParent();
+        // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
 }
@@ -663,8 +678,9 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
+    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive);
+    OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -682,7 +698,7 @@ void UINode::SetFreeze(bool isFreeze)
     auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
     if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
-        onFreezeStateChange();
+        OnFreezeStateChange();
         UpdateChildrenFreezeState(isFreeze_);
     }
 }
@@ -796,7 +812,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool) {}
+void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -879,6 +895,40 @@ void UINode::DumpTree(int32_t depth)
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1);
+    }
+}
+
+void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+{
+    current->Put("ID", nodeId_);
+    current->Put("Type", tag_.c_str());
+    auto nodeChildren = GetChildren();
+    DumpSimplifyInfo(current);
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    if (hasChildren) {
+        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
+        auto array = JsonUtil::CreateArray();
+        if (!nodeChildren.empty()) {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        if (!disappearingChildren_.empty()) {
+            for (const auto& [item, index, branch] : disappearingChildren_) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        current->PutRef("Children", std::move(array));
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        auto overlay = JsonUtil::Create();
+        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
+        current->PutRef("Overlay", std::move(overlay));
     }
 }
 
@@ -994,12 +1044,6 @@ PipelineContext* UINode::GetContext() const
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
     }
-
-    if (context && context->IsDestroyed()) {
-        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
-            context_? " not" : "");
-    }
-
     return context;
 }
 
@@ -1536,8 +1580,13 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
+    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }
@@ -1601,30 +1650,6 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
-int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
-{
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += changeIdx;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
-    return updateFrom;
-}
-
-void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
-{
-    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
-    auto accessibilityId = GetAccessibilityId();
-    auto parent = GetParent();
-    if (parent) {
-        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
-    }
-}
-
 void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
@@ -1659,6 +1684,30 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
+    }
+}
+
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += changeIdx;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

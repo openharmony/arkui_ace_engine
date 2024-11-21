@@ -164,7 +164,8 @@ public:
     static void* GetFrameNode();
     static void SetDragPreview(const NG::DragDropInfo& info);
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
-    static void SetBorderImageSource(const std::string& bdImageSrc);
+    static void SetBorderImageSource(
+        const std::string& bdImageSrc, const std::string& bundleName = "", const std::string& moduleName = "");
 
     // visual
     static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
@@ -260,7 +261,8 @@ public:
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
-    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverFunc&& onHoverEventFunc);

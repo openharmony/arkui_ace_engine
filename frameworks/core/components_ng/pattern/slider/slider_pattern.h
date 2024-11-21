@@ -56,6 +56,7 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
+        InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
@@ -231,6 +232,27 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void AccessibilityVirtualNodeRenderTask();
+    void InitAccessibilityVirtualNodeTask();
+    void InitAccessibilityHoverEvent();
+    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
+    bool InitAccessibilityVirtualNode();
+    void ModifyAccessibilityVirtualNode();
+    void AddStepPointsAccessibilityVirtualNode();
+    void HandleTextOnAccessibilityFocusCallback();
+    void HandleSliderOnAccessibilityFocusCallback();
+    void UpdateStepAccessibilityVirtualNode();
+    void UpdateParentNodeSize();
+    std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
+    uint32_t GetCurrentStepIndex();
+    SizeF GetStepPointAccessibilityVirtualNodeSize();
+    void UpdateStepPointsAccessibilityVirtualNodeSelected();
+    void SetStepPointsAccessibilityVirtualNodeEvent(
+        const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
+    void SetStepPointAccessibilityVirtualNode(
+        const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
+    void SendAccessibilityValueEvent(int32_t mode);
+
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     void SetSkipGestureEvents()
@@ -289,6 +311,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+    bool isTouchUpFlag_ = false;
 
     // tip Parameters
     bool bubbleFlag_ = false;
@@ -298,6 +321,13 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
 
+    RefPtr<FrameNode> parentAccessibilityNode_;
+    std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
+    std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
+    bool isInitAccessibilityVirtualNode_ = false;
+    uint64_t lastSendPostValueTime_ = 0;
+    float accessibilityValue_ = 0.0f;
+    
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

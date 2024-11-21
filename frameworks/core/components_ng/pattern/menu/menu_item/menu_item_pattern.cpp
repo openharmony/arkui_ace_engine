@@ -57,6 +57,11 @@ constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
+const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
+// id of system resource start from 0x07000000
+constexpr uint64_t MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+// id of system resource end to 0x07FFFFFF
+constexpr uint64_t MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -340,13 +345,47 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
+    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(true);
+    subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+        static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
+}
+
+RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_RETURN(customNode, nullptr);
+    if (customNode->GetTag() == V2::MENU_ETS_TAG) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode;
+    }
+    uint32_t depth = 0;
+    auto child = customNode->GetFrameChildByIndex(0, false);
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child  = child->GetChildAtIndex(0);
+                ++depth;
+            }
+            continue;
+        }
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        child  = child->GetChildAtIndex(0);
+        ++depth;
+    }
+    return nullptr;
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 {
-    if (customNode->GetTag() == V2::MENU_ETS_TAG) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-        CHECK_NULL_VOID(frameNode);
+    auto frameNode = GetSubMenu(customNode);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(props);
         auto pattern = frameNode->GetPattern<MenuPattern>();
@@ -679,6 +718,11 @@ void MenuItemPattern::OnClick()
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    auto menuWrapper = GetMenuWrapper();
+    // When menu wrapper exists, the pressed state is handed over to the menu wrapper
+    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return;
+    }
     // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
@@ -711,7 +755,6 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -738,13 +781,6 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
-        auto menuWrapper = GetMenuWrapper();
-        CHECK_NULL_VOID(menuWrapper);
-        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        menuWrapperPattern->SetLastTouchItem(host);
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
@@ -1137,6 +1173,9 @@ void MenuItemPattern::AddClickableArea()
         !clickableArea_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(hostAccessibilityProperty);
+        hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
@@ -1153,6 +1192,13 @@ void MenuItemPattern::AddClickableArea()
         auto clickableContext = clickableArea->GetRenderContext();
         CHECK_NULL_VOID(clickableContext);
         clickableContext->UpdateBorderRadius(border);
+        auto menuProperty = host->GetLayoutProperty<MenuItemLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        std::string content = menuProperty->GetContent().value_or("");
+        std::string label = menuProperty->GetLabel().value_or("");
+        auto accessibilityProperty = clickableArea->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
     }
@@ -1274,8 +1320,26 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
+        bool useDefaultThemeIcon = UseDefaultThemeIcon(imageSourceInfo);
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
     }
+}
+
+bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
+{
+    if (imageSourceInfo.IsSvg()) {
+        auto src = imageSourceInfo.GetSrc();
+        auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+            src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        if (srcId.find("ohos_") != std::string::npos) {
+            return true;
+        }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
+    }
+    return false;
 }
 
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
@@ -1348,7 +1412,39 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
             textAlign = TextAlign::START;
         }
     }
-    UpdateTextOverflow(textProperty);
+
+    UpdateFont(menuProperty, theme, isLabel);
+    textProperty->UpdateContent(content);
+    UpdateTextOverflow(textProperty, theme);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
+    RefPtr<SelectTheme>& theme)
+{
+    if (theme && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (theme->GetExpandDisplay()) {
+            textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textProperty->UpdateMaxLines(1);
+        } else {
+            textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        }
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textProperty->UpdateMaxLines(1);
+    }
+    UpdateMaxLinesFromTheme(textProperty);
+}
+
+void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto& node = isLabel ? label_ : content_;
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
@@ -1366,21 +1462,16 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (menuItemRenderContext->HasForegroundColor()) {
+            textProperty->UpdateTextColor(menuItemRenderContext->GetForegroundColorValue());
             renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
         }
     }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
-    textProperty->UpdateContent(content);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty)
 {
-    textProperty->UpdateMaxLines(1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

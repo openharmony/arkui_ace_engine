@@ -119,12 +119,34 @@ public:
         displayId_ = displayId;
     }
 
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+
+    void SetWidth(int32_t width)
+    {
+        width_ = width;
+    }
+
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
+
+    void SetHeight(int32_t height)
+    {
+        height_ = height;
+    }
+
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
     Rotation rotation_ = Rotation::ROTATION_0;
     std::vector<Rect> currentFoldCreaseRegion_;
     uint64_t displayId_ = 0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DISPLAY_INFO_H

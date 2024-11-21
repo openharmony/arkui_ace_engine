@@ -23,6 +23,7 @@
 
 #include "base/error/error_code.h"
 #include "base/memory/referenced.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
@@ -50,6 +51,21 @@ JSRenderingContext::JSRenderingContext()
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+        auto onAttach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnAttachToCanvas();
+        };
+        auto onDetach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnDetachFromCanvas();
+        };
+        auto canvasRenderingContext2DModel =
+            AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+        CHECK_NULL_VOID(canvasRenderingContext2DModel);
+        canvasRenderingContext2DModel->SetOnAttach(onAttach);
+        canvasRenderingContext2DModel->SetOnDetach(onDetach);
     } else {
         renderingContext2DModel_ = AceType::MakeRefPtr<Framework::CanvasRenderingContext2DModelImpl>();
     }
@@ -62,6 +78,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
     // Define all properties of the "CanvasRenderingContext2D"
+    JSClass<JSRenderingContext>::CustomProperty(
+        "canvas", &JSRenderingContext::JsGetCanvas, &JSRenderingContext::JsSetCanvas);
     JSClass<JSRenderingContext>::CustomProperty(
         "width", &JSRenderingContext::JsGetWidth, &JSRenderingContext::JsSetWidth);
     JSClass<JSRenderingContext>::CustomProperty(
@@ -157,6 +175,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("reset", &JSCanvasRenderer::JsReset);
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
+    JSClass<JSRenderingContext>::CustomMethod("on", &JSRenderingContext::JsOn);
+    JSClass<JSRenderingContext>::CustomMethod("off", &JSRenderingContext::JsOff);
 
     // Register the "CanvasRenderingContext2D" to the global object of the vm
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
@@ -187,12 +207,62 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
     }
 }
 
+void JSRenderingContext::OnAttachToCanvas()
+{
+    ContainerScope scope(instanceId_);
+    for (const auto& iter : attachCallback_) {
+        auto callback = iter.second;
+        if (callback) {
+            callback();
+        }
+    }
+}
+
+void JSRenderingContext::OnDetachFromCanvas()
+{
+    ContainerScope scope(instanceId_);
+    for (const auto& iter : detachCallback_) {
+        auto callback = iter.second;
+        if (callback) {
+            callback();
+        }
+    }
+}
+
+void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
+{
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    auto nodeId = canvasRenderingContext2DModel->GetId();
+
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getFrameNodeByNodeId__"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    JSRef<JSVal> params[2]; // The count of the function's params is 2.
+    params[0] = JSRef<JSVal>::Make(ToJSValue(instanceId_));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+    auto returnPtr = jsFunc->ExecuteJS(2, params);
+    info.SetReturnValue(returnPtr);
+    return;
+}
+
+void JSRenderingContext::JsSetCanvas(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
+    canvasRenderingContext2DModel->GetWidth(width);
     double density = GetDensity();
     width /= density;
     auto returnValue = JSVal(ToJSValue(width));
@@ -215,7 +285,7 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     double height = 0.0;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
+    canvasRenderingContext2DModel->GetHeight(height);
     double density = GetDensity();
     height /= density;
     auto returnValue = JSVal(ToJSValue(height));
@@ -251,11 +321,11 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = jsImage->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, pixelMap);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
 #else
     auto imageData = jsImage->GetImageData();
     CHECK_NULL_VOID(imageData);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, imageData);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
 #endif
 }
 
@@ -356,7 +426,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
     isImageAnalyzing_ = true;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);
+    canvasRenderingContext2DModel->StartImageAnalyzer(configNativeValue, onAnalyzed_);
     ReturnPromise(info, promise);
 }
 
@@ -365,6 +435,152 @@ void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_);
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StopImageAnalyzer(canvasPattern_);
+    canvasRenderingContext2DModel->StopImageAnalyzer();
+}
+
+CanvasCallbackFuncPairList::const_iterator JSRenderingContext::FindCbList(
+    napi_env env, napi_value cb, CanvasCallbackFuncPairList& callbackFuncPairList)
+{
+    return std::find_if(callbackFuncPairList.begin(), callbackFuncPairList.end(), [env, cb](const auto& item) -> bool {
+        bool result = false;
+        napi_value refItem;
+        napi_get_reference_value(env, item.first, &refItem);
+        napi_strict_equals(env, refItem, cb, &result);
+        return result;
+    });
+}
+
+void JSRenderingContext::AddCallbackToList(
+    napi_env env, napi_value cb, CanvasCallbackType type, const std::function<void()>&& onFunc)
+{
+    if (type == CanvasCallbackType::ON_ATTACH) {
+        auto iter = FindCbList(env, cb, attachCallback_);
+        if (iter == attachCallback_.end()) {
+            napi_ref ref = nullptr;
+            napi_create_reference(env, cb, 1, &ref);
+            attachCallback_.emplace_back(ref, onFunc);
+        }
+    } else if (type == CanvasCallbackType::ON_DETACH) {
+        auto iter = FindCbList(env, cb, detachCallback_);
+        if (iter == detachCallback_.end()) {
+            napi_ref ref = nullptr;
+            napi_create_reference(env, cb, 1, &ref);
+            detachCallback_.emplace_back(ref, onFunc);
+        }
+    }
+}
+
+void JSRenderingContext::DeleteCallbackFromList(int argc, napi_env env, napi_value cb, CanvasCallbackType type)
+{
+    if (argc == 1) {
+        if (type == CanvasCallbackType::ON_ATTACH) {
+            for (const auto& item : attachCallback_) {
+                napi_delete_reference(env, item.first);
+            }
+            attachCallback_.clear();
+        } else if (type == CanvasCallbackType::ON_DETACH) {
+            for (const auto& item : detachCallback_) {
+                napi_delete_reference(env, item.first);
+            }
+            detachCallback_.clear();
+        }
+    } else if (argc == 2) { // The count of params is 2.
+        if (type == CanvasCallbackType::ON_ATTACH) {
+            auto iter = FindCbList(env, cb, attachCallback_);
+            if (iter != attachCallback_.end()) {
+                napi_delete_reference(env, iter->first);
+                attachCallback_.erase(iter);
+            }
+        } else if (type == CanvasCallbackType::ON_DETACH) {
+            auto iter = FindCbList(env, cb, detachCallback_);
+            if (iter != detachCallback_.end()) {
+                napi_delete_reference(env, iter->first);
+                detachCallback_.erase(iter);
+            }
+        }
+    }
+}
+
+CanvasCallbackType JSRenderingContext::GetCanvasCallbackType(const std::string& strType)
+{
+    CanvasCallbackType type = CanvasCallbackType::UNKNOWN;
+    static constexpr char attachType[] = "onAttach";
+    static constexpr char detachType[] = "onDetach";
+    if (strType.compare(attachType) == 0) {
+        type = CanvasCallbackType::ON_ATTACH;
+    } else if (strType.compare(detachType) == 0) {
+        type = CanvasCallbackType::ON_DETACH;
+    }
+    return type;
+}
+
+void JSRenderingContext::JsOn(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString() || !info[1]->IsFunction()) {
+        return;
+    }
+    const CanvasCallbackType type = GetCanvasCallbackType(info[0]->ToString());
+    if (type == CanvasCallbackType::UNKNOWN) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter error.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    std::function<void()> onFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                                       id = instanceId_]() {
+        ContainerScope scope(id);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        func->Execute();
+    };
+    ContainerScope scope(instanceId_);
+#if !defined(PREVIEW)
+    auto engine = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+#else
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+#endif
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scopeNapi(env);
+    panda::Local<JsiValue> value = info[1].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value cb = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_handle_scope napiScope = nullptr;
+    napi_open_handle_scope(env, &napiScope);
+    CHECK_NULL_VOID(napiScope);
+
+    AddCallbackToList(env, cb, type, std::move(onFunc));
+    napi_close_handle_scope(env, napiScope);
+}
+
+void JSRenderingContext::JsOff(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsString()) {
+        return;
+    }
+    const CanvasCallbackType type = GetCanvasCallbackType(info[0]->ToString());
+    if (type == CanvasCallbackType::UNKNOWN) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter error.");
+        return;
+    }
+    ContainerScope scope(instanceId_);
+#if !defined(PREVIEW)
+    auto engine = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+#else
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+#endif
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scopeNapi(env);
+    napi_value cb = nullptr;
+    if (info[1]->IsFunction()) {
+        panda::Local<JsiValue> value = info[1].Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        cb = nativeEngine->ValueToNapiValue(valueWrapper);
+    }
+
+    DeleteCallbackFromList(info.Length(), env, cb, type);
 }
 } // namespace OHOS::Ace::Framework

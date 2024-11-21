@@ -227,8 +227,21 @@ void XComponentPattern::InitSurface()
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
+    if (type_ == XComponentType::TEXTURE) {
+        renderSurface_->RegisterBufferCallback();
+    }
+    if (isTypedNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
 
+    UpdateTransformHint();
+}
+
+void XComponentPattern::UpdateTransformHint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
@@ -467,12 +480,12 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
                 ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
                 eventHub->FireControllerDestroyedEvent(surfaceId_);
             }
-#ifdef RENDER_EXTRACT_SUPPORTED
-            if (renderContextForSurface_) {
-                renderContextForSurface_->RemoveSurfaceChangedCallBack();
-            }
-#endif
         }
+#ifdef RENDER_EXTRACT_SUPPORTED
+        if (renderContextForSurface_) {
+            renderContextForSurface_->RemoveSurfaceChangedCallBack();
+        }
+#endif
     }
 
     auto id = frameNode->GetId();
@@ -537,6 +550,16 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
+void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+}
+
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
     if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
@@ -577,7 +600,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
     }
-#ifndef RENDER_EXTRACT_SUPPORTED
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
@@ -659,7 +682,7 @@ void XComponentPattern::XComponentSizeInit()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-#ifdef RENDER_EXTRACT_SUPPORTED
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
@@ -916,7 +939,7 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-#ifdef RENDER_EXTRACT_SUPPORTED
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     focusHub->SetFocusable(true);
 #endif
 
@@ -1082,6 +1105,18 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
+    if (touchType == TouchType::DOWN) {
+        RequestFocus();
+    }
+#endif
+#ifdef PLATFORM_VIEW_SUPPORTED
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        const auto& changedPoint = touchInfoList.front();
+        PlatformViewDispatchTouchEvent(changedPoint);
+    }
+#endif
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     if (touchType == TouchType::DOWN) {
         RequestFocus();
     }
@@ -1350,6 +1385,8 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+        "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
 void XComponentPattern::HandleOnFrameEvent()
@@ -1364,6 +1401,8 @@ void XComponentPattern::HandleOnFrameEvent()
         xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
             displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
     });
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+        displaySync_->GetId());
     displaySync_->AddToPipelineOnContainer();
 }
 
@@ -1373,6 +1412,8 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
     displaySync_->UnregisterOnFrame();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+        displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
 }
 
@@ -1603,7 +1644,6 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(nativeXComponent_);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
-        InitNativeWindow(width, height);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
@@ -1932,7 +1972,8 @@ void XComponentPattern::EnableSecure(bool isSecure)
     if (type_ != XComponentType::SURFACE) {
         return;
     }
-    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    handlingSurfaceRenderContext_->SetSecurityLayer(isSecure);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetSecurityLayer(isSecure);
+    isEnableSecure_ = isSecure;
 }
 } // namespace OHOS::Ace::NG

@@ -54,7 +54,7 @@ HWTEST_F(GridIrregularLayoutTest, LayoutChildren001, TestSize.Level1)
     algorithm->crossLens_ = { 50.0f, 50.0f, 100.0f };
     algorithm->crossGap_ = 5.0f;
     algorithm->mainGap_ = 1.0f;
-    algorithm->LayoutChildren(0.0f);
+    algorithm->LayoutChildren(0.0f, 0);
 
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetX(), 5.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset().GetY(), 3.0f);
@@ -572,7 +572,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset004, TestSize.Level1)
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
     algo->wrapper_ = AceType::RawPtr(frameNode_);
-    frameNode_->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    frameNode_->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 
     algo->Measure(AceType::RawPtr(frameNode_));
 

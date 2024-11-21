@@ -45,4 +45,14 @@ std::string RatingAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(ratingRenderProperty, "");
     return std::to_string(ratingRenderProperty->GetRatingScore().value_or(0));
 }
+
+bool RatingAccessibilityProperty::IsEditable() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<NG::RatingLayoutProperty>();
+    CHECK_NULL_RETURN(ratingLayoutProperty, false);
+    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
+    return !indicator;
+}
 } // namespace OHOS::Ace::NG

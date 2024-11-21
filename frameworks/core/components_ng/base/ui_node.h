@@ -95,6 +95,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -197,6 +198,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
+    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id);
@@ -591,7 +593,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    bool IsLayoutSeperaely() const
+    bool IsLayoutSeperately() const
     {
         return layoutSeperately_;
     }
@@ -640,7 +642,7 @@ public:
     {
         rootNodeId_ = rootNodeId;
     }
-
+    
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
         return false;
@@ -743,6 +745,10 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
+
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
         END_CHANGE_POSITION = 1,
@@ -757,10 +763,6 @@ public:
      * @param notificationType the type of notification.
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
-
-    virtual void GetInspectorValue();
-    virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
 
     // Used to mark freeze and block dirty mark.
     virtual void SetFreeze(bool isFreeze);
@@ -808,6 +810,7 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
@@ -816,10 +819,10 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
-    virtual void onFreezeStateChange() {}
+    virtual void OnFreezeStateChange() {}
     virtual void UpdateChildrenFreezeState(bool isFreeze);
 
     // run offscreen process.
@@ -855,7 +858,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
+    
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);

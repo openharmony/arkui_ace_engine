@@ -190,26 +190,29 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
 
     if (isNeedAging) {
-        auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(hourNode, nullptr);
-        auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(hourLayoutProperty, nullptr);
-        hourLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        hourNode->MarkModifyDone();
-        auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(minuteNode, nullptr);
-        auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
-        minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        minuteNode->MarkModifyDone();
+        for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
+            auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+            CHECK_NULL_RETURN(childStackNode, nullptr);
+            for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+                auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+                CHECK_NULL_RETURN(childNode, nullptr);
+                auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+                CHECK_NULL_RETURN(childLayoutProperty, nullptr);
+                childLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+            }
+            auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+            layoutProperty->UpdateAlignment(Alignment::CENTER);
+            layoutProperty->UpdateLayoutWeight(0);
+        }
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
-    dialogPattern->SetIsPickerDiaglog(true);
-    auto closeDiaglogEvent = CloseDiaglogEvent(timePickerPattern, dialogNode);
-    auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+    dialogPattern->SetIsPickerDialog(true);
+    auto closeDialogEvent = CloseDialogEvent(timePickerPattern, dialogNode);
+    auto event = [func = std::move(closeDialogEvent)](const GestureEvent& /* info */) {
         func();
     };
 
@@ -227,7 +230,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     return dialogNode;
 }
 
-std::function<void()> TimePickerDialogView::CloseDiaglogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
+std::function<void()> TimePickerDialogView::CloseDialogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
     const RefPtr<FrameNode>& dialogNode)
 {
     auto event = [weak = WeakPtr<FrameNode>(dialogNode),
@@ -236,12 +239,14 @@ std::function<void()> TimePickerDialogView::CloseDiaglogEvent(const RefPtr<TimeP
         CHECK_NULL_VOID(dialogNode);
         auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(dialogPattern);
-        dialogPattern->SetIsPickerDiaglog(false);
+        dialogPattern->SetIsPickerDialog(false);
         auto timePickerPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(timePickerPattern);
         if (timePickerPattern->GetIsShowInDialog()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = dialogNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
             overlayManager->CloseDialog(dialogNode);
             timePickerPattern->SetIsShowInDialog(false);
         }
@@ -557,26 +562,26 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
                                                 const RefPtr<FrameNode>& cancelNextDividerNode,
                                                 const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(ampmNode);
-    auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(ampmLayoutProperty);
-    ampmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
-    ampmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
-    auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(hourNode);
-    auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(hourLayoutProperty);
-    hourLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-
-    auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
-    CHECK_NULL_VOID(minuteNode);
-    auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(minuteLayoutProperty);
-    minuteLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-    hourNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    minuteNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
+        auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childStackNode);
+        auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+            CHECK_NULL_VOID(childNode);
+            auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(childLayoutProperty);
+            if (i == 0) {
+                childLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+                layoutProperty->UpdateLayoutWeight(switchFlag_ ? 1 : 0);
+            } else {
+                childLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+                layoutProperty->UpdateLayoutWeight(switchFlag_ ? 0 : 1);
+            }
+            childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        }
+    }
 
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
@@ -795,7 +800,9 @@ void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonInfos[index].type.has_value()) {
         buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());

@@ -141,6 +141,10 @@ void ProcessImageNode(const RefPtr<UINode>& node)
 bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 {
     CHECK_NULL_RETURN(node, false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    if (frameNode && !frameNode->IsVisible()) {
+        return true;
+    }
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
         imageCount++;
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
@@ -152,8 +156,7 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
         auto imageStateManger = imageLoadContext->GetStateManger();
         CHECK_NULL_RETURN(imageStateManger, false);
 
-        auto result =
-            imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS || !imageNode->IsVisible();
+        auto result = imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS;
         if (!result) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
                 "Image loading failed! ImageId=%{public}d ImageState=%{public}d ImageKey=%{public}s",

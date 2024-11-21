@@ -41,6 +41,7 @@ public:
     static napi_value CreateInt32(napi_env env, int32_t code);
     static int32_t GetCInt32(napi_env env, napi_value value);
     static napi_value CreateNull(napi_env env);
+    static int64_t GetCInt64(napi_env env, napi_value value);
     static bool GetBool(napi_env env, napi_value value);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static std::string GetStringFromValueUtf8(napi_env env, napi_value value);

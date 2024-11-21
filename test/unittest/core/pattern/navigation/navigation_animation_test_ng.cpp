@@ -412,7 +412,7 @@ HWTEST_F(NavigationAnimationTest, CollectTextNodeAsRenderGroup001, TestSize.Leve
     /**
      * @tc.steps: step3. call the target function.
      */
-    navDestinationNode->CollectTextNodeAsRenderGroup();
+    navDestinationNode->CollectTextNodeAsRenderGroup(true);
     ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
 }
 
@@ -444,7 +444,7 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
     /**
      * @tc.steps: step3. collect text nodes before release.
      */
-    navDestinationNode->CollectTextNodeAsRenderGroup();
+    navDestinationNode->CollectTextNodeAsRenderGroup(true);
     ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
     /**
      * @tc.steps: step4. call the target function.
@@ -452,4 +452,4 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
     navDestinationNode->ReleaseTextNodeList();
     ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
 }
-};
+}; // namespace OHOS::Ace::NG

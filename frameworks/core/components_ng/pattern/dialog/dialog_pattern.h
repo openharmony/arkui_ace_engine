@@ -186,7 +186,7 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void DumpInfo() override;
-
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -270,19 +270,20 @@ public:
         return fontScaleForElderly_;
     }
 
-    void SetIsPickerDiaglog(bool value)
+    void SetIsPickerDialog(bool value)
     {
-        isPickerDiaglog_ = value;
+        isPickerDialog_ = value;
     }
 
-    bool GetIsPickerDiaglog()
+    bool GetIsPickerDialog()
     {
-        return isPickerDiaglog_;
+        return isPickerDialog_;
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void UpdateFontScale();
+    PipelineContext* GetDialogContext();
 
     bool GetIsSuitOldMeasure()
     {
@@ -359,6 +360,10 @@ private:
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpObjectProperty();
+    void DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
@@ -388,7 +393,7 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isPickerDiaglog_ = false;
+    bool isPickerDialog_ = false;
     bool notAdapationAging_ = false;
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;

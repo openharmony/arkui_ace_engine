@@ -21,11 +21,13 @@
 #include "base/utils/utils.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -34,18 +36,13 @@
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
+class NavDestinationPattern : public NavDestinationPatternBase, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, NavDestinationPatternBase, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
     NavDestinationPattern();
     ~NavDestinationPattern() override;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -57,11 +54,6 @@ public:
         auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
         layout->SetIsShown(isOnShow_);
         return layout;
-    }
-    
-    bool CheckCustomAvoidKeyboard() const override
-    {
-        return !NearZero(avoidKeyboardOffset_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -143,21 +135,6 @@ public:
     RefPtr<UINode> GetCustomNode()
     {
         return customNode_;
-    }
-
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
-
-    std::list<int32_t> GetRouteOfFirstScope() override
-    {
-        return {};
-    }
-
-    bool IsEntryFocusView() override
-    {
-        return false;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -245,15 +222,6 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
-    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
-    {
-        avoidKeyboardOffset_ = avoidKeyboardOffset;
-    }
-
-    float GetAvoidKeyboardOffset()
-    {
-        return avoidKeyboardOffset_;
-    }
 
     bool NeedIgnoreKeyboard();
 
@@ -270,13 +238,14 @@ public:
     void OnWindowHide() override;
 
 private:
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
-    void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
-    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
-    void HandleLongPress();
-    void HandleLongPressActionEnd();
+    void MountTitleBar(
+        RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation);
     void OnFontScaleConfigurationUpdate() override;
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -289,12 +258,6 @@ private:
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
-    void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    float avoidKeyboardOffset_ = 0.0f;
-
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<FrameNode> dialogNode_;
 
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;

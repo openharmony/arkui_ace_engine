@@ -55,11 +55,6 @@ void NavigationRouteOhos::InitRouteMap()
     allRouteItems_ = bundleInfo.routerArray;
 }
 
-void NavigationRouteOhos::OnPackageChange()
-{
-    InitRouteMap();
-}
-
 bool NavigationRouteOhos::GetRouteItem(const std::string& name, NG::RouteItem& info)
 {
     AppExecFwk::RouterItem routeItem;

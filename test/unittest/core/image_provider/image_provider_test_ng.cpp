@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 #include <cstddef>
 #include <optional>
 #include <vector>
+
 #include "gtest/gtest.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 
@@ -23,18 +25,13 @@
 #define private public
 
 #include "test/mock/base/mock_pixel_map.h"
-
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
 #include "test/mock/core/image_provider/mock_image_file_cache.cpp"
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -60,6 +57,7 @@ constexpr int32_t LENGTH_63 = 63;
 constexpr int32_t LENGTH_128 = 128;
 int32_t callbackFlag = 0;
 } // namespace
+
 namespace OHOS::Ace::NG {
 class ImageProviderTestNg : public testing::Test {
 public:
@@ -127,14 +125,12 @@ HWTEST_F(ImageProviderTestNg, CreateFunc001, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, Destruction001, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    auto ctx =
-        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx, nullptr);
     ctx->syncLoad_ = false;
 
     auto src1 = ImageSourceInfo(SRC_JPG);
-    auto ctx1 =
-        AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx1, nullptr);
 
     ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx1);
@@ -150,14 +146,12 @@ HWTEST_F(ImageProviderTestNg, Destruction001, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, Destruction002, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    auto ctx =
-        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx, nullptr);
     ctx->syncLoad_ = false;
 
     auto src1 = ImageSourceInfo(SRC_JPG);
-    auto ctx1 =
-        AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx1, nullptr);
 
     ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx1);
@@ -174,14 +168,12 @@ HWTEST_F(ImageProviderTestNg, Destruction002, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, HandleCommand001, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    auto ctx =
-        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx, nullptr);
     ctx->syncLoad_ = false;
 
     auto src1 = ImageSourceInfo(SRC_JPG);
-    auto ctx1 =
-        AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx1 = AceType::MakeRefPtr<ImageLoadingContext>(src1, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx1, nullptr);
 
     ctx->stateManager_ = AceType::MakeRefPtr<ImageStateManager>(ctx1);
@@ -205,25 +197,24 @@ HWTEST_F(ImageProviderTestNg, HandleCommand001, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    auto ctx =
-        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx, nullptr);
 
     callbackFlag = 0;
     auto callback1 = [](const ImageSourceInfo& src) {
         callbackFlag = 1;
-        return ;
+        return;
     };
     auto callback2 = [](const ImageSourceInfo& src) {
         callbackFlag = 2;
-        return ;
+        return;
     };
     auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
         callbackFlag = 3;
-        return ;
+        return;
     };
     ctx->notifiers_ = LoadNotifier(std::move(callback1), std::move(callback2), std::move(callback3));
-    std::function<void()> func = [](){};
+    std::function<void()> func = []() {};
     ctx->pendingMakeCanvasImageTask_ = func;
     ctx->OnLoadFail();
     EXPECT_EQ(callbackFlag, 3);
@@ -358,13 +349,9 @@ HWTEST_F(ImageProviderTestNg, MakeCanvasImageIfNeed001, TestSize.Level1)
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
 
-    std::vector<ImageFit> imageFitCases = {
-        ImageFit::COVER, ImageFit::FILL
-    };
-    std::vector<std::optional<SizeF>> sourceSizeCases = {
-        std::make_optional(SizeF(1, 1)),
-        std::make_optional(SizeF(2, 2))
-    };
+    std::vector<ImageFit> imageFitCases = { ImageFit::COVER, ImageFit::FILL };
+    std::vector<std::optional<SizeF>> sourceSizeCases = { std::make_optional(SizeF(1, 1)),
+        std::make_optional(SizeF(2, 2)) };
     ctx->SetSourceSize(SizeF(1, 1));
 
     for (int i = 0; i < 2; ++i) {
@@ -464,7 +451,7 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
     ctx->imageObj_ =
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
     SizeF dstSize(LENGTH_100, LENGTH_100);
-    std::function<void()> func = [](){};
+    std::function<void()> func = []() {};
     ctx->pendingMakeCanvasImageTask_ = func;
     auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
     EXPECT_TRUE(res);
@@ -498,19 +485,11 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
     auto src = ImageSourceInfo(SRC_JPG);
     EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
 
-#ifndef USE_ROSEN_DRAWING
-    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
-#else
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-#endif
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
-#ifndef USE_ROSEN_DRAWING
-    data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 2);
-#else
     data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
-#endif
     imageObject = ImageProvider::BuildImageObject(src, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 
@@ -668,11 +647,7 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData, TestSize.Level1)
     auto src = ImageSourceInfo(SRC_JPG);
     EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
 
-#ifndef USE_ROSEN_DRAWING
-    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
-#else
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-#endif
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     ImageProvider::CacheImageObject(imageObject);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
@@ -736,9 +711,6 @@ HWTEST_F(ImageProviderTestNg, CreatePixmap, TestSize.Level1)
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
     auto data = AceType::MakeRefPtr<PixmapData>(pixmap);
     EXPECT_NE(PixelMapImageObject::Create(src, data), nullptr);
-
-    auto data1 = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
-    EXPECT_EQ(PixelMapImageObject::Create(src, data1), nullptr);
 }
 
 /**
@@ -1350,7 +1322,7 @@ HWTEST_F(ImageProviderTestNg, DownloadImageSuccess001, TestSize.Level1)
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
 
-    auto data = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
+    auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
     auto imageObject = ImageProvider::BuildImageObject(src, data);
     ctx->DownloadImageSuccess("image data");
     EXPECT_NE(ctx->downloadedUrlData_, "image data");

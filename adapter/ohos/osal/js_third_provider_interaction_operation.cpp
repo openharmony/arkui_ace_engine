@@ -639,8 +639,9 @@ bool JsThirdProviderInteractionOperation::HandleEventByFramework(
                     nativeAccessibilityEvent.GetElementInfo()->GetElementId(),
                     accessibilityEventInfo);
             }
-        default:
             break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Invalid eventType");
     }
     return needSendEvent;
 }

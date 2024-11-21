@@ -17,9 +17,6 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class RefreshVersionElevenTestNg : public RefreshTestNg {
 public:
 };
@@ -36,10 +33,10 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag001, TestSize.Level1)
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnRefreshing(std::move(onRefreshing));
-        model.SetOnStateChange(std::move(onStateChange));
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshing));
+    model.SetOnStateChange(std::move(onStateChange));
+    CreateDone();
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -79,8 +76,8 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag001, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx()
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate(
+        (TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 
@@ -115,7 +112,8 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag002, TestSize.Level1)
      * @tc.expected: Would not trigger refresh
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    Create([](RefreshModelNG model) {});
+    CreateRefresh();
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -136,11 +134,11 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag001, TestSize.Level1)
     RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
     auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
     auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnRefreshing(std::move(onRefreshing));
-        model.SetOnStateChange(std::move(onStateChange));
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetOnRefreshing(std::move(onRefreshing));
+    model.SetOnStateChange(std::move(onStateChange));
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. HandleDragStart
@@ -172,8 +170,8 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag001, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
-    pattern_->HandleDragUpdate(((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx())
-                               / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate(
+        ((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx()) / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 
@@ -208,9 +206,9 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag002, TestSize.Level1)
      * @tc.expected: Would not trigger refresh
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    Create([](RefreshModelNG model) {
-        model.SetCustomBuilder(CreateCustomNode());
-    });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
     pattern_->HandleDragStart();
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
     pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
@@ -226,8 +224,9 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag002, TestSize.Level1)
  */
 HWTEST_F(RefreshVersionElevenTestNg, AttrRefreshing001, TestSize.Level1)
 {
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(CreateCustomNode());
+    CreateDone();
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -256,7 +255,8 @@ HWTEST_F(RefreshVersionElevenTestNg, AttrRefreshing001, TestSize.Level1)
 HWTEST_F(RefreshVersionElevenTestNg, AttrRefreshing002, TestSize.Level1)
 {
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-    Create();
+    CreateRefresh();
+    CreateDone();
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false

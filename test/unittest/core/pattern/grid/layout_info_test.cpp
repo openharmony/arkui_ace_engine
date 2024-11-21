@@ -415,6 +415,7 @@ void CheckEachIndex(const GridLayoutInfo& info, int32_t maxIdx)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 1;
     auto nullIt = info.FindInMatrix(1);
     EXPECT_EQ(nullIt, info.gridMatrix_.end());
 
@@ -434,6 +435,7 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 2;
     info.gridMatrix_ = MATRIX_DEMO_3;
 
     CheckEachIndex(info, 11);
@@ -450,6 +452,7 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix002, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
 {
     GridLayoutInfo info;
+    info.crossCount_ = 2;
     info.gridMatrix_ = MATRIX_DEMO_5;
 
     CheckEachIndex(info, 10);
@@ -560,7 +563,7 @@ HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, FindStartLineInMatrix001, TestSize.Level1)
 {
     GridLayoutInfo info;
-
+    info.crossCount_ = 3;
     info.gridMatrix_ = MATRIX_DEMO_8;
     auto item = info.FindInMatrix(5);
     item = info.FindStartLineInMatrix(item, 5);
@@ -665,5 +668,36 @@ HWTEST_F(GridLayoutInfoTest, TransformAutoScrollAlign002, TestSize.Level1)
     info.startIndex_ = 0;
     info.endIndex_ = -1;
     EXPECT_EQ(info.TransformAutoScrollAlign(3, 1, 300.0f, 5.0f), ScrollAlign::END);
+}
+
+/**
+ * @tc.name: SkipStartIndexByOffset001
+ * @tc.desc: Test GridLayoutInfo::SkipStartIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 162.5f }, { 1, 422.16f }, { 2, 422.16f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 10000;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 8874, 8876, 8878, 8975, 8977, 8979, 8981, 9725 };
+
+    info.currentOffset_ = 26915.4f;
+    info.prevOffset_ = -164.25f;
+    info.currentHeight_ = 1396768.75f;
+
+    info.SkipStartIndexByOffset(option, 2.f);
+
+    EXPECT_EQ(info.startIndex_, 9674);
 }
 } // namespace OHOS::Ace::NG

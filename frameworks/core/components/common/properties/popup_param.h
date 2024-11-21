@@ -480,6 +480,16 @@ public:
         return isCaretMode_;
     }
 
+    void SetFollowTransformOfTarget (bool followTransformOfTarget)
+    {
+        followTransformOfTarget_ = followTransformOfTarget;
+    }
+
+    bool IsFollowTransformOfTarget() const
+    {
+        return followTransformOfTarget_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -495,6 +505,7 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
+    bool followTransformOfTarget_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

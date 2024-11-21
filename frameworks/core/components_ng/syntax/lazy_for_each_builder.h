@@ -32,7 +32,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -307,7 +306,7 @@ public:
         auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = itemInfo.second->GetContext();
         CHECK_NULL_RETURN(context, itemInfo.second);
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         context->SetPredictNode(frameNode);
@@ -318,9 +317,6 @@ public:
         }
         ProcessOffscreenNode(itemInfo.second, false);
         itemInfo.second->Build(nullptr);
-        if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-            frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-        }
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
@@ -452,6 +448,9 @@ public:
         ProcessOffscreenNode(node.second, true);
         NotifyItemDeleted(RawPtr(node.second), key);
 
+        if (node.second) {
+            node.second->DetachFromMainTree();
+        }
         if (DeleteExpiringItemImmediately()) {
             expiringIter = expiringItem_.erase(expiringIter);
         } else {
@@ -587,7 +586,7 @@ protected:
     }
 
     virtual LazyForEachChild OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
+        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
     
     virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
         std::map<int32_t, LazyForEachChild>& cachedItems,

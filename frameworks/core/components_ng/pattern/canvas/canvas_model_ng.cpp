@@ -84,6 +84,15 @@ void CanvasModelNG::SetImageAIOptions(void* options)
     pattern->SetImageAIOptions(options);
 }
 
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
+}
+
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
 {
     CHECK_NULL_VOID(frameNode);

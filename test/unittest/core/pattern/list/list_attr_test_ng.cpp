@@ -2133,4 +2133,102 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition006, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 0);
 }
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition007
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup with header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    auto groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(10));
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 0, insert 1 Item in 0.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll to listItem1, insert 1 Item in 0.
+     * @tc.expected: Current index is 2, currentOffset = 260
+     */
+    UpdateCurrentOffset(-160);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
+
+    /**
+     * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
+     * @tc.expected: Current index is 1, currentOffset = 260
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition008
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup with header/footer, delete all item in Group
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    for (int32_t i = 0; i < 4; i++) {
+        auto groupModel = CreateListItemGroup();
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        groupModel.SetHeader(std::move(header));
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        groupModel.SetFooter(std::move(footer));
+        CreateListItems(1);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Scroll To first Group footer.
+     * @tc.expected: Current offset is 175
+     */
+    UpdateCurrentOffset(-175);
+    EXPECT_EQ(pattern_->currentOffset_, 175);
+
+    /**
+     * @tc.steps: step2. Current start index is 0, insert 1 Item in 0.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(2, -1);
+    groupNode->RemoveChildAtIndex(2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 75);
+}
 } // namespace OHOS::Ace::NG

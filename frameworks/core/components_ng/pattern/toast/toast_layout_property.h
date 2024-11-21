@@ -39,6 +39,7 @@ struct ToastInfo {
     std::optional<Color> textColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<Shadow> shadow;
+    bool isTypeStyleShadow = true;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
@@ -61,6 +62,22 @@ public:
         LayoutProperty::Reset();
         ResetBottom();
         ResetShowMode();
+    }
+
+    enum class SelectStatus {
+        OFF = 0,
+        ON,
+        NONE,
+    };
+
+    SelectStatus& GetSelectStatus()
+    {
+        return propStatus_;
+    }
+
+    void SetSelectStatus(const SelectStatus& status)
+    {
+        propStatus_ = status;
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToastAlignment, Alignment, PROPERTY_UPDATE_MEASURE);
@@ -90,6 +107,7 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ToastLayoutProperty);
+    SelectStatus propStatus_ = SelectStatus::NONE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOAST_TOAST_LAYOUT_PROPERTY_H

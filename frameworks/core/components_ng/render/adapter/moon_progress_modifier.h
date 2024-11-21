@@ -39,6 +39,7 @@ public:
     void SetEnableBreathe(bool enableBreathe);
 
 private:
+    void CalculateSquareMoonPath(RSPath& path, const PointF& centerPt, const double& angle);
     void PaintSquareMoon(RSCanvas& canvas);
     void PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush);
     void RegisterVisibleChange();

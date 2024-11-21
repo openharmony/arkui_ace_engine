@@ -26,6 +26,14 @@ namespace {} // namespace
 
 class TabsEventTestNg : public TabsTestNg {
 public:
+    AssertionResult VerifyBackgroundColor(int32_t itemIndex, Color expectColor)
+    {
+        Color actualColor = GetChildFrameNode(tabBarNode_, itemIndex)->GetRenderContext()->GetBackgroundColor().value();
+        if (NearEqual(actualColor, expectColor)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actualColor.ToString() << " Expected: " << expectColor.ToString();
+    }
 };
 
 void FocusTest(const RefPtr<TabBarLayoutProperty>& tabBarLayoutProperty, const RefPtr<TabBarPattern>& tabBarPattern)
@@ -116,61 +124,6 @@ HWTEST_F(TabsEventTestNg, TabsController001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnChange001
- * @tc.desc: Test Tabs event
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnChange001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Change swiper index
-     * @tc.expected: OnChangeEvent was triggered
-     */
-    bool isTrigger = false;
-    auto event = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
-    TabsModelNG model = CreateTabs();
-    model.SetOnChangeEvent(event);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    SwipeToWithoutAnimation(1);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
-    EXPECT_TRUE(isTrigger);
-
-    /**
-     * @tc.steps: step2. Swap OnChangeEvent
-     * @tc.expected: OnChangeEvent was swaped
-     */
-    bool isTrigger2 = false;
-    auto event2 = [&isTrigger2](const BaseEventInfo* info) { isTrigger2 = true; };
-    pattern_->SetOnIndexChangeEvent(std::move(event2));
-    SwipeToWithoutAnimation(2);
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 2);
-    EXPECT_TRUE(isTrigger2);
-}
-
-/**
- * @tc.name: OnChange002
- * @tc.desc: Test Tabs event
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnChange002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Change swiper index by click tabBarItem
-     * @tc.expected: OnChangeEvent was triggered
-     */
-    bool isTrigger = false;
-    auto event = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
-    TabsModelNG model = CreateTabs();
-    model.SetOnChangeEvent(event);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
-    EXPECT_TRUE(isTrigger);
-}
-
-/**
  * @tc.name: OnTabBarClick001
  * @tc.desc: Test Tabs event
  * @tc.type: FUNC
@@ -181,15 +134,17 @@ HWTEST_F(TabsEventTestNg, OnTabBarClick001, TestSize.Level1)
      * @tc.steps: step1. Click tabBar
      * @tc.expected: OnTabBarClick was triggered
      */
-    bool isTrigger = false;
-    auto event = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
     TabsModelNG model = CreateTabs();
     model.SetOnTabBarClick(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
-    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
-    EXPECT_TRUE(isTrigger);
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+    EXPECT_EQ(currentIndex, 1);
 }
 
 /**
@@ -212,7 +167,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange001, TestSize.Level1)
     model.SetOnContentWillChange(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isTrigger);
 }
@@ -237,7 +192,7 @@ HWTEST_F(TabsEventTestNg, OnContentWillChange002, TestSize.Level1)
     model.SetOnContentWillChange(event);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
     EXPECT_TRUE(isTrigger);
 }
@@ -258,16 +213,14 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd001, TestSize.Level1)
         isStartTrigger = true;
     };
     bool isEndTrigger = false;
-    auto endEvent = [&isEndTrigger](int32_t index, const AnimationCallbackInfo& info) {
-        isEndTrigger = true;
-    };
+    auto endEvent = [&isEndTrigger](int32_t index, const AnimationCallbackInfo& info) { isEndTrigger = true; };
     TabsModelNG model = CreateTabs();
     model.SetAnimationDuration(1000.f); // open animation
     model.SetOnAnimationStart(startEvent);
     model.SetOnAnimationEnd(endEvent);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(isStartTrigger);
     EXPECT_TRUE(isEndTrigger);
@@ -290,17 +243,13 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
         isStartTrigger = true;
     };
     bool isEndTrigger = false;
-    auto endEvent = [&isEndTrigger](int32_t index, const AnimationCallbackInfo& info) {
-        isEndTrigger = true;
-    };
+    auto endEvent = [&isEndTrigger](int32_t index, const AnimationCallbackInfo& info) { isEndTrigger = true; };
     bool isStartTrigger2 = false;
     auto startEvent2 = [&isStartTrigger2](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         isStartTrigger2 = true;
     };
     bool isEndTrigger2 = false;
-    auto endEvent2 = [&isEndTrigger2](int32_t index, const AnimationCallbackInfo& info) {
-        isEndTrigger2 = true;
-    };
+    auto endEvent2 = [&isEndTrigger2](int32_t index, const AnimationCallbackInfo& info) { isEndTrigger2 = true; };
     TabsModelNG model = CreateTabs();
     model.SetAnimationDuration(1000.f); // open animation
     model.SetOnAnimationStart(startEvent);
@@ -309,7 +258,7 @@ HWTEST_F(TabsEventTestNg, onAnimationStartEnd002, TestSize.Level1)
     CreateTabsDone(model);
     pattern_->SetAnimationStartEvent(std::move(startEvent2));
     pattern_->SetAnimationEndEvent(std::move(endEvent2));
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_FALSE(isStartTrigger);
     EXPECT_FALSE(isEndTrigger);
@@ -334,7 +283,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     GestureEvent info;
     info.SetLocalLocation(Offset(200.f, 30.f));
     info.SetSourceDevice(SourceType::KEYBOARD);
-    tabBarPattern_->HandleClick(info, 1);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
@@ -353,7 +302,7 @@ HWTEST_F(TabsEventTestNg, HandleClick002, TestSize.Level1)
      */
     TabsModelNG model = CreateTabs();
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1);
+    HandleClick(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -371,7 +320,7 @@ HWTEST_F(TabsEventTestNg, HandleClick003, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(1);
     CreateTabsDone(model);
-    ClickTo(Offset(200.f, 30.f), 1);
+    HandleClick(Offset(200.f, 30.f), 1);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -394,7 +343,7 @@ HWTEST_F(TabsEventTestNg, HandleClick004, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
     scrollable->isSpringAnimationStop_ = false;
-    ClickTo(Offset(200.f, 30.f), 1); // click second tabBarItem
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(scrollable->IsSpringStopped());
 }
@@ -413,121 +362,173 @@ HWTEST_F(TabsEventTestNg, HandleClick005, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
-    
-    ClickTo(Offset(400.f, 30.f), 1); // click second tabBarItem
+
+    HandleClick(Offset(400.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
 }
 
 /**
  * @tc.name: HandleMouseTouch001
- * @tc.desc: Test HandleMouseEvent and HandleTouchEvent
+ * @tc.desc: Hover on the tabBar when empty items, hoverIndex_ is null
  * @tc.type: FUNC
  */
 HWTEST_F(TabsEventTestNg, HandleMouseTouch001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Empty items
+     * @tc.steps: step1. Empty items and hove tabBar
      * @tc.expected: hoverIndex_ has no value
      */
     TabsModelNG model = CreateTabs();
     CreateTabsDone(model);
-    MouseTo(MouseAction::MOVE, Offset(100.f, 30.f), true);
+    HandleMouseEvent(MouseAction::MOVE, Offset(100.f, 30.f));
+    HandleHoverEvent(true);
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
 }
 
 /**
- * @tc.name: HandleMouseTouch002
- * @tc.desc: Test HandleMouseEvent and HandleTouchEvent
+ * @tc.name: HandleMouseTouch0021
+ * @tc.desc: Move mouse from left to right on the tabBar
  * @tc.type: FUNC
  */
 HWTEST_F(TabsEventTestNg, HandleMouseTouch002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Move mouse from outside to the tabBarItem(index:0,1) and move to outside
-     */
     TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabContents(2);
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step2. Move mouse to outside
+     * @tc.steps: step1. Move mouse at outside
      * @tc.expected: hoverIndex_ has no value
      */
-    MouseTo(MouseAction::MOVE, Offset(-1.f, 1.f), false);
+    const float inTabBarItemY = 30.f;
+    HandleMouseEvent(MouseAction::MOVE, Offset(-1.f, inTabBarItemY));
+    HandleHoverEvent(false);
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
 
     /**
-     * @tc.steps: step3. Move mouse to tabs but not on the tabBar
-     * @tc.expected: hoverIndex_ has no value
+     * @tc.steps: step2. Move mouse to tabBarItem(index:0)
+     * @tc.expected: hoverIndex_ is 0, change color
      */
-    MouseTo(MouseAction::WINDOW_ENTER, Offset(100.f, 100.f), false);
-    EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
-
-    /**
-     * @tc.steps: step4. Move mouse to tabBarItem(index:0)
-     * @tc.expected: hoverIndex_ is 0, BackgroundColor change to hover color
-     */
-    MouseTo(MouseAction::MOVE, Offset(100.f, 30.f), true);
+    HandleMouseEvent(MouseAction::WINDOW_ENTER, Offset(180.f, inTabBarItemY));
+    HandleHoverEvent(true);
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 0);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::RED);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
 
     /**
-     * @tc.steps: step5. Move mouse to tabBarItem(index:1)
-     * @tc.expected: hoverIndex_ is 0, BackgroundColor change to hover color
+     * @tc.steps: step3. Still in tabBarItem(index:0)
+     * @tc.expected: Not change
      */
-    MouseTo(MouseAction::MOVE, Offset(200.f, 30.f), true);
+    HandleMouseEvent(MouseAction::WINDOW_ENTER, Offset(200.f, inTabBarItemY));
+    HandleHoverEvent(true);
+    EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 0);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
+
+    /**
+     * @tc.steps: step4. Move mouse to tabBarItem(index:1)
+     * @tc.expected: hoverIndex_ is 1, change color
+     */
+    HandleMouseEvent(MouseAction::MOVE, Offset(540.f, inTabBarItemY));
+    HandleHoverEvent(true);
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::RED);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::TRANSPARENT));
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::RED));
 
     /**
-     * @tc.steps: step6. Move mouse to outside
-     * @tc.expected: hoverIndex_ is 0, BackgroundColor change to hover color
+     * @tc.steps: step5. Move mouse to outside
+     * @tc.expected: hoverIndex_ has no value, change color
      */
-    MouseTo(MouseAction::WINDOW_LEAVE, Offset(200.f, 100.f), false);
+    HandleMouseEvent(MouseAction::WINDOW_LEAVE, Offset(TABS_WIDTH + 1.f, inTabBarItemY));
+    HandleHoverEvent(false);
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 }
 
 /**
  * @tc.name: HandleMouseTouch003
- * @tc.desc: Test HandleMouseEvent and HandleTouchEvent
+ * @tc.desc: Move mouse from top to bottom on the tabBar
  * @tc.type: FUNC
  */
 HWTEST_F(TabsEventTestNg, HandleMouseTouch003, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. hover tabBarItem(index:0), touch down and touch up
-     */
     TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabContents(2);
     CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Move mouse at outside
+     * @tc.expected: hoverIndex_ has no value
+     */
+    const float mouseX = 180.f;
+    HandleMouseEvent(MouseAction::MOVE, Offset(mouseX, -1.f));
+    HandleHoverEvent(false);
+    EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
+
+    /**
+     * @tc.steps: step2. Move mouse to tabBarItem(index:0)
+     * @tc.expected: hoverIndex_ is 0, change color
+     */
+    const float inTabBarItemY = 30.f;
+    HandleMouseEvent(MouseAction::WINDOW_ENTER, Offset(mouseX, inTabBarItemY));
+    HandleHoverEvent(true);
+    EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 0);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
+
+    /**
+     * @tc.steps: step3. Move mouse to outside
+     * @tc.expected: hoverIndex_ has no value, change color
+     */
+    HandleMouseEvent(MouseAction::WINDOW_LEAVE, Offset(mouseX, 100.f));
+    HandleHoverEvent(false);
+    EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::TRANSPARENT));
+}
+
+/**
+ * @tc.name: HandleMouseTouch004
+ * @tc.desc: hover tabBarItem, touch down and touch up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(2);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Hover and Touch down at outSide
+     * @tc.expected: touchingIndex_ has no value
+     */
+    const float inTabBarItemY = 30.f;
+    HandleMouseEvent(MouseAction::MOVE, Offset(-1.f, inTabBarItemY));
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, Offset(-1.f, inTabBarItemY));
+    EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
 
     /**
      * @tc.steps: step2. Hover and Touch down tabBarItem(index:0)
      * @tc.expected: touchingIndex_ is 0, BackgroundColor change to press color
      */
-    MouseTo(MouseAction::MOVE, Offset(100.f, 30.f), true);
-    TouchTo(TouchType::DOWN, Offset(100.f, 30.f));
+    HandleMouseEvent(MouseAction::MOVE, Offset(180.f, inTabBarItemY));
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, Offset(180.f, inTabBarItemY));
     EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::GREEN);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     /**
      * @tc.steps: step3. Touch up tabBarItem(index:0)
      * @tc.expected: touchingIndex_ is 0, BackgroundColor change to hover color
      */
-    TouchTo(TouchType::UP, Offset(100.f, 30.f));
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::RED);
+    HandleTouchEvent(TouchType::UP, Offset(180.f, inTabBarItemY));
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::RED));
 }
 
 /**
- * @tc.name: HandleMouseTouch004
+ * @tc.name: HandleMouseTouch005
  * @tc.desc: Test HandleMouseEvent and HandleTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Touch down tabBarItem(index:0) than move to tabBarItem(index:1) and touch up
@@ -541,32 +542,34 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch004, TestSize.Level1)
      * @tc.steps: step2. Hover and Touch down tabBarItem(index:0) and move to tabBarItem(index:1)
      * @tc.expected: tabBarItem(index:0) BackgroundColor is press color, tabBarItem(index:1) not change
      */
-    MouseTo(MouseAction::MOVE, Offset(100.f, 30.f), true);
-    TouchTo(TouchType::DOWN, Offset(100.f, 30.f));
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::GREEN);
+    HandleMouseEvent(MouseAction::MOVE, Offset(100.f, 30.f));
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, Offset(100.f, 30.f));
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
-    MouseTo(MouseAction::MOVE, Offset(200.f, 30.f), true);
+    HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
+    HandleHoverEvent(true);
     EXPECT_EQ(tabBarPattern_->touchingIndex_, 0);
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::GREEN);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::GREEN));
 
     /**
      * @tc.steps: step3. Touch up tabBarItem(index:1)
      * @tc.expected: tabBarItem(index:1) BackgroundColor is hover color
      */
-    TouchTo(TouchType::UP, Offset(200.f, 30.f));
+    HandleTouchEvent(TouchType::UP, Offset(200.f, 30.f));
     EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
     EXPECT_EQ(tabBarPattern_->hoverIndex_.value(), 1);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 0)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::RED);
+    EXPECT_TRUE(VerifyBackgroundColor(0, Color::TRANSPARENT));
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::RED));
 }
 
 /**
- * @tc.name: HandleMouseTouch005
+ * @tc.name: HandleMouseTouch006
  * @tc.desc: Test HandleMouseEvent and HandleTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
+HWTEST_F(TabsEventTestNg, HandleMouseTouch006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Touch down tabBarItem(index:1) than move to outside and touch cancel
@@ -580,33 +583,36 @@ HWTEST_F(TabsEventTestNg, HandleMouseTouch005, TestSize.Level1)
      * @tc.steps: step2. Hover and Touch down tabBarItem(index:1)
      * @tc.expected: tabBarItem(index:1) BackgroundColor is press color
      */
-    MouseTo(MouseAction::MOVE, Offset(200.f, 30.f), true);
-    TouchTo(TouchType::DOWN, Offset(200.f, 30.f));
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::GREEN);
+    HandleMouseEvent(MouseAction::MOVE, Offset(200.f, 30.f));
+    HandleHoverEvent(true);
+    HandleTouchEvent(TouchType::DOWN, Offset(200.f, 30.f));
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::GREEN));
 
     /**
      * @tc.steps: step3. Move to tabs but not on tabBar
      * @tc.expected: tabBarItem(index:1) BackgroundColor is TRANSPARENT color
      */
-    MouseTo(MouseAction::WINDOW_LEAVE, Offset(200.f, 100.f), false);
+    HandleMouseEvent(MouseAction::WINDOW_LEAVE, Offset(200.f, 100.f));
+    HandleHoverEvent(false);
     EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
     /**
      * @tc.steps: step5. Continue move to outside
      */
-    MouseTo(MouseAction::MOVE, Offset(TABS_WIDTH + 1.f, 1.f), false);
+    HandleMouseEvent(MouseAction::MOVE, Offset(TABS_WIDTH + 1.f, 1.f));
+    HandleHoverEvent(false);
     EXPECT_EQ(tabBarPattern_->touchingIndex_, 1);
     EXPECT_FALSE(tabBarPattern_->hoverIndex_.has_value());
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 
     /**
      * @tc.steps: step6. Touch cancel
      */
-    TouchTo(TouchType::CANCEL, Offset(TABS_WIDTH + 1.f, 1.f));
+    HandleTouchEvent(TouchType::CANCEL, Offset(TABS_WIDTH + 1.f, 1.f));
     EXPECT_FALSE(tabBarPattern_->touchingIndex_.has_value());
-    EXPECT_EQ(GetChildFrameNode(tabBarNode_, 1)->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
+    EXPECT_TRUE(VerifyBackgroundColor(1, Color::TRANSPARENT));
 }
 
 /**
@@ -858,99 +864,6 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternHandleMouseEvent001
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    auto info = MouseInfo();
-    Offset s1(0.1, 0.1);
-    info.SetLocalLocation(s1);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-
-    /**
-     * @tc.steps: step2. Test function HandleMouseEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            tabBarPattern_->HandleMouseEvent(info);
-        }
-        tabBarPattern_->AddTabBarItemType(1, true);
-    }
-}
-
-/*
- * @tc.name: TabBarPatternHandleMouseEvent002
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    tabBarNode_->Clean(false, false);
-
-    /**
-     * @tc.steps: step2. Test function GetBottomTabBarImageSizeAndOffset.
-     * @tc.expected: Related function runs ok.
-     */
-    auto info = MouseInfo();
-    int32_t nodeId = 1;
-    tabBarPattern_->HandleMouseEvent(info);
-    for (int i = 0; i <= 2; i++) {
-        auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
-            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-        tabBarNode_->AddChild(frameNode_);
-    }
-
-    Offset s1(0.1, 0.1);
-    info.SetLocalLocation(s1);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-    tabBarPattern_->HandleMouseEvent(info);
-}
-
-/*
- * @tc.name: TabBarPatternHandleMouseEvent003
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent003, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function HandleMouseEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    auto info = MouseInfo();
-    int32_t nodeId = 1;
-    for (int i = 0; i <= 2; i++) {
-        auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
-            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-        tabBarNode_->AddChild(frameNode_);
-    }
-    Offset s1(0.2, 0.2);
-    Offset s2(0.3, 0.3);
-    info.SetLocalLocation(s1);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-    tabBarPattern_->visibleItemPosition_[1] = { 0.2f, 0.3f };
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleMouseEvent(info);
-        info.SetLocalLocation(s2);
-    }
-}
-
-/**
  * @tc.name: TabBarPatternOnKeyEvent001
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC
@@ -998,146 +911,6 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
     tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->HandleTouchEvent(touchLocationInfo);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
-}
-
-/**
- * @tc.name: TabBarPatternHandleHoverEvent001
- * @tc.desc: test HandleHoverEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleHoverEvent001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    bool isHover = true;
-    std::optional<int32_t> hoverIndex_test(0);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-    tabBarPattern_->hoverIndex_ = hoverIndex_test;
-    tabBarPattern_->touchingIndex_ = hoverIndex_test;
-
-    /**
-     * @tc.steps: step2. Test function HandleHoverEvent.
-     * @tc.expected: Related functions run ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->HandleHoverEvent(isHover);
-                isHover = false;
-                tabBarPattern_->hoverIndex_ = {};
-            }
-            tabBarPattern_->hoverIndex_ = hoverIndex_test;
-        }
-        isHover = true;
-        tabBarPattern_->hoverIndex_ = {};
-    }
-
-    isHover = false;
-    IndicatorStyle style;
-    style.color = Color::BLACK;
-    tabBarPattern_->hoverIndex_ = hoverIndex_test;
-    tabBarPattern_->touchingIndex_ = {};
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    tabBarPattern_->SetSelectedMode(SelectedMode::BOARD, 0);
-    tabBarPattern_->SetIndicatorStyle(style, 0);
-
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleHoverEvent(isHover);
-        tabBarPattern_->AddTabBarItemType(1, true);
-    }
-}
-
-/**
- * @tc.name: TabBarPatternHandleHoverOnEvent001
- * @tc.desc: test HandleHoverOnEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleHoverOnEvent001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    std::optional<int32_t> hoverIndex_test(0);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-    tabBarPattern_->hoverIndex_ = hoverIndex_test;
-    tabBarPattern_->touchingIndex_ = hoverIndex_test;
-
-    /**
-     * @tc.steps: step2. Test function HandleHoverOnEvent.
-     * @tc.expected: Related functions run ok.
-     */
-    IndicatorStyle style;
-    style.color = Color::BLACK;
-    tabBarPattern_->hoverIndex_ = hoverIndex_test;
-    tabBarPattern_->touchingIndex_ = {};
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    tabBarPattern_->SetSelectedMode(SelectedMode::BOARD, 0);
-    tabBarPattern_->SetIndicatorStyle(style, 0);
-
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleHoverOnEvent(0);
-        tabBarPattern_->AddTabBarItemType(1, true);
-    }
-}
-
-/**
- * @tc.name: TabBarPatternOnKeyEvent002
- * @tc.desc: test OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function OnKeyEvent.
-     * @tc.expected: Related functions run ok.
-     */
-    KeyCode code = KeyCode::KEY_CLEAR;
-    KeyAction action = KeyAction::CLICK;
-    std::vector<KeyCode> pressedCodes;
-    pressedCodes.emplace_back(KeyCode::KEY_0);
-    pressedCodes.emplace_back(KeyCode::KEY_1);
-    int32_t repeatTime = 1;
-    int64_t timeStamp = 0;
-    std::chrono::milliseconds milliseconds(timeStamp);
-    TimeStamp time(milliseconds);
-    int32_t metaKey = 1;
-    int64_t deviceId = 1;
-    SourceType sourceType = SourceType::NONE;
-    tabBarPattern_->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::HORIZONTAL);
-
-    auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->OnKeyEvent(event);
-                event.action = KeyAction::DOWN;
-                event.code = KeyCode::KEY_DPAD_LEFT;
-            }
-            event.code = KeyCode::KEY_DPAD_UP;
-        }
-        tabBarPattern_->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::VERTICAL);
-    }
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->OnKeyEvent(event);
-                event.code = KeyCode::KEY_DPAD_RIGHT;
-            }
-            event.code = KeyCode::KEY_DPAD_DOWN;
-        }
-        tabBarPattern_->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::VERTICAL);
-    }
-    event.code = KeyCode::KEY_TAB;
-    tabBarPattern_->GetLayoutProperty<TabBarLayoutProperty>()->UpdateIndicator(1);
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->OnKeyEvent(event);
-        tabBarPattern_->GetLayoutProperty<TabBarLayoutProperty>()->UpdateIndicator(-2);
-    }
 }
 
 /**
@@ -1214,79 +987,6 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
     focusHub->getInnerFocusRectFunc_(paintRect);
 }
 
-/*
- * @tc.name: TabBarPatternHandleMouseEvent004
- * @tc.desc: test HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent004, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    auto info = MouseInfo();
-
-    /**
-     * @tc.steps: step2. Test function HandleMouseEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    int32_t nodeId = 1;
-    for (int i = 0; i <= 2; i++) {
-        auto frameNode_ = TabsModelNG::GetOrCreateTabsNode(
-            V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-        tabBarNode_->AddChild(frameNode_);
-    }
-    Offset s1(0.1, 0.1);
-    Offset s2(0.4, 0.4);
-    info.SetLocalLocation(s1);
-    ASSERT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 0);
-    tabBarPattern_->hoverIndex_.emplace(1);
-    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
-    tabBarPattern_->visibleItemPosition_[1] = { 0.2f, 0.3f };
-    tabBarPattern_->visibleItemPosition_[2] = { 0.3f, 0.4f };
-    IndicatorStyle indicatorStyle1;
-    IndicatorStyle indicatorStyle2;
-    IndicatorStyle indicatorStyle3;
-    indicatorStyle1.color = Color::BLACK;
-    indicatorStyle2.color = Color::RED;
-    indicatorStyle3.color = Color::BLUE;
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE,
-        TabBarStyle::NOSTYLE };
-    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR, SelectedMode::BOARD };
-    tabBarPattern_->indicatorStyles_ = { indicatorStyle1, indicatorStyle2, indicatorStyle3 };
-
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            tabBarPattern_->HandleMouseEvent(info);
-            info.SetLocalLocation(s2);
-            ASSERT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 2);
-            tabBarPattern_->hoverIndex_.reset();
-        }
-        tabBarPattern_->hoverIndex_.emplace(1);
-        tabBarPattern_->touchingIndex_.emplace(1);
-    }
-
-    Offset s3(0.2, 0.2);
-    info.SetLocalLocation(s3);
-    ASSERT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 0);
-    info.SetAction(MouseAction::MOVE);
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->HandleMouseEvent(info);
-                tabBarPattern_->touchingIndex_.reset();
-                tabBarPattern_->hoverIndex_ = 1;
-            }
-            tabBarPattern_->hoverIndex_.reset();
-        }
-        tabBarPattern_->hoverIndex_.emplace(0);
-        info.SetAction(MouseAction::WINDOW_ENTER);
-    }
-
-    info.SetAction(MouseAction::WINDOW_LEAVE);
-    tabBarPattern_->HandleMouseEvent(info);
-}
-
 /**
  * @tc.name: TabBarPatternOnKeyEvent003
  * @tc.desc: test OnKeyEvent
@@ -1317,53 +1017,6 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent003, TestSize.Level1)
     tabBarLayoutProperty_->UpdateIndicator(1);
     auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
     tabBarPattern_->OnKeyEvent(event);
-}
-
-/**
- * @tc.name: TabBarPatternHandleTouchEvent004
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    IndicatorStyle indicatorStyle1;
-    IndicatorStyle indicatorStyle2;
-    indicatorStyle1.color = Color::BLACK;
-    indicatorStyle2.color = Color::RED;
-    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
-    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
-    tabBarPattern_->indicatorStyles_ = { indicatorStyle1, indicatorStyle2 };
-
-    /**
-     * @tc.steps: step2. Test function HandleTouchEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    TouchLocationInfo touchLocationInfo(1);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    touchLocationInfo.SetLocalLocation(Offset(1.0f, 1.0f));
-    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
-    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->HandleTouchEvent(touchLocationInfo);
-        touchLocationInfo.SetLocalLocation(Offset(-1.0f, -1.0f));
-    }
-    EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
-    tabBarPattern_->touchingIndex_ = 1;
-    touchLocationInfo.SetTouchType(TouchType::UP);
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                tabBarPattern_->HandleTouchEvent(touchLocationInfo);
-                tabBarPattern_->touchingIndex_ = 1;
-                touchLocationInfo.SetTouchType(TouchType::CANCEL);
-            }
-            touchLocationInfo.SetTouchType(TouchType::DOWN);
-        }
-        tabBarPattern_->touchingIndex_.reset();
-    }
 }
 
 /**
@@ -1481,48 +1134,6 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent007, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOnChangeEvent002.
- * @tc.desc: Test the SetOnChangeEvent function in the TabsPattern class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, SetOnChangeEvent002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize all properties of tabs.
-     */
-
-    Color color = Color::RED;
-    TabsItemDivider divider;
-    divider.color = color;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. set different conditions and invoke SetOnChangeEvent.
-     * @tc.expected: step2. related function is called.
-     */
-    pattern_->onIndexChangeEvent_ = nullptr;
-    pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent(0, 1);
-    tabBarPattern_->isMaskAnimationByCreate_ = true;
-    swiperPattern_->FireChangeEvent(0, 1);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    swiperPattern_->FireChangeEvent(0, 1);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    swiperPattern_->FireChangeEvent(0, 1);
-    EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(Axis::HORIZONTAL), Axis::HORIZONTAL);
-    tabBarPattern_->changeByClick_ = true;
-    swiperPattern_->FireChangeEvent(0, 1);
-    pattern_->SetOnTabBarClickEvent([](const BaseEventInfo* info) {});
-    auto onTabBarClickEvent = pattern_->GetTabBarClickEvent();
-    (*onTabBarClickEvent)(1);
-    EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
-}
-
-/**
  * @tc.name: TabBarPatternInitTurnPageRateEvent001
  * @tc.desc: test InitTurnPageRateEvent
  * @tc.type: FUNC
@@ -1610,9 +1221,7 @@ HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     int32_t code = ERROR_CODE_NO_ERROR;
-    auto onPreloadFinish = [&code](int32_t errorCode, std::string message) {
-        code = errorCode;
-    };
+    auto onPreloadFinish = [&code](int32_t errorCode, std::string message) { code = errorCode; };
 
     /**
      * @tc.steps: steps2. Set preload items to different value
@@ -1633,6 +1242,191 @@ HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
     swiperController_->SetPreloadFinishCallback(onPreloadFinish);
     swiperController_->PreloadItems(indexSet);
     EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: SetOnIndexChangeEvent001
+ * @tc.desc: Test SetOnIndexChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Change swiper index by click tabBarItem
+     * @tc.expected: OnChangeEvent was triggered
+     */
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChangeEvent(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+    EXPECT_EQ(currentIndex, 1);
+}
+
+/**
+ * @tc.name: SetOnIndexChangeEvent002
+ * @tc.desc: Test SetOnIndexChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Change swiper index
+     * @tc.expected: OnChangeEvent was triggered
+     */
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChangeEvent(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 1);
+
+    /**
+     * @tc.steps: step2. Swap OnChangeEvent
+     * @tc.expected: OnChangeEvent was swap
+     */
+    int32_t currentIndex2;
+    auto event2 = [&currentIndex2](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex2 = tabInfo->GetIndex();
+    };
+    pattern_->SetOnIndexChangeEvent(std::move(event2));
+    SwipeToWithoutAnimation(2);
+    EXPECT_EQ(currentIndex, 1);
+    EXPECT_EQ(currentIndex2, 2);
+}
+
+/**
+ * @tc.name: SetOnIndexChangeEvent003
+ * @tc.desc: test SetOnChangeEvent, event will not be triggered when IsMaskAnimationExecuted
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Change swiper index by click tabBarItem
+     * @tc.expected: OnChangeEvent was triggered
+     */
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChangeEvent(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->SetMaskAnimationExecuted(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
+
+    HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
+    EXPECT_EQ(currentIndex, 0);
+}
+
+/**
+ * @tc.name: SetOnChangeEvent001
+ * @tc.desc: test SetOnChangeEvent, event will be triggered when index change
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnChangeEvent001, TestSize.Level1)
+{
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Change swiper index
+     * @tc.expected: Event was triggered
+     */
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 1);
+
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex, 3);
+}
+
+/**
+ * @tc.name: SetOnChangeEvent002
+ * @tc.desc: test SetOnChangeEvent, swap event
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnChangeEvent002, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Swap event
+     * @tc.expected: Event was swap
+     */
+    bool currentIndex2;
+    auto event2 = [&currentIndex2](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex2 = tabInfo->GetIndex();
+    };
+    pattern_->SetOnChangeEvent(std::move(event2));
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 0);
+    EXPECT_EQ(currentIndex2, 1);
+}
+
+/**
+ * @tc.name: SetOnChangeEvent003
+ * @tc.desc: test SetOnChangeEvent, event will not be triggered when IsMaskAnimationExecuted
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnChangeEvent003, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. IsMaskAnimationExecuted
+     * @tc.expected: Event was not triggered
+     */
+    tabBarPattern_->SetMaskAnimationExecuted(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
+
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 0);
+
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex, 0);
 }
 
 /**

@@ -16,6 +16,7 @@
 #include "tabs_test_ng.h"
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -388,7 +389,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -424,7 +426,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight004, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -458,7 +461,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -493,7 +497,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight006, Test
      */
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -527,7 +532,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -562,7 +568,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight008, Test
      */
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -595,7 +602,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -629,7 +637,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight010, Test
      * @tc.expected: Related function runs ok.
      */
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -663,7 +672,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -697,7 +707,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -731,7 +742,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -764,7 +776,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -923,7 +936,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -957,7 +971,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -991,7 +1006,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1024,7 +1040,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1058,7 +1075,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
     iconStyle.selectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1091,7 +1109,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
     iconStyle.unselectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1124,7 +1143,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
     iconStyle.selectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1156,7 +1176,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
     IconStyle iconStyle;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1308,5 +1329,238 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation005, TestSize.Level1
 
     tabBarPattern_->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
+}
+
+/**
+ * @tc.name: TabBarPatternStartShowTabBarTest001
+ * @tc.desc: test StartShowTabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. default translate is 0, test function StartShowTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    MockAnimationManager::GetInstance().Tick();
+
+    /**
+     * @tc.steps: step3. Set translate to a value greater than 0, test function StartShowTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 10.0f, 0.0f));
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_LT(options.y.ConvertToPx(), 10.0f);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+
+    /**
+     * @tc.steps: step4. Set translate to a value greater than tab bar size, test function StartShowTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 500.0f, 0.0f));
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartShowTabBar(2000);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarPatternStopShowTabBarTest001
+ * @tc.desc: test StopShowTabBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternStopShowTabBarTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Not start show tab bar, test function StopShowTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->StopShowTabBar();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+
+    /**
+     * @tc.steps: step3. Start show tab bar, test function StopShowTabBar.
+     * @tc.expected: Related function runs ok.
+     */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 10.0f, 0.0f));
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_LT(options.y.ConvertToPx(), 10.0f);
+    tabBarPattern_->StopShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    EXPECT_GT(options.y.ConvertToPx(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTabBarRatioTest001
+ * @tc.desc: test UpdateTabBarRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarRatioTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set ratio to 0.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    auto ratio = 0.5f;
+    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto opacity = renderContext->GetOpacityValue(1.0f);
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f - size * ratio);
+    EXPECT_EQ(opacity, 1.0f - ratio);
+
+    /**
+     * @tc.steps: step3.Set ratio to -0.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+    EXPECT_EQ(opacity, 1.0f);
+
+    /**
+     * @tc.steps: step4.Set ratio to 1.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    ratio = 1.5f;
+    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), - size);
+    EXPECT_EQ(opacity, 0.0f);
+
+    /**
+     * @tc.steps: step5.Start show tab bar then set ratio to -1.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->StartShowTabBar();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
+    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_LT(options.y.ConvertToPx(), 0.0f);
+    EXPECT_LT(opacity, 1.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+    EXPECT_EQ(opacity, 1.0f);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateTabBarRatioTest002
+ * @tc.desc: test UpdateTabBarRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarRatioTest002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set ratio to 0.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    auto ratio = 0.5f;
+    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto opacity = renderContext->GetOpacityValue(1.0f);
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f + size * ratio);
+    EXPECT_EQ(opacity, 1.0f - ratio);
+
+    /**
+     * @tc.steps: step3.Set ratio to -0.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern_->UpdateTabBarHiddenRatio(-ratio);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), 0.0f);
+    EXPECT_EQ(opacity, 1.0f);
+
+    /**
+     * @tc.steps: step4.Set ratio to 1.5f, test function UpdateTabBarRatio.
+     * @tc.expected: Related function runs ok.
+     */
+    ratio = 1.5f;
+    tabBarPattern_->UpdateTabBarHiddenRatio(ratio);
+    options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    opacity = renderContext->GetOpacityValue(1.0f);
+    EXPECT_EQ(options.y.ConvertToPx(), size);
+    EXPECT_EQ(opacity, 0.0f);
+}
+
+/**
+ * @tc.name: TabBarPatternSetTabBarTranslateAndOpacityTest001
+ * @tc.desc: test SetTabBarTranslate and SetTabBarOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternSetTabBarTranslateAndOpacityTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2.Set translate and opacity, test function SetTabBarTranslate and SetTabBarOpacity.
+     * @tc.expected: Related function runs ok.
+     */
+    auto options = TranslateOptions(10.f, 10.f, 1.0f);
+    tabBarPattern_->SetTabBarTranslate(options);
+    auto opacity = 0.5f;
+    tabBarPattern_->SetTabBarOpacity(opacity);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(options, renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f)));
+    EXPECT_EQ(opacity, renderContext->GetOpacityValue(1.0f));
 }
 } // namespace OHOS::Ace::NG

@@ -59,15 +59,34 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
-  title(value: any): NavigationAttribute {
-    throw new Error('Method not implemented.');
+  title(value: any, options?: NavigationTitleOptions): NavigationAttribute {
+    let arkNavigationTitle = new ArkNavigationTitle();
+    if (!isUndefined(options) && !isNull(options) && isObject(options)) {
+      if (Object.keys(options).length !== 0) {
+        arkNavigationTitle.navigationTitleOptions = options;
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, TitleModifier.identity,
+      TitleModifier, arkNavigationTitle);
+    return this;
   }
   subTitle(value: string): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
-  hideTitleBar(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
+  hideTitleBar(isHide: boolean, animated?: boolean): NavigationAttribute {
+    let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideTitleBar.animated = animated;
+    }
+    if (arkNavigationHideTitleBar.isHide === undefined && arkNavigationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, arkNavigationHideTitleBar);
+    }
     return this;
   }
   hideBackButton(value: boolean): NavigationAttribute {
@@ -87,8 +106,19 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   toolbarConfiguration(value: any): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
-  hideToolBar(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
+  hideToolBar(isHide: boolean, animated?: boolean): NavigationAttribute {
+    let arkNavigationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideToolBar.animated = animated;
+    }
+    if (arkNavigationHideToolBar.isHide === undefined && arkNavigationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, arkNavigationHideToolBar);
+    }
     return this;
   }
   onTitleModeChange(callback: (titleMode: NavigationTitleMode) => void): NavigationAttribute {
@@ -232,14 +262,18 @@ class ModeModifier extends ModifierWithKey<number> {
   }
 }
 
-class HideToolBarModifier extends ModifierWithKey<boolean> {
+class HideToolBarModifier extends ModifierWithKey<ArkNavHideTitleBarOrToolBar | undefined> {
+  constructor(value: ArkNavHideTitleBarOrToolBar) {
+    super(value);
+  }
+
   static identity: Symbol = Symbol('hideToolBar');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().navigation.resetHideToolBar(node);
     } else {
-      getUINativeModule().navigation.setHideToolBar(node, this.value);
+      getUINativeModule().navigation.setHideToolBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
@@ -268,6 +302,23 @@ class HideBackButtonModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TitleModifier extends ModifierWithKey<ArkNavigationTitle | undefined> {
+  constructor(value: ArkNavigationTitle | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('title');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetTitle(node);
+    } else {
+      getUINativeModule().navigation.setTitle(node, this.value?.navigationTitleOptions);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+
 class SubTitleModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('subTitle');
 
@@ -280,14 +331,18 @@ class SubTitleModifier extends ModifierWithKey<string> {
   }
 }
 
-class NavigationHideTitleBarModifier extends ModifierWithKey<boolean> {
+class NavigationHideTitleBarModifier extends ModifierWithKey<ArkNavHideTitleBarOrToolBar | undefined> {
+  constructor(value: ArkNavHideTitleBarOrToolBar) {
+    super(value);
+  }
+
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().navigation.resetHideTitleBar(node);
     } else {
-      getUINativeModule().navigation.setHideTitleBar(node, this.value);
+      getUINativeModule().navigation.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }

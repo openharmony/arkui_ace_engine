@@ -82,7 +82,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    NONE = 40000
 };
 
 uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
@@ -434,7 +435,7 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     auto resId = jsObj->Get(vm,
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
-    ResourceType resType;
+    ResourceType resType = ResourceType::NONE;
     std::string targetModule;
     std::string resName;
     if (resId->IsString(vm)) {

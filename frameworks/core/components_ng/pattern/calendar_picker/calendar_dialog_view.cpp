@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -110,7 +111,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
 {
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = dialogNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     RefPtr<DialogTheme> dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -192,6 +193,27 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
+void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
+    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
+{
+    CHECK_NULL_VOID(leftYearArrowNode);
+    auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(leftYearProperty);
+    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
+    CHECK_NULL_VOID(leftDayArrowNode);
+    auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(leftDayProperty);
+    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
+    CHECK_NULL_VOID(rightDayArrowNode);
+    auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(rightDayProperty);
+    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
+    CHECK_NULL_VOID(rightYearArrowNode);
+    auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(rightYearProperty);
+    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
+}
+
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -199,7 +221,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -252,14 +274,14 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-
+    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
     return titleRow;
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -372,6 +394,11 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
             calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
+        if (i == CURRENT_MONTH_INDEX) {
+            auto currentPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+            CHECK_NULL_RETURN(currentPattern, nullptr);
+            currentPattern->SetIsFirstEnter(true);
+        }
         monthLayoutProperty->UpdateLayoutDirection(textDirection);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -434,7 +461,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
 
     auto monthLayoutProperty = monthFrameNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = monthFrameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -483,7 +510,7 @@ void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode
 
 RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -681,7 +708,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
 
 RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
@@ -728,7 +755,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = contentRow->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     UpdateOptionLayoutProps(contentRow, pipelineContext);
 
@@ -790,7 +817,7 @@ void CalendarDialogView::UpdateOptionLayoutProps(
 
 void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& settingData)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -1011,7 +1038,7 @@ void CalendarDialogView::UpdatePaintProperties(
 void CalendarDialogView::UpdateButtons(
     const RefPtr<FrameNode>& buttonNode, size_t buttonIndex, std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = buttonNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);

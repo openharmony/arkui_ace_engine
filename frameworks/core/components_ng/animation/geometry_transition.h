@@ -82,6 +82,7 @@ private:
     RectF GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos = std::nullopt) const;
     void AnimateWithSandBox(const OffsetF& inNodeParentPos, bool inNodeParentHasScales,
         const std::function<void()>& propertyCallback, const AnimationOption& option);
+    void SyncGeometryPropertiesAfterLayout(const RefPtr<FrameNode>& syncNode);
 
     static constexpr int32_t RESYNC_DURATION = 1;
     std::string id_;

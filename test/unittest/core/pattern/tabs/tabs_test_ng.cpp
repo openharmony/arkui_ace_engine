@@ -81,7 +81,7 @@ void TabsTestNg::TearDown()
 
     dividerNode_ = nullptr;
     dividerRenderProperty_ = nullptr;
-    ClearOldNodes();  // Each testcase will create new list at begin
+    ClearOldNodes(); // Each testcase will create new list at begin
 }
 
 void TabsTestNg::GetTabs()
@@ -120,6 +120,7 @@ TabsModelNG TabsTestNg::CreateTabs(BarPosition barPosition, int32_t index)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     GetTabs();
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return model;
 }
 
@@ -138,6 +139,7 @@ TabContentModelNG TabsTestNg::CreateTabContent()
     tabContentNode->UpdateRecycleElmtId(elmtId); // for AddChildToGroup
     tabContentNode->GetTabBarItemId();           // for AddTabBarItem
     tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return tabContentModel;
 }
 
@@ -204,26 +206,29 @@ void TabsTestNg::SwipeToWithoutAnimation(int32_t index)
     FlushLayoutTask(frameNode_);
 }
 
-void TabsTestNg::ClickTo(Offset offset, int32_t index)
+void TabsTestNg::HandleClick(Offset offset, int32_t index)
 {
     GestureEvent info;
     info.SetLocalLocation(offset);
-    tabBarPattern_->HandleClick(info, index);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), index);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushLayoutTask(frameNode_);
 }
 
-void TabsTestNg::MouseTo(MouseAction action, Offset location, bool isHover)
+void TabsTestNg::HandleMouseEvent(MouseAction action, Offset location)
 {
     MouseInfo mouseInfo;
     mouseInfo.SetAction(action);
     mouseInfo.SetLocalLocation(location);
     tabBarPattern_->HandleMouseEvent(mouseInfo);
-    // when on the tabBar is true, else false
+}
+
+void TabsTestNg::HandleHoverEvent(bool isHover)
+{
     tabBarPattern_->HandleHoverEvent(isHover);
 }
 
-void TabsTestNg::TouchTo(TouchType type, Offset location)
+void TabsTestNg::HandleTouchEvent(TouchType type, Offset location)
 {
     TouchLocationInfo touchInfo(0);
     touchInfo.SetTouchType(type);
@@ -319,31 +324,90 @@ HWTEST_F(TabsTestNg, ConvertToString001, TestSize.Level1)
 HWTEST_F(TabsTestNg, TabsNodeToJsonValue001, TestSize.Level2)
 {
     TabsModelNG model = CreateTabs();
-    model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(1);
     CreateTabsDone(model);
 
-    /**
-     * @tc.steps: steps2. Create ScrollableBarModeOptions and assign them different values to enter different branches.
-     */
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("index"), "0");
+    EXPECT_EQ(json->GetString("animationDuration"), "");
+    EXPECT_EQ(json->GetString("barMode"), "BarMode.Fixed");
+    EXPECT_EQ(json->GetString("barWidth"), "720.000000");
+    EXPECT_EQ(json->GetString("barHeight"), "56.000000");
+    EXPECT_EQ(json->GetString("fadingEdge"), "true");
+    EXPECT_EQ(json->GetString("barBackgroundColor"), "#00000000");
+    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "BlurStyle.NONE");
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
+    EXPECT_EQ(json->GetString("barGridAlign"), "");
+
+    pattern_->SetAnimateMode(TabAnimateMode::ACTION_FIRST);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    swiperPaintProperty_->UpdateEdgeEffect(EdgeEffect::FADE);
+    json = JsonUtil::Create(true);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("barMode"),
+        "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}");
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.ACTION_FIRST");
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::FADE");
+
     ScrollableBarModeOptions options;
-    options.margin = 0.0_vp;
     options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
+    pattern_->SetAnimateMode(TabAnimateMode::NO_ANIMATION);
+    swiperPaintProperty_->UpdateEdgeEffect(EdgeEffect::NONE);
+    json = JsonUtil::Create(true);
     frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("barMode"),
+        "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}");
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.NO_ANIMATION");
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::NONE");
+
     options.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
+    pattern_->SetAnimateMode(TabAnimateMode::MAX_VALUE);
+    json = JsonUtil::Create(true);
     frameNode_->ToJsonValue(json, filter);
-    options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
-    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("barMode"), "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":"
+                                          "\"LayoutStyle.SPACE_BETWEEN_OR_CENTER\"}");
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
+}
 
-    /**
-     * @tc.steps: steps3. ToJsonValue.
-     * @tc.expected: steps3. Check the result of ToJsonValue.
-     */
-    EXPECT_NE(json, nullptr);
+/**
+ * @tc.name: TabsNodeToJsonValue002
+ * @tc.desc: Test the ToJsonValue function in the TabsNode class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+
+    frameNode_->swiperId_ = std::nullopt;
+    frameNode_->tabBarId_ = std::nullopt;
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("index"), "0");
+    EXPECT_EQ(json->GetString("animationDuration"), "");
+    EXPECT_EQ(json->GetString("barMode"), "BarMode.Fixed");
+    EXPECT_EQ(json->GetString("barWidth"), "0.000000");
+    EXPECT_EQ(json->GetString("barHeight"), "0.000000");
+    EXPECT_EQ(json->GetString("fadingEdge"), "true");
+    EXPECT_EQ(json->GetString("barBackgroundColor"), "#00000000");
+    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "BlurStyle.NONE");
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
+    EXPECT_EQ(json->GetString("barGridAlign"), "");
+
+    std::string attr = "id";
+    filter.AddFilterAttr(attr);
+    json = JsonUtil::Create(true);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
+    EXPECT_EQ(json->ToString(), "{\"id\":\"\"}");
 }
 
 /**
@@ -374,200 +438,10 @@ HWTEST_F(TabsTestNg, TabsNodeGetScrollableBarModeOptions001, TestSize.Level2)
 }
 
 /**
- * @tc.name: TabsLayoutAlgorithmMeasure001
- * @tc.desc: Test the Measure function in the TabsLayoutAlgorithm class.
+ * @tc.name: ProvideRestoreInfo001
+ * @tc.desc: test AddTabBarItem
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabsLayoutAlgorithmMeasure001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: steps2. Test Measure by using different conditions.
-     */
-    auto tabsLayoutAlgorithm = pattern_->CreateLayoutAlgorithm();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
-    LayoutConstraintF layoutConstraintVaild;
-    float layoutSize = 10000.0f;
-    layoutConstraintVaild.selfIdealSize.SetSize(SizeF(layoutSize, layoutSize));
-    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
-        ->UpdateLayoutConstraint(layoutConstraintVaild);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-
-    /**
-     * @tc.steps: step3. Create a child named swiperLayoutWrapper for layoutWrapper.
-     */
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode_, geometryNode1, swiperNode_->GetLayoutProperty());
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-    layoutWrapper.AppendChild(swiperLayoutWrapper);
-
-    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetAxis(Axis::HORIZONTAL);
-    frameNode_->GetLayoutProperty<TabsLayoutProperty>()->UpdateTabBarPosition(BarPosition::START);
-    layoutWrapper.GetGeometryNode()->SetFrameSize(SizeF(10000.0f, 10000.0f));
-    tabsLayoutAlgorithm->Layout(&layoutWrapper);
-    frameNode_->GetLayoutProperty<TabsLayoutProperty>()->UpdateBarOverlap(true);
-
-    /**
-     * @tc.steps: steps4. Measure.
-     * @tc.expected: steps4. Check the result of BarOverlap.
-     */
-    tabsLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_TRUE(frameNode_->GetLayoutProperty<TabsLayoutProperty>()->GetBarOverlap().value());
-    frameNode_->GetLayoutProperty<TabsLayoutProperty>()->UpdateBarOverlap(false);
-    tabsLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_FALSE(frameNode_->GetLayoutProperty<TabsLayoutProperty>()->GetBarOverlap().value());
-}
-
-/**
- * @tc.name: TabBarAddChildToGroup001.
- * @tc.desc: Test the AddChildToGroup function in the TabContentNode class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    LabelStyle labelStyle;
-    tabContentModel.SetLabelStyle(labelStyle);
-    ViewStackProcessor::GetInstance()->Pop();
-    CreateTabsDone(model);
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    frameNode_->AddChildToGroup(tabContentFrameNode, 1);
-    frameNode_->swiperChildren_.insert(1);
-    frameNode_->swiperChildren_.insert(2);
-    frameNode_->AddChildToGroup(tabContentFrameNode, 1);
-    auto tabBarNodeswiper =
-        FrameNode::GetOrCreateFrameNode("test", 2, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    frameNode_->children_.clear();
-    frameNode_->children_.push_back(tabBarNodeswiper);
-    tabContentFrameNode->nodeId_ = 0;
-    frameNode_->AddChildToGroup(tabContentFrameNode, 1);
-    EXPECT_NE(tabBarNodeswiper, nullptr);
-}
-
-/**
- * @tc.name: OnDetachFromMainTree001.
- * @tc.desc: Test the OnDetachFromMainTree function in the TabContentNode class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, OnDetachFromMainTree001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    LabelStyle labelStyle;
-    tabContentModel.SetLabelStyle(labelStyle);
-    ViewStackProcessor::GetInstance()->Pop();
-    CreateTabsDone(model);
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabBarNodeswiper =
-        FrameNode::GetOrCreateFrameNode("test", 1, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    frameNode_->children_.clear();
-    frameNode_->children_.push_back(tabBarNodeswiper);
-
-    /**
-     * @tc.steps: step2. Invoke OnDetachFromMainTree.
-     */
-    tabContentFrameNode->OnDetachFromMainTree(true);
-    EXPECT_NE(tabContentFrameNode, nullptr);
-    swiperPattern_->currentIndex_ = 1;
-    tabContentFrameNode->OnDetachFromMainTree(true);
-    EXPECT_NE(tabContentFrameNode, nullptr);
-}
-
-/**
- * @tc.name: TabPatternOnModifyDone001.
- * @tc.desc: test OnModifyDone in TabsPattern class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabPatternOnModifyDone001, TestSize.Level1)
-{
-    Color color = Color::RED;
-    TabsItemDivider divider;
-    divider.color = color;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step3. invoke OnModifyDone and onChangeEvent_.
-     * @tc.expected: step3. related function is called.
-     */
-    pattern_->OnModifyDone();
-    pattern_->onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>();
-    pattern_->OnModifyDone();
-}
-
-/**
- * @tc.name: SetOnIndexChangeEvent001.
- * @tc.desc: test SetOnIndexChangeEvent in TabsPattern class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
-{
-    Color color = Color::RED;
-    TabsItemDivider divider;
-    divider.color = color;
-    TabsModelNG model = CreateTabs();
-    model.SetDivider(divider);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step3. invoke OnModifyDone and onIndexChangeEvent_.
-     * @tc.expected: step3. related function is called.
-     */
-    pattern_->onIndexChangeEvent_ = std::make_shared<ChangeEvent>();
-    pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    pattern_->onIndexChangeEvent_ = nullptr;
-    pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent(0, 1);
-}
-
-/**
-* @tc.name: InitScrollable001
-* @tc.desc: test InitScrollable001
-* @tc.type: FUNC
-*/
-HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->axis_ = Axis::HORIZONTAL;
-    auto axis_test = Axis::HORIZONTAL;
-    tabBarPattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(axis_test);
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    /**
-    * @tc.steps: step2. Clear visibleItemPosition_ InitScrollable is called after data in
-    * @tc.expected: TabItem Offsets_ Value is empty
-    */
-    tabBarPattern_->visibleItemPosition_.clear();
-    tabBarPattern_->InitScrollable(gestureHub);
-    tabBarPattern_->axis_ = Axis::VERTICAL;
-    ASSERT_TRUE(tabBarPattern_->visibleItemPosition_.empty());
-}
-
-/**
-* @tc.name: ProvideRestoreInfo001
-* @tc.desc: test AddTabBarItem
-* @tc.type: FUNC
-*/
 HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -579,10 +453,10 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 }
 
 /**
-* @tc.name: SetEdgeEffect002
-* @tc.desc: test SetEdgeEffect
-* @tc.type: FUNC
-*/
+ * @tc.name: SetEdgeEffect002
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
@@ -593,39 +467,39 @@ HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
-    * @tc.steps: step1. Test function SetEdgeEffect.
-    * @tc.expected: SetEdgeEffect calling interface.
-    */
+     * @tc.steps: step1. Test function SetEdgeEffect.
+     * @tc.expected: SetEdgeEffect calling interface.
+     */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
     /**
-    * @tc.steps: step1. Set scrollEffect_ Value is empty.
-    * @tc.expected: SetEdgeEffect calling interface
-    */
+     * @tc.steps: step1. Set scrollEffect_ Value is empty.
+     * @tc.expected: SetEdgeEffect calling interface
+     */
     tabBarPattern_->scrollEffect_ = nullptr;
     tabBarPattern_->SetEdgeEffect(gestureHub);
 }
 
 /**
-* @tc.name: Create003
-* @tc.desc: test SetEdgeEffect
-* @tc.type: FUNC
-*/
+ * @tc.name: Create003
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
 {
     /**
-    * @tc.steps: step1. Construct TabContentModelNG object
-    */
+     * @tc.steps: step1. Construct TabContentModelNG object
+     */
     int32_t testIndex = 0;
     TabsModelNG model = CreateTabs(BarPosition::END, testIndex);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
     /**
-    * @tc.steps: step2. Test function Create.
-    * @tc.expected: TestIndex greater than or equal to 0
-    */
+     * @tc.steps: step2. Test function Create.
+     * @tc.expected: TestIndex greater than or equal to 0
+     */
     swiperPaintProperty_->UpdateEdgeEffect(EdgeEffect::SPRING);
     EXPECT_TRUE(testIndex >= 0);
 }
@@ -650,10 +524,10 @@ HWTEST_F(TabsTestNg, TabsPatternOnRestoreInfo002, TestSize.Level1)
 }
 
 /**
-* @tc.name: TabsPatternSetOnAnimationEnd002
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabsPatternSetOnAnimationEnd002
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabsTestNg, TabsPatternSetOnAnimationEnd002, TestSize.Level1)
 {
     auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
@@ -758,7 +632,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->HandleClick(info, 0);
+    tabBarPattern_->HandleClick(info.GetSourceDevice(), 0);
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_TRUE(swiperPattern_->customAnimationToIndex_.has_value());
 

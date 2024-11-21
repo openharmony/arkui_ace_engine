@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -30,6 +31,7 @@ constexpr float CONTENT_OFFSET_PERCENT = 0.2f;
 constexpr float TITLE_OFFSET_PERCENT = 0.02f;
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
+constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
@@ -219,7 +221,11 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     SetIsOnAnimation(false);
-    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    bool isInvisible = IsNodeInvisible(navigation);
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH && isInvisible) {
         GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     }
     auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
@@ -329,7 +335,7 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
     bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
 {
     if (isPopPage) {
-        CollectTextNodeAsRenderGroup();
+        CollectTextNodeAsRenderGroup(isPopPage);
     } else {
         CHECK_NULL_VOID(proxy);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -342,13 +348,13 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
             if (proxy && proxy->GetIsFinished()) {
                 return;
             }
-            navDestination->CollectTextNodeAsRenderGroup();
+            navDestination->CollectTextNodeAsRenderGroup(false);
         });
         pipeline->RequestFrame();
     }
 }
 
-void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup(bool isPopPage)
 {
     ReleaseTextNodeList();
     std::queue<RefPtr<UINode>> childrenLoopQueue;
@@ -360,16 +366,12 @@ void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
     while (!childrenLoopQueue.empty() && remainTextNodeNeedRenderGroup > 0) {
         auto currentNode = childrenLoopQueue.front();
         childrenLoopQueue.pop();
-        if (!currentNode) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(currentNode);
         for (auto& child : currentNode->GetChildren()) {
             if (remainTextNodeNeedRenderGroup <= 0) {
                 break;
             }
-            if (!child) {
-                continue;
-            }
+            CHECK_NULL_CONTINUE(child);
             childrenLoopQueue.push(child);
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (!frameNode || (frameNode->GetTag() != V2::TEXT_ETS_TAG)) {
@@ -380,12 +382,23 @@ void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
                 (layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
                 continue;
             }
-            auto renderContext = frameNode->GetRenderContext();
-            if (renderContext && (renderContext->GetRenderGroupValue(false) != true)) {
-                renderContext->SetMarkNodeGroup(true);
-                textNodeList_.emplace_back(WeakPtr<UINode>(child));
-                --remainTextNodeNeedRenderGroup;
+            auto& renderContext = frameNode->GetRenderContext();
+            if (!renderContext || renderContext->GetRenderGroupValue(false)) {
+                continue;
             }
+            renderContext->SetMarkNodeGroup(isPopPage ||
+                (renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT));
+            textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            --remainTextNodeNeedRenderGroup;
+            auto pattern = AceType::DynamicCast<TextPattern>(frameNode->GetPattern());
+            CHECK_NULL_CONTINUE(pattern);
+            pattern->RegisterAfterLayoutCallback([weakRenderContext = WeakPtr<RenderContext>(renderContext)]() {
+                auto renderContext = weakRenderContext.Upgrade();
+                if (renderContext && !(renderContext->GetRenderGroupValue(false))) {
+                    renderContext->SetMarkNodeGroup(
+                        renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT);
+                }
+            });
         }
     }
 }
@@ -396,6 +409,10 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
         auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
         if (!textNode) {
             continue;
+        }
+        auto pattern = AceType::DynamicCast<TextPattern>(textNode->GetPattern());
+        if (pattern) {
+            pattern->UnRegisterAfterLayoutCallback();
         }
         auto renderContext = textNode->GetRenderContext();
         if (renderContext) {
@@ -416,5 +433,14 @@ void NavDestinationGroupNode::CleanContent()
     if (GetContentNode()) {
         GetContentNode()->Clean(false, true);
     }
+}
+
+bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigaiton = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigaiton, false);
+    int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
+    bool isInvisible = index_ < lastStandardIndex;
+    return isInvisible;
 }
 } // namespace OHOS::Ace::NG

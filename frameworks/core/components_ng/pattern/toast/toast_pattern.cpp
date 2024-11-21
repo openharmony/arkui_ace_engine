@@ -22,6 +22,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -56,13 +57,26 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(context, false);
     auto toastNode = dirty->GetHostNode();
+    CHECK_NULL_RETURN(toastNode, false);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, false);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
-    if (!IsDefaultToast()) {
-        OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
-            Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
+    if (!IsSystemTopMost() && (IsUIExtensionSubWindow() || (!IsDefaultToast() && expandDisplay_))) {
+        auto nodeContext = toastNode->GetContextWithCheck();
+        CHECK_NULL_RETURN(nodeContext, false);
+        auto subwindowOffset = nodeContext->GetDisplayWindowRectInfo().GetOffset();
+        if (!IsUIExtensionSubWindow() && (!NearEqual(subwindowOffset.GetX(), 0) ||
+            !NearEqual(subwindowOffset.GetY(), 0))) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "toast subwindow offset, x: %{public}f, y: %{public}f",
+                subwindowOffset.GetX(), subwindowOffset.GetY());
+        }
+        OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX() -
+            subwindowOffset.GetX()), Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY() -
+            subwindowOffset.GetY()) };
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
             displayWindowOffset.GetX().ConvertToVp(), displayWindowOffset.GetY().ConvertToVp());
         offset += displayWindowOffset;
@@ -75,6 +89,9 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto keyboardAnimationConfig = context->GetKeyboardAnimationConfig();
         auto safeAreaManager = context->GetSafeAreaManager();
         auto keyboardHeight = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        if (safeAreaManager && NearEqual(keyboardHeight, 0.0f)) {
+            keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
+        }
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
         context->Animate(option, option.GetCurve(), func);
     } else {
@@ -90,6 +107,9 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
     auto rootWidth = context->GetRootWidth();
+    if (IsSystemTopMost()) {
+        rootWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    }
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textWidth = text->GetGeometryNode()->GetMarginFrameSize().Width();
@@ -113,7 +133,8 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(text, Dimension(0.0));
-    auto rootHeight = context->GetRootHeight();
+    auto rootHeight = IsSystemTopMost() ? static_cast<double>(SystemProperties::GetDeviceHeight())
+                                        : context->GetRootHeight();
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -122,9 +143,12 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto safeAreaOffset = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
     auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
     auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+    if (safeAreaManager && NearEqual(keyboardInset, 0.0f)) {
+        keyboardInset = safeAreaManager->GetRawKeyboardHeight();
+    }
     auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
     if (showMode == ToastShowMode::DEFAULT) {
-        safeAreaOffset = safeAreaOffset + keyboardOffset;
+        safeAreaOffset = std::max(keyboardOffset, safeAreaOffset);
     }
     // Get toastBottom and update defaultBottom_
     auto toastBottom = GetBottomValue(layoutWrapper);
@@ -158,7 +182,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     TAG_LOGD(AceLogTag::ACE_OVERLAY,
         "toast device height: %{public}.2f, keyboardOffset: %{public}d, "
         "textHeight: %{public}.2f, offsetY: %{public}.2f",
-        deviceHeight, keyboardOffset, textHeight, offsetY.Value());
+        deviceHeight, (uint32_t)keyboardOffset, textHeight, offsetY.Value());
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
@@ -168,6 +192,9 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto pipeline = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto rootHeight = Dimension(pipeline->GetRootHeight());
+    if (IsSystemTopMost()) {
+        rootHeight = Dimension(static_cast<double>(SystemProperties::GetDeviceHeight()));
+    }
     auto toastTheme = pipeline->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
 
@@ -206,6 +233,9 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootWidth = Dimension(context->GetRootWidth());
+    if (IsSystemTopMost()) {
+        rootWidth = Dimension(static_cast<double>(SystemProperties::GetDeviceWidth()));
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto limitWidth = Dimension(GetTextMaxWidth());
         toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(limitWidth), std::nullopt));
@@ -272,6 +302,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto toastInfo = GetToastInfo();
     textLayoutProperty->UpdateTextColor(toastInfo.textColor.value_or(textColor));
     host->SetNeedCallChildrenUpdate(false);
+    ToastView::UpdateToastNodeStyle(host);
 }
 
 void ToastPattern::OnAttachToFrameNode()
@@ -303,6 +334,42 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     }
 }
 
+bool ToastPattern::IsShowInFreeMultiWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFreeMultiWindow();
+}
+
+bool ToastPattern::IsUIExtensionSubWindow()
+{
+    if (IsDefaultToast()) {
+        return false;
+    }
+
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_RETURN(container, false);
+    }
+    return container->IsUIExtensionWindow();
+}
+
 void ToastPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
@@ -331,17 +398,24 @@ double ToastPattern::GetTextMaxHeight()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto containerId = Container::CurrentId();
-    double deviceHeight = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+    double deviceHeight = 0.0;
+    if (IsSystemTopMost()) {
         deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "SystemTopMost toast get device height: %{public}f.", deviceHeight);
+    } else if (IsUIExtensionSubWindow()) {
+        auto toastNode = GetHost();
+        CHECK_NULL_RETURN(toastNode, 0.0);
+        auto nodeContext = toastNode->GetContextWithCheck();
+        CHECK_NULL_RETURN(nodeContext, 0.0);
+        deviceHeight = nodeContext->GetDisplayWindowRectInfo().Height();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast in UIExtension subwindow, device height: %{public}f.", deviceHeight);
     } else {
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceHeight = windowGlobalRect.Height();
+        deviceHeight = pipelineContext->GetRootHeight();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get device height: %{public}f.", deviceHeight);
     }
     if (LessOrEqual(deviceHeight, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device height is invalid, containerId: %{public}d", containerId);
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "toast get device height is invalid.");
+        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
     }
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
@@ -360,17 +434,24 @@ double ToastPattern::GetTextMaxWidth()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto containerId = Container::CurrentId();
-    double deviceWidth = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+    double deviceWidth = 0.0;
+    if (IsSystemTopMost()) {
         deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "SystemTopMost toast get device width: %{public}f.", deviceWidth);
+    } else if (IsUIExtensionSubWindow()) {
+        auto toastNode = GetHost();
+        CHECK_NULL_RETURN(toastNode, 0.0);
+        auto nodeContext = toastNode->GetContextWithCheck();
+        CHECK_NULL_RETURN(nodeContext, 0.0);
+        deviceWidth = nodeContext->GetDisplayWindowRectInfo().Width();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast in UIExtension subwindow, device width: %{public}f.", deviceWidth);
     } else {
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceWidth = windowGlobalRect.Width();
+        deviceWidth = pipelineContext->GetRootWidth();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get device width: %{public}f.", deviceWidth);
     }
     if (LessOrEqual(deviceWidth, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device width is invalid, containerId: %{public}d", containerId);
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "toast get device width is invalid.");
+        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
     }
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);

@@ -100,7 +100,7 @@ public:
     }
 
     virtual void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) {}
-    virtual void OnHandleMoveStart(bool isFirst) {}
+    virtual void OnHandleMoveStart(const GestureEvent& event, bool isFirst) {}
     virtual void OnHandleMove(const RectF&, bool isFirst) {}
     virtual void OnHandleMoveDone(const RectF&, bool isFirst) {}
     virtual void OnHandleClosed(bool closedByGlobalEvent)

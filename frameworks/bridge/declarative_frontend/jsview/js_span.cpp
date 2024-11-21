@@ -315,6 +315,33 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetTextShadow(shadows);
 }
 
+void JSSpan::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    std::string text;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        text = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityText(text);
+}
+
+void JSSpan::SetAccessibilityDescription(const JSCallbackInfo& info)
+{
+    std::string description;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        description = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityDescription(description);
+}
+
+void JSSpan::SetAccessibilityLevel(const JSCallbackInfo& info)
+{
+    std::string level;
+    if ((info.Length() > 0) && info[0]->IsString()) {
+        level = info[0]->ToString();
+    }
+    SpanModel::GetInstance()->SetAccessibilityImportance(level);
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -339,6 +366,9 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
     JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
     JSClass<JSSpan>::StaticMethod("textBackgroundStyle", &JSContainerSpan::SetTextBackgroundStyle, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityText", &JSSpan::SetAccessibilityText, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityDescription", &JSSpan::SetAccessibilityDescription, opt);
+    JSClass<JSSpan>::StaticMethod("accessibilityLevel", &JSSpan::SetAccessibilityLevel, opt);
     JSClass<JSSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

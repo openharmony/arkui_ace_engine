@@ -42,6 +42,22 @@ public:
     {
         return nullptr;
     }
+    virtual void SetHeaderComponent(const RefPtr<NG::UINode>& headerComponent)
+    {
+        return;
+    }
+    virtual void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent)
+    {
+        return;
+    }
+    virtual void RemoveHeader()
+    {
+        return;
+    }
+    virtual void RemoveFooter()
+    {
+        return;
+    }
 
 private:
     static std::unique_ptr<ListItemGroupModel> instance_;

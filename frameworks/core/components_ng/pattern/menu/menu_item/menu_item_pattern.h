@@ -239,6 +239,10 @@ private:
     void RegisterOnHover();
     virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
+    virtual bool IsCustomMenuItem()
+    {
+        return false;
+    }
     void OnClick();
 
     void RegisterWrapperMouseEvent();
@@ -248,7 +252,9 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
-    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -280,6 +286,7 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
+    bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -340,6 +347,10 @@ private:
     void OnTouch(const TouchEventInfo& info) override;
     void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
+    bool IsCustomMenuItem() override
+    {
+        return true;
+    }
     std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG

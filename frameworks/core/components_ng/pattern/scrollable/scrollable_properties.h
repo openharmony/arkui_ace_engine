@@ -22,7 +22,9 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/event/pan_event.h"
+#include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -53,11 +55,11 @@ enum class ScrollSnapAlign {
 };
 
 enum class ScrollPagingStatus {
-    // no enablePaging and scrollSnap setting
+    // no enablePaging set
     NONE = 0,
-    // scrollSnap has set, enablePaging is not effective
+    // enablePaging is false
     INVALID,
-    // enablePaging is effective
+    // enablePaging is true
     VALID,
 };
 
@@ -135,6 +137,22 @@ struct NestedScrollOptions {
     {
         return "NestedScrollOptions forward: " + std::to_string(static_cast<int32_t>(forward)) +
                ", backward: " + std::to_string(static_cast<int32_t>(backward));
+    }
+
+    std::string GetNestedScrollModeStr(NestedScrollMode mode) const
+    {
+        switch (mode) {
+            case NestedScrollMode::SELF_ONLY:
+                return "NestedScrollMode.SELF_ONLY";
+            case NestedScrollMode::SELF_FIRST:
+                return "NestedScrollMode.SELF_FIRST";
+            case NestedScrollMode::PARENT_FIRST:
+                return "NestedScrollMode.PARENT_FIRST";
+            case NestedScrollMode::PARALLEL:
+                return "NestedScrollMode.PARALLEL";
+            default:
+                return "";
+        }
     }
 };
 
@@ -362,6 +380,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollState, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -377,6 +396,16 @@ using CalePredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+
+struct ScrollerObserver {
+    RefPtr<NG::TouchEventImpl> onTouchEvent;
+    GestureEventFunc onPanActionEndEvent;
+    OnReachEvent onReachStartEvent;
+    OnReachEvent onReachEndEvent;
+    OnScrollStartEvent onScrollStartEvent;
+    OnScrollStopEvent onScrollStopEvent;
+    OnDidScrollEvent onDidScrollEvent;
+};
 } // namespace OHOS::Ace
 
 #endif

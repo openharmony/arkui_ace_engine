@@ -46,41 +46,6 @@ RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer
 
 } // namespace
 
-struct TransformInstance {
-    std::unordered_map<int, TransformConfig> transFormConfig;
-    std::unordered_map<int, AncestorNodeInfo> transFormIds;
-};
-
-TransformInstance g_emptyInstance;
-std::unordered_map<int, TransformInstance> globalTransFormInstance;
-
-std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormConfig;
-    }
-    return iter->second.transFormConfig;
-}
-
-std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormIds;
-    }
-    return iter->second.transFormIds;
-}
-
-void NGGestureRecognizer::ResetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    globalTransFormInstance[id].transFormConfig.clear();
-    globalTransFormInstance[id].transFormIds.clear();
-}
-
 bool NGGestureRecognizer::ShouldResponse()
 {
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
@@ -135,7 +100,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            auto result = AboutToAddCurrentFingers(point.id);
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -215,7 +180,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
             } else {
                 inputEventType_ = InputEventType::TOUCH_SCREEN;
             }
-            auto result = AboutToAddCurrentFingers(point.id);
+            auto result = AboutToAddCurrentFingers(point);
             if (result) {
                 HandleTouchDownEvent(point);
                 HandleEventToBridgeObjList(point, bridgeObjList_);
@@ -422,11 +387,9 @@ void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) cons
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
-    eventMgr->GetEventTreeRecord().AddGestureProcedure(
-        reinterpret_cast<uintptr_t>(this),
-        procedure,
-        TransRefereeState(this->GetRefereeState()),
-        TransGestureDisposal(this->GetGestureDisposal()));
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure, TransRefereeState(this->GetRefereeState()),
+            TransGestureDisposal(this->GetGestureDisposal()));
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
@@ -439,11 +402,9 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
-    eventMgr->GetEventTreeRecord().AddGestureProcedure(
-        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
-        point,
-        TransRefereeState(recognizer->GetRefereeState()),
-        TransGestureDisposal(recognizer->GetGestureDisposal()));
+    eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
+            TransRefereeState(recognizer->GetRefereeState()), TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
@@ -523,13 +484,17 @@ bool NGGestureRecognizer::IsInResponseLinkRecognizers()
         [recognizer = Claim(this)](const RefPtr<NGGestureRecognizer>& item) { return item == recognizer; });
 }
 
-bool NGGestureRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
 {
-    if (fingersId_.find(touchId) != fingersId_.end()) {
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        return false;
+    }
+    if (fingersId_.find(event.id) != fingersId_.end()) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
-            touchId, node ? node->GetTag().c_str() : "null",
+            event.id, node ? node->GetTag().c_str() : "null",
             node ? std::to_string(node->GetId()).c_str() : "invalid");
         return false;
     }

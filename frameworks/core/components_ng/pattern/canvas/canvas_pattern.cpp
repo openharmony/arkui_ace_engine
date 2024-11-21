@@ -35,6 +35,63 @@ CanvasPattern::~CanvasPattern()
     }
 }
 
+void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    DetachRenderContext();
+}
+
+void CanvasPattern::OnDetachFromMainTree()
+{
+    DetachRenderContext();
+}
+
+void CanvasPattern::AttachRenderContext()
+{
+    if (!isAttached_) {
+        isAttached_ = true;
+        FireOnContext2DAttach();
+    }
+}
+
+void CanvasPattern::DetachRenderContext()
+{
+    if (isAttached_) {
+        isAttached_ = false;
+        FireOnContext2DDetach();
+    }
+}
+
+void CanvasPattern::OnAttachToMainTree()
+{
+    if (paintMethod_) {
+        paintMethod_->SetHostCustomNodeName();
+    }
+}
+
+void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
+{
+    onContext2DAttach_ = std::move(callback);
+}
+
+void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
+{
+    onContext2DDetach_ = std::move(callback);
+}
+
+void CanvasPattern::FireOnContext2DAttach()
+{
+    if (onContext2DAttach_) {
+        onContext2DAttach_();
+    }
+}
+
+void CanvasPattern::FireOnContext2DDetach()
+{
+    if (onContext2DDetach_) {
+        onContext2DDetach_();
+    }
+}
+
 void CanvasPattern::OnAttachToFrameNode()
 {
 #ifndef ACE_UNITTEST
@@ -848,7 +905,7 @@ void CanvasPattern::Save()
 #else
     paintMethod_->PushTask<SaveOp>();
 #endif
-    paintMethod_->SaveMatrix();
+    paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
@@ -861,7 +918,7 @@ void CanvasPattern::Restore()
 #else
     paintMethod_->PushTask<RestoreOp>();
 #endif
-    paintMethod_->RestoreMatrix();
+    paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
@@ -1169,6 +1226,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
+    paintMethod_->ResetLineDash();
     SetTextDirection(TextDirection::INHERIT);
 }
 
@@ -1179,6 +1237,7 @@ void CanvasPattern::OnLanguageConfigurationUpdate()
 
 void CanvasPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     UpdateTextDefaultDirection();
 }
 
@@ -1193,5 +1252,24 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+int32_t CanvasPattern::GetId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
+void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto jsonMethod = JsonUtil::Create();
+    paintMethod_->GetSimplifyDumpInfo(jsonMethod);
+    json->PutRef("CanvasPaint", std::move(jsonMethod));
+    CHECK_NULL_VOID(contentModifier_);
+    auto arrayModifier = JsonUtil::Create();
+    contentModifier_->GetSimplifyDumpInfo(arrayModifier);
+    json->PutRef("CanvasModifier", std::move(arrayModifier));
 }
 } // namespace OHOS::Ace::NG

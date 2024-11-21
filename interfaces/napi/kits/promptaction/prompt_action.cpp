@@ -319,7 +319,7 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     shadowProps.SetIsFilled(isFilled);
 }
 
-void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
+void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow, bool& isTypeStyleShadow)
 {
     Shadow shadowProps;
     napi_valuetype valueType = napi_undefined;
@@ -362,6 +362,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
             }
         }
         GetToastObjectShadow(env, shadowNApi, shadowProps);
+        isTypeStyleShadow = false;
     }
     shadow = shadowProps;
 }
@@ -412,7 +413,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     GetToastBackgroundColor(env, backgroundColorNApi, toastInfo.backgroundColor);
     GetToastTextColor(env, textColorNApi, toastInfo.textColor);
     GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);
-    GetToastShadow(env, shadowNApi, toastInfo.shadow);
+    GetToastShadow(env, shadowNApi, toastInfo.shadow, toastInfo.isTypeStyleShadow);
     return true;
 }
 

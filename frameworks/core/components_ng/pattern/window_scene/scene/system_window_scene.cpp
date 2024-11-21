@@ -181,19 +181,19 @@ void SystemWindowScene::RegisterEventCallback()
             }
             taskExecutor->PostTask([weakThis, PointerEvent]() {
                 auto self = weakThis.Upgrade();
-            if (!self) {
-                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
-                    "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
-                return;
-            }
+                if (!self) {
+                    TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                        "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
+                    PointerEvent->MarkProcessed();
+                    return;
+                }
                 auto host = self->GetHost();
-            if (!host) {
-                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
-                    "GetHost null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
-                return;
-            }
+                if (!host) {
+                    TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                        "GetHost null,id:%{public}d", PointerEvent->GetId());
+                    PointerEvent->MarkProcessed();
+                    return;
+                }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
             },
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
@@ -254,12 +254,10 @@ void SystemWindowScene::RegisterFocusCallback()
 {
     CHECK_NULL_VOID(session_);
 
-    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+    auto requestFocusCallback = [weakThis = WeakClaim(this), frameNode = frameNode_, instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto pattern = weakThis.Upgrade();
-        auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
             auto pipeline = PipelineContext::GetCurrentContext();

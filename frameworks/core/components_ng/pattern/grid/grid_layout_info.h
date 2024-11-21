@@ -30,7 +30,20 @@ namespace OHOS::Ace::NG {
 struct GridPredictLayoutParam {
     LayoutConstraintF layoutConstraint;
     std::map<int32_t, float> itemsCrossSizes;
-    float crossGap;
+    float crossGap = 0.0f;
+};
+
+struct GridPreloadItem {
+    explicit GridPreloadItem(int32_t idx) : idx(idx) {}
+    GridPreloadItem(int32_t idx, bool buildOnly) : idx(idx), buildOnly(buildOnly) {}
+
+    bool operator==(const GridPreloadItem& other) const
+    {
+        return idx == other.idx && buildOnly == other.buildOnly;
+    }
+
+    int32_t idx = -1;
+    bool buildOnly = false; // true if item only needs to be created, not measure / layout
 };
 
 /**
@@ -189,6 +202,12 @@ struct GridLayoutInfo {
     std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator FindInMatrix(int32_t index) const;
 
     /**
+     * @param itemIdx
+     * @return position [col, row] of the item. [-1, -1] if item is not in matrix.
+     */
+    std::pair<int32_t, int32_t> GetItemPos(int32_t itemIdx) const;
+
+    /**
      * @brief Tries to find the item between startMainLine and endMainLine.
      *
      * @param target The target item to find.
@@ -343,6 +362,8 @@ struct GridLayoutInfo {
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
 
+    void UpdateDefaultCachedCount();
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -402,6 +423,9 @@ struct GridLayoutInfo {
     std::map<int32_t, bool> irregularLines_;
 
     bool clearStretch_ = false;
+
+    // default cached count
+    int32_t defCachedCount_ = 1;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
