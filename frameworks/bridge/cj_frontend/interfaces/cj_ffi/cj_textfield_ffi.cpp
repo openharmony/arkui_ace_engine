@@ -19,6 +19,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "securec.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -817,31 +818,28 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
-void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(void (*callback)(int32_t value, CJSubmitEvent))
+void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto task = [func = CJLambda::Create(callback), node = targetNode](
                 int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
         auto submitEvent = std::make_unique<CJSubmitEvent>();
-        if (submitEvent == nullptr) {
-            return;
-        }
         std::string text = event.GetText();
         size_t len = text.length() + 1;
         submitEvent->text = (char*)malloc(len);
         submitEvent->keepEditable = event.IsKeepEditable();
         if (submitEvent->text) {
             const char* src = text.c_str();
-            char* dest = submitEvent->text;
-            for (size_t i = 0; i < len - 1; ++i) {
-                dest[i] = src[i];
+            errno_t ret = strncpy_s(submitEvent->text, len, src, len - 1);
+            if (ret != EOK) {
+                free(submitEvent->text);
+                return;
             }
-            dest[len - 1] = '\0';
-            func(key, *submitEvent);
+            event.SetKeepEditable(func(key, *submitEvent));
             free(submitEvent->text);
         } else {
-            func(key, *submitEvent);
+            event.SetKeepEditable(func(key, *submitEvent));
         }
     };
     TextFieldModel::GetInstance()->SetOnSubmit(task);
