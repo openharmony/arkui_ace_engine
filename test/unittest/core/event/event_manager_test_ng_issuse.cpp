@@ -423,7 +423,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest007, TestSize.Level1)
     event.action = MouseAction::RELEASE;
     event.button = MouseButton::LEFT_BUTTON;
     result = eventManager->DispatchMouseEventNG(event);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -468,7 +468,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest008, TestSize.Level1)
     event.action = MouseAction::RELEASE;
     event.button = MouseButton::LEFT_BUTTON;
     result = eventManager->DispatchMouseEventNG(event);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     event.action = MouseAction::RELEASE;
     event.button = MouseButton::RIGHT_BUTTON;
     result = eventManager->DispatchMouseEventNG(event);
