@@ -509,9 +509,8 @@ void DataDetectorAdapter::StartAITask()
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_) {
         aiSpanMapCopy = aiSpanMap_;
-    } else {
-        detectTexts_.clear();
     }
+    detectTexts_.clear();
     aiSpanMap_.clear();
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
