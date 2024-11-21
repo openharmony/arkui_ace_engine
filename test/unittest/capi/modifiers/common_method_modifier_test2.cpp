@@ -61,6 +61,17 @@ const auto ATTRIBUTE_BORDER_RADIUS_NAME = "borderRadius";
 const auto ATTRIBUTE_BORDER_IMAGE_NAME = "borderImage";
 const auto ATTRIBUTE_LINEAR_GRADIENT_NAME = "linearGradient";
 const auto ATTRIBUTE_SWEEP_GRADIENT_NAME = "sweepGradient";
+const auto ATTRIBUTE_MARK_ANCHOR_NAME = "markAnchor";
+const auto ATTRIBUTE_MARK_ANCHOR_X_NAME = "x";
+const auto ATTRIBUTE_MARK_ANCHOR_Y_NAME = "y";
+const auto ATTRIBUTE_FOCUS_SCOPE_ID_NAME = "focusScopeId";
+const auto ATTRIBUTE_FOCUS_SCOPE_ID_NAME_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_IS_GROUP_NAME = "isGroup";
+const auto ATTRIBUTE_FOCUS_IS_GROUP_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME = "arrowStepOut";
+const auto ATTRIBUTE_FOCUS_ARROW_STEP_OUT_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME = "focusScopePriority";
+const auto ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE = "FocusPriority.AUTO";
 
 static const float VALID_VAL = 123.4567f;
 static const Opt_Length OPT_LEN_EMPTY = Converter::ArkValue<Opt_Length>(Ark_Empty());
@@ -1636,4 +1647,285 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadBothValues, TestSize.Lev
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().style.has_value());
 }
 
+static const std::vector<std::pair<Ark_Length, std::string>> LENGTH_TEST_PLAN_1 = {
+    { Converter::ArkValue<Ark_Length>(1), "1.00px" },
+    { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
+    { Converter::ArkValue<Ark_Length>(0), "0.00px" },
+    { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+    { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
+    { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+    { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
+    { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+    { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
+    { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+    { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
+    { Converter::ArkValue<Ark_Length>("12.00%"), "12.00%" },
+};
+/*
+ * @tc.name: setMarkAnchorTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setMarkAnchorTestValidValues, TestSize.Level1)
+{
+    Ark_Position position;
+    for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN_1) {
+        position.x = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        auto value = Converter::ArkUnion<Ark_Union_Position_LocalizedPosition, Ark_Position>(position);
+        modifier_->setMarkAnchor(node_, &value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        auto xResult = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MARK_ANCHOR_X_NAME);
+        EXPECT_EQ(xResult, expected);
+        auto yResult = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MARK_ANCHOR_Y_NAME);
+        EXPECT_EQ(yResult, "0.00px");
+    }
+}
+
+/*
+ * @tc.name: setFocusScopeId0TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopeId0TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_ID_NAME_DEFAULT_VALUE) <<
+        "Default value for attribute 'focusScopeId.id'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_GROUP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_IS_GROUP_DEFAULT_VALUE) <<
+        "Default value for attribute 'focusScopeId.isGroup'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_ARROW_STEP_OUT_DEFAULT_VALUE) <<
+        "Default value for attribute 'focusScopeId.arrowStepOut'";
+}
+
+// Fixture 'String' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureStringValidValues = {
+    { "\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc" },
+    { "\"\"", Converter::ArkValue<Ark_String>(""), "" },
+    { "\"xyz\"", Converter::ArkValue<Ark_String>("xyz"), "xyz" },
+};
+
+std::vector<std::tuple<std::string, Ark_Boolean, std::string>> testFixtureBooleanValidValues = {
+    { "true", Converter::ArkValue<Ark_Boolean>(true), "true" },
+    { "false", Converter::ArkValue<Ark_Boolean>(false), "false" },
+};
+
+/*
+ * @tc.name: setFocusScopeIdTestFocusScopeIdValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestFocusScopeIdValidValues, TestSize.Level1)
+{
+    Ark_String initValueFocusScopeId;
+    Opt_Boolean initValueIsGroup;
+
+    // Initial setup
+    initValueFocusScopeId = std::get<1>(testFixtureStringValidValues[0]);
+    initValueIsGroup = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFocusScopeId, &initValueIsGroup](
+                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+        Ark_String inputValueFocusScopeId = initValueFocusScopeId;
+        Opt_Boolean inputValueIsGroup = initValueIsGroup;
+
+        inputValueFocusScopeId = value;
+        modifier_->setFocusScopeId0(node_, &inputValueFocusScopeId, &inputValueIsGroup);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setFocusScopeId, attribute: focusScopeId";
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    for (auto& [input, value, expected] : testFixtureStringValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setFocusScopeIdTestIsGroupValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestSize.Level1)
+{
+    Ark_String initValueFocusScopeId;
+    Opt_Boolean initValueIsGroup;
+
+    // Initial setup
+    initValueFocusScopeId = std::get<1>(testFixtureStringValidValues[0]);
+    initValueIsGroup = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFocusScopeId, &initValueIsGroup](
+                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+        Ark_String inputValueFocusScopeId = initValueFocusScopeId;
+        Opt_Boolean inputValueIsGroup = initValueIsGroup;
+
+        inputValueIsGroup = value;
+        modifier_->setFocusScopeId0(node_, &inputValueFocusScopeId, &inputValueIsGroup);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_GROUP_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setFocusScopeId, attribute: isGroup";
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setFocusScopeIdTestIsArrowStepOutValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsArrowStepOutValidValues, TestSize.Level1)
+{
+    Ark_String initValueFocusScopeId;
+    Opt_Boolean initValueIsGroup;
+    Opt_Boolean initValueArrowStepOut;
+
+    // Initial setup
+    initValueFocusScopeId = std::get<1>(testFixtureStringValidValues[0]);
+    initValueIsGroup = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+    initValueArrowStepOut = ArkValue<Opt_Boolean>(std::get<1>(testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueFocusScopeId, &initValueIsGroup, &initValueArrowStepOut](
+                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+        Ark_String inputValueFocusScopeId = initValueFocusScopeId;
+        Opt_Boolean inputValueIsGroup = initValueIsGroup;
+        Opt_Boolean inputValueArrowStepOut = initValueArrowStepOut;
+
+        inputValueArrowStepOut = value;
+        modifier_->setFocusScopeId1(node_, &inputValueFocusScopeId, &inputValueIsGroup,
+            &inputValueArrowStepOut);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ARROW_STEP_OUT_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setFocusScopeId, attribute: arrowStepOut";
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+    }
+}
+
+/*
+ * @tc.name: setFocusScopePriorityTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE)<<"Default value for focusScopePriority";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_ID_NAME_DEFAULT_VALUE) << "Default value for attribute 'priority'";
+}
+
+std::vector<std::tuple<std::string, Ark_FocusPriority, std::string>> testFixtureEnumFocusPriorityValidValues = {
+    { "ARK_FOCUS_PRIORITY_AUTO", ARK_FOCUS_PRIORITY_AUTO, "FocusPriority.AUTO" },
+    { "ARK_FOCUS_PRIORITY_PRIOR", ARK_FOCUS_PRIORITY_PRIOR, "FocusPriority.PRIOR" },
+    { "ARK_FOCUS_PRIORITY_PREVIOUS", ARK_FOCUS_PRIORITY_PREVIOUS, "FocusPriority.PREVIOUS" },
+};
+
+std::vector<std::tuple<std::string, Ark_FocusPriority>> testFixtureEnumFocusPriorityInvalidValues = {
+    { "-1", static_cast<Ark_FocusPriority>(-1) },
+    { "INT_MAX", static_cast<Ark_FocusPriority>(INT_MAX) },
+};
+
+/*
+ * @tc.name: setFocusScopePriorityTestFocusScopePriorityValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestFocusScopePriorityValidValues, TestSize.Level1)
+{
+    Ark_String initValueFocusScopeId;
+    Opt_FocusPriority initValuePriority;
+
+    // Initial setup
+    initValueFocusScopeId = std::get<1>(testFixtureStringValidValues[0]);
+    initValuePriority = ArkValue<Opt_FocusPriority>(std::get<1>(testFixtureEnumFocusPriorityValidValues[0]));
+
+    auto checkValue = [this, &initValueFocusScopeId, &initValuePriority](
+                          const std::string& input, const Ark_FocusPriority& value, const std::string& expectedStr) {
+        Ark_String inputValueFocusScopeId = initValueFocusScopeId;
+        Opt_FocusPriority inputValuePriority = initValuePriority;
+
+        inputValuePriority = ArkValue<Opt_FocusPriority>(value);
+        modifier_->setFocusScopePriority(node_, &inputValueFocusScopeId, &inputValuePriority);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setFocusScopePriority, attribute: focusScopePriority";
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
+        EXPECT_EQ(resultStr, "abc")
+            << "Input value is: " << "abc" << ", method: setFocusScopePriority, attribute: focusScopeId";
+    };
+
+    for (auto& [input, value, expected] : testFixtureEnumFocusPriorityValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setFocusScopePriorityTestPriorityInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestPriorityInvalidValues, TestSize.Level1)
+{
+    Ark_String initValueFocusScopePriority;
+    Opt_FocusPriority initValuePriority;
+
+    // Initial setup
+    initValueFocusScopePriority = std::get<1>(testFixtureStringValidValues[0]);
+    initValuePriority = ArkValue<Opt_FocusPriority>(std::get<1>(testFixtureEnumFocusPriorityValidValues[0]));
+
+    auto checkValue = [this, &initValueFocusScopePriority, &initValuePriority](
+                          const std::string& input, const Opt_FocusPriority& value) {
+        Ark_String inputValueFocusScopePriority = initValueFocusScopePriority;
+        Opt_FocusPriority inputValuePriority = initValuePriority;
+
+        modifier_->setFocusScopePriority(node_, &inputValueFocusScopePriority, &inputValuePriority);
+        inputValuePriority = value;
+        modifier_->setFocusScopePriority(node_, &inputValueFocusScopePriority, &inputValuePriority);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setFocusScopePriority, attribute: priority";
+    };
+
+    for (auto& [input, value] : testFixtureEnumFocusPriorityInvalidValues) {
+        checkValue(input, ArkValue<Opt_FocusPriority>(value));
+    }
+}
 } // namespace OHOS::Ace::NG

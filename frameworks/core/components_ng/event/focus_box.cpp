@@ -15,10 +15,12 @@
 #include "focus_box.h"
 
 namespace OHOS::Ace::NG {
-void FocusBox::SetStyle(const FocusBoxStyle& style)
+void FocusBox::SetStyle(const std::optional<FocusBoxStyle>& style)
 {
     paintStyle_ = style;
-
+    if (!paintStyle_.has_value()) {
+        return;
+    }
     if (paintStyle_->strokeWidth.has_value() && paintStyle_->strokeWidth->IsNegative()) {
         paintStyle_->strokeWidth.reset();
     }

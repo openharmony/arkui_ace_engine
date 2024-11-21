@@ -19,7 +19,9 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
@@ -41,6 +43,9 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
+const uint32_t FOCUS_PRIORITY_AUTO = 0;
+const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
+const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
 }
 
 namespace OHOS::Ace::NG {
@@ -49,6 +54,10 @@ struct EdgesParamOptions {
     bool isLocalized;
 };
 
+struct BiasOpt {
+    std::optional<float> first;
+    std::optional<float> second;
+};
 struct ScaleOpt {
     std::optional<float> x;
     std::optional<float> y;
@@ -57,11 +66,24 @@ struct ScaleOpt {
     std::optional<Dimension> centerY;
 };
 
+struct RotateOpt {
+    DimensionOffset pivot;
+    Vector5F vec5f = Vector5F(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+};
+
 struct TranslateOpt {
     std::optional<Dimension> x;
     std::optional<Dimension> y;
     std::optional<Dimension> z;
 };
+
+struct GridSizeOpt {
+    std::optional<int32_t> span;
+    std::optional<int32_t> offset;
+    GridSizeType type;
+};
+
+using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
 using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
 using OffsetOrEdgesParam = std::variant<
@@ -713,6 +735,386 @@ void AssignCast(std::optional<PixStretchEffectOption>& dst, const Ark_PixelStret
     dst = {.left = left.value_or(invalidValue), .top = top.value_or(invalidValue),
         .right = right.value_or(invalidValue), .bottom = bottom.value_or(invalidValue)};
 }
+
+template<>
+PositionWithLocalization Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    if (!x && !y) {
+        return PositionWithLocalization {std::nullopt, false};
+    }
+    auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
+    if (x) {
+        offsetOpt->SetX(*x);
+    }
+    if (y) {
+        offsetOpt->SetY(*y);
+    }
+    return PositionWithLocalization {offsetOpt, false};
+}
+
+template<>
+PositionWithLocalization Convert(const Ark_LocalizedPosition& src)
+{
+    auto start = Converter::OptConvert<Dimension>(src.start);
+    auto top = Converter::OptConvert<Dimension>(src.top);
+    auto offsetOpt = std::make_optional<OffsetT<Dimension>>();
+    if (start.has_value()) {
+        offsetOpt->SetX(start.value());
+    }
+    if (top.has_value()) {
+        offsetOpt->SetY(top.value());
+    }
+    return PositionWithLocalization {offsetOpt, true};
+}
+
+template<>
+void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& src)
+{
+    switch (src) {
+        case ARK_HORIZONTAL_ALIGN_START: dst = HorizontalAlign::START; break;
+        case ARK_HORIZONTAL_ALIGN_END: dst = HorizontalAlign::END; break;
+        case ARK_HORIZONTAL_ALIGN_CENTER: dst = HorizontalAlign::CENTER; break;
+        default: LOGE("Unexpected enum value in Ark_HorizontalAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<VerticalAlign>& dst, const Ark_VerticalAlign& src)
+{
+    switch (src) {
+        case ARK_VERTICAL_ALIGN_TOP: dst = VerticalAlign::TOP; break;
+        case ARK_VERTICAL_ALIGN_BOTTOM: dst = VerticalAlign::BOTTOM; break;
+        case ARK_VERTICAL_ALIGN_CENTER: dst = VerticalAlign::CENTER; break;
+        default: LOGE("Unexpected enum value in Ark_VerticalAlign: %{public}d", src);
+    }
+}
+
+template<>
+AlignRule Convert(const Ark_Literal_String_anchor_HorizontalAlign_align& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_LocalizedHorizontalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<HorizontalAlign>(src.align);
+    if (align.has_value()) {
+        rule.horizontal = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_Literal_String_anchor_VerticalAlign_align& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
+    }
+    return rule;
+}
+
+template<>
+AlignRule Convert(const Ark_LocalizedVerticalAlignParam& src)
+{
+    AlignRule rule;
+    rule.anchor = Convert<std::string>(src.anchor);
+    auto align = OptConvert<VerticalAlign>(src.align);
+    if (align.has_value()) {
+        rule.vertical = align.value();
+    }
+    return rule;
+}
+
+template<>
+std::map<AlignDirection, AlignRule> Convert(const Ark_AlignRuleOption& src)
+{
+    std::map<AlignDirection, AlignRule> rulesMap;
+    auto rule = OptConvert<AlignRule>(src.left);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::LEFT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.right);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::RIGHT] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.middle);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::MIDDLE] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.top);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::TOP] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.bottom);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::BOTTOM] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.center);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::CENTER] = rule.value();
+    }
+    return rulesMap;
+}
+
+template<>
+std::map<AlignDirection, AlignRule> Convert(const Ark_LocalizedAlignRuleOptions& src)
+{
+    std::map<AlignDirection, AlignRule> rulesMap;
+    auto rule = OptConvert<AlignRule>(src.start);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::START] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.end);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::END] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.middle);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::MIDDLE] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.top);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::TOP] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.bottom);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::BOTTOM] = rule.value();
+    }
+    rule = OptConvert<AlignRule>(src.center);
+    if (rule.has_value()) {
+        rulesMap[AlignDirection::CENTER] = rule.value();
+    }
+    return rulesMap;
+}
+
+template<>
+BiasOpt Convert(const Ark_Bias& src)
+{
+    BiasOpt bias;
+    bias.first = OptConvert<float>(src.horizontal);
+    bias.second = OptConvert<float>(src.vertical);
+    return bias;
+}
+
+template<>
+void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
+{
+    switch (src) {
+        case ARK_FOCUS_PRIORITY_AUTO: dst = FOCUS_PRIORITY_AUTO; break;
+        case ARK_FOCUS_PRIORITY_PRIOR: dst = FOCUS_PRIORITY_PRIOR; break;
+        case ARK_FOCUS_PRIORITY_PREVIOUS: dst = FOCUS_PRIORITY_PREVIOUS; break;
+        default: LOGE("Unexpected enum value in Ark_FocusPriority: %{public}d", src);
+    }
+}
+
+template<>
+FocusBoxStyle Convert(const Ark_FocusBoxStyle& src)
+{
+    FocusBoxStyle style;
+    style.strokeWidth = Converter::OptConvert<Dimension>(src.strokeWidth);
+    style.margin = Converter::OptConvert<Dimension>(src.margin);
+    return style;
+}
+
+template<>
+MotionBlurOption Convert(const Ark_MotionBlurOptions& src)
+{
+    MotionBlurOption options;
+    options.radius = Convert<float>(src.radius);
+    options.anchor.x = Convert<float>(src.anchor.x);
+    options.anchor.y = Convert<float>(src.anchor.y);
+    return options;
+}
+
+template<>
+RotateOpt Convert(const Ark_RotateOptions& src)
+{
+    RotateOpt options;
+    auto coord = OptConvert<float>(src.x);
+    options.vec5f.x = coord.value_or(0.0);
+    coord = OptConvert<float>(src.y);
+    options.vec5f.y = coord.value_or(0.0);
+    coord = OptConvert<float>(src.z);
+    options.vec5f.z = coord.value_or(0.0);
+    coord = OptConvert<float>(src.angle);
+    options.vec5f.w = coord.value_or(0.0);
+    coord = OptConvert<float>(src.perspective);
+    options.vec5f.v = coord.value_or(0.0);
+
+    auto center = OptConvert<Dimension>(src.centerX);
+    if (center.has_value()) {
+        options.pivot.SetX(center.value());
+    }
+    center = OptConvert<Dimension>(src.centerY);
+    if (center.has_value()) {
+        options.pivot.SetY(center.value());
+    }
+    center = OptConvert<Dimension>(src.centerZ);
+    if (center.has_value()) {
+        options.pivot.SetZ(center.value());
+    }
+    return options;
+}
+
+template<>
+void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& src)
+{
+    switch (src) {
+        case ARK_TRANSITION_TYPE_ALL: dst = TransitionType::ALL; break;
+        case ARK_TRANSITION_TYPE_INSERT: dst = TransitionType::APPEARING; break;
+        case ARK_TRANSITION_TYPE_DELETE: dst = TransitionType::DISAPPEARING; break;
+        default: LOGE("Unexpected enum value in Opt_TransitionType: %{public}d", src);
+    }
+}
+
+template<>
+TranslateOptions Convert(const Ark_TranslateOptions& src)
+{
+    TranslateOptions translateOptions;
+    auto coord = OptConvert<Dimension>(src.x);
+    if (coord.has_value()) {
+        translateOptions.x = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.y);
+    if (coord.has_value()) {
+        translateOptions.y = coord.value();
+    }
+    coord = OptConvert<Dimension>(src.z);
+    if (coord.has_value()) {
+        translateOptions.z = coord.value();
+    }
+    return translateOptions;
+}
+
+template<>
+ScaleOptions Convert(const Ark_ScaleOptions& src)
+{
+    ScaleOptions scaleOptions;
+    auto coord = OptConvert<float>(src.x);
+    scaleOptions.xScale = coord.value_or(0.0);
+    coord = OptConvert<float>(src.y);
+    scaleOptions.yScale = coord.value_or(0.0);
+    coord = OptConvert<float>(src.z);
+    scaleOptions.zScale = coord.value_or(0.0);
+
+    auto center = OptConvert<Dimension>(src.centerX);
+    if (center.has_value()) {
+        scaleOptions.centerX = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerY);
+    if (center.has_value()) {
+        scaleOptions.centerY = center.value();
+    }
+    return scaleOptions;
+}
+
+template<>
+RotateOptions Convert(const Ark_RotateOptions& src)
+{
+    RotateOptions rotateOptions;
+    auto coord = OptConvert<float>(src.x);
+    if (coord.has_value()) {
+        rotateOptions.xDirection = coord.value();
+    }
+    coord = OptConvert<float>(src.y);
+    if (coord.has_value()) {
+        rotateOptions.yDirection = coord.value();
+    }
+    coord = OptConvert<float>(src.z);
+    if (coord.has_value()) {
+        rotateOptions.zDirection = coord.value();
+    }
+    auto angle = OptConvert<float>(src.angle);
+    if (angle.has_value()) {
+        rotateOptions.angle = angle.value();
+    }
+    auto perspective = OptConvert<float>(src.perspective);
+    if (perspective.has_value()) {
+        rotateOptions.perspective = perspective.value();
+    }
+    auto center = OptConvert<Dimension>(src.centerX);
+    if (center.has_value()) {
+        rotateOptions.centerX = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerY);
+    if (center.has_value()) {
+        rotateOptions.centerY = center.value();
+    }
+    center = OptConvert<Dimension>(src.centerZ);
+    if (center.has_value()) {
+        rotateOptions.centerZ = center.value();
+    }
+    return rotateOptions;
+}
+
+template<>
+TransitionOptions Convert(const Ark_TransitionOptions& src)
+{
+    TransitionOptions options;
+    auto type = OptConvert<TransitionType>(src.type);
+    if (type.has_value()) {
+        options.Type = type.value();
+    }
+    auto opacity = OptConvert<float>(src.opacity);
+    if (opacity.has_value()) {
+        options.UpdateOpacity(opacity.value());
+    }
+    auto translateOpt = Converter::OptConvert<TranslateOptions>(src.translate);
+    if (translateOpt.has_value()) {
+        options.UpdateTranslate(translateOpt.value());
+    }
+    auto scaleOpt = Converter::OptConvert<ScaleOptions>(src.scale);
+    if (scaleOpt.has_value()) {
+        options.UpdateScale(scaleOpt.value());
+    }
+    auto rotateOpt = Converter::OptConvert<RotateOptions>(src.rotate);
+    if (rotateOpt.has_value()) {
+        options.UpdateRotate(rotateOpt.value());
+    }
+    return options;
+}
+
+template<>
+TransitionOptions Convert(const Ark_TransitionEffect& src)
+{
+    TransitionOptions options;
+    LOGE("ARKOALA: CommonMethod::Convert: Ark_TransitionEffect to TransitionOptions is not implemented."
+        " Ark_Materialized issue\n");
+    return options;
+}
+
+template<>
+GridSizeOpt Convert(const Ark_Number& src)
+{
+    GridSizeOpt options;
+    options.span = OptConvert<int32_t>(src);
+    options.offset = 0;
+    return options;
+}
+
+template<>
+GridSizeOpt Convert(const Ark_Literal_Number_offset_span& src)
+{
+    GridSizeOpt options;
+    options.span = OptConvert<int32_t>(src.span);
+    options.offset = OptConvert<int32_t>(src.offset);
+    return options;
+}
+
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -1559,8 +1961,8 @@ void TabIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTabIndex(frameNode, convValue);
+    auto convValue = Converter::Convert<int32_t>(*value);
+    ViewAbstract::SetTabIndex(frameNode, convValue);
 }
 void DefaultFocusImpl(Ark_NativePointer node,
                       Ark_Boolean value)
@@ -1568,7 +1970,7 @@ void DefaultFocusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetDefaultFocus(frameNode, convValue);
+    ViewAbstract::SetDefaultFocus(frameNode, convValue);
 }
 void GroupDefaultFocusImpl(Ark_NativePointer node,
                            Ark_Boolean value)
@@ -1576,7 +1978,7 @@ void GroupDefaultFocusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetGroupDefaultFocus(frameNode, convValue);
+    ViewAbstract::SetGroupDefaultFocus(frameNode, convValue);
 }
 void FocusOnTouchImpl(Ark_NativePointer node,
                       Ark_Boolean value)
@@ -1584,7 +1986,7 @@ void FocusOnTouchImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetFocusOnTouch(frameNode, convValue);
+    ViewAbstract::SetFocusOnTouch(frameNode, convValue);
 }
 void FocusBoxImpl(Ark_NativePointer node,
                   const Ark_FocusBoxStyle* value)
@@ -1592,8 +1994,9 @@ void FocusBoxImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetFocusBox(frameNode, convValue);
+    LOGE("ARKOALA: CommonMethod::FocusBoxImpl: Ark_FocusBoxStyle.CustomObject is not supported.\n");
+    auto convValue = Converter::OptConvert<NG::FocusBoxStyle>(*value);
+    ViewAbstract::SetFocusBoxStyle(frameNode, convValue);
 }
 void AnimationImpl(Ark_NativePointer node,
                    const Ark_AnimateParam* value)
@@ -1647,8 +2050,8 @@ void Transition0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTransition0(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TransitionOptions>(*value);
+    ViewAbstract::SetTransition(frameNode, convValue);
 }
 void Transition1Impl(Ark_NativePointer node,
                      const Ark_TransitionEffect* effect,
@@ -1667,8 +2070,8 @@ void MotionBlurImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMotionBlur(frameNode, convValue);
+    auto convValue = Converter::OptConvert<MotionBlurOption>(*value);
+    ViewAbstract::SetMotionBlur(frameNode, convValue);
 }
 void BrightnessImpl(Ark_NativePointer node,
                     const Ark_Number* value)
@@ -1846,8 +2249,11 @@ void RotateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetRotate(frameNode, convValue);
+    auto convValue = Converter::OptConvert<RotateOpt>(*value);
+    if (convValue.has_value()) {
+        ViewAbstract::SetPivot(frameNode, convValue.value().pivot);
+        ViewAbstract::SetRotate(frameNode, convValue.value().vec5f);
+    }
 }
 void TransformImpl(Ark_NativePointer node,
                    const Ark_CustomObject* value)
@@ -1970,8 +2376,8 @@ void FlexGrowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetFlexGrow(frameNode, convValue);
+    auto convValue = Converter::Convert<float>(*value);
+    ViewAbstract::SetFlexGrow(frameNode, convValue);
 }
 void FlexShrinkImpl(Ark_NativePointer node,
                     const Ark_Number* value)
@@ -1979,8 +2385,8 @@ void FlexShrinkImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetFlexShrink(frameNode, convValue);
+    auto convValue = Converter::Convert<float>(*value);
+    ViewAbstract::SetFlexShrink(frameNode, convValue);
 }
 void FlexBasisImpl(Ark_NativePointer node,
                    const Ark_Union_Number_String* value)
@@ -1988,8 +2394,10 @@ void FlexBasisImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetFlexBasis(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ViewAbstract::SetFlexBasis(frameNode, convValue);
 }
 void AlignSelfImpl(Ark_NativePointer node,
                    Ark_ItemAlign value)
@@ -2077,8 +2485,18 @@ void MarkAnchorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMarkAnchor(frameNode, convValue);
+    auto anchorOpt = Converter::OptConvert<PositionWithLocalization>(*value);
+    if (anchorOpt) {
+        if (anchorOpt->second && anchorOpt->first.has_value()) {
+            ViewAbstract::SetMarkAnchorStart(frameNode, anchorOpt->first->GetX());
+            ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+            return;
+        }
+        ViewAbstract::MarkAnchor(frameNode, anchorOpt->first);
+    } else {
+        ViewAbstract::MarkAnchor(frameNode, std::nullopt);
+    }
+    ViewAbstract::ResetMarkAnchorStart(frameNode);
 }
 void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value)
@@ -2110,8 +2528,23 @@ void UseSizeTypeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetUseSizeType(frameNode, convValue);
+
+    auto gridSizeOptXS = Converter::OptConvert<GridSizeOpt>(value->xs);
+    if (gridSizeOptXS.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOptXS.value().span, gridSizeOptXS.value().offset, GridSizeType::XS);
+    }
+    auto gridSizeOptSM = Converter::OptConvert<GridSizeOpt>(value->sm);
+    if (gridSizeOptSM.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOptSM.value().span, gridSizeOptSM.value().offset, GridSizeType::SM);
+    }
+    auto gridSizeOptMD = Converter::OptConvert<GridSizeOpt>(value->md);
+    if (gridSizeOptMD.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOptMD.value().span, gridSizeOptMD.value().offset, GridSizeType::MD);
+    }
+    auto gridSizeOptLG = Converter::OptConvert<GridSizeOpt>(value->lg);
+    if (gridSizeOptLG.has_value()) {
+        ViewAbstract::SetGrid(frameNode, gridSizeOptLG.value().span, gridSizeOptLG.value().offset, GridSizeType::LG);
+    }
 }
 void AlignRules0Impl(Ark_NativePointer node,
                      const Ark_AlignRuleOption* value)
@@ -2119,8 +2552,14 @@ void AlignRules0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetAlignRules0(frameNode, convValue);
+    auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
+    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
+    if (convBiasValue.has_value()) {
+        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+    } else {
+        ViewAbstract::SetBias(frameNode, std::nullopt);
+    }
 }
 void AlignRules1Impl(Ark_NativePointer node,
                      const Ark_LocalizedAlignRuleOptions* value)
@@ -2128,8 +2567,14 @@ void AlignRules1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetAlignRules1(frameNode, convValue);
+    auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(*value);
+    ViewAbstract::SetAlignRules(frameNode, convMapValue);
+    auto convBiasValue = Converter::OptConvert<BiasOpt>(value->bias);
+    if (convBiasValue.has_value()) {
+        ViewAbstract::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
+    } else {
+        ViewAbstract::SetBias(frameNode, std::nullopt);
+    }
 }
 void AspectRatioImpl(Ark_NativePointer node,
                      const Ark_Number* value)
@@ -2384,6 +2829,7 @@ void Mask1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    LOGE("CommonMethodModifier::Mask1Impl, not implemented due to deprecated");
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetMask1(frameNode, convValue);
 }
@@ -2778,9 +3224,10 @@ void FocusScopeId0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(id);
-    //auto convValue = Converter::OptConvert<type>(id); // for enums
-    //CommonMethodModelNG::SetFocusScopeId0(frameNode, convValue);
+    CHECK_NULL_VOID(id);
+    auto convIdValue = Converter::Convert<std::string>(*id);
+    auto convIsGroupValue = isGroup ? Converter::OptConvert<bool>(*isGroup) : std::nullopt;
+    ViewAbstract::SetFocusScopeId(frameNode, convIdValue, convIsGroupValue, std::nullopt);
 }
 void FocusScopeId1Impl(Ark_NativePointer node,
                        const Ark_String* id,
@@ -2789,9 +3236,15 @@ void FocusScopeId1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(id);
-    //auto convValue = Converter::OptConvert<type>(id); // for enums
-    //CommonMethodModelNG::SetFocusScopeId1(frameNode, convValue);
+    CHECK_NULL_VOID(id);
+    auto convIdValue = Converter::Convert<std::string>(*id);
+    auto convIsGroupValue = isGroup ? Converter::OptConvert<bool>(*isGroup) : std::nullopt;
+    auto convArrowStepOutValue = arrowStepOut ? Converter::OptConvert<bool>(*arrowStepOut) : std::nullopt;
+    if (convArrowStepOutValue.has_value()) {
+        ViewAbstract::SetFocusScopeId(frameNode, convIdValue, convIsGroupValue, convArrowStepOutValue.value());
+    } else {
+        ViewAbstract::SetFocusScopeId(frameNode, convIdValue, convIsGroupValue, std::nullopt);
+    }
 }
 void FocusScopePriorityImpl(Ark_NativePointer node,
                             const Ark_String* scopeId,
@@ -2799,9 +3252,10 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(scopeId);
-    //auto convValue = Converter::OptConvert<type>(scopeId); // for enums
-    //CommonMethodModelNG::SetFocusScopePriority(frameNode, convValue);
+    CHECK_NULL_VOID(scopeId);
+    auto convIdValue = Converter::Convert<std::string>(*scopeId);
+    auto optPriority = priority ? Converter::OptConvert<uint32_t>(*priority) : std::nullopt;
+    ViewAbstract::SetFocusScopePriority(frameNode, convIdValue, optPriority);
 }
 void GestureImpl(Ark_NativePointer node,
                  Ark_GestureControl_GestureType gesture,

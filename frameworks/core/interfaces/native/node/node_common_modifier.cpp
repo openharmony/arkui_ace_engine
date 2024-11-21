@@ -87,7 +87,6 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
-constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -2806,7 +2805,7 @@ void ResetMarkAnchor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::MarkAnchor(frameNode, { Dimension(0.0_vp), Dimension(0.0_vp) });
+    ViewAbstract::MarkAnchor(frameNode, std::optional<OffsetT<Dimension>>({Dimension(0.0_vp), Dimension(0.0_vp)}));
 }
 
 void SetVisibility(ArkUINodeHandle node, ArkUI_Int32 value)

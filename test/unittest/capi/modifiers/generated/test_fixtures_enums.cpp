@@ -18,6 +18,33 @@
 #include <climits>
 
 namespace OHOS::Ace::NG::Fixtures {
+std::vector<std::tuple<std::string, Ark_AdaptiveColor, std::string>> testFixtureEnumAdaptiveColorValidValues = {
+    { "ARK_ADAPTIVE_COLOR_DEFAULT", ARK_ADAPTIVE_COLOR_DEFAULT, "AdaptiveColor.DEFAULT" },
+    { "ARK_ADAPTIVE_COLOR_AVERAGE", ARK_ADAPTIVE_COLOR_AVERAGE, "AdaptiveColor.AVERAGE" },
+};
+
+std::vector<std::tuple<std::string, Ark_AdaptiveColor>> testFixtureEnumAdaptiveColorInvalidValues = {
+    { "-1", static_cast<Ark_AdaptiveColor>(-1) },
+    { "INT_MAX", static_cast<Ark_AdaptiveColor>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_Alignment, std::string>> testFixtureEnumAlignmentValidValues = {
+    { "ARK_ALIGNMENT_TOP_START", ARK_ALIGNMENT_TOP_START, "Alignment.TopStart" },
+    { "ARK_ALIGNMENT_TOP", ARK_ALIGNMENT_TOP, "Alignment.Top" },
+    { "ARK_ALIGNMENT_TOP_END", ARK_ALIGNMENT_TOP_END, "Alignment.TopEnd" },
+    { "ARK_ALIGNMENT_START", ARK_ALIGNMENT_START, "Alignment.Start" },
+    { "ARK_ALIGNMENT_CENTER", ARK_ALIGNMENT_CENTER, "Alignment.Center" },
+    { "ARK_ALIGNMENT_END", ARK_ALIGNMENT_END, "Alignment.End" },
+    { "ARK_ALIGNMENT_BOTTOM_START", ARK_ALIGNMENT_BOTTOM_START, "Alignment.BottomStart" },
+    { "ARK_ALIGNMENT_BOTTOM", ARK_ALIGNMENT_BOTTOM, "Alignment.Bottom" },
+    { "ARK_ALIGNMENT_BOTTOM_END", ARK_ALIGNMENT_BOTTOM_END, "Alignment.BottomEnd" },
+};
+
+std::vector<std::tuple<std::string, Ark_Alignment>> testFixtureEnumAlignmentInvalidValues = {
+    { "-1", static_cast<Ark_Alignment>(-1) },
+    { "INT_MAX", static_cast<Ark_Alignment>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_AnimationStatus, std::string>> testFixtureEnumAnimationStatusValidValues = {
     { "ARK_ANIMATION_STATUS_INITIAL", ARK_ANIMATION_STATUS_INITIAL, "AnimationStatus.Initial" },
     { "ARK_ANIMATION_STATUS_RUNNING", ARK_ANIMATION_STATUS_RUNNING, "AnimationStatus.Running" },
@@ -28,6 +55,18 @@ std::vector<std::tuple<std::string, Ark_AnimationStatus, std::string>> testFixtu
 std::vector<std::tuple<std::string, Ark_AnimationStatus>> testFixtureEnumAnimationStatusInvalidValues = {
     { "-1", static_cast<Ark_AnimationStatus>(-1) },
     { "INT_MAX", static_cast<Ark_AnimationStatus>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ArrowPointPosition, std::string>>
+    testFixtureEnumArrowPointPositionValidValues = {
+        { "ARK_ARROW_POINT_POSITION_START", ARK_ARROW_POINT_POSITION_START, "ArrowPointPosition.START" },
+        { "ARK_ARROW_POINT_POSITION_CENTER", ARK_ARROW_POINT_POSITION_CENTER, "ArrowPointPosition.CENTER" },
+        { "ARK_ARROW_POINT_POSITION_END", ARK_ARROW_POINT_POSITION_END, "ArrowPointPosition.END" },
+    };
+
+std::vector<std::tuple<std::string, Ark_ArrowPointPosition>> testFixtureEnumArrowPointPositionInvalidValues = {
+    { "-1", static_cast<Ark_ArrowPointPosition>(-1) },
+    { "INT_MAX", static_cast<Ark_ArrowPointPosition>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValues = {
@@ -62,6 +101,54 @@ std::vector<std::tuple<std::string, Ark_BarStyle>> testFixtureEnumBarStyleInvali
     { "INT_MAX", static_cast<Ark_BarStyle>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_BlendApplyType, std::string>> testFixtureEnumBlendApplyTypeValidValues = {
+    { "ARK_BLEND_APPLY_TYPE_FAST", ARK_BLEND_APPLY_TYPE_FAST, "BlendApplyType.FAST" },
+    { "ARK_BLEND_APPLY_TYPE_OFFSCREEN", ARK_BLEND_APPLY_TYPE_OFFSCREEN, "BlendApplyType.OFFSCREEN" },
+};
+
+std::vector<std::tuple<std::string, Ark_BlendApplyType>> testFixtureEnumBlendApplyTypeInvalidValues = {
+    { "-1", static_cast<Ark_BlendApplyType>(-1) },
+    { "INT_MAX", static_cast<Ark_BlendApplyType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_BlendMode, std::string>> testFixtureEnumBlendModeValidValues = {
+    { "ARK_BLEND_MODE_NONE", ARK_BLEND_MODE_NONE, "BlendMode.NONE" },
+    { "ARK_BLEND_MODE_CLEAR", ARK_BLEND_MODE_CLEAR, "BlendMode.CLEAR" },
+    { "ARK_BLEND_MODE_SRC", ARK_BLEND_MODE_SRC, "BlendMode.SRC" },
+    { "ARK_BLEND_MODE_DST", ARK_BLEND_MODE_DST, "BlendMode.DST" },
+    { "ARK_BLEND_MODE_SRC_OVER", ARK_BLEND_MODE_SRC_OVER, "BlendMode.SRC_OVER" },
+    { "ARK_BLEND_MODE_DST_OVER", ARK_BLEND_MODE_DST_OVER, "BlendMode.DST_OVER" },
+    { "ARK_BLEND_MODE_SRC_IN", ARK_BLEND_MODE_SRC_IN, "BlendMode.SRC_IN" },
+    { "ARK_BLEND_MODE_DST_IN", ARK_BLEND_MODE_DST_IN, "BlendMode.DST_IN" },
+    { "ARK_BLEND_MODE_SRC_OUT", ARK_BLEND_MODE_SRC_OUT, "BlendMode.SRC_OUT" },
+    { "ARK_BLEND_MODE_DST_OUT", ARK_BLEND_MODE_DST_OUT, "BlendMode.DST_OUT" },
+    { "ARK_BLEND_MODE_SRC_ATOP", ARK_BLEND_MODE_SRC_ATOP, "BlendMode.SRC_ATOP" },
+    { "ARK_BLEND_MODE_DST_ATOP", ARK_BLEND_MODE_DST_ATOP, "BlendMode.DST_ATOP" },
+    { "ARK_BLEND_MODE_XOR", ARK_BLEND_MODE_XOR, "BlendMode.XOR" },
+    { "ARK_BLEND_MODE_PLUS", ARK_BLEND_MODE_PLUS, "BlendMode.PLUS" },
+    { "ARK_BLEND_MODE_MODULATE", ARK_BLEND_MODE_MODULATE, "BlendMode.MODULATE" },
+    { "ARK_BLEND_MODE_SCREEN", ARK_BLEND_MODE_SCREEN, "BlendMode.SCREEN" },
+    { "ARK_BLEND_MODE_OVERLAY", ARK_BLEND_MODE_OVERLAY, "BlendMode.OVERLAY" },
+    { "ARK_BLEND_MODE_DARKEN", ARK_BLEND_MODE_DARKEN, "BlendMode.DARKEN" },
+    { "ARK_BLEND_MODE_LIGHTEN", ARK_BLEND_MODE_LIGHTEN, "BlendMode.LIGHTEN" },
+    { "ARK_BLEND_MODE_COLOR_DODGE", ARK_BLEND_MODE_COLOR_DODGE, "BlendMode.COLOR_DODGE" },
+    { "ARK_BLEND_MODE_COLOR_BURN", ARK_BLEND_MODE_COLOR_BURN, "BlendMode.COLOR_BURN" },
+    { "ARK_BLEND_MODE_HARD_LIGHT", ARK_BLEND_MODE_HARD_LIGHT, "BlendMode.HARD_LIGHT" },
+    { "ARK_BLEND_MODE_SOFT_LIGHT", ARK_BLEND_MODE_SOFT_LIGHT, "BlendMode.SOFT_LIGHT" },
+    { "ARK_BLEND_MODE_DIFFERENCE", ARK_BLEND_MODE_DIFFERENCE, "BlendMode.DIFFERENCE" },
+    { "ARK_BLEND_MODE_EXCLUSION", ARK_BLEND_MODE_EXCLUSION, "BlendMode.EXCLUSION" },
+    { "ARK_BLEND_MODE_MULTIPLY", ARK_BLEND_MODE_MULTIPLY, "BlendMode.MULTIPLY" },
+    { "ARK_BLEND_MODE_HUE", ARK_BLEND_MODE_HUE, "BlendMode.HUE" },
+    { "ARK_BLEND_MODE_SATURATION", ARK_BLEND_MODE_SATURATION, "BlendMode.SATURATION" },
+    { "ARK_BLEND_MODE_COLOR", ARK_BLEND_MODE_COLOR, "BlendMode.COLOR" },
+    { "ARK_BLEND_MODE_LUMINOSITY", ARK_BLEND_MODE_LUMINOSITY, "BlendMode.LUMINOSITY" },
+};
+
+std::vector<std::tuple<std::string, Ark_BlendMode>> testFixtureEnumBlendModeInvalidValues = {
+    { "-1", static_cast<Ark_BlendMode>(-1) },
+    { "INT_MAX", static_cast<Ark_BlendMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_BlurStyle, std::string>> testFixtureEnumBlurStyleValidValues = {
     { "ARK_BLUR_STYLE_THIN", ARK_BLUR_STYLE_THIN, "BlurStyle.Thin" },
     { "ARK_BLUR_STYLE_REGULAR", ARK_BLUR_STYLE_REGULAR, "BlurStyle.Regular" },
@@ -82,6 +169,33 @@ std::vector<std::tuple<std::string, Ark_BlurStyle, std::string>> testFixtureEnum
 std::vector<std::tuple<std::string, Ark_BlurStyle>> testFixtureEnumBlurStyleInvalidValues = {
     { "-1", static_cast<Ark_BlurStyle>(-1) },
     { "INT_MAX", static_cast<Ark_BlurStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_BlurStyleActivePolicy, std::string>>
+    testFixtureEnumBlurStyleActivePolicyValidValues = {
+        { "ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE",
+            ARK_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE,
+            "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE" },
+        { "ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE", ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE,
+            "BlurStyleActivePolicy.ALWAYS_ACTIVE" },
+        { "ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE", ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE,
+            "BlurStyleActivePolicy.ALWAYS_INACTIVE" },
+    };
+
+std::vector<std::tuple<std::string, Ark_BlurStyleActivePolicy>> testFixtureEnumBlurStyleActivePolicyInvalidValues = {
+    { "-1", static_cast<Ark_BlurStyleActivePolicy>(-1) },
+    { "INT_MAX", static_cast<Ark_BlurStyleActivePolicy>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_BorderStyle, std::string>> testFixtureEnumBorderStyleValidValues = {
+    { "ARK_BORDER_STYLE_DOTTED", ARK_BORDER_STYLE_DOTTED, "BorderStyle.Dotted" },
+    { "ARK_BORDER_STYLE_DASHED", ARK_BORDER_STYLE_DASHED, "BorderStyle.Dashed" },
+    { "ARK_BORDER_STYLE_SOLID", ARK_BORDER_STYLE_SOLID, "BorderStyle.Solid" },
+};
+
+std::vector<std::tuple<std::string, Ark_BorderStyle>> testFixtureEnumBorderStyleInvalidValues = {
+    { "-1", static_cast<Ark_BorderStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_BorderStyle>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_BreakpointsReference, std::string>>
@@ -140,6 +254,28 @@ std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnum
 std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues = {
     { "-1", static_cast<Ark_CacheMode>(-1) },
     { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ChainStyle, std::string>> testFixtureEnumChainStyleValidValues = {
+    { "ARK_CHAIN_STYLE_SPREAD", ARK_CHAIN_STYLE_SPREAD, "ChainStyle.SPREAD" },
+    { "ARK_CHAIN_STYLE_SPREAD_INSIDE", ARK_CHAIN_STYLE_SPREAD_INSIDE, "ChainStyle.SPREAD_INSIDE" },
+    { "ARK_CHAIN_STYLE_PACKED", ARK_CHAIN_STYLE_PACKED, "ChainStyle.PACKED" },
+};
+
+std::vector<std::tuple<std::string, Ark_ChainStyle>> testFixtureEnumChainStyleInvalidValues = {
+    { "-1", static_cast<Ark_ChainStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_ChainStyle>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ClickEffectLevel, std::string>> testFixtureEnumClickEffectLevelValidValues = {
+    { "ARK_CLICK_EFFECT_LEVEL_LIGHT", ARK_CLICK_EFFECT_LEVEL_LIGHT, "ClickEffectLevel.LIGHT" },
+    { "ARK_CLICK_EFFECT_LEVEL_MIDDLE", ARK_CLICK_EFFECT_LEVEL_MIDDLE, "ClickEffectLevel.MIDDLE" },
+    { "ARK_CLICK_EFFECT_LEVEL_HEAVY", ARK_CLICK_EFFECT_LEVEL_HEAVY, "ClickEffectLevel.HEAVY" },
+};
+
+std::vector<std::tuple<std::string, Ark_ClickEffectLevel>> testFixtureEnumClickEffectLevelInvalidValues = {
+    { "-1", static_cast<Ark_ClickEffectLevel>(-1) },
+    { "INT_MAX", static_cast<Ark_ClickEffectLevel>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureEnumColorValidValues = {
@@ -206,6 +342,31 @@ std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureEnumCopyOptions
     { "INT_MAX", static_cast<Ark_CopyOptions>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_Direction, std::string>> testFixtureEnumDirectionValidValues = {
+    { "ARK_DIRECTION_LTR", ARK_DIRECTION_LTR, "Direction.Ltr" },
+    { "ARK_DIRECTION_RTL", ARK_DIRECTION_RTL, "Direction.Rtl" },
+    { "ARK_DIRECTION_AUTO", ARK_DIRECTION_AUTO, "Direction.Auto" },
+};
+
+std::vector<std::tuple<std::string, Ark_Direction>> testFixtureEnumDirectionInvalidValues = {
+    { "-1", static_cast<Ark_Direction>(-1) },
+    { "INT_MAX", static_cast<Ark_Direction>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_DragPreviewMode, std::string>> testFixtureEnumDragPreviewModeValidValues = {
+    { "ARK_DRAG_PREVIEW_MODE_AUTO", ARK_DRAG_PREVIEW_MODE_AUTO, "DragPreviewMode.AUTO" },
+    { "ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE", ARK_DRAG_PREVIEW_MODE_DISABLE_SCALE, "DragPreviewMode.DISABLE_SCALE" },
+    { "ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW", ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_SHADOW,
+        "DragPreviewMode.ENABLE_DEFAULT_SHADOW" },
+    { "ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS", ARK_DRAG_PREVIEW_MODE_ENABLE_DEFAULT_RADIUS,
+        "DragPreviewMode.ENABLE_DEFAULT_RADIUS" },
+};
+
+std::vector<std::tuple<std::string, Ark_DragPreviewMode>> testFixtureEnumDragPreviewModeInvalidValues = {
+    { "-1", static_cast<Ark_DragPreviewMode>(-1) },
+    { "INT_MAX", static_cast<Ark_DragPreviewMode>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_DynamicRangeMode, std::string>> testFixtureEnumDynamicRangeModeValidValues = {
     { "ARK_DYNAMIC_RANGE_MODE_HIGH", ARK_DYNAMIC_RANGE_MODE_HIGH, "DynamicRangeMode.HIGH" },
     { "ARK_DYNAMIC_RANGE_MODE_CONSTRAINT", ARK_DYNAMIC_RANGE_MODE_CONSTRAINT, "DynamicRangeMode.CONSTRAINT" },
@@ -226,6 +387,16 @@ std::vector<std::tuple<std::string, Ark_EdgeEffect, std::string>> testFixtureEnu
 std::vector<std::tuple<std::string, Ark_EdgeEffect>> testFixtureEnumEdgeEffectInvalidValues = {
     { "-1", static_cast<Ark_EdgeEffect>(-1) },
     { "INT_MAX", static_cast<Ark_EdgeEffect>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_EffectType, std::string>> testFixtureEnumEffectTypeValidValues = {
+    { "ARK_EFFECT_TYPE_DEFAULT", ARK_EFFECT_TYPE_DEFAULT, "EffectType.DEFAULT" },
+    { "ARK_EFFECT_TYPE_WINDOW_EFFECT", ARK_EFFECT_TYPE_WINDOW_EFFECT, "EffectType.WINDOW_EFFECT" },
+};
+
+std::vector<std::tuple<std::string, Ark_EffectType>> testFixtureEnumEffectTypeInvalidValues = {
+    { "-1", static_cast<Ark_EffectType>(-1) },
+    { "INT_MAX", static_cast<Ark_EffectType>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testFixtureEnumEllipsisModeValidValues = {
@@ -266,6 +437,17 @@ std::vector<std::tuple<std::string, Ark_FillMode>> testFixtureEnumFillModeInvali
     { "INT_MAX", static_cast<Ark_FillMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_FinishCallbackType, std::string>>
+    testFixtureEnumFinishCallbackTypeValidValues = {
+        { "ARK_FINISH_CALLBACK_TYPE_REMOVED", ARK_FINISH_CALLBACK_TYPE_REMOVED, "FinishCallbackType.REMOVED" },
+        { "ARK_FINISH_CALLBACK_TYPE_LOGICALLY", ARK_FINISH_CALLBACK_TYPE_LOGICALLY, "FinishCallbackType.LOGICALLY" },
+    };
+
+std::vector<std::tuple<std::string, Ark_FinishCallbackType>> testFixtureEnumFinishCallbackTypeInvalidValues = {
+    { "-1", static_cast<Ark_FinishCallbackType>(-1) },
+    { "INT_MAX", static_cast<Ark_FinishCallbackType>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues = {
     { "ARK_FLEX_DIRECTION_ROW", ARK_FLEX_DIRECTION_ROW, "FlexDirection.Row" },
     { "ARK_FLEX_DIRECTION_COLUMN", ARK_FLEX_DIRECTION_COLUMN, "FlexDirection.Column" },
@@ -276,6 +458,17 @@ std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixture
 std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues = {
     { "-1", static_cast<Ark_FlexDirection>(-1) },
     { "INT_MAX", static_cast<Ark_FlexDirection>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_FocusPriority, std::string>> testFixtureEnumFocusPriorityValidValues = {
+    { "ARK_FOCUS_PRIORITY_AUTO", ARK_FOCUS_PRIORITY_AUTO, "FocusPriority.AUTO" },
+    { "ARK_FOCUS_PRIORITY_PRIOR", ARK_FOCUS_PRIORITY_PRIOR, "FocusPriority.PRIOR" },
+    { "ARK_FOCUS_PRIORITY_PREVIOUS", ARK_FOCUS_PRIORITY_PREVIOUS, "FocusPriority.PREVIOUS" },
+};
+
+std::vector<std::tuple<std::string, Ark_FocusPriority>> testFixtureEnumFocusPriorityInvalidValues = {
+    { "-1", static_cast<Ark_FocusPriority>(-1) },
+    { "INT_MAX", static_cast<Ark_FocusPriority>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues = {
@@ -300,6 +493,42 @@ std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureEnu
 std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureEnumFontWeightInvalidValues = {
     { "-1", static_cast<Ark_FontWeight>(-1) },
     { "INT_MAX", static_cast<Ark_FontWeight>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_GestureControl_GestureType, std::string>>
+    testFixtureEnumGestureControl_GestureTypeValidValues = {
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE,
+            "GestureControl_GestureType.TAP_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE,
+            "GestureControl_GestureType.LONG_PRESS_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE,
+            "GestureControl_GestureType.PAN_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE,
+            "GestureControl_GestureType.PINCH_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE,
+            "GestureControl_GestureType.SWIPE_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE", ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE,
+            "GestureControl_GestureType.ROTATION_GESTURE" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG", ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG,
+            "GestureControl_GestureType.DRAG" },
+        { "ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK", ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK,
+            "GestureControl_GestureType.CLICK" },
+    };
+
+std::vector<std::tuple<std::string, Ark_GestureControl_GestureType>>
+    testFixtureEnumGestureControl_GestureTypeInvalidValues = {
+        { "-1", static_cast<Ark_GestureControl_GestureType>(-1) },
+        { "INT_MAX", static_cast<Ark_GestureControl_GestureType>(INT_MAX) },
+    };
+
+std::vector<std::tuple<std::string, Ark_GestureMask, std::string>> testFixtureEnumGestureMaskValidValues = {
+    { "ARK_GESTURE_MASK_NORMAL", ARK_GESTURE_MASK_NORMAL, "GestureMask.Normal" },
+    { "ARK_GESTURE_MASK_IGNORE_INTERNAL", ARK_GESTURE_MASK_IGNORE_INTERNAL, "GestureMask.IgnoreInternal" },
+};
+
+std::vector<std::tuple<std::string, Ark_GestureMask>> testFixtureEnumGestureMaskInvalidValues = {
+    { "-1", static_cast<Ark_GestureMask>(-1) },
+    { "INT_MAX", static_cast<Ark_GestureMask>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_GradientDirection, std::string>> testFixtureEnumGradientDirectionValidValues = {
@@ -327,6 +556,41 @@ std::vector<std::tuple<std::string, Ark_GridRowDirection, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_GridRowDirection>> testFixtureEnumGridRowDirectionInvalidValues = {
     { "-1", static_cast<Ark_GridRowDirection>(-1) },
     { "INT_MAX", static_cast<Ark_GridRowDirection>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_HitTestMode, std::string>> testFixtureEnumHitTestModeValidValues = {
+    { "ARK_HIT_TEST_MODE_DEFAULT", ARK_HIT_TEST_MODE_DEFAULT, "HitTestMode.Default" },
+    { "ARK_HIT_TEST_MODE_BLOCK", ARK_HIT_TEST_MODE_BLOCK, "HitTestMode.Block" },
+    { "ARK_HIT_TEST_MODE_TRANSPARENT", ARK_HIT_TEST_MODE_TRANSPARENT, "HitTestMode.Transparent" },
+    { "ARK_HIT_TEST_MODE_NONE", ARK_HIT_TEST_MODE_NONE, "HitTestMode.None" },
+};
+
+std::vector<std::tuple<std::string, Ark_HitTestMode>> testFixtureEnumHitTestModeInvalidValues = {
+    { "-1", static_cast<Ark_HitTestMode>(-1) },
+    { "INT_MAX", static_cast<Ark_HitTestMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_HorizontalAlign, std::string>> testFixtureEnumHorizontalAlignValidValues = {
+    { "ARK_HORIZONTAL_ALIGN_START", ARK_HORIZONTAL_ALIGN_START, "HorizontalAlign.Start" },
+    { "ARK_HORIZONTAL_ALIGN_CENTER", ARK_HORIZONTAL_ALIGN_CENTER, "HorizontalAlign.Center" },
+    { "ARK_HORIZONTAL_ALIGN_END", ARK_HORIZONTAL_ALIGN_END, "HorizontalAlign.End" },
+};
+
+std::vector<std::tuple<std::string, Ark_HorizontalAlign>> testFixtureEnumHorizontalAlignInvalidValues = {
+    { "-1", static_cast<Ark_HorizontalAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_HorizontalAlign>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_HoverEffect, std::string>> testFixtureEnumHoverEffectValidValues = {
+    { "ARK_HOVER_EFFECT_AUTO", ARK_HOVER_EFFECT_AUTO, "HoverEffect.Auto" },
+    { "ARK_HOVER_EFFECT_SCALE", ARK_HOVER_EFFECT_SCALE, "HoverEffect.Scale" },
+    { "ARK_HOVER_EFFECT_HIGHLIGHT", ARK_HOVER_EFFECT_HIGHLIGHT, "HoverEffect.Highlight" },
+    { "ARK_HOVER_EFFECT_NONE", ARK_HOVER_EFFECT_NONE, "HoverEffect.None" },
+};
+
+std::vector<std::tuple<std::string, Ark_HoverEffect>> testFixtureEnumHoverEffectInvalidValues = {
+    { "-1", static_cast<Ark_HoverEffect>(-1) },
+    { "INT_MAX", static_cast<Ark_HoverEffect>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_IlluminatedType, std::string>> testFixtureEnumIlluminatedTypeValidValues = {
@@ -514,6 +778,17 @@ std::vector<std::tuple<std::string, Ark_NestedScrollMode>> testFixtureEnumNested
     { "INT_MAX", static_cast<Ark_NestedScrollMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_OutlineStyle, std::string>> testFixtureEnumOutlineStyleValidValues = {
+    { "ARK_OUTLINE_STYLE_SOLID", ARK_OUTLINE_STYLE_SOLID, "OutlineStyle.SOLID" },
+    { "ARK_OUTLINE_STYLE_DASHED", ARK_OUTLINE_STYLE_DASHED, "OutlineStyle.DASHED" },
+    { "ARK_OUTLINE_STYLE_DOTTED", ARK_OUTLINE_STYLE_DOTTED, "OutlineStyle.DOTTED" },
+};
+
+std::vector<std::tuple<std::string, Ark_OutlineStyle>> testFixtureEnumOutlineStyleInvalidValues = {
+    { "-1", static_cast<Ark_OutlineStyle>(-1) },
+    { "INT_MAX", static_cast<Ark_OutlineStyle>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_OverScrollMode, std::string>> testFixtureEnumOverScrollModeValidValues = {
     { "ARK_OVER_SCROLL_MODE_NEVER", ARK_OVER_SCROLL_MODE_NEVER, "OverScrollMode.NEVER" },
     { "ARK_OVER_SCROLL_MODE_ALWAYS", ARK_OVER_SCROLL_MODE_ALWAYS, "OverScrollMode.ALWAYS" },
@@ -522,6 +797,53 @@ std::vector<std::tuple<std::string, Ark_OverScrollMode, std::string>> testFixtur
 std::vector<std::tuple<std::string, Ark_OverScrollMode>> testFixtureEnumOverScrollModeInvalidValues = {
     { "-1", static_cast<Ark_OverScrollMode>(-1) },
     { "INT_MAX", static_cast<Ark_OverScrollMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_PixelRoundCalcPolicy, std::string>>
+    testFixtureEnumPixelRoundCalcPolicyValidValues = {
+        { "ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND", ARK_PIXEL_ROUND_CALC_POLICY_NO_FORCE_ROUND,
+            "PixelRoundCalcPolicy.NO_FORCE_ROUND" },
+        { "ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL", ARK_PIXEL_ROUND_CALC_POLICY_FORCE_CEIL,
+            "PixelRoundCalcPolicy.FORCE_CEIL" },
+        { "ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR", ARK_PIXEL_ROUND_CALC_POLICY_FORCE_FLOOR,
+            "PixelRoundCalcPolicy.FORCE_FLOOR" },
+    };
+
+std::vector<std::tuple<std::string, Ark_PixelRoundCalcPolicy>> testFixtureEnumPixelRoundCalcPolicyInvalidValues = {
+    { "-1", static_cast<Ark_PixelRoundCalcPolicy>(-1) },
+    { "INT_MAX", static_cast<Ark_PixelRoundCalcPolicy>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_Placement, std::string>> testFixtureEnumPlacementValidValues = {
+    { "ARK_PLACEMENT_LEFT", ARK_PLACEMENT_LEFT, "Placement.Left" },
+    { "ARK_PLACEMENT_RIGHT", ARK_PLACEMENT_RIGHT, "Placement.Right" },
+    { "ARK_PLACEMENT_TOP", ARK_PLACEMENT_TOP, "Placement.Top" },
+    { "ARK_PLACEMENT_BOTTOM", ARK_PLACEMENT_BOTTOM, "Placement.Bottom" },
+    { "ARK_PLACEMENT_TOP_LEFT", ARK_PLACEMENT_TOP_LEFT, "Placement.TopLeft" },
+    { "ARK_PLACEMENT_TOP_RIGHT", ARK_PLACEMENT_TOP_RIGHT, "Placement.TopRight" },
+    { "ARK_PLACEMENT_BOTTOM_LEFT", ARK_PLACEMENT_BOTTOM_LEFT, "Placement.BottomLeft" },
+    { "ARK_PLACEMENT_BOTTOM_RIGHT", ARK_PLACEMENT_BOTTOM_RIGHT, "Placement.BottomRight" },
+    { "ARK_PLACEMENT_LEFT_TOP", ARK_PLACEMENT_LEFT_TOP, "Placement.LeftTop" },
+    { "ARK_PLACEMENT_LEFT_BOTTOM", ARK_PLACEMENT_LEFT_BOTTOM, "Placement.LeftBottom" },
+    { "ARK_PLACEMENT_RIGHT_TOP", ARK_PLACEMENT_RIGHT_TOP, "Placement.RightTop" },
+    { "ARK_PLACEMENT_RIGHT_BOTTOM", ARK_PLACEMENT_RIGHT_BOTTOM, "Placement.RightBottom" },
+};
+
+std::vector<std::tuple<std::string, Ark_Placement>> testFixtureEnumPlacementInvalidValues = {
+    { "-1", static_cast<Ark_Placement>(-1) },
+    { "INT_MAX", static_cast<Ark_Placement>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_PlayMode, std::string>> testFixtureEnumPlayModeValidValues = {
+    { "ARK_PLAY_MODE_NORMAL", ARK_PLAY_MODE_NORMAL, "PlayMode.Normal" },
+    { "ARK_PLAY_MODE_REVERSE", ARK_PLAY_MODE_REVERSE, "PlayMode.Reverse" },
+    { "ARK_PLAY_MODE_ALTERNATE", ARK_PLAY_MODE_ALTERNATE, "PlayMode.Alternate" },
+    { "ARK_PLAY_MODE_ALTERNATE_REVERSE", ARK_PLAY_MODE_ALTERNATE_REVERSE, "PlayMode.AlternateReverse" },
+};
+
+std::vector<std::tuple<std::string, Ark_PlayMode>> testFixtureEnumPlayModeInvalidValues = {
+    { "-1", static_cast<Ark_PlayMode>(-1) },
+    { "INT_MAX", static_cast<Ark_PlayMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ProgressStatus, std::string>> testFixtureEnumProgressStatusValidValues = {
@@ -559,6 +881,33 @@ std::vector<std::tuple<std::string, Ark_RadioIndicatorType>> testFixtureEnumRadi
     { "INT_MAX", static_cast<Ark_RadioIndicatorType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_RenderFit, std::string>> testFixtureEnumRenderFitValidValues = {
+    { "ARK_RENDER_FIT_CENTER", ARK_RENDER_FIT_CENTER, "RenderFit.CENTER" },
+    { "ARK_RENDER_FIT_TOP", ARK_RENDER_FIT_TOP, "RenderFit.TOP" },
+    { "ARK_RENDER_FIT_BOTTOM", ARK_RENDER_FIT_BOTTOM, "RenderFit.BOTTOM" },
+    { "ARK_RENDER_FIT_LEFT", ARK_RENDER_FIT_LEFT, "RenderFit.LEFT" },
+    { "ARK_RENDER_FIT_RIGHT", ARK_RENDER_FIT_RIGHT, "RenderFit.RIGHT" },
+    { "ARK_RENDER_FIT_TOP_LEFT", ARK_RENDER_FIT_TOP_LEFT, "RenderFit.TOP_LEFT" },
+    { "ARK_RENDER_FIT_TOP_RIGHT", ARK_RENDER_FIT_TOP_RIGHT, "RenderFit.TOP_RIGHT" },
+    { "ARK_RENDER_FIT_BOTTOM_LEFT", ARK_RENDER_FIT_BOTTOM_LEFT, "RenderFit.BOTTOM_LEFT" },
+    { "ARK_RENDER_FIT_BOTTOM_RIGHT", ARK_RENDER_FIT_BOTTOM_RIGHT, "RenderFit.BOTTOM_RIGHT" },
+    { "ARK_RENDER_FIT_RESIZE_FILL", ARK_RENDER_FIT_RESIZE_FILL, "RenderFit.RESIZE_FILL" },
+    { "ARK_RENDER_FIT_RESIZE_CONTAIN", ARK_RENDER_FIT_RESIZE_CONTAIN, "RenderFit.RESIZE_CONTAIN" },
+    { "ARK_RENDER_FIT_RESIZE_CONTAIN_TOP_LEFT", ARK_RENDER_FIT_RESIZE_CONTAIN_TOP_LEFT,
+        "RenderFit.RESIZE_CONTAIN_TOP_LEFT" },
+    { "ARK_RENDER_FIT_RESIZE_CONTAIN_BOTTOM_RIGHT", ARK_RENDER_FIT_RESIZE_CONTAIN_BOTTOM_RIGHT,
+        "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT" },
+    { "ARK_RENDER_FIT_RESIZE_COVER", ARK_RENDER_FIT_RESIZE_COVER, "RenderFit.RESIZE_COVER" },
+    { "ARK_RENDER_FIT_RESIZE_COVER_TOP_LEFT", ARK_RENDER_FIT_RESIZE_COVER_TOP_LEFT, "RenderFit.RESIZE_COVER_TOP_LEFT" },
+    { "ARK_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT", ARK_RENDER_FIT_RESIZE_COVER_BOTTOM_RIGHT,
+        "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" },
+};
+
+std::vector<std::tuple<std::string, Ark_RenderFit>> testFixtureEnumRenderFitInvalidValues = {
+    { "-1", static_cast<Ark_RenderFit>(-1) },
+    { "INT_MAX", static_cast<Ark_RenderFit>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnumRenderModeValidValues = {
     { "ARK_RENDER_MODE_ASYNC_RENDER", ARK_RENDER_MODE_ASYNC_RENDER, "RenderMode.ASYNC_RENDER" },
     { "ARK_RENDER_MODE_SYNC_RENDER", ARK_RENDER_MODE_SYNC_RENDER, "RenderMode.SYNC_RENDER" },
@@ -567,6 +916,18 @@ std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFixtureEnu
 std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues = {
     { "-1", static_cast<Ark_RenderMode>(-1) },
     { "INT_MAX", static_cast<Ark_RenderMode>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_RepeatMode, std::string>> testFixtureEnumRepeatModeValidValues = {
+    { "ARK_REPEAT_MODE_REPEAT", ARK_REPEAT_MODE_REPEAT, "RepeatMode.Repeat" },
+    { "ARK_REPEAT_MODE_STRETCH", ARK_REPEAT_MODE_STRETCH, "RepeatMode.Stretch" },
+    { "ARK_REPEAT_MODE_ROUND", ARK_REPEAT_MODE_ROUND, "RepeatMode.Round" },
+    { "ARK_REPEAT_MODE_SPACE", ARK_REPEAT_MODE_SPACE, "RepeatMode.Space" },
+};
+
+std::vector<std::tuple<std::string, Ark_RepeatMode>> testFixtureEnumRepeatModeInvalidValues = {
+    { "-1", static_cast<Ark_RepeatMode>(-1) },
+    { "INT_MAX", static_cast<Ark_RepeatMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
@@ -578,6 +939,20 @@ std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeIn
     { "-1", static_cast<Ark_ShadowType>(-1) },
     { "INT_MAX", static_cast<Ark_ShadowType>(INT_MAX) },
 };
+
+std::vector<std::tuple<std::string, Ark_SharedTransitionEffectType, std::string>>
+    testFixtureEnumSharedTransitionEffectTypeValidValues = {
+        { "ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC", ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC,
+            "SharedTransitionEffectType.Static" },
+        { "ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE", ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE,
+            "SharedTransitionEffectType.Exchange" },
+    };
+
+std::vector<std::tuple<std::string, Ark_SharedTransitionEffectType>>
+    testFixtureEnumSharedTransitionEffectTypeInvalidValues = {
+        { "-1", static_cast<Ark_SharedTransitionEffectType>(-1) },
+        { "INT_MAX", static_cast<Ark_SharedTransitionEffectType>(INT_MAX) },
+    };
 
 std::vector<std::tuple<std::string, Ark_SliderBlockType, std::string>> testFixtureEnumSliderBlockTypeValidValues = {
     { "ARK_SLIDER_BLOCK_TYPE_DEFAULT", ARK_SLIDER_BLOCK_TYPE_DEFAULT, "SliderBlockType.DEFAULT" },
@@ -765,6 +1140,53 @@ std::vector<std::tuple<std::string, Ark_TitleHeight, std::string>> testFixtureEn
 std::vector<std::tuple<std::string, Ark_TitleHeight>> testFixtureEnumTitleHeightInvalidValues = {
     { "-1", static_cast<Ark_TitleHeight>(-1) },
     { "INT_MAX", static_cast<Ark_TitleHeight>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_TransitionHierarchyStrategy, std::string>>
+    testFixtureEnumTransitionHierarchyStrategyValidValues = {
+        { "ARK_TRANSITION_HIERARCHY_STRATEGY_NONE", ARK_TRANSITION_HIERARCHY_STRATEGY_NONE,
+            "TransitionHierarchyStrategy.NONE" },
+        { "ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE", ARK_TRANSITION_HIERARCHY_STRATEGY_ADAPTIVE,
+            "TransitionHierarchyStrategy.ADAPTIVE" },
+    };
+
+std::vector<std::tuple<std::string, Ark_TransitionHierarchyStrategy>>
+    testFixtureEnumTransitionHierarchyStrategyInvalidValues = {
+        { "-1", static_cast<Ark_TransitionHierarchyStrategy>(-1) },
+        { "INT_MAX", static_cast<Ark_TransitionHierarchyStrategy>(INT_MAX) },
+    };
+
+std::vector<std::tuple<std::string, Ark_TransitionType, std::string>> testFixtureEnumTransitionTypeValidValues = {
+    { "ARK_TRANSITION_TYPE_ALL", ARK_TRANSITION_TYPE_ALL, "TransitionType.All" },
+    { "ARK_TRANSITION_TYPE_INSERT", ARK_TRANSITION_TYPE_INSERT, "TransitionType.Insert" },
+    { "ARK_TRANSITION_TYPE_DELETE", ARK_TRANSITION_TYPE_DELETE, "TransitionType.Delete" },
+};
+
+std::vector<std::tuple<std::string, Ark_TransitionType>> testFixtureEnumTransitionTypeInvalidValues = {
+    { "-1", static_cast<Ark_TransitionType>(-1) },
+    { "INT_MAX", static_cast<Ark_TransitionType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_VerticalAlign, std::string>> testFixtureEnumVerticalAlignValidValues = {
+    { "ARK_VERTICAL_ALIGN_TOP", ARK_VERTICAL_ALIGN_TOP, "VerticalAlign.Top" },
+    { "ARK_VERTICAL_ALIGN_CENTER", ARK_VERTICAL_ALIGN_CENTER, "VerticalAlign.Center" },
+    { "ARK_VERTICAL_ALIGN_BOTTOM", ARK_VERTICAL_ALIGN_BOTTOM, "VerticalAlign.Bottom" },
+};
+
+std::vector<std::tuple<std::string, Ark_VerticalAlign>> testFixtureEnumVerticalAlignInvalidValues = {
+    { "-1", static_cast<Ark_VerticalAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_VerticalAlign>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_Visibility, std::string>> testFixtureEnumVisibilityValidValues = {
+    { "ARK_VISIBILITY_VISIBLE", ARK_VISIBILITY_VISIBLE, "Visibility.Visible" },
+    { "ARK_VISIBILITY_HIDDEN", ARK_VISIBILITY_HIDDEN, "Visibility.Hidden" },
+    { "ARK_VISIBILITY_NONE", ARK_VISIBILITY_NONE, "Visibility.None" },
+};
+
+std::vector<std::tuple<std::string, Ark_Visibility>> testFixtureEnumVisibilityInvalidValues = {
+    { "-1", static_cast<Ark_Visibility>(-1) },
+    { "INT_MAX", static_cast<Ark_Visibility>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_WaterFlowLayoutMode, std::string>>

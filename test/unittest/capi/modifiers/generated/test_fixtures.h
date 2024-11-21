@@ -349,6 +349,9 @@ extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegInvalidValues;
 
+// Fixture 'FlexBasisValid' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlexBasisValidValidValues;
+
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonPercInvalidValues;
