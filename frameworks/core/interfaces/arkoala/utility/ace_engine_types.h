@@ -77,6 +77,14 @@ struct FontFamilies {
     std::vector<std::string> families;
 };
 
+enum class MessageLevel {
+    DEBUG = 1,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4,
+    LOG = 5
+};
+
 using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
 using PickerValueType = std::variant<std::string, std::vector<std::string>>;
 } // namespace OHOS::Ace::NG::Converter

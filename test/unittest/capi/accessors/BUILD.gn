@@ -22,10 +22,13 @@ ace_unittest("capi_all_accessors_test") {
     "canvas_renderer_accessor_test.cpp",
     "canvas_rendering_context2d_accessor_test.cpp",
     "children_main_size_accessor_test.cpp",
+    "console_message_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
     "drawing_rendering_context_accessor_test.cpp",
     "gesture_recognizer_accessor_test.cpp",
     "image_analyzer_controller_accessor_test.cpp",
+    "js_geolocation_accessor_test.cpp",
+    "js_result_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
@@ -38,6 +41,7 @@ ace_unittest("capi_all_accessors_test") {
     "text_timer_controller_accessor_test.cpp",
     "video_controller_accessor_test.cpp",
     "web_controller_accessor_test.cpp",
+    "web_resource_request_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [
