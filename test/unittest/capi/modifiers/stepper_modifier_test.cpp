@@ -130,8 +130,8 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
 HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnFinish, nullptr);
-    const int32_t CONTEXT_ID = 123;
-    const int32_t INDEX_ARG = 0;
+    const int32_t contextId = 123;
+    const int32_t indexArg = 0;
 
     static std::optional<int32_t> checkData;
     void (*checkCallback)(const Ark_Int32 resourceId) =
@@ -139,7 +139,7 @@ HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
     modifier_->setOnFinish(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -147,10 +147,10 @@ HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    eventHub->FireFinishEvent(INDEX_ARG);
+    eventHub->FireFinishEvent(indexArg);
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+    EXPECT_EQ(checkData.value(), contextId);
 }
 
 /*
@@ -161,8 +161,8 @@ HWTEST_F(StepperModifierTest, setOnFinishTest, TestSize.Level1)
 HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnSkip, nullptr);
-    const int32_t CONTEXT_ID = 123;
-    const int32_t INDEX_ARG = 0;
+    const int32_t contextId = 123;
+    const int32_t indexArg = 0;
 
     static std::optional<int32_t> checkData;
     void (*checkCallback)(const Ark_Int32 resourceId) =
@@ -170,7 +170,7 @@ HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, CONTEXT_ID);
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
     modifier_->setOnSkip(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -178,10 +178,10 @@ HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    eventHub->FireSkipEvent(INDEX_ARG);
+    eventHub->FireSkipEvent(indexArg);
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), CONTEXT_ID);
+    EXPECT_EQ(checkData.value(), contextId);
 }
 
 /*
@@ -192,9 +192,9 @@ HWTEST_F(StepperModifierTest, setOnSkipTest, TestSize.Level1)
 HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnChange, nullptr);
-    const int32_t CONTEXT_ID = 123;
-    const int32_t FIRST_ARG = 0;
-    const int32_t SECOND_ARG = 1;
+    const int32_t contextId = 123;
+    const int32_t firstArg = 0;
+    const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
     void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
@@ -205,7 +205,7 @@ HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
     modifier_->setOnChange(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -213,12 +213,12 @@ HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    eventHub->FireChangeEvent(FIRST_ARG, SECOND_ARG);
+    eventHub->FireChangeEvent(firstArg, secondArg);
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
-    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
-    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
+    EXPECT_EQ(std::get<0>(checkData.value()), contextId);
+    EXPECT_EQ(std::get<1>(checkData.value()), firstArg);
+    EXPECT_EQ(std::get<2>(checkData.value()), secondArg);
 }
 
 /*
@@ -229,9 +229,9 @@ HWTEST_F(StepperModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnNext, nullptr);
-    const int32_t CONTEXT_ID = 123;
-    const int32_t FIRST_ARG = 0;
-    const int32_t SECOND_ARG = 1;
+    const int32_t contextId = 123;
+    const int32_t firstArg = 0;
+    const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
     void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
@@ -242,7 +242,7 @@ HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
     modifier_->setOnNext(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -250,12 +250,12 @@ HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    eventHub->FireNextEvent(FIRST_ARG, SECOND_ARG);
+    eventHub->FireNextEvent(firstArg, secondArg);
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
-    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
-    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
+    EXPECT_EQ(std::get<0>(checkData.value()), contextId);
+    EXPECT_EQ(std::get<1>(checkData.value()), firstArg);
+    EXPECT_EQ(std::get<2>(checkData.value()), secondArg);
 }
 
 /*
@@ -266,9 +266,9 @@ HWTEST_F(StepperModifierTest, setOnNextTest, TestSize.Level1)
 HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPrevious, nullptr);
-    const int32_t CONTEXT_ID = 123;
-    const int32_t FIRST_ARG = 0;
-    const int32_t SECOND_ARG = 1;
+    const int32_t contextId = 123;
+    const int32_t firstArg = 0;
+    const int32_t secondArg = 1;
 
     static std::optional<std::tuple<int32_t, int32_t, int32_t>> checkData;
     void (*checkCallback)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) =
@@ -279,7 +279,7 @@ HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, CONTEXT_ID);
+    auto arkCallback = Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
     modifier_->setOnPrevious(node_, &arkCallback);
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
@@ -287,11 +287,11 @@ HWTEST_F(StepperModifierTest, setOnPreviousTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    eventHub->FirePreviousEvent(FIRST_ARG, SECOND_ARG);
+    eventHub->FirePreviousEvent(firstArg, secondArg);
     // check the invoking result
     ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(std::get<0>(checkData.value()), CONTEXT_ID);
-    EXPECT_EQ(std::get<1>(checkData.value()), FIRST_ARG);
-    EXPECT_EQ(std::get<2>(checkData.value()), SECOND_ARG);
+    EXPECT_EQ(std::get<0>(checkData.value()), contextId);
+    EXPECT_EQ(std::get<1>(checkData.value()), firstArg);
+    EXPECT_EQ(std::get<2>(checkData.value()), secondArg);
 }
 } // namespace OHOS::Ace::NG
