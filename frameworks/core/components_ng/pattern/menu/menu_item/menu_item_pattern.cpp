@@ -716,7 +716,6 @@ bool MenuItemPattern::OnClick()
         onChange(IsSelected());
         RecordChangeEvent();
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -1638,10 +1637,8 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
     CHECK_NULL_VOID(host);
     if (isSelected) {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     } else {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 
