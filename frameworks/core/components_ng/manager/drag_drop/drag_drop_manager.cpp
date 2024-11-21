@@ -1718,7 +1718,7 @@ OffsetF DragDropManager::GetTouchOffsetRelativeToSubwindow(int32_t containerId, 
         containerId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(containerId)
                                            : containerId);
     CHECK_NULL_RETURN(subwindow, OffsetF(x, y));
-    auto subwindowOffset = subwindow->GetRect().GetOffset();
+    auto subwindowOffset = subwindow->GetWindowRect().GetOffset();
     touchOffset.SetX(touchOffset.GetX() - subwindowOffset.GetX());
     touchOffset.SetY(touchOffset.GetY() - subwindowOffset.GetY());
     return touchOffset;
