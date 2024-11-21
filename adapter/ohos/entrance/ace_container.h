@@ -690,6 +690,8 @@ public:
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

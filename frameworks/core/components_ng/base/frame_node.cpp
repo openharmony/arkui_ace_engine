@@ -286,8 +286,6 @@ public:
                 "[%{public}d:%{public}s] reset children while in use", hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetLayoutDetectEnabled()) {
                 abort();
-            } else {
-                LogBacktrace();
             }
             delayReset_ = true;
             needResetChild_ = needResetChild;
@@ -3253,7 +3251,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
 {
     Point pMax = pointList[0];
     Point pMin = pointList[0];
-    
+
     for (auto &point: pointList) {
         if (point.GetX() > pMax.GetX()) {
             pMax.SetX(point.GetX());

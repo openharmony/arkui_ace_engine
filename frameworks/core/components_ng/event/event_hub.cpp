@@ -498,4 +498,14 @@ void EventHub::OnDetachClear()
     FireOnDisappear();
     ClearStateStyle();
 }
+
+void EventHub::SetEnabled(bool enabled)
+{
+    auto host = GetFrameNode();
+    if (enabled_ != enabled && host) {
+        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
+    enabled_ = enabled;
+    developerEnabled_ = enabled;
+}
 } // namespace OHOS::Ace::NG
