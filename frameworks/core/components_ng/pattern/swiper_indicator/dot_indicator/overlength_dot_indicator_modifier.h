@@ -203,7 +203,7 @@ private:
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;
-    std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
+    std::pair<float, float> CalcLongPointEndCenterXWithBlack(size_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
     int32_t GetBlackPointsAnimationDuration() const;
     void AdjustTargetStatus(int32_t targetPageIndex);
