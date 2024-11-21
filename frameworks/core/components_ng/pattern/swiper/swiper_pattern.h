@@ -641,6 +641,7 @@ private:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
+    bool InsideIndicatorRegion(const TouchLocationInfo& locationInfo);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
