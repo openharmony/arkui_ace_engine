@@ -154,6 +154,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
     }
+    algo->SetCachedShow(IsCachedShow());
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
@@ -1888,7 +1889,7 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
     for (const auto& index : indexSet) {
         if (index < 0 || index >= childrenSize) {
             FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID,
-                "BusinessError 401: Parameter error. Each value in indices must be valid index value of tab content.");
+                "BusinessError 401: Parameter error. Each value in indices must be valid index value of child.");
             return;
         }
         validIndexSet.emplace(index);
@@ -1928,6 +1929,27 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
         auto preloadFinishCallback = swiperController_->GetPreloadFinishCallback();
         swiperController_->SetPreloadFinishCallback(nullptr);
         preloadFinishCallback(errorCode, message);
+    }
+}
+
+void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child)
+{
+    auto childNode = FindForEachNode(child);
+    if (!childNode) {
+        return;
+    }
+
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(childNode.value());
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScrollNode>(childNode.value());
+    for (auto index : indexSet) {
+        if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+            forEachNode->GetChildAtIndex(index)->Build(nullptr);
+            continue;
+        }
+
+        if (repeatNode) {
+            repeatNode->GetFrameChildByIndex(index, true);
+        }
     }
 }
 
@@ -1973,7 +1995,6 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
         for (auto index : indexSet) {
             if (lazyForEachNode) {
                 lazyForEachNode->GetFrameChildByIndex(index, true);
@@ -1982,17 +2003,7 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
     }
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
-            continue;
-        }
-
-        auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
-        for (auto index : indexSet) {
-            if (forEachNode && forEachNode->GetChildAtIndex(index)) {
-                forEachNode->GetChildAtIndex(index)->Build(nullptr);
-                continue;
-            }
-        }
+        BuildForEachChild(indexSet, child);
     }
 }
 
@@ -3991,6 +4002,13 @@ float SwiperPattern::GetItemSpace() const
         itemSpace = 0.0f;
     }
     return itemSpace;
+}
+
+bool SwiperPattern::IsCachedShow() const
+{
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetCachedIsShown().value_or(false);
 }
 
 float SwiperPattern::GetPrevMargin() const
@@ -6002,6 +6020,30 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
             return targetNode;
         }
     }
+    return std::nullopt;
+}
+
+std::optional<RefPtr<UINode>> SwiperPattern::FindForEachNode(const RefPtr<UINode>& baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<ForEachNode>(baseNode)) {
+        return baseNode;
+    }
+
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+
     return std::nullopt;
 }
 
