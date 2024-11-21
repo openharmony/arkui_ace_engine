@@ -296,7 +296,11 @@ void DragEventActuator::GetThumbnailPixelMap(bool isSync)
         PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
     } else if (dragPreviewInfo.customNode != nullptr) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
-        GetThumbnailPixelMapForCustomNode(isSync);
+        if (isSync) {
+            GetThumbnailPixelMapForCustomNodeSync();
+        } else {
+            GetThumbnailPixelMapForCustomNode();
+        }
     } else {
         GetThumbnailPixelMapAsync(gestureHub);
     }
@@ -315,7 +319,7 @@ void DragEventActuator::GetThumbnailPixelMap(bool isSync)
     }
 }
 
-void DragEventActuator::GetThumbnailPixelMapForCustomNode(bool isSync)
+void DragEventActuator::GetThumbnailPixelMapForCustomNodeSync()
 {
 #if defined(PIXEL_MAP_SUPPORTED)
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -324,24 +328,40 @@ void DragEventActuator::GetThumbnailPixelMapForCustomNode(bool isSync)
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewInfo = frameNode->GetDragPreview();
     SnapshotParam param;
-    if (isSync) {
-        auto pixelMap = ComponentSnapshot::CreateSync(dragPreviewInfo.customNode, param);
-        CHECK_NULL_VOID(pixelMap);
-        auto previewPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-        gestureHub->SetPixelMap(previewPixelMap);
-        gestureHub->SetDragPreviewPixelMap(previewPixelMap);
-        PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
-        return;
-    }
+    auto pixelMap = ComponentSnapshot::CreateSync(dragPreviewInfo.customNode, param);
+    CHECK_NULL_VOID(pixelMap);
+    auto previewPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    gestureHub->SetPixelMap(previewPixelMap);
+    gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+    PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
+#endif
+}
+
+void DragEventActuator::GetThumbnailPixelMapForCustomNode()
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak = WeakClaim(this)]
-        (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+        (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
         ContainerScope scope(id);
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDragRemoveCustomNode");
         if (pixelMap != nullptr) {
             auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-            auto taskScheduler = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskScheduler);
             taskScheduler->PostTask(
                 [gestureHub, customPixelMap, weak]() {
                     CHECK_NULL_VOID(gestureHub);
@@ -357,6 +377,7 @@ void DragEventActuator::GetThumbnailPixelMapForCustomNode(bool isSync)
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
         }
     };
+    SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
     param.checkImageStatus = true;
     param.options.waitUntilRenderFinished = true;
