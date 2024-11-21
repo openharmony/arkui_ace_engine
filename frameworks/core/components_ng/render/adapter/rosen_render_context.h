@@ -273,6 +273,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
+    void SetHDRBrightness(float hdrBrightness) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
