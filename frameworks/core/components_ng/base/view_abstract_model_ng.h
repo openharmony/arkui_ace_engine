@@ -1400,6 +1400,7 @@ public:
         ViewAbstract::DisableOnBlur();
     }
 
+    static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override
     {
@@ -1426,8 +1427,6 @@ public:
         ViewAbstract::SetIlluminatedBorderWidth(value);
     }
 
-    static void SetBloom(FrameNode *frameNode, const std::optional<float>& value,
-        const RefPtr<ThemeConstants>& themeConstants);
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);
@@ -1491,7 +1490,6 @@ public:
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
     static void SetBackShadow(FrameNode *frameNode, const std::vector<Shadow>& shadows);
-    static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
     static void SetLightPosition(FrameNode* frameNode, const std::optional<CalcDimension>& positionX,
         const std::optional<CalcDimension>& positionY, const std::optional<CalcDimension>& positionZ);
     static void SetLightIntensity(FrameNode* frameNode, const std::optional<float>& value);
@@ -1555,7 +1553,6 @@ private:
     {
         ViewAbstract::SetOffsetLocalizedEdges(needLocalized);
     }
-
 };
 } // namespace OHOS::Ace::NG
 

@@ -48,7 +48,6 @@ RowOptions Convert(const Ark_RowOptions& src)
         .space = OptConvert<Dimension>(src.space),
     };
 }
-
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
