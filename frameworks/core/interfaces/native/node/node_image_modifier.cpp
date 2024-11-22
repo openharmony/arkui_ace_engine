@@ -297,6 +297,36 @@ void ResetSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
+void SetImageMatrix(ArkUINodeHandle node, const ArkUI_Float32* matrix)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Matrix4 matrix4Value = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModelNG::SetImageMatrix(frameNode, matrix4Value);
+}
+
+void ResetImageMatrix(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 defaultValue = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModelNG::SetImageMatrix(frameNode, defaultValue);
+}
+
 void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -961,6 +991,8 @@ const ArkUIImageModifier* GetImageModifier()
         .resetRenderMode = ResetRenderMode,
         .setSyncLoad = SetSyncLoad,
         .resetSyncLoad = ResetSyncLoad,
+        .setImageMatrix = SetImageMatrix,
+        .resetImageMatrix = ResetImageMatrix,
         .setObjectFit = SetObjectFit,
         .resetObjectFit = ResetObjectFit,
         .setFitOriginalSize = SetFitOriginalSize,
