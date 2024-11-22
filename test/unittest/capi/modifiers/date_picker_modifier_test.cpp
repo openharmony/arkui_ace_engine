@@ -240,12 +240,12 @@ const std::vector<PickerDateOptionsStepTest> PICKER_DATE_OPTIONS_TEST_PLAN = {
         { "1970-1-1", "2100-12-31", "2023-7-21" } },
     { { PickerDate(1975, 4, 3), PickerDate(2008, 11, 21), PickerDate(2007, 11, 22) },
         { "1975-4-3", "2008-11-21", "2007-11-22" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "2024-11-10", "2021-1-2" } },
-    { { PickerDate(2018, 10, 15), PickerDate(2021, 1, 2), PickerDate(2019, 6, 8) },
-        { "2018-10-115", "2021-111-2", "2119-6-8" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
-        { "2019-7-5", "2021-1-2", "2021-1-2" } }
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 5, 4), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "2024-5-4", "2021-1-2" } },
+    { { PickerDate(2018, 10, 115), PickerDate(2021, 111, 2), PickerDate(2119, 6, 8) },
+        { "1970-1-1", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(-2019, 3, 2), PickerDate(2021, -5, 6), PickerDate(2024, 9, -10) },
+        { "1970-1-1", "1970-1-1", "1970-1-1" } }
 };
 
 std::string ToJsonString(const PickerDate& pickerDate)
@@ -1039,26 +1039,30 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDatePickerOptions, nullptr);
 
-    auto counter = 1;
     for (const auto& [actual, expected] : PICKER_DATE_OPTIONS_TEST_PLAN) {
+      
         Ark_DatePickerOptions arkOptions = {
             .start = Converter::ArkValue<Opt_Date>(std::get<0>(actual)),
             .end = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
             .selected = Converter::ArkValue<Opt_Date>(std::get<2>(actual)),
         };
         auto optOptions = Converter::ArkValue<Opt_DatePickerOptions>(arkOptions);
+        auto p = std::get<0>(actual);
+        auto p2 = std::get<1>(actual);
+        auto p3 = std::get<2>(actual);
+        std::printf("\n\ntester : 1  %d-%d-%d ", p.GetYear(), p.GetMonth(), p.GetDay());
+        std::printf("%d-%d-%d ", p2.GetYear(), p2.GetMonth(), p2.GetDay());
+        std::printf("%d-%d-%d", p3.GetYear(), p3.GetMonth(), p3.GetDay());
         modifier_->setDatePickerOptions(node_, &optOptions);
+        std::printf("\ntester : 2");
         auto fullJson = GetJsonValue(node_);
         auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CONSTRUCTOR_NAME);
-
         auto checkStart = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_START_NAME);
         auto checkEnd = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_END_NAME);
         auto checkSelected = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_SELECT_NAME);
-
-        AssertionFailure() << "pattern : " << std::to_string(counter++) << std::endl;
-        
-        //  << "-"     << std::to_string( s.month) << "-" << std::to_string( s.day);
-
+        std::printf("\ntester : 3  %s %s %s ", checkStart.c_str(), checkEnd.c_str(), checkSelected.c_str());
+        std::printf("\ntester : 4  %s %s %s\n", std::get<0>(expected).c_str(), std::get<1>(expected).c_str(),
+            std::get<2>(expected).c_str());
         EXPECT_EQ(checkStart, std::get<0>(expected));
         EXPECT_EQ(checkEnd, std::get<1>(expected));
         EXPECT_EQ(checkSelected, std::get<2>(expected));

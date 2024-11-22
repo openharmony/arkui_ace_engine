@@ -91,24 +91,27 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     auto p = opt->start;
     auto p2 = opt->end;
     auto p3 = opt->selected;
-    std::printf("\nmodifier:  %d-%d-%d ", p->GetYear(), p->GetMonth(), p->GetDay());
+    std::printf("\nmodifier:    %d-%d-%d ", p->GetYear(), p->GetMonth(), p->GetDay());
     std::printf("%d-%d-%d ", p2->GetYear(), p2->GetMonth(), p2->GetDay());
-    std::printf("%d-%d-%d \n", p3->GetYear(), p3->GetMonth(), p3->GetDay());
+    std::printf("%d-%d-%d", p3->GetYear(), p3->GetMonth(), p3->GetDay());
     if (opt->start.has_value()) {
-        DatePickerModelNG::SetStartDate(frameNode, *opt->start);
+        std::printf("\nmodifier: 1");
+        DatePickerModelNG::SetStartDate(frameNode, *(opt->start));
     }
     if (opt->end.has_value()) {
-        DatePickerModelNG::SetEndDate(frameNode, *opt->end);
+        std::printf("\nmodifier: 2");
+        DatePickerModelNG::SetEndDate(frameNode, *(opt->end));
     }
     if (opt->selected.has_value()) {
-        DatePickerModelNG::SetSelectedDate(frameNode, *opt->selected);
+        std::printf("\nmodifier: 3");
+        DatePickerModelNG::SetSelectedDate(frameNode, *(opt->selected));
     }
-    auto s = DatePickerModelNG::getStartDate();
-    auto s2 = DatePickerModelNG::getEndDate();
-    auto s3 = DatePickerModelNG::getSelectedDate();
-    std::printf("\nmodifier:  %d-%d-%d ", s.year, s.month, s.day);
+    auto s = DatePickerModelNG::getStartDate(frameNode);
+    auto s2 = DatePickerModelNG::getEndDate(frameNode);
+    auto s3 = DatePickerModelNG::getSelectedDate(frameNode);
+    std::printf("\nmodifier: 4 %d-%d-%d ", s.year, s.month, s.day);
     std::printf(" %d-%d-%d ", s2.year, s2.month, s2.day);
-    std::printf(" %d-%d-%d\n", s3.year, s3.month, s3.day);
+    std::printf(" %d-%d-%d\n", s3.year, s3.month, s.day);
   }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
