@@ -230,6 +230,13 @@ struct CJGestureEvent {
     double pinchCenterY;
     double angle;
     double speed;
+    int64_t tiltX;
+    int64_t tiltY;
+    int32_t sourceTool;
+    double velocityX;
+    double velocityY;
+    double velocity;
+    double pressure;
 };
 
 struct CJDragInfo {
@@ -241,6 +248,16 @@ struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
     const char* extraInfo;
+};
+
+struct CJBaseEvent {
+    CJEventTarget* target;
+    int64_t timestamp;
+    int32_t source;
+    double pressure;
+    int64_t tiltX;
+    int64_t tiltY;
+    int32_t sourceTool;
 };
 
 struct AtCPackage;
