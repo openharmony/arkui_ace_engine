@@ -3176,7 +3176,7 @@ class ArkComponent {
         if (this.nativePtr === undefined) {
           return;
         }
-        if (this.nativePtr !== -1) {
+        if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
         value.applyStageImmediately(this.nativePtr, this);
