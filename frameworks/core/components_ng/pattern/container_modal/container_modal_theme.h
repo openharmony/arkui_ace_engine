@@ -19,6 +19,7 @@
 #include <cstdint>
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -83,13 +84,15 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->themeConstants_ = themeConstants;
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ContainerModalTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ContainerModalTheme>& theme) const
         {
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return;
             }
@@ -101,7 +104,10 @@ public:
             theme->backgroundUnfocusColor_ = pattern->GetAttr<Color>("container_modal_unfocus_background", Color());
             theme->titleTextColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
 
-            auto isLightMode = SystemProperties::GetColorMode() == ColorMode::LIGHT;
+            auto resAdapter = themeConstants->GetResourceAdapter();
+            CHECK_NULL_VOID(resAdapter);
+            auto isLightMode = resAdapter->GetResourceColorMode() == ColorMode::LIGHT;
+
             theme->iconPrimaryColor_ = pattern->GetAttr<Color>(
                 "icon_primary",
                 isLightMode ? Color(ICON_PRIMARY_LIGHT) : Color(ICON_PRIMARY_DARK)
@@ -135,7 +141,7 @@ public:
 
     Color GetControlBtnColor(bool isCloseBtn, ControlBtnColorType type)
     {
-        auto isLightMode = SystemProperties::GetColorMode() == ColorMode::LIGHT;
+        auto isLightMode = IsLightMode();
         auto normalBtnOpacity = isLightMode ? 0.1f : 0.2f;
         auto normalBtnColor = iconPrimaryColor_;
         auto closeBtnOpacity = isLightMode ? 0.1f : 0.3f;
@@ -184,6 +190,13 @@ public:
         return btnColor;
     }
 
+    bool IsLightMode()
+    {
+        auto resAdapter = themeConstants_->GetResourceAdapter();
+        CHECK_NULL_RETURN(resAdapter, true);
+        return resAdapter->GetResourceColorMode() == ColorMode::LIGHT;
+    }
+
 private:
     Color backgroundColor_;
     Color backgroundUnfocusColor_;
@@ -194,6 +207,7 @@ private:
     Color interactiveHoverColor_;
     Color interactiveClickColor_;
     Color warningColor_;
+    RefPtr<ThemeConstants> themeConstants_ = nullptr;
 };
 
 } // namespace OHOS::Ace
