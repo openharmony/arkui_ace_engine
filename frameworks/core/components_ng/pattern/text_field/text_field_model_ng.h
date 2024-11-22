@@ -39,6 +39,7 @@ public:
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
+    void SetCapitalizationMode(AutoCapitalizationMode value) override;
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
@@ -195,6 +196,7 @@ public:
     static void SetCancelSymbolIcon(FrameNode* frameNode,
         const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);

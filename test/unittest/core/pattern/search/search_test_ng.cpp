@@ -2010,6 +2010,44 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
     searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
 }
+
+/**
+ * @tc.name: SetSearchCapitalizationMode001
+ * @tc.desc: SetSearchCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    EXPECT_EQ(AutoCapitalizationMode::SENTENCES, textFieldPattern->GetAutoCapitalizationMode());
+}
+
+/**
+ * @tc.name: SetSearchCapitalizationMode002
+ * @tc.desc: SetSearchCapitalizationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchCapitalizationMode002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::WORDS);
+    EXPECT_EQ(AutoCapitalizationMode::WORDS, textFieldPattern->GetAutoCapitalizationMode());
+}
+
 /**
  * @tc.name: SetEnablePreviewText
  * @tc.desc: Test SetEnablePreviewText

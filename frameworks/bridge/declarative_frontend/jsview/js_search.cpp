@@ -161,6 +161,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
+    JSClass<JSSearch>::StaticMethod("autoCapitalizationMode", &JSSearch::SetCapitalizationMode);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1201,6 +1202,24 @@ void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
     }
     TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
     SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
+}
+
+void JSSearch::SetCapitalizationMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
+    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
+        SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
+        return;
+    }
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
+    SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
 }
 
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)

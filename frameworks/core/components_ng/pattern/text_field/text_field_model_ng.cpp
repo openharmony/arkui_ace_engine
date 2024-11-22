@@ -334,6 +334,13 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
     pattern->UpdateTextInputAction(value);
 }
 
+void TextFieldModelNG::SetCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
+}
+
 void TextFieldModelNG::SetCaretColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
@@ -1196,6 +1203,13 @@ void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction val
         value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void TextFieldModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void TextFieldModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
