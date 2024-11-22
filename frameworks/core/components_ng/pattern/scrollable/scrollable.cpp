@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
@@ -89,6 +91,10 @@ void Scrollable::SetFriction(double sFriction)
 Scrollable::~Scrollable()
 {
     // If animation still runs, force stop it.
+    if (!IsStopped()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+        AceAsyncTraceEnd(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+    }
     StopFrictionAnimation();
     StopSpringAnimation();
     StopSnapAnimation();
