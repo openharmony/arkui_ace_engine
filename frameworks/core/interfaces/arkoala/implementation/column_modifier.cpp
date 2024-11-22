@@ -80,10 +80,10 @@ void JustifyContentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(value));
 }
-#ifdef POINT_LIGHT_ENABLE
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
