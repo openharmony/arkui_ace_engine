@@ -40,17 +40,18 @@ struct DatePickerOptions {
 
 bool IsDateValid(uint32_t year, uint32_t month, uint32_t day)
 {
+    auto maxDay = PickerDate::GetMaxDay(year, month);
     if (year < DATE_MIN.GetYear() || year > DATE_MAX.GetYear()) {
         return false;
     } else if (month < DATE_MIN.GetMonth() || month > DATE_MAX.GetMonth()) {
         return false;
-    } else if (day < DATE_MIN.GetDay() || day > PickerDate::GetMaxDay(year, month)) {
+    } else if (day < DATE_MIN.GetDay() || day > maxDay) {
         return false;
     }
     return true;
 }
 
-bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
+bool g_checkValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
 {
     if (!sourceJson || sourceJson->IsNull()) {
         return false;
@@ -58,7 +59,6 @@ bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
     auto year = sourceJson->GetValue(YEAR);
     auto month = sourceJson->GetValue(MONTH);
     auto day = sourceJson->GetValue(DAY);
-
     if (!year || !year->IsNumber() || !month || !month->IsNumber() || !day || !day->IsNumber()) {
         return false;
     }
@@ -89,13 +89,30 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
 
     auto opt = Converter::OptConvert<DatePickerOptions>(*options);
-    CHECK_NULL_VOID(opt->start);
-    CHECK_NULL_VOID(opt->end);
-    CHECK_NULL_VOID(opt->selected);
+    auto p = opt->start;
+    auto p2 = opt->end;
+    auto p3 = opt->selected;
 
-    DatePickerModelNG::SetStartDate(frameNode, *opt->start);
-    DatePickerModelNG::SetEndDate(frameNode, *opt->end);
-    DatePickerModelNG::SetSelectedDate(frameNode, *opt->selected);
+    std::printf("\nmodifier:  %d-%d-%d ", p->GetYear(), p->GetMonth(), p->GetDay());
+    std::printf("%d-%d-%d ", p2->GetYear(), p2->GetMonth(), p2->GetDay());
+    std::printf("%d-%d-%d \n", p3->GetYear(), p3->GetMonth(), p3->GetDay());
+
+    if(opt->start.has_value()){
+        DatePickerModelNG::SetStartDate(frameNode, *opt->start);
+    }
+    if (opt->end.has_value()) {
+        DatePickerModelNG::SetEndDate(frameNode, *opt->end);
+    }
+    if (opt->selected.has_value()) {
+        DatePickerModelNG::SetSelectedDate(frameNode, *opt->selected);
+    }
+    auto s = DatePickerModelNG::getStartDate(frameNode);
+    auto s2 = DatePickerModelNG::getEndDate(frameNode);
+    auto s3 = DatePickerModelNG::getSelectedDate(frameNode);
+
+    std::printf("pattern:  %d-%d-%d ", s.year, s.month, s.day);
+    std::printf("%d-%d-%d ", s2.year, s2.month, s2.day);
+    std::printf("%d-%d-%d \n", s3.year, s3.month, s3.day);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
@@ -159,7 +176,7 @@ void OnChangeImpl(Ark_NativePointer node,
         auto year = DATE_MIN.GetYear();
         auto month = DATE_MIN.GetMonth();
         auto day = DATE_MIN.GetDay();
-        if (CheckValidDateValues(sourceJson)) {
+        if (g_checkValidDateValues(sourceJson)) {
             year = sourceJson->GetValue(YEAR)->GetInt();
             month = sourceJson->GetValue(MONTH)->GetInt();
             day = sourceJson->GetValue(DAY)->GetInt();
@@ -191,7 +208,7 @@ void OnDateChangeImpl(Ark_NativePointer node,
         auto year = DATE_MIN.GetYear();
         auto month = DATE_MIN.GetMonth();
         auto day = DATE_MIN.GetDay();
-        if (CheckValidDateValues(sourceJson)) {
+        if (g_checkValidDateValues(sourceJson)) {
             year = sourceJson->GetValue(YEAR)->GetInt();
             month = sourceJson->GetValue(MONTH)->GetInt();
             day = sourceJson->GetValue(DAY)->GetInt();

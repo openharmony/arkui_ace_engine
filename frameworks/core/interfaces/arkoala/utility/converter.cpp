@@ -1237,18 +1237,16 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     const auto DATE_MIN = PickerDate(1970, 1, 1);
     const auto DATE_MAX = PickerDate(2100, 12, 31);
     const auto SEC_TO_MILLISEC = 1000L;
-
     auto timestamp = reinterpret_cast<int64_t>(src);
     time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&time);
     dst = PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
-
+    auto maxDay = PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth());
     if (dst->GetYear() < DATE_MIN.GetYear() || dst->GetYear() > DATE_MAX.GetYear()) {
         dst = DATE_MIN;
     } else if (dst->GetMonth() < DATE_MIN.GetMonth() || dst->GetMonth() > DATE_MAX.GetMonth()) {
         dst = DATE_MIN;
-    } else if (dst->GetDay() < DATE_MIN.GetDay() ||
-               dst->GetDay() > PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth())) {
+    } else if (dst->GetDay() < DATE_MIN.GetDay() || dst->GetDay() > maxDay) {
         dst = DATE_MIN;
     }
 }
