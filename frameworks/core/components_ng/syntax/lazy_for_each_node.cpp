@@ -125,6 +125,7 @@ void LazyForEachNode::OnDataReloaded()
         }
     }
     NotifyChangeWithCount(0, 0, NotificationType::START_CHANGE_POSITION);
+    NotifyChangeWithCount(static_cast<int32_t>(FrameCount()), 0, NotificationType::END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
