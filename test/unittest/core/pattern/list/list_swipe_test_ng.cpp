@@ -1662,4 +1662,64 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
     EXPECT_FALSE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT - 10.f)));
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT + 10.f)));
 }
+
+/**
+ * @tc.name: SetBuilderComponent01
+ * @tc.desc: Test BuilderComponent of start in swipeAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Creat swipeItemts with component content in List.
+     */
+    const int32_t startNodeIndex = 0;
+    const int32_t itemNodeIndex = 1;
+    CreateList();
+    auto startBuilder = CreateCustomNode("Start", START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItemsWithComponentContent(startBuilder, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const float slightSwipeDelta = START_NODE_LEN * SWIPER_TH;
+    const float obviousSwipeDelta = START_NODE_LEN * SWIPER_TH + 1;
+
+    /**
+     * @tc.steps: step2. Swipe start.
+     * @tc.expected: StartNode can be added and moved successfully.
+     */
+    DragSwiperItem(item_, slightSwipeDelta, SWIPER_SPEED_TH);
+    RectF startNodeRect = GetChildRect(item_, startNodeIndex);
+    RectF itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    RectF expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_LEN, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    RectF expectItemNodeRect = itemNodeInitialRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    ListItemSwipeIndex swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
+
+    DragSwiperItem(item_, obviousSwipeDelta, SWIPER_SPEED_TH);
+    startNodeRect = GetChildRect(item_, startNodeIndex);
+    itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    expectItemNodeRect = itemNodeSwipeStartRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_START);
+
+    /**
+     * @tc.steps: step3. Collapse start.
+     * @tc.expected: StartNode can be collapse.
+     */
+    DragSwiperItem(item_, -obviousSwipeDelta, SWIPER_SPEED_TH);
+    startNodeRect = GetChildRect(item_, startNodeIndex);
+    itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    expectItemNodeRect = itemNodeInitialRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
+}
 } // namespace OHOS::Ace::NG

@@ -1797,8 +1797,8 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
      */
     bool headerResult = false;
     bool footerResult = false;
-    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
-    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader", LIST_WIDTH, LIST_HEIGHT));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter", LIST_WIDTH, LIST_HEIGHT));
     const char newFooter[] = "NewFooter";
     const char newHeader[] = "NewHeader";
     auto children = group0->GetChildren();
