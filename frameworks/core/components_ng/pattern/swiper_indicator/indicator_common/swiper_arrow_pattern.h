@@ -79,7 +79,7 @@ private:
     void OnModifyDone() override;
     void InitNavigationArrow();
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);
-    void InitButtonEvent();
+    void InitEvent();
     void UpdateButtonNode(int32_t index);
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonClickEvent();
@@ -89,9 +89,9 @@ private:
     void OnClick() const;
 
     int32_t TotalCount() const;
-    RefPtr<ClickEvent> buttonClickListenr_;
-    RefPtr<TouchEventImpl> buttonTouchListenr_;
-    RefPtr<InputEvent> buttonOnHoverListenr_;
+    RefPtr<ClickEvent> buttonClickListener_;
+    RefPtr<TouchEventImpl> buttonTouchListener_;
+    RefPtr<InputEvent> buttonOnHoverListener_;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
 
     int32_t index_ = 0;

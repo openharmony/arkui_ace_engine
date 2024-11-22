@@ -38,7 +38,7 @@ void SwiperArrowPattern::OnModifyDone()
         InitSwiperChangeEvent(swiperEventHub);
         index_ = GetSwiperArrowLayoutProperty()->GetIndex().value_or(0);
         isFirstCreate_ = false;
-        InitButtonEvent();
+        InitEvent();
         InitOnKeyEvent();
     } else {
         UpdateArrowContent();
@@ -129,43 +129,46 @@ void SwiperArrowPattern::UpdateButtonNode(int32_t index)
     symbolNode->MarkModifyDone();
 }
 
-void SwiperArrowPattern::InitButtonEvent()
+void SwiperArrowPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
+    auto arrowGestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(arrowGestureHub);
+    // Set hit test mode transparent to avoid blocking the touch event of child nodes and sibling nodes.
+    arrowGestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
 
-    auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    auto buttonGestureHub  = buttonNode->GetOrCreateGestureEventHub();
 
     auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
-    buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    arrowGestureHub->AddTouchEvent(buttonTouchListenr_);
-    arrowGestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    buttonTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    buttonGestureHub->AddTouchEvent(buttonTouchListener_);
 
     auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ButtonOnHover(buttonNode, isHovered);
     };
-    buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
+    buttonOnHoverListener_  = MakeRefPtr<InputEvent>(std::move(hoverCallback));
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
-    buttonInputHub->AddOnHoverEvent(buttonOnHoverListenr_);
+    buttonInputHub->AddOnHoverEvent(buttonOnHoverListener_);
 
     auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ButtonClickEvent();
     };
-    if (buttonClickListenr_) {
-        arrowGestureHub->RemoveClickEvent(buttonClickListenr_);
+    if (buttonClickListener_) {
+        arrowGestureHub->RemoveClickEvent(buttonClickListener_);
     }
-    buttonClickListenr_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    arrowGestureHub->AddClickEvent(buttonClickListenr_);
+    buttonClickListener_  = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    buttonGestureHub->AddClickEvent(buttonClickListener_);
 }
 
 void SwiperArrowPattern::ButtonClickEvent()
@@ -306,6 +309,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(host);
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
+    auto buttonNodeGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(buttonNodeGestureHub);
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
@@ -317,8 +322,6 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto leftIndex = 0;
     auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
@@ -329,7 +332,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == rightIndex)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
-            gestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+            // Set hit test mode NONE to make sure button not respond to the touch events when invisible.
+            buttonNodeGestureHub->SetHitTestMode(HitTestMode::HTMNONE);
             hostFocusHub->SetParentFocusable(false);
             hostFocusHub->LostSelfFocus();
             return;
@@ -343,7 +347,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         visible = true;
     }
     renderContext->SetVisible(visible);
-    gestureHub->SetHitTestMode(visible ? HitTestMode::HTMDEFAULT : HitTestMode::HTMTRANSPARENT);
+    // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
+    buttonNodeGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMNONE);
 }
 
 void SwiperArrowPattern::UpdateArrowContent()
