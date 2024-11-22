@@ -273,13 +273,13 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/interfaces/arkoala/implementation/video_controller_peer_impl.cpp",
     "$ace_root/frameworks/core/interfaces/arkoala/utility/converter_enums.cpp",
     "$ace_root/frameworks/core/interfaces/arkoala/utility/reverse_converter_enums.cpp",
+    "common/view_model.cpp",
+    "common/view_model2.cpp",
     "node/extension_companion_node.cpp",
     "node/node_adapter_impl.cpp",
     "node/node_api.cpp",
     "node/node_list_item_modifier.cpp",
     "node/util_modifier.cpp",
-    "node/view_model.cpp",
-    "node/view_model2.cpp",
   ]
   sources += generated_sources
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
