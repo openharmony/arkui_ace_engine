@@ -54,9 +54,9 @@ namespace OHOS::Ace::Framework {
 
 void JSForm::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0 || !info[0]->IsObject())
+    if (info.Length() == 0 || !info[0]->IsObject()) {
         return;
-
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> id = obj->GetProperty("id");
     JSRef<JSVal> name = obj->GetProperty("name");
@@ -80,8 +80,7 @@ void JSForm::Create(const JSCallbackInfo& info)
             return;
         }
         formInfo.id = inputFormId;
-    }
-    if (id->IsNumber()) {
+    } else if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
     }
     LOGI("JSForm Create, info.id: %{public}" PRId64, formInfo.id);
