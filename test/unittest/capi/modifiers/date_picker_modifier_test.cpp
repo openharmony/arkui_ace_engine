@@ -49,6 +49,10 @@ const auto ATTRIBUTE_FONT_SIZE_NAME = "size";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "weight";
 const auto ATTRIBUTE_FONT_STYLE_NAME = "style";
 const auto ATTRIBUTE_FONT_FAMILY_NAME = "family";
+const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
+const auto ATTRIBUTE_DATE_START_NAME = "start";
+const auto ATTRIBUTE_DATE_END_NAME = "end";
+const auto ATTRIBUTE_DATE_SELECT_NAME = "selected";
 
 // Expected values
 static const std::string EXPECTED_TRUE("true");
@@ -63,6 +67,9 @@ const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = "#FF000000";
+const auto ATTRIBUTE_DATE_START_DEFAULT_VALUE = PickerDate(1970,1,1);
+const auto ATTRIBUTE_DATE_END_DEFAULT_VALUE = PickerDate(2100,12,31);
+const auto ATTRIBUTE_DATE_SELECTED_DEFAULT_VALUE = PickerDate::Current();
 
 // Test plans
 // size
@@ -105,7 +112,6 @@ const std::vector<UnionStringResourceTestStep> FONT_FAMILY_TEST_PLAN = {
 { Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(FONT_FAMILY_STRING), FONT_FAMILY_STRING }
 };
 
-
 // size ark=ok
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
@@ -113,7 +119,6 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(AINT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
-
 };
 
 // style ark=ok
@@ -214,9 +219,9 @@ typedef std::pair<PickerDate, PickerDate> PickerDateTest;
 const std::vector<PickerDateTest> CHANGE_EVENT_TEST_PLAN = {
     { PickerDate(1970, 1, 1), PickerDate(1970, 1, 1) },
     { PickerDate(2020, 12, 10), PickerDate(2020, 12, 10) },
-    { PickerDate(2200, 12, 31), PickerDate(1900, 1, 1) },
-    { PickerDate(0, -1, -5), PickerDate(1900, 1, 1) },
-    { PickerDate(-1, 24, 64), PickerDate(1900, 1, 1) },
+    { PickerDate(2200, 12, 31), PickerDate(1970, 1, 1) },
+    { PickerDate(0, -1, -5), PickerDate(1970, 1, 1) },
+    { PickerDate(-1, 24, 64), PickerDate(1970, 1, 1) },
 };
 typedef std::pair<Ark_Boolean, std::string> BoolTest;
 const std::vector<BoolTest> BOOL_TEST_PLAN = {
@@ -227,6 +232,81 @@ const std::vector<BoolTest> BOOL_TEST_PLAN = {
     { 25, "true" },
 };
 
+typedef std::tuple<PickerDate, PickerDate, PickerDate> PickerDateStepTest;
+typedef std::tuple<std::string, std::string, std::string> PickerStringStepTest;
+typedef std::pair<PickerDateStepTest, PickerStringStepTest> PickerDateOptionsStepTest;
+const std::vector<PickerDateOptionsStepTest> PICKER_DATE_OPTIONS_TEST_PLAN = {
+    { { PickerDate(1970, 1, 1), PickerDate(2100, 12, 31), PickerDate(2023, 7, 21) },
+        { "1970-1-1", "2100-12-31", "2023-7-21" } },
+    { { PickerDate(1975, 4, 3), PickerDate(2008, 11, 21), PickerDate(2007, 11, 22) },
+        { "1975-4-3", "2008-11-21", "2007-11-22" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "2024-11-21", "2021-1-2" } },
+    { { PickerDate(2018, 10, 15), PickerDate(2021, 1, 2), PickerDate(2019, 6, 8) },
+        { "2018-10-15", "2021-1-2", "2019-6-8" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
+        { "2019-7-5", "2021-1-2", "2021-1-2" } },
+    { { PickerDate(2019, 57, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
+        { "1970-1-1", "2021-1-2", "2021-1-2" } },
+    { { PickerDate(2019, 7, 105), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
+        { "1970-1-1", "2021-1-2", "2021-1-2" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2021, 101, 2), PickerDate(2024, 11, 21) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 201), PickerDate(2024, 11, 21) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 111, 121) },
+        { "2019-7-5", "2021-1-2", "2019-7-5" } },
+    { { PickerDate(2200, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
+        { "1970-1-1", "2021-1-2", "2021-1-2" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2200, 7, 5), PickerDate(2024, 11, 21) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2200, 7, 5) },
+        { "2019-7-5", "2021-1-2", "2019-7-5" } },
+    { { PickerDate(2024, 11, 21), PickerDate(2019, 7, 5), PickerDate(2021, 1, 2) },
+        { "2024-11-21", "2019-7-5", "2024-11-21" } },
+    { { PickerDate(2021, 1, 2), PickerDate(2019, 7, 5), PickerDate(2024, 11, 21) },
+        { "2021-1-2", "2019-7-5", "2019-7-5" } },
+    { { PickerDate(-2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "1970-1-1", "2024-11-21", "2021-1-2" } },
+    { { PickerDate(2019, -7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "1970-1-1", "2024-11-21", "2021-1-2" } },
+    { { PickerDate(2019, 7, -5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "1970-1-1", "2024-11-21", "2021-1-2" } },
+    { { PickerDate(2019, 7, 5), PickerDate(-2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, -11, 21), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, -21), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(-2021, 1, 2) },
+        { "2019-7-5", "2024-11-21", "2019-7-5" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, -1, -2) },
+        { "2019-7-5", "2024-11-21", "2019-7-5" } },
+    { { PickerDate(1970, 1, 1), PickerDate(2100, 12, 31), PickerDate(2023, 7, 21) },
+        { "1970-1-1", "2100-12-31", "2023-7-21" } },
+    { { PickerDate(1940, 1, 2), PickerDate(2100, 12, 31), PickerDate(2023, 7, 21) },
+        { "1970-1-1", "2100-12-31", "2023-7-21" } },
+    { { PickerDate(2019, 7, 5), PickerDate(1970, 1, 1), PickerDate(2023, 7, 21) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(1940, 1, 2), PickerDate(2023, 7, 21) },
+        { "2019-7-5", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2100, 12, 31), PickerDate(1970, 1, 1) },
+        { "2019-7-5", "2100-12-31", "2019-7-5" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2100, 12, 31), PickerDate(1940, 1, 2) },
+        { "2019-7-5", "2100-12-31", "2019-7-5" } },
+    { { PickerDate(1940, 1, 2), PickerDate(1940, 1, 2), PickerDate(1940, 1, 2) },
+        { "1970-1-1", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2200, 7, 5), PickerDate(2200, 7, 5), PickerDate(2200, 7, 5) },
+        { "1970-1-1", "1970-1-1", "1970-1-1" } },
+    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
+        { "2019-7-5", "2024-11-21", "2021-1-2" } },
+};
+
+std::string ToJsonString(const PickerDate& pickerDate)
+{
+    return std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
+           std::to_string(pickerDate.GetDay());
+}
 } // namespace
 
 class DatePickerModifierTest : public ModifierTestBase<GENERATED_ArkUIDatePickerModifier,
@@ -979,6 +1059,98 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
         EXPECT_EQ(selectedDate.GetYear(), testValue.second.GetYear());
         EXPECT_EQ(selectedDate.GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(selectedDate.GetDay(), testValue.second.GetDay());
+    };
+}
+
+/*
+ * @tc.name: setDatePickerOptionsDefaultValuesTest
+ * @tc.desc: Check the functionality of DatePickerModifier.SetDatePickerOptionsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDatePickerOptionsDefaultValuesTest, TestSize.Level1)
+{
+    auto fullJson = GetJsonValue(node_);
+
+    auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CONSTRUCTOR_NAME);
+    auto checkStart = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_START_NAME);
+    auto checkEnd = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_END_NAME);
+    auto checkSelected = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_SELECT_NAME);
+    auto defaultStart = ToJsonString(ATTRIBUTE_DATE_START_DEFAULT_VALUE);
+    auto defaultEnd = ToJsonString(ATTRIBUTE_DATE_END_DEFAULT_VALUE);
+    auto defaultSelected = ToJsonString(ATTRIBUTE_DATE_SELECTED_DEFAULT_VALUE);
+
+    EXPECT_EQ(checkStart, defaultStart);
+    EXPECT_EQ(checkEnd, defaultEnd);
+    EXPECT_EQ(checkSelected, defaultSelected);
+}
+
+/*
+ * @tc.name: setDatePickerOptionsTest
+ * @tc.desc: Check the functionality of DatePickerModifier.SetDatePickerOptionsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDatePickerOptions, nullptr);
+
+    for (const auto& [actual, expected] : PICKER_DATE_OPTIONS_TEST_PLAN) {
+        Ark_DatePickerOptions arkOptions = {
+            .start = Converter::ArkValue<Opt_Date>(std::get<0>(actual)),
+            .end = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
+            .selected = Converter::ArkValue<Opt_Date>(std::get<2>(actual)),
+        };
+        auto optOptions = Converter::ArkValue<Opt_DatePickerOptions>(arkOptions);
+        modifier_->setDatePickerOptions(node_, &optOptions);
+        auto fullJson = GetJsonValue(node_);
+        auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CONSTRUCTOR_NAME);
+
+        auto checkStart = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_START_NAME);
+        auto checkEnd = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_END_NAME);
+        auto checkSelected = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_SELECT_NAME);
+
+        EXPECT_EQ(checkStart, std::get<0>(expected));
+        EXPECT_EQ(checkEnd, std::get<1>(expected));
+        EXPECT_EQ(checkSelected, std::get<2>(expected));
+    }
+}
+
+/*
+ * @tc.name: setOnDateChangeTest
+ * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnChange, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<PickerDate> selectedDate = std::nullopt;
+    auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
+        selectedDate = Converter::OptConvert<PickerDate>(parameter);
+    };
+    Callback_Date_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDateChange
+    };
+
+    modifier_->setOnDateChange(node_, &func);
+
+    for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+        DatePickerChangeEvent event(testValue.first.ToString(true));
+        eventHub->FireChangeEvent(&event);
+
+        EXPECT_TRUE(selectedDate.has_value());
+        EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
+        EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
+        EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
     };
 }
 

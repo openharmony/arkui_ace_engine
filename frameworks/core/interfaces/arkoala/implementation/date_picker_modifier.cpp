@@ -21,23 +21,33 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "frameworks/base/utils/time_util.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-const int32_t YEAR_MIN = 1900;
-const int32_t YEAR_MAX = 2100;
-const int32_t MONTH_MIN = 1;
-const int32_t MONTH_MAX = 12;
-const int32_t DAY_MIN = 1;
-const int32_t DAY_MAX = 31;
 const std::string YEAR = "year";
 const std::string MONTH = "month";
 const std::string DAY = "day";
 const int64_t SEC_TO_MILLISEC = 1000;
+const auto DATE_MIN = PickerDate(1970, 1, 1);
+const auto DATE_MAX = PickerDate(2100, 12, 31);
+
 struct DatePickerOptions {
     std::optional<PickerDate> start;
     std::optional<PickerDate> end;
     std::optional<PickerDate> selected;
+};
+
+bool IsDateValid(uint32_t year, uint32_t month, uint32_t day)
+{
+    if (year < DATE_MIN.GetYear() || year > DATE_MAX.GetYear()) {
+        return false;
+    } else if (month < DATE_MIN.GetMonth() || month > DATE_MAX.GetMonth()) {
+        return false;
+    } else if (day < DATE_MIN.GetDay() || day > PickerDate::GetMaxDay(year, month)) {
+        return false;
+    }
+    return true;
 }
 
 bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
@@ -49,53 +59,23 @@ bool CheckValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
     auto month = sourceJson->GetValue(MONTH);
     auto day = sourceJson->GetValue(DAY);
 
-    if (!year || !year->IsNumber() || year->GetInt() < YEAR_MIN || year->GetInt() > YEAR_MAX) {
+    if (!year || !year->IsNumber() || !month || !month->IsNumber() || !day || !day->IsNumber()) {
         return false;
     }
-    if (!month || !month->IsNumber() || month->GetInt() < MONTH_MIN || month->GetInt() > MONTH_MAX) {
-        return false;
-    }
-    if (!day || !day->IsNumber() || day->GetInt() < DAY_MIN || day->GetInt() > DAY_MAX) {
+    if (!IsDateValid(year->GetInt(), month->GetInt(), day->GetInt())) {
         return false;
     }
     return true;
 }
 } // namespace
 namespace Converter {
-
-void AssignArkValue(Ark_Date& dst, const PickerDate& src)
-{
-
-    std::tm tm{};
-    tm.tm_year = src.GetYear();
-    tm.tm_mon = src.GetMonth()-1;
-    tm.tm_mday = src.GetDay();
-    std::time_t time = std::mktime(&tm);
-    int64_t timemillis = staitc_cast<int64_t>(time*SEC_TO_MILLISEC);
-    dst = reinterpret_cast<Ark_Date>(timemillis);
-}
-
 template<>
-void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
+void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptions& src)
 {
-    auto timestamp = reinterpret_cast<int64_t>(src);
-    auto t = static_cast<std::time_t>(timestamp / SEC_TO_MILLISEC);
-    auto local = std::localtime(&t);
-    if (!local) {
-        return;
-    }
-    dst = new PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
-}
-
-template<>
-DatePickerOptions Convert(const Ark_DatePickerOptions& src)
-{
-    DatePickerOptions dst;
     dst->start = Converter::OptConvert<PickerDate>(src.start);
     dst->end = Converter::OptConvert<PickerDate>(src.end);
     dst->selected = Converter::OptConvert<PickerDate>(src.selected);
 }
-
 
 } // namespace  OHOS::Ace:NG:Converter
 } // namespace  OHOS::Ace:NG
@@ -104,21 +84,18 @@ namespace DatePickerInterfaceModifier {
 void SetDatePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_DatePickerOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
 
-    auto datePickerOptions = Converter::Convert<DatePickerOptions>(*options);
+    auto opt = Converter::OptConvert<DatePickerOptions>(*options);
+    CHECK_NULL_VOID(opt->start);
+    CHECK_NULL_VOID(opt->end);
+    CHECK_NULL_VOID(opt->selected);
 
-    if(datePickerOptions.start){
-        DatePickerModelNG::SetStartDate(*datePickerOptions.start);    
-    }    
-    if(datePickerOptions.end){
-        DatePickerModelNG::SetStartDate(*datePickerOptions.end);    
-    }    
-    if(datePickerOptions.selected){
-        DatePickerModelNG::SetStartDate(*datePickerOptions.selected);    
-    }    
+    DatePickerModelNG::SetStartDate(frameNode, *opt->start);
+    DatePickerModelNG::SetEndDate(frameNode, *opt->end);
+    DatePickerModelNG::SetSelectedDate(frameNode, *opt->selected);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
@@ -179,13 +156,13 @@ void OnChangeImpl(Ark_NativePointer node,
         auto selectedStr = eventInfo->GetSelectedStr();
         auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
 
-        auto year = YEAR_MIN;
-        auto month = MONTH_MIN;
-        auto day = DAY_MIN;
+        auto year = DATE_MIN.GetYear();
+        auto month = DATE_MIN.GetMonth();
+        auto day = DATE_MIN.GetDay();
         if (CheckValidDateValues(sourceJson)) {
-            year = sourceJson->GetValue(::YEAR)->GetInt();
-            month = sourceJson->GetValue(::MONTH)->GetInt();
-            day = sourceJson->GetValue(::DAY)->GetInt();
+            year = sourceJson->GetValue(YEAR)->GetInt();
+            month = sourceJson->GetValue(MONTH)->GetInt();
+            day = sourceJson->GetValue(DAY)->GetInt();
         }
         Ark_DatePickerResult result = {
             .year = Converter::ArkValue<Opt_Number>(year),
@@ -200,7 +177,7 @@ void OnChangeImpl(Ark_NativePointer node,
 void OnDateChangeImpl(Ark_NativePointer node,
                       const Callback_Date_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -211,20 +188,19 @@ void OnDateChangeImpl(Ark_NativePointer node,
         auto selectedStr = eventInfo->GetSelectedStr();
         auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
 
-        auto year = YEAR_MIN;
-        auto month = MONTH_MIN;
-        auto day = DAY_MIN;
+        auto year = DATE_MIN.GetYear();
+        auto month = DATE_MIN.GetMonth();
+        auto day = DATE_MIN.GetDay();
         if (CheckValidDateValues(sourceJson)) {
-            year = sourceJson->GetValue(::YEAR)->GetInt();
-            month = sourceJson->GetValue(::MONTH)->GetInt();
-            day = sourceJson->GetValue(::DAY)->GetInt();
+            year = sourceJson->GetValue(YEAR)->GetInt();
+            month = sourceJson->GetValue(MONTH)->GetInt();
+            day = sourceJson->GetValue(DAY)->GetInt();
         }
-        auto pickerDate = new PickerDate(year, month, day);
+        auto pickerDate = PickerDate(year, month, day);
         auto result = Converter::ArkValue<Ark_Date>(pickerDate);
         arkCallback.Invoke(result);
     };
-
-    DatePickerModelNG::SetOnDateChange(frameNode, std::move(onChange))
+    DatePickerModelNG::SetOnDateChange(frameNode, std::move(onChange));
 }
 } // DatePickerAttributeModifier
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()

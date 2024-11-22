@@ -169,6 +169,27 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
     onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 }
 
+void AssignArkValue(Ark_Date& dst, const PickerDate& src)
+{
+    const auto start = PickerDate(1970, 1, 1);
+    const auto end = PickerDate(2100, 12, 31);
+    const int64_t SEC_TO_MILLISEC = 1000;
+    auto date = src;
+    if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
+        date = start;
+    } else if (src.GetMonth() < start.GetMonth() || src.GetMonth() > end.GetMonth()) {
+        date = start;
+    } else if (src.GetDay() < start.GetDay() || src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
+        date = start;
+    }
+    std::tm tm {};
+    tm.tm_year = date.GetYear();
+    tm.tm_mon = date.GetMonth() - 1;
+    tm.tm_mday = date.GetDay();
+    time_t time = std::mktime(&tm);
+    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+}
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -1208,5 +1229,27 @@ PickerSelectedType Convert(const Array_Number& src)
         dst.push_back(static_cast<uint32_t>(selected));
     }
     return dst;
+}
+
+template<>
+void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
+{
+    const auto DATE_MIN = PickerDate(1970, 1, 1);
+    const auto DATE_MAX = PickerDate(2100, 12, 31);
+    const auto SEC_TO_MILLISEC = 1000L;
+
+    auto timestamp = reinterpret_cast<int64_t>(src);
+    time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
+    auto local = std::localtime(&time);
+    dst = PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
+
+    if (dst->GetYear() < DATE_MIN.GetYear() || dst->GetYear() > DATE_MAX.GetYear()) {
+        dst = DATE_MIN;
+    } else if (dst->GetMonth() < DATE_MIN.GetMonth() || dst->GetMonth() > DATE_MAX.GetMonth()) {
+        dst = DATE_MIN;
+    } else if (dst->GetDay() < DATE_MIN.GetDay() ||
+               dst->GetDay() > PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth())) {
+        dst = DATE_MIN;
+    }
 }
 } // namespace OHOS::Ace::NG::Converter
