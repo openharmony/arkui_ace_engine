@@ -405,9 +405,12 @@ void BarModeBarMode_SCROLLABLEImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto optOptions = Converter::ArkValue<Opt_ScrollableBarModeOptions>(*options);
-    BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, &optOptions);
+    if (options) {
+        auto optOptions = Converter::ArkValue<Opt_ScrollableBarModeOptions>(*options);
+        BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, &optOptions);
+    } else {
+        BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
+    }
 }
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
