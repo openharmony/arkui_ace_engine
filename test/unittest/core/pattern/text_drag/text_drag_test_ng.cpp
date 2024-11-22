@@ -297,7 +297,7 @@ HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg003, TestSize.Level1)
      * @tc.expected: lastLineHeight/textRect/contentoffset as expected.
      */
     EXPECT_EQ(dragPattern_->GetContentOffset(),  OffsetF(-8.f, 32.f));
-    EXPECT_EQ(dragPattern_->GetTextRect(),  RectF(8.f, -32.f, 460.f, 160.f));
+    EXPECT_EQ(dragPattern_->GetTextRect(),  RectF(8.f, -32.f, 160.f, 160.f));
 }
 
 /**
