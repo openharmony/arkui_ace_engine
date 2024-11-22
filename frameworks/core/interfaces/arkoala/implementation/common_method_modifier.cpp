@@ -29,6 +29,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
 
@@ -1271,7 +1272,10 @@ void OnClick0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
+        callback.Invoke(Converter::ArkValue<Ark_ClickEvent>(info));
+    };
+    NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
 void OnClick1Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* event,
@@ -1279,14 +1283,17 @@ void OnClick1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [frameNode](GestureEvent& info) {
-        Ark_ClickEvent onClick = Converter::ArkValue<Ark_ClickEvent>(info);
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(distanceThreshold);
+    auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
+        callback.Invoke(Converter::ArkValue<Ark_ClickEvent>(info));
     };
+    auto convValue = Converter::Convert<float>(*distanceThreshold);
 
     if (frameNode->GetTag() == "Span") {
         SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
     } else {
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), convValue);
     }
 }
 void OnHoverImpl(Ark_NativePointer node,
