@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -102,6 +103,11 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish)
     auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto transitionType = pattern->GetPageTransitionType();
+        if (transitionType == PageTransitionType::ENTER_PUSH || transitionType == PageTransitionType::ENTER_POP) {
+            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         if (sharedFinish == pattern->pageTransitionFinish_) {
