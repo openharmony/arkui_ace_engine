@@ -79,7 +79,9 @@ bool TextPickerOverscroller::CanOverScroll(float scrollDelta) const
     CHECK_NULL_RETURN(column, false);
     auto currentIdx = column->GetCurrentIndex();
     auto optionCount = column->GetOptionCount();
-
+    if (optionCount == 0) {
+        return false;
+    }
     auto isDown = GreatNotEqual(overScroll_, 0.0) || (GreatNotEqual(scrollDelta, 0.0) && NearZero(overScroll_));
     auto isUp = LessNotEqual(overScroll_, 0.0) || (LessNotEqual(scrollDelta, 0.0) && NearZero(overScroll_));
     return (currentIdx == 0 && isDown) || (currentIdx == optionCount - 1 && isUp);

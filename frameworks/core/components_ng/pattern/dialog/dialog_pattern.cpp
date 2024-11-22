@@ -236,9 +236,15 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), host->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(SubwindowManager::GetInstance()->GetDialogSubWindowId());
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (!container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+        }
+
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
 }
@@ -360,6 +366,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
+
     if (!props.title.empty() || !props.subtitle.empty()) {
         auto title = BuildTitle(props);
         CHECK_NULL_VOID(title);
@@ -483,9 +490,11 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titlePadding.bottom = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
     }
     titleProp->UpdatePadding(titlePadding);
+
     // XTS inspector value
     title_ = dialogProperties.title;
     subtitle_ = dialogProperties.subtitle;
+
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(titleRow, nullptr);
@@ -664,6 +673,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // parse button text color and background color
     std::string textColor;
     std::optional<Color> bgColor;
+    isFirstDefaultFocus_ = true;
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
 
     // append text inside button
@@ -671,7 +681,9 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
+
     SetButtonEnabled(buttonNode, params.enabled);
+
     auto hub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     // bind click event
@@ -726,6 +738,7 @@ void DialogPattern::UpdateDialogButtonProperty(
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
     buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
     buttonProp->UpdatePadding(buttonPadding);
+
     if (!isVertical) {
         // set flex grow to fill horizontal space
         buttonProp->UpdateLayoutWeight(1);
@@ -761,6 +774,7 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_RETURN(dividerPaintProps, nullptr);
     dividerPaintProps->UpdateDividerColor(color);
+
     // add divider margin
     MarginProperty margin = {
         .left = CalcLength((space - dividerWidth) / 2),
@@ -808,6 +822,7 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
     actionPadding.top = CalcLength(dialogTheme_->GetButtonWithContentPadding());
     actionPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
+
     AddButtonAndDivider(buttons, container, isVertical);
     container->MarkModifyDone();
     buttonContainer_ = container;
@@ -999,9 +1014,10 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
     menuNode_ = menu;
     // column -> button
-    for (size_t i = 0; i < buttons.size(); ++i) {
+    const size_t size = buttons.size();
+    for (size_t i = 0; i < size; ++i) {
         RefPtr<FrameNode> button;
-        uint32_t val = buttons.size() > 0 ? buttons.size() - 1 : 0;
+        uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
             button = CreateButton(buttons[i], i);
         } else {
