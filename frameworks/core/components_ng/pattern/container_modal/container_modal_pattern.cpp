@@ -454,7 +454,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
 
 void ContainerModalPattern::SetAppTitle(const std::string& title)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully, title is %{public}s", title.c_str());
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully");
     auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
