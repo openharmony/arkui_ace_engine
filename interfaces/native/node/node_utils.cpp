@@ -222,7 +222,7 @@ int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_Ac
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUINodeHandle* innerNodes = nullptr;
-    uint32_t totalSize = 0;
+    int32_t totalSize = 0;
     impl->getNodeModifiers()->getFrameNodeModifier()->getActiveChildrenInfo(
         head->uiNodeHandle, &innerNodes, &totalSize);
     *handle = new ArkUI_ActiveChildrenInfo({ .nodeList = nullptr, .nodeCount = totalSize });
@@ -344,7 +344,7 @@ void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle)
 ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index)
 {
     CHECK_NULL_RETURN(handle, nullptr);
-    if (index < handle->nodeCount) {
+    if (index < handle->nodeCount && index >= 0) {
         return handle->nodeList[index];
     }
     return nullptr;

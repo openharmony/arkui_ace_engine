@@ -562,7 +562,7 @@ ArkUI_Int32 GetNodeTag(ArkUINodeHandle node)
     return uiNode->IsCNode();
 }
 
-void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size)
+void GetActiveChildrenInfo(ArkUINodeHandle handle, ArkUINodeHandle** items, ArkUI_Int32* size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(handle);
     CHECK_NULL_VOID(frameNode);
