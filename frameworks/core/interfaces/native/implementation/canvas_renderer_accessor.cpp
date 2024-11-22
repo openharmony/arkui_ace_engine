@@ -1115,4 +1115,4 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
     return &CanvasRendererAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}
