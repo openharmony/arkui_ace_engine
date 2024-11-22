@@ -62,7 +62,7 @@ public:
     // The lifecycle interface
     void NotifyCreate() override;
     void NotifyForeground() override;
-    void NotifyBackground() override;
+    void NotifyBackground(bool isHandleError) override;
     void NotifyDestroy(bool isHandleError = true) override;
     void NotifyConfigurationUpdate() override;
 
