@@ -740,12 +740,20 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 #if defined(PIXEL_MAP_SUPPORTED)
                 TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak]
-                    (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+                    (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
                     ContainerScope scope(id);
+                    CHECK_NULL_VOID(pipeline);
+                    auto taskScheduler = pipeline->GetTaskExecutor();
+                    CHECK_NULL_VOID(taskScheduler);
+                    taskScheduler->PostTask(
+                        [finishCallback]() {
+                            if (finishCallback) {
+                                finishCallback();
+                            }
+                        },
+                        TaskExecutor::TaskType::UI, "ArkUIDragRemoveCustomNode");
                     if (pixelMap != nullptr) {
                         auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-                        auto taskScheduler = pipeline->GetTaskExecutor();
-                        CHECK_NULL_VOID(taskScheduler);
                         taskScheduler->PostTask(
                             [gestureHub, customPixelMap, weak]() {
                                 CHECK_NULL_VOID(gestureHub);
