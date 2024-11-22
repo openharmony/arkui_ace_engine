@@ -1690,8 +1690,8 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
     if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
         nextNode = GetForEachMenuItem(parent, true);
     } else {
-        const auto& children = parent->GetChildren();
-        if (index >= static_cast<int32_t>(children.size() - 1)) {
+        const size_t size = parent->GetChildren().size();
+        if (size == 0 || index >= static_cast<int32_t>(size - 1)) {
             return;
         }
         nextNode = parent->GetChildAtIndex(index + 1);
@@ -1738,9 +1738,9 @@ RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, boo
         auto forEachNode = AceType::DynamicCast<UINode>(parent->GetParent());
         CHECK_NULL_RETURN(forEachNode, nullptr);
         auto syntIndex = forEachNode->GetChildIndex(parent);
-        const auto& children = forEachNode->GetChildren();
+        const size_t size = forEachNode->GetChildren().size();
         if (next) {
-            if (syntIndex < static_cast<int32_t>(children.size() - 1)) { // next is inside forEach
+            if (size > 0 && syntIndex < static_cast<int32_t>(size - 1)) { // next is inside forEach
                 auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
                 CHECK_NULL_RETURN(nextSyntax, nullptr);
                 return nextSyntax->GetFirstChild();
@@ -1771,8 +1771,8 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     CHECK_NULL_RETURN(parentForEachNode, nullptr);
     auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
     int32_t shift = next ? 1 : -1;
-    const auto& children = parentForEachNode->GetChildren();
-    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(children.size() - 1)) {
+    const size_t size = parentForEachNode->GetChildren().size();
+    if (size > 0 && (forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(size - 1)) {
         return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
     } else {
         return nullptr;

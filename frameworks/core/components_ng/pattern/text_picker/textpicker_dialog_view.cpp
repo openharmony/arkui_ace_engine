@@ -1269,7 +1269,7 @@ void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColum
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, true, false, false);
-    } else if (dialogNodePage != (columnCount - 1)) {
+    } else if (columnCount > 0 && dialogNodePage != (columnCount - 1)) {
         SetSecondDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, false, true, false);
     } else {
@@ -1325,6 +1325,7 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
                 auto childNode = AceType::DynamicCast<FrameNode>(child);
                 CHECK_NULL_VOID(childNode);
                 auto childNodeProperty = childNode->GetLayoutProperty<LayoutProperty>();
+                CHECK_NULL_VOID(childNodeProperty);
                 childNodeProperty->UpdateVisibility(VisibleType::GONE);
             }
         } else {
@@ -1335,6 +1336,7 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
                 auto childNode = AceType::DynamicCast<FrameNode>(child);
                 CHECK_NULL_VOID(childNode);
                 auto childNodeProperty = childNode->GetLayoutProperty<LayoutProperty>();
+                CHECK_NULL_VOID(childNodeProperty);
                 childNodeProperty->UpdateVisibility(VisibleType::VISIBLE);
             }
         }

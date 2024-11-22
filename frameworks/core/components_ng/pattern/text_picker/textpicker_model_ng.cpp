@@ -1168,7 +1168,8 @@ std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)
     for (auto& valueRet : values) {
         result.append(valueRet + ';');
     }
-    result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+    const size_t length = result.length();
+    result = result.substr(0, length > 0 ? length - 1 : 0);
     return result;
 }
  
