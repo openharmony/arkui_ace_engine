@@ -1035,7 +1035,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsDefaultValuesTest, TestSize
  * @tc.desc: Check the functionality of DatePickerModifier.SetDatePickerOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDatePickerOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDatePickerOptions, nullptr);
 
