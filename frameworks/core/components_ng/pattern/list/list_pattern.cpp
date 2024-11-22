@@ -2212,7 +2212,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             if (!selectedZone.IsIntersectWith(itemGroupRect)) {
                 continue;
             }
-            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
+            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.GetOffset());
             continue;
         }
         auto itemPattern = item->GetPattern<ListItemPattern>();
@@ -2236,7 +2236,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 }
 
 void ListPattern::HandleCardModeSelectedEvent(
-    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop)
+    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset)
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
@@ -2254,7 +2254,8 @@ void ListPattern::HandleCardModeSelectedEvent(
         auto context = item->GetRenderContext();
         CHECK_NULL_VOID(context);
         auto itemRect = itemGeometry->GetFrameRect();
-        RectF itemRectInGroup(itemRect.GetX(), itemRect.GetY() + itemGroupTop, itemRect.Width(), itemRect.Height());
+        RectF itemRectInGroup(itemRect.GetX() + groupOffset.GetX(),
+            itemRect.GetY() + groupOffset.GetY(), itemRect.Width(), itemRect.Height());
         if (!selectedZone.IsIntersectWith(itemRectInGroup)) {
             itemPattern->MarkIsSelected(false);
         } else {
