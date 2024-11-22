@@ -298,8 +298,10 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
         }
         return true;
     }
-    stageNode_->RemoveChild(pageNode);
-    pageNode->SetChildrenInDestroying();
+    if (pageNode) {
+        stageNode_->RemoveChild(pageNode);
+        pageNode->SetChildrenInDestroying();
+    }
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
