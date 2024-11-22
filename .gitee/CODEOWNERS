@@ -1612,6 +1612,7 @@ frameworks/bridge/plugin_frontend/plugin_frontend.h @arkuilayout
 frameworks/bridge/test/BUILD.gn @arkui_architecture
 frameworks/bridge/test/unittest/common/pluginadapter/BUILD.gn  @arkuilayout
 frameworks/bridge/test/unittest/common/pluginadapter/plugin_adapter_test.cpp @arkuilayout
+frameworks/bridge/cj_frontend @arkui_cj
 
 [Frameworks Core Old Abilities]
 frameworks/core/accessibility/ @arkuiabilitygroup
