@@ -22,6 +22,7 @@
 #include "core/interfaces/arkoala/implementation/text_clock_controller_peer_impl.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
     struct TextClockOptions {
@@ -87,10 +88,8 @@ void OnDateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onDateChange = [frameNode](const std::string& value) {
-        Ark_Number nValue = Converter::ArkValue<Ark_Number>(std::stof(value));
-        GetFullAPI()->getEventsAPI()->getTextClockEventsReceiver()->onDateChange(
-            frameNode->GetId(), nValue);
+    auto onDateChange = [arkCallback = CallbackHelper(*value)](const std::string& data) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(std::stof(data)));
     };
     TextClockModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }

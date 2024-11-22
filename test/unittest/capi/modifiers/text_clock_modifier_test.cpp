@@ -24,22 +24,13 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-struct EventsTracker {
-    static inline GENERATED_ArkUITextClockEventsReceiver eventsReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
-        .getTextClockEventsReceiver = []() -> const GENERATED_ArkUITextClockEventsReceiver* {
-            return &eventsReceiver;
-        }
-    };
-}; // EventsTracker
-
     const auto ATTRIBUTE_TIME_ZONE_OFFSET_NAME = "timeZoneOffset";
     const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = "0.000000";
 } // namespace
@@ -52,9 +43,6 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<TextTheme>();
-
-        // setup the test event handler
-        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -203,7 +191,6 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
 HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDateChange, nullptr);
-    Callback_Number_Void func = {};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
@@ -214,15 +201,23 @@ HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
         float index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::eventsReceiver.onDateChange = [](Ark_Int32 nodeId, const Ark_Number index)
-    {
+    auto onDateChange = [](Ark_Int32 nodeId, const Ark_Number index) {
         checkEvent = {
             .nodeId = nodeId,
             .index = Converter::Convert<float>(index),
         };
     };
 
-    modifier_->setOnDateChange(node_, &func);
+    Callback_Number_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDateChange
+    };
+
+    modifier_->setOnDateChange(node_, &callBackValue);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);
