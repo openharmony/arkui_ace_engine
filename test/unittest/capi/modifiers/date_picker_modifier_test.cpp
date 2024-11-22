@@ -1040,7 +1040,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
     ASSERT_NE(modifier_->setDatePickerOptions, nullptr);
 
     for (const auto& [actual, expected] : PICKER_DATE_OPTIONS_TEST_PLAN) {
-      
+        GetJsonValue(node_);
         Ark_DatePickerOptions arkOptions = {
             .start = Converter::ArkValue<Opt_Date>(std::get<0>(actual)),
             .end = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
@@ -1066,6 +1066,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
         EXPECT_EQ(checkStart, std::get<0>(expected));
         EXPECT_EQ(checkEnd, std::get<1>(expected));
         EXPECT_EQ(checkSelected, std::get<2>(expected));
+        GetJsonValue(node_);
     }
 }
 

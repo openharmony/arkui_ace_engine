@@ -112,7 +112,7 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     std::printf("\nmodifier: 4 %d-%d-%d ", s.year, s.month, s.day);
     std::printf(" %d-%d-%d ", s2.year, s2.month, s2.day);
     std::printf(" %d-%d-%d\n", s3.year, s3.month, s.day);
-  }
+}
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
 void LunarImpl(Ark_NativePointer node,
