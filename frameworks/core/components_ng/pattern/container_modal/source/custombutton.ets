@@ -1,6 +1,5 @@
 const IMAGE_SIZE: string = '28vp'
 const BUTTON_SIZE: string = '28vp'
-const BUTTON_RADIUS: string = '4vp'
 const BUTTON_ELEMENT_MARGIN_HORIZONTAL: string = '12vp'
 const BUTTON_ELEMENT_MARGIN_HORIZONTAL_END: string = '8vp'
 const TITLE_BUTTON_RESPONSE_REGION_OFFSET_X: string = '-8vp'
@@ -48,7 +47,7 @@ const recoverNormalResource: Resource = {
   type: 20000
 }
 
-const buttonNormalBackgroundColor: Color = Color.Transparent
+const buttonNormalBackgroundColor: Color =  Color.Transparent
 
 const buttonNormalIconFillColor: Resource = {
   bundleName: '',
@@ -74,7 +73,7 @@ const buttonHoverIconFillColor: Resource = {
   type: 10001
 }
 
-const closeNormalBackgroundColor: Color = Color.Transparent
+const closeNormalBackgroundColor : Color =  Color.Transparent
 
 const closeNormalIconFillColor: Resource = {
   bundleName: '',
@@ -106,72 +105,6 @@ const menuHoverColor: Resource = {
   params: [],
   id: 125831024,
   type: 10001
-}
-
-
-@Component
-struct ButtonComponent {
-  @Prop componentId: string
-  @Prop imageResource: Resource
-  @Prop imageSize: string
-  @Prop fillColor: Resource
-  @Prop imageScale: number
-  @Prop buttonBackgroundColor: Resource | Color
-  @Prop buttonSize: string
-  @State buttonBorderRadius: string = '4vp'
-  @Prop buttonVisibility: Visibility
-
-  build() {
-    Button() {
-      Image(this.imageResource)
-        .width(this.imageSize)
-        .height(this.imageSize)
-        .fillColor(this.fillColor)
-        .draggable(false)
-        .interpolation(ImageInterpolation.High)
-        .scale({ x: this.imageScale, y: this.imageScale })
-    }
-    .id(this.componentId)
-    .backgroundColor(this.buttonBackgroundColor)
-    .width(this.buttonSize)
-    .height(this.buttonSize)
-    .type(ButtonType.Normal)
-    .borderRadius(this.buttonBorderRadius)
-    .visibility(this.buttonVisibility)
-  }
-}
-
-@Component
-struct MenuItemComponent {
-  @Prop imageResource: Resource
-  @Prop imageSize: string
-  @Prop fillColor: Resource
-  @Prop title: Resource
-  @Prop itemBackgroundColor: ResourceColor
-
-  build() {
-    Row() {
-      Image(this.imageResource)
-        .width(this.imageSize)
-        .height(this.imageSize)
-        .fillColor(this.fillColor)
-        .margin({
-          top: MENU_MARGIN_V,
-          bottom: MENU_MARGIN_V,
-          left: MENU_MARGIN_H,
-          right: MENU_MARGIN_H
-        })
-      Text(this.title)
-        .fontSize(MENU_TITLE_TEXT_FONT_SIZE)
-        .textAlign(TextAlign.Start)
-        .maxLines(1)
-        .margin({ top: MENU_TITLE_MARGIN_V, bottom: MENU_TITLE_MARGIN_V, right: MENU_MARGIN_H })
-    }
-    .borderRadius('4vp')
-    .width('100%')
-    .backgroundColor(this.itemBackgroundColor)
-    .justifyContent(FlexAlign.Start)
-  }
 }
 
 @Entry
@@ -363,6 +296,7 @@ struct Index {
     this.menuWidth = (80 + parseInt(width)) + 'vp'
   }
 
+
   setRowVisibility() {
     if (this.maximizeVisibility == Visibility.None && this.minimizeVisibility == Visibility.None &&
       this.closeVisibility == Visibility.None) {
@@ -422,167 +356,211 @@ struct Index {
   @Builder
   MenuBuilder() {
     Column() {
-      MenuItemComponent({
-        imageResource: this.menuLeftResource,
-        imageSize: MENU_ICON_SIZE,
-        fillColor: this.splitFillColor,
-        title: this.leftSplitTitle,
-        itemBackgroundColor: this.leftSplitBackgroundColor
+      Row() {
+        Image(this.menuLeftResource)
+          .width(MENU_ICON_SIZE)
+          .height(MENU_ICON_SIZE)
+          .fillColor(this.splitFillColor)
+          .margin({
+            top: MENU_MARGIN_V,
+            bottom: MENU_MARGIN_V,
+            left: MENU_MARGIN_H,
+            right: MENU_MARGIN_H
+          })
+        Text(this.leftSplitTitle)
+          .fontSize(MENU_TITLE_TEXT_FONT_SIZE)
+          .textAlign(TextAlign.Start)
+          .maxLines(1)
+          .margin({ top: MENU_TITLE_MARGIN_V, bottom: MENU_TITLE_MARGIN_V, right: MENU_MARGIN_H })
+      }
+      .borderRadius('4vp')
+      .width('100%')
+      .backgroundColor(this.leftSplitBackgroundColor)
+      .margin({
+        top: '0vp',
+        bottom: '2vp',
+        left: '4vp',
+        right: '4vp'
       })
-        .margin({
-          top: '0vp',
-          bottom: '2vp',
-          left: '4vp',
-          right: '4vp'
-        })
-        .onClick(() => {
-          this.onMenuLeftSplitClick()
-        })
-        .onHover((isHover: boolean, event: HoverEvent) => {
-          if (isHover) {
-            this.leftSplitBackgroundColor = menuHoverColor
-          } else {
-            this.leftSplitBackgroundColor = Color.Transparent
-          }
-        })
-      MenuItemComponent({
-        imageResource: this.menuRightResource,
-        imageSize: MENU_ICON_SIZE,
-        fillColor: this.splitFillColor,
-        title: this.rightSplitTitle,
-        itemBackgroundColor: this.rightSplitBackgroundColor
-      }).margin({
+      .justifyContent(FlexAlign.Start)
+      .onClick(() => {
+        this.onMenuLeftSplitClick()
+      })
+      .onHover((isHover: boolean, event: HoverEvent) => {
+        if (isHover) {
+          this.leftSplitBackgroundColor = menuHoverColor
+        } else {
+          this.leftSplitBackgroundColor = Color.Transparent
+        }
+      })
+
+      Row() {
+        Image(this.menuRightResource)
+          .width(MENU_ICON_SIZE)
+          .height(MENU_ICON_SIZE)
+          .fillColor(this.splitFillColor)
+          .margin({
+            top: MENU_MARGIN_V,
+            bottom: MENU_MARGIN_V,
+            left: MENU_MARGIN_H,
+            right: MENU_MARGIN_H
+          })
+        Text(this.rightSplitTitle)
+          .fontSize(MENU_TITLE_TEXT_FONT_SIZE)
+          .textAlign(TextAlign.Start)
+          .maxLines(1)
+          .margin({ top: MENU_TITLE_MARGIN_V, bottom: MENU_TITLE_MARGIN_V, right: MENU_MARGIN_H })
+      }
+      .borderRadius('4vp')
+      .width('100%')
+      .backgroundColor(this.rightSplitBackgroundColor)
+      .margin({
         top: '2vp',
         bottom: '0vp',
         left: '4vp',
         right: '4vp'
       })
-        .onClick(() => {
-          this.onMenuRightSplitClick()
-        })
-        .onHover((isHover: boolean, event: HoverEvent) => {
-          if (isHover) {
-            this.rightSplitBackgroundColor = menuHoverColor
-          } else {
-            this.rightSplitBackgroundColor = Color.Transparent
-          }
-        })
+      .justifyContent(FlexAlign.Start)
+      .onClick(() => {
+        this.onMenuRightSplitClick()
+      })
+      .onHover((isHover: boolean, event: HoverEvent) => {
+        if (isHover) {
+          this.rightSplitBackgroundColor = menuHoverColor
+        } else {
+          this.rightSplitBackgroundColor = Color.Transparent
+        }
+      })
     }.width(this.menuWidth)
   }
 
   build() {
     Row() {
       Row() {
-        ButtonComponent({
-          componentId: 'EnhanceMaximizeBtn',
-          imageResource: this.maximizeResource,
-          imageSize: IMAGE_SIZE,
-          fillColor: this.maximizeFillColor,
-          imageScale: this.maximizeScale,
-          buttonBackgroundColor: this.maximizeBackgroundColor,
-          buttonSize: BUTTON_SIZE,
-          buttonBorderRadius: BUTTON_RADIUS,
-          buttonVisibility: this.maximizeVisibility
+        Button() {
+          Image(this.maximizeResource)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.maximizeFillColor)
+            .draggable(false)
+            .interpolation(ImageInterpolation.High)
+            .scale({ x: this.maximizeScale, y: this.maximizeScale })
+        }
+        .id('EnhanceMaximizeBtn')
+        .backgroundColor(this.maximizeBackgroundColor)
+        .width(BUTTON_SIZE)
+        .height(BUTTON_SIZE)
+        .type(ButtonType.Normal)
+        .borderRadius('4vp')
+        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .responseRegion({
+          x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
+          y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
+          width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
+          height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
         })
-          .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
-          .responseRegion({
-            x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
-            y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
-            width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
-            height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
-          })
-          .bindMenu(this.isShowMenu, this.MenuBuilder, {
-            placement: Placement.BottomRight, aboutToDisappear: () => {
-              this.isShowMenu = false;
-            }
-          })
-          .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
+        .visibility(this.maximizeVisibility)
+        .bindMenu(this.isShowMenu, this.MenuBuilder, {
+          placement: Placement.BottomRight, aboutToDisappear: () => {
+            this.isShowMenu = false;
+          }
+        })
+        .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
+          this.onMenuWidthChange()
+          this.isShowMenu = true
+        }), TapGesture().onAction(() => {
+          this.onMaximizeButtonClick()
+        })))
+        .onHover((isHover: boolean, event: HoverEvent) => {
+          this.onHoverMaximizeButton(isHover)
+          if (isHover) {
             this.onMenuWidthChange()
-            this.isShowMenu = true
-          }), TapGesture().onAction(() => {
-            this.onMaximizeButtonClick()
-          })))
-          .onHover((isHover: boolean, event: HoverEvent) => {
-            this.onHoverMaximizeButton(isHover)
+            this.onShowMenuWithTimer()
+          } else {
+            this.onCancelMenuTimer()
+          }
+          this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
-              this.onMenuWidthChange()
-              this.onShowMenuWithTimer()
+              this.maximizeScale = 1.1
             } else {
-              this.onCancelMenuTimer()
+              this.maximizeScale = 1.0
             }
-            this.getUIContext()?.animateTo({ duration: 0 }, () => {
-              if (isHover) {
-                this.maximizeScale = 1.1
-              } else {
-                this.maximizeScale = 1.0
-              }
-            })
           })
-
-        ButtonComponent({
-          componentId: 'EnhanceMinimizeBtn',
-          imageResource: this.minimizeResource,
-          imageSize: IMAGE_SIZE,
-          fillColor: this.minimizeFillColor,
-          imageScale: this.minimizeScale,
-          buttonBackgroundColor: this.minimizeBackgroundColor,
-          buttonSize: BUTTON_SIZE,
-          buttonBorderRadius: BUTTON_RADIUS,
-          buttonVisibility: this.minimizeVisibility
         })
-          .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
-          .responseRegion({
-            x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
-            y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
-            width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
-            height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
-          })
-          .visibility(this.minimizeVisibility)
-          .gesture(TapGesture().onAction(() => {
-            this.onMinimizeButtonClick()
-          }))
-          .onHover((isHover: boolean, event: HoverEvent) => {
-            this.onHoverMinimizeButton(isHover)
-            this.getUIContext()?.animateTo({ duration: 0 }, () => {
-              if (isHover) {
-                this.minimizeScale = 1.1
-              } else {
-                this.minimizeScale = 1.0
-              }
-            })
-          })
 
-        ButtonComponent({
-          componentId: 'EnhanceCloseBtn',
-          imageResource: this.closeResource,
-          imageSize: IMAGE_SIZE,
-          fillColor: this.closeFillColor,
-          imageScale: this.closeScale,
-          buttonBackgroundColor: this.closeBackgroundColor,
-          buttonSize: BUTTON_SIZE,
-          buttonBorderRadius: BUTTON_RADIUS,
-          buttonVisibility: this.closeVisibility
+        Button() {
+          Image(this.minimizeResource)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.minimizeFillColor)
+            .draggable(false)
+            .interpolation(ImageInterpolation.High)
+            .scale({ x: this.minimizeScale, y: this.minimizeScale })
+        }
+        .id('EnhanceMinimizeBtn')
+        .backgroundColor(this.minimizeBackgroundColor)
+        .width(BUTTON_SIZE)
+        .height(BUTTON_SIZE)
+        .type(ButtonType.Normal)
+        .borderRadius('4vp')
+        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .responseRegion({
+          x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
+          y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
+          width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
+          height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
         })
-          .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
-          .responseRegion({
-            x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
-            y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
-            width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
-            height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
+        .visibility(this.minimizeVisibility)
+        .gesture(TapGesture().onAction(() => {
+          this.onMinimizeButtonClick()
+        }))
+        .onHover((isHover: boolean, event: HoverEvent) => {
+          this.onHoverMinimizeButton(isHover)
+          this.getUIContext()?.animateTo({ duration: 0 }, () => {
+            if (isHover) {
+              this.minimizeScale = 1.1
+            } else {
+              this.minimizeScale = 1.0
+            }
           })
-          .gesture(TapGesture().onAction(() => {
-            this.onCloseButtonClick()
-          }))
-          .onHover((isHover: boolean, event: HoverEvent) => {
-            this.onHoverCloseButton(isHover)
-            this.getUIContext()?.animateTo({ duration: 0 }, () => {
-              if (isHover) {
-                this.closeScale = 1.1
-              } else {
-                this.closeScale = 1.0
-              }
-            })
+        })
+
+        Button() {
+          Image(this.closeResource)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.closeFillColor)
+            .draggable(false)
+            .interpolation(ImageInterpolation.High)
+            .scale({ x: this.closeScale, y: this.closeScale })
+        }
+        .id('EnhanceCloseBtn')
+        .backgroundColor(this.closeBackgroundColor)
+        .width(BUTTON_SIZE)
+        .height(BUTTON_SIZE)
+        .type(ButtonType.Normal)
+        .borderRadius('4vp')
+        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .responseRegion({
+          x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
+          y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
+          width: TITLE_BUTTON_RESPONSE_REGION_WIDTH,
+          height: TITLE_BUTTON_RESPONSE_REGION_HEIGHT
+        })
+        .visibility(this.closeVisibility)
+        .gesture(TapGesture().onAction(() => {
+          this.onCloseButtonClick()
+        }))
+        .onHover((isHover: boolean, event: HoverEvent) => {
+          this.onHoverCloseButton(isHover)
+          this.getUIContext()?.animateTo({ duration: 0 }, () => {
+            if (isHover) {
+              this.closeScale = 1.1
+            } else {
+              this.closeScale = 1.0
+            }
           })
+        })
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: BUTTON_ELEMENT_MARGIN_HORIZONTAL_END })

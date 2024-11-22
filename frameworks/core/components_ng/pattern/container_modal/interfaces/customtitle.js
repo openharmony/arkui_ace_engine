@@ -176,11 +176,10 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const i = '28vp';
 const j = '28vp';
-const j4 = '4vp';
 const m = '12vp';
 const i4 = '8vp';
 const o = '-8vp';
-const t = '-8vp';
+const u4 = '-8vp';
 const u = '40vp';
 const a1 = '40vp';
 const b1 = '24vp';
@@ -270,246 +269,6 @@ const u1 = {
     id: 125831024,
     type: 10001
 };
-class l4 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.g3 = new SynchedPropertySimpleOneWayPU(params.componentId, this, "componentId");
-        this.h3 = new SynchedPropertyObjectOneWayPU(params.imageResource, this, "imageResource");
-        this.i3 = new SynchedPropertySimpleOneWayPU(params.imageSize, this, "imageSize");
-        this.j3 = new SynchedPropertyObjectOneWayPU(params.fillColor, this, "fillColor");
-        this.l3 = new SynchedPropertySimpleOneWayPU(params.imageScale, this, "imageScale");
-        this.m3 = new SynchedPropertyObjectOneWayPU(params.buttonBackgroundColor, this, "buttonBackgroundColor");
-        this.n3 = new SynchedPropertySimpleOneWayPU(params.buttonSize, this, "buttonSize");
-        this.n4 = new ObservedPropertySimplePU('4vp', this, "buttonBorderRadius");
-        this.o4 = new SynchedPropertySimpleOneWayPU(params.buttonVisibility, this, "buttonVisibility");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-        if (params.buttonBorderRadius !== undefined) {
-            this.buttonBorderRadius = params.buttonBorderRadius;
-        }
-    }
-    updateStateVars(params) {
-        this.g3.reset(params.componentId);
-        this.h3.reset(params.imageResource);
-        this.i3.reset(params.imageSize);
-        this.j3.reset(params.fillColor);
-        this.l3.reset(params.imageScale);
-        this.m3.reset(params.buttonBackgroundColor);
-        this.n3.reset(params.buttonSize);
-        this.o4.reset(params.buttonVisibility);
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.g3.purgeDependencyOnElmtId(rmElmtId);
-        this.h3.purgeDependencyOnElmtId(rmElmtId);
-        this.i3.purgeDependencyOnElmtId(rmElmtId);
-        this.j3.purgeDependencyOnElmtId(rmElmtId);
-        this.l3.purgeDependencyOnElmtId(rmElmtId);
-        this.m3.purgeDependencyOnElmtId(rmElmtId);
-        this.n3.purgeDependencyOnElmtId(rmElmtId);
-        this.n4.purgeDependencyOnElmtId(rmElmtId);
-        this.o4.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.g3.aboutToBeDeleted();
-        this.h3.aboutToBeDeleted();
-        this.i3.aboutToBeDeleted();
-        this.j3.aboutToBeDeleted();
-        this.l3.aboutToBeDeleted();
-        this.m3.aboutToBeDeleted();
-        this.n3.aboutToBeDeleted();
-        this.n4.aboutToBeDeleted();
-        this.o4.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get componentId() {
-        return this.g3.get();
-    }
-    set componentId(newValue) {
-        this.g3.set(newValue);
-    }
-    get imageResource() {
-        return this.h3.get();
-    }
-    set imageResource(newValue) {
-        this.h3.set(newValue);
-    }
-    get imageSize() {
-        return this.i3.get();
-    }
-    set imageSize(newValue) {
-        this.i3.set(newValue);
-    }
-    get fillColor() {
-        return this.j3.get();
-    }
-    set fillColor(newValue) {
-        this.j3.set(newValue);
-    }
-    get imageScale() {
-        return this.l3.get();
-    }
-    set imageScale(newValue) {
-        this.l3.set(newValue);
-    }
-    get buttonBackgroundColor() {
-        return this.m3.get();
-    }
-    set buttonBackgroundColor(newValue) {
-        this.m3.set(newValue);
-    }
-    get buttonSize() {
-        return this.n3.get();
-    }
-    set buttonSize(newValue) {
-        this.n3.set(newValue);
-    }
-    get buttonBorderRadius() {
-        return this.n4.get();
-    }
-    set buttonBorderRadius(newValue) {
-        this.n4.set(newValue);
-    }
-    get buttonVisibility() {
-        return this.o4.get();
-    }
-    set buttonVisibility(newValue) {
-        this.o4.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Button.createWithChild();
-            Button.id(this.componentId);
-            Button.backgroundColor(ObservedObject.GetRawObject(this.buttonBackgroundColor));
-            Button.width(this.buttonSize);
-            Button.height(this.buttonSize);
-            Button.type(ButtonType.Normal);
-            Button.borderRadius(this.buttonBorderRadius);
-            Button.visibility(this.buttonVisibility);
-        }, Button);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create(this.imageResource);
-            Image.width(this.imageSize);
-            Image.height(this.imageSize);
-            Image.fillColor(ObservedObject.GetRawObject(this.fillColor));
-            Image.draggable(false);
-            Image.interpolation(ImageInterpolation.High);
-            Image.scale({ x: this.imageScale, y: this.imageScale });
-        }, Image);
-        Button.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
-class m4 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.h3 = new SynchedPropertyObjectOneWayPU(params.imageResource, this, "imageResource");
-        this.i3 = new SynchedPropertySimpleOneWayPU(params.imageSize, this, "imageSize");
-        this.j3 = new SynchedPropertyObjectOneWayPU(params.fillColor, this, "fillColor");
-        this.q4 = new SynchedPropertyObjectOneWayPU(params.title, this, "title");
-        this.r4 = new SynchedPropertyObjectOneWayPU(params.itemBackgroundColor, this, "itemBackgroundColor");
-        this.setInitiallyProvidedValue(params);
-        this.finalizeConstruction();
-    }
-    setInitiallyProvidedValue(params) {
-    }
-    updateStateVars(params) {
-        this.h3.reset(params.imageResource);
-        this.i3.reset(params.imageSize);
-        this.j3.reset(params.fillColor);
-        this.q4.reset(params.title);
-        this.r4.reset(params.itemBackgroundColor);
-    }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.h3.purgeDependencyOnElmtId(rmElmtId);
-        this.i3.purgeDependencyOnElmtId(rmElmtId);
-        this.j3.purgeDependencyOnElmtId(rmElmtId);
-        this.q4.purgeDependencyOnElmtId(rmElmtId);
-        this.r4.purgeDependencyOnElmtId(rmElmtId);
-    }
-    aboutToBeDeleted() {
-        this.h3.aboutToBeDeleted();
-        this.i3.aboutToBeDeleted();
-        this.j3.aboutToBeDeleted();
-        this.q4.aboutToBeDeleted();
-        this.r4.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-    get imageResource() {
-        return this.h3.get();
-    }
-    set imageResource(newValue) {
-        this.h3.set(newValue);
-    }
-    get imageSize() {
-        return this.i3.get();
-    }
-    set imageSize(newValue) {
-        this.i3.set(newValue);
-    }
-    get fillColor() {
-        return this.j3.get();
-    }
-    set fillColor(newValue) {
-        this.j3.set(newValue);
-    }
-    get title() {
-        return this.q4.get();
-    }
-    set title(newValue) {
-        this.q4.set(newValue);
-    }
-    get itemBackgroundColor() {
-        return this.r4.get();
-    }
-    set itemBackgroundColor(newValue) {
-        this.r4.set(newValue);
-    }
-    initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.borderRadius('4vp');
-            Row.width('100%');
-            Row.backgroundColor(ObservedObject.GetRawObject(this.itemBackgroundColor));
-            Row.justifyContent(FlexAlign.Start);
-        }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create(this.imageResource);
-            Image.width(this.imageSize);
-            Image.height(this.imageSize);
-            Image.fillColor(ObservedObject.GetRawObject(this.fillColor));
-            Image.margin({
-                top: c1,
-                bottom: c1,
-                left: d1,
-                right: d1
-            });
-        }, Image);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.title);
-            Text.fontSize(f1);
-            Text.textAlign(TextAlign.Start);
-            Text.maxLines(1);
-            Text.margin({ top: e1, bottom: e1, right: d1 });
-        }, Text);
-        Text.pop();
-        Row.pop();
-    }
-    rerender() {
-        this.updateDirtyElements();
-    }
-}
 class v1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -1074,17 +833,21 @@ class v1 extends ViewPU {
             Column.width(this.menuWidth);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.margin({
+            Row.create();
+            Row.borderRadius('4vp');
+            Row.width('100%');
+            Row.backgroundColor(ObservedObject.GetRawObject(this.leftSplitBackgroundColor));
+            Row.margin({
                 top: '0vp',
                 bottom: '2vp',
                 left: '4vp',
                 right: '4vp'
             });
-            __Common__.onClick(() => {
+            Row.justifyContent(FlexAlign.Start);
+            Row.onClick(() => {
                 this.onMenuLeftSplitClick();
             });
-            __Common__.onHover((isHover, event) => {
+            Row.onHover((isHover, event) => {
                 if (isHover) {
                     this.leftSplitBackgroundColor = u1;
                 }
@@ -1092,53 +855,44 @@ class v1 extends ViewPU {
                     this.leftSplitBackgroundColor = Color.Transparent;
                 }
             });
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new m4(this, {
-                        imageResource: this.menuLeftResource,
-                        imageSize: b1,
-                        fillColor: this.splitFillColor,
-                        title: this.leftSplitTitle,
-                        itemBackgroundColor: this.leftSplitBackgroundColor
-                    }, undefined, elmtId, () => { }, { page: "library/Index.ets", line: 425, s4: 7 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            imageResource: this.menuLeftResource,
-                            imageSize: b1,
-                            fillColor: this.splitFillColor,
-                            title: this.leftSplitTitle,
-                            itemBackgroundColor: this.leftSplitBackgroundColor
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        imageResource: this.menuLeftResource,
-                        imageSize: b1,
-                        fillColor: this.splitFillColor,
-                        title: this.leftSplitTitle,
-                        itemBackgroundColor: this.leftSplitBackgroundColor
-                    });
-                }
-            }, { name: "MenuItemComponent" });
-        }
-        __Common__.pop();
+        }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.margin({
+            Image.create(this.menuLeftResource);
+            Image.width(b1);
+            Image.height(b1);
+            Image.fillColor(ObservedObject.GetRawObject(this.splitFillColor));
+            Image.margin({
+                top: c1,
+                bottom: c1,
+                left: d1,
+                right: d1
+            });
+        }, Image);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.leftSplitTitle);
+            Text.fontSize(f1);
+            Text.textAlign(TextAlign.Start);
+            Text.maxLines(1);
+            Text.margin({ top: e1, bottom: e1, right: d1 });
+        }, Text);
+        Text.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.borderRadius('4vp');
+            Row.width('100%');
+            Row.backgroundColor(ObservedObject.GetRawObject(this.rightSplitBackgroundColor));
+            Row.margin({
                 top: '2vp',
                 bottom: '0vp',
                 left: '4vp',
                 right: '4vp'
             });
-            __Common__.onClick(() => {
+            Row.justifyContent(FlexAlign.Start);
+            Row.onClick(() => {
                 this.onMenuRightSplitClick();
             });
-            __Common__.onHover((isHover, event) => {
+            Row.onHover((isHover, event) => {
                 if (isHover) {
                     this.rightSplitBackgroundColor = u1;
                 }
@@ -1146,41 +900,28 @@ class v1 extends ViewPU {
                     this.rightSplitBackgroundColor = Color.Transparent;
                 }
             });
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new m4(this, {
-                        imageResource: this.menuRightResource,
-                        imageSize: b1,
-                        fillColor: this.splitFillColor,
-                        title: this.rightSplitTitle,
-                        itemBackgroundColor: this.rightSplitBackgroundColor
-                    }, undefined, elmtId, () => { }, { page: "library/Index.ets", line: 448, s4: 7 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            imageResource: this.menuRightResource,
-                            imageSize: b1,
-                            fillColor: this.splitFillColor,
-                            title: this.rightSplitTitle,
-                            itemBackgroundColor: this.rightSplitBackgroundColor
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        imageResource: this.menuRightResource,
-                        imageSize: b1,
-                        fillColor: this.splitFillColor,
-                        title: this.rightSplitTitle,
-                        itemBackgroundColor: this.rightSplitBackgroundColor
-                    });
-                }
-            }, { name: "MenuItemComponent" });
-        }
-        __Common__.pop();
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.menuRightResource);
+            Image.width(b1);
+            Image.height(b1);
+            Image.fillColor(ObservedObject.GetRawObject(this.splitFillColor));
+            Image.margin({
+                top: c1,
+                bottom: c1,
+                left: d1,
+                right: d1
+            });
+        }, Image);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.rightSplitTitle);
+            Text.fontSize(f1);
+            Text.textAlign(TextAlign.Start);
+            Text.maxLines(1);
+            Text.margin({ top: e1, bottom: e1, right: d1 });
+        }, Text);
+        Text.pop();
+        Row.pop();
         Column.pop();
     }
     initialRender() {
@@ -1206,15 +947,22 @@ class v1 extends ViewPU {
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.margin({ right: m });
-            __Common__.responseRegion({
+            Button.createWithChild();
+            Button.id('EnhanceMaximizeBtn');
+            Button.backgroundColor(ObservedObject.GetRawObject(this.maximizeBackgroundColor));
+            Button.width(j);
+            Button.height(j);
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.margin({ right: m });
+            Button.responseRegion({
                 x: o,
-                y: t,
+                y: u4,
                 width: u,
                 height: a1
             });
-            __Common__.bindMenu(this.isShowMenu, { builder: this.MenuBuilder.bind(this) }, {
+            Button.visibility(this.maximizeVisibility);
+            Button.bindMenu(this.isShowMenu, { builder: this.MenuBuilder.bind(this) }, {
                 placement: Placement.BottomRight, aboutToDisappear: () => {
                     this.isShowMenu = false;
                 }
@@ -1234,7 +982,7 @@ class v1 extends ViewPU {
             TapGesture.pop();
             GestureGroup.pop();
             Gesture.pop();
-            __Common__.onHover((isHover, event) => {
+            Button.onHover((isHover, event) => {
                 this.onHoverMaximizeButton(isHover);
                 if (isHover) {
                     this.onMenuWidthChange();
@@ -1252,62 +1000,33 @@ class v1 extends ViewPU {
                     }
                 });
             });
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new l4(this, {
-                        componentId: 'EnhanceMaximizeBtn',
-                        imageResource: this.maximizeResource,
-                        imageSize: i,
-                        fillColor: this.maximizeFillColor,
-                        imageScale: this.maximizeScale,
-                        buttonBackgroundColor: this.maximizeBackgroundColor,
-                        buttonSize: j,
-                        buttonBorderRadius: j4,
-                        buttonVisibility: this.maximizeVisibility
-                    }, undefined, elmtId, () => { }, { page: "library/Index.ets", line: 476, s4: 9 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            componentId: 'EnhanceMaximizeBtn',
-                            imageResource: this.maximizeResource,
-                            imageSize: i,
-                            fillColor: this.maximizeFillColor,
-                            imageScale: this.maximizeScale,
-                            buttonBackgroundColor: this.maximizeBackgroundColor,
-                            buttonSize: j,
-                            buttonBorderRadius: j4,
-                            buttonVisibility: this.maximizeVisibility
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        componentId: 'EnhanceMaximizeBtn',
-                        imageResource: this.maximizeResource,
-                        imageSize: i,
-                        fillColor: this.maximizeFillColor,
-                        imageScale: this.maximizeScale,
-                        buttonBackgroundColor: this.maximizeBackgroundColor,
-                        buttonSize: j,
-                        buttonVisibility: this.maximizeVisibility
-                    });
-                }
-            }, { name: "ButtonComponent" });
-        }
-        __Common__.pop();
+        }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.margin({ right: m });
-            __Common__.responseRegion({
+            Image.create(this.maximizeResource);
+            Image.width(i);
+            Image.height(i);
+            Image.fillColor(ObservedObject.GetRawObject(this.maximizeFillColor));
+            Image.draggable(false);
+            Image.interpolation(ImageInterpolation.High);
+            Image.scale({ x: this.maximizeScale, y: this.maximizeScale });
+        }, Image);
+        Button.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild();
+            Button.id('EnhanceMinimizeBtn');
+            Button.backgroundColor(ObservedObject.GetRawObject(this.minimizeBackgroundColor));
+            Button.width(j);
+            Button.height(j);
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.margin({ right: m });
+            Button.responseRegion({
                 x: o,
-                y: t,
+                y: u4,
                 width: u,
                 height: a1
             });
-            __Common__.visibility(this.minimizeVisibility);
+            Button.visibility(this.minimizeVisibility);
             Gesture.create(GesturePriority.Low);
             TapGesture.create();
             TapGesture.onAction(() => {
@@ -1315,7 +1034,7 @@ class v1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
-            __Common__.onHover((isHover, event) => {
+            Button.onHover((isHover, event) => {
                 this.onHoverMinimizeButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1326,61 +1045,33 @@ class v1 extends ViewPU {
                     }
                 });
             });
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new l4(this, {
-                        componentId: 'EnhanceMinimizeBtn',
-                        imageResource: this.minimizeResource,
-                        imageSize: i,
-                        fillColor: this.minimizeFillColor,
-                        imageScale: this.minimizeScale,
-                        buttonBackgroundColor: this.minimizeBackgroundColor,
-                        buttonSize: j,
-                        buttonBorderRadius: j4,
-                        buttonVisibility: this.minimizeVisibility
-                    }, undefined, elmtId, () => { }, { page: "library/Index.ets", line: 522, s4: 9 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            componentId: 'EnhanceMinimizeBtn',
-                            imageResource: this.minimizeResource,
-                            imageSize: i,
-                            fillColor: this.minimizeFillColor,
-                            imageScale: this.minimizeScale,
-                            buttonBackgroundColor: this.minimizeBackgroundColor,
-                            buttonSize: j,
-                            buttonBorderRadius: j4,
-                            buttonVisibility: this.minimizeVisibility
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        componentId: 'EnhanceMinimizeBtn',
-                        imageResource: this.minimizeResource,
-                        imageSize: i,
-                        fillColor: this.minimizeFillColor,
-                        imageScale: this.minimizeScale,
-                        buttonBackgroundColor: this.minimizeBackgroundColor,
-                        buttonSize: j,
-                        buttonVisibility: this.minimizeVisibility
-                    });
-                }
-            }, { name: "ButtonComponent" });
-        }
-        __Common__.pop();
+        }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            __Common__.create();
-            __Common__.margin({ right: m });
-            __Common__.responseRegion({
+            Image.create(this.minimizeResource);
+            Image.width(i);
+            Image.height(i);
+            Image.fillColor(ObservedObject.GetRawObject(this.minimizeFillColor));
+            Image.draggable(false);
+            Image.interpolation(ImageInterpolation.High);
+            Image.scale({ x: this.minimizeScale, y: this.minimizeScale });
+        }, Image);
+        Button.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild();
+            Button.id('EnhanceCloseBtn');
+            Button.backgroundColor(ObservedObject.GetRawObject(this.closeBackgroundColor));
+            Button.width(j);
+            Button.height(j);
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.margin({ right: m });
+            Button.responseRegion({
                 x: o,
-                y: t,
+                y: u4,
                 width: u,
                 height: a1
             });
+            Button.visibility(this.closeVisibility);
             Gesture.create(GesturePriority.Low);
             TapGesture.create();
             TapGesture.onAction(() => {
@@ -1388,7 +1079,7 @@ class v1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
-            __Common__.onHover((isHover, event) => {
+            Button.onHover((isHover, event) => {
                 this.onHoverCloseButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1399,52 +1090,17 @@ class v1 extends ViewPU {
                     }
                 });
             });
-        }, __Common__);
-        {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new l4(this, {
-                        componentId: 'EnhanceCloseBtn',
-                        imageResource: this.closeResource,
-                        imageSize: i,
-                        fillColor: this.closeFillColor,
-                        imageScale: this.closeScale,
-                        buttonBackgroundColor: this.closeBackgroundColor,
-                        buttonSize: j,
-                        buttonBorderRadius: j4,
-                        buttonVisibility: this.closeVisibility
-                    }, undefined, elmtId, () => { }, { page: "library/Index.ets", line: 555, s4: 9 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
-                        return {
-                            componentId: 'EnhanceCloseBtn',
-                            imageResource: this.closeResource,
-                            imageSize: i,
-                            fillColor: this.closeFillColor,
-                            imageScale: this.closeScale,
-                            buttonBackgroundColor: this.closeBackgroundColor,
-                            buttonSize: j,
-                            buttonBorderRadius: j4,
-                            buttonVisibility: this.closeVisibility
-                        };
-                    };
-                    componentCall.paramsGenerator_ = paramsLambda;
-                }
-                else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                        componentId: 'EnhanceCloseBtn',
-                        imageResource: this.closeResource,
-                        imageSize: i,
-                        fillColor: this.closeFillColor,
-                        imageScale: this.closeScale,
-                        buttonBackgroundColor: this.closeBackgroundColor,
-                        buttonSize: j,
-                        buttonVisibility: this.closeVisibility
-                    });
-                }
-            }, { name: "ButtonComponent" });
-        }
-        __Common__.pop();
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.closeResource);
+            Image.width(i);
+            Image.height(i);
+            Image.fillColor(ObservedObject.GetRawObject(this.closeFillColor));
+            Image.draggable(false);
+            Image.interpolation(ImageInterpolation.High);
+            Image.scale({ x: this.closeScale, y: this.closeScale });
+        }, Image);
+        Button.pop();
         Row.pop();
         Row.pop();
     }
