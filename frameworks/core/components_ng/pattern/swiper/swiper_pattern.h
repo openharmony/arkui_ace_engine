@@ -901,6 +901,7 @@ private:
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
     void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child);
     void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
     void InitCapture();
@@ -967,6 +968,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    std::optional<RefPtr<UINode>> FindForEachNode(const RefPtr<UINode>& baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
@@ -988,6 +990,7 @@ private:
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
     void CheckAndFireCustomAnimation();
+    bool IsCachedShow() const;
 
     friend class SwiperHelper;
 
