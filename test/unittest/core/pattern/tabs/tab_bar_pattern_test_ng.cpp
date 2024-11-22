@@ -373,7 +373,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -446,7 +446,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -517,7 +517,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -588,7 +588,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -657,7 +657,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -693,7 +693,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -728,7 +728,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -763,7 +763,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -921,7 +921,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -957,7 +957,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -992,7 +992,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1027,7 +1027,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1061,7 +1061,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1096,7 +1096,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1130,7 +1130,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1164,7 +1164,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.

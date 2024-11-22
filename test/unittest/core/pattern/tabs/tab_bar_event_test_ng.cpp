@@ -546,7 +546,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
 
     /**
      * @tc.steps: steps2. HandleTouchEvent
@@ -1001,7 +1001,7 @@ HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
     auto actuator = eventHub->touchEventActuator_;
     auto events = actuator->touchEvents_;
     events.front()->callback_(info);
-    tabBarPattern_->tabBarType_ = { { 0, false }, { 1, true } };
+    tabBarPattern_->tabBarType_ = { { 0, TabBarParamType::NORMAL }, { 1, TabBarParamType::CUSTOM_BUILDER } };
     tabBarPattern_->HandleHoverEvent(true);
     MouseInfo mouseInfo;
     mouseInfo.SetAction(MouseAction::MOVE);

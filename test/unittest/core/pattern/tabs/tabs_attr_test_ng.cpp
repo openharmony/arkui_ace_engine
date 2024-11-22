@@ -1748,7 +1748,7 @@ HWTEST_F(TabsAttrTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     tabBarPattern_->SetMaskAnimationByCreate(true);
     swiperNode_->childrenUpdatedFrom_ = 1;
-    layoutProperty_->UpdateIndex(2);
+    layoutProperty_->UpdateIndexSetByUser(2);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();

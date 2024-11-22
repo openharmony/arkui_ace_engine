@@ -2177,7 +2177,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(columnNode);
         auto columnId = columnNode->GetId();
         auto iter = tabBarType_.find(columnId);
-        if (iter != tabBarType_.end() && iter->second) {
+        if (iter != tabBarType_.end() && iter->second != TabBarParamType::NORMAL) {
             index++;
             continue;
         }
@@ -2400,7 +2400,8 @@ SelectedMode TabBarPattern::GetSelectedMode() const
 
 bool TabBarPattern::IsContainsBuilder()
 {
-    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(),
+        [](const auto& isBuilder) { return isBuilder.second == TabBarParamType::CUSTOM_BUILDER; });
 }
 
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
