@@ -124,7 +124,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
     return true;
 }
 
-void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
+void GestureEventHub::StartLongPressActionForWeb()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -133,12 +133,12 @@ void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
     CHECK_NULL_VOID(taskScheduler);
 
     taskScheduler->PostTask(
-        [weak = WeakClaim(this), isFloatImage]() {
+        [weak = WeakClaim(this)]() {
             auto gestureHub = weak.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
-            dragEventActuator->StartLongPressActionForWeb(isFloatImage);
+            dragEventActuator->StartLongPressActionForWeb();
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }

@@ -187,13 +187,12 @@ public:
 
     bool IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode);
     void StartDragTaskForWeb(const GestureEvent& info);
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void ResetDragActionForWeb() {
         if (isReceivedLongPress_) {
             isReceivedLongPress_ = false;
         }
-        isFloatImage_ = true;
     }
 
     void SetIsNotInPreviewState(bool isNotInPreviewState)
@@ -335,7 +334,6 @@ private:
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
-    bool isFloatImage_ = true;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;

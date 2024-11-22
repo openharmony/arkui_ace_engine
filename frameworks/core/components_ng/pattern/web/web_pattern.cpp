@@ -480,18 +480,8 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    if (!previewImageNodeId_.has_value()) {
-        return false;
-    }
-    auto previewNode =
-        FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, previewImageNodeId_.value());
-    CHECK_NULL_RETURN(previewNode, false);
-    auto previewRenderContext = previewNode->GetRenderContext();
-    CHECK_NULL_RETURN(previewRenderContext, false);
-    auto previewGesture = previewNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(previewGesture, false);
-    bool isNotNeedShowPreview = previewGesture->GetBindMenuStatus().IsNotNeedShowPreview();
-    TAG_LOGI(AceLogTag::ACE_DRAG, "IsPreviewMenuNotNeedShowPreview:%{public}d", isNotNeedShowPreview);
+    bool isNotNeedShowPreview = isNewDragStyle_ && IsPreviewImageNodeExist();
+    TAG_LOGI(AceLogTag::ACE_WEB, "IsPreviewMenuNotNeedShowPreview:%{public}d", isNotNeedShowPreview);
     return isNotNeedShowPreview;
 }
 
@@ -1763,12 +1753,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
     if (!isMouseEvent_) {
         // mouse drag does not need long press action
-        bool isFloatImage = true;
-        auto param = GetPreviewSelectionMenuParams(WebElementType::IMAGE, ResponseType::LONG_PRESS);
-        if (isNewDragStyle_ && delegate_->IsImageDrag() && param && curContextMenuResult_) {
-            isFloatImage = false;
-        }
-        gestureHub->StartLongPressActionForWeb(isFloatImage);
+        gestureHub->StartLongPressActionForWeb();
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
         "is mouse event: %{public}d", isMouseEvent_);
@@ -4376,7 +4361,8 @@ RectF WebPattern::ComputeClippedSelectionBounds(
             selectY = offset.GetY();
         }
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds pos: (%{public}f, %{public}f)", selectX, selectY);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds pos: (%{public}f, %{public}f, %{public}f, %{public}f)",
+        selectX, selectY, selectWidth, SELECT_MENE_HEIGHT);
     return RectF(selectX, selectY, selectWidth, SELECT_MENE_HEIGHT);
 }
 
