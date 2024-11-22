@@ -212,7 +212,7 @@ public:
     bool GetTouchable() const;
     void SetTouchable(bool touchable);
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
-    bool IsDragForbidden();
+    bool IsDragForbidden() const;
     void SetDragForbiddenForcely(bool isDragForbidden);
     bool GetTextDraggable() const;
     void SetTextDraggable(bool draggable);
