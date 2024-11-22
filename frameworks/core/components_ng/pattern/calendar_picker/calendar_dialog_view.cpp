@@ -118,7 +118,7 @@ void CalendarDialogView::SetWeekTextDirection(const TextDirection& dialogDirecti
     const TextDirection& calendarDirection, const RefPtr<FrameNode>& weekNode)
 {
     std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
-    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
+    for (int32_t column = 0; column < DAYS_OF_WEEK; column++) {
         auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textWeekNode);
