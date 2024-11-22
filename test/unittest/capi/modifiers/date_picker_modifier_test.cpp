@@ -1050,7 +1050,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
         auto p = std::get<0>(actual);
         auto p2 = std::get<1>(actual);
         auto p3 = std::get<2>(actual);
-        std::printf("\n\ntester : 1  %d-%d-%d ", p.GetYear(), p.GetMonth(), p.GetDay());
+        std::printf("\n\ntester : 1   %d-%d-%d ", p.GetYear(), p.GetMonth(), p.GetDay());
         std::printf("%d-%d-%d ", p2.GetYear(), p2.GetMonth(), p2.GetDay());
         std::printf("%d-%d-%d", p3.GetYear(), p3.GetMonth(), p3.GetDay());
         modifier_->setDatePickerOptions(node_, &optOptions);
@@ -1060,8 +1060,8 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
         auto checkStart = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_START_NAME);
         auto checkEnd = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_END_NAME);
         auto checkSelected = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_SELECT_NAME);
-        std::printf("\ntester : 3  %s %s %s ", checkStart.c_str(), checkEnd.c_str(), checkSelected.c_str());
-        std::printf("\ntester : 4  %s %s %s\n", std::get<0>(expected).c_str(), std::get<1>(expected).c_str(),
+        std::printf("\ntester : 3   %s %s %s ", checkStart.c_str(), checkEnd.c_str(), checkSelected.c_str());
+        std::printf("\ntester : 4   %s %s %s\n", std::get<0>(expected).c_str(), std::get<1>(expected).c_str(),
             std::get<2>(expected).c_str());
         EXPECT_EQ(checkStart, std::get<0>(expected));
         EXPECT_EQ(checkEnd, std::get<1>(expected));

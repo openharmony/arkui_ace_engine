@@ -175,8 +175,7 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     const auto end = PickerDate(2100, 12, 31);
     const int64_t SEC_TO_MILLISEC = 1000;
     auto date = src;
-    std::printf("\nreverse : 4 src  %d-%d-%d", src.GetYear(), src.GetMonth(), src.GetDay());
-
+    std::printf("\nreverse :   src  %d-%d-%d", src.GetYear(), src.GetMonth(), src.GetDay());
     if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
         date = start;
     } else if (src.GetMonth() < start.GetMonth() || src.GetMonth() > end.GetMonth()) {
@@ -184,17 +183,27 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     } else if (src.GetDay() < start.GetDay() || src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
         date = start;
     }
+    std::printf("\nreverse : 2 date  %d-%d-%d", date.GetYear(), date.GetMonth(), date.GetDay());
     std::tm tm {};
     tm.tm_year = date.GetYear();
     tm.tm_mon = date.GetMonth() - 1;
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
-    std::printf("reverse : 2 tm  %d-%d-%d", tm.tm_year, tm.tm_mon, tm.tm_mday);
-    std::printf("reverse : 3 time %ld", time);
-    auto local = std::localtime(&time);
-    std::printf("reverse : 4 timestamp %ld", (time * SEC_TO_MILLISEC));
+    std::printf("\nreverse : 3 tm  %d-%d-%d", tm.tm_year, tm.tm_mon, tm.tm_mday);
+    std::printf("\nreverse : 4 time %ld", time);
     dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
-    std::printf("reverse : 5 dst %ld", dst);
+    std::printf("\nreverse : 5 dst %ld", dst);
+    std::printf("\nreverse : 6 time %ld", time);
+    auto local = std::localtime(&time);
+    std::printf("\nreverse : 7 time loc %d-%d-%d", local->tm_year, local->tm_mon, local->tm_mday);
+    auto gmt = std::localtime(&time);
+    std::printf("\nreverse : 8 time gmt %d-%d-%d", gmt->tm_year, gmt->tm_mon, gmt->tm_mday);
+    time_t timestamp = static_cast<time_t>(time * SEC_TO_MILLISEC);
+    std::printf("\nreverse : 9 timestamp %ld", timestamp);
+    auto local2 = std::localtime(&timestamp);
+    std::printf("\nreverse : 10 timestamp loc %d-%d-%d", local2->tm_year, local2->tm_mon, local2->tm_mday);
+    auto gmt2 = std::localtime(&timestamp);
+    std::printf("\nreverse : 11 timestamp gmt %d-%d-%d", gmt2->tm_year, gmt2->tm_mon, gmt2->tm_mday);
 }
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
@@ -1245,13 +1254,13 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     const auto DATE_MAX = PickerDate(2100, 12, 31);
     const auto SEC_TO_MILLISEC = 1000L;
     auto timestamp = reinterpret_cast<int64_t>(src);
-    std::printf("converter: 1 timestamp %ld", timestamp);
+    std::printf("\nconverter: 1 timestamp %ld", timestamp);
     time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
-    std::printf("converter: 2 time %ld", time);
+    std::printf("\nconverter: 2 time %ld", time);
     auto local = std::localtime(&time);
-    std::printf("converter: 3 local %d-%d-%d", local->tm_year, local->tm_mon, local->tm_mday);
+    std::printf("\nconverter: 3 local %d-%d-%d", local->tm_year, local->tm_mon, local->tm_mday);
     dst = PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
-    std::printf("converter: 4 dst   %d-%d-%d", dst->GetYear(), dst->GetMonth(), dst->GetDay());
+    std::printf("\nconverter: 4 dst   %d-%d-%d", dst->GetYear(), dst->GetMonth(), dst->GetDay());
     auto maxDay = PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth());
     if (dst->GetYear() < DATE_MIN.GetYear() || dst->GetYear() > DATE_MAX.GetYear()) {
         dst = DATE_MIN;
