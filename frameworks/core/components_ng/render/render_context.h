@@ -171,6 +171,7 @@ public:
     enum class PatternType : int8_t {
         DEFAULT,
         VIDEO,
+        XCOM,
 #ifdef PLATFORM_VIEW_SUPPORTED
         PLATFORM_VIEW,
 #endif
@@ -192,6 +193,7 @@ public:
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
     virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
     virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+    virtual void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -267,14 +269,8 @@ public:
         return isSynced_;
     }
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
-    {
-        return false;
-    }
-
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
-    virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
@@ -299,6 +295,11 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    /**
+     * @brief Only clip the content & foreground layer by @c rect.
+     * @param rect - offset of @c rect is relative to FrameRect.
+     */
+    virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -342,7 +343,7 @@ public:
         return {};
     }
 
-    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 
@@ -407,6 +408,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
@@ -648,6 +650,7 @@ public:
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -665,10 +668,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
-    virtual std::vector<double> GetTrans()
-    {
-        return std::vector<double>();
-    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
     virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -724,6 +723,12 @@ public:
     }
 
     virtual void SetRenderFit(RenderFit renderFit) {}
+
+    virtual void UpdateWindowBlur() {}
+    virtual size_t GetAnimationsCount() const
+    {
+        return 0;
+    }
 
 protected:
     RenderContext() = default;
@@ -814,6 +819,8 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
+    virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
+    virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}

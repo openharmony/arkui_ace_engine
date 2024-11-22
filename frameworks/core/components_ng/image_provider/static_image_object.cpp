@@ -23,8 +23,10 @@
 namespace OHOS::Ace::NG {
 
 void StaticImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize, bool forceResize, bool syncLoad)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize, bool syncLoad)
 {
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     RefPtr<CanvasImage> cachedImage;
     auto key = ImageUtils::GenerateImageKey(src_, targetSize);
     if (SystemProperties::GetImageFrameworkEnabled()) {
@@ -46,6 +48,8 @@ void StaticImageObject::MakeCanvasImage(
 
 RefPtr<ImageObject> StaticImageObject::Clone()
 {
-    return MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    auto object = MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    object->SetOrientation(orientation_);
+    return object;
 }
 } // namespace OHOS::Ace::NG

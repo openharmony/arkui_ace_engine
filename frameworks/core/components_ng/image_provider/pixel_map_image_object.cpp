@@ -21,8 +21,10 @@
 namespace OHOS::Ace::NG {
 
 void PixelMapImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool syncLoad)
 {
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
         return;

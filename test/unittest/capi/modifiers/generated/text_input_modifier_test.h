@@ -83,7 +83,7 @@ const auto ATTRIBUTE_FONT_FAMILY_NAME = "fontFamily";
 const auto ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE = "Harmony"
                                                  "OS Sans";
 const auto ATTRIBUTE_COPY_OPTION_NAME = "copyOption";
-const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.Distributed";
+const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.Local";
 const auto ATTRIBUTE_SHOW_PASSWORD_ICON_NAME = "showPasswordIcon";
 const auto ATTRIBUTE_SHOW_PASSWORD_ICON_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_TEXT_ALIGN_NAME = "textAlign";

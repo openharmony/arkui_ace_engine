@@ -379,7 +379,12 @@ void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, Converter::OptConvert<BlurStyle>(value));
+    BlurStyleOption option;
+    auto blurStyle = Converter::OptConvert<BlurStyle>(value);
+    if (blurStyle) {
+        option.blurStyle = blurStyle.value();
+    }
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              const Callback_Number_Number_Boolean* value)

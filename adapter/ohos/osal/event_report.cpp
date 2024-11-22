@@ -109,6 +109,7 @@ constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
 constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
 constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
+constexpr char UIEXTENSION_TRANSPARENT_DETECTED[] = "UIEXTENSION_TRANSPARENT_DETECTED";
 
 void StrTrim(std::string& str)
 {
@@ -356,6 +357,22 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
             EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
             EVENT_KEY_PACKAGE_NAME, packageName);
+}
+
+void EventReport::ReportDragInfo(const DragInfo& dragInfo)
+{
+    HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::DRAG_UE,
+        dragInfo.dragBehavior,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "PNAMEID", dragInfo.pNameId,
+        "PVERSIONID", dragInfo.pVersionId,
+        "ISCROSSING", dragInfo.isCrossing,
+        "RESULT", dragInfo.result,
+        "HOSTNAME", dragInfo.hostName,
+        "SUMMARYTYPE", dragInfo.summaryType,
+        "SUMMARYNUM", dragInfo.summaryNum,
+        "ALLOW_DROP_TYPE", dragInfo.allowDropType);
 }
 
 void EventReport::ReportEventComplete(DataBase& data)
@@ -641,5 +658,19 @@ void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName,
         EVENT_KEY_ABILITY_NAME, abilityName,
         EVENT_KEY_MODULE_NAME, moduleName,
         EVENT_KEY_DIMENSION, dimension);
+}
+
+void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    auto app_version_code = AceApplicationInfo::GetInstance().GetAppVersionCode();
+    auto app_version_name = AceApplicationInfo::GetInstance().GetAppVersionName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UIEXTENSION_TRANSPARENT_DETECTED,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PAGE_NAME, pageUrl,
+        EVENT_KEY_VERSION_CODE, app_version_code,
+        EVENT_KEY_VERSION_NAME, app_version_name,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_MODULE_NAME, moduleName);
 }
 } // namespace OHOS::Ace

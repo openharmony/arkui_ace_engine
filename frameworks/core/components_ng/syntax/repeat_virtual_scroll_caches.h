@@ -84,7 +84,7 @@ public:
     RefPtr<UINode> CreateNewNode(uint32_t forIndex);
 
     // iterate over L1 keys, not allowed to modify L1
-    void ForEachL1IndexUINode(const std::function<void(uint32_t index, const RefPtr<UINode>& node)>& cbFunc);
+    void ForEachL1IndexUINode(std::map<int32_t, RefPtr<UINode>>& children);
 
     void RecycleItemsByIndex(int32_t index);
 
@@ -139,7 +139,11 @@ public:
 
     void AddKeyToL1(const std::string& key, bool shouldTriggerReuse = true);
 
+    void AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index, bool shouldTriggerRecycle);
+
     void RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle = true);
+
+    bool hasTTypeChanged(uint32_t index);
 
     bool IsInL1Cache(const std::string& key) const
     {
@@ -253,9 +257,15 @@ private:
         const std::unordered_map<std::string, RefPtr<UINode>>& uiNode4Key) const;
 
     /**
-     * get more index -> key and index -> ttype from TS side
+     * does given range overlap the last active range?
      */
-    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to);
+    bool HasOverlapWithLastActiveRange(uint32_t from, uint32_t to);
+
+    /**
+     * get more index -> key and index -> ttype from TS side
+     * may request additional keys if allowFetchMore is true
+     */
+    bool FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore = true);
 
     // Map ttype -> cacheSize. Each ttype incl default has own L2 size
     std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype_;

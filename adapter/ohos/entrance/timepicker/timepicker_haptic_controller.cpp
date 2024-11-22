@@ -35,6 +35,7 @@ TimePickerHapticController::TimePickerHapticController() noexcept
         Media::AudioHapticPlayerOptions options;
         options.muteAudio = false;
         options.muteHaptics = false;
+        options.parallelPlayFlag = true;
         effectAudioHapticPlayer_ = audioHapticManager_->CreatePlayer(effectSourceId_, options);
         if (effectAudioHapticPlayer_) {
             effectAudioHapticPlayer_->Prepare();
@@ -204,6 +205,11 @@ void TimePickerHapticController::HandleDelta(double dy)
     } else {
         Stop();
     }
+}
+
+void TimePickerHapticController::ClearVelocityInfo()
+{
+    velocityTracker_.Reset();
 }
 
 double TimePickerHapticController::ConvertPxToMillimeters(double px) const

@@ -45,6 +45,11 @@ struct CustomSpanMetrics {
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+};
+
+struct UserMouseOptions {
+    OnHoverFunc onHover;
 };
 
 struct ImageSpanSize {
@@ -108,6 +113,7 @@ struct ImageSpanAttribute {
 struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
+    UserMouseOptions userMouseOption;
 
     std::string ToString() const
     {
@@ -124,6 +130,12 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
+
+    bool HasValue() const
+    {
+        return offset.has_value() || image.has_value() || bundleName.has_value() || moduleName.has_value() ||
+               imagePixelMap.has_value() || imageAttribute.has_value();
+    }
 
     std::string ToString() const
     {

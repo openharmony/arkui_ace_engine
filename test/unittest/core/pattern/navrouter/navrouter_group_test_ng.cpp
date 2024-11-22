@@ -757,7 +757,8 @@ HWTEST_F(NavrouterGroupTestNg, MountTitleBar001, TestSize.Level1)
     EXPECT_EQ(hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts(), nullptr);
     // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
@@ -796,7 +797,8 @@ HWTEST_F(NavrouterGroupTestNg, MountTitleBar002, TestSize.Level1)
     EXPECT_FALSE(hostOpts->Expansive());
     // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
@@ -841,7 +843,8 @@ HWTEST_F(NavrouterGroupTestNg, MountTitleBar003, TestSize.Level1)
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
     // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
@@ -885,7 +888,8 @@ HWTEST_F(NavrouterGroupTestNg, MountTitleBar004, TestSize.Level1)
     ASSERT_NE(hostOpts, nullptr);
     EXPECT_TRUE(hostOpts->Expansive());
     EXPECT_NE(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
-    navDestinationPattern->MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
@@ -908,7 +912,8 @@ HWTEST_F(NavrouterGroupTestNg, MountTitleBar005, TestSize.Level1)
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
     hostNode->index_ = 0;
     EXPECT_EQ(hostNode->GetIndex(), 0);
-    navDestinationPattern->MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**

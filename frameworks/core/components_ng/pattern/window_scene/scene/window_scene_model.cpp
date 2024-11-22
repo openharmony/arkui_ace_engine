@@ -62,7 +62,7 @@ void WindowSceneModel::Create(int32_t persistentId)
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain][WMSSystem] session is nullptr, persistentId:%{public}d", persistentId);
+            "session is nullptr, persistentId: %{public}d", persistentId);
         return;
     }
 

@@ -305,5 +305,54 @@ void SetOnPreDrag(ArkUINodeHandle node, void* extraParam)
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }
+
+void ResetOnDragStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragStart(frameNode);
+}
+
+void ResetOnDragEnter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragEnter(frameNode);
+}
+
+void ResetOnDragDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDrop(frameNode);
+}
+
+void ResetOnDragMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragMove(frameNode);
+}
+
+void ResetOnDragLeave(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragLeave(frameNode);
+}
+
+void ResetOnDragEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragEnd(frameNode);
+}
+
+void ResetOnPreDrag(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnPreDrag(frameNode);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

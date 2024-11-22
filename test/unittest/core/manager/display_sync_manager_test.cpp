@@ -427,7 +427,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
     EXPECT_EQ(0, displaySyncRate3);
 
     monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
-    EXPECT_EQ(0, monitorSyncRate);
+    EXPECT_EQ(displaySyncManager->GetVsyncRate(), monitorSyncRate);
 }
 
 /**

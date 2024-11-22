@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 
 class CustomNodeBase;
+class NavigationTransitionProxy;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
@@ -137,6 +138,8 @@ public:
     {
         return navDestinationPathInfo_;
     }
+    
+    int32_t GetNavigationNodeId() const;
 
     void SetNeedRemoveInPush(bool need)
     {
@@ -148,16 +151,27 @@ public:
         return needRemoveInPush_;
     }
 
+    void SetSystemTransitionType(NavigationSystemTransitionType type)
+    {
+        systemTransitionType_ = type;
+    }
+
+    NavigationSystemTransitionType GetSystemTransitionType() const
+    {
+        return systemTransitionType_;
+    }
+
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
-    void SystemTransitionPushCallback(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback();
+    bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
+    bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
     void SetRecoverable(bool recoverable)
     {
@@ -184,10 +198,16 @@ public:
         return needAppearFromRecovery_;
     }
 
-    void UpdateTextNodeListAsRenderGroup(bool isPopPage);
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();
-    void CollectTextNodeAsRenderGroup();
+    void CollectTextNodeAsRenderGroup(bool isPopPage);
 
+    void CleanContent();
+    bool IsNeedContentTransition();
+    bool TransitionContentInValid();
+    bool IsNeedTitleTransition();
+
+    std::string ToDumpString();
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -204,6 +224,7 @@ private:
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
     std::list<WeakPtr<UINode>> textNodeList_;
+    NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
 };
 
 } // namespace OHOS::Ace::NG

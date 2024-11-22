@@ -117,6 +117,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame01, TestSize.Level1)
      */
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrame(children);
+    EXPECT_NE(node->overlayNode_, nullptr);
 }
 
 /**
@@ -146,6 +147,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame02, TestSize.Level1)
      */
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrame(children);
+    EXPECT_EQ(node->overlayNode_, nullptr);
 }
 
 /**
@@ -177,6 +179,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrameWithOffset01, TestSize
     OffsetF Offset = { 0, 0 };
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_NE(node->overlayNode_, nullptr);
 }
 
 /**
@@ -207,6 +210,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrameWithOffset02, TestSize
     OffsetF Offset = { 0, 0 };
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_EQ(node->overlayNode_, nullptr);
 }
 
 /**
@@ -257,6 +261,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeProcessOffscreenNode01, TestSize.Level1)
      * @tc.steps: step3. call the function ProcessOffscreenNode.
      */
     frameNode->ProcessOffscreenNode(node);
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -290,6 +295,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpAlignRulesInfo01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->DumpAlignRulesInfo();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -402,6 +409,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpOnSizeChangeInfo01, TestSize.Level1)
      * @tc.steps: step3. call the function DumpOnSizeChangeInfo.
      */
     frameNode->DumpOnSizeChangeInfo();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -658,6 +666,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree02, TestSize.Level1)
      * @tc.steps: step3. call the function OnAttachToMainTree.
      */
     frameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(childNode->isLayoutDirtyMarked_);
+    EXPECT_FALSE(frameNode->useOffscreenProcess_);
+    EXPECT_TRUE(frameNode->isPropertyDiffMarked_);
 }
 
 /**
@@ -676,6 +687,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToBuilderNode01, TestSize.Level1)
      * @tc.steps: step2. call the function OnAttachToBuilderNode.
      */
     frameNode->OnAttachToBuilderNode(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    EXPECT_NE(frameNode->pattern_, nullptr);
 }
 
 /**
@@ -701,6 +713,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnConfigurationUpdate01, TestSize.Level1)
     configurationChange.iconUpdate = false;
     configurationChange.skinUpdate = false;
     frameNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(configurationChange.colorModeUpdate);
+    EXPECT_FALSE(configurationChange.fontUpdate);
+    EXPECT_FALSE(configurationChange.iconUpdate);
+    EXPECT_FALSE(configurationChange.skinUpdate);
 }
 
 /**
@@ -738,6 +754,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirtyLayoutWrapperOnMainThread01, TestSiz
     frameNode->SetBackgroundFunction(builderFunc);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_TRUE(frameNode->isActive_);
 }
 
 /**
@@ -795,6 +812,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirtyLayoutWrapperOnMainThread02, TestSiz
     frameNode->SetBackgroundFunction(builderFunc);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -830,6 +849,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->AdjustGridOffset();
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -1200,6 +1221,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear01, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->IsFrameDisappear();
+    EXPECT_FALSE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -1234,6 +1259,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear02, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->IsFrameDisappear();
+    EXPECT_TRUE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -1318,6 +1347,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
 }
 
 /**
@@ -1354,6 +1385,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
+    EXPECT_TRUE(frameNode->isActive_);
+    EXPECT_EQ(frameNode->eventHub_->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**
@@ -1379,6 +1414,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask03, TestSize.Level1)
      * @tc.steps: step2. call the function ThrottledVisibleTask.
      */
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->eventHub_->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**
@@ -1407,6 +1444,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateLayoutTask(true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1436,6 +1475,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateRenderTask(true).value()();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1464,6 +1506,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateRenderTask(false).value()();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1513,6 +1558,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->UpdateLayoutWrapper(layoutWrapper, false, true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::GONE);
 }
 
 /**
@@ -1539,6 +1587,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->UpdateLayoutWrapper(nullptr, false, true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1561,6 +1612,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier01, TestSize.Level1)
     frameNode->GetContentModifier();
     frameNode->renderContext_->UpdateAccessibilityFocus(false);
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1582,6 +1634,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier02, TestSize.Level1)
      * @tc.steps: step2. call the function GetContentModifier.
      */
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode->extensionHandler_, nullptr);
 }
 
 /**
@@ -1600,6 +1653,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier03, TestSize.Level1)
      * @tc.steps: step2. call the function GetContentModifier.
      */
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1619,6 +1673,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodePostIdleTask01, TestSize.Level1)
     int32_t flag = 0;
     std::function<void(int64_t, bool)>&& callback = [&flag](int64_t radio, bool isVisible) { flag++; };
     frameNode->PostIdleTask(std::move(callback));
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1646,6 +1701,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree01, TestSize.Level1)
      */
     frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
     frameNode->RebuildRenderContextTree();
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
 
     /**
      * @tc.steps: step4. update layoutProperty and call the function RebuildRenderContextTree.
@@ -1659,6 +1715,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree01, TestSize.Level1)
      */
     frameNode->overlayNode_ = nullptr;
     frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->overlayNode_, nullptr);
 }
 
 /**
@@ -1686,6 +1743,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree02, TestSize.Level1)
      */
     frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
     frameNode->RebuildRenderContextTree();
+    EXPECT_NE(frameNode->overlayNode_->layoutProperty_, nullptr);
 }
 
 /**
@@ -1707,6 +1765,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree03, TestSize.Level1)
      * @tc.steps: step2. call the function RebuildRenderContextTree.
      */
     frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->overlayNode_->layoutProperty_, nullptr);
 }
 
 /**
@@ -1733,6 +1792,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone01, TestSize.Level1)
      * @tc.steps: step2. call the function MarkModifyDone.
      */
     frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->isPrivacySensitive_);
+    EXPECT_TRUE(frameNode->isRestoreInfoUsed_);
 }
 
 /**
@@ -1756,6 +1817,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone02, TestSize.Level1)
      * @tc.steps: step2. call the function MarkModifyDone.
      */
     frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->isPrivacySensitive_);
+    EXPECT_TRUE(frameNode->isRestoreInfoUsed_);
+    EXPECT_EQ(pipeline->privacySensitiveManager_, nullptr);
 }
 
 /**
@@ -1778,6 +1842,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkDirtyNode01, TestSize.Level1)
      */
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     testNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    EXPECT_FALSE(frameNode->isPrivacySensitive_);
+    EXPECT_FALSE(frameNode->isRestoreInfoUsed_);
 }
 
 /**
@@ -1797,6 +1863,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetAncestorNodeOfFrame01, TestSize.Level1)
      * @tc.steps: step2. call the function GetAncestorNodeOfFrame.
      */
     frameNode->GetAncestorNodeOfFrame(true);
+    EXPECT_TRUE(frameNode->isWindowBoundary_);
 }
 
 /**
@@ -1815,6 +1882,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode01, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1835,6 +1903,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode02, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(parentNode, nullptr);
 }
 
 /**
@@ -1855,6 +1925,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode03, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(parentNode, nullptr);
 }
 
 /**
@@ -1922,6 +1994,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkNeedRender01, TestSize.Level1)
      * @tc.steps: step2. call the function MarkNeedRender.
      */
     frameNode->MarkNeedRender(false);
+    EXPECT_FALSE(frameNode->isLayoutDirtyMarked_);
+    EXPECT_TRUE(frameNode->isRenderDirtyMarked_);
 }
 
 /**
@@ -1945,6 +2019,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame01, TestSize.Le
     std::list<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     frameNode->OnGenerateOneDepthVisibleFrame(children);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
 }
 
 /**
@@ -1968,6 +2043,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame02, TestSize.Le
     std::list<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     frameNode->OnGenerateOneDepthVisibleFrame(children);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
+    EXPECT_EQ(frameNode->overlayNode_, nullptr);
 }
 
 /**
@@ -1994,5 +2071,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition0
     frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
+    EXPECT_TRUE(frameNode->isActive_);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
+    EXPECT_EQ(frameNode->overlayNode_, 1);
 }
 } // namespace OHOS::Ace::NG

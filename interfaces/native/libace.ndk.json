@@ -1420,12 +1420,56 @@
         "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_AddCustomProperty"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_RemoveCustomProperty"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetCustomProperty"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_CustomProperty_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_CustomProperty_GetStringValue"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetParentInPageTree"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetActiveChildrenInfo"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetCurrentPageRootNode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_IsCreatedByNDK"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_GetNodeType"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ActiveChildrenInfo_GetCount"
     },
     {
         "first_introduced": "12",
@@ -2366,5 +2410,77 @@
     {
         "first_introduced": "13",
         "name": "OH_ArkUI_AccessibilityElementInfoSetElementId"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Create"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_StyledString_Descriptor_Destroy"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_UnmarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_MarshallStyledStringDescriptor"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_ConvertToHtml"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_NativeXComponent_RegisterKeyEventCallbackWithResult"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetType"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyCode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyText"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeySource"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetDeviceId"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetMetaKey"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetTimestamp"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_StopPropagation"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetModifierKeyState"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetKeyIntensionCode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_GetUnicode"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_KeyEvent_SetConsumed"
     }
 ]

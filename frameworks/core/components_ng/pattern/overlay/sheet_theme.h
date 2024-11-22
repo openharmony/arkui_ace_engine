@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
+constexpr Dimension SHEET_HOVERMODE_UP_HEIGHT = 40.0_vp;
+constexpr Dimension SHEET_HOVERMODE_DOWN_HEIGHT = 28.0_vp;
 constexpr Dimension SHEET_BLANK_FLOATING_STATUS_BAR = 32.0_vp;
 constexpr Dimension SHEET_SPLIT_AI_BAR = 24.0_vp;
 constexpr Dimension SHEET_SPLIT_STATUS_BAR = 24.0_vp;
@@ -53,6 +55,7 @@ constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_MARGIN = 4.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 constexpr int32_t SHEET_SHADOW_NONE = 6;
+constexpr Dimension SHEET_TITLE_TEXT_HORIZONTAL_MARGIN = 16.0_vp;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -111,6 +114,11 @@ public:
                 sheetPattern->GetAttr<Color>("sheet_outline_border_color", Color::TRANSPARENT);
             theme->sheetInnerBorderColor_ =
                 sheetPattern->GetAttr<Color>("sheet_inner_border_color", Color::TRANSPARENT);
+            theme->closeIconWidth_ =
+                sheetPattern->GetAttr<Dimension>("close_icon_width", SHEET_CLOSE_ICON_IMAGE_HEIGHT);
+            theme->titleTextHorizMargin_ =
+                sheetPattern->GetAttr<Dimension>("title_text_horizontal_margin", SHEET_TITLE_TEXT_HORIZONTAL_MARGIN);
+            theme->closeIconRadius_ = sheetPattern->GetAttr<Dimension>("close_icon_radius", SHEET_CLOSE_ICON_RADIUS);
         }
     };
     ~SheetTheme() override = default;
@@ -240,6 +248,21 @@ public:
         return isOuterBorderEnable_;
     }
 
+    const Dimension& GetCloseIconWidth() const
+    {
+        return closeIconWidth_;
+    }
+
+    const Dimension& GetTitleTextHorizMargin() const
+    {
+        return titleTextHorizMargin_;
+    }
+
+    const Dimension& GetCloseIconRadius() const
+    {
+        return closeIconRadius_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -269,6 +292,9 @@ private:
     bool isOuterBorderEnable_;
     Color sheetOuterBorderColor_;
     Color sheetInnerBorderColor_;
+    Dimension closeIconWidth_;
+    Dimension titleTextHorizMargin_;
+    Dimension closeIconRadius_;
 };
 } // namespace OHOS::Ace::NG
 

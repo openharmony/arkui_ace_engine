@@ -30,8 +30,6 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
-#include "root_scene.h"
-#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -44,6 +42,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -98,7 +97,9 @@ constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
-constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr int32_t POPUP_EDGE_INTERVAL = 8;
+constexpr int32_t POPUP_MIN_EDGE = 1;
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
@@ -265,7 +266,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("Container Destroyed");
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -933,14 +934,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -981,7 +974,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
-                aceContainer->NotifyDensityUpdate();
+                aceContainer->NotifyDensityUpdate(density);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -1024,10 +1017,14 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI, "ArkUISurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
+    InitDragEventCallback();
+}
 
+void AceContainer::InitDragEventCallback()
+{
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-            const PointerEvent& pointerEvent, const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
+                                       const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
             auto callback = [context, pointerEvent, action, node]() {
@@ -1303,48 +1300,9 @@ public:
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
         }
-        auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto rectf = node->GetRectWithRender();
         AbilityRuntime::AutoFill::PopupOffset offset;
-        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
-        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
-            // popup will display at the bottom of the container
-            offset.deltaY = rect_.top + rect_.height - rectf.Height();
-        } else {
-            // popup will display in the middle of the container
-            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-                offset.deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
-            } else {
-                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = rect_.left - edgeDist;
-            if (offset.deltaX > edgeDist) {
-                offset.deltaX = edgeDist;
-            }
-            if (edgeDist + size.width > windowRect_.width_) {
-                offset.deltaX = 0;
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
-            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
-                offset.deltaX = -edgeDist;
-            }
-        }
-
+        offset.deltaX = GetPopupConfigWillUpdateX(config);
+        offset.deltaY = GetPopupConfigWillUpdateY(config);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
         config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
@@ -1360,6 +1318,102 @@ public:
         windowRect_ = rect;
     }
 private:
+    double GetPopupConfigWillUpdateY(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaY = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        auto trans = node->GetTransformRelativeOffset();
+        auto bottomAvoidHeight = GetBottomAvoidHeight();
+        auto edge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_EDGE_INTERVAL);
+        auto minEdge = PipelineBase::Vp2PxWithCurrentDensity(POPUP_MIN_EDGE);
+
+        bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
+        if (rectf.GetY() > size.height + edge + minEdge) {
+            if (isBottom) {
+                deltaY = rect_.top - trans.GetY() + rect_.height + size.height + edge * POPUP_CALCULATE_RATIO;
+            } else {
+                deltaY = rect_.top - trans.GetY();
+            }
+        } else if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + edge * POPUP_CALCULATE_RATIO + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY() + edge;
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - edge;
+            }
+        } else {
+            // popup will display in the middle of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() + edge;
+            } else {
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY() - edge;
+            }
+        }
+        return deltaY;
+    }
+
+    double GetPopupConfigWillUpdateX(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaX = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = rect_.left - edgeDist;
+            if (deltaX > edgeDist) {
+                deltaX = edgeDist;
+            }
+            if (rect_.left + size.width > windowRect_.width_) {
+                deltaX = windowRect_.width_ - size.width - edgeDist;
+            }
+            if (edgeDist + size.width > windowRect_.width_) {
+                deltaX = 0;
+            }
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((deltaX < -DBL_EPSILON) && (std::fabs(deltaX) > edgeDist)) {
+                deltaX = -edgeDist;
+            }
+        }
+        return deltaX;
+    }
+
+    uint32_t GetBottomAvoidHeight()
+    {
+        auto containerId = Container::CurrentId();
+        RefPtr<NG::PipelineContext> pipelineContext;
+        if (containerId >= MIN_SUBCONTAINER_ID) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_RETURN(parentContainer, 0);
+            pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+        } else {
+            pipelineContext = NG::PipelineContext::GetCurrentContext();
+        }
+        CHECK_NULL_RETURN(pipelineContext, 0);
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManager, 0);
+        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
@@ -1421,15 +1475,6 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 
-bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
-{
-    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
-    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
-    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
-}
-
 void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
@@ -1441,13 +1486,22 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
     if (!autoFillUserName.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
-            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+            if (!nodeInfoWrap) {
+                continue;
+            }
+            auto metadataObject = JsonUtil::ParseJsonString(nodeInfoWrap->GetMetadata());
+            if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
                 nodeInfoWrap->SetValue(autoFillUserName);
                 viewDataWrap->SetUserSelected(true);
-                pattern->SetAutoFillUserName("");
                 break;
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_UNSPECIFIED && metadataObject &&
+                       metadataObject->Contains("type")) {
+                metadataObject->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(metadataObject->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
+        pattern->SetAutoFillUserName("");
     }
     if (!autoFillNewPassword.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
@@ -1541,7 +1595,6 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
@@ -1705,6 +1758,9 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
     DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
@@ -1970,6 +2026,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    auto windowDensityCallback = [weak = WeakClaim(this)]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0.0);
+        return container->GetWindowDensity();
+    };
+    pipelineContext_->RegisterWindowDensityCallback(std::move(windowDensityCallback));
+
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
         pipelineContext_->OnSurfaceDensityChanged(density);
@@ -2047,6 +2110,21 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
+
+    auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireAccessibilityEventCallback(eventId, parameter);
+    };
+    pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -2105,6 +2183,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         if (jsEngine && !isFormRender_) {
             // register state profiler callback
             jsEngine->JsStateProfilerResgiter();
+            jsEngine->JsSetAceDebugMode();
         }
     }
 
@@ -2173,22 +2252,6 @@ bool AceContainer::IsTransparentBg() const
     std::string bgOpacity = bgColor.ColorToString().substr(0, 3);
     std::string transparentOpacity = "#00";
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
-}
-
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
 }
 
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
@@ -2294,6 +2357,14 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
             SystemBarStyleOhos::SetSystemBarStyle(window, style);
         });
+    windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
+        [window = uiWindow_]() -> bool {
+            return window->GetFreeMultiWindowModeEnabledState();
+        });
+    windowManager->SetPerformBackCallback(
+        [window = uiWindow_]() -> void {
+            return window->PerformBack();
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -2318,28 +2389,6 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
-{
-    Rosen::WSRect avoidArea;
-    Rect sessionAvoidArea;
-    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    }
-    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
-        sessionAvoidArea.ToString().c_str());
-    return sessionAvoidArea;
-}
-
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
 {
     CHECK_NULL_RETURN(uiWindow_, {});
@@ -2360,6 +2409,12 @@ Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
         return avoidArea;
     }
     return {};
+}
+
+uint32_t AceContainer::GetStatusBarHeight()
+{
+    CHECK_NULL_RETURN(uiWindow_, 0);
+    return static_cast<uint32_t>(uiWindow_->GetStatusBarHeight());
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
@@ -2417,10 +2472,6 @@ void AceContainer::CheckAndSetFontFamily()
 void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
-    if (IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
-        return;
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
@@ -2466,17 +2517,41 @@ void AceContainer::ReleaseResourceAdapter()
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+DeviceOrientation AceContainer::ProcessDirectionUpdate(
+    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
-    if (!parsedConfig.IsValid()) {
-        LOGW("AceContainer::OnConfigurationUpdated param is empty");
-        return;
+    if (!parsedConfig.direction.empty()) {
+        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+        if (parsedConfig.direction == "horizontal") {
+            resDirection = DeviceOrientation::LANDSCAPE;
+        } else if (parsedConfig.direction == "vertical") {
+            resDirection = DeviceOrientation::PORTRAIT;
+        }
+        configurationChange.directionUpdate = true;
+        return resDirection;
     }
-    ConfigurationChange configurationChange;
-    CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = pipelineContext_->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto resConfig = GetResourceConfiguration();
+    return DeviceOrientation::ORIENTATION_UNDEFINED;
+}
+
+void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
+{
+    if (!parsedConfig.themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
+        int fontUpdate = json->GetInt("fonts");
+        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
+        int iconUpdate = json->GetInt("icons");
+        configurationChange.iconUpdate = iconUpdate;
+        int skinUpdate = json->GetInt("skin");
+        configurationChange.skinUpdate = skinUpdate;
+        if (fontUpdate) {
+            CheckAndSetFontFamily();
+        }
+    }
+}
+
+void AceContainer::BuildResConfig(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
+{
     if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
         if (parsedConfig.colorMode == "dark") {
@@ -2511,30 +2586,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         fontManager->SetAppCustomFont(parsedConfig.fontFamily);
     }
     if (!parsedConfig.direction.empty()) {
-        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
-        if (parsedConfig.direction == "horizontal") {
-            resDirection = DeviceOrientation::LANDSCAPE;
-        } else if (parsedConfig.direction == "vertical") {
-            resDirection = DeviceOrientation::PORTRAIT;
-        }
-        configurationChange.directionUpdate = true;
-        resConfig.SetOrientation(resDirection);
+        resConfig.SetOrientation(ProcessDirectionUpdate(parsedConfig, configurationChange));
     }
     if (!parsedConfig.densitydpi.empty()) {
         configurationChange.dpiUpdate = true;
     }
-    if (!parsedConfig.themeTag.empty()) {
-        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("fonts");
-        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
-        int iconUpdate = json->GetInt("icons");
-        configurationChange.iconUpdate = iconUpdate;
-        int skinUpdate = json->GetInt("skin");
-        configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
-            CheckAndSetFontFamily();
-        }
-    }
+    ProcessThemeUpdate(parsedConfig, configurationChange);
     if (!parsedConfig.colorModeIsSetByApp.empty()) {
         resConfig.SetColorModeIsSetByApp(true);
     }
@@ -2543,6 +2600,25 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    ConfigurationChange configurationChange;
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    BuildResConfig(resConfig, configurationChange, parsedConfig);
+    if (!parsedConfig.preferredLanguage.empty()) {
+        resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2557,10 +2633,14 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         front->OnConfigurationUpdated(configuration);
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    if (configurationChange.IsNeedUpdate()) {
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+    }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2840,6 +2920,15 @@ bool AceContainer::IsUIExtensionWindow()
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
 }
 
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
+}
+
 bool AceContainer::IsSceneBoardEnabled()
 {
     return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
@@ -2869,6 +2958,18 @@ bool AceContainer::IsSystemWindow() const
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
         uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
 }
 
 bool AceContainer::IsHostMainWindow() const
@@ -2944,7 +3045,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed()) {
+            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
                 for (const auto& callback : callbacksIter->second) {
                     if (callback) {
                         callback();
@@ -2960,7 +3061,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
 
 bool AceContainer::GetCurPointerEventInfo(
     int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
@@ -2979,6 +3080,7 @@ bool AceContainer::GetCurPointerEventInfo(
     globalX = pointerItem.GetDisplayX();
     globalY = pointerItem.GetDisplayY();
     sourceTool = pointerItem.GetToolType();
+    displayId = currentPointerEvent->GetTargetDisplayId();
     RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3136,6 +3238,24 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
         TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
 }
 
+void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), eventId, parameter] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
+}
+
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -3203,12 +3323,15 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
     return true;
 }
 
-void AceContainer::NotifyDensityUpdate()
+void AceContainer::NotifyDensityUpdate(double density)
 {
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
+    }
+    if (fullUpdate) {
+        UpdateResourceDensity(density);
     }
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
@@ -3269,5 +3392,26 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+}
+
+void AceContainer::UpdateResourceOrientation(int32_t orientation)
+{
+    DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetOrientation(newOrientation);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::UpdateResourceDensity(double density)
+{
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetDensity(density);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
 }
 } // namespace OHOS::Ace::Platform

@@ -19,6 +19,7 @@
 #endif
 
 #include <securec.h>
+#include <vector>
 
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
@@ -41,6 +43,7 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -61,6 +64,8 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/html_utils.h"
+#include "interfaces/native/native_type.h"
 #include "core/common/card_scope.h"
 
 namespace OHOS::Ace::NG {
@@ -239,8 +244,10 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        frameNode->setIsCNode(true);
+        auto* uiNode = reinterpret_cast<UINode*>(node);
+        if (uiNode) {
+            uiNode->setIsCNode(true);
+        }
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }
@@ -270,10 +277,7 @@ ArkUI_CharPtr GetName(ArkUINodeHandle node)
     return ViewModel::GetName(node);
 }
 
-static void DumpTree(ArkUINodeHandle node, int indent)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "dumpTree %{public}p", node);
-}
+static void DumpTree(ArkUINodeHandle node, int indent) {}
 
 void DumpTreeNode(ArkUINodeHandle node)
 {
@@ -336,14 +340,10 @@ ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, Ark
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value)
-{
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p SetAttribute %{public}s, %{public}s", node, attribute, value);
-}
+void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value) {}
 
 ArkUI_CharPtr GetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p GetAttribute %{public}s", node, attribute);
     return "";
 }
 
@@ -368,7 +368,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
-    nullptr,
+    NodeModifier::SetOnKeyEvent,
     NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
@@ -385,6 +385,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragLeave,
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
+    NodeModifier::SetOnKeyPreIme,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -453,6 +454,11 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnDownloadProgress,
 };
 
+const ComponentAsyncEventHandler IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageSpanOnCompleteEvent,
+    NodeModifier::SetImageSpanOnErrorEvent,
+};
+
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetDatePickerOnDateChange,
 };
@@ -463,6 +469,7 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnChange,
+    NodeModifier::SetTextPickerOnScrollStop,
 };
 
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -562,7 +569,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     NodeModifier::ResetOnHover,
     NodeModifier::ResetOnBlur,
-    nullptr,
+    NodeModifier::ResetOnKeyEvent,
     NodeModifier::ResetOnMouse,
     NodeModifier::ResetOnAreaChange,
     NodeModifier::ResetOnVisibleAreaChange,
@@ -572,6 +579,14 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
+    NodeModifier::ResetOnDragStart,
+    NodeModifier::ResetOnDragEnter,
+    NodeModifier::ResetOnDragDrop,
+    NodeModifier::ResetOnDragMove,
+    NodeModifier::ResetOnDragLeave,
+    NodeModifier::ResetOnDragEnd,
+    NodeModifier::ResetOnPreDrag,
+    NodeModifier::ResetOnKeyPreIme,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -756,6 +771,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_SPAN: {
+            if (subKind >= sizeof(IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SCROLL: {
@@ -2048,12 +2071,7 @@ ArkUIExtendedNodeAPI impl_extended = {
 /* clang-format on */
 
 void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
-    ArkUI_Float32 bottom, ArkUIPaintHandle paint)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
-        "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n", canvas, left, top, right,
-        bottom);
-}
+    ArkUI_Float32 bottom, ArkUIPaintHandle paint) {}
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {
@@ -2253,6 +2271,80 @@ const ArkUIExtendedNodeAPI* GetExtendedAPI()
     return &impl_extended;
 }
 
+ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
+    return new ArkUI_StyledString_Descriptor;
+}
+
+void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor destroy");
+    CHECK_NULL_VOID(descriptor);
+    if (descriptor->html) {
+        delete descriptor->html;
+        descriptor->html = nullptr;
+    }
+    if (descriptor->spanString) {
+        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
+        delete spanString;
+        descriptor->spanString = nullptr;
+    }
+    delete descriptor;
+    descriptor = nullptr;
+}
+
+ArkUI_Int32 UnmarshallStyledStringDescriptor(
+    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
+    CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
+    std::vector<uint8_t> vec(buffer, buffer + bufferSize);
+    SpanString* spanString = new SpanString("");
+    spanString->DecodeTlvExt(vec, spanString);
+    descriptor->spanString = reinterpret_cast<void*>(spanString);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 MarshallStyledStringDescriptor(
+    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "MarshallStyledStringDescriptor");
+    CHECK_NULL_RETURN(buffer && resultSize && descriptor, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(descriptor->spanString, ARKUI_ERROR_CODE_INVALID_STYLED_STRING);
+    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
+    std::vector<uint8_t> tlvData;
+    spanStringRawPtr->EncodeTlv(tlvData);
+    *resultSize = tlvData.size();
+    if (bufferSize < *resultSize) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto data = tlvData.data();
+    std::copy(data, data + *resultSize, buffer);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+const char* ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ConvertToHtml");
+    CHECK_NULL_RETURN(descriptor && descriptor->spanString, "");
+    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
+    auto htmlStr = HtmlUtils::ToHtml(spanStringRawPtr);
+    char* html = new char[htmlStr.length() + 1];
+    CHECK_NULL_RETURN(html, "");
+    std::copy(htmlStr.begin(), htmlStr.end(), html);
+    html[htmlStr.length()] = '\0';
+    descriptor->html = html;
+    return descriptor->html;
+}
+
+const ArkUIStyledStringAPI* GetStyledStringAPI()
+{
+    static const ArkUIStyledStringAPI impl { CreateArkUIStyledStringDescriptor, DestroyArkUIStyledStringDescriptor,
+        UnmarshallStyledStringDescriptor, MarshallStyledStringDescriptor, ConvertToHtml };
+    return &impl;
+}
+
 /* clang-format off */
 ArkUIFullNodeAPI impl_full = {
     ARKUI_NODE_API_VERSION,
@@ -2266,6 +2358,7 @@ ArkUIFullNodeAPI impl_full = {
     GetExtendedAPI,         // Extended
     NodeAdapter::GetNodeAdapterAPI,         // adapter.
     DragAdapter::GetDragAdapterAPI,        // drag adapter.
+    GetStyledStringAPI,     // StyledStringAPI
 };
 /* clang-format on */
 

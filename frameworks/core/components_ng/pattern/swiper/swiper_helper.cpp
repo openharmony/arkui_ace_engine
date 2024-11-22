@@ -268,6 +268,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     DumpDirection(swiper.direction_);
     swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
                             : DumpLog::GetInstance().AddDesc("disableSwipe:false");
+    swiper.GetNonAutoLayoutDirection() == TextDirection::RTL ? DumpLog::GetInstance().AddDesc("TextDirection::RTL")
+                                                             : DumpLog::GetInstance().AddDesc("TextDirection::LTR");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
@@ -283,9 +285,6 @@ void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
     swiper.targetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(swiper.targetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("targetIndex:null");
-    swiper.preTargetIndex_.has_value()
-        ? DumpLog::GetInstance().AddDesc("preTargetIndex:" + std::to_string(swiper.preTargetIndex_.value()))
-        : DumpLog::GetInstance().AddDesc("preTargetIndex:null");
     swiper.pauseTargetIndex_.has_value()
         ? DumpLog::GetInstance().AddDesc("pauseTargetIndex:" + std::to_string(swiper.pauseTargetIndex_.value()))
         : DumpLog::GetInstance().AddDesc("pauseTargetIndex:null");
@@ -386,7 +385,7 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
     jsonValue->Put("bottom", params->dimBottom.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("itemWidth", params->itemWidth.value_or(6.0_vp).ToString().c_str());
     jsonValue->Put("itemHeight", params->itemHeight.value_or(6.0_vp).ToString().c_str());
-    jsonValue->Put("selectedItemWidth", params->selectedItemWidth.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put("selectedItemWidth", params->selectedItemWidth.value_or(12.0_vp).ToString().c_str());
     jsonValue->Put("selectedItemHeight", params->selectedItemHeight.value_or(6.0_vp).ToString().c_str());
     jsonValue->Put(
         "selectedColor", params->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());

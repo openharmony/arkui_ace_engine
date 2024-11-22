@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -28,37 +29,49 @@ public:
     {}
     ~ScrollablePaintMethod() override = default;
 
-
     void SetOverlayRenderContext(const RefPtr<RenderContext>& overlayRenderContext)
     {
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f, float startPercent = 0.0f,
-        float endPercent = 1.0f)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, bool hasFadingEdge, float percentFading = 0.0f,
+        float startPercent = 0.0f, float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
+        hasFadingEdge_ = hasFadingEdge;
         percentFading_ = percentFading;
         startPercent_ = startPercent;
         endPercent_ = endPercent;
     }
 
+protected:
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
 
-protected:
+    /**
+     * @brief Try to set content clip to render context.
+     *
+     * @return true if content clip is set up
+     */
+    bool TryContentClip(PaintWrapper* wrapper);
+
     bool vertical_ = false;
     bool isReverse_ = false;
     bool isVerticalReverse_ = false;
 
 private:
+    /**
+     * @brief Return the default content clip mode.
+     */
+    virtual ContentClipMode GetDefaultContentClip() const = 0;
+
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
+    bool hasFadingEdge_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;
-    
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H

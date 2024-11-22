@@ -282,6 +282,7 @@ void PreFixEmptyBundleName(napi_env env, napi_value value)
     NapiStringToString(env, bundleNameNApi, bundleName);
     if (bundleName.empty()) {
         auto container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
         bundleName = container->GetBundleName();
         bundleNameNApi = CreateNapiString(env, bundleName);
         napi_set_named_property(env, value, BUNDLE_NAME, bundleNameNApi);
@@ -472,7 +473,13 @@ void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString
         if (param == "false" || param == "end") {
             param = "0.000000";
         }
-        curveValue.emplace_back(std::stof(param));
+        errno = 0;
+        char* end = nullptr;
+        float value = strtof(param.c_str(), &end);
+        if (end == param.c_str() || errno == ERANGE) {
+            LOGW("%{public}s can not be converted to float or is out of range.", param.c_str());
+        }
+        curveValue.emplace_back(value);
     }
 }
 

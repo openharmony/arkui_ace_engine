@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT NodeContainerModelNG : public NodeContainerModel {
 public:
     void Create() override;
-    void SetMakeFunction(std::function<RefPtr<UINode>(int32_t)>&& makeFunc) override;
+    void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc) override;
     void SetOnResize(std::function<void(const SizeF& size)>&& resizeFunc) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;

@@ -16,10 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWING_COLOR_FILTER_PREVIEW_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_DRAWING_COLOR_FILTER_PREVIEW_H
 
-#ifdef USE_ROSEN_DRAWING
 #include "effect/color_filter.h"
-#endif
-
 #include "base/image/drawing_color_filter.h"
 
 namespace OHOS::Ace {

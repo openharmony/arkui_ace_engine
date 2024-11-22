@@ -27,19 +27,6 @@ constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
-
-float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
-{
-    if (NearZero(friction)) {
-        return delta;
-    }
-    float deltaToLimit = extentOffset / friction;
-    if (delta < deltaToLimit) {
-        return delta * friction;
-    }
-    return extentOffset + delta - deltaToLimit;
-}
-
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -70,6 +57,30 @@ void ScrollPattern::OnModifyDone()
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto drawDirection = (layoutDirection == TextDirection::RTL);
+    auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
+    paint->SetScrollBar(GetScrollBar());
+    CreateScrollBarOverlayModifier();
+    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
+    }
+    if (!scrollContentModifier_) {
+        scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+    }
+    paint->SetContentModifier(scrollContentModifier_);
+    UpdateFadingEdge(paint);
+    return paint;
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -109,6 +120,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     SetScrollSource(SCROLL_FROM_NONE);
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
+    if (scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE && AnimateStoped()) {
+        scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+    }
     return paintProperty->GetFadingEdge().value_or(false);
 }
 
@@ -152,16 +166,14 @@ bool ScrollPattern::ScrollSnapTrigger()
 {
     auto scrollBar = GetScrollBar();
     auto scrollBarProxy = GetScrollBarProxy();
-    if (scrollBar && scrollBar->IsPressed()) {
+    if (scrollBar && scrollBar->IsDriving()) {
         return false;
     }
     if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        auto predictSnapOffset = CalcPredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
+        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
             FireOnScrollStart();
             return true;
         }
@@ -297,17 +309,12 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     } else {
         overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0f));
     }
-    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
-    if ((overScrollPastStart > 0.0f && delta < 0.0f) || (overScrollPastEnd > 0.0f && delta > 0.0f)) {
-        return;
-    }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = ScrollablePattern::CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
-    float direction = delta > 0.0f ? 1.0f : -1.0f;
-    delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
+    float friction = CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
+    delta = delta * friction;
 }
 
 float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)
@@ -389,7 +396,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
     auto scrollRes =
         onScroll(scrollX, scrollY, GetScrollState(), ScrollablePattern::ConvertScrollSource(GetScrollSource()));
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     CHECK_NULL_RETURN(context, scroll);
     if (GetAxis() == Axis::HORIZONTAL) {
         return context->NormalizeToPx(scrollRes.xOffset);
@@ -400,6 +407,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    FireObserverOnDidScroll(scroll);
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -429,8 +437,10 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
-    if (ReachStart()) {
+    CHECK_NULL_VOID(host);
+    if (ReachStart(!isInitialized_)) {
+        FireObserverOnReachStart();
+        CHECK_NULL_VOID(onReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachStart();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -440,11 +450,15 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
-    if (ReachEnd()) {
+    CHECK_NULL_VOID(host);
+    if (ReachEnd(false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachEnd();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && ReachEnd(true)) {
+        FireObserverOnReachEnd();
     }
 }
 
@@ -463,17 +477,18 @@ bool ScrollPattern::IsCrashBottom() const
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
 
-bool ScrollPattern::ReachStart() const
+bool ScrollPattern::ReachStart(bool firstLayout) const
 {
-    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || !isInitialized_) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollUpToReachTop = (LessNotEqual(prevOffset_, 0.0) || firstLayout) && GreatOrEqual(currentOffset_, 0.0);
     bool scrollDownToReachTop = GreatNotEqual(prevOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
-bool ScrollPattern::ReachEnd() const
+bool ScrollPattern::ReachEnd(bool firstLayout) const
 {
     float minExtent = -scrollableDistance_;
-    bool scrollDownToReachEnd = GreatNotEqual(prevOffset_, minExtent) && LessOrEqual(currentOffset_, minExtent);
+    bool scrollDownToReachEnd =
+        (GreatNotEqual(prevOffset_, minExtent) || firstLayout) && LessOrEqual(currentOffset_, minExtent);
     bool scrollUpToReachEnd = LessNotEqual(prevOffset_, minExtent) && GreatOrEqual(currentOffset_, minExtent);
     return (scrollUpToReachEnd || scrollDownToReachEnd);
 }
@@ -565,10 +580,8 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    if (!NearZero(distance)) {
-        ScrollBy(distance, distance, smooth);
-        scrollEdgeType_ = scrollEdgeType;
-    }
+    ScrollBy(distance, distance, smooth);
+    scrollEdgeType_ = scrollEdgeType;
 }
 
 void ScrollPattern::CheckScrollToEdge()
@@ -669,6 +682,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -789,7 +803,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
@@ -1252,9 +1266,24 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+bool ScrollPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
-    return ScrollSnapTrigger();
+    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity);
+    if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
+        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
+        return true;
+    }
+    return false;
+}
+
+void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+{
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    auto scrollable = scrollableEvent->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 }
 
 void ScrollPattern::GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1343,5 +1372,16 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         infochildren->Put(child);
     }
     json->Put("scrollMeasureInfos", infochildren);
+}
+
+SizeF ScrollPattern::GetChildrenExpandedSize()
+{
+    auto axis = GetAxis();
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewPort_.Width(), viewPortExtent_.Height());
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

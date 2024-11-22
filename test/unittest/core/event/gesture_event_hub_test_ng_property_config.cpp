@@ -15,6 +15,15 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_interaction_interface.h"
+
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -88,7 +97,7 @@ RefPtr<FrameNode> ProcessDragItemGroupScene()
     CHECK_NULL_RETURN(gridItem, nullptr);
     auto pattern = gridNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
 
     gestureEventHub->InitDragDropEvent();
     auto actuator = gestureEventHub->GetDragEventActuator();
@@ -812,25 +821,21 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call AttachGesture
      *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has one element & gestureHierarchy_ has one element
+     * @tc.expected: modifierGestures_ has one element & gestureHierarchy_ has zero element
      */
     auto longPressGesture = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
     gestureEventHub->AttachGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     /**
      * @tc.steps: step3. call RemoveGesture
      *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has zero element & gestureHierarchy_ has zero element
+     * @tc.expected: modifierGestures_ has zero element & gestureHierarchy_ has zero element
      */
     gestureEventHub->RemoveGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 0);
@@ -839,18 +844,15 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. call AttachGesture & ClearModifierGesture
      *            case: recreateGesture_ is true & gestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has cleared & gestureHierarchy_ has cleared
+     * @tc.expected: modifierGestures_ has cleared & gestureHierarchy_ has cleared
      */
     gestureEventHub->AttachGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     gestureEventHub->ClearModifierGesture();
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 0);
@@ -877,8 +879,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step4. call RemoveGesturesByTag
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ one element & gestureHierarchy_ has one element & group has one child
+     * @tc.expected: modifierGestures_ one element & gestureHierarchy_ has zero element & group has one child
      */
     std::vector<RefPtr<Gesture>> gestures;
     auto longPressGestureOne = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
@@ -888,18 +889,16 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
     gestures.emplace_back(longPressGestureTwo);
     auto group = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
     gestureEventHub->AttachGesture(group);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     gestureEventHub->RemoveGesturesByTag(CHECK_TAG_1);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
     EXPECT_EQ(group->gestures_.size(), 1);
 }
 
@@ -1724,7 +1723,7 @@ HWTEST_F(GestureEventHubTestNg, GridNodeHandleOnDragUpdate001, TestSize.Level1)
     ASSERT_NE(gridItem, nullptr);
     auto pattern = gridNode->GetPattern<GridPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->gridLayoutInfo_.endIndex_ = DEFAULT_CHILD_COUNT;
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
 
     /**
      * @tc.steps: step2. set all griditems are selected.
@@ -1786,6 +1785,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
      * @tc.steps: step3. Invoke GetDragCallback to get function and fire this function.
      * @tc.expected: fire function success.
      */
+    MockContainer::SetUp();
     int32_t callbackInfo = 0;
     eventHub->SetOnDragEnd([&callbackInfo](const RefPtr<OHOS::Ace::DragEvent>& /*dragEvent*/) {
         callbackInfo = 1;
@@ -1797,6 +1797,7 @@ HWTEST_F(GestureEventHubTestNg, GetDragCallback001, TestSize.Level1)
     dragCallback(notifyMessage);
     EXPECT_FALSE(dragDropManager->IsDragged());
     EXPECT_EQ(callbackInfo, 1);
+    MockContainer::TearDown();
 }
 
 /**

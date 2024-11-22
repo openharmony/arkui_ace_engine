@@ -40,8 +40,10 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 }
 
 RefPtr<FrameNode> UIExtensionModelNG::Create(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding, bool isModal)
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const InnerModalUIExtensionConfig& config)
 {
+    bool isAsyncModalBinding = config.isAsyncModalBinding;
+    bool isModal = config.isModal;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [isAsyncModalBinding, isModal]() {
@@ -49,6 +51,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
         });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
+    pattern->SetDensityDpi(config.isDensityFollowHost);
     pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
@@ -258,6 +261,18 @@ void UIExtensionModelNG::SetOnReceive(
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnReceiveCallback(std::move(onReceive));
+}
+
+std::string UIExtensionModelNG::GetUiExtensionType(NG::SessionType sessionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, "");
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+        CHECK_NULL_RETURN(pattern, "");
+        return pattern->GetUiExtensionType();
+    }
+    return "";
 }
 
 void UIExtensionModelNG::SetOnError(

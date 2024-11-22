@@ -1035,8 +1035,14 @@ HWTEST_F(RichEditorBaseTestOneNg, AddSpanByPasteData001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. init spans
-     */
-    AddImageSpan();
+    */
+    ImageSpanOptions imageOptions;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    imageOptions.imagePixelMap = pixelMap;
+    richEditorPattern->AddImageSpan(imageOptions);
+
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     richEditorController->AddTextSpan(options);
@@ -1163,7 +1169,8 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
     std::string str = "\n";
     spanItem->content = str;
     spans.emplace_back(spanItem);
-    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager));
+    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
+        std::nullopt);
     ASSERT_NE(layoutAlgorithm, nullptr);
     EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
 }

@@ -247,6 +247,15 @@ var ImageRenderMode;
   ImageRenderMode[ImageRenderMode["Template"] = 1] = "Template";
 })(ImageRenderMode || (ImageRenderMode = {}));
 
+var ImageRotateOrientation;
+(function (ImageRotateOrientation) {
+  ImageRotateOrientation[ImageRotateOrientation["AUTO"] = 0] = "AUTO";
+  ImageRotateOrientation[ImageRotateOrientation["UP"] = 1] = "UP";
+  ImageRotateOrientation[ImageRotateOrientation["RIGHT"] = 2] = "RIGHT";
+  ImageRotateOrientation[ImageRotateOrientation["DOWN"] = 3] = "DOWN";
+  ImageRotateOrientation[ImageRotateOrientation["LEFT"] = 4] = "LEFT";
+})(ImageRotateOrientation || (ImageRotateOrientation = {}));
+
 var ImageInterpolation;
 (function (ImageInterpolation) {
   ImageInterpolation[ImageInterpolation["None"] = 0] = "None";
@@ -715,6 +724,8 @@ var FormDimension;
   FormDimension["Dimension_2_1"] = 5;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
+  FormDimension["DIMENSION_2_3"] = 8;
+  FormDimension["DIMENSION_3_3"] = 9;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1009,9 +1020,9 @@ var NavigationTitleMode;
 
 let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
-  BarStyle[BarStyle.STACK = 1] = "STACK";
-  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
+  BarStyle[BarStyle.STANDARD = 0] = 'STANDARD';
+  BarStyle[BarStyle.STACK = 1] = 'STACK';
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = 'SAFE_AREA_PADDING';
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -1044,6 +1055,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
+
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
 (function (NavigationOperation) {
@@ -1136,7 +1155,9 @@ var SourceTool;
 (function (SourceTool) {
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool["Finger"] = 1;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool["Pen"] = 2;
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
@@ -1217,6 +1238,12 @@ var OverScrollMode;
   OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
   OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
 })(OverScrollMode || (OverScrollMode = {}));
+
+var BlurOnKeyboardHideMode;
+(function (BlurOnKeyboardHideMode) {
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["SILENT"] = 0] = "SILENT";
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["BLUR"] = 1] = "BLUR";
+})(BlurOnKeyboardHideMode || (BlurOnKeyboardHideMode = {}));
 
 var RenderExitReason;
 (function (RenderExitReason) {
@@ -1465,6 +1492,12 @@ var BlurType;
   BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
 })(BlurType || (BlurType = {}));
 
+let EffectType;
+(function (EffectType) {
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
+})(EffectType || (EffectType = {}));
+
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
@@ -1632,11 +1665,11 @@ var ScrollSizeMode ;
 
 var SheetKeyboardAvoidMode;
 (function (SheetKeyboardAvoidMode) {
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
-})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['NONE'] = 0] = 'NONE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_RESIZE'] = 1] = 'TRANSLATE_AND_RESIZE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['RESIZE_ONLY'] = 2] = 'RESIZE_ONLY';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_SCROLL'] = 3] = 'TRANSLATE_AND_SCROLL';
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -2016,7 +2049,7 @@ class TextMenuItemId {
   static get CUT() {
     return new TextMenuItemId('OH_DEFAULT_CUT');
   }
-  
+
   static get COPY() {
     return new TextMenuItemId('OH_DEFAULT_COPY');
   }
@@ -2119,6 +2152,9 @@ class NavPathInfo {
     this.needUpdate = false;
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
+    this.promise = undefined;
+    this.replacedDestinationInfo = undefined;
+    this.recoveryFromReplaceDestination = undefined;
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
@@ -2203,7 +2239,6 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
-    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2230,29 +2265,29 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-
-    let promise = this.nativeStack?.onPushDestination(info);
-    if (!promise) {
-      return new Promise((resolve, reject) => {
-        reject({ message: 'Internal error.', code: 100001 });
-      })
-    }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
-    info.pushDestination = true;
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode === 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      };
+    });
   }
   parseNavigationOptions(param) {
     let launchMode = LaunchMode.STANDARD;
     let animated = true;
     if (typeof param === 'boolean') {
       animated = param;
-    } else if (param !== undefined) {
+    } else if (param !== undefined && param !== null) {
       if (typeof param.animated === 'boolean') {
         animated = param.animated;
       }
-      if (param.launchMode !== undefined) {
+      if (param.launchMode !== undefined && param.launchMode !== null) {
         launchMode = param.launchMode;
       }
     }
@@ -2282,7 +2317,13 @@ class NavPathStack {
     }
     return [false, null];
   }
+  checkPathValid(info) {
+    return info !== undefined && info !== null;
+  }
   pushPath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, _] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, false);
     if (ret) {
@@ -2292,13 +2333,20 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
-    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
   }
   pushDestination(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
+    }
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let [ret, promiseRet] = this.pushWithLaunchModeAndAnimated(info, launchMode, animated, true);
     if (ret) {
@@ -2306,24 +2354,26 @@ class NavPathStack {
     }
     this.isReplace = 0;
     this.animated = animated;
-    let promise = this.nativeStack?.onPushDestination(info);
-    if (!promise) {
-      return new Promise((resolve, reject) => {
-        reject({ message: 'Internal error.', code: 100001 });
-      })
-    }
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
-    info.pushDestination = true;
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode === 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      };
+    });
   }
-  replacePath(info, optionParam) {
+  doReplaceInner(info, optionParam, isReplaceDestination) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let index = -1;
+    let needCreatePromiseWithLaunchMode = false;
     if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
       index = this.pathArray.findIndex(element => element.name === info.name);
       if (index !== -1) {
@@ -2339,11 +2389,17 @@ class NavPathStack {
           }
           this.pathArray.push(targetInfo[0]);
         }
+        if (isReplaceDestination) {
+          needCreatePromiseWithLaunchMode = true;
+        }
       }
     }
     if (index === -1) {
       if (this.pathArray.length !== 0) {
-        this.pathArray.pop();
+        let popInfo = this.pathArray.pop();
+        if (isReplaceDestination) {
+          info.replacedDestinationInfo = popInfo;
+        }
       }
       this.pathArray.push(info);
       this.pathArray[this.pathArray.length - 1].index = -1;
@@ -2351,6 +2407,41 @@ class NavPathStack {
     this.isReplace = 1;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+    if (needCreatePromiseWithLaunchMode) {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    }
+    return undefined;
+  }
+  replacePath(info, optionParam) {
+    if (!this.checkPathValid(info)) {
+      return;
+    }
+    this.doReplaceInner(info, optionParam);
+  }
+  replaceDestination(info, navigationOptions) {
+    if (!this.checkPathValid(info)) {
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
+    }
+    let promiseWithLaunchMode = this.doReplaceInner(info, navigationOptions, true);
+    if (promiseWithLaunchMode !== undefined) {
+      return promiseWithLaunchMode;
+    }
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode === 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      };
+    });
   }
   replacePathByName(name, param, animated) {
     if (this.pathArray.length !== 0) {
@@ -2534,14 +2625,16 @@ class NavPathStack {
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
-  removeInvalidPage(name, param) {
-    for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].name === name &&
-        this.pathArray[i].param === param) {
-        this.pathArray.splice(i, 1);
-        return;
-      }
+  removeInvalidPage(index) {
+    if (index >= this.pathArray.length || index < 0) {
+      return;
     }
+    if (this.pathArray[index].replacedDestinationInfo !== undefined) {
+      this.pathArray[index] = this.pathArray[index].replacedDestinationInfo;
+      this.pathArray[index].recoveryFromReplaceDestination = true;
+      return;
+    }
+    this.pathArray.splice(index, 1);
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -3295,19 +3388,19 @@ let DataOperationType;
 
 var StyledStringKey;
 (function (StyledStringKey) {
-  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
-  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
-  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
-  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
-  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
-  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
-  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
-  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
-  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
-  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
+  StyledStringKey[StyledStringKey['FONT'] = 0] = 'FONT';
+  StyledStringKey[StyledStringKey['DECORATION'] = 1] = 'DECORATION';
+  StyledStringKey[StyledStringKey['BASELINE_OFFSET'] = 2] = 'BASELINE_OFFSET';
+  StyledStringKey[StyledStringKey['LETTER_SPACING'] = 3] = 'LETTER_SPACING';
+  StyledStringKey[StyledStringKey['TEXT_SHADOW'] = 4] = 'TEXT_SHADOW';
+  StyledStringKey[StyledStringKey['LINE_HEIGHT'] = 5] = 'LINE_HEIGHT';
+  StyledStringKey[StyledStringKey['PARAGRAPH_STYLE'] = 200] = 'PARAGRAPH_STYLE';
+  StyledStringKey[StyledStringKey['BACKGROUND_COLOR'] = 6] = 'BACKGROUND_COLOR';
+  StyledStringKey[StyledStringKey['URL'] = 7] = 'URL';
+  StyledStringKey[StyledStringKey['GESTURE'] = 100] = 'GESTURE';
+  StyledStringKey[StyledStringKey['IMAGE'] = 300] = 'IMAGE';
+  StyledStringKey[StyledStringKey['CUSTOM_SPAN'] = 400] = 'CUSTOM_SPAN';
+  StyledStringKey[StyledStringKey['USER_DATA'] = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
@@ -3360,6 +3453,13 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
+let ContentClipMode;
+(function (ContentClipMode) {
+  ContentClipMode[ContentClipMode['CONTENT_ONLY'] = 0] = 'CONTENT_ONLY';
+  ContentClipMode[ContentClipMode['BOUNDARY'] = 1] = 'BOUNDARY';
+  ContentClipMode[ContentClipMode['SAFE_AREA'] = 2] = 'SAFE_AREA';
+})(ContentClipMode || (ContentClipMode = {}));
+
 var AccessibilityHoverType;
 (function (AccessibilityHoverType) {
   AccessibilityHoverType[AccessibilityHoverType["HOVER_ENTER"] = 0] = "HOVER_ENTER";
@@ -3383,6 +3483,16 @@ let HeightBreakpoint;
   HeightBreakpoint[HeightBreakpoint['HEIGHT_MD'] = 1] = 'HEIGHT_MD';
   HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
 })(HeightBreakpoint || (HeightBreakpoint = {}));
+
+var WebElementType;
+(function (WebElementType) {
+  WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
+})(WebElementType || (WebElementType = {}));
+
+var WebResponseType;
+(function (WebResponseType) {
+  WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+})(WebResponseType || (WebResponseType = {}));
 
 class ImageAnalyzerController {
   constructor() {

@@ -27,6 +27,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT TextModelImpl : public TextModel {
 public:
     void Create(const std::string& content) override;
+    void Create(const std::u16string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override {}
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
@@ -34,6 +35,8 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
     void SetTextSelectableMode(TextSelectableMode value) override {};
+    void SetTextCaretColor(const Color& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override {};
@@ -63,7 +66,7 @@ public:
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
-    void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold) override;
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;

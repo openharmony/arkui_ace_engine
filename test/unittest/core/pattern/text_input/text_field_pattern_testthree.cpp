@@ -42,12 +42,14 @@ HWTEST_F(TextFieldPatternTestThree, UpdateFocusForward001, TestSize.Level0)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
     cleanNodeResponseArea->UpdateCleanNode(false);
     pattern_->focusIndex_ = FocuseIndex::TEXT;
     auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
@@ -66,12 +68,14 @@ HWTEST_F(TextFieldPatternTestThree, UpdateFocusBackward001, TestSize.Level0)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
     cleanNodeResponseArea->UpdateCleanNode(false);
     pattern_->focusIndex_ = FocuseIndex::UNIT;
     auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
@@ -550,5 +554,34 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     auto contentController = pattern_->GetTextContentController();
     auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
     ASSERT_EQ(sentenceContent, spanStr->GetString());
+}
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        pattern_->imeShown_ = true;
+#else
+        pattern_->connection_= true;
+#endif
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
+}
+
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    pattern_->HandleOnCameraInput();
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
 }
 } // namespace OHOS::Ace::NG

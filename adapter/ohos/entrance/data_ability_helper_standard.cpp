@@ -18,14 +18,39 @@
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
-
+#include <variant>
 #include "data_ability_helper.h"
 
 #include "base/log/ace_trace.h"
 #include "base/utils/string_utils.h"
+#include "utils.h"
 
 namespace OHOS::Ace {
 const std::string MEDIA_SERVER_HEAD = "datashare:///media";
+const std::string IMAGE_PATH_DATA = "data";
+const std::string MOVINGPHOTO_IMAGE_COVERPOSITION = "cover_positon";
+const std::string IMAGE_URI = "uri";
+
+template<typename ResultSet>
+static inline std::string GetStringVal(const std::string &field, const ResultSet &result)
+{
+    return std::get<std::string>(ResultSetUtils::GetValFromColumn(field, result, ResultSetDataType::TYPE_STRING));
+}
+template<typename ResultSet>
+static inline int32_t GetInt32Val(const std::string &field, const ResultSet &result)
+{
+    return std::get<int32_t>(ResultSetUtils::GetValFromColumn(field, result, ResultSetDataType::TYPE_INT32));
+}
+template<typename ResultSet>
+static inline int64_t GetInt64Val(const std::string &field, const ResultSet &result)
+{
+    return std::get<int64_t>(ResultSetUtils::GetValFromColumn(field, result, ResultSetDataType::TYPE_INT64));
+}
+template<typename ResultSet>
+static inline double GetDoubleVal(const std::string &field, const ResultSet &result)
+{
+    return std::get<double>(ResultSetUtils::GetValFromColumn(field, result, ResultSetDataType::TYPE_DOUBLE));
+}
 
 DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS::AppExecFwk::Context>& context,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& runtimeContext, bool useStageModel)
@@ -74,6 +99,40 @@ int64_t DataAbilityHelperStandard::GetMovingPhotoDateModified(const std::string&
     return mgr_.GetMovingPhotoDateModified(uri);
 #else
     return -1;
+#endif
+}
+
+int64_t DataAbilityHelperStandard::GetMovingPhotoCoverPosition(const std::string& columnName,
+                                                               const std::string& value,
+                                                               std::vector<std::string>& columns)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    auto resultSet = mgr_.GetResultSetFromDb(columnName, value, columns);
+    if (resultSet == nullptr || resultSet->GoToFirstRow() != 0) {
+        LOGE("Result is nullptr or GoToFirstRow failed.");
+        return -1;
+    }
+    int64_t coverPosition = GetInt64Val(MOVINGPHOTO_IMAGE_COVERPOSITION, resultSet);
+    return coverPosition;
+#else
+    return -1;
+#endif
+}
+
+std::string DataAbilityHelperStandard::GetMovingPhotoImagePath(const std::string& uri)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    std::vector<std::string> columns = {IMAGE_PATH_DATA};
+    auto resultSet = mgr_.GetResultSetFromDb(IMAGE_URI, uri, columns);
+    if (resultSet == nullptr || resultSet->GoToFirstRow() != 0) {
+        LOGE("Result is nullptr or GoToFirstRow failed.");
+        return "";
+    }
+    std::string path = GetStringVal(IMAGE_PATH_DATA, resultSet);
+    LOGI("resultSet path : %{public}s.", path.c_str());
+    return path;
+#else
+    return "";
 #endif
 }
 

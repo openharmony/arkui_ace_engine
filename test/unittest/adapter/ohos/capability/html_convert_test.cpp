@@ -327,7 +327,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert007, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
     EXPECT_EQ(spans.size(), 1);
     auto it = spans.begin();
-    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::VP));
+    EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(50, DimensionUnit::PX));
 }
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)

@@ -106,6 +106,8 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
         TAG_LOGW(AceLogTag::ACE_FONT, "Drawing is not supported dynamic font");
 #endif
 #else
+        TAG_LOGI(AceLogTag::ACE_FONT, "LoadFontFromList familyName:%{public}s, length:%{public}d", familyName.c_str(),
+            static_cast<int32_t>(length));
         fontCollection_->LoadFont(familyName, fontData, length);
 #endif
     }

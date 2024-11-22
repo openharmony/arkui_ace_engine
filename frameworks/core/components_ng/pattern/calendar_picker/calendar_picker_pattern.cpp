@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -57,7 +58,7 @@ void CalendarPickerPattern::OnModifyDone()
     InitOnHoverEvent();
     HandleEnable();
     FlushTextStyle();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
@@ -78,7 +79,7 @@ void CalendarPickerPattern::UpdateAccessibilityText()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        message += textLayoutProperty->GetContent().value_or("");
+        message += UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u""));
     }
     auto textAccessibilityProperty = contentNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
@@ -120,7 +121,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -155,7 +156,7 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     CHECK_NULL_VOID(host);
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -164,7 +165,7 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     CHECK_NULL_VOID(addButtonNode);
     auto subButtonNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(SUB_BUTTON_INDEX));
     CHECK_NULL_VOID(subButtonNode);
-    
+
     auto textDirection = host->GetLayoutProperty()->GetNonAutoLayoutDirection();
     BorderWidthProperty addBorderWidth;
     BorderWidthProperty subBorderWidth;
@@ -432,7 +433,10 @@ void CalendarPickerPattern::ShowDialog()
     if (IsDialogShow()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
 
     std::map<std::string, NG::DialogEvent> dialogEvent;
@@ -455,8 +459,6 @@ void CalendarPickerPattern::ShowDialog()
         pattern->SetDialogShow(false);
     };
     dialogCancelEvent["cancelId"] = cancelId;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     calendarData_.entryNode = AceType::DynamicCast<FrameNode>(host);
     DialogProperties properties;
     InitDialogProperties(properties);
@@ -887,7 +889,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -909,16 +911,15 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     if (state) {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
     } else {
-        ResetTextStateByNode(DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index)));
+        textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     }
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CalendarPickerPattern::HandleButtonHoverEvent(bool state, int32_t index)
@@ -940,7 +941,7 @@ void CalendarPickerPattern::HandleButtonTouchEvent(bool isPressed, int32_t index
     CHECK_NULL_VOID(buttonFlexNode);
     auto buttonFrameNode = DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -1073,7 +1074,7 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     auto hostOffset = host->GetOffsetRelativeToWindow();
     auto hostSize = host->GetGeometryNode()->GetFrameSize();
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -1140,6 +1141,15 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void CalendarPickerPattern::OnColorConfigurationUpdate()
+{
+    if (IsDialogShow()) {
+        return;
+    }
+    selected_ = CalendarPickerSelectedType::OTHER;
+    ResetTextState();
+}
+
 std::string CalendarPickerPattern::GetEntryDateInfo()
 {
     if (!HasContentNode()) {
@@ -1154,19 +1164,22 @@ std::string CalendarPickerPattern::GetEntryDateInfo()
     CHECK_NULL_RETURN(yearNode, "");
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("year", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("1970")));
+    json->Put("year",
+        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"1970"))));
 
     auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(monthIndex_));
     CHECK_NULL_RETURN(monthNode, "");
     textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("month", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
+    json->Put("month",
+        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"01"))));
 
     auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(dayIndex_));
     CHECK_NULL_RETURN(dayNode, "");
     textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    json->Put("day", StringUtils::StringToInt(textLayoutProperty->GetContent().value_or("01")));
+    json->Put("day",
+        StringUtils::StringToInt(UtfUtils::Str16ToStr8(textLayoutProperty->GetContent().value_or(u"01"))));
 
     return json->ToString();
 }
@@ -1270,7 +1283,9 @@ void CalendarPickerPattern::SetSelectedType(CalendarPickerSelectedType type)
 
 bool CalendarPickerPattern::IsContainerModal()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto windowManager = pipelineContext->GetWindowManager();
     return pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&

@@ -23,29 +23,21 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<DividerModel> DividerModel::instance_ = nullptr;
-std::mutex DividerModel::mutex_;
-
 DividerModel* DividerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::DividerModelNG());
+    static NG::DividerModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::DividerModelNG());
-            } else {
-                instance_.reset(new Framework::DividerModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::DividerModelNG instance;
+        return &instance;
+    } else {
+        static Framework::DividerModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

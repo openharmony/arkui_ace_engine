@@ -17,6 +17,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -139,26 +140,6 @@ HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-}
-
-/**
- * @tc.name: KeyEvent003
- * @tc.desc: Test HandleDirectionKey func
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, KeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Test HandleDirectionKey
-     * @tc.expected: Only KEY_DPAD_UP/KEY_DPAD_DOWN will return true
-     */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
-    CreateDone(frameNode_);
-    EXPECT_FALSE(pattern_->HandleDirectionKey(KeyCode::KEY_UNKNOWN));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
-    EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
 }
 
 /**
@@ -907,7 +888,7 @@ HWTEST_F(GridCommonTestNg, FocusStep008, TestSize.Level1)
      */
     int32_t currentIndex = 4;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 3);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 3);
 }
 
 /**
@@ -933,7 +914,7 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
      */
     int32_t currentIndex = 19;
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 20);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 20);
 }
 
 /**
@@ -968,11 +949,11 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Scroll to second row
-     * @tc.expected: Would change startMainLineIndex_, focus last child.
+     * @tc.expected: item 1 scroll out of viewport, lost focus
      */
     gridFocusNode->RequestFocusImmediately();
     ScrollTo(ITEM_HEIGHT + 1.f);
-    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 }
 
 /**
@@ -1211,7 +1192,7 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
      * @tc.cases: case4. Position in grid but not in item and in currentRect_
      * @tc.expected: Return -1
      */
-    pattern_->gridLayoutInfo_.currentRect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
+    pattern_->info_.currentRect_ = RectF(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), NULL_VALUE);
 }
 
@@ -1326,7 +1307,7 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
      * @tc.steps: step1. get pattern .
      * @tc.expected: function ProvideRestoreInfo is called.
      */
-    pattern_->gridLayoutInfo_.startIndex_ = 1;
+    pattern_->info_.startIndex_ = 1;
     std::string ret = pattern_->ProvideRestoreInfo();
 
     /**
@@ -1334,7 +1315,7 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
      * @tc.expected: Passing JSON format.
      */
     pattern_->OnRestoreInfo(ret);
-    EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 1);
+    EXPECT_EQ(pattern_->info_.jumpIndex_, 1);
 }
 
 /**
@@ -1400,5 +1381,79 @@ HWTEST_F(GridCommonTestNg, GridItemModelNg001, TestSize.Level1)
     auto theme = themeManager->GetTheme<GridItemTheme>();
     ASSERT_NE(theme, nullptr);
     EXPECT_EQ(theme->GetGridItemBorderRadius(), radius);
+}
+
+/**
+ * @tc.name: ClipContent001
+ * @tc.desc: Test Grid contentClip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ViewAbstract::SetMargin(CalcLength(10.0f));
+    ViewAbstract::SetPadding(CalcLength(1.0f));
+    CreateDone(frameNode_);
+
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+
+    auto rect = AceType::MakeRefPtr<ShapeRect>();
+    rect->SetWidth(Dimension(200.0f));
+    rect->SetHeight(Dimension(200.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(478.0f, 798.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: Focus002
+ * @tc.desc: Test Focus with Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, Focus002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFocusableGridItems(18, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. When focus grid from the outside
+     * @tc.expected: Will focus first child
+     */
+    auto gridFocusNode = frameNode_->GetOrCreateFocusHub();
+    gridFocusNode->RequestFocusImmediately();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Scroll to third row
+     * @tc.expected: item 0 scroll out of viewport, lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT * 2, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Scroll to top
+     * @tc.expected: item 0 scroll into viewport, request focus
+     */
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT * 2, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

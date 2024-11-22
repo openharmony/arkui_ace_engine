@@ -51,33 +51,33 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
-    gridLayoutInfo_.crossCount_ = crossCount;
+    info_.crossCount_ = crossCount;
     if (targetIndex_.has_value()) {
-        gridLayoutInfo_.targetIndex_ = targetIndex_;
+        info_.targetIndex_ = targetIndex_;
     }
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
-        return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        return MakeRefPtr<GridLayoutAlgorithm>(info_, crossCount, mainCount);
     }
 
     // When rowsTemplate and columnsTemplate is both not setting, use adaptive layout algorithm.
     if (rows.empty() && cols.empty()) {
-        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(gridLayoutInfo_);
+        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
     const bool overScroll = CanOverScroll(GetScrollSource()) || forceOverScroll_;
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, overScroll);
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, overScroll);
         algo->SetEnableSkip(!disableSkip);
         return algo;
     }
     RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
-        result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_, crossCount, mainCount);
     } else {
-        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_, crossCount, mainCount);
     }
     result->SetCanOverScroll(overScroll);
     result->SetScrollSource(GetScrollSource());
@@ -95,7 +95,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    gridLayoutInfo_.childrenCount_ = host->GetTotalChildCount();
+    info_.childrenCount_ = host->GetTotalChildCount();
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -129,12 +129,12 @@ void GridPattern::OnModifyDone()
         UninitMouseEvent();
     }
 
-    gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+    info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
         return;
     }
-    SetAxis(gridLayoutInfo_.axis_);
+    SetAxis(info_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
     }
@@ -195,8 +195,8 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
             iter->second.selectChangeEvent = itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
         }
-        auto startMainOffset = mouseStartOffset_.GetMainOffset(gridLayoutInfo_.axis_);
-        if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+        auto startMainOffset = mouseStartOffset_.GetMainOffset(info_.axis_);
+        if (info_.axis_ == Axis::VERTICAL) {
             iter->second.rect = itemRect + OffsetF(0, totalOffsetOfMousePressed_ - startMainOffset);
         } else {
             iter->second.rect = itemRect + OffsetF(totalOffsetOfMousePressed_ - startMainOffset, 0);
@@ -275,6 +275,11 @@ void GridPattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
+    FireObserverOnScrollStart();
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->GetFocusManager()->SetNeedTriggerScroll(std::nullopt);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
@@ -287,19 +292,24 @@ void GridPattern::FireOnScrollStart()
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
-    if (gridLayoutInfo_.startIndex_ == 0) {
+    CHECK_NULL_VOID(host);
+    if (info_.startIndex_ == 0) {
         if (!isInitialized_) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            FireObserverOnReachStart();
+            if (onReachStart) {
+                onReachStart();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            }
         }
-        auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
+        auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
         if (!NearZero(finalOffset)) {
             bool scrollUpToStart =
-                GreatOrEqual(gridLayoutInfo_.prevHeight_, 0.0) && LessOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
+                GreatOrEqual(info_.prevHeight_, 0.0) && LessOrEqual(info_.currentHeight_, 0.0);
             bool scrollDownToStart =
-                LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
+                LessNotEqual(info_.prevHeight_, 0.0) && GreatOrEqual(info_.currentHeight_, 0.0);
             if (scrollUpToStart || scrollDownToStart) {
+                FireObserverOnReachStart();
+                CHECK_NULL_VOID(onReachStart);
                 ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
                     scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachStart();
@@ -312,15 +322,20 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
-    if (gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
-        auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
+    CHECK_NULL_VOID(host);
+    if (info_.endIndex_ == (info_.childrenCount_ - 1)) {
+        if (!isInitialized_) {
+            FireObserverOnReachEnd();
+        }
+        auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
         if (!NearZero(finalOffset)) {
-            bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
-                                   GreatOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
-            bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
-                                 LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
+            bool scrollDownToEnd = LessNotEqual(info_.prevHeight_, endHeight_) &&
+                                   GreatOrEqual(info_.currentHeight_, endHeight_);
+            bool scrollUpToEnd = GreatNotEqual(info_.prevHeight_, endHeight_) &&
+                                 LessOrEqual(info_.currentHeight_, endHeight_);
             if (scrollDownToEnd || scrollUpToEnd) {
+                FireObserverOnReachEnd();
+                CHECK_NULL_VOID(onReachEnd);
                 ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                     scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachEnd();
@@ -333,7 +348,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    onScrollIndex(gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_);
+    onScrollIndex(info_.startIndex_, info_.endIndex_);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -354,8 +369,18 @@ float GridPattern::GetMainGap() const
     CHECK_NULL_RETURN(geometryNode, 0.0);
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+    mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info_.axis_);
     return mainGap;
+}
+
+bool GridPattern::IsFadingBottom() const
+{
+    float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
+    if (LessNotEqual(info_.totalHeightOfItemsInView_, mainSize) && info_.startIndex_ == 0) {
+        return Positive(info_.currentOffset_);
+    } else {
+        return !info_.offsetEnd_;
+    }
 }
 
 bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
@@ -376,55 +401,55 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
-    if (gridLayoutInfo_.synced_) {
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        gridLayoutInfo_.synced_ = false;
+    if (info_.synced_) {
+        info_.prevOffset_ = info_.currentOffset_;
+        info_.synced_ = false;
     }
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    bool regular = !UseIrregularLayout();
+    bool irregular = UseIrregularLayout();
     float mainGap = GetMainGap();
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
-    if (gridLayoutInfo_.offsetEnd_) {
+    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
+    if (info_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (!regular) {
-                overScroll = gridLayoutInfo_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
+            if (irregular) {
+                overScroll = info_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
             } else {
-                overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+                overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
             }
-            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
-        gridLayoutInfo_.currentOffset_ -= userOffset;
+        info_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-        if (GreatNotEqual(gridLayoutInfo_.currentOffset_, GetMainContentSize() - itemsHeight)) {
-            gridLayoutInfo_.offsetEnd_ = false;
-            gridLayoutInfo_.reachEnd_ = false;
+        if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
+            info_.offsetEnd_ = false;
+            info_.reachEnd_ = false;
         }
+
         return true;
     }
-    if (gridLayoutInfo_.reachStart_) {
+    if (info_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction =
-                ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
-        gridLayoutInfo_.currentOffset_ -= userOffset;
+        info_.currentOffset_ -= userOffset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-        if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
-            gridLayoutInfo_.reachStart_ = false;
+        if (LessNotEqual(info_.currentOffset_, 0.0)) {
+            info_.reachStart_ = false;
         }
         return true;
     }
     auto userOffset = FireOnWillScroll(-offset);
-    gridLayoutInfo_.currentOffset_ -= userOffset;
+    info_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -444,27 +469,27 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
     Dimension offset(offsetPx.ConvertToVp(), DimensionUnit::VP);
     scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (!isInitialized_ || gridLayoutInfo_.startIndex_ != gridLayoutInfo.startIndex_) {
+    if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
     }
 
-    bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
-                        (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
-    bool offsetEnd = gridLayoutInfo_.offsetEnd_;
-    gridLayoutInfo_ = gridLayoutInfo;
-    gridLayoutInfo_.synced_ = true;
+    bool indexChanged = (gridLayoutInfo.startIndex_ != info_.startIndex_) ||
+                        (gridLayoutInfo.endIndex_ != info_.endIndex_);
+    bool offsetEnd = info_.offsetEnd_;
+    info_ = gridLayoutInfo;
+    info_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    gridLayoutInfo_.reachStart_ =
-        gridLayoutInfo_.startIndex_ == 0 && GreatOrEqual(gridLayoutInfo_.currentOffset_, 0.0f);
+    info_.reachStart_ =
+        info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, 0.0f);
 
-    gridLayoutInfo_.currentHeight_ = EstimateHeight();
-    if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
-        endHeight_ = gridLayoutInfo_.currentHeight_;
+    info_.currentHeight_ = EstimateHeight();
+    if (!offsetEnd && info_.offsetEnd_) {
+        endHeight_ = info_.currentHeight_;
     }
-    ProcessEvent(indexChanged, gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_);
-    gridLayoutInfo_.prevHeight_ = gridLayoutInfo_.currentHeight_;
-    gridLayoutInfo_.extraOffset_.reset();
+    ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
+    info_.prevHeight_ = info_.currentHeight_;
+    info_.extraOffset_.reset();
     SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
@@ -481,7 +506,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    return paintProperty->GetFadingEdge().value_or(false);
+    return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();
 }
 
 void GridPattern::CheckGridItemRange(const std::pair<int32_t, int32_t>& range)
@@ -512,15 +537,11 @@ void GridPattern::CheckScrollable()
     CHECK_NULL_VOID(host);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
-    if (((gridLayoutInfo_.endIndex_ - gridLayoutInfo_.startIndex_ + 1) < gridLayoutInfo_.childrenCount_) ||
-        (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap(), !UseIrregularLayout()) > GetMainContentSize())) {
+    if (((info_.endIndex_ - info_.startIndex_ + 1) < info_.childrenCount_) ||
+        (info_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
-        if (gridLayoutInfo_.startMainLineIndex_ != 0 || GetAlwaysEnabled()) {
-            scrollable_ = true;
-        } else {
-            scrollable_ = false;
-        }
+        scrollable_ = info_.startMainLineIndex_ != 0 || GetAlwaysEnabled();
     }
 
     SetScrollEnabled(scrollable_);
@@ -542,6 +563,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
+    FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -553,6 +575,60 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     FireOnReachEnd(onReachEnd);
     OnScrollStop(gridEventHub->GetOnScrollStop());
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    if (needTriggerFocus_) {
+        if (triggerFocus_) {
+            needTriggerFocus_ = false;
+            triggerFocus_ = false;
+            focusHub->GetNextFocusByStep(keyEvent_);
+        } else {
+            if (!focusIndex_.has_value()) {
+                needTriggerFocus_ = false;
+                return;
+            }
+            triggerFocus_ = true;
+            auto child = host->GetOrCreateChildByIndex(focusIndex_.value());
+            CHECK_NULL_VOID(child);
+            auto childNode = child->GetHostNode();
+            auto childFocusHub = childNode->GetFocusHub();
+            if (childFocusHub && !childFocusHub->IsCurrentFocus()) {
+                childFocusHub->RequestFocusImmediately();
+            }
+            MarkDirtyNodeSelf();
+        }
+        return;
+    }
+    if (indexChanged && focusIndex_.has_value()) {
+        FireFocus();
+    }
+}
+
+void GridPattern::FireFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    CHECK_NULL_VOID(focusIndex_.has_value());
+    if (IsInViewport(focusIndex_.value())) {
+        auto child = host->GetChildByIndex(focusIndex_.value());
+        CHECK_NULL_VOID(child);
+        auto childNode = child->GetHostNode();
+        auto childFocusHub = childNode->GetFocusHub();
+        if (!childFocusHub->IsCurrentFocus()) {
+            focusHub->SetFocusDependence(FocusDependence::AUTO);
+            childFocusHub->RequestFocusImmediately();
+            TAG_LOGI(
+                AceLogTag::ACE_GRID, "GridItem [%{public}d] scroll into viewport, Requests focus", focusIndex_.value());
+        }
+    } else {
+        focusHub->LostChildFocusToSelf();
+    }
 }
 
 void GridPattern::MarkDirtyNodeSelf()
@@ -587,7 +663,7 @@ std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIn
     auto findGreater = std::find_if(crossIndexSet.begin(), crossIndexSet.end(),
         [curCrossIndex](int32_t crossIndex) { return curCrossIndex < crossIndex; });
     return { curCrossIndex == 0 || findLesser == crossIndexSet.end(),
-        curCrossIndex == gridLayoutInfo_.crossCount_ - 1 || findGreater == crossIndexSet.end() };
+        curCrossIndex == info_.crossCount_ - 1 || findGreater == crossIndexSet.end() };
 }
 
 std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step)
@@ -597,7 +673,7 @@ std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex,
     auto isFirstOrLastFocusable = IsFirstOrLastFocusableChild(curMainIndex, curCrossIndex);
     auto isFirstFocusable = isFirstOrLastFocusable.first;
     auto isLastFocusable = isFirstOrLastFocusable.second;
-    if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+    if (info_.axis_ == Axis::VERTICAL) {
         if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
             firstStep = FocusStep::UP;
             secondStep = FocusStep::RIGHT_END;
@@ -605,7 +681,7 @@ std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(int32_t curMainIndex,
             firstStep = FocusStep::DOWN;
             secondStep = FocusStep::LEFT_END;
         }
-    } else if (gridLayoutInfo_.axis_ == Axis::HORIZONTAL) {
+    } else if (info_.axis_ == Axis::HORIZONTAL) {
         if (isFirstFocusable && step == FocusStep::SHIFT_TAB) {
             firstStep = FocusStep::LEFT;
             secondStep = FocusStep::DOWN_END;
@@ -637,17 +713,17 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto curMainIndex = curItemProperty->GetMainIndex().value_or(-1);
     auto curCrossIndex = curItemProperty->GetCrossIndex().value_or(-1);
     auto curMainSpan =
-        hasIrregularItemInfo ? irregularInfo.value().mainSpan : curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().mainSpan : curItemProperty->GetMainSpan(info_.axis_);
     auto curCrossSpan =
-        hasIrregularItemInfo ? irregularInfo.value().crossSpan : curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().crossSpan : curItemProperty->GetCrossSpan(info_.axis_);
     auto curMainStart =
-        hasIrregularItemInfo ? irregularInfo.value().mainStart : curItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().mainStart : curItemProperty->GetMainStart(info_.axis_);
     auto curCrossStart =
-        hasIrregularItemInfo ? irregularInfo.value().crossStart : curItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().crossStart : curItemProperty->GetCrossStart(info_.axis_);
     auto curMainEnd =
-        hasIrregularItemInfo ? irregularInfo.value().mainEnd : curItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().mainEnd : curItemProperty->GetMainEnd(info_.axis_);
     auto curCrossEnd =
-        hasIrregularItemInfo ? irregularInfo.value().crossEnd : curItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+        hasIrregularItemInfo ? irregularInfo.value().crossEnd : curItemProperty->GetCrossEnd(info_.axis_);
 
     curFocusIndexInfo_.mainIndex = curMainIndex;
     curFocusIndexInfo_.crossIndex = curCrossIndex;
@@ -662,7 +738,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         TAG_LOGW(AceLogTag::ACE_GRID, "can't find focused child.");
         return nullptr;
     }
-    if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+    if (info_.gridMatrix_.find(curMainIndex) == info_.gridMatrix_.end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return nullptr;
     }
@@ -677,7 +753,15 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
         auto secondStepRes = GetNextFocusNode(focusSteps.second, firstStepRes);
         if (!secondStepRes.Upgrade()) {
+            int32_t index = GetIndexByFocusHub(firstStepRes);
+            if (index > -1) {
+                focusIndex_ = index;
+            }
             return firstStepRes;
+        }
+        int32_t index = GetIndexByFocusHub(secondStepRes);
+        if (index > -1) {
+            focusIndex_ = index;
         }
         return secondStepRes;
     }
@@ -685,18 +769,22 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto nextMainIndex = indexes.first;
     auto nextCrossIndex = indexes.second;
     while (nextMainIndex >= 0 && nextCrossIndex >= 0) {
-        if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+        if (info_.gridMatrix_.find(nextMainIndex) == info_.gridMatrix_.end()) {
             TAG_LOGW(AceLogTag::ACE_GRID, "Can not find next main index: %{public}d", nextMainIndex);
             return nullptr;
         }
         auto nextMaxCrossCount = GetCrossCount();
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
-        auto weakChild = gridLayoutInfo_.hasBigItem_ ? SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex)
+        auto weakChild = info_.hasBigItem_ ? SearchIrregularFocusableChild(nextMainIndex, nextCrossIndex)
                                                      : SearchFocusableChildInCross(nextMainIndex, nextCrossIndex,
                                                            nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
+            int32_t index = GetIndexByFocusHub(weakChild);
+            if (index > -1) {
+                focusIndex_ = index;
+            }
             return weakChild;
         }
         auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
@@ -706,58 +794,71 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     return nullptr;
 }
 
+int32_t GridPattern::GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode)
+{
+    auto focusHub = focusNode.Upgrade();
+    CHECK_NULL_RETURN(focusHub, -1);
+    auto node = focusHub->GetFrameNode();
+    CHECK_NULL_RETURN(node, -1);
+    auto property = AceType::DynamicCast<GridItemLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(property, -1);
+    int32_t crossIndex = property->GetCrossIndex().value_or(-1);
+    int32_t mainIndex = property->GetMainIndex().value_or(-1);
+    return info_.FindInMatrixByMainIndexAndCrossIndex(mainIndex, crossIndex);
+}
+
 std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step)
 {
-    auto curMainStart = gridLayoutInfo_.startMainLineIndex_;
-    auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
-    auto curChildStartIndex = gridLayoutInfo_.startIndex_;
-    auto curChildEndIndex = gridLayoutInfo_.endIndex_;
-    auto childrenCount = gridLayoutInfo_.childrenCount_;
-    auto hasIrregularItems = gridLayoutInfo_.hasBigItem_;
-    if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+    auto curMainStart = info_.startMainLineIndex_;
+    auto curMainEnd = info_.endMainLineIndex_;
+    auto curChildStartIndex = info_.startIndex_;
+    auto curChildEndIndex = info_.endIndex_;
+    auto childrenCount = info_.childrenCount_;
+    auto hasIrregularItems = info_.hasBigItem_;
+    if (info_.gridMatrix_.find(curMainIndex) == info_.gridMatrix_.end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
         return { -1, -1 };
     }
     TAG_LOGI(AceLogTag::ACE_GRID,
         "Current: (%{public}d,%{public}d)-[%{public}d,%{public}d]. axis: %{public}d, step: %{public}d",
-        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, gridLayoutInfo_.axis_, step);
+        curMainIndex, curCrossIndex, curMainSpan, curCrossSpan, info_.axis_, step);
     auto curMaxCrossCount = GetCrossCount();
     auto nextMainIndex = curMainIndex;
     auto nextCrossIndex = curCrossIndex;
-    if ((step == FocusStep::UP_END && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-        (step == FocusStep::LEFT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    if ((step == FocusStep::UP_END && info_.axis_ == Axis::HORIZONTAL) ||
+        (step == FocusStep::LEFT_END && info_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = 0;
         isLeftEndStep_ = hasIrregularItems ? true : false;
-    } else if ((step == FocusStep::DOWN_END && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-               (step == FocusStep::RIGHT_END && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    } else if ((step == FocusStep::DOWN_END && info_.axis_ == Axis::HORIZONTAL) ||
+               (step == FocusStep::RIGHT_END && info_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curMaxCrossCount - 1;
         isRightEndStep_ = hasIrregularItems ? true : false;
-    } else if (((step == FocusStep::UP || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-               ((step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    } else if (((step == FocusStep::UP || step == FocusStep::SHIFT_TAB) && info_.axis_ == Axis::HORIZONTAL) ||
+               ((step == FocusStep::LEFT || step == FocusStep::SHIFT_TAB) && info_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex - 1;
         isLeftStep_ = hasIrregularItems ? true : false;
-    } else if ((step == FocusStep::UP && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
-               (step == FocusStep::LEFT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
+    } else if ((step == FocusStep::UP && info_.axis_ == Axis::VERTICAL) ||
+               (step == FocusStep::LEFT && info_.axis_ == Axis::HORIZONTAL)) {
         nextMainIndex = hasIrregularItems ? curMainIndex - curMainSpan : curMainIndex - 1;
         nextCrossIndex = curCrossIndex + static_cast<int32_t>((curCrossSpan - 1) / 2);
         isUpStep_ = hasIrregularItems ? true : false;
-    } else if (((step == FocusStep::DOWN || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::HORIZONTAL) ||
-               ((step == FocusStep::RIGHT || step == FocusStep::TAB) && gridLayoutInfo_.axis_ == Axis::VERTICAL)) {
+    } else if (((step == FocusStep::DOWN || step == FocusStep::TAB) && info_.axis_ == Axis::HORIZONTAL) ||
+               ((step == FocusStep::RIGHT || step == FocusStep::TAB) && info_.axis_ == Axis::VERTICAL)) {
         nextMainIndex = curMainIndex;
         nextCrossIndex = curCrossIndex + curCrossSpan;
         isRightStep_ = hasIrregularItems ? true : false;
-    } else if ((step == FocusStep::DOWN && gridLayoutInfo_.axis_ == Axis::VERTICAL) ||
-               (step == FocusStep::RIGHT && gridLayoutInfo_.axis_ == Axis::HORIZONTAL)) {
+    } else if ((step == FocusStep::DOWN && info_.axis_ == Axis::VERTICAL) ||
+               (step == FocusStep::RIGHT && info_.axis_ == Axis::HORIZONTAL)) {
         nextMainIndex = hasIrregularItems ? curMainIndex + 1 : curMainIndex + curMainSpan;
         nextCrossIndex = curCrossIndex + static_cast<int32_t>((curCrossSpan - 1) / 2);
         isDownStep_ = hasIrregularItems ? true : false;
     } else {
         TAG_LOGW(AceLogTag::ACE_GRID, "Next index return: Invalid step: %{public}d and axis: %{public}d", step,
-            gridLayoutInfo_.axis_);
+            info_.axis_);
         return { -1, -1 };
     }
     if (curChildStartIndex == 0 && curMainIndex == 0 && nextMainIndex < curMainIndex) {
@@ -788,8 +889,8 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
             pipeline->FlushUITasks();
         }
     }
-    curMainStart = gridLayoutInfo_.startMainLineIndex_;
-    curMainEnd = gridLayoutInfo_.endMainLineIndex_;
+    curMainStart = info_.startMainLineIndex_;
+    curMainEnd = info_.endMainLineIndex_;
     if (nextMainIndex < curMainStart || nextMainIndex > curMainEnd) {
         ResetAllDirectionsStep();
         return { -1, -1 };
@@ -798,7 +899,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         ResetAllDirectionsStep();
         return { -1, -1 };
     }
-    if (gridLayoutInfo_.gridMatrix_.find(nextMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+    if (info_.gridMatrix_.find(nextMainIndex) == info_.gridMatrix_.end()) {
         ResetAllDirectionsStep();
         return { -1, -1 };
     }
@@ -875,7 +976,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, nullptr);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         if (!childFocus->IsFocusable()) {
             continue;
@@ -898,17 +1000,17 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         auto childMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto childCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
         auto childMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
-                                                   : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+                                                   : childItemProperty->GetMainStart(info_.axis_);
         auto childMainEnd =
-            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(info_.axis_);
         auto chidCrossStart = hasIrregularItemInfo ? irregularInfo.value().crossStart
-                                                   : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
+                                                   : childItemProperty->GetCrossStart(info_.axis_);
         auto chidCrossEnd = hasIrregularItemInfo ? irregularInfo.value().crossEnd
-                                                 : childItemProperty->GetCrossEnd(gridLayoutInfo_.axis_);
+                                                 : childItemProperty->GetCrossEnd(info_.axis_);
         auto childCrossSpan = hasIrregularItemInfo ? irregularInfo.value().crossSpan
-                                                   : childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+                                                   : childItemProperty->GetCrossSpan(info_.axis_);
         auto childMainSpan = hasIrregularItemInfo ? irregularInfo.value().mainSpan
-                                                  : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+                                                  : childItemProperty->GetMainSpan(info_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
@@ -976,10 +1078,10 @@ int32_t GridPattern::CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo 
             curFocusIndexInfo_.mainEnd == -1 ? curFocusIndexInfo_.mainIndex : curFocusIndexInfo_.mainEnd;
         curFocusRightBottonY = GetCrossCount();
     } else {
-        curFocusLeftTopX = gridLayoutInfo_.startMainLineIndex_;
+        curFocusLeftTopX = info_.startMainLineIndex_;
         curFocusLeftTopY =
             curFocusIndexInfo_.crossStart == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossStart;
-        curFocusRightBottonX = gridLayoutInfo_.endMainLineIndex_;
+        curFocusRightBottonX = info_.endMainLineIndex_;
         curFocusRightBottonY =
             curFocusIndexInfo_.crossEnd == -1 ? curFocusIndexInfo_.crossIndex : curFocusIndexInfo_.crossEnd;
     }
@@ -1061,7 +1163,8 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
     CHECK_NULL_RETURN(gridFrame, nullptr);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, nullptr);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         auto childFrame = childFocus->GetFrameNode();
         if (!childFrame) {
@@ -1082,23 +1185,23 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
         auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
         if (tarIndex < 0) {
-            auto curMainSpan = childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
-            auto curCrossSpan = childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
+            auto curMainSpan = childItemProperty->GetMainSpan(info_.axis_);
+            auto curCrossSpan = childItemProperty->GetCrossSpan(info_.axis_);
             if (curMainIndex <= tarMainIndex && curMainIndex + curMainSpan > tarMainIndex &&
                 curCrossIndex <= tarCrossIndex && curCrossIndex + curCrossSpan > tarCrossIndex) {
                 return AceType::WeakClaim(AceType::RawPtr(childFocus));
             }
         } else {
-            if (gridLayoutInfo_.gridMatrix_.find(curMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+            if (info_.gridMatrix_.find(curMainIndex) == info_.gridMatrix_.end()) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "Can not find target main index: %{public}d", curMainIndex);
                 continue;
             }
-            if (gridLayoutInfo_.gridMatrix_[curMainIndex].find(curCrossIndex) ==
-                gridLayoutInfo_.gridMatrix_[curMainIndex].end()) {
+            if (info_.gridMatrix_[curMainIndex].find(curCrossIndex) ==
+                info_.gridMatrix_[curMainIndex].end()) {
                 TAG_LOGW(AceLogTag::ACE_GRID, "Can not find target cross index: %{public}d", curCrossIndex);
                 continue;
             }
-            if (gridLayoutInfo_.gridMatrix_[curMainIndex][curCrossIndex] == tarIndex) {
+            if (info_.gridMatrix_[curMainIndex][curCrossIndex] == tarIndex) {
                 return AceType::WeakClaim(AceType::RawPtr(childFocus));
             }
         }
@@ -1113,7 +1216,8 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
     CHECK_NULL_RETURN(gridFrame, result);
     auto gridFocus = gridFrame->GetFocusHub();
     CHECK_NULL_RETURN(gridFocus, result);
-    auto childFocusList = gridFocus->GetChildren();
+    std::list<RefPtr<FocusHub>> childFocusList;
+    gridFocus->FlushChildrenFocusHub(childFocusList);
     for (const auto& childFocus : childFocusList) {
         if (!childFocus->IsFocusable()) {
             continue;
@@ -1139,9 +1243,9 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
         auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
         auto curMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
-                                                 : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
+                                                 : childItemProperty->GetMainStart(info_.axis_);
         auto curMainEnd =
-            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
+            hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(info_.axis_);
         if ((curMainIndex == tarMainIndex) ||
             (curMainStart >= 0 && curMainStart <= tarMainIndex && tarMainIndex <= curMainEnd)) {
             result.emplace(curCrossIndex);
@@ -1156,6 +1260,7 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
 
 void GridPattern::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
 {
+    StopAnimate();
     auto nextFocus = focusNode.Upgrade();
     CHECK_NULL_VOID(nextFocus);
     UpdateStartIndex(GetFocusNodeIndex(nextFocus));
@@ -1173,26 +1278,27 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     CHECK_NULL_RETURN(tarItemProperty, -1);
     auto tarMainIndex = tarItemProperty->GetMainIndex().value_or(-1);
     auto tarCrossIndex = tarItemProperty->GetCrossIndex().value_or(-1);
-    if (gridLayoutInfo_.gridMatrix_.find(tarMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
+    if (info_.gridMatrix_.find(tarMainIndex) == info_.gridMatrix_.end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find target main index: %{public}d", tarMainIndex);
         if (tarMainIndex == 0) {
             return 0;
         }
-        return gridLayoutInfo_.childrenCount_ - 1;
+        return info_.childrenCount_ - 1;
     }
-    if (gridLayoutInfo_.gridMatrix_[tarMainIndex].find(tarCrossIndex) ==
-        gridLayoutInfo_.gridMatrix_[tarMainIndex].end()) {
+    if (info_.gridMatrix_[tarMainIndex].find(tarCrossIndex) ==
+        info_.gridMatrix_[tarMainIndex].end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find target cross index: %{public}d", tarCrossIndex);
         if (tarMainIndex == 0) {
             return 0;
         }
-        return gridLayoutInfo_.childrenCount_ - 1;
+        return info_.childrenCount_ - 1;
     }
-    return gridLayoutInfo_.gridMatrix_[tarMainIndex][tarCrossIndex];
+    return info_.gridMatrix_[tarMainIndex][tarCrossIndex];
 }
 
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
+    StopAnimate();
     UpdateStartIndex(index);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1214,6 +1320,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     if (scrollToIndex < 0) {
         return false;
     }
+    StopAnimate();
     auto ret = UpdateStartIndex(scrollToIndex);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -1222,7 +1329,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
-std::pair<std::function<bool(float)>, Axis> GridPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility GridPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
@@ -1277,6 +1384,43 @@ void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+
+    focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleBlurEvent();
+        }
+    });
+}
+
+void GridPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+
+    auto child = focusHub->GetLastWeakFocusNode();
+    auto childFocusHub = child.Upgrade();
+    CHECK_NULL_VOID(childFocusHub);
+    int32_t index = GetIndexByFocusHub(childFocusHub);
+    if (index >= 0) {
+        focusIndex_ = index;
+        TAG_LOGI(AceLogTag::ACE_GRID, "Grid on focus with index: %{public}d", index);
+    }
+}
+
+void GridPattern::HandleBlurEvent()
+{
+    TAG_LOGI(AceLogTag::ACE_GRID, "Grid lost focus");
 }
 
 bool GridPattern::OnKeyEvent(const KeyEvent& event)
@@ -1287,17 +1431,56 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
+
+    if (FocusHub::IsFocusStepKey(event.code)) {
+        if (ScrollToLastFocusIndex(event.code)) {
+            keyEvent_ = event;
+            return true;
+        }
+    }
     return false;
 }
 
-bool GridPattern::HandleDirectionKey(KeyCode code)
+bool GridPattern::IsInViewport(int32_t index) const
 {
-    if (code == KeyCode::KEY_DPAD_UP) {
-        // Need to update: current selection
-        return true;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
+    bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
+    if (!showCachedItems) {
+        return index >= info_.startIndex_ && index <= info_.endIndex_;
     }
-    if (code == KeyCode::KEY_DPAD_DOWN) {
-        // Need to update: current selection
+    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
+}
+
+bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(pipeline->GetIsFocusActive(), false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
+    CHECK_NULL_RETURN(focusIndex_.has_value(), false);
+
+    if (!IsInViewport(focusIndex_.value())) {
+        StopAnimate();
+        needTriggerFocus_ = true;
+        // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
+        if (focusIndex_.value() < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP &&
+            focusIndex_.value() - GetCrossCount() >= 0) {
+            UpdateStartIndex(focusIndex_.value() - GetCrossCount());
+        // If focused item is below viewport and the current keyCode type is DOWN, scroll backward one more line
+        } else if (focusIndex_.value() > info_.endIndex_ && keyCode == KeyCode::KEY_DPAD_DOWN &&
+                   focusIndex_.value() + GetCrossCount() < GetChildrenCount()) {
+            UpdateStartIndex(focusIndex_.value() + GetCrossCount());
+        } else {
+            UpdateStartIndex(focusIndex_.value());
+        }
         return true;
     }
     return false;
@@ -1310,7 +1493,7 @@ void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType 
         distance = distance / 2.f;
     }
     if (smooth) {
-        float position = -gridLayoutInfo_.currentHeight_ + distance;
+        float position = -info_.currentHeight_ + distance;
         ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
         return;
     } else {
@@ -1330,7 +1513,7 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    gridLayoutInfo_.jumpIndex_ = index;
+    info_.jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // AccessibilityEventType::SCROLL_END
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1339,7 +1522,7 @@ bool GridPattern::UpdateStartIndex(int32_t index)
 
 bool GridPattern::UpdateStartIndex(int32_t index, ScrollAlign align)
 {
-    gridLayoutInfo_.scrollAlign_ = align;
+    info_.scrollAlign_ = align;
     return UpdateStartIndex(index);
 }
 
@@ -1378,16 +1561,17 @@ float GridPattern::EstimateHeight() const
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        const auto* infoPtr = UseIrregularLayout() ? &gridLayoutInfo_ : &scrollGridLayoutInfo_;
+        const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
+        CHECK_NULL_RETURN(infoPtr, 0.0f);
         int32_t lineIndex = 0;
-        infoPtr->GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
-        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - gridLayoutInfo_.currentOffset_;
+        infoPtr->GetLineIndexByIndex(info_.startIndex_, lineIndex);
+        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - info_.currentOffset_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
@@ -1407,7 +1591,7 @@ float GridPattern::GetAverageHeight() const
     CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
 
@@ -1444,26 +1628,24 @@ float GridPattern::GetTotalHeight() const
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, gridLayoutInfo_.axis_);
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info_.axis_);
     if (UseIrregularLayout()) {
-        return gridLayoutInfo_.GetIrregularHeight(mainGap);
+        return info_.GetIrregularHeight(mainGap);
     }
-    return gridLayoutInfo_.GetContentHeight(mainGap);
+    return info_.GetContentHeight(mainGap);
 }
 
 void GridPattern::UpdateScrollBarOffset()
 {
-    if (!GetScrollBar() && !GetScrollBarProxy()) {
-        return;
-    }
-    if (!isConfigScrollable_) {
+    CheckScrollBarOff();
+    if ((!GetScrollBar() && !GetScrollBarProxy()) || !isConfigScrollable_) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
     float offset = 0;
     float estimatedHeight = 0.f;
     if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
@@ -1492,14 +1674,14 @@ void GridPattern::UpdateScrollBarOffset()
     }
     auto viewSize = geometryNode->GetFrameSize();
     auto overScroll = 0.0f;
-    if (gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_)) {
-        overScroll = gridLayoutInfo_.currentOffset_;
+    if (info_.reachStart_ && Positive(info_.currentOffset_)) {
+        overScroll = info_.currentOffset_;
     } else {
-        overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
+        overScroll = info_.lastMainSize_ - estimatedHeight + offset;
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
-    if (gridLayoutInfo_.offsetEnd_ && NearZero(overScroll)) {
-        offset = estimatedHeight - gridLayoutInfo_.lastMainSize_;
+    if (info_.offsetEnd_ && NearZero(overScroll)) {
+        offset = estimatedHeight - info_.lastMainSize_;
     }
     HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
@@ -1516,22 +1698,22 @@ DisplayMode GridPattern::GetDefaultScrollBarDisplayMode() const
 
 int32_t GridPattern::GetOriginalIndex() const
 {
-    return gridLayoutInfo_.GetOriginalIndex();
+    return info_.GetOriginalIndex();
 }
 
 int32_t GridPattern::GetCrossCount() const
 {
-    return gridLayoutInfo_.crossCount_;
+    return info_.crossCount_;
 }
 
 int32_t GridPattern::GetChildrenCount() const
 {
-    return gridLayoutInfo_.childrenCount_;
+    return info_.childrenCount_;
 }
 
 void GridPattern::ClearDragState()
 {
-    gridLayoutInfo_.ClearDragState();
+    info_.ClearDragState();
     MarkDirtyNodeSelf();
 }
 
@@ -1548,10 +1730,10 @@ void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
         CHECK_NULL_VOID(itemProperty);
         auto mainIndex = itemProperty->GetMainIndex().value_or(-1);
         auto crossIndex = itemProperty->GetCrossIndex().value_or(-1);
-        if (mainIndex * gridLayoutInfo_.crossCount_ + crossIndex == insertIndex) {
+        if (mainIndex * info_.crossCount_ + crossIndex == insertIndex) {
             auto size = item->GetRenderContext()->GetPaintRectWithTransform();
             size.SetOffset(item->GetTransformRelativeOffset());
-            gridLayoutInfo_.currentRect_ = size;
+            info_.currentRect_ = size;
             break;
         }
     }
@@ -1560,7 +1742,7 @@ void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
 void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 {
     if (insertIndex < 0 ||
-        insertIndex >= ((itemIndex == -1) ? (gridLayoutInfo_.childrenCount_ + 1) : gridLayoutInfo_.childrenCount_)) {
+        insertIndex >= ((itemIndex == -1) ? (info_.childrenCount_ + 1) : info_.childrenCount_)) {
         return;
     }
 
@@ -1568,7 +1750,7 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
         UpdateRectOfDraggedInItem(insertIndex);
     }
 
-    gridLayoutInfo_.SwapItems(itemIndex, insertIndex);
+    info_.SwapItems(itemIndex, insertIndex);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1581,35 +1763,35 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 
 bool GridPattern::IsOutOfBoundary(bool /*useCurrentDelta*/)
 {
-    const bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
-                            (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
-                            GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
+    const bool scrollable = GetAlwaysEnabled() || (info_.startIndex_ > 0) ||
+                            (info_.endIndex_ < info_.childrenCount_ - 1) ||
+                            GreatNotEqual(info_.totalHeightOfItemsInView_, info_.lastMainSize_);
     return scrollable &&
-           (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd(GetMainGap(), UseIrregularLayout()));
+           (info_.IsOutOfStart() || info_.IsOutOfEnd(GetMainGap(), UseIrregularLayout()));
 }
 
 float GridPattern::GetEndOffset()
 {
-    auto& info = gridLayoutInfo_;
+    auto& info = info_;
     float contentHeight = info.lastMainSize_ - info.contentEndPadding_;
-    float mainGap = GetMainGap();
-    bool regular = !UseIrregularLayout();
-    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, regular);
+    const float mainGap = GetMainGap();
+    const bool irregular = UseIrregularLayout();
+    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
     if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
         // overScroll with contentHeight < viewport
-        if (!regular) {
+        if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
         float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
-    if (regular) {
+    if (!irregular) {
         return contentHeight - heightInView;
     }
-    float disToBot = gridLayoutInfo_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
-    return gridLayoutInfo_.currentOffset_ - disToBot;
+    float disToBot = info_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
+    return info_.currentOffset_ - disToBot;
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1617,10 +1799,10 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
-        if (!grid->gridLayoutInfo_.synced_) {
+        if (!grid->info_.synced_) {
             grid->SyncLayoutBeforeSpring();
         }
-        return grid->gridLayoutInfo_.currentOffset_;
+        return grid->info_.currentOffset_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
@@ -1638,13 +1820,13 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 
 void GridPattern::SyncLayoutBeforeSpring()
 {
-    auto& info = gridLayoutInfo_;
+    auto& info = info_;
     if (info.synced_) {
         return;
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_.rbegin()->second)) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info_.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;
@@ -1657,15 +1839,19 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     forceOverScroll_ = true;
     host->SetActive();
-    host->CreateLayoutTask();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
     forceOverScroll_ = false;
 }
 
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
-    const auto& info = gridLayoutInfo_;
+    const auto& info = info_;
+    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
     float disToBot = info.GetDistanceToBottom(
-        info.lastMainSize_ - info.contentEndPadding_, info.totalHeightOfItemsInView_, GetMainGap());
+        info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
     if (!info.offsetEnd_) {
         offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
     } else if (Negative(delta)) {
@@ -1678,8 +1864,8 @@ void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delt
 OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (gridLayoutInfo_.startIndex_ == 0 && gridLayoutInfo_.startMainLineIndex_ == 0) {
-        auto startPos = gridLayoutInfo_.currentOffset_;
+    if (info_.startIndex_ == 0 && info_.startMainLineIndex_ == 0) {
+        auto startPos = info_.currentOffset_;
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {
             offset.start = delta;
@@ -1695,12 +1881,12 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         return offset;
     }
-    if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
-        float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-        float mainSize = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    if (info_.endIndex_ == info_.childrenCount_ - 1) {
+        float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_;
+        float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
         if (GreatNotEqual(
-                GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
-            endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
+                GetMainContentSize(), info_.currentOffset_ + info_.totalHeightOfItemsInView_)) {
+            endPos = info_.currentOffset_ + GetMainContentSize();
         }
         float newEndPos = endPos + delta;
         if (endPos < mainSize && newEndPos < mainSize) {
@@ -1731,35 +1917,41 @@ void GridPattern::DumpAdvanceInfo()
                       : DumpLog::GetInstance().AddDesc("supportAnimation:false");
     isConfigScrollable_ ? DumpLog::GetInstance().AddDesc("isConfigScrollable:true")
                         : DumpLog::GetInstance().AddDesc("isConfigScrollable:false");
-    gridLayoutInfo_.lastCrossCount_.has_value()
-        ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(gridLayoutInfo_.lastCrossCount_.value()))
+    info_.lastCrossCount_.has_value()
+        ? DumpLog::GetInstance().AddDesc("lastCrossCount:" + std::to_string(info_.lastCrossCount_.value()))
         : DumpLog::GetInstance().AddDesc("lastCrossCount:null");
-    gridLayoutInfo_.reachEnd_ ? DumpLog::GetInstance().AddDesc("reachEnd:true")
+    info_.reachEnd_ ? DumpLog::GetInstance().AddDesc("reachEnd:true")
                               : DumpLog::GetInstance().AddDesc("reachEnd:false");
-    gridLayoutInfo_.reachStart_ ? DumpLog::GetInstance().AddDesc("reachStart:true")
+    info_.reachStart_ ? DumpLog::GetInstance().AddDesc("reachStart:true")
                                 : DumpLog::GetInstance().AddDesc("reachStart:false");
-    gridLayoutInfo_.offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
+    info_.offsetEnd_ ? DumpLog::GetInstance().AddDesc("offsetEnd:true")
                                : DumpLog::GetInstance().AddDesc("offsetEnd:false");
-    gridLayoutInfo_.hasBigItem_ ? DumpLog::GetInstance().AddDesc("hasBigItem:true")
+    info_.hasBigItem_ ? DumpLog::GetInstance().AddDesc("hasBigItem:true")
                                 : DumpLog::GetInstance().AddDesc("hasBigItem:false");
-    gridLayoutInfo_.synced_ ? DumpLog::GetInstance().AddDesc("synced:true")
+    info_.synced_ ? DumpLog::GetInstance().AddDesc("synced:true")
                             : DumpLog::GetInstance().AddDesc("synced:false");
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
-    DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(gridLayoutInfo_.prevHeight_));
-    DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(gridLayoutInfo_.currentHeight_));
+    DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(info_.prevHeight_));
+    DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(info_.currentHeight_));
     DumpLog::GetInstance().AddDesc("endHeight:" + std::to_string(endHeight_));
-    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(gridLayoutInfo_.currentOffset_));
-    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(gridLayoutInfo_.prevOffset_));
-    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(gridLayoutInfo_.lastMainSize_));
+    DumpLog::GetInstance().AddDesc("currentOffset:" + std::to_string(info_.currentOffset_));
+    DumpLog::GetInstance().AddDesc("prevOffset:" + std::to_string(info_.prevOffset_));
+    DumpLog::GetInstance().AddDesc("lastMainSize:" + std::to_string(info_.lastMainSize_));
     DumpLog::GetInstance().AddDesc(
-        "totalHeightOfItemsInView:" + std::to_string(gridLayoutInfo_.totalHeightOfItemsInView_));
-    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(gridLayoutInfo_.startIndex_));
-    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(gridLayoutInfo_.endIndex_));
-    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(gridLayoutInfo_.jumpIndex_));
-    DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(gridLayoutInfo_.crossCount_));
-    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(gridLayoutInfo_.childrenCount_));
+        "totalHeightOfItemsInView:" + std::to_string(info_.totalHeightOfItemsInView_));
+    DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info_.startIndex_));
+    DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info_.endIndex_));
+    DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info_.jumpIndex_));
+    DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(info_.crossCount_));
+    DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info_.childrenCount_));
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    property->GetRowsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowsGap:" + std::to_string(property->GetRowsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("RowsGap:null");
+    property->GetColumnsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnsGap:" + std::to_string(property->GetColumnsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("ColumnsGap:null");
     property->GetCachedCount().has_value()
         ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
         : DumpLog::GetInstance().AddDesc("CachedCount:null");
@@ -1788,7 +1980,7 @@ void GridPattern::DumpAdvanceInfo()
             break;
         }
     }
-    switch (gridLayoutInfo_.scrollAlign_) {
+    switch (info_.scrollAlign_) {
         case ScrollAlign::NONE: {
             DumpLog::GetInstance().AddDesc("ScrollAlign:NONE");
             break;
@@ -1813,10 +2005,10 @@ void GridPattern::DumpAdvanceInfo()
             break;
         }
     }
-    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+    if (!info_.gridMatrix_.empty()) {
         DumpLog::GetInstance().AddDesc("-----------start print gridMatrix------------");
         std::string res = std::string("");
-        for (auto item : gridLayoutInfo_.gridMatrix_) {
+        for (auto item : info_.gridMatrix_) {
             res.append(std::to_string(item.first));
             res.append(": ");
             for (auto index : item.second) {
@@ -1831,16 +2023,16 @@ void GridPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print gridMatrix------------");
     }
-    if (!gridLayoutInfo_.lineHeightMap_.empty()) {
+    if (!info_.lineHeightMap_.empty()) {
         DumpLog::GetInstance().AddDesc("-----------start print lineHeightMap------------");
-        for (auto item : gridLayoutInfo_.lineHeightMap_) {
+        for (auto item : info_.lineHeightMap_) {
             DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
         }
         DumpLog::GetInstance().AddDesc("-----------end print lineHeightMap------------");
     }
-    if (!gridLayoutInfo_.irregularItemsPosition_.empty()) {
+    if (!info_.irregularItemsPosition_.empty()) {
         DumpLog::GetInstance().AddDesc("-----------start print irregularItemsPosition_------------");
-        for (auto item : gridLayoutInfo_.irregularItemsPosition_) {
+        for (auto item : info_.irregularItemsPosition_) {
             DumpLog::GetInstance().AddDesc(std::to_string(item.first).append(" :").append(std::to_string(item.second)));
         }
         DumpLog::GetInstance().AddDesc("-----------end print irregularItemsPosition_------------");
@@ -1876,18 +2068,18 @@ std::string GridPattern::GetIrregularIndexesString() const
 
 std::string GridPattern::ProvideRestoreInfo()
 {
-    return std::to_string(gridLayoutInfo_.startIndex_);
+    return std::to_string(info_.startIndex_);
 }
 
 void GridPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
-    gridLayoutInfo_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
-    gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
+    info_.jumpIndex_ = StringUtils::StringToInt(restoreInfo);
+    info_.scrollAlign_ = ScrollAlign::START;
 }
 
 Rect GridPattern::GetItemRect(int32_t index) const
 {
-    if (index < 0 || index < gridLayoutInfo_.startIndex_ || index > gridLayoutInfo_.endIndex_) {
+    if (index < 0 || index < info_.startIndex_ || index > info_.endIndex_) {
         return Rect();
     }
     auto host = GetHost();
@@ -1902,7 +2094,7 @@ Rect GridPattern::GetItemRect(int32_t index) const
 
 int32_t GridPattern::GetItemIndex(double x, double y) const
 {
-    for (int32_t index = gridLayoutInfo_.startIndex_; index <= gridLayoutInfo_.endIndex_; ++index) {
+    for (int32_t index = info_.startIndex_; index <= info_.endIndex_; ++index) {
         Rect rect = GetItemRect(index);
         if (rect.IsInRegion({x, y})) {
             return index;
@@ -1920,7 +2112,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     int32_t totalChildCount = host->TotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (extraOffset.has_value()) {
-            gridLayoutInfo_.extraOffset_ = -extraOffset.value();
+            info_.extraOffset_ = -extraOffset.value();
         }
         if (smooth) {
             SetExtraOffset(extraOffset);
@@ -1939,7 +2131,7 @@ void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     if (UseIrregularLayout() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         ScrollToIndex(LAST_ITEM, smooth);
         // for irregular layout, last item might not be at bottom
-        gridLayoutInfo_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
+        info_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1969,17 +2161,17 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
     if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto size = GridLayoutUtils::GetItemSize(&gridLayoutInfo_, RawPtr(host), *targetIndex_);
-        targetPos = gridLayoutInfo_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
+        auto size = GridLayoutUtils::GetItemSize(&info_, RawPtr(host), *targetIndex_);
+        targetPos = info_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
         if (Negative(targetPos)) {
             success = false;
         }
     } else {
         auto gridScrollLayoutAlgorithm = DynamicCast<GridScrollLayoutAlgorithm>(algo->GetLayoutAlgorithm());
-        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+        infoCopy_ = gridScrollLayoutAlgorithm->MoveInfoCopy();
         // Based on the index, align gets the position to scroll to
-        success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
-            gridLayoutInfo_, *targetIndex_, align, mainGap, targetPos);
+        success = infoCopy_ && infoCopy_->GetGridItemAnimatePos(
+            info_, *targetIndex_, align, mainGap, targetPos);
     }
     if (!success) {
         if (NearZero(extraOffset.value_or(0.0f))) {
@@ -2006,7 +2198,7 @@ std::vector<RefPtr<FrameNode>> GridPattern::GetVisibleSelectedItems()
     std::vector<RefPtr<FrameNode>> children;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, children);
-    for (int32_t index = gridLayoutInfo_.startIndex_; index <= gridLayoutInfo_.endIndex_; ++index) {
+    for (int32_t index = info_.startIndex_; index <= info_.endIndex_; ++index) {
         auto item = host->GetChildByIndex(index);
         if (!AceType::InstanceOf<FrameNode>(item)) {
             continue;
@@ -2032,13 +2224,13 @@ void GridPattern::StopAnimate()
 
 bool GridPattern::IsPredictOutOfRange(int32_t index) const
 {
-    CHECK_NULL_RETURN(gridLayoutInfo_.reachEnd_, false);
+    CHECK_NULL_RETURN(info_.reachEnd_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * gridLayoutInfo_.crossCount_;
-    return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
+    return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
 }
 
 inline bool GridPattern::UseIrregularLayout() const
@@ -2058,7 +2250,7 @@ bool GridPattern::IsReverse() const
 
 void GridPattern::BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json)
 {
-    switch (gridLayoutInfo_.scrollAlign_) {
+    switch (info_.scrollAlign_) {
         case ScrollAlign::NONE: {
             json->Put("ScrollAlign", "NONE");
             break;
@@ -2087,10 +2279,10 @@ void GridPattern::BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json)
 
 void GridPattern::BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json)
 {
-    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+    if (!info_.gridMatrix_.empty()) {
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         std::string res = std::string("");
-        for (auto item : gridLayoutInfo_.gridMatrix_) {
+        for (auto item : info_.gridMatrix_) {
             for (auto index : item.second) {
                 res.append("[")
                     .append(std::to_string(index.first))
@@ -2103,16 +2295,16 @@ void GridPattern::BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json)
         }
         children->Put("gridMatrix", children);
     }
-    if (!gridLayoutInfo_.lineHeightMap_.empty()) {
+    if (!info_.lineHeightMap_.empty()) {
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
-        for (auto item : gridLayoutInfo_.lineHeightMap_) {
+        for (auto item : info_.lineHeightMap_) {
             children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
         }
         children->Put("lineHeightMap", children);
     }
-    if (!gridLayoutInfo_.irregularItemsPosition_.empty()) {
+    if (!info_.irregularItemsPosition_.empty()) {
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
-        for (auto item : gridLayoutInfo_.irregularItemsPosition_) {
+        for (auto item : info_.irregularItemsPosition_) {
             children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
         }
         children->Put("irregularItemsPosition_", children);
@@ -2127,27 +2319,27 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("GridLayoutOptions", property->HasLayoutOptions() ? GetIrregularIndexesString().c_str() : "null");
     json->Put("supportAnimation", supportAnimation_);
     json->Put("isConfigScrollable", isConfigScrollable_);
-    json->Put("lastCrossCount", gridLayoutInfo_.lastCrossCount_.has_value()
-                                    ? std::to_string(gridLayoutInfo_.lastCrossCount_.value()).c_str()
+    json->Put("lastCrossCount", info_.lastCrossCount_.has_value()
+                                    ? std::to_string(info_.lastCrossCount_.value()).c_str()
                                     : "null");
-    json->Put("reachEnd", gridLayoutInfo_.reachEnd_);
-    json->Put("reachStart", gridLayoutInfo_.reachStart_);
-    json->Put("offsetEnd", gridLayoutInfo_.offsetEnd_);
-    json->Put("hasBigItem", gridLayoutInfo_.hasBigItem_);
-    json->Put("synced", gridLayoutInfo_.synced_);
+    json->Put("reachEnd", info_.reachEnd_);
+    json->Put("reachStart", info_.reachStart_);
+    json->Put("offsetEnd", info_.offsetEnd_);
+    json->Put("hasBigItem", info_.hasBigItem_);
+    json->Put("synced", info_.synced_);
     json->Put("scrollStop", std::to_string(scrollStop_).c_str());
-    json->Put("prevHeight", gridLayoutInfo_.prevHeight_);
-    json->Put("currentHeight", gridLayoutInfo_.currentHeight_);
+    json->Put("prevHeight", info_.prevHeight_);
+    json->Put("currentHeight", info_.currentHeight_);
     json->Put("endHeight", endHeight_);
-    json->Put("currentOffset", std::to_string(gridLayoutInfo_.currentOffset_).c_str());
-    json->Put("prevOffset", std::to_string(gridLayoutInfo_.prevOffset_).c_str());
-    json->Put("lastMainSize", std::to_string(gridLayoutInfo_.lastMainSize_).c_str());
-    json->Put("totalHeightOfItemsInView", std::to_string(gridLayoutInfo_.totalHeightOfItemsInView_).c_str());
-    json->Put("startIndex", gridLayoutInfo_.startIndex_);
-    json->Put("endIndex", gridLayoutInfo_.endIndex_);
-    json->Put("jumpIndex", gridLayoutInfo_.jumpIndex_);
-    json->Put("crossCount", gridLayoutInfo_.crossCount_);
-    json->Put("childrenCount", gridLayoutInfo_.childrenCount_);
+    json->Put("currentOffset", std::to_string(info_.currentOffset_).c_str());
+    json->Put("prevOffset", std::to_string(info_.prevOffset_).c_str());
+    json->Put("lastMainSize", std::to_string(info_.lastMainSize_).c_str());
+    json->Put("totalHeightOfItemsInView", std::to_string(info_.totalHeightOfItemsInView_).c_str());
+    json->Put("startIndex", info_.startIndex_);
+    json->Put("endIndex", info_.endIndex_);
+    json->Put("jumpIndex", info_.jumpIndex_);
+    json->Put("crossCount", info_.crossCount_);
+    json->Put("childrenCount", info_.childrenCount_);
     json->Put("RowsTemplate", property->GetRowsTemplate()->c_str());
     json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
     json->Put("CachedCount",
@@ -2167,5 +2359,39 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AlignItems", property->GetAlignItems() ? "GridItemAlignment.STRETCH" : "GridItemAlignment.DEFAULT");
     BuildScrollAlignInfo(json);
     BuildGridLayoutInfo(json);
+}
+
+SizeF GridPattern::GetChildrenExpandedSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+
+    auto axis = GetAxis();
+    float estimatedHeight = 0.f;
+    const auto& info = info_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (UseIrregularLayout()) {
+        estimatedHeight = info.GetIrregularHeight(mainGap);
+    } else if (!layoutProperty->GetLayoutOptions().has_value()) {
+        estimatedHeight = info.GetContentHeight(mainGap);
+    } else {
+        estimatedHeight =
+            info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

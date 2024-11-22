@@ -19,11 +19,15 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
+
 #include "base/memory/ace_type.h"
 
 #define private public
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #undef private
 
 #include "core/common/udmf/unified_data.h"
@@ -93,6 +97,10 @@ public:
     MOCK_METHOD(int32_t, GetGridItemColumnSpan, (), (override));
     MOCK_METHOD(bool, GetIsAccessibilityFocus, (), (override));
     MOCK_METHOD(bool, GetIsPluralLineSupported, (), (override));
+    MOCK_METHOD(bool, GetIsAccessibilityGroup, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityLevel, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityDescription, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityText, (), (override));
 };
 
 class WebPatternTouchTestNg : public testing::Test {
@@ -106,7 +114,11 @@ public:
 void WebPatternTouchTestNg::SetUpTestCase() {}
 void WebPatternTouchTestNg::TearDownTestCase() {}
 void WebPatternTouchTestNg::SetUp() {}
-void WebPatternTouchTestNg::TearDown() {}
+void WebPatternTouchTestNg::TearDown()
+{
+    OHOS::Ace::SetReturnStatus("");
+    OHOS::Ace::SetComponentType("");
+}
 
 /**
  * @tc.name: CheckSafeAreaIsExpand_001
@@ -132,6 +144,84 @@ HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaIsExpand_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckSafeAreaIsExpand_002
+ * @tc.desc: CheckSafeAreaIsExpand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaIsExpand_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts { .type = SAFE_AREA_TYPE_CUTOUT, .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaIsExpand();
+    EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: CheckSafeAreaIsExpand_003
+ * @tc.desc: CheckSafeAreaIsExpand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaIsExpand_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaIsExpand();
+    EXPECT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: CheckSafeAreaIsExpand_004
+ * @tc.desc: CheckSafeAreaIsExpand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaIsExpand_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts { .type = SAFE_AREA_TYPE_KEYBOARD, .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaIsExpand();
+    EXPECT_EQ(ret, true);
+#endif
+}
+
+/**
  * @tc.name: CheckSafeAreaKeyBoard_001
  * @tc.desc: CheckSafeAreaKeyBoard.
  * @tc.type: FUNC
@@ -147,6 +237,84 @@ HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaKeyBoard_001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaKeyBoard();
+    EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: CheckSafeAreaKeyBoard_002
+ * @tc.desc: CheckSafeAreaKeyBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaKeyBoard_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD, .edges = SAFE_AREA_EDGE_BOTTOM };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaKeyBoard();
+    EXPECT_EQ(ret, true);
+#endif
+}
+
+/**
+ * @tc.name: CheckSafeAreaKeyBoard_003
+ * @tc.desc: CheckSafeAreaKeyBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaKeyBoard_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD, .edges = SAFE_AREA_EDGE_TOP };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->CheckSafeAreaKeyBoard();
+    EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: CheckSafeAreaKeyBoard_004
+ * @tc.desc: CheckSafeAreaKeyBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CheckSafeAreaKeyBoard_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM };
+    layoutProperty->UpdateSafeAreaExpandOpts(opts);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
     auto ret = webPattern->CheckSafeAreaKeyBoard();
@@ -193,6 +361,31 @@ HWTEST_F(WebPatternTouchTestNg, Backward_001, TestSize.Level1)
     EXPECT_EQ(webpattern.delegate_, nullptr);
     auto ret = webpattern.Backward();
     EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: Backward_002
+ * @tc.desc: Backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, Backward_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    auto ret = webPattern->Backward();
+    EXPECT_EQ(ret, false);
+    ret = webPattern->Backward();
+    EXPECT_EQ(ret, true);
 #endif
 }
 
@@ -325,7 +518,21 @@ HWTEST_F(WebPatternTouchTestNg, GetWebInfoType_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    webPattern->GetWebInfoType();
+    OHOS::Ace::SetReturnStatus("8");
+    auto ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_2IN1);
+
+    OHOS::Ace::SetReturnStatus("4");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_TABLET);
+
+    OHOS::Ace::SetReturnStatus("2");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_MOBILE);
+
+    OHOS::Ace::SetReturnStatus("1");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_MOBILE);
 #endif
 }
 
@@ -463,11 +670,13 @@ HWTEST_F(WebPatternTouchTestNg, JsonNodePutDefaultValue_005, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    std::unique_ptr<OHOS::Ace::JsonValue> jsonNode = nullptr;
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    auto jsonNode = std::make_unique<OHOS::Ace::JsonValue>();
     auto key = WebPattern::WebAccessibilityType::SEL_END;
+    int32_t value = 1;
     int32_t defaultValue = 0;
-    webPattern->JsonNodePutDefaultValue(jsonNode, key, defaultValue);
+    webPattern->JsonNodePutDefaultValue(jsonNode, key, value, defaultValue);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -488,11 +697,13 @@ HWTEST_F(WebPatternTouchTestNg, JsonNodePutDefaultValue_006, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
+    EXPECT_NE(webPattern->delegate_, nullptr);
     std::unique_ptr<OHOS::Ace::JsonValue> jsonNode = std::make_unique<OHOS::Ace::JsonValue>();
     auto key = WebPattern::WebAccessibilityType::SEL_END;
+    int32_t value = 1;
     int32_t defaultValue = 1;
-    webPattern->JsonNodePutDefaultValue(jsonNode, key, defaultValue);
+    webPattern->JsonNodePutDefaultValue(jsonNode, key, value, defaultValue);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -594,6 +805,105 @@ HWTEST_F(WebPatternTouchTestNg, WebNodeInfoToJsonValue_001, TestSize.Level1)
     EXPECT_CALL(*mockNodeInfo, GetSelectionEnd()).WillRepeatedly(testing::Return(0));
     EXPECT_CALL(*mockNodeInfo, GetRectWidth()).WillRepeatedly(testing::Return(0));
     EXPECT_CALL(*mockNodeInfo, GetRectHeight()).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockNodeInfo, GetSelectionStart()).Times(0);
+    EXPECT_CALL(*mockNodeInfo, GetRectX()).Times(0);
+    EXPECT_CALL(*mockNodeInfo, GetRectY()).Times(0);
+    auto jsonNodeArray = std::make_shared<OHOS::Ace::JsonValue>();
+    std::string nodeTag = "test";
+    webPattern->WebNodeInfoToJsonValue(jsonNodeArray, mockNodeInfo, nodeTag);
+#endif
+}
+
+/**
+ * @tc.name: WebNodeInfoToJsonValue_002
+ * @tc.desc: WebNodeInfoToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, WebNodeInfoToJsonValue_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto mockNodeInfo = std::make_shared<NiceMock<MockNWebAccessibilityNodeInfo>>();
+    EXPECT_CALL(*mockNodeInfo, GetSelectionEnd()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*mockNodeInfo, GetRectWidth()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*mockNodeInfo, GetRectHeight()).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockNodeInfo, GetSelectionStart()).Times(1);
+    EXPECT_CALL(*mockNodeInfo, GetRectX()).Times(1);
+    EXPECT_CALL(*mockNodeInfo, GetRectY()).Times(1);
+    auto jsonNodeArray = std::make_shared<OHOS::Ace::JsonValue>();
+    std::string nodeTag = "test";
+    webPattern->WebNodeInfoToJsonValue(jsonNodeArray, mockNodeInfo, nodeTag);
+#endif
+}
+
+/**
+ * @tc.name: WebNodeInfoToJsonValue_003
+ * @tc.desc: WebNodeInfoToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, WebNodeInfoToJsonValue_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto mockNodeInfo = std::make_shared<NiceMock<MockNWebAccessibilityNodeInfo>>();
+    EXPECT_CALL(*mockNodeInfo, GetSelectionEnd()).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockNodeInfo, GetRectWidth()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*mockNodeInfo, GetRectHeight()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*mockNodeInfo, GetSelectionStart()).Times(0);
+    EXPECT_CALL(*mockNodeInfo, GetRectX()).Times(1);
+    EXPECT_CALL(*mockNodeInfo, GetRectY()).Times(1);
+    auto jsonNodeArray = std::make_shared<OHOS::Ace::JsonValue>();
+    std::string nodeTag = "test";
+    webPattern->WebNodeInfoToJsonValue(jsonNodeArray, mockNodeInfo, nodeTag);
+#endif
+}
+
+/**
+ * @tc.name: WebNodeInfoToJsonValue_004
+ * @tc.desc: WebNodeInfoToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, WebNodeInfoToJsonValue_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto mockNodeInfo = std::make_shared<NiceMock<MockNWebAccessibilityNodeInfo>>();
+    EXPECT_CALL(*mockNodeInfo, GetSelectionEnd()).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockNodeInfo, GetRectWidth()).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*mockNodeInfo, GetRectHeight()).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*mockNodeInfo, GetSelectionStart()).Times(0);
+    EXPECT_CALL(*mockNodeInfo, GetRectX()).Times(1);
+    EXPECT_CALL(*mockNodeInfo, GetRectY()).Times(1);
     auto jsonNodeArray = std::make_shared<OHOS::Ace::JsonValue>();
     std::string nodeTag = "test";
     webPattern->WebNodeInfoToJsonValue(jsonNodeArray, mockNodeInfo, nodeTag);
@@ -619,6 +929,7 @@ HWTEST_F(WebPatternTouchTestNg, GetWebAllInfosImpl_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_ = nullptr;
     int32_t webId = 123;
     auto callback = [](std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int32_t receivedWebId) {};
     webPattern->GetWebAllInfosImpl(callback, webId);
@@ -644,9 +955,16 @@ HWTEST_F(WebPatternTouchTestNg, GetWebAllInfosImpl_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetComponentType("none");
     int32_t webId = 123;
     auto callback = [](std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int32_t receivedWebId) {};
     webPattern->GetWebAllInfosImpl(callback, webId);
+
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetComponentType("genericContainer");
+    webPattern->GetWebAllInfosImpl(callback, webId);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -796,7 +1114,41 @@ HWTEST_F(WebPatternTouchTestNg, CreateOverlay_001, TestSize.Level1)
     int pointX = 5;
     int pointY = 6;
     webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
-    EXPECT_NE(webPattern, nullptr);
+    EXPECT_NE(webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus, nullptr);
+    webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus(true);
+    webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus(false);
+#endif
+}
+
+/**
+ * @tc.name: CreateOverlay_002
+ * @tc.desc: CreateOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, CreateOverlay_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::WEB);
+    RefPtr<OHOS::Ace::PixelMap> pixelMap = nullptr;
+    int offsetX = 10;
+    int offsetY = 20;
+    int rectWidth = 30;
+    int rectHeight = 40;
+    int pointX = 5;
+    int pointY = 6;
+    webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+    EXPECT_NE(webPattern->overlayCreating_, true);
 #endif
 }
 
@@ -826,7 +1178,37 @@ HWTEST_F(WebPatternTouchTestNg, OnOverlayStateChanged_001, TestSize.Level1)
     int rectWidth = 30;
     int rectHeight = 40;
     webPattern->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
-    EXPECT_NE(webPattern, nullptr);
+    EXPECT_EQ(webPattern->imageAnalyzerManager_->IsOverlayCreated(), false);
+#endif
+}
+
+/**
+ * @tc.name: OnOverlayStateChanged_002
+ * @tc.desc: OnOverlayStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, OnOverlayStateChanged_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::WEB);
+    RefPtr<OHOS::Ace::PixelMap> pixelMap = nullptr;
+    int offsetX = 10;
+    int offsetY = 20;
+    int rectWidth = 30;
+    int rectHeight = 40;
+    webPattern->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
+    EXPECT_EQ(webPattern->imageAnalyzerManager_->IsOverlayCreated(), false);
 #endif
 }
 

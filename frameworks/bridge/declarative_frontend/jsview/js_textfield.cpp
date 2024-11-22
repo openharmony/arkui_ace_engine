@@ -30,10 +30,11 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -42,11 +43,13 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components/common/properties/text_style_parser.h"
+#include "core/image/image_source_info.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -55,21 +58,18 @@ std::mutex TextFieldModel::mutex_;
 
 TextFieldModel* TextFieldModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::TextFieldModelNG());
+    static NG::TextFieldModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::TextFieldModelNG());
-            } else {
-                instance_.reset(new Framework::TextFieldModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::TextFieldModelNG instance;
+        return &instance;
+    } else {
+        static Framework::TextFieldModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -92,9 +92,42 @@ constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
+
+void ProcessStringUnpairedSurrogates(std::optional<std::string>& value)
+{
+    if (!value.has_value()) {
+        return;
+    }
+    std::u16string temp = StringUtils::Str8ToStr16(value.value());
+    std::string result(value.value().c_str());
+    if (temp.length() == 0 && result.length() != 0) {
+        result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(result);
+    }
+    value = result;
+}
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -145,6 +178,8 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
         }
     }
 
+    ProcessStringUnpairedSurrogates(placeholderSrc);
+    ProcessStringUnpairedSurrogates(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -193,6 +228,9 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
+
+    ProcessStringUnpairedSurrogates(placeholderSrc);
+    ProcessStringUnpairedSurrogates(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -385,7 +423,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
         auto caretWidth = paramObject->GetProperty("width");
 
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -448,7 +486,7 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
 
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -816,9 +854,41 @@ NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>&
 void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
+        ViewAbstractModel::GetInstance()->SetDashGap(Dimension(-1));
+        ViewAbstractModel::GetInstance()->SetDashWidth(Dimension(-1));
         return;
     }
-    JSViewAbstract::JsBorder(info);
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueWidth = object->GetProperty(static_cast<int32_t>(ArkUIIndex::WIDTH));
+    if (!valueWidth->IsUndefined()) {
+        JSViewAbstract::ParseBorderWidth(valueWidth);
+    }
+
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR)));
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+    }
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
+
+    auto dashGap = object->GetProperty("dashGap");
+    if (!dashGap->IsUndefined()) {
+        JSViewAbstract::ParseDashGap(dashGap);
+    }
+    auto dashWidth = object->GetProperty("dashWidth");
+    if (!dashWidth->IsUndefined()) {
+        JSViewAbstract::ParseDashWidth(dashWidth);
+    }
+
     TextFieldModel::GetInstance()->SetBackBorder();
     info.ReturnSelf();
 }
@@ -853,13 +923,88 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
+void JSTextField::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object,
+    std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        CalcDimension value;
+        ParseJsLengthMetrics(startObj, value);
+        radius = value;
+    }
+}
+
+bool JSTextField::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+    CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        std::optional<CalcDimension> topStart;
+        std::optional<CalcDimension> topEnd;
+        std::optional<CalcDimension> bottomStart;
+        std::optional<CalcDimension> bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart.has_value() ? topStart.value() : topLeft;
+        topRight = topEnd.has_value() ? topEnd.value() : topRight;
+        bottomLeft = bottomStart.has_value() ? bottomStart.value() : bottomLeft;
+        bottomRight = bottomEnd.has_value() ? bottomEnd.value() : bottomRight;
+        return true;
+    }
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight);
+    return false;
+}
+
+void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+                return;
+        }
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
+}
+
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
-    if (!jsValue->IsObject() && !jsValue->IsString() && !jsValue->IsNumber()) {
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsValue, checkList)) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+        ViewAbstractModel::GetInstance()->SetBorderRadius(defaultBorderRadius);
         return;
     }
-    JSViewAbstract::JsBorderRadius(info);
+    ParseBorderRadius(jsValue);
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
@@ -1051,7 +1196,7 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (jsValue->IsNumber()) {
         auto emunNumber = jsValue->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
@@ -1401,6 +1546,8 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
+
+    // set style
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
@@ -1411,18 +1558,21 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
     TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
+
+    // set default icon
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
-            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
-        } else {
-            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
-        }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+        SetCancelDefaultIcon();
         return;
     }
+
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
+    if (isSymbolIcon) {
+        SetCancelSymbolIcon(info);
+        return;
+    }
+
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
@@ -1435,6 +1585,33 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
+}
+
+void JSTextField::SetCancelDefaultIcon()
+{
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+    }
+    TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+}
+
+void JSTextField::SetCancelSymbolIcon(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        TextFieldModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+        TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+    }
 }
 
 void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
@@ -1451,11 +1628,17 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     }
     GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
     TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(false);
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+        return;
+    }
+    auto info = ImageSourceInfo(iconSrc, bundleName, moduleName);
+    if (info.IsSvg() && iconSrc != "") {
+        // svg need not default color, otherwise multi color svg will render fault
         return;
     }
     if (SystemProperties::GetColorMode() == ColorMode::DARK) {
@@ -1492,7 +1675,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -1537,7 +1720,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);

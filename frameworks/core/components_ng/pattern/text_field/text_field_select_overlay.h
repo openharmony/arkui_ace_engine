@@ -58,7 +58,6 @@ public:
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
     std::string GetSelectedText() override;
-    void OnHandleMarkInfoChange(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -96,7 +95,7 @@ public:
     {
         return !HasRenderTransform();
     }
-    void UpdateHandleColor();
+    std::optional<Color> GetHandleColor() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

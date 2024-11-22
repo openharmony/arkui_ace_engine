@@ -29,6 +29,8 @@ PixelFormat PixelMapOhos::PixelFormatConverter(Media::PixelFormat pixelFormat)
             return PixelFormat::RGB_565;
         case Media::PixelFormat::RGBA_8888:
             return PixelFormat::RGBA_8888;
+        case Media::PixelFormat::RGBA_1010102:
+            return PixelFormat::RGBA_1010102;
         case Media::PixelFormat::BGRA_8888:
             return PixelFormat::BGRA_8888;
         case Media::PixelFormat::ALPHA_8:
@@ -65,6 +67,24 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
             return AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
         default:
             return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    }
+}
+
+AllocatorType PixelMapOhos::AllocatorTypeConverter(Media::AllocatorType allocatorType)
+{
+    switch (allocatorType) {
+        case Media::AllocatorType::DEFAULT:
+            return AllocatorType::DEFAULT;
+        case Media::AllocatorType::HEAP_ALLOC:
+            return AllocatorType::HEAP_ALLOC;
+        case Media::AllocatorType::SHARE_MEM_ALLOC:
+            return AllocatorType::SHARE_MEM_ALLOC;
+        case Media::AllocatorType::CUSTOM_ALLOC:
+            return AllocatorType::CUSTOM_ALLOC;
+        case Media::AllocatorType::DMA_ALLOC:
+            return AllocatorType::DMA_ALLOC;
+        default:
+            return AllocatorType::DEFAULT;
     }
 }
 
@@ -191,6 +211,18 @@ int32_t PixelMapOhos::GetByteCount() const
 {
     CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetByteCount();
+}
+
+AllocatorType PixelMapOhos::GetAllocatorType() const
+{
+    CHECK_NULL_RETURN(pixmap_, AllocatorType::DEFAULT);
+    return AllocatorTypeConverter(pixmap_->GetAllocatorType());
+}
+
+bool PixelMapOhos::IsHdr() const
+{
+    CHECK_NULL_RETURN(pixmap_, false);
+    return pixmap_->IsHdr();
 }
 
 void* PixelMapOhos::GetPixelManager() const

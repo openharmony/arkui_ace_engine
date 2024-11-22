@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,21 +15,17 @@
 
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
-#include "image_painter_utils.h"
+#include "render_service_base/include/pipeline/rs_recording_canvas.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#ifdef USE_ROSEN_DRAWING
-#include "render_service_base/include/pipeline/rs_recording_canvas.h"
-#endif
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-#endif
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,6 +46,8 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
 constexpr int32_t BORDER_RADIUS_ARRAY_SIZE = 4;
+constexpr int32_t DEGREE_NINETY = 90;
+constexpr int32_t DEGREE_HUNDRED_EIGHTY = 180;
 
 void PrintDrawingLatticeConfig(const Rosen::Drawing::Lattice& lattice, const RSRect& dstRect)
 {
@@ -138,6 +136,20 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     }
 }
 #endif
+
+int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::LEFT:
+            return -DEGREE_NINETY;
+        case ImageRotateOrientation::RIGHT:
+            return DEGREE_NINETY;
+        case ImageRotateOrientation::DOWN:
+            return DEGREE_HUNDRED_EIGHTY;
+        default:
+            return 0;
+    }
+}
 } // namespace
 
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
@@ -291,17 +303,32 @@ bool PixelMapImage::CheckIfNeedForStretching(
     return false;
 }
 
+void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPtr<PixelMap>& pixmap)
+{
+    FireDrawCompleteCallback(RenderedImageInfo{
+        .renderSuccess = true,
+        .width = pixmap->GetWidth(),
+        .height = pixmap->GetHeight(),
+        .rowStride = pixmap->GetRowStride(),
+        .rowBytes = pixmap->GetRowBytes(),
+        .byteCount = pixmap->GetByteCount(),
+        .isHdr = pixmap->IsHdr(),
+        .alphaType = pixmap->GetAlphaType(),
+        .pixelFormat = pixmap->GetPixelFormat(),
+        .allocatorType = pixmap->GetAllocatorType(),
+        .pixelMapId = pixmap->GetId(),
+        .srcInfo = srcInfo
+    });
+}
+
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
     auto dfxConfig = GetImageDfxConfig();
-    const auto& src = dfxConfig.imageSrc_;
-    const auto& nodeId = dfxConfig.nodeId_;
-    long long accessId = dfxConfig.accessibilityId_;
     if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
-        TAG_LOGE(
-            AceLogTag::ACE_IMAGE, "pixmap null, %{public}s-[%{public}d-%{public}lld]", src.c_str(), nodeId, accessId);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "pixmap null, %{private}s-%{public}s", dfxConfig.imageSrc_.c_str(),
+            dfxConfig.ToStringWithoutSrc().c_str());
         return;
     }
 #ifdef ENABLE_ROSEN_BACKEND
@@ -309,8 +336,8 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
     const auto& config = GetPaintConfig();
-    ACE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s], [%s]", nodeId, accessId, pixmap->GetWidth(),
-        pixmap->GetHeight(), src.c_str(), dfxConfig.borderRadiusValue_.c_str());
+    ACE_SCOPED_TRACE("DrawToRSCanvas %s-[%d x %d]-[%s]", dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(),
+        pixmap->GetHeight(), dfxConfig.borderRadiusValue_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
@@ -331,15 +358,15 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
+    rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "pixmap, src:%{public}s, [%{public}d-%{public}lld]-[%{public}d * "
-            "%{public}d]-[%{public}s][%{public}s]",
-            src.c_str(), nodeId, accessId, pixmap->GetWidth(), pixmap->GetHeight(),
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s][%{public}s]",
+            dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(),
             dfxConfig.borderRadiusValue_.c_str(), GetDynamicModeString(config.dynamicMode).c_str());
-        pixmap->SavePixelMapToFile(std::to_string(nodeId) + "_" + std::to_string(accessId) + "_ToRS_");
+        pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif

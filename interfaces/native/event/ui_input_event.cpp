@@ -104,6 +104,13 @@ int32_t OH_ArkUI_UIInputEvent_GetSourceType(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->sourceType;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+            }
+            return axisEvent->sourceType;
+        }
         default:
             break;
     }
@@ -129,6 +136,13 @@ int32_t OH_ArkUI_UIInputEvent_GetToolType(const ArkUI_UIInputEvent* event)
                 return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
             }
             return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(mouseEvent->actionTouchPoint.toolType);
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+            }
+            return OHOS::Ace::NodeModel::ConvertToCInputEventToolType(axisEvent->actionTouchPoint.toolType);
         }
         default:
             break;
@@ -172,6 +186,13 @@ int64_t OH_ArkUI_UIInputEvent_GetEventTime(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->timeStamp;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0;
+            }
+            return axisEvent->timeStamp;
+        }
         default:
             break;
     }
@@ -194,6 +215,13 @@ uint32_t OH_ArkUI_PointerEvent_GetPointerCount(const ArkUI_UIInputEvent* event)
         case C_MOUSE_EVENT_ID: {
             const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
             if (!mouseEvent) {
+                return 0;
+            }
+            return 1;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
                 return 0;
             }
             return 1;
@@ -223,6 +251,13 @@ int32_t OH_ArkUI_PointerEvent_GetPointerId(const ArkUI_UIInputEvent* event, uint
                 return 0;
             }
             return mouseEvent->actionTouchPoint.id;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0;
+            }
+            return axisEvent->actionTouchPoint.id;
         }
         default:
             break;
@@ -264,6 +299,13 @@ float OH_ArkUI_PointerEvent_GetX(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.nodeX;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.nodeX;
+        }
         default:
             break;
     }
@@ -289,6 +331,13 @@ float OH_ArkUI_PointerEvent_GetXByIndex(const ArkUI_UIInputEvent* event, uint32_
                 return 0.0f;
             }
             return mouseEvent->actionTouchPoint.nodeX;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.nodeX;
         }
         default:
             break;
@@ -330,6 +379,13 @@ float OH_ArkUI_PointerEvent_GetY(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.nodeY;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.nodeY;
+        }
         default:
             break;
     }
@@ -356,6 +412,13 @@ float OH_ArkUI_PointerEvent_GetYByIndex(const ArkUI_UIInputEvent* event, uint32_
                 return 0.0f;
             }
             return mouseEvent->actionTouchPoint.nodeY;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.nodeY;
         }
         default:
             break;
@@ -397,6 +460,13 @@ float OH_ArkUI_PointerEvent_GetWindowX(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.windowX;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.windowX;
+        }
         default:
             break;
     }
@@ -423,6 +493,13 @@ float OH_ArkUI_PointerEvent_GetWindowXByIndex(const ArkUI_UIInputEvent* event, u
                 return 0.0f;
             }
             return mouseEvent->actionTouchPoint.windowX;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.windowX;
         }
         default:
             break;
@@ -464,6 +541,13 @@ float OH_ArkUI_PointerEvent_GetWindowY(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.windowY;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.windowY;
+        }
         default:
             break;
     }
@@ -490,6 +574,13 @@ float OH_ArkUI_PointerEvent_GetWindowYByIndex(const ArkUI_UIInputEvent* event, u
                 return 0.0f;
             }
             return mouseEvent->actionTouchPoint.windowY;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.windowY;
         }
         default:
             break;
@@ -531,6 +622,13 @@ float OH_ArkUI_PointerEvent_GetDisplayX(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.screenX;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.screenX;
+        }
         default:
             break;
     }
@@ -557,6 +655,13 @@ float OH_ArkUI_PointerEvent_GetDisplayXByIndex(const ArkUI_UIInputEvent* event, 
                 return 0.0f;
             }
             return mouseEvent->actionTouchPoint.screenX;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.screenX;
         }
         default:
             break;
@@ -598,6 +703,13 @@ float OH_ArkUI_PointerEvent_GetDisplayY(const ArkUI_UIInputEvent* event)
             }
             return mouseEvent->actionTouchPoint.screenY;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.screenY;
+        }
         default:
             break;
     }
@@ -625,6 +737,13 @@ float OH_ArkUI_PointerEvent_GetDisplayYByIndex(const ArkUI_UIInputEvent* event, 
             }
             return mouseEvent->actionTouchPoint.screenY;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                return 0.0f;
+            }
+            return axisEvent->actionTouchPoint.screenY;
+        }
         default:
             break;
     }
@@ -643,13 +762,6 @@ float OH_ArkUI_PointerEvent_GetPressure(const ArkUI_UIInputEvent* event, uint32_
                 return 0.0f;
             }
             return touchEvent->touchPointes[touchEvent->touchPointSize-1].pressure;
-        }
-        case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent || pointerIndex != 0) {
-                return 0.0f;
-            }
-            return mouseEvent->actionTouchPoint.pressure;
         }
         default:
             break;
@@ -670,13 +782,6 @@ float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t p
             }
             return touchEvent->touchPointes[touchEvent->touchPointSize-1].tiltX;
         }
-        case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent || pointerIndex != 0) {
-                return 0.0f;
-            }
-            return mouseEvent->actionTouchPoint.tiltX;
-        }
         default:
             break;
     }
@@ -695,13 +800,6 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
                 return 0.0f;
             }
             return touchEvent->touchPointes[touchEvent->touchPointSize-1].tiltY;
-        }
-        case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent || pointerIndex != 0) {
-                return 0.0f;
-            }
-            return mouseEvent->actionTouchPoint.tiltY;
         }
         default:
             break;
@@ -722,13 +820,6 @@ float OH_ArkUI_PointerEvent_GetTouchAreaWidth(const ArkUI_UIInputEvent* event, u
             }
             return touchEvent->touchPointes[touchEvent->touchPointSize-1].contactAreaWidth;
         }
-        case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent || pointerIndex != 0) {
-                return 0.0f;
-            }
-            return mouseEvent->actionTouchPoint.contactAreaWidth;
-        }
         default:
             break;
     }
@@ -747,13 +838,6 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
                 return 0.0f;
             }
             return touchEvent->touchPointes[touchEvent->touchPointSize-1].contactAreaHeight;
-        }
-        case C_MOUSE_EVENT_ID: {
-            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-            if (!mouseEvent || pointerIndex != 0) {
-                return 0.0f;
-            }
-            return mouseEvent->actionTouchPoint.contactAreaHeight;
         }
         default:
             break;
@@ -1071,6 +1155,13 @@ double OH_ArkUI_AxisEvent_GetVerticalAxisValue(const ArkUI_UIInputEvent* event)
             }
             break;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0;
+            }
+            return axisEvent->verticalAxis;
+        }
         default:
             break;
     }
@@ -1090,6 +1181,13 @@ double OH_ArkUI_AxisEvent_GetHorizontalAxisValue(const ArkUI_UIInputEvent* event
             }
             break;
         }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0;
+            }
+            return axisEvent->horizontalAxis;
+        }
         default:
             break;
     }
@@ -1108,6 +1206,13 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
                 return axisEvent->pinchAxisScale;
             }
             break;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return 0.0;
+            }
+            return axisEvent->pinchAxisScale;
         }
         default:
             break;

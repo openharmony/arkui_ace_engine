@@ -49,8 +49,9 @@ private:
     ~EventController() = default;
     void NotifyConfigChange();
     void ApplyNewestConfig() const;
+    void ApplyExposureCfgInner(const std::shared_ptr<Config>& config) const;
 
-    std::shared_mutex cacheLock_;
+    std::shared_mutex mutable cacheLock_;
     std::vector<UIEventClient> clientList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventController);

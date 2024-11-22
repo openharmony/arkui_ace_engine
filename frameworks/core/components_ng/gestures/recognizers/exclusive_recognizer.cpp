@@ -99,8 +99,7 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     }
     switch (point.type) {
         case TouchType::MOVE:
-        case TouchType::DOWN:
-        case TouchType::CANCEL: {
+        case TouchType::DOWN: {
             if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 DispatchEventToActiveRecognizers(point);
             } else {
@@ -108,7 +107,8 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::UP: {
+        case TouchType::UP:
+        case TouchType::CANCEL: {
             DispatchEventToAllRecognizers(point);
             break;
         }
@@ -299,8 +299,9 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 void ExclusiveRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
-        if (child) {
-            child->CleanRecognizerState();
+        auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
+        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+            childRecognizer->CleanRecognizerState();
         }
     }
     if ((refereeState_ == RefereeState::SUCCEED ||

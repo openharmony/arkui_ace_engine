@@ -26,14 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr int32_t ERR_OK = 0;
-const std::string JSON_EMPTY_STRING = "{}";
-const std::string JSON_NULL_STRING = "null";
-
-inline bool HasContent(const std::string &str)
-{
-    return !str.empty() && str != JSON_EMPTY_STRING && str != JSON_NULL_STRING;
-}
+    constexpr int32_t ERR_OK = 0;
 }
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
@@ -68,6 +61,11 @@ int32_t FormUtilsImpl::RouterEvent(
     if (uri->IsValid() && !abilityName->IsValid()) {
         auto uriStr = uri->GetString();
         want.SetUri(uriStr);
+        auto bundleName = eventAction->GetValue("bundleName");
+        auto bundle = bundleName->GetString();
+        if (!bundle.empty()) {
+            want.SetElementName(bundle, std::string());
+        }
     } else {
         auto bundleName = eventAction->GetValue("bundleName");
         auto bundle = bundleName->GetString();
@@ -85,69 +83,23 @@ int32_t FormUtilsImpl::RouterEvent(
 }
 
 int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, std::function<void(int32_t, int64_t&, std::string&)> numCallBack)
+    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     std::unique_ptr<AppExecFwk::FormProviderData> formBindingData = std::make_unique<AppExecFwk::FormProviderData>();
     bool withFormBindingData = false;
-    std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     if (!formBindingDataStr.empty()) {
-        nlohmann::json jsonData;
-        if (SetFormBindingDataObj(formBindingDataStr, jsonData)) {
-            if (jsonData.contains("data") && HasContent(jsonData["data"].get<std::string>())) {
-                auto bindJsonData = jsonData.at("data");
-                withFormBindingData = true;
-                formBindingData->UpdateData(bindJsonData);
-                formBindingData->ParseImagesData();
-            }
-            ParseProxies(formDataProxies, jsonData);
-        }
+        withFormBindingData = true;
+        formBindingData->SetDataString(const_cast<std::string&>(formBindingDataStr));
+        formBindingData->ParseImagesData();
     }
-
-    int64_t formId = 0;
-    std::string errMsg;
+    std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
         withFormBindingData, formBindingData, formId, formDataProxies);
     if (ret != ERR_OK) {
         errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
-        numCallBack(ret, formId, errMsg);
-        return ret;
     }
-
-    ret = OHOS::AppExecFwk::FormMgr::GetInstance().AcquireAddFormResult(static_cast<const int64_t>(formId));
-    if (ret != ERR_OK) {
-        errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
-    }
-
-    numCallBack(ret, formId, errMsg);
+    
     return ret;
-}
-
-bool FormUtilsImpl::SetFormBindingDataObj(const std::string& formBindingDataStr, nlohmann::json &jsonData)
-{
-    jsonData = nlohmann::json::parse(formBindingDataStr, nullptr, false);
-    if (jsonData.is_discarded()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "fail parse formBindingDataStr: %{private}s.", formBindingDataStr.c_str());
-        return false;
-    }
-    if (!jsonData.is_object()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "formBindingDataStr not object");
-        return false;
-    }
-    return true;
-}
-
-void FormUtilsImpl::ParseProxies(std::vector<AppExecFwk::FormDataProxy> &formDataProxies, nlohmann::json &jsonData)
-{
-    if (!jsonData.contains("proxies")) {
-        return;
-    }
-    nlohmann::json proxies = jsonData.at("proxies");
-    for (auto &iter : proxies) {
-        AppExecFwk::FormDataProxy formDataProxy("", "");
-        formDataProxy.key = iter["key"].get<std::string>();
-        formDataProxy.subscribeId = iter["subscriberId"].get<std::string>();
-        formDataProxies.push_back(formDataProxy);
-    }
 }
 
 int32_t FormUtilsImpl::BackgroundEvent(

@@ -652,7 +652,7 @@ HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite002, TestSize.Level1)
     auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     richEditorPattern->HandleAIWriteResult(0, 5, buff);
-    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 3);
 }
 
 /**

@@ -46,10 +46,6 @@ public:
     {
         return height_;
     }
-    bool IsSucceed()
-    {
-        return isSucceed_;
-    }
     size_t GetBitmapSize()
     {
         return bitmapSize_;
@@ -64,7 +60,6 @@ private:
 
     int32_t width_;
     int32_t height_;
-    bool isSucceed_ = true;
     size_t bitmapSize_ = 0;
 };
 } // namespace OHOS::Ace::NG

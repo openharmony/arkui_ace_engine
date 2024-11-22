@@ -58,21 +58,18 @@ std::mutex TextModel::mutex_;
 
 TextModel* TextModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::TextModelNG());
+    static NG::TextModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::TextModelNG());
-            } else {
-                instance_.reset(new Framework::TextModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::TextModelNG instance;
+        return &instance;
+    } else {
+        static Framework::TextModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -112,6 +109,14 @@ void JSText::SetHeight(const JSCallbackInfo& info)
 void JSText::SetFont(const JSCallbackInfo& info)
 {
     Font font;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetTextStyle().GetFontSize();
+    font.fontWeight = theme->GetTextStyle().GetFontWeight();
+    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
+    font.fontStyle = theme->GetTextStyle().GetFontStyle();
     GetFontInfo(info, font);
     TextModel::GetInstance()->SetFont(font);
     if (info.Length() < 2) { // 2 : two args
@@ -133,15 +138,6 @@ void JSText::SetFont(const JSCallbackInfo& info)
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
     auto tmpInfo = info[0];
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    font.fontSize = theme->GetTextStyle().GetFontSize();
-    font.fontWeight = theme->GetTextStyle().GetFontWeight();
-    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
-    font.fontStyle = theme->GetTextStyle().GetFontStyle();
-
     if (!tmpInfo->IsObject()) {
         return;
     }
@@ -153,7 +149,7 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
-    if (!fontWeight->IsNull()) {
+    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
         int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
         ParseJsInt32(fontWeight, variableFontWeight);
         TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
@@ -165,14 +161,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
-    if (!fontFamily->IsNull()) {
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
     auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
-    if (!style->IsNull() || style->IsNumber()) {
+    if (!style->IsNull() && style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
 }
@@ -185,7 +181,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     CalcDimension fontSize;
     JSRef<JSVal> args = info[0];
     if (!ParseJsDimensionFpNG(args, fontSize, false) || fontSize.IsNegative()) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -282,7 +278,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
@@ -380,14 +376,44 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
     }
     auto startIndex = argsStartIndex->ToNumber<int32_t>();
     auto endIndex = argsEndIndex->ToNumber<int32_t>();
-    if (startIndex == -1 && endIndex == -1) {
-        TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
-        return;
-    }
-    if (startIndex >= endIndex) {
-        return;
-    }
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
+}
+
+void JSText::SetTextCaretColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color caretColor;
+    if (!ParseJsColor(info[0], caretColor)) {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        caretColor = theme->GetCaretColor();
+    }
+    TextModel::GetInstance()->SetTextCaretColor(caretColor);
+}
+
+void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
+    }
+    TextModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
 void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
@@ -503,7 +529,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -525,7 +551,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -658,18 +684,23 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            std::string label = "";
+            std::u16string label = u"";
             if (!node.Invalid()) {
                 auto pattern = node.GetRawPtr()->GetPattern();
                 CHECK_NULL_VOID(pattern);
                 auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
                 CHECK_NULL_VOID(layoutProperty);
-                label = layoutProperty->GetContent().value_or("");
+                label = layoutProperty->GetContent().value_or(u"");
             }
             JSInteractableView::ReportClickEvent(node, label);
 #endif
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClick));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClick), distanceThreshold);
 
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -700,7 +731,12 @@ void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute(newInfo);
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId), distanceThreshold);
     }
 #endif
 }
@@ -714,7 +750,7 @@ void JSText::JsRemoteMessage(const JSCallbackInfo& info)
 
 void JSText::Create(const JSCallbackInfo& info)
 {
-    std::string data;
+    std::u16string data;
     if (info.Length() <= 0) {
         TextModel::GetInstance()->Create(data);
         return;
@@ -1070,6 +1106,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("letterSpacing", &JSText::SetLetterSpacing, opt);
     JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
     JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
+    JSClass<JSText>::StaticMethod("caretColor", &JSText::SetTextCaretColor);
+    JSClass<JSText>::StaticMethod("selectedBackgroundColor", &JSText::SetSelectedBackgroundColor);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
     JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1141,6 +1179,8 @@ void JSTextController::SetStyledString(const JSCallbackInfo& info)
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     controller->SetStyledString(spanStringController);
+    auto thisObj = info.This();
+    thisObj->SetPropertyObject("STYLED_STRING_IN_CONTROLLER", info[0]);
 }
 
 void JSTextController::JSBind(BindingTarget globalObj)

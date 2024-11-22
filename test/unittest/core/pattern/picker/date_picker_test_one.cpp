@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <optional>
-#include <utility>
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -25,37 +22,14 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/point.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -301,7 +275,10 @@ HWTEST_F(DatePickerTestOne, NeedAdaptForAging002, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
     pipeline->fontScale_ = 5.0f;
+    pipeline->rootHeight_ = 1000;
     bool ret = DatePickerDialogView::NeedAdaptForAging();
     ASSERT_TRUE(ret);
 }
@@ -337,7 +314,8 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue004, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->followSystem_ = true;
+    pipeline->maxAppFontScale_ = 5.0f;
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
     /**
@@ -382,7 +360,9 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(2.0f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
     /**
@@ -391,9 +371,9 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue006, TestSize.Level1)
      * @tc.expected: result expect equal fontSizeValue - fontSizeLimit / fontSizeScale.
      */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, false);
-    float fontSizeScale = pipeline->GetFontScale();
+    float fontSizeScale = pipeline->GetMaxAppFontScale();
     auto fontSizeValueResult = fontSizeLimit / fontSizeScale;
-    EXPECT_EQ((int)result.Value(), (fontSizeValue - fontSizeValueResult).Value());
+    EXPECT_EQ((int)result.Value(), (fontSizeLimit - fontSizeValueResult).Value());
 }
 
 /**
@@ -442,9 +422,10 @@ HWTEST_F(DatePickerTestOne, ConvertTitleFontScaleValue001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(6.0f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 50.0_px;
-
     auto result = DatePickerDialogView::ConvertTitleFontScaleValue(fontSizeValue);
     EXPECT_EQ((int)result.Value(), 14);
 }
@@ -459,9 +440,10 @@ HWTEST_F(DatePickerTestOne, ConvertTitleFontScaleValue002, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = 5.0f;
-
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
+    pipeline->rootWidth_ = 1000;
     Dimension fontSizeValue = 50.0_vp;
-
     auto result = DatePickerDialogView::ConvertTitleFontScaleValue(fontSizeValue);
     EXPECT_EQ((int)result.Value(), 72);
 }
@@ -592,7 +574,6 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton002, TestSize.Level1)
     ASSERT_NE(buttonTitleNode, nullptr);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     buttonTitleNode->MountToParent(contentColumn);
-    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     datePickerPattern->SetContentRowNode(contentRow);
     contentRow->MountToParent(contentColumn);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -606,9 +587,9 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton002, TestSize.Level1)
     ASSERT_NE(nextButton, nullptr);
     auto nextButtonLayoutProperty = nextButton->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(nextButtonLayoutProperty, nullptr);
+    nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(nextButtonLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
-
 /**
  * @tc.name: SwitchContentRowButton003
  * @tc.desc: Test DatePickerDialogView SwitchContentRowButton.
@@ -648,7 +629,6 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton003, TestSize.Level1)
     auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     buttonTitleNode->MountToParent(contentColumn);
-    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     datePickerPattern->SetContentRowNode(contentRow);
     contentRow->MountToParent(contentColumn);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -663,6 +643,7 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton003, TestSize.Level1)
     ASSERT_NE(confirmButton, nullptr);
     auto confirmLayoutProperty = confirmButton->GetLayoutProperty<LayoutProperty>();
     ASSERT_NE(confirmLayoutProperty, nullptr);
+    confirmLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(confirmLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
 
@@ -719,6 +700,7 @@ HWTEST_F(DatePickerTestOne, SwitchContentRowButton004, TestSize.Level1)
     ASSERT_NE(nextButton, nullptr);
     auto nextButtonLayoutProperty = nextButton->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(nextButtonLayoutProperty, nullptr);
+    nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_EQ(nextButtonLayoutProperty->propVisibility_, VisibleType::VISIBLE);
 }
 
@@ -929,6 +911,29 @@ HWTEST_F(DatePickerTestOne, CreateLunarswitchNode002, TestSize.Level1)
         contentColumn, dateNode, changeEvent, true, checkboxData);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCheckboxPaintProperty
+ * @tc.desc: Test DatePickerDialogView UpdateCheckboxPaintProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, UpdateCheckboxPaintProperty, TestSize.Level1)
+{
+    auto checkbox = FrameNode::CreateFrameNode(
+        V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_VOID(checkbox);
+    auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkboxPaintProps);
+    CheckboxSettingData checkboxData;
+    checkboxData.selectedColor = Color::BLUE;
+    checkboxData.unselectedColor = Color::BLUE;
+    checkboxData.strokeColor = Color::BLUE;
+    DatePickerDialogView::UpdateCheckboxPaintProperty(
+        checkboxPaintProps, true, checkboxData);
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxUnSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxCheckMarkColor());
 }
 
 /**

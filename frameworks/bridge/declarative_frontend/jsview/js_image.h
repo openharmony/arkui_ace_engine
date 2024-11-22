@@ -54,6 +54,7 @@ public:
     static void SetSmoothEdge(const JSCallbackInfo& info);
     static void SetDynamicRangeMode(const JSCallbackInfo& info);
     static void SetEnhancedImageQuality(const JSCallbackInfo& info);
+    static void SetOrientation(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
@@ -66,7 +67,7 @@ public:
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
-    static void JsSetDraggable(bool draggable);
+    static void JsSetDraggable(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
 

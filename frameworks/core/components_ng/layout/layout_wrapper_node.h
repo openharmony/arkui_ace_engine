@@ -172,9 +172,9 @@ public:
 
     bool SkipMeasureContent() const override;
 
-    bool IsConstraintNoChanged() const
+    bool ConstraintChanged() const
     {
-        return isConstraintNotChanged_;
+        return !isConstraintNotChanged_;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.

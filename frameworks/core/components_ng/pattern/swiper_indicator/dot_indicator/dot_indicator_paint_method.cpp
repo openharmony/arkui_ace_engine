@@ -54,6 +54,8 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    totalItemCount_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        totalItemCount_ : itemCount_;
     if (isHorizontalAndRightToLeft_) {
         if (isSwipeByGroup_) {
             currentIndex_ = totalItemCount_ - 1 - currentIndex_;
@@ -66,6 +68,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
+    dotIndicatorModifier_->SetCurrentIndexActual(currentIndexActual_);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
@@ -304,12 +307,15 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     }
     float startCenterX = margin + padding;
     float endCenterX = margin + padding;
-    if (isSwipeByGroup_ && displayCount_ != 0) {
-        index /= displayCount_;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (isSwipeByGroup_ && displayCount_ != 0) {
+            index /= displayCount_;
+        }
+        if (isPressed_ && isHorizontalAndRightToLeft_ && isSwipeByGroup_ && currentIndex_ <= displayCount_) {
+            touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        }
     }
-    if (isPressed_ && isHorizontalAndRightToLeft_ && isSwipeByGroup_ && currentIndex_ <= displayCount_) {
-        touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    }
+
     if (Positive(turnPageRate_)) {
         auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
         auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
@@ -360,7 +366,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod
 
 std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
 {
-    auto actualTurnPageRate = isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
+    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(actualTurnPageRate));
     float longPointLeftCenterMoveRate = 0.0f;
@@ -521,7 +528,8 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
 {
     auto actualTurnPageRate = turnPageRate_;
-    if (isSwipeByGroup_ && groupTurnPageRate_ != 0) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        isSwipeByGroup_ && groupTurnPageRate_ != 0) {
         actualTurnPageRate = groupTurnPageRate_;
     }
 
@@ -559,7 +567,8 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
     }
 
     auto actualTurnPageRate = turnPageRate_;
-    if (isSwipeByGroup_ && groupTurnPageRate_ != 0) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        isSwipeByGroup_ && groupTurnPageRate_ != 0) {
         actualTurnPageRate = groupTurnPageRate_;
     }
     // item may be invalid in auto linear scene

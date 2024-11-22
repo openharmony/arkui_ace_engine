@@ -190,7 +190,6 @@ public:
     void ShowSelectMenu();
     
     Dimension GetFontSize();
-    void SetSelectDefaultTheme();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
@@ -311,7 +310,6 @@ private:
     MenuAlign menuAlign_;
     std::string selectValue_;
     bool isFitTrigger_ = false;
-    Color selectDefaultBgColor_ = Color::TRANSPARENT;
     ControlSize controlSize_ = ControlSize::NORMAL;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };

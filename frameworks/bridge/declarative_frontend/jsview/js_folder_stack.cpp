@@ -29,24 +29,10 @@
 #include "frameworks/core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<FolderStackModel> FolderStackModel::instance_ = nullptr;
-std::mutex FolderStackModel::mutex_;
-
 FolderStackModel* FolderStackModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-#ifdef NG_BUILD
-            instance_.reset(new NG::FolderStackModelNG());
-#else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::FolderStackModelNG());
-            }
-#endif
-        }
-    }
-    return instance_.get();
+    static NG::FolderStackModelNG instance;
+    return &instance;
 }
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {

@@ -98,6 +98,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
@@ -310,6 +317,14 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
     }
 
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
+    uint32_t parentWindowType = 0;
+    if (container->IsUIExtensionWindow()) {
+        parentWindowType = container->GetParentWindowType();
+    } else {
+        parentWindowType = container->GetWindowType();
+    }
+    PLATFORM_LOGI("isNotifyOccupiedAreaChange is %{public}d, parentWindowType: %{public}u",
+        isNotifyOccupiedAreaChange_, parentWindowType);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo;
@@ -318,6 +333,7 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
     extensionSessionInfo.callerToken_ = callerToken;
     extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
     extensionSessionInfo.want = wantPtr;
+    extensionSessionInfo.parentWindowType_ = parentWindowType;
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
@@ -448,6 +464,7 @@ void SecuritySessionWrapperImpl::NotifyCreate() {}
 
 void SecuritySessionWrapperImpl::NotifyForeground()
 {
+    ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -523,6 +540,26 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
 }
 
+void SecuritySessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    PLATFORM_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("[AceSecurityUiExtension]OnExtensionDetachToDisplay:: The "
+                    "callSessionId(%{public}d) is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISecurityUIExtensionOnExtensionDetachToDisplay");
+}
+
 void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
 {
     int32_t callSessionId = GetSessionId();
@@ -538,7 +575,7 @@ void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
             }
             bool isTransparent = errorCode == ERROR_CODE_UIEXTENSION_TRANSPARENT;
             pattern->FireOnErrorCallback(
-                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
+                isTransparent ? errorCode : ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
                 isTransparent ? EXTENSION_TRANSPARENT_NAME : LIFECYCLE_TIMEOUT_NAME,
                 isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
@@ -594,8 +631,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
         displayArea_.ToString().c_str(), persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (transaction_.lock()) {
-            transaction = transaction_.lock();
+        if (auto temp = transaction_.lock()) {
+            transaction = temp;
             transaction_.reset();
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
@@ -624,7 +661,7 @@ void SecuritySessionWrapperImpl::NotifyOriginAvoidArea(
     const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
     CHECK_NULL_VOID(session_);
-    PLATFORM_LOGD("The avoid area is notified to the provider.");
+    PLATFORM_LOGI("The avoid area is notified to the provider.");
     session_->UpdateAvoidArea(
         sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
@@ -647,7 +684,7 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
         info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
     newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    PLATFORM_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
+    PLATFORM_LOGI("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
         keyboardHeight);
     session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;

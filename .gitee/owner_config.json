@@ -4,7 +4,7 @@
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
-            "https://gitee.com/cheng-feiwang",
+            "https://gitee.com/cheng-feiwang"
         ],
         "https://gitee.com/arkuiabilitygroup": [
             "https://gitee.com/lmleon",
@@ -17,7 +17,7 @@
             "https://gitee.com/harmony_zhangjian",
             "https://gitee.com/yesiyuanjim",
             "https://gitee.com/lushi1202",
-            "https://gitee.com/xiang-shouxing",
+            "https://gitee.com/xiang-shouxing"
         ],
         "https://gitee.com/arkuievent": [
             "https://gitee.com/jiangtao92",
@@ -25,18 +25,19 @@
             "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
             "https://gitee.com/zhou-chaobo",
+            "https://gitee.com/liukaii",
+            "https://gitee.com/yihao-lin"
         ],
         "https://gitee.com/arkui_architecture": [
             "https://gitee.com/sunfei2021",
             "https://gitee.com/yan-shuifeng",
-            "https://gitee.com/lightningHo",
-            "https://gitee.com/liyi0309",
+            "https://gitee.com/lightningHo"
         ],
         "https://gitee.com/arkui_image": [
             "https://gitee.com/ileft2019",
             "https://gitee.com/jinweiliu",
             "https://gitee.com/lexiaoyao2",
-            "https://gitee.com/liyujie43",
+            "https://gitee.com/liyujie43"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -52,7 +53,7 @@
             "https://gitee.com/zcdqs",
             "https://gitee.com/zhoutianer",
             "https://gitee.com/xuzhidan",
-            "https://gitee.com/Hu_ZeQi",
+            "https://gitee.com/Hu_ZeQi"
         ],
         "https://gitee.com/arkuipopupwindow": [
             "https://gitee.com/zhangfanfan2",
@@ -63,18 +64,29 @@
             "https://gitee.com/fredtt",
             "https://gitee.com/futurescape",
             "https://gitee.com/luoying_ace_admin",
+            "https://gitee.com/houguobiao"
         ],
         "https://gitee.com/huawei_g_five": [
             "https://gitee.com/kangshihui",
             "https://gitee.com/luckclover",
             "https://gitee.com/lijuan124",
-            "https://gitee.com/tzcurtain",
+            "https://gitee.com/tzcurtain"
         ],
         "https://gitee.com/arkuilayout": [
             "https://gitee.com/ZhangYu-Home",
             "https://gitee.com/xiexiyun",
             "https://gitee.com/keerecles",
-            "https://gitee.com/sunbees",
+            "https://gitee.com/sunbees"
+        ],
+        "https://gitee.com/arkwebinarkuireview": [
+            "https://gitee.com/libing23",
+            "https://gitee.com/LongLie",
+            "https://gitee.com/defeng2020",
+            "https://gitee.com/zhufenghao",
+            "https://gitee.com/cr_wanghui",
+            "https://gitee.com/chenjiadong0322",
+            "https://gitee.com/smileJuliet",
+            "https://gitee.com/bc_yx"
         ]
     },
     "userInfos": {
@@ -138,6 +150,10 @@
             "info": "[拖拽/事件手势/组件截图 jiadexiang]",
             "group": "https://gitee.com/arkuievent"
         },
+        "https://gitee.com/liukaii": {
+            "info": "[拖拽 liukai]",
+            "group": "https://gitee.com/arkuievent"
+        },
         "https://gitee.com/zhaojian2021": {
             "info": "[事件手势 zhaojian]",
             "group": "https://gitee.com/arkuievent"
@@ -150,6 +166,10 @@
             "info": "[焦点/根视图/通用属性 liuyongchang]",
             "group": "https://gitee.com/arkuievent"
         },
+        "https://gitee.com/yihao-lin": {
+            "info": "[焦点/根视图/通用属性 linyihao]",
+            "group": "https://gitee.com/arkuievent"
+        },
         "https://gitee.com/sunfei2021": {
             "info": "[架构/编译gn相关 sunfei]",
             "group": "https://gitee.com/arkui_architecture"
@@ -160,10 +180,6 @@
         },
         "https://gitee.com/lightningHo": {
             "info": "[渲染核心数据结构 hesu]",
-            "group": "https://gitee.com/arkui_architecture"
-        },
-        "https://gitee.com/liyi0309": {
-            "info": "[C-API框架 liyi]",
             "group": "https://gitee.com/arkui_architecture"
         },
         "https://gitee.com/ileft2019": {
@@ -262,6 +278,10 @@
             "info": "Dialog相关 luoying",
             "group": "https://gitee.com/arkuipopupwindow"
         },
+        "https://gitee.com/houguobiao": {
+            "info": "[Picker类组件 houguobiao]",
+            "group": "https://gitee.com/arkuipopupwindow"
+        },
         "https://gitee.com/kangshihui": {
             "info": "[AutoFill&文本菜单 kangshihui]",
             "group": "https://gitee.com/huawei_g_five"
@@ -294,5 +314,37 @@
             "info": "[绘制类组件 sunqinjia]",
             "group": "https://gitee.com/arkuilayout"
         },
+        "https://gitee.com/libing23": {
+            "info": "[web-基础框架 libing]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/LongLie": {
+            "info": "[web-渲染 lvjunmao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/defeng2020": {
+            "info": "[web-渲染性能 wudefeng]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhufenghao": {
+            "info": "[web-事件交互 zhufenghao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/cr_wanghui": {
+            "info": "[web-网络加载 wanghui]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/chenjiadong0322": {
+            "info": "[web-网络加载 chenjiadong]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/smileJuliet": {
+            "info": "[web-性能优化 yangshimiao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/bc_yx": {
+            "info": "[web-性能优化 liurongliang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        }
     }
 }

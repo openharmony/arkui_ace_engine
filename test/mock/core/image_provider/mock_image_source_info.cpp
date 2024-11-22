@@ -276,6 +276,11 @@ bool ImageSourceInfo::SupportObjCache() const
     return false;
 }
 
+const std::string& ImageSourceInfo::GetBundleName() const
+{
+    return bundleName_;
+}
+
 const std::string& ImageSourceInfo::GetModuleName() const
 {
     return moduleName_;
@@ -289,11 +294,6 @@ void ImageSourceInfo::SetBundleName(const std::string& bundleName)
 void ImageSourceInfo::SetModuleName(const std::string& moduleName)
 {
     moduleName_ = moduleName;
-}
-
-const std::string& ImageSourceInfo::GetBundleName() const
-{
-    return bundleName_;
 }
 
 void ImageSourceInfo::GenerateCacheKey() {}

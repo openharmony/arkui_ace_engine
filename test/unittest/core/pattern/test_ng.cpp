@@ -18,6 +18,8 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
@@ -31,7 +33,9 @@ void TestNG::SetUpTestSuite()
 {
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->SetUseNewPipeline();
     MockPipelineContext::SetUp();
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void TestNG::TearDownTestSuite()
@@ -124,7 +128,7 @@ RefPtr<ThemeConstants> TestNG::CreateThemeConstants(const std::string& patternNa
     return themeConstants;
 }
 
-RefPtr<FrameNode> TestNG::CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback)
+RefPtr<FrameNode> TestNG::CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback)
 {
     TextModelNG model;
     model.Create(content);
@@ -169,5 +173,88 @@ void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, cons
         ViewAbstract::SetWidth(crossSize);
         ViewAbstract::SetHeight(mainSize);
     }
+}
+
+void TestNG::DragStart(const RefPtr<FrameNode>& frameNode, Offset startOffset)
+{
+    rootNode_ = FindRootNode(frameNode);
+    dragNode_ = FindScrollableNode(frameNode);
+    GestureEvent gesture;
+    dragInfo_ = gesture;
+    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
+    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
+    dragInfo_.SetSourceTool(SourceTool::FINGER);
+    dragInfo_.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    dragInfo_.SetGlobalPoint(Point() + startOffset);
+    dragInfo_.SetGlobalLocation(startOffset);
+    dragInfo_.SetLocalLocation(startOffset);
+    scrollable->HandleTouchDown();
+    scrollable->isDragging_ = true;
+    scrollable->HandleDragStart(dragInfo_);
+}
+
+void TestNG::DragUpdate(float delta)
+{
+    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
+    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
+    double velocity = delta > 0 ? 200 : -200;
+    dragInfo_.SetMainVelocity(velocity);
+    dragInfo_.SetMainDelta(delta);
+    dragInfo_.SetGlobalPoint(Point(0, delta));
+    dragInfo_.SetGlobalLocation(Offset(0, delta));
+    dragInfo_.SetLocalLocation(Offset(0, delta));
+    scrollable->HandleDragUpdate(dragInfo_);
+    FlushLayoutTask(rootNode_);
+    FlushLayoutTask(dragNode_);
+}
+
+void TestNG::DragEnd(float velocityDelta)
+{
+    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
+    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
+    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
+    dragInfo_.SetMainDelta(0);
+    dragInfo_.SetMainVelocity(velocity);
+    dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
+    dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
+    dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(dragInfo_);
+    scrollable->isDragging_ = false;
+    FlushLayoutTask(rootNode_);
+    FlushLayoutTask(dragNode_);
+    rootNode_ = nullptr;
+    dragNode_ = nullptr;
+}
+
+void TestNG::DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, float dragDelta, float velocityDelta)
+{
+    DragStart(frameNode, startOffset);
+    DragUpdate(dragDelta);
+    DragEnd(velocityDelta);
+}
+
+RefPtr<FrameNode> TestNG::FindRootNode(const RefPtr<FrameNode>& frameNode)
+{
+    auto rootNode = frameNode;
+    while (rootNode && !rootNode->IsRootNode()) {
+        if (!rootNode->GetParent()) {
+            break;
+        }
+        rootNode = AceType::DynamicCast<FrameNode>(rootNode->GetParent());
+    }
+    return rootNode;
+}
+
+RefPtr<FrameNode> TestNG::FindScrollableNode(const RefPtr<FrameNode>& frameNode)
+{
+    auto scrollableNode = frameNode;
+    while (scrollableNode) {
+        if (AceType::InstanceOf<ScrollablePattern>(scrollableNode->GetPattern())) {
+            return scrollableNode;
+        }
+        scrollableNode = AceType::DynamicCast<FrameNode>(scrollableNode->GetParent());
+    }
+    return scrollableNode;
 }
 } // namespace OHOS::Ace::NG

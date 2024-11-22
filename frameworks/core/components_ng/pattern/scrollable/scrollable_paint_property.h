@@ -36,6 +36,15 @@ struct FadingEdgeProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdgeLength, Dimension);
 };
 
+enum class ContentClipMode {
+    CONTENT_ONLY, // area excluding margin & padding & SafeAreaPadding
+    BOUNDARY,     // corresponding to FrameRect, area excluding margin
+    SAFE_AREA,    // CONTENT_ONLY area + SafeAreaPadding (which can stack up with ancestor's SafeAreaPadding)
+    CUSTOM,       // inner enum, not present in frontend. Custom shape's offset is relative to FrameOffset.
+    DEFAULT,      // Different scrollable components have different default clip values.
+};
+using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
+
 class ScrollablePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty)
 
@@ -49,6 +58,7 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propScrollBarProperty_ = CloneScrollBarProperty();
         paintProperty->propFadingEdgeProperty_ = CloneFadingEdgeProperty();
+        paintProperty->propContentClip_ = CloneContentClip();
         return paintProperty;
     }
 
@@ -57,6 +67,7 @@ public:
         ResetScrollBarProperty();
         ResetFadingEdgeProperty();
         PaintProperty::Reset();
+        ResetContentClip();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -68,6 +79,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(FadingEdgeProperty, FadingEdgeProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeLength, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentClip, ContentClip, PROPERTY_UPDATE_RENDER);
     Dimension GetBarWidth() const;
     Color GetBarColor() const;
 

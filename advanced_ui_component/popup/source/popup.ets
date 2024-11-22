@@ -367,7 +367,12 @@ export struct PopupComponent {
       if (px2vp(defaultDisplaySync.width) > 400) {
         textMaxWeight = 400
       } else {
-        textMaxWeight = px2vp(defaultDisplaySync.width) - 40 - 40
+        if (defaultDisplaySync.width != 0) {
+          textMaxWeight = px2vp(defaultDisplaySync.width)
+        } else {
+          // The previewer does not support the display interface to use abnormal values
+          textMaxWeight = -1
+        }
       }
       textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
       textMaxWeight -= this.theme.windows.padding.end.value
@@ -483,7 +488,7 @@ export struct PopupComponent {
     scrollMaxHeight -= (this.theme.windows.padding.bottom.value -
       (this.theme.button.textMargin.bottom.value / 2))
     if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
-      return scrollMaxHeight
+      return this.textHeight
     } else {
       scrollMaxHeight = undefined
       return scrollMaxHeight
@@ -511,7 +516,12 @@ export struct PopupComponent {
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      applyMaxWidth = px2vp(defaultDisplaySync.width) - 40 - 40
+      if (defaultDisplaySync.width != 0) {
+        applyMaxWidth = px2vp(defaultDisplaySync.width)
+      } else {
+        // The previewer does not support the display interface to use abnormal values
+        applyMaxWidth = -1
+      }
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
@@ -591,6 +601,7 @@ export struct PopupComponent {
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
+              .edgeEffect(EdgeEffect.Spring)
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
@@ -685,6 +696,7 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
+                .edgeEffect(EdgeEffect.Spring)
                 .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number

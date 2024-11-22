@@ -23,21 +23,6 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-namespace OHOS::Ace {
-std::unique_ptr<CanvasModel> CanvasModel::instance_ = nullptr;
-std::mutex CanvasModel::mutex_;
-CanvasModel* CanvasModel::GetInstanceNG()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::CanvasModelNG());
-        }
-    }
-    return instance_.get();
-}
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::NG {
 RefPtr<AceType> CanvasModelNG::Create()
 {

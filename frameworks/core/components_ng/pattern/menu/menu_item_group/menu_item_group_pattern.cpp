@@ -117,20 +117,20 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     return nullptr;
 }
 
-std::string MenuItemGroupPattern::GetHeaderContent() const
+std::u16string MenuItemGroupPattern::GetHeaderContent() const
 {
-    CHECK_NULL_RETURN(headerContent_, "");
+    CHECK_NULL_RETURN(headerContent_, u"");
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(content, "");
-    return content->GetContentValue("");
+    CHECK_NULL_RETURN(content, u"");
+    return content->GetContentValue(u"");
 }
 
-std::string MenuItemGroupPattern::GetFooterContent() const
+std::u16string MenuItemGroupPattern::GetFooterContent() const
 {
-    CHECK_NULL_RETURN(footerContent_, "");
+    CHECK_NULL_RETURN(footerContent_, u"");
     auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(content, "");
-    return content->GetContentValue("");
+    CHECK_NULL_RETURN(content, u"");
+    return content->GetContentValue(u"");
 }
 
 void MenuItemGroupPattern::UpdateMenuItemIconInfo()

@@ -15,6 +15,7 @@
 
 #include "mock_clipboard.h"
 
+#include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
@@ -77,17 +78,41 @@ void MockClipBoard::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, con
 void MockClipBoard::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) {}
 void MockClipBoard::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) {}
 void MockClipBoard::AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) {}
+void MockClipBoard::AddMultiTypeRecord(
+    const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord)
+{}
 void MockClipBoard::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) {}
 void MockClipBoard::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
 {}
 void MockClipBoard::GetSpanStringData(
-    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {}
 
 RefPtr<PasteDataMix> MockClipBoard::CreatePasteDataMix()
 {
     return AceType::MakeRefPtr<PasteDataMix>();
+}
+
+void MultiTypeRecordImpl::SetPlainText(const std::string plainText) {}
+void MultiTypeRecordImpl::SetUri(const std::string uri) {}
+void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap) {}
+
+const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
+{
+    return nullptr;
+}
+const std::string MultiTypeRecordImpl::GetPlainText()
+{
+    return "";
+}
+const std::string MultiTypeRecordImpl::GetUri()
+{
+    return "";
+}
+std::vector<uint8_t>& MultiTypeRecordImpl::GetSpanStringBuffer()
+{
+    return spanStringBuffer_;
 }
 } // namespace OHOS::Ace

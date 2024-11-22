@@ -38,7 +38,7 @@ public:
     void Pop() override;
     void SetIndex(int32_t index) override;
     void SetTabBarPosition(BarPosition tabBarPosition) override;
-    void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) override;
+    void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption) override;
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;
@@ -66,6 +66,7 @@ public:
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     void SetAnimateMode(TabAnimateMode mode) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetBarBackgroundEffect(const EffectOption& effectOption) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -76,7 +77,7 @@ public:
     static void SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode,  const std::optional<Color>& backgroundColorOpt);
-    static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const std::optional<BlurStyle>& tabBarBlurStyleOpt);
+    static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
     static void SetTabBarPosition(FrameNode* frameNode, const std::optional<BarPosition>& tabBarPositionOpt);
@@ -89,6 +90,7 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);
+    static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange);
     static void SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick);
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);

@@ -46,6 +46,7 @@ public:
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern,
         const std::vector<NG::RangeContent>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
+    static void SetDialogScrollStop(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onScrollStop);
     static void SetDefaultPickerItemHeight(const Dimension& value);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
@@ -131,7 +132,7 @@ private:
     static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
+    static std::function<void()> CloseDialogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
         const RefPtr<FrameNode>& dialogNode);
 
     static void SetDividerNodeActive(RefPtr<UINode>& contentRow, bool firstDivider,

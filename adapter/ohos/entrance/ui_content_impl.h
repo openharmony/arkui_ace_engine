@@ -60,10 +60,12 @@ public:
     UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
     UIContentErrorCode Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
+    UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content,
+        napi_value storage, const std::string& contentName) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override;
+    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -83,7 +85,8 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
-    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
@@ -98,11 +101,13 @@ public:
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
-    void UpdateDecorVisible(bool visible, bool hasDeco) override;
+    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
+    void UpdateDecorVisible(bool visible, bool hasDecor) override;
+    void UpdateWindowBlur();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
+    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
@@ -130,9 +135,6 @@ public:
 
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
-
-    // Set UIContent callback after lastest layout finish
-    void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
@@ -360,6 +362,14 @@ public:
         destructCallbacks_.erase(key);
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -383,6 +393,7 @@ private:
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void UnregisterDisplayManagerCallback();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -416,6 +427,7 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
+    int32_t hostInstanceId_ = -1;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
     std::vector<std::string> registerComponents_;
@@ -428,6 +440,9 @@ private:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
+
+    SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
+    std::mutex updateDecorVisibleMutex_;
 };
 
 } // namespace OHOS::Ace

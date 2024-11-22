@@ -121,7 +121,7 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -139,24 +139,24 @@ public:
 
     const GridLayoutInfo& GetGridLayoutInfo() const
     {
-        return gridLayoutInfo_;
+        return info_;
     }
 
     /* caution when using mutable reference */
     GridLayoutInfo& GetMutableLayoutInfo()
     {
-        return gridLayoutInfo_;
+        return info_;
     }
 
     void ResetGridLayoutInfo()
     {
-        gridLayoutInfo_.lineHeightMap_.clear();
-        gridLayoutInfo_.gridMatrix_.clear();
-        gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
-        gridLayoutInfo_.endMainLineIndex_ = 0;
-        gridLayoutInfo_.ResetPositionFlags();
-        gridLayoutInfo_.irregularItemsPosition_.clear();
-        gridLayoutInfo_.clearStretch_ = true;
+        info_.lineHeightMap_.clear();
+        info_.gridMatrix_.clear();
+        info_.endIndex_ = info_.startIndex_ - 1;
+        info_.endMainLineIndex_ = 0;
+        info_.ResetPositionFlags();
+        info_.irregularItemsPosition_.clear();
+        info_.clearStretch_ = true;
     }
 
     void SetIrregular(bool value)
@@ -166,7 +166,7 @@ public:
 
     void ResetPositionFlags()
     {
-        gridLayoutInfo_.ResetPositionFlags();
+        info_.ResetPositionFlags();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -175,13 +175,15 @@ public:
 
     bool IsAtTop() const override
     {
-        return gridLayoutInfo_.reachStart_;
+        return info_.reachStart_;
     }
 
     bool IsAtBottom() const override
     {
-        return gridLayoutInfo_.offsetEnd_;
+        return info_.offsetEnd_;
     }
+
+    bool IsFadingBottom() const override;
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
@@ -263,8 +265,20 @@ public:
 
     Axis GetAxis() const override
     {
-        return gridLayoutInfo_.axis_;
+        return info_.axis_;
     }
+
+    int32_t GetDefaultCachedCount() const
+    {
+        return info_.defCachedCount_;
+    }
+
+    void ResetFocusedIndex()
+    {
+        focusIndex_ = std::nullopt;
+    }
+
+    SizeF GetChildrenExpandedSize() override;
 
     const std::shared_ptr<GridItemAdapter>& GetGridItemAdapter()
     {
@@ -316,7 +330,10 @@ private:
     std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleDirectionKey(KeyCode code);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool ScrollToLastFocusIndex(KeyCode keyCode);
+    int32_t GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(const GestureEvent& info) override;
@@ -346,6 +363,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
+    void FireFocus();
+    bool IsInViewport(int32_t index) const;
 
     std::string GetIrregularIndexesString() const;
 
@@ -368,13 +387,17 @@ private:
     bool isRightEndStep_ = false;
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
+    bool needTriggerFocus_ = false;
+    bool triggerFocus_ = false;
+    KeyEvent keyEvent_;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-    GridLayoutInfo scrollGridLayoutInfo_;
-    GridLayoutInfo gridLayoutInfo_;
+    std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
+    GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     std::shared_ptr<GridItemAdapter> adapter_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);

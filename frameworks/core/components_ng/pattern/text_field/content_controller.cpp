@@ -45,7 +45,6 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, value);
     if (textField->GetIsPreviewText()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no PreprocessString at previewing text");
         return tmp;
     }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -144,10 +143,9 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             break;
         }
         case TextInputType::VISIBLE_PASSWORD:
-        case TextInputType::NEW_PASSWORD: {
-            textChanged |= FilterWithAscii(result);
             break;
-        }
+        case TextInputType::NEW_PASSWORD:
+            break;
         case TextInputType::NUMBER_PASSWORD: {
             textChanged |= FilterWithEvent(DIGIT_WHITE_LIST, result);
             break;
@@ -167,17 +165,16 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
     }
 }
 
-void ContentController::FilterValue()
+bool ContentController::FilterValue()
 {
     bool textChanged = false;
     auto result = content_;
     auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, false);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textField);
+    CHECK_NULL_RETURN(textField, false);
     if (textField->GetIsPreviewText()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no filter at previewing text");
-        return;
+        return false;
     }
 
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -202,7 +199,9 @@ void ContentController::FilterValue()
         // clamp emoji
         auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
         content_ = StringUtils::ToString(subWstring);
+        return true;
     }
+    return textChanged;
 }
 
 void ContentController::FilterValueType(std::string& value)
@@ -352,6 +351,9 @@ bool ContentController::FilterWithEvent(const std::string& filter, std::string& 
 
 void ContentController::erase(int32_t startIndex, int32_t length)
 {
+    if (startIndex < 0 || startIndex >= static_cast<int32_t>(GetWideText().length())) {
+        return;
+    }
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
 }

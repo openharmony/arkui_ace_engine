@@ -21,8 +21,9 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
-    : pManager_(paragraphs)
+RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+    std::optional<TextStyle> typingTextStyle)
+    : pManager_(paragraphs), typingTextStyle_(typingTextStyle)
 {
     allSpans_ = spans;
     // split spans into groups by \newline
@@ -72,6 +73,12 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 
 void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target)
 {
+    if (typingTextStyle_.has_value()) {
+        auto typingTextStyle = typingTextStyle_.value();
+        target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
+        target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
+        return;
+    }
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }
@@ -141,7 +148,7 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper, maxSize.Width())) {
+    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
     }
     CHECK_NULL_RETURN(paragraphManager_, false);
@@ -155,7 +162,7 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
 }
 
 bool RichEditorLayoutAlgorithm::CreateParagraph(
-    const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth)
+    const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth)
 {
     CHECK_NULL_RETURN(!spans_.empty(), false);
     if (!paragraphManager_) {
@@ -237,7 +244,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
     MultipleParagraphLayoutAlgorithm::Layout(layoutWrapper);
 }
 
@@ -253,7 +260,7 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
+    const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
     auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();

@@ -123,43 +123,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         ResetForm();
     }
 
+    SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    wantCache_.SetElementName(info.bundleName, info.abilityName);
-
-    if (info.wantWrap) {
-        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
-    }
-
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
-    wantCache_.SetParam(
-        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext) {
-        auto density = pipelineContext->GetDensity();
-        // 在OHOS::AppExecFwk::Constants中加类似常量
-        wantCache_.SetParam("ohos.extra.param.key.form_density", density);
-    }
-    if (info.dimension != -1) {
-        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
-    }
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
-
-    if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
-        CHECK_NULL_VOID(renderDelegate_);
-        wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
-        wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
-        wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
-    }
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
-
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
@@ -223,18 +188,40 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        CheckWhetherSurfaceChangeFailed();
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
-
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         recycleStatus_ = RecycleStatus::RECOVERED;
     }
-
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
+    }
+}
+
+void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
+{
+    float width = 0.0f;
+    float height = 0.0f;
+    float borderWidth = 0.0f;
+    bool needRedispatch = false;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (notifySurfaceChangeFailedRecord_.isfailed == true) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "redispatch surface change event");
+            needRedispatch = true;
+            notifySurfaceChangeFailedRecord_.isfailed = false;
+            width = notifySurfaceChangeFailedRecord_.expectedWidth;
+            height = notifySurfaceChangeFailedRecord_.expectedHeight;
+            borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+        }
+    }
+    if (needRedispatch) {
+        uint32_t reason = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
+        formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, reason, nullptr, borderWidth);
     }
 }
 
@@ -282,6 +269,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -297,6 +285,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -317,6 +306,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -429,7 +419,9 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -447,6 +439,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - OnActionEventHandle ,formId: %{public}" PRId64,
+            runningCardId_);
         actionEventHandle_(action);
     }
 }
@@ -539,7 +533,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            return;
+        }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
@@ -599,28 +597,10 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 
 #ifdef OHOS_STANDARD_SYSTEM
     if (type == "router") {
-        AAFwk::Want want;
-        if (!ParseAction(action, type, want)) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
-        } else {
-            CHECK_NULL_VOID(formUtils_);
-            auto context = context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            auto instantId = context->GetInstanceId();
-            formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-        }
+        OnRouterActionEvent(action);
         return;
     } else if (type == "call") {
-        AAFwk::Want want;
-        if (!ParseAction(action, type, want)) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
-        } else {
-            CHECK_NULL_VOID(formUtils_);
-            auto context = context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            auto instantId = context->GetInstanceId();
-            formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-        }
+        OnCallActionEvent(action);
         return;
     }
 
@@ -724,21 +704,30 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
-    if (formRendererDispatcher_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
-        return;
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (formRendererDispatcher_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
+            notifySurfaceChangeFailedRecord_.isfailed = true;
+            notifySurfaceChangeFailedRecord_.expectedWidth = width;
+            notifySurfaceChangeFailedRecord_.expectedHeight = height;
+            notifySurfaceChangeFailedRecord_.expectedBorderWidth = borderWidth;
+            return;
+        }
     }
     WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
     if (FormManager::GetInstance().IsSizeChangeByRotate()) {
         sizeChangeReason = WindowSizeChangeReason::ROTATION;
     }
     std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (sizeChangeReason != WindowSizeChangeReason::UNDEFINED) {
-        if (FormManager::GetInstance().GetRSTransaction().lock()) {
-            transaction = FormManager::GetInstance().GetRSTransaction().lock();
-        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-            transaction = transactionController->GetRSTransaction();
-        }
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        transaction = transactionController->GetRSTransaction();
     }
 
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
@@ -793,6 +782,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }
@@ -1036,6 +1027,74 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
     TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}s",
         std::to_string(runningCardId_).c_str());
     HandleEnableFormCallback(enable);
+}
+
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
+{
+    wantCache_.SetElementName(info.bundleName, info.abilityName);
+
+    if (info.wantWrap) {
+        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
+    }
+
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
+    wantCache_.SetParam(
+        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext) {
+        auto density = pipelineContext->GetDensity();
+        // 在OHOS::AppExecFwk::Constants中加类似常量
+        wantCache_.SetParam("ohos.extra.param.key.form_density", density);
+    }
+    if (info.dimension != -1) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
+    }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
+
+    if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+        CHECK_NULL_VOID(renderDelegate_);
+        wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
+        wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
+        wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
+    }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
+}
+
+
+void FormManagerDelegate::OnRouterActionEvent(const std::string& action)
+{
+    AAFwk::Want want;
+    if (!ParseAction(action, "router", want)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
+    } else {
+        CHECK_NULL_VOID(formUtils_);
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto instantId = context->GetInstanceId();
+        formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+    }
+}
+
+void FormManagerDelegate::OnCallActionEvent(const std::string& action)
+{
+    AAFwk::Want want;
+    if (!ParseAction(action, "call", want)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
+    } else {
+        CHECK_NULL_VOID(formUtils_);
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto instantId = context->GetInstanceId();
+        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+    }
 }
 #endif
 } // namespace OHOS::Ace

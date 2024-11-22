@@ -49,8 +49,8 @@ public:
         napi_value storage) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override {}
+    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -154,6 +154,23 @@ public:
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
+
+    void EnableContainerModalGesture(bool isEnable) override {};
+
+    bool GetContainerFloatingTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerCustomTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerControlButtonVisible() override
+    {
+        return false;
+    }
 
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,

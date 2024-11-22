@@ -201,11 +201,6 @@ public:
         return {};
     }
 
-    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
-    {
-        return {};
-    }
-
     virtual std::string GetHapPath() const
     {
         return {};
@@ -453,6 +448,7 @@ public:
     }
 
     virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
+
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -497,7 +493,7 @@ public:
 
     virtual bool GetCurPointerEventInfo(
         int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -562,6 +558,15 @@ public:
         return apiTargetVersion >= static_cast<int32_t>(version);
     }
 
+    static int32_t GetCurrentApiTargetVersion()
+    {
+        auto container = Current();
+        if (!container) {
+            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        }
+        return container->GetApiTargetVersion();
+    }
+
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
     {
         appBar_ = appBar;
@@ -603,6 +608,15 @@ public:
 
     virtual void CheckAndSetFontFamily() {};
 
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
+    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    {
+        return Rect();
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

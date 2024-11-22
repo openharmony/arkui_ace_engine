@@ -84,10 +84,14 @@ HWTEST_F(NativeGestureTest, NativeGestureTest002, TestSize.Level1)
     auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_1"));
     auto pinchGesture = gestureAPI->createPinchGesture(2, 0.0f);
+    EXPECT_NE(pinchGesture, nullptr);
     auto swipeGesture = gestureAPI->createSwipeGesture(1, 1, 0.0f);
+    EXPECT_NE(swipeGesture, nullptr);
     auto panGesture = gestureAPI->createPanGesture(0, GESTURE_DIRECTION_DOWN, 5);
+    EXPECT_NE(panGesture, nullptr);
     gestureAPI->dispose(pinchGesture);
     gestureAPI->dispose(swipeGesture);
     gestureAPI->dispose(panGesture);
+    EXPECT_NE(gestureAPI, nullptr);
 }
 

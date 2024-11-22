@@ -275,6 +275,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
+    JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -331,7 +332,6 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
     } else {
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
-        return;
     }
 
     NG::NavigationTitlebarOptions options;
@@ -351,9 +351,17 @@ void JSNavigation::SetSubTitle(const std::string& subTitle)
     NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
-void JSNavigation::SetHideTitleBar(bool hide)
+void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
 {
-    NavigationModel::GetInstance()->SetHideTitleBar(hide);
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)
@@ -400,9 +408,17 @@ void JSNavigation::SetHideBackButton(bool hide)
     NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
-void JSNavigation::SetHideToolBar(bool hide)
+void JSNavigation::SetHideToolBar(const JSCallbackInfo& info)
 {
-    NavigationModel::GetInstance()->SetHideToolBar(hide);
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
 }
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
@@ -838,5 +854,16 @@ void JSNavigation::SetRecoverable(const JSCallbackInfo& info)
     }
     auto recoverable = info[0]->ToBoolean();
     NavigationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's drag bar is false
+        NavigationModel::GetInstance()->SetEnableDragBar(false);
+        return;
+    }
+    auto enableDragBar = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
 }
 } // namespace OHOS::Ace::Framework

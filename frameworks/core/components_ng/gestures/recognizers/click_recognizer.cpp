@@ -37,7 +37,13 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 void ClickRecognizer::ForceCleanRecognizer()
 {
     MultiFingersRecognizer::ForceCleanRecognizer();
-    OnResetStatus();
+    tappedCount_ = 0;
+    equalsToFingers_ = false;
+    focusPoint_ = {};
+    fingerDeadlineTimer_.Cancel();
+    tapDeadlineTimer_.Cancel();
+    currentTouchPointsNum_ = 0;
+    responseRegionBuffer_.clear();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -83,6 +89,8 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
+    
+    SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
 void ClickRecognizer::InitGlobalValue(SourceType sourceType)
@@ -152,9 +160,6 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
-    if (onAccessibilityEventFunc_) {
-        onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
-    }
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     TouchEvent touchPoint = {};
@@ -185,6 +190,11 @@ void ClickRecognizer::OnAccepted()
             static_cast<long long>(inputTime), static_cast<long long>(overTime));
     }
     firstInputTime_.reset();
+
+    // already send Event in onClick
+    if (onAccessibilityEventFunc_ && !onClick_) {
+        onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
+    }
 }
 
 void ClickRecognizer::OnRejected()
@@ -203,7 +213,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRender()) {
         touchDownTime_ = event.time;
     }
@@ -295,7 +305,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
     if (pipeline && pipeline->IsFormRender() && IsFormRenderClickRejected(event)) {
@@ -315,6 +325,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }
+    bool fingersNumberSatisfied = equalsToFingers_;
     // Check whether multi-finger taps are completed in count_ times
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0) && isUpInRegion) {
         // Turn off the multi-finger lift deadline timer
@@ -329,7 +340,11 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
     }
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        if (fingersNumberSatisfied) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        } else {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
     if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
         DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
@@ -347,7 +362,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     InitGlobalValue(event.sourceType);
     // In form scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRender()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
@@ -378,7 +393,7 @@ void ClickRecognizer::HandleOverdueDeadline()
 
 void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -463,6 +478,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 #endif
     info.SetPointerEvent(lastPointEvent_);
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+    info.SetInputEventType(inputEventType_);
     return info;
 }
 
@@ -533,6 +549,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     onAction_ = std::move(curr->onAction_);
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -541,7 +558,8 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
     oss << "count: " << count_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }
@@ -561,5 +579,17 @@ void ClickRecognizer::CleanRecognizerState()
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+}
+
+OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
+        auto recognizer = weak.Upgrade();
+        CHECK_NULL_VOID(recognizer);
+        auto node = recognizer->GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(node);
+        node->OnAccessibilityEvent(eventType);
+    };
+    return callback;
 }
 } // namespace OHOS::Ace::NG

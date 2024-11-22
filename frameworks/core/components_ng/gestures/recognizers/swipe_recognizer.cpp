@@ -275,7 +275,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     time_ = event.time;
     lastAxisEvent_ = event;
     UpdateTouchPointWithAxisEvent(event);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     bool isShiftKeyPressed = false;
     bool hasDifferentDirectionGesture = false;
     if (pipeline) {
@@ -400,6 +400,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -462,6 +463,7 @@ bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     onAction_ = std::move(curr->onAction_);
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -471,7 +473,8 @@ RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
     std::stringstream oss;
     oss << "direction: " << direction_.type << ", "
         << "speed: " << speed_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

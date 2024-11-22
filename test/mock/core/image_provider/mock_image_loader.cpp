@@ -51,11 +51,7 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& /
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& /*sourceInfo*/)
-#else
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& /*sourceInfo*/)
-#endif
 {
     return nullptr;
 }

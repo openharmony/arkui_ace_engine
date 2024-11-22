@@ -20,6 +20,7 @@
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
 #include "base/thread/frame_trace_adapter.h"
+#include "base/thread/thread_priority.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -190,6 +191,7 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
         return;
     }
     SetThreadName(threadNo);
+    ThreadPriority::SetThreadPriority(TaskExecutor::TaskType::BACKGROUND);
     Task task;
     const uint32_t purgeFlag = (1u << (threadNo - 1u));
     std::unique_lock<std::mutex> lock(mutex_);

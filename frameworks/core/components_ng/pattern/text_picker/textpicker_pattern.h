@@ -81,6 +81,10 @@ public:
 
     void FireChangeEvent(bool refresh);
 
+    void SetScrollStopEventCallback(EventCallback&& value);
+
+    void FireScrollStopEvent(bool refresh);
+
     void OnColumnsBuilding();
 
     void FlushOptions();
@@ -253,6 +257,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
     void OnFontConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
     {
@@ -337,7 +342,8 @@ public:
         isPicker_ = isPicker;
     }
 
-    void CheckAndUpdateColumnSize(SizeF& size);
+    void CheckAndUpdateColumnSize(SizeF& size, bool isNeedAdaptForAging = false);
+    bool NeedAdaptForAging();
 
     void SetDivider(const ItemDivider& divider)
     {

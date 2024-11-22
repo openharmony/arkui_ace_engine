@@ -32,9 +32,11 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
+constexpr int32_t NULL_VALUE = -1;
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr double NEW_DEFAULT_FRICTION = 0.7;
-constexpr int32_t NULL_VALUE = -1;
+constexpr float FRICTION_SCALE = -4.2f;
+constexpr float DRAG_VELOCITY = 200.f;
 
 class TestNG : public testing::Test {
 public:
@@ -47,10 +49,16 @@ public:
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
     void FlushExpandSafeAreaTask();
     void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
-    RefPtr<FrameNode> CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback);
+    RefPtr<FrameNode> CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback);
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
     void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
+    void DragStart(const RefPtr<FrameNode>& frameNode, Offset startOffset);
+    void DragUpdate(float delta);
+    void DragEnd(float velocityDelta);
+    void DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, float dragDelta, float velocityDelta);
+    RefPtr<FrameNode> FindRootNode(const RefPtr<FrameNode>& frameNode);
+    RefPtr<FrameNode> FindScrollableNode(const RefPtr<FrameNode>& frameNode);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {
@@ -217,6 +225,9 @@ public:
     }
 
     ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
+    RefPtr<FrameNode> rootNode_;
+    RefPtr<FrameNode> dragNode_;
+    GestureEvent dragInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H

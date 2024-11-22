@@ -31,6 +31,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -61,7 +62,7 @@ public:
     void TearDown() override;
     bool InitOptionTestNg();
     RefPtr<FrameNode> frameNode_;
-    RefPtr<OptionPattern> optionPattern_;
+    RefPtr<MenuItemPattern> optionPattern_;
     RefPtr<OptionAccessibilityProperty> optionAccessibilityProperty_;
 
 protected:
@@ -103,10 +104,10 @@ PaintWrapper* OptionPaintMethodTestNg::GetPaintWrapper(RefPtr<OptionPaintPropert
 bool OptionPaintMethodTestNg::InitOptionTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     CHECK_NULL_RETURN(frameNode_, false);
 
-    optionPattern_ = frameNode_->GetPattern<OptionPattern>();
+    optionPattern_ = frameNode_->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(optionPattern_, false);
 
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -130,7 +131,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -172,7 +173,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -214,7 +215,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg003, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -256,7 +257,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -298,7 +299,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -341,7 +342,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg006, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -384,7 +385,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg007, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -427,7 +428,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg008, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -470,7 +471,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg009, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -513,7 +514,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg010, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -556,7 +557,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg011, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -600,7 +601,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg012, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -644,7 +645,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg013, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -688,7 +689,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg014, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -732,7 +733,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg015, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -776,7 +777,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg016, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -820,7 +821,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg017, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -864,7 +865,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg018, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -908,7 +909,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg019, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -953,7 +954,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg020, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -998,7 +999,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg021, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1043,7 +1044,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg022, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1088,7 +1089,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg023, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1133,7 +1134,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg024, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1178,7 +1179,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg025, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1224,7 +1225,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg026, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1270,7 +1271,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg027, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1316,7 +1317,7 @@ HWTEST_F(OptionPaintMethodTestNg, OptionPaintMethodTestNg028, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<MenuItemPattern>(true, 0));
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);

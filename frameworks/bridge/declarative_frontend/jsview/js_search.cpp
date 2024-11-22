@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
@@ -45,21 +46,18 @@ std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SearchModelNG());
+    static NG::SearchModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SearchModelNG());
-            } else {
-                instance_.reset(new Framework::SearchModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SearchModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SearchModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -70,6 +68,26 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -235,7 +253,7 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -307,6 +325,13 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             }
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        }
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
         }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
@@ -717,8 +742,45 @@ void JSSearch::SetTextAlign(int32_t value)
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
+        ViewAbstractModel::GetInstance()->SetDashGap(Dimension(-1));
+        ViewAbstractModel::GetInstance()->SetDashWidth(Dimension(-1));
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueWidth = object->GetProperty(static_cast<int32_t>(ArkUIIndex::WIDTH));
+    if (!valueWidth->IsUndefined()) {
+        JSViewAbstract::ParseBorderWidth(valueWidth);
+    }
+
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR)));
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+        SearchModel::GetInstance()->SetBackBorderRadius();
+    }
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
+
+    auto dashGap = object->GetProperty("dashGap");
+    if (!dashGap->IsUndefined()) {
+        JSViewAbstract::ParseDashGap(dashGap);
+    }
+    auto dashWidth = object->GetProperty("dashWidth");
+    if (!dashWidth->IsUndefined()) {
+        JSViewAbstract::ParseDashWidth(dashWidth);
+    }
+
     SearchModel::GetInstance()->SetBackBorder();
+    info.ReturnSelf();
 }
 
 void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
@@ -748,20 +810,136 @@ void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetBackBorder();
 }
 
+void JSSearch::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object,
+    std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        CalcDimension value;
+        ParseJsLengthMetrics(startObj, value);
+        radius = value;
+    }
+}
+
+bool JSSearch::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+    CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        std::optional<CalcDimension> topStart;
+        std::optional<CalcDimension> topEnd;
+        std::optional<CalcDimension> bottomStart;
+        std::optional<CalcDimension> bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart.has_value() ? topStart.value() : topLeft;
+        topRight = topEnd.has_value() ? topEnd.value() : topRight;
+        bottomLeft = bottomStart.has_value() ? bottomStart.value() : bottomLeft;
+        bottomRight = bottomEnd.has_value() ? bottomEnd.value() : bottomRight;
+        return true;
+    }
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight);
+    return false;
+}
+
+void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+                return;
+        }
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
+}
+
 void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorderRadius(info);
-    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsValue, checkList)) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+        ViewAbstractModel::GetInstance()->SetBorderRadius(defaultBorderRadius);
         return;
     }
-    SearchModel::GetInstance()->SetBackBorder();
+    ParseBorderRadius(jsValue);
+    SearchModel::GetInstance()->SetBackBorderRadius();
+}
+
+void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::string& value, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject(
+            "keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {stringValue, dataObject};
+        func->Execute(param);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+#ifdef NG_BUILD
+    CreateJsSearchCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsSearchCommonEvent(info);
+    } else {
+        JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+        SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)
@@ -866,7 +1044,7 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
@@ -1061,7 +1239,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
@@ -1106,7 +1284,7 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);

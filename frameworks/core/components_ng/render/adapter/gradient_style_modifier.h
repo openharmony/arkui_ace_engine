@@ -88,8 +88,8 @@ public:
 
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);
-    void PaddingColors(ColorAnimatableArithmetic& colors);
-    void PaddingColorStops(ColorStopAnimatableArithmetic& colorStops);
+    void PaddingColors(ColorAnimatableArithmetic& colors, bool repeat);
+    void PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat);
     void SetSizeF(const SizeF& size);
 
 private:

@@ -91,13 +91,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 CHECK_NULL_VOID(node);
                 node->ShowSelectOverlay(animation);
             }
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
-                auto hostNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(hostNode);
-                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-            });
         },
         TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
 
@@ -150,12 +143,13 @@ bool SelectOverlayManager::DestroySelectOverlay(bool animation)
     return false;
 }
 
-bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool animation)
+bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool isBackPressed, bool animation)
 {
     NotifyOverlayClosed(true);
     auto isDestroyed = DestroySelectOverlay(animation);
     CHECK_NULL_RETURN(selectContentManager_, isDestroyed);
-    auto isClosed = selectContentManager_->CloseCurrent(animation, CloseReason::CLOSE_REASON_BACK_PRESSED);
+    auto isClosed = selectContentManager_->CloseCurrent(
+        animation, isBackPressed ? CloseReason::CLOSE_REASON_BACK_PRESSED : CloseReason::CLOSE_REASON_NORMAL);
     auto closeFlag = isDestroyed || isClosed;
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "isDestroyed:%{public}d,isClosed:%{public}d", isDestroyed, isClosed);
     return closeFlag;
@@ -194,17 +188,6 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
     rootNode->RebuildRenderContextTree();
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(rootNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        if (AceType::InstanceOf<FrameNode>(hostNode)) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
-            CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
-        }
-    });
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)

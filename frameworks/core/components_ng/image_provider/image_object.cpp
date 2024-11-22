@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/image_provider/image_object.h"
+
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 const SizeF& ImageObject::GetImageSize() const
@@ -54,5 +56,25 @@ int32_t ImageObject::GetFrameCount() const
 void ImageObject::SetFrameCount(int32_t frameCount)
 {
     frameCount_ = frameCount;
+}
+
+void ImageObject::SetOrientation(ImageRotateOrientation orientation)
+{
+    orientation_ = orientation;
+}
+
+ImageRotateOrientation ImageObject::GetOrientation() const
+{
+    return orientation_;
+}
+
+void ImageObject::SetUserOrientation(ImageRotateOrientation orientation)
+{
+    userOrientation_ = orientation;
+}
+
+ImageRotateOrientation ImageObject::GetUserOrientation() const
+{
+    return userOrientation_;
 }
 } // namespace OHOS::Ace::NG

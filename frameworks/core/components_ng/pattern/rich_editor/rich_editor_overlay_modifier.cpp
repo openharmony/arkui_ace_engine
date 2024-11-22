@@ -36,8 +36,6 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
     AttachProperty(caretHeight_);
     caretWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     AttachProperty(caretWidth_);
-    selectedBackgroundColor_ = AceType::MakeRefPtr<PropertyInt>(0);
-    AttachProperty(selectedBackgroundColor_);
     caretColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     AttachProperty(caretColor_);
     scrollOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
@@ -88,12 +86,6 @@ void RichEditorOverlayModifier::SetCaretColor(uint32_t caretColor)
 {
     CHECK_NULL_VOID(caretColor_);
     caretColor_->Set(static_cast<int32_t>(caretColor));
-}
-
-void RichEditorOverlayModifier::SetSelectedBackgroundColor(uint32_t selectedBackgroundColor)
-{
-    CHECK_NULL_VOID(selectedBackgroundColor_);
-    selectedBackgroundColor_->Set(static_cast<int32_t>(selectedBackgroundColor));
 }
 
 void RichEditorOverlayModifier::SetCaretWidth(float width)
@@ -224,7 +216,7 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     PaintCaret(drawingContext);
     PaintPreviewTextDecoration(drawingContext);
-    SetSelectedColor(selectedBackgroundColor_->Get());
+    SetSelectedColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     TextOverlayModifier::onDraw(drawingContext);
     drawingContext.canvas.Restore();
 

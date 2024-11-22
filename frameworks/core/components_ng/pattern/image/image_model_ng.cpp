@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
@@ -202,7 +203,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         pattern->ResetImageProperties();
     }
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     if (draggable && !frameNode->IsDraggable()) {
@@ -799,14 +800,8 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::option
     CHECK_NULL_VOID(frameNode);
     if (interpolation) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation.value(), frameNode);
-        auto pattern = frameNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetImageInterpolation(interpolation.value());
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, frameNode);
-        auto pattern = frameNode->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetImageInterpolation(pattern->GetDefaultInterpolation());
     }
 }
 
@@ -1089,6 +1084,22 @@ void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImage();
+}
+
+void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrientation(orientation);
+}
+
+void ImageModelNG::SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation, frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOrientation(orientation);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

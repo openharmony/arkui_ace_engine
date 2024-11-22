@@ -37,6 +37,8 @@ public:
     void SearchRequestStopTwinkling();
     void ResetSearchRequestStopTwinkling();
     bool IsNeedProcessAutoFill() override;
+    int32_t GetRequestKeyboardId() override;
+    float FontSizeConvertToPx(const Dimension& fontSize) override;
 
 private:
     bool searchRequestStopTwinkling_ = false;

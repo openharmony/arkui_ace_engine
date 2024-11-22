@@ -84,7 +84,6 @@ template("ace_core_interfaces_native_node") {
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
       "node/line_modifier.cpp",
-      "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
@@ -143,6 +142,7 @@ template("ace_core_interfaces_native_node") {
       "node/rich_editor_modifier.cpp",
       "node/row_modifier.cpp",
       "node/row_split_modifier.cpp",
+      "node/scrollable_modifier.cpp",
       "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
       "node/select_modifier.cpp",
@@ -244,8 +244,10 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   defines = []
   include_dirs = []
 
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-  public_configs = [ ":ace_core_interfaces_native_node_config" ]
+  public_configs = [
+    ":ace_core_interfaces_native_node_config",
+    "$ace_root/test/unittest:ace_unittest_config",
+  ]
 
   defines += [ "ARKUI_CAPI_UNITTEST " ]
   defines += [ "INCLUDE_GENERATED_SOURCES" ]

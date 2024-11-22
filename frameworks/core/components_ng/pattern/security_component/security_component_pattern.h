@@ -37,6 +37,7 @@ constexpr int64_t REGISTER_RETRY_INTERVAL = 30; // 30ms
 
 static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag)
 {
+    CHECK_NULL_RETURN(parent, nullptr);
     for (const auto& child : parent->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
         CHECK_NULL_RETURN(node, nullptr);
@@ -98,10 +99,16 @@ protected:
     void OnTouch(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
+    bool IsFontColorSet();
+    void OnColorConfigurationUpdate() override;
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
+    void ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
+        const InspectorFilter& filter) const;
+    void ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
+        const InspectorFilter& filter) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool IsParentMenu(RefPtr<FrameNode>& secCompNode);

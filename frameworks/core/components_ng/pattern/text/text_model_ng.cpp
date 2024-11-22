@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,7 +32,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_ALPHA = 255;
 constexpr float DEFAULT_OPACITY = 0.2;
 
-void TextModelNG::Create(const std::string& content)
+void TextModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -43,7 +44,7 @@ void TextModelNG::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
@@ -58,9 +59,14 @@ void TextModelNG::Create(const std::string& content)
     textPattern->ClearSelectionMenu();
 }
 
+void TextModelNG::Create(const std::string& content)
+{
+    Create(UtfUtils::Str8ToStr16(content));
+}
+
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 {
-    TextModelNG::Create("");
+    TextModelNG::Create(u"");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -73,7 +79,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     }
 }
 
-RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
+RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::u16string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -404,14 +410,14 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
+void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetOnClickEvent(std::move(clickFunc));
+    textPattern->SetOnClickEvent(std::move(clickFunc), distanceThreshold);
 }
 
 void TextModelNG::ClearOnClick()
@@ -444,6 +450,16 @@ void TextModelNG::SetTextSelection(int32_t startIndex, int32_t endIndex)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetTextSelection(startIndex, endIndex);
+}
+
+void TextModelNG::SetTextCaretColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value);
+}
+
+void TextModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
@@ -480,7 +496,7 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
+void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
@@ -680,12 +696,12 @@ void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
 
-std::string TextModelNG::GetContent(FrameNode* frameNode)
+std::u16string TextModelNG::GetContent(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, "");
+    CHECK_NULL_RETURN(frameNode, u"");
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetContent().value_or("");
+    CHECK_NULL_RETURN(layoutProperty, u"");
+    return layoutProperty->GetContent().value_or(u"");
 }
 
 float TextModelNG::GetLineHeight(FrameNode* frameNode)
@@ -861,7 +877,7 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
 
 Color TextModelNG::GetDefaultColor()
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color::BLACK);
@@ -970,6 +986,31 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value, frameNode);
+}
+
+Color TextModelNG::GetCaretColor(FrameNode* frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    Color value = theme->GetCaretColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CursorColor, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::ResetCaretColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->ResetCursorColor();
+    }
+}
+
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     Color color = value;
@@ -982,7 +1023,7 @@ void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& 
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, Color::BLACK);

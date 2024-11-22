@@ -1253,15 +1253,19 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     ASSERT_NE(textFieldLayoutProperty, nullptr);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    searchModelInstance.SetOnSubmit([&](const std::string& title) {
+    searchModelInstance.SetOnSubmit([&searchModelInstance, &textFieldLayoutProperty](
+        const std::string& title, NG::TextFieldCommonEvent& commonEvent) {
         if (title == "SetOnSubmit") {
             std::vector<std::string> fontFamilies { "Georgia", "Serif" };
             Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
             searchModelInstance.SetTextFont(otherFont);
             EXPECT_EQ(textFieldLayoutProperty->GetFontWeight(), FontWeight::W200);
+            commonEvent.SetKeepEditable(true);
+            EXPECT_TRUE(commonEvent.keepEditable_);
         }
     });
-    eventHub->UpdateSubmitEvent("SetOnSubmit");
+    TextFieldCommonEvent event;
+    eventHub->FireOnSubmit("SetOnSubmit", event);
 }
 
 /**
@@ -2022,39 +2026,5 @@ HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetEnablePreviewText(true);
     EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
-}
-/**
- * @tc.name: ConvertTextFontScaleValue001
- * @tc.desc: Test ConvertTextFontScaleValue
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, ConvertTextFontScaleValue001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetFontScale(0.0f);
-    const Dimension fontsizevalue = Dimension(20.1, DimensionUnit::PX);
-    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), fontsizevalue);
-}
-/**
- * @tc.name: ConvertTextFontScaleValue002
- * @tc.desc: Test ConvertTextFontScaleValue
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, ConvertTextFontScaleValue002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetFontScale(3.0f);
-    const Dimension fontsizevalue = Dimension(6.0, DimensionUnit::PX);
-    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), Dimension(4.0, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG

@@ -38,7 +38,7 @@ struct ImageSizeStyle {
         }
         json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
         json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("autoResize", propAutoResize.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("autoResize", propAutoResize.value_or(false) ? "true" : "false", filter);
     }
 };
 
@@ -150,20 +150,13 @@ public:
         UpdateBaselineOffset(Dimension(json->GetDouble("baselineOffset")));
         /* register image frame node to pipeline context to receive memory level notification and window state change
          * notification */
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
         pipeline->AddNodesToNotifyMemoryLevel(frameNode->GetId());
         pipeline->AddWindowStateChangedCallback(frameNode->GetId());
         LayoutProperty::FromJson(json);
-    }
-
-    void UpdateImageSourceInfoCacheKey()
-    {
-        if (propImageSourceInfo_.has_value()) {
-            propImageSourceInfo_.value().GenerateCacheKey();
-        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
@@ -178,6 +171,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlaceHolderStyle, TextBackgroundStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasPlaceHolderStyle, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageRotateOrientation, ImageRotateOrientation, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

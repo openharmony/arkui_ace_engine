@@ -121,7 +121,6 @@ public:
     {
         isFromReset_ = isFromReset;
     }
-    const std::string GetColorModeToString();
 
     void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
     {

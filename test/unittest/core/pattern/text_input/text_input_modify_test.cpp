@@ -35,6 +35,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -1091,6 +1092,9 @@ HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(AceType::WeakClaim(pattern_.GetRawPtr()));
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. call OnScrollEndCallback
@@ -1166,6 +1170,29 @@ HWTEST_F(TextFieldModifyTest, StripNextLine001, TestSize.Level1)
     std::wstring value = StringUtils::ToWstring(ori);
     pattern_->StripNextLine(value);
     EXPECT_EQ(ori, StringUtils::ToString(value));
+}
+
+/**
+ * @tc.name: StripNextLine002
+ * @tc.desc: Test function OnVirtualKeyboardAreaChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, StripNextLine002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Call OnScrollEndCallback.
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    std::string ori = "123\n45";
+    std::wstring value = StringUtils::ToWstring(ori);
+    pattern_->StripNextLine(value);
+    EXPECT_EQ("12345", StringUtils::ToString(value));
 }
 
 /**

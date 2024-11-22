@@ -88,6 +88,12 @@ void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progres
     progressAnimatableProperty.borderColor = borderColor;
     progressAnimatableProperty.strokeWidth = strokeWidth_;
     progressAnimatableProperty.strokeRadius = strokeRadius;
+
+    if (paintProperty->HasGradientColor()) {
+        progressAnimatableProperty.ringProgressColor = paintProperty->GetGradientColorValue();
+    } else {
+        progressAnimatableProperty.ringProgressColor = convertGradient(color);
+    }
 }
 
 void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
@@ -274,12 +280,31 @@ void ProgressPattern::OnModifyDone()
     } else {
         RemoveTouchEvent();
     }
+    OnAccessibilityEvent();
 }
 
 void ProgressPattern::DumpInfo()
 {
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    
+    auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    auto maxValue = paintProperty->GetMaxValue().value();
+    auto jsonValue = JsonUtil::Create(true);
+    auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
+    jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
+    DumpLog::GetInstance().AddDesc(std::string("value:").append(std::to_string(value)));
+    DumpLog::GetInstance().AddDesc(std::string("maxValue:").append(std::to_string(maxValue)));
+    DumpLog::GetInstance().AddDesc(std::string("color:").append(color.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("style:").append(jsonValue->ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("EnableSmoothEffect: ")
             .append(paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false"));
@@ -436,8 +461,43 @@ RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
 
 void ProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+
+    auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    auto maxValue = paintProperty->GetMaxValue().value();
+    auto jsonValue = JsonUtil::Create(true);
+    auto color = paintProperty->GetColor().value_or(theme->GetCapsuleSelectColor());
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
+    jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
+    jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
+    json->Put("value:", std::to_string(value).c_str());
+    json->Put("maxValue:", std::to_string(maxValue).c_str());
+    json->Put("color:", color.ToString().c_str());
+    json->Put("style:", jsonValue->ToString().c_str());
     json->Put("EnableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
+}
+
+void ProgressPattern::OnAccessibilityEvent()
+{
+    if (!initFlag_) {
+        initFlag_ = true;
+        return;
+    }
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto value = paintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    if (!NearEqual(value_, value)) {
+        value_ = value;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+    }
 }
 } // namespace OHOS::Ace::NG

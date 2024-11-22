@@ -19,12 +19,15 @@
 #define NAPI_VERSION 8
 
 #include <memory>
+
+#include "js_native_api_types.h"
+
 #include "interfaces/inner_api/ace/ai/image_analyzer_interface.h"
 
 namespace OHOS::Ace {
 using ImageAnalyzerInstance = std::unique_ptr<ImageAnalyzerInterface, std::function<void (ImageAnalyzerInterface*)>>;
 
-class ImageAnalyzerLoader : public std::enable_shared_from_this<ImageAnalyzerLoader> {
+class ACE_FORCE_EXPORT ImageAnalyzerLoader : public std::enable_shared_from_this<ImageAnalyzerLoader> {
 public:
     static std::shared_ptr<ImageAnalyzerLoader> Load();
     ~ImageAnalyzerLoader();

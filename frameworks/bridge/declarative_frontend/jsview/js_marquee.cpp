@@ -36,21 +36,18 @@ std::unique_ptr<MarqueeModel> MarqueeModel::instance_ = nullptr;
 std::mutex MarqueeModel::mutex_;
 MarqueeModel* MarqueeModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::MarqueeModelNG());
+    static NG::MarqueeModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::MarqueeModelNG());
-            } else {
-                instance_.reset(new Framework::MarqueeModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::MarqueeModelNG instance;
+        return &instance;
+    } else {
+        static Framework::MarqueeModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 

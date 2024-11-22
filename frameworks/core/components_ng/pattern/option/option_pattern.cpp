@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 
@@ -24,6 +26,11 @@ namespace {
     constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
     constexpr Dimension OPTION_MARGIN = 8.0_vp;
     constexpr int32_t COLUMN_NUM = 2;
+    const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
+    // id of system resource start from 0x07000000
+    constexpr uint64_t MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+    // id of system resource end to 0x07FFFFFF
+    constexpr uint64_t MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -32,6 +39,15 @@ void OptionPattern::OnAttachToFrameNode()
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
+}
+
+void OptionPattern::UpdatePasteDisabledOpacity(const double& disabledColorAlpha)
+{
+    CHECK_NULL_VOID(pasteButton_);
+    auto pasteButtonRenderContext = pasteButton_->GetRenderContext();
+    CHECK_NULL_VOID(pasteButtonRenderContext);
+    pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
+    pasteButton_->MarkModifyDone();
 }
 
 void OptionPattern::OnModifyDone()
@@ -48,13 +64,14 @@ void OptionPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
+    UpdateIconSrc();
     if (!eventHub->IsEnabled()) {
-        UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
+        UpdatePasteDisabledOpacity(selectTheme_->GetDisabledFontColorAlpha());
+
         CHECK_NULL_VOID(text_);
-        text_->GetRenderContext()->UpdateForegroundColor(selectTheme_->GetDisabledMenuFontColor());
-        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
+        auto textRenderContext = text_->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
         text_->MarkModifyDone();
         if (icon_) {
             icon_->GetRenderContext()->UpdateOpacity(selectTheme_->GetDisabledFontColorAlpha());
@@ -64,6 +81,41 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+bool OptionPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
+{
+    if (imageSourceInfo.IsSvg()) {
+        auto src = imageSourceInfo.GetSrc();
+        auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+            src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        if (srcId.find("ic_") != std::string::npos) {
+            return true;
+        }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
+    }
+    return false;
+}
+
+void OptionPattern::UpdateIconSrc()
+{
+    if (icon_ == nullptr || iconSrc_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    ImageSourceInfo imageSourceInfo(iconSrc_);
+    bool useDefaultIcon = UseDefaultThemeIcon(imageSourceInfo);
+    if (useDefaultIcon) {
+        auto iconRenderProperty = icon_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(selectTheme->GetMenuIconColor());
+    }
 }
 
 void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
@@ -469,7 +521,7 @@ std::string OptionPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return textProps->GetContentValue();
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
 }
 
 void OptionPattern::UpdateText(const std::string& content)

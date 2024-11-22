@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/base/inspector.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalPatternEnhance : public ContainerModalPattern {
     DECLARE_ACE_TYPE(ContainerModalPatternEnhance, ContainerModalPattern);
@@ -28,55 +30,95 @@ public:
     void OnWindowUnfocused() override;
     void OnWindowForceUnfocused() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
-    VisibleType GetControlButtonVisibleBeforeAnim()
-    {
-        return controlButtonVisibleBeforeAnim_;
-    }
-
-    void SetControlButtonVisibleBeforeAnim(VisibleType visibleType)
-    {
-        controlButtonVisibleBeforeAnim_ = visibleType;
-    }
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
+    void EnableContainerModalGesture(bool isEnable) override;
+    void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
     RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
-    OffsetF GetMenuOffset();
+    /* event */
+    void SetTapGestureEvent(RefPtr<FrameNode>& gestureRow);
+    RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode);
+    void OnMaxButtonClick(GestureEvent& info);
+    void OnMinButtonClick(GestureEvent& info);
+    void OnCloseButtonClick(GestureEvent& info);
+    void OnMaxBtnInputEvent(MouseInfo& info);
+    void OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameNode>& maximizeBtn);
+    void OnMenuItemClickGesture(bool isSplistLeft);
+    static void OnMenuItemHoverEvent(RefPtr<FrameNode> item, bool isHover);
+    static void OnMenuItemClickEvent(RefPtr<FrameNode> item, MouseInfo& info);
+    void EnablePanEventOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void EnableTapGestureOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    bool GetFloatingTitleVisible() override;
+    bool GetCustomTitleVisible() override;
+    bool GetControlButtonVisible() override;
+    void OnColorConfigurationUpdate() override;
 
-protected:
-    RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
-    void ChangeFloatingTitle(bool isFocus) override;
+    void Init() override;
+    void SetCloseButtonStatus(bool isEnabled) override;
+    void InitButtonsLayoutProperty() override;
+    CalcLength GetControlButtonRowWidth() override;
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
 
-    void ChangeCustomTitle(bool isFocus) override;
-
-    void ChangeControlButtons(bool isFocus) override;
-
-    void ChangeTitleButtonIcon(
-        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn) override;
-
+    void OnMaxButtonClick();
+    void OnMinButtonClick();
+    void OnCloseButtonClick();
     void AddPointLight();
 
+private:
+    RefPtr<FrameNode> GetButtonRowByInspectorId()
+    {
+        return NG::Inspector::GetFrameNodeByKey("containerModalButtonRowId");
+    }
+
+    RefPtr<FrameNode> GetMaximizeButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("EnhanceMaximizeBtn");
+    }
+
+    RefPtr<FrameNode> GetMinimizeButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("EnhanceMinimizeBtn");
+    }
+
+    RefPtr<FrameNode> GetCloseButton()
+    {
+        return NG::Inspector::GetFrameNodeByKey("EnhanceCloseBtn");
+    }
+    RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
+    void ChangeFloatingTitle(bool isFocus) override;
+    void ChangeCustomTitle(bool isFocus) override;
+    void ChangeControlButtons(bool isFocus) override;
+    
     void SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
         RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn);
-
     void UpdateLightColor();
-
     void UpdateLightIntensity();
-
-    Color GetContainerColor(bool isFocus);
-
-private:
-    RefPtr<FrameNode> BuildLeftSplitMenuItem();
-    RefPtr<FrameNode> BuildRightSplitMenuItem();
-    RefPtr<FrameNode> BuildMenuItem(
-        std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent);
+    RefPtr<FrameNode> ShowMaxMenu(RefPtr<FrameNode>& container, const RefPtr<FrameNode>& targetNode);
+    void ResetHoverTimer();
     Dimension GetMenuWidth();
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
+    void UpdateLightOffDelay(double timeStamp);
+    void BuildMenuList();
+
+    void SetColorConfigurationUpdate();
+    void SetMaximizeIconIsRecover();
+
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;
     bool isTitleRowHovered_;
     RefPtr<FrameNode> menuList_;
     OffsetF menuOffset_;
     float textWidth_ = 0.0f;
+    bool isMenuPending_ = false;
+    bool isForbidMenuEvent_ = false;
+    bool enableSplit_ = true;
+    CancelableCallback<void()> contextTimer_;
+    CancelableCallback<void()> lightOffCallback_;
+    bool isLightOn_;
+    double lightOffDelayUpdateTime_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

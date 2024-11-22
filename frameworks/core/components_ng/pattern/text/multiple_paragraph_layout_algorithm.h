@@ -54,9 +54,9 @@ public:
 protected:
     void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
     virtual ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
+        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
+        const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
     virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
     virtual RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
     {
@@ -72,6 +72,8 @@ protected:
     bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
         const TextStyle& textStyle);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    virtual void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
     std::string SpansToString()
     {
         std::stringstream ss;
@@ -98,7 +100,6 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
-    float indent_ = 0.0f;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
@@ -111,7 +112,9 @@ private:
     {
         return 0.0f;
     }
-    static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
+    template<typename T>
+    static TextDirection GetTextDirection(const T& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirectionByContent(const std::u16string& content);
     static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
@@ -140,6 +143,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
+    TextStyle InheritParentTextStyle();
 
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;
@@ -148,6 +152,20 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
+
+template<typename T>
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const T& content, LayoutWrapper* layoutWrapper)
+{
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+
+    auto direction = textLayoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
+    return GetTextDirectionByContent(content);
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H

@@ -62,7 +62,7 @@ public:
         return false;
     }
 
-    void SetOnWillDismiss(const std::function<void(const int32_t& info)>& onWillDismiss)
+    void SetOnWillDismiss(const std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
     {
         onWillDismiss_ = onWillDismiss;
     }
@@ -88,10 +88,10 @@ public:
         return false;
     }
 
-    void CallOnWillDismiss(const int32_t reason)
+    void CallOnWillDismiss(const int32_t reason, const int32_t instanceId)
     {
         if (onWillDismiss_) {
-            onWillDismiss_(reason);
+            onWillDismiss_(reason, instanceId);
         }
     }
 
@@ -187,7 +187,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -281,14 +281,14 @@ public:
         return fontScaleForElderly_;
     }
 
-    void SetIsPickerDiaglog(bool value)
+    void SetIsPickerDialog(bool value)
     {
-        isPickerDiaglog_ = value;
+        isPickerDialog_ = value;
     }
 
-    bool GetIsPickerDiaglog()
+    bool GetIsPickerDialog()
     {
-        return isPickerDiaglog_;
+        return isPickerDialog_;
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
@@ -309,6 +309,8 @@ public:
     {
         return true;
     }
+
+    bool IsShowInFreeMultiWindow();
 
 private:
     bool AvoidKeyboard() const override
@@ -366,6 +368,7 @@ private:
     void RecordEvent(int32_t btnIndex) const;
     void ParseBorderRadius(BorderRadiusProperty& raidus);
     void UpdateSheetIconAndText();
+    void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateAlignmentAndOffset();
@@ -373,13 +376,16 @@ private:
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
     void DumpObjectProperty();
     void DumpObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
-    void CheckDirection();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -394,7 +400,7 @@ private:
     std::string message_;
     std::string title_;
     std::string subtitle_;
-    std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
@@ -404,14 +410,13 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isPickerDiaglog_ = false;
+    bool isPickerDialog_ = false;
     bool notAdapationAging_ = false;
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
-    TextDirection direction_ = TextDirection::AUTO;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

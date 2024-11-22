@@ -102,6 +102,7 @@ public:
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
@@ -143,9 +144,9 @@ public:
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
-    int32_t GetInstanceId();
-    int32_t GetSessionId();
-    int32_t GetNodeId();
+    int32_t GetInstanceId() const;
+    int32_t GetSessionId() const;
+    int32_t GetNodeId() const;
     int32_t GetUiExtensionId() override;
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
@@ -153,19 +154,29 @@ public:
     }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    void HandleVisibleAreaChange(bool visible, double ratio);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
     bool IsShowPlaceholder()
     {
         return (curPlaceholderType_ != PlaceholderType::NONE);
     }
+    bool IsCanMountPlaceholder(PlaceholderType type)
+    {
+        return (static_cast<int32_t>(type) > static_cast<int32_t>(curPlaceholderType_));
+    }
     void SetCurPlaceholderType(PlaceholderType type)
     {
         curPlaceholderType_ = type;
     }
+    void PostDelayRemovePlaceholder(uint32_t delay);
+    void ReplacePlaceholderByContent();
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnAreaUpdated();
     bool IsModalUec();
     bool IsForeground();
+    void OnExtensionDetachToDisplay();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)
@@ -197,6 +208,9 @@ public:
         return sessionViewportConfig_;
     }
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpOthers();
+    int32_t GetInstanceIdFromHost();
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -255,9 +269,18 @@ private:
     {
         return isFoldStatusChanged_;
     }
+    void SetRotateStatusChanged(bool isChanged)
+    {
+        isRotateStatusChanged_ = isChanged;
+    }
+    bool IsRotateStatusChanged()
+    {
+        return isRotateStatusChanged_;
+    }
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
+    void ResetAccessibilityChildTreeCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -290,10 +313,12 @@ private:
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
+    bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
+    bool isKeyAsync_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
@@ -301,11 +326,11 @@ private:
     int32_t surfacePositionCallBackId_ = -1;
     int32_t foldDisplayCallBackId_ = -1;
     RectF displayArea_;
-    bool isKeyAsync_ = false;
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
+    bool curVisible_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

@@ -111,7 +111,9 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        controlDistanceChanged_ = Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance);
+        if (Positive(controlDistance_)) {
+            controlDistanceChanged_ = true;
+        }
         controlDistance_ = controlDistance;
     }
 
@@ -334,6 +336,13 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 private:
     void OnModifyDone() override;
+    void InitScrollPositionCallback();
+    void InitScrollEndCallback();
+    void AddScrollableEvent();
+    void SetInBarRegionCallback();
+    void SetBarCollectTouchTargetCallback();
+    void SetBarCollectClickAndLongPressTargetCallback();
+    void SetInBarRectRegionCallback();
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset();

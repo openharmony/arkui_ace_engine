@@ -18,8 +18,10 @@
 
 #include <optional>
 
-#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "base/log/dump_log.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -75,47 +77,78 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        }
+        return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LinearLayoutPattern::ToJsonValue(json, filter);
-
-        /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;
         }
+        ToJsonValueAttribute(json);
+    }
 
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
+    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json) const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        bool enableInc = false;
+        auto addNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
+        if (addNode) {
+            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+            if (eventHub) {
+                enableInc = eventHub->GetStateEffect();
+            }
+        }
+        json->Put("enableInc", enableInc ? "true" : "false");
 
-        // put enableDec attr value
-        if (subId_.has_value()) {
-            auto subId = subId_.value();
-            auto subNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(subId)));
-            CHECK_NULL_VOID(subNode);
+        bool enableDec = false;
+        auto subNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
+        if (subNode) {
             auto eventHub = subNode->GetEventHub<ButtonEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            json->PutExtAttr("enableDec", eventHub->IsEnabled() ? "true" : "false", filter);
-        } else {
-            json->PutExtAttr("enableDec", "false", filter);
+            if (eventHub) {
+                enableDec = eventHub->GetStateEffect();
+            }
+        }
+        json->Put("enableDec", enableDec ? "true" : "false");
+    }
+    
+private:
+    void DumpInfo() override
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto addNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
+        if (addNode) {
+            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableInc = eventHub->GetStateEffect();
+                DumpLog::GetInstance().AddDesc(std::string("enableInc: ").append(enableInc ? "true" : "false"));
+            }
         }
 
-        // put enableInc attr value
-        if (addId_.has_value()) {
-            auto addId = addId_.value();
-            auto addNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(addId)));
-            CHECK_NULL_VOID(addNode);
-            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            json->PutExtAttr("enableInc", eventHub->IsEnabled() ? "true" : "false", filter);
-        } else {
-            json->PutExtAttr("enableInc", "false", filter);
+        auto subNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
+        if (subNode) {
+            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableDec = eventHub->GetStateEffect();
+                DumpLog::GetInstance().AddDesc(std::string("enableDec: ").append(enableDec ? "true" : "false"));
+            }
         }
     }
 
-private:
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        ToJsonValueAttribute(json);
+    }
+
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;
     std::optional<int32_t> addId_;

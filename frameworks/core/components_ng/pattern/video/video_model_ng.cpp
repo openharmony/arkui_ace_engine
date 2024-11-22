@@ -220,14 +220,12 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 
 void VideoModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto node = AceType::Claim(frameNode);
-    CHECK_NULL_VOID(node);
-
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), node);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::Claim(frameNode));
 }
 
 RefPtr<FrameNode> VideoModelNG::CreateFrameNode(int32_t nodeId)

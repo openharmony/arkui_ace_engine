@@ -49,7 +49,10 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     };
 
     auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
+    if (!executor) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
+        return;
+    }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
@@ -142,6 +145,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
     RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "CustomDialogController SetCloseDialog enter.");
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     if (!container) {

@@ -32,7 +32,7 @@ async function getFolders(filePath) {
 async function createCsvData(casePath) {
     const csvContext = [];
     let index = 1;
-    const projectPath = path.join(casePath, "test", "componenttest", "test_cases", "components");
+    const projectPath = path.join(casePath, "test", "component_test", "test_cases", "components");
 
     try {
         const projectNames = await getFolders(projectPath);

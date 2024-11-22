@@ -59,7 +59,7 @@ HWTEST_F(GradientStyleModifierTest, gradientStyleModifierTest001, TestSize.Level
     auto context = RosenRenderContext();
     auto modifier = std::make_shared<GradientStyleModifier>(AceType::WeakClaim(&context));
     modifier->SetGradient(gradient);
-    modifier->PaddingColorStops(colorStops);
+    modifier->PaddingColorStops(colorStops, true);
     auto outputGradient = modifier->GetGradient();
     /**
      * @tc.steps: step4. check data size.

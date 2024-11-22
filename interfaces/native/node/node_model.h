@@ -34,6 +34,8 @@ extern "C" {
 struct ArkUI_Node {
     int32_t type;
     ArkUINodeHandle uiNodeHandle = nullptr;
+    bool cNode = false;
+    bool buildNode = false;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
     ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
@@ -142,6 +144,9 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();
+void HandleTouchEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
+void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
+void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent);
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent);
@@ -156,5 +161,6 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
+bool CheckIsCNode(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

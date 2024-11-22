@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,11 +84,15 @@ public:
     }
 
     void OnModifyDone() override;
-	
+
     std::string ProvideRestoreInfo() override;
-    
+
     void OnRestoreInfo(const std::string& restoreInfo) override;
-	
+
+    void AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override;
+
+    void RecoverInnerOnGestureRecognizerJudgeBegin() override;
+
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     ChangeEventPtr GetIndexChangeEvent()

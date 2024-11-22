@@ -29,4 +29,9 @@ void ConvertToMouseEvent(MouseEvent& mouseEvent, const std::shared_ptr<MMI::Poin
 {
     Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, Container::Current()->IsScenceBoardWindow());
 }
+
+void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
+{
+    Platform::ConvertAxisEvent(srcPointerEvent, event);
+}
 }

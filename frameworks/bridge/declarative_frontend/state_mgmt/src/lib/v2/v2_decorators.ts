@@ -37,7 +37,7 @@
 type ConstructorV2 = { new(...args: any[]): any };
 
 function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
-  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@ObservedV2`, BaseClass?.name);
   return observedV2Internal<T>(BaseClass);
 }
 
@@ -51,7 +51,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
  * @from 12
  */
 const Trace = (target: Object, propertyKey: string): void => {
-  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Trace`, propertyKey);
   return trackInternal(target, propertyKey);
 };
 
@@ -69,7 +69,7 @@ const Trace = (target: Object, propertyKey: string): void => {
  *
  */
 const Local = (target: Object, propertyKey: string): void => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Local');
   return trackInternal(target, propertyKey);
 };
 
@@ -89,8 +89,8 @@ const Local = (target: Object, propertyKey: string): void => {
  *
  */
 const Param = (proto: Object, propertyKey: string): void => {
-  stateMgmtConsole.debug(`@param ${propertyKey}`);
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@param', undefined);
+  stateMgmtConsole.debug(`@Param ${propertyKey}`);
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@Param', undefined);
 
   let storeProp = ObserveV2.OB_PREFIX + propertyKey;
   proto[storeProp] = proto[propertyKey];
@@ -101,8 +101,8 @@ const Param = (proto: Object, propertyKey: string): void => {
     },
     set(val) {
       const meta = proto[ObserveV2.V2_DECO_META]?.[propertyKey];
-      if (meta && meta.deco2 !== '@once') {
-        stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+      if (meta && meta.deco2 !== '@Once') {
+        stateMgmtConsole.applicationError(`@Param ${propertyKey.toString()}: can not assign a new value, application error.`);
         return;
       }
       if (val !== this[storeProp]) {
@@ -130,8 +130,8 @@ const Param = (proto: Object, propertyKey: string): void => {
  *
  */
 const Once = (proto: Object, propertyKey: string): void => {
-  stateMgmtConsole.debug(`@once ${propertyKey}`);
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
+  stateMgmtConsole.debug(`@Once ${propertyKey}`);
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@Once');
 };
 
 /**
@@ -150,7 +150,7 @@ const Once = (proto: Object, propertyKey: string): void => {
  */
 
 const Event = (target, propertyKey): void => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Event');
   target[propertyKey] ??= (): void => { };
 };
 
@@ -208,25 +208,20 @@ const Consumer = (aliasName?: string) => {
     ) ? varName : aliasName;
     const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
     proto[storeProp] = providerName;
-    let retVal = this[varName];
-    let providerInfo;
 
     Reflect.defineProperty(proto, varName, {
       get() {
-        providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-        if (providerInfo && providerInfo[0] && providerInfo[1]) {
-          retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-        }
-        return retVal;
+        // this get function should never be called,
+        // because transpiler will always assign it a value first.
+        stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
+        return undefined;
       },
       set(val) {
-        if (!providerInfo) {
-          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-          if (providerInfo && providerInfo[0] && providerInfo[1]) {
-            retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-          } else {
-            retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-          }
+        let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+        if (providerInfo && providerInfo[0] && providerInfo[1]) {
+          ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+        } else {
+          ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
         }
       },
       enumerable: true
@@ -255,7 +250,7 @@ const Consumer = (aliasName?: string) => {
 const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
-    stateMgmtConsole.debug(`@monitor('${pathsUniqueString}')`);
+    stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
     target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };

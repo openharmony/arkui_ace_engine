@@ -23,6 +23,7 @@ class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
@@ -123,6 +124,13 @@ class FrameNode {
   }
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;
+  }
+  getValidNodePtr(): NodePtr {
+    if (this.nodePtr_) {
+      return this.nodePtr_;
+    } else {
+      throw Error('The FrameNode has been disposed!');
+    }
   }
   dispose(): void {
     this.renderNode_?.dispose();
@@ -388,12 +396,12 @@ class FrameNode {
   }
 
   getMeasuredSize(): Size {
-    const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+    const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
     return { width: size[0], height: size[1] };
   }
 
   getLayoutPosition(): Position {
-    const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+    const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -494,8 +502,10 @@ class FrameNode {
     const minSize: Size = constraint.minSize;
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
       maxSize.height, percentReference.width, percentReference.height);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   layout(position: Position): void {
@@ -524,9 +534,25 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
+
+  get gestureEvent(): UIGestureEvent {
+    if (this._gestureEvent === undefined) {
+        this._gestureEvent = new UIGestureEvent();
+        this._gestureEvent.setNodePtr(this.nodePtr_);
+        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+        this._gestureEvent.setWeakNodePtr(weakPtr);
+    }
+    return this._gestureEvent;
+  }
   updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
+  }
+  triggerOnReuse(): void {
+    getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
+  }
+  triggerOnRecycle(): void {
+    getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
   }
 }
 
@@ -850,37 +876,37 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     ['Checkbox', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
         return new ArkCheckboxComponent(node, type);
-      })
+      });
     }],
     ['CheckboxGroup', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
         return new ArkCheckboxGroupComponent(node, type);
-      })
+      });
     }],
     ['Radio', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
         return new ArkRadioComponent(node, type);
-      })
+      });
     }],
     ['Rating', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
         return new ArkRatingComponent(node, type);
-      })
+      });
     }],
     ['Slider', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
         return new ArkSliderComponent(node, type);
-      })
+      });
     }],
     ['Select', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
         return new ArkSelectComponent(node, type);
-      })
+      });
     }],
     ['Toggle', (context: UIContext, options?: object): FrameNode=> {
       return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
         return new ArkToggleComponent(node, type);
-      }, options)
+      }, options);
     }],
   ]
 )

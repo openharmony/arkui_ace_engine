@@ -20,6 +20,7 @@ build_component_ng("text_field_pattern_ng") {
     "text_field_accessibility_property.cpp",
     "text_field_content_modifier.cpp",
     "text_field_controller.cpp",
+    "text_field_foreground_modifier.cpp",
     "text_field_layout_algorithm.cpp",
     "text_field_manager.cpp",
     "text_field_model_ng.cpp",

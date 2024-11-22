@@ -350,6 +350,9 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 
     TextInsertValueInfo info;
     std::string insertValue;
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
 
     richEditorPattern->InsertDiffStyleValueInSpan(spanNode, info, insertValue, false);
     ASSERT_EQ(richEditorPattern->moveLength_, 0);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
+#include "base/utils/utf_helper.h"
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
@@ -165,8 +166,9 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         CHECK_NULL_VOID(theme);
         message = Localization::GetInstance()->GetEntryLetters("common.more");
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
-                message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
+            CHECK_NULL_VOID(symbolNode);
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolNode);
             return;
         }
         auto info = ImageSourceInfo("");
@@ -181,16 +183,12 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         CHECK_NULL_VOID(textLayoutProperty);
         auto textValue = textLayoutProperty->GetContent();
         if (!textValue.value().empty()) {
-            message = textValue.value();
+            message = UtfUtils::Str16ToStr8(textValue.value());
         }
     }
     if (imageNode != nullptr) {
         if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-            auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
-                symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}),
-                symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageNode);
             return;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();

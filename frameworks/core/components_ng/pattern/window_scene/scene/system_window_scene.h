@@ -82,6 +82,7 @@ private:
     void RegisterResponseRegionCallback();
     void PostCheckContextTransparentTask();
     void PostFaultInjectTask();
+    void SetWindowScenePosition();
 
     int32_t instanceId_ = Container::CurrentId();
 

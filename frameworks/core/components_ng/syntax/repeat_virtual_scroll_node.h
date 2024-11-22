@@ -43,7 +43,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
@@ -51,7 +51,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     ~RepeatVirtualScrollNode() override = default;
 
@@ -156,13 +156,12 @@ public:
             child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
-
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
     }
 protected:
-    void UpdateChildrenFreezeState(bool isFreeze) override;
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void PostIdleTask();
 
@@ -193,7 +192,7 @@ private:
     mutable RepeatVirtualScrollCaches caches_;
 
     // get active child range
-    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
+    std::function<void(int32_t, int32_t)> onSetActiveRange_;
 
     // used by one of the unknown functions
     std::list<std::string> ids_;

@@ -79,6 +79,9 @@ public:
         isScenceBoardWindow_ = isScenceBoardWindow;
     }
 
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(int32_t, GetInstanceId, (), (const, override));

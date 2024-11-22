@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATION_PUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANIMATION_PUB_H
 
+#include <atomic>
 #include <string>
 
 namespace OHOS::Ace {
@@ -93,7 +94,18 @@ enum class FinishCallbackType {
     LOGICALLY = 1
 };
 
+enum class AnimationInterface : int32_t {
+    ANIMATION = 0,
+    ANIMATE_TO,
+    ANIMATE_TO_IMMEDIATELY,
+    KEYFRAME_ANIMATE_TO,
+};
+
+const char* GetAnimationInterfaceName(AnimationInterface interfaceName);
+
 using ShareId = std::string;
+
+int32_t GetAnimationFinshCount();
 
 } // namespace OHOS::Ace
 

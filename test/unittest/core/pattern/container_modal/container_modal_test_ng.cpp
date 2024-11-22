@@ -505,18 +505,6 @@ HWTEST_F(ContainerModelTestNg, Test006, TestSize.Level1)
     EXPECT_FALSE(bResult);
 }
 /**
- * @tc.name: Test007
- * @tc.desc: SetIsHoveredMenu GetIsHoveredMenu.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
-{
-    CreateContainerModal();
-    pattern_->SetIsHoveredMenu(true);
-    bool bResult = pattern_->GetIsHoveredMenu();
-    EXPECT_TRUE(bResult);
-}
-/**
  * @tc.name: Test009
  * @tc.desc: AddButtonStyleMouseEvent.
  * @tc.type: FUNC

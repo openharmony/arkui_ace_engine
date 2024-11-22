@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,15 @@ void ShapeModelNG::Create()
     stack->Push(frameNode);
 }
 
-void ShapeModelNG::SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row)
+void ShapeModelNG::InitBox(const RefPtr<PixelMap>& pixMap)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageSourceInfo pixelMapInfo(pixMap);
+        ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo);
+    }
+}
+
+void ShapeModelNG::SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row)
 {
     ACE_UPDATE_PAINT_PROPERTY(ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row));
 }
@@ -57,6 +65,11 @@ void ShapeModelNG::SetStroke(const Color& color)
 void ShapeModelNG::SetFill(const Color& color)
 {
     ShapeAbstractModelNG().SetFill(color);
+}
+
+void ShapeModelNG::SetForegroundColor(const Color& color)
+{
+    ShapeAbstractModelNG().SetForegroundColor(color);
 }
 
 void ShapeModelNG::SetStrokeDashOffset(const Ace::Dimension& dashOffset)
@@ -219,7 +232,7 @@ void ShapeModelNG::SetViewPort(FrameNode* frameNode,
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 
-void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row)
+void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, const std::vector<float>& mesh, int32_t column, int32_t row)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);

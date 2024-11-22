@@ -846,6 +846,7 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle001, TestSize.Level1)
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     richEditorPattern->HandleClickEvent(info);
+    richEditorPattern->HandleFocusEvent();
     EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
     /**
      * @tc.steps: step2. repeat click caret position show single handle
@@ -890,6 +891,7 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle002, TestSize.Level1)
     GestureEvent info;
     info.localLocation_ = Offset(0, 5);
     richEditorPattern->HandleClickEvent(info);
+    richEditorPattern->HandleFocusEvent();
     EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
     /**
      * @tc.steps: step3. repeat click caret position show single handle

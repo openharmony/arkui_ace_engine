@@ -59,7 +59,6 @@ export struct SelectTitleBar {
   private static instanceCount = 0;
 
   @State selectMaxWidth: number = 0;
-  @State backActive: boolean = false;
   @State fontSize: number = 1;
 
   build() {
@@ -69,13 +68,10 @@ export struct SelectTitleBar {
     }) {
       Row() {
         if (!this.hidesBackButton) {
-          Navigator()
-            .active(this.backActive);
-
           ImageMenuItem({ item: {
             value: PUBLIC_BACK,
             isEnabled: true,
-            action: () => this.backActive = true
+            action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
 
@@ -85,7 +81,6 @@ export struct SelectTitleBar {
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderColor: $r('sys.color.ohos_id_color_emphasize'),
                 borderWidth: 0
@@ -94,7 +89,8 @@ export struct SelectTitleBar {
               Row() {
                 Select(this.options)
                   .selected(this.selected)
-                  .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                  .value(this.selected >= 0 && this.selected < this.options.length ?
+                    this.options[this.selected].value : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -111,7 +107,8 @@ export struct SelectTitleBar {
             Row() {
               Select(this.options)
                 .selected(this.selected)
-                .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
+                .value(this.selected >= 0 && this.selected < this.options.length ?
+                  this.options[this.selected].value : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
@@ -244,7 +241,7 @@ struct CollapsibleMenuSection {
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+      if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1
       }
@@ -478,6 +475,7 @@ struct ImageMenuItem {
     .backgroundColor(this.getBgColor())
     .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
+    .enabled(this.item.isEnabled)
     .stateStyles({
       focused: {
         .border({

@@ -68,7 +68,7 @@ void ExpandSafeAreaTestNg::InitSafeAreaManager(AvoidConfig config)
     safeAreaManager->SetIsFullScreen(config.isFullScreen);
     safeAreaManager->SetIsNeedAvoidWindow(config.isNeedAvoidWindow);
     safeAreaManager->SetIgnoreSafeArea(config.ignoreSafeArea);
-    safeAreaManager->SetKeyBoardAvoidMode(config.keyboardSafeAreaEnabled);
+    safeAreaManager->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
 }
 
 void ExpandSafeAreaTestNg::TearDown()

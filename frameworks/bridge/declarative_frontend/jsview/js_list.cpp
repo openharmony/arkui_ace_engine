@@ -132,7 +132,8 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
 
 void JSList::SetDirection(int32_t direction)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && direction != 0 && direction != 1) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) && direction != 0 &&
+        direction != 1) {
         direction = 0;
     }
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
@@ -183,7 +184,12 @@ void JSList::SetCachedCount(const JSCallbackInfo& info)
     int32_t cachedCount = 1;
     ParseJsInteger<int32_t>(info[0], cachedCount);
     cachedCount = cachedCount < 0 ? 1 : cachedCount;
-    ListModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    // 2: represent 2 params.
+    if (info.Length() == 2) {
+        show = info[1]->ToBoolean();
+    }
+    ListModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSList::SetScroller(RefPtr<JSScroller> scroller)
@@ -972,8 +978,7 @@ void JSListScroller::GetVisibleListContentInfo(const JSCallbackInfo& args)
                 retObj->SetProperty<int32_t>("itemIndexInGroup", itemGroup.indexInGroup);
             }
 
-            auto ret = JSRef<JSVal>::Cast(retObj);
-            args.SetReturnValue(ret);
+            args.SetReturnValue(retObj);
         }
     }
     return;

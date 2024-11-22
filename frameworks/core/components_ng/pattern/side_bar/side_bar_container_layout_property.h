@@ -18,12 +18,10 @@
 
 #include <string>
 
-#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -96,6 +94,7 @@ public:
         }
         constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
         constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+        constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
         constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
         constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
         constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
@@ -109,16 +108,6 @@ public:
         constexpr static int32_t PLATFORM_VERSION_TEN = 10;
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
-        CHECK_NULL_VOID(sideBarTheme);
-        auto defaultControlButtonWidthSmall = sideBarTheme->GetControlButtonWidthSmall();
-        auto defaultControlButtonHeightSmall = sideBarTheme->GetControlButtonHeightSmall();
-        auto controlButtonMarginTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
-        auto controlButtonMarginLeftSmall = sideBarTheme->GetControlButtonMarginLeftSmall();
-        auto controlButtonMarginLeftMiddle = sideBarTheme->GetControlButtonMarginLeftMiddle();
-        auto controlButtonMarginLeftLarge = sideBarTheme->GetControlButtonMarginLeftLarge();
-        auto breakPointSmall = sideBarTheme->GetBreakPointHorizontalSmall();
-        auto breakPointMiddle = sideBarTheme->GetBreakPointHorizontalMiddle();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
             DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
@@ -164,27 +153,10 @@ public:
         json->PutExtAttr("divider", jsonDivider->ToString().c_str(), filter);
 
         CHECK_NULL_VOID(propControlButtonStyle_);
-        Dimension controlButtonLeft = controlButtonMarginLeftSmall;
-        Dimension controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
-        Dimension controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-        Dimension controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            controlButtonTop = controlButtonMarginTopSmall;
-            controlButtonWidth = defaultControlButtonWidthSmall;
-            controlButtonHeight = defaultControlButtonHeightSmall;
-            if (LessNotEqual(sideBarWidth.ConvertToPx(), breakPointSmall.ConvertToPx())) {
-                controlButtonLeft = controlButtonMarginLeftSmall;
-            } else if (LessNotEqual(sideBarWidth.ConvertToPx(), breakPointMiddle.ConvertToPx())) {
-                controlButtonLeft = controlButtonMarginLeftMiddle;
-            } else {
-                controlButtonLeft = controlButtonMarginLeftLarge;
-            }
-        }
-        
-        auto left = propControlButtonStyle_->propControlButtonLeft.value_or(controlButtonLeft);
-        auto top = propControlButtonStyle_->propControlButtonTop.value_or(controlButtonTop);
-        auto width = propControlButtonStyle_->propControlButtonWidth.value_or(controlButtonWidth);
-        auto height = propControlButtonStyle_->propControlButtonHeight.value_or(controlButtonHeight);
+        auto left = propControlButtonStyle_->propControlButtonLeft.value_or(DEFAULT_CONTROL_BUTTON_LEFT);
+        auto top = propControlButtonStyle_->propControlButtonTop.value_or(DEFAULT_CONTROL_BUTTON_TOP);
+        auto width = propControlButtonStyle_->propControlButtonWidth.value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+        auto height = propControlButtonStyle_->propControlButtonHeight.value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
 
         auto jsonControl = JsonUtil::Create(true);
         CHECK_NULL_VOID(jsonControl);

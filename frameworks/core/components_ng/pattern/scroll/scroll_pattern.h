@@ -61,29 +61,7 @@ public:
         return layoutAlgorithm;
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-        auto drawDirection = (layoutDirection == TextDirection::RTL);
-        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
-        paint->SetScrollBar(GetScrollBar());
-        CreateScrollBarOverlayModifier();
-        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
-        auto scrollEffect = GetScrollEdgeEffect();
-        if (scrollEffect && scrollEffect->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect);
-        }
-        if (!scrollContentModifier_) {
-            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
-        }
-        paint->SetContentModifier(scrollContentModifier_);
-        UpdateFadingEdge(paint);
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     OPINC_TYPE_E OpIncType() override
     {
@@ -160,7 +138,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
@@ -370,7 +348,12 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+    bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
+
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+
+    SizeF GetChildrenExpandedSize() override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -381,8 +364,8 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
-    bool ReachStart() const;
-    bool ReachEnd() const;
+    bool ReachStart(bool firstLayout) const;
+    bool ReachEnd(bool firstLayout) const;
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();

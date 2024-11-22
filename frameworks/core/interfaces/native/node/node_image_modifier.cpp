@@ -28,7 +28,7 @@ constexpr int NUM_0 = 1;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-constexpr int NUM_8 = 8;
+constexpr int NUM_12 = 12;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
@@ -562,7 +562,7 @@ void SetImageBorderWithValues(ArkUINodeHandle node, const ArkUI_Float32* values,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_8)) {
+    if ((values == nullptr) || (valuesSize != NUM_12)) {
         return;
     }
 
@@ -880,6 +880,24 @@ void ResetImageOnFinish(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
 }
+
+void SetImageRotateOrientation(ArkUINodeHandle node, ArkUI_Int32 orientation)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto orientationValue = static_cast<ImageRotateOrientation>(orientation);
+    if (orientationValue < ImageRotateOrientation::AUTO || orientationValue > ImageRotateOrientation::LEFT) {
+        orientationValue = ImageRotateOrientation::UP;
+    }
+    ImageModelNG::SetOrientation(frameNode, orientationValue);
+}
+
+void ResetImageRotateOrientation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::UP);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -894,13 +912,13 @@ const ArkUIImageModifier* GetImageModifier()
         SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
         SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, SetImageBorderWithValues, ResetImageBorder,
         SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable, ResetResizable,
-        SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc,
-        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable,
-        GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap,
-        SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve,
-        AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent, ResetImageSrc,
-        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
-        ResetImageOnFinish };
+        SetDynamicRangeMode, ResetDynamicRangeMode, SetImageRotateOrientation, ResetImageRotateOrientation,
+        SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
+        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
+        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
+        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
+        GetDrawingColorFilter, ResetImageContent, ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
+        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 

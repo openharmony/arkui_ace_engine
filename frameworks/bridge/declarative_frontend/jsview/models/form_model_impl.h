@@ -35,8 +35,7 @@ public:
     void SetVisibility(VisibleType visible) override;
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
     int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
-        const std::string& formBindingDataStr,
-        std::function<void(int32_t, int64_t&, std::string&)> numCallBack) override;
+        const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FORM_MODEL_IMPL_H

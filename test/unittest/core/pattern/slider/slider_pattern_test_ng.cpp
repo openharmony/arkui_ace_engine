@@ -267,6 +267,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->UpdateBlock();
     sliderPattern->LayoutImageNode();
     sliderPattern->bubbleFlag_ = true;
+    sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
@@ -315,6 +316,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest002, TestSize.Level1)
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
     sliderPattern->imageFrameNode_ =
         FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
+    sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     sliderPaintProperty->UpdateBlockType(SliderModel::BlockStyleType::DEFAULT);
     sliderPattern->UpdateBlock();
@@ -577,7 +579,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest006, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetOffsetX(-1);
     sliderPattern->HandlingGestureEvent(info);
-    ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
+    sliderPattern->isVisibleArea_ = true;
     sliderPattern->HandledGestureEvent();
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
 }
@@ -907,6 +909,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+    sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
 
@@ -1409,10 +1412,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             std::string text, description;
             EXPECT_EQ(pointAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::YES_STR);
             if (i == 0) {
-                text = selected + pointNodeProperty->GetContent().value_or("");
+                text = selected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = " ";
             } else {
-                text = unselected + pointNodeProperty->GetContent().value_or("");
+                text = unselected + StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
                 description = "";
             }
             EXPECT_EQ(pointAccessibilityProperty->accessibilityText_.value(), text);
@@ -1472,7 +1475,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     ASSERT_NE(pointNodeProperty, nullptr);
     auto expectSize = CalcSize(CalcLength(CONTAINER_SIZE.Width()), CalcLength(CONTAINER_SIZE.Height()));
     EXPECT_EQ(pointNodeProperty->calcLayoutConstraint_->selfIdealSize, std::optional<CalcSize>(expectSize));
-    EXPECT_EQ(pointNodeProperty->GetContent(), std::optional<std::string>(SLIDER_MODEL_NG_BLOCK_IMAGE));
+    EXPECT_EQ(pointNodeProperty->GetContent(),
+        std::optional<std::u16string>(StringUtils::Str8ToStr16(SLIDER_MODEL_NG_BLOCK_IMAGE)));
 
     /**
      * @tc.steps: step3. Get frameNode property.

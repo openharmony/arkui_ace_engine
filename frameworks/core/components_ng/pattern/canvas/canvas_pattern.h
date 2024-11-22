@@ -44,8 +44,6 @@ public:
 
     void SetOnContext2DAttach(std::function<void()>&& callback);
     void SetOnContext2DDetach(std::function<void()>&& callback);
-    void FireOnContext2DAttach();
-    void FireOnContext2DDetach();
 
     int32_t GetId() const
     {
@@ -56,6 +54,7 @@ public:
 
     void AttachRenderContext();
     void DetachRenderContext();
+    void OnAttachToMainTree() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -82,6 +81,11 @@ public:
     bool IsSupportDrawModifier() const override
     {
         return false;
+    }
+
+    bool IsAttached() const
+    {
+        return isAttached_;
     }
 
     void SetAntiAlias(bool isEnabled);
@@ -185,11 +189,15 @@ public:
     void Reset();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
+    void FireOnContext2DAttach();
+    void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
     void CreateAnalyzerOverlay();
@@ -212,6 +220,7 @@ private:
     bool isEnableAnalyzer_ = false;
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
+    bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

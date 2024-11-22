@@ -72,8 +72,8 @@ const l2 = '#00FFFFFF';
 const m2 = 100;
 const n2 = 12;
 const o2 = 8;
-const TAG = 'TreeView';
-const LOG_CODE = 0x3900;
+const i16 = 'TreeView';
+const j16 = 0x3900;
 const ARROW_DOWN = {
     'id': -1,
     'type': 20000,
@@ -1136,6 +1136,7 @@ export class TreeView extends ViewPU {
             return;
         }
         this.setImageSources(this.viewLastIndex, a3.NORMAL);
+        this.listNodeDataSource.i8(this.viewLastIndex, a3.NORMAL);
         this.nodeList[this.viewLastIndex].a6({
             'id': -1,
             'type': 10001,
@@ -1153,7 +1154,9 @@ export class TreeView extends ViewPU {
         });
         this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
         this.listNodeDataSource.w7[this.viewLastIndex].r6(false);
-        this.listNodeDataSource.i8(this.viewLastIndex, a3.NORMAL);
+        this.listNodeDataSource.w7[this.viewLastIndex].j4 =
+            this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                .v3?.source;
     }
 
     setImageSources(index, f17) {
@@ -1175,7 +1178,7 @@ export class TreeView extends ViewPU {
             List.create({});
             List.onDragMove((event, extraParams) => {
                 if (this.isMultiPress) {
-                    hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
+                    hilog.error(j16, i16, 'drag error, a item has been dragged');
                     return;
                 }
                 let b17 = i1;
@@ -1233,12 +1236,12 @@ export class TreeView extends ViewPU {
                 let n16 = JSON.parse(extraParams).insertIndex;
                 let o16 = this.dropSelectedIndex;
                 if (o16 - 1 > this.listNodeDataSource.totalCount() || o16 === undefined) {
-                    hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
+                    hilog.error(j16, i16, 'drag error, currentNodeIndex is not found');
                     this.listNodeDataSource.u8(false);
                     return;
                 }
                 if (n16 === this.listNodeDataSource.totalCount()) {
-                    hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
+                    hilog.info(j16, i16, 'need to insert into the position of the last line');
                     n16 -= 1;
                 }
                 let p16 = this.listNodeDataSource.getData(n16);
@@ -1351,7 +1354,7 @@ export class TreeView extends ViewPU {
                         ListItem.align(Alignment.Start);
                         ListItem.onDragStart((event, extraParams) => {
                             if (this.listNodeDataSource.a9() || this.listNodeDataSource.l8() || this.isMultiPress) {
-                                hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
+                                hilog.error(j16, i16, 'drag error, a item has been dragged');
                                 return;
                             }
                             this.dropSelectedIndex = JSON.parse(extraParams).selectedIndex;
@@ -1359,8 +1362,7 @@ export class TreeView extends ViewPU {
                             let f16 = this.listNodeDataSource.getData(e16);
                             let g16 = u15.e6();
                             if (e16 >= this.listNodeDataSource.totalCount() || e16 === undefined) {
-                                hilog.error(LOG_CODE, TAG,
-                                    'drag error, currentNodeIndex is not found in onDragStart');
+                                hilog.error(j16, i16, 'drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
                             this.listNodeDataSource.b9(true);
@@ -1372,7 +1374,7 @@ export class TreeView extends ViewPU {
                             this.listNodeDataSource.v8(h16);
                             this.listNodeDataSource.g9(e16);
                             if (g16 !== f16?.e6()) {
-                                hilog.error(LOG_CODE, TAG, 'drag is too fast, it attribute a fault to OH');
+                                hilog.error(j16, i16, 'drag is too fast, it attribute a fault to OH');
                                 this.listNodeDataSource.u8(false);
                                 return;
                             }
@@ -1427,7 +1429,7 @@ export class TreeView extends ViewPU {
                                         index: this.listNodeDataSource.findIndex(u15.e6()),
                                         listTreeViewMenu: this.listTreeViewMenu,
                                     }, undefined, elmtId, () => {
-                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1130, x9: 13 });
+                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1133, x9: 13 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
@@ -1666,7 +1668,7 @@ function j(parentNodeId, q14, r14, count) {
                 r14 ? parent.o6().r10 + count : parent.o6().r10 - count;
             s14 = parent.parentNodeId;
         } else {
-            hilog.error(LOG_CODE, TAG, 'updateParentChildNumHandler: parent node not found');
+            hilog.error(j16, i16, 'updateParentChildNumHandler: parent node not found');
             break;
         }
     }
@@ -1846,7 +1848,7 @@ class h3 extends g3 {
 
     p12(index) {
         if (index < 0 || index >= this.w7.length) {
-            hilog.error(LOG_CODE, TAG, 'check index fail');
+            hilog.error(j16, i16, 'check index fail');
             return false;
         }
         return true;
@@ -1920,7 +1922,7 @@ class h3 extends g3 {
 
     w12(e14) {
         if (e14 >= this.w7.length) {
-            hilog.error(LOG_CODE, TAG, 'changeNodeStatus clickIndex error.');
+            hilog.error(j16, i16, 'changeNodeStatus clickIndex error.');
             return;
         }
         let f14 = e14;
@@ -1936,7 +1938,7 @@ class h3 extends g3 {
 
     z12(v13, w13) {
         if (v13 >= this.w7.length) {
-            hilog.error(LOG_CODE, TAG, 'handleExpandAndCollapse clickIndex error.');
+            hilog.error(j16, i16, 'handleExpandAndCollapse clickIndex error.');
             return;
         }
         let x13 = v13;
@@ -1947,6 +1949,9 @@ class h3 extends g3 {
         let z13 = this.a11.get(y13);
         if (this.w7[x13].o6().a13 && z13 === z2.COLLAPSE) {
             for (let d14 = 0; d14 < this.w7[x13].o6().r10; d14++) {
+                if (this.w7[x13 + 1 + d14] === undefined) {
+                    return;
+                }
                 this.w7[x13 + 1 + d14].i6(false);
                 this.w7[x13 + 1 + d14].c6(h1);
             }
@@ -1963,6 +1968,9 @@ class h3 extends g3 {
         }
         if (z13 === z2.EXPAND) {
             for (let b14 = 0; b14 < a14.length; b14++) {
+                if (this.w7[a14[b14]] === undefined) {
+                    return;
+                }
                 this.w7[a14[b14]].i6(true);
                 this.w7[a14[b14]].c6(i1);
                 let c14 = this.w7[a14[b14]].e6();
@@ -2006,7 +2014,7 @@ class h3 extends g3 {
                 return false;
             }, this.s10, p13, q13);
         } catch (err) {
-            hilog.error(LOG_CODE, TAG, 'traverseSectionNodeDF function callbacks error.');
+            hilog.error(j16, i16, 'traverseSectionNodeDF function callbacks error.');
             this.c13(o13);
         }
     }
@@ -2045,105 +2053,6 @@ class h3 extends g3 {
 
     k10() {
         this.d13(this.w7, 0, 1);
-    }
-
-    h13(b13, c13) {
-        let d13 = [];
-        if (b13.length === 0) {
-            return;
-        }
-        let startIndex = undefined;
-        for (let g13 = 0; g13 < b13.length; g13++) {
-            if (this.b11.has(b13[g13])) {
-                let i13 = this.b11.get(b13[g13]);
-                d13.push(i13);
-            }
-            if (startIndex === undefined && this.c11.has(b13[g13])) {
-                startIndex = this.c11.get(b13[g13]);
-            }
-            if (startIndex !== undefined) {
-                let h13 = this.w7.splice(startIndex, 1);
-                h13 = null;
-            }
-            if (this.a11.has(b13[g13])) {
-                this.a11.delete(b13[g13]);
-            }
-        }
-        d13.forEach((value) => {
-            this.p10(value);
-            this.g9(value);
-        });
-        if (c13.k6().x3 === null) {
-            if (this.c11.has(c13.e6())) {
-                let f13 = this.c11.get(c13.e6());
-                this.w7[f13]?.z5(false);
-            }
-            this.a11.delete(c13.e6());
-            this.g9(this.b11.get(c13.e6()));
-        }
-        let callbackParam = {
-            currentNodeId: c13.e6(),
-            parentNodeId: c13.f6(),
-        };
-        this.v12();
-        this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
-    }
-
-    i13(y12) {
-        let z12 = new f3(new j3(d3), d3);
-        if (this.v10.has(y12[0])) {
-            let node = this.v10.get(y12[0]);
-            z12 = new f3(node, this.w10.get(y12[0]));
-            z12.m5(node.o6().a13);
-        }
-        z12.h7(true);
-        let index = 0;
-        for (let a13 = 0; a13 < this.w7.length; a13++) {
-            if (this.w7[a13].e6() === z12.f6()) {
-                index = a13;
-                if (this.w7[a13].k6().x3 === null) {
-                    this.w7[a13].z5(true);
-                    this.g9(index);
-                } else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
-                    this.w12(index);
-                }
-                this.w7.splice(a13 + 1, 0, z12);
-                this.w7[a13 + 1].y5(true);
-                this.w7[a13 + 1].i6(true);
-                this.w7[a13 + 1].c6(i1);
-                this.c11.set(y12[0], a13 + 1);
-                this.i8(a13 + 1, a3.EDIT);
-                this.j13 = t2.ADD_NODE;
-                this.o10(a13 + 1);
-                this.k13(a13 + 1, this.j13);
-                break;
-            }
-        }
-        this.y10 = index + 1;
-        this.h9(index);
-        this.lastIndex = index;
-        this.a11.set(z12.f6(), z2.EXPAND);
-        this.z12(index, true);
-    }
-
-    g10(operation, parentNodeId, v12) {
-        let w12 = new f3(new j3(d3), d3);
-        if (this.v10.has(parentNodeId)) {
-            let x12 = this.v10.get(parentNodeId);
-            w12 = new f3(x12, this.w10.get(parentNodeId));
-            w12.m5(x12.o6().a13);
-        }
-        if (operation === t2.REMOVE_NODE) {
-            this.x11.set(parentNodeId, this.z11);
-            this.g9(this.b11.get(parentNodeId));
-            this.h13(v12, w12);
-        }
-        if (operation === t2.ADD_NODE) {
-            this.d12 = v12[0];
-            this.x11.set(this.c10(), this.z11);
-            this.x11.set(v12[0], this.a12);
-            this.i13(v12);
-        }
     }
 
     h9(index) {
@@ -3114,7 +3023,7 @@ class h3 extends g3 {
                     t8 ? parent.o6().r10 + count : parent.o6().r10 - count;
                 parentNodeId = parent.parentNodeId;
             } else {
-                hilog.error(LOG_CODE, TAG, 'updateParentChildNum: parent node not found.');
+                hilog.error(j16, i16, 'updateParentChildNum: parent node not found.');
                 break;
             }
         }
@@ -3128,6 +3037,137 @@ class h3 extends g3 {
         return current.parentNodeId;
     }
 
+    h13(b13, c13) {
+        let d13 = [];
+        if (b13.length === 0) {
+            return;
+        }
+        let startIndex = undefined;
+        for (let g13 = 0; g13 < b13.length; g13++) {
+            if (this.b11.has(b13[g13])) {
+                let i13 = this.b11.get(b13[g13]);
+                d13.push(i13);
+            }
+            if (startIndex === undefined && this.c11.has(b13[g13])) {
+                startIndex = this.c11.get(b13[g13]);
+            }
+            if (startIndex !== undefined) {
+                let h13 = this.w7.splice(startIndex, 1);
+                h13 = null;
+            }
+            if (this.a11.has(b13[g13])) {
+                this.a11.delete(b13[g13]);
+            }
+        }
+        d13.forEach((value) => {
+            this.p10(value);
+            this.g9(value);
+        });
+        if (c13.k6().x3 === null) {
+            if (this.c11.has(c13.e6())) {
+                let f13 = this.c11.get(c13.e6());
+                this.w7[f13]?.z5(false);
+            }
+            this.a11.delete(c13.e6());
+            this.g9(this.b11.get(c13.e6()));
+        }
+        let callbackParam = {
+            currentNodeId: c13.e6(),
+            parentNodeId: c13.f6(),
+        };
+        this.v12();
+        this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
+    }
+
+    i13(y12) {
+        let z12 = new f3(new j3(d3), d3);
+        if (this.v10.has(y12[0])) {
+            let node = this.v10.get(y12[0]);
+            z12 = new f3(node, this.w10.get(y12[0]));
+            z12.m5(node.o6().a13);
+        }
+        z12.h7(true);
+        let index = 0;
+        for (let a13 = 0; a13 < this.w7.length; a13++) {
+            if (this.w7[a13].e6() === z12.f6()) {
+                index = a13;
+                if (this.w7[a13].k6().x3 === null) {
+                    this.w7[a13].z5(true);
+                    this.g9(index);
+                } else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
+                    this.w12(index);
+                }
+                this.w7.splice(a13 + 1, 0, z12);
+                this.w7[a13 + 1].y5(true);
+                this.w7[a13 + 1].i6(true);
+                this.w7[a13 + 1].c6(i1);
+                this.c11.set(y12[0], a13 + 1);
+                this.i8(a13 + 1, a3.EDIT);
+                this.j13 = t2.ADD_NODE;
+                this.o10(a13 + 1);
+                this.k13(a13 + 1, this.j13);
+                break;
+            }
+        }
+        this.y10 = index + 1;
+        this.h9(index);
+        this.lastIndex = index;
+        this.a11.set(z12.f6(), z2.EXPAND);
+        this.z12(index, true);
+    }
+
+    g10(operation, parentNodeId, v12) {
+        let w12 = new f3(new j3(d3), d3);
+        if (this.v10.has(parentNodeId)) {
+            let x12 = this.v10.get(parentNodeId);
+            w12 = new f3(x12, this.w10.get(parentNodeId));
+            w12.m5(x12.o6().a13);
+        }
+        if (operation === t2.REMOVE_NODE) {
+            this.x11.set(parentNodeId, this.z11);
+            this.g9(this.b11.get(parentNodeId));
+            this.h13(v12, w12);
+        }
+        if (operation === t2.ADD_NODE) {
+            this.d12 = v12[0];
+            this.x11.set(this.c10(), this.z11);
+            this.x11.set(v12[0], this.a12);
+            this.i13(v12);
+        }
+    }
+
+    removeNode(currentNodeId, parentNodeId) {
+        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
+            let parent = this.v10.get(parentNodeId);
+            let current = this.v10.get(currentNodeId);
+            let f8 = [];
+            let index = current.y14;
+            let g8 = 0;
+            if (index < 0) {
+                hilog.error(j16, i16, 'node does not exist.');
+                return [];
+            } else {
+                g8 = parent.children[index].o6().r10 + 1;
+                this.z14(parent.children[index], f8);
+                for (let j8 = index; j8 < parent.children.length; j8++) {
+                    parent.children[j8].y14 -= 1;
+                }
+                let node = parent.children.splice(index, 1);
+                node = null;
+                this.d16(parentNodeId);
+            }
+            parent.o6().b13 = parent.children.length;
+            parent.o6().r10 -= (g8);
+            let h8 = [];
+            h8.push(parent.parentNodeId);
+            i(false, g8, this.v10, h8);
+            return f8;
+        } else {
+            hilog.error(j16, i16, 'parent does not exist.');
+            return [];
+        }
+    }
+
     addNode(parentNodeId, currentNodeId, data, p8) {
         if (this.s10 === null) {
             this.s10 = new j3(d3);
@@ -3139,8 +3179,7 @@ class h3 extends g3 {
             let parent = this.v10.get(parentNodeId);
             let q8 = new j3(data);
             if (parent.b5 > this.t10) {
-                hilog.error(LOG_CODE, TAG,
-                    'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+                hilog.error(j16, i16, 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
                 return false;
             }
             q8.b5 = parent.b5 + 1;
@@ -3153,19 +3192,32 @@ class h3 extends g3 {
             parent.o6().a13 = true;
             parent.o6().b13 = parent.children.length;
             parent.o6().r10 += 1;
+            this.d16(parentNodeId);
             if (p8) {
                 this.e12.push(parent.parentNodeId);
             } else {
-                let r8 = [];
-                r8.push(parent.parentNodeId);
-                i(true, 1, this.v10, r8);
+                let r2 = [];
+                r2.push(parent.parentNodeId);
+                i(true, 1, this.v10, r2);
             }
             this.w10.set(currentNodeId, data);
             this.v10.set(currentNodeId, q8);
             return true;
         } else {
-            hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: Parent node not found.');
+            hilog.error(j16, i16, 'ListDataSource[addNode]: Parent node not found.');
             return false;
+        }
+    }
+
+    d16(parentNodeId) {
+        let parent = this.v10.get(parentNodeId);
+        let k2 = this.c11.get(parentNodeId);
+        if (parent.children.length > 0) {
+            if (this.c11.has(parentNodeId)) {
+                this.w7[k2]?.m5(true);
+            }
+        } else {
+            this.w7[k2]?.m5(false);
         }
     }
 
@@ -3184,50 +3236,13 @@ class h3 extends g3 {
         });
     }
 
-    removeNode(currentNodeId, parentNodeId) {
-        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
-            let parent = this.v10.get(parentNodeId);
-            let current = this.v10.get(currentNodeId);
-            let f8 = [];
-            let index = current.y14;
-            let g8 = 0;
-            if (index < 0) {
-                hilog.error(LOG_CODE, TAG, 'node does not exist.');
-                return [];
-            } else {
-                g8 = parent.children[index].o6().r10 + 1;
-                this.z14(parent.children[index], f8);
-                for (let j8 = index; j8 < parent.children.length; j8++) {
-                    parent.children[j8].y14 -= 1;
-                }
-                let node = parent.children.splice(index, 1);
-                node = null;
-                if (parent.children.length === 0) {
-                    if (this.c11.has(parentNodeId)) {
-                        let i8 = this.c11.get(parentNodeId);
-                        this.w7[i8]?.m5(false);
-                    }
-                }
-            }
-            parent.o6().b13 = parent.children.length;
-            parent.o6().r10 -= (g8);
-            let h8 = [];
-            h8.push(parent.parentNodeId);
-            i(false, g8, this.v10, h8);
-            return f8;
-        } else {
-            hilog.error(LOG_CODE, TAG, 'parent does not exist.');
-            return [];
-        }
-    }
-
     a15(e8) {
         if (e8?.currentNodeId === undefined) {
-            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: currentId is undefined');
+            hilog.error(j16, i16, 'getNodeInfoByNodeItem: currentId is undefined');
             return new f3(new j3(d3), d3);
         }
         if (!this.c11.has(e8.currentNodeId)) {
-            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
+            hilog.error(j16, i16, 'getNodeInfoByNodeItem: not has nodeItem.');
             return new f3(new j3(d3), d3);
         }
         let index = this.c11.get(e8.currentNodeId);
@@ -3367,7 +3382,7 @@ class h3 extends g3 {
             let parent = this.v10.get(parentNodeId);
             let l7 = new j3(data);
             if (parent.b5 > this.t10) {
-                hilog.error(LOG_CODE, TAG, 'addDragNode: The level of the tree view cannot exceed 50.');
+                hilog.error(j16, i16, 'addDragNode: The level of the tree view cannot exceed 50.');
                 return false;
             }
             l7.b5 = parent.b5 + 1;
@@ -3404,7 +3419,7 @@ class h3 extends g3 {
             this.w10.set(currentNodeId, data);
             return true;
         } else {
-            hilog.error(LOG_CODE, TAG, 'addDragNode: Parent node not found.');
+            hilog.error(j16, i16, 'addDragNode: Parent node not found.');
             return false;
         }
     }

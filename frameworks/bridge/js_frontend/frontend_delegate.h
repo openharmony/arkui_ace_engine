@@ -134,6 +134,10 @@ public:
 
     virtual void ResetRequestFocusCallback();
 
+    virtual bool Activate(bool isActive, bool autoInactive = true);
+
+    virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
+
     // restore
     virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         const std::string& contentInfo, ContentInfoType type)
@@ -182,7 +186,7 @@ public:
     virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
         std::function<void(bool)>&& onStatusChanged) {};
-    virtual void RemoveCustomDialog() {};
+    virtual void RemoveCustomDialog(int32_t instanceId) {};
     virtual void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) {};
     virtual void CloseCustomDialog(const int32_t dialogId) {};
     virtual void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) {};

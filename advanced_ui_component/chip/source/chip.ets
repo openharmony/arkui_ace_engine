@@ -22,6 +22,7 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
+import common from '@ohos.app.ability.common';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -38,6 +39,12 @@ enum BreakPointsType {
   LG = "LG"
 }
 
+export enum AccessibilitySelectedType {
+  CLICKED = 0,
+  CHECKED = 1,
+  SELECTED = 2,
+}
+
 export interface IconCommonOptions {
   src: ResourceStr;
   size?: SizeOptions;
@@ -47,13 +54,30 @@ export interface IconCommonOptions {
 
 export interface SuffixIconOptions extends IconCommonOptions {
   action?: () => void;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
 export interface PrefixIconOptions extends IconCommonOptions {}
 
+export interface AccessibilityOptions {
+  accessibilityLevel?: string;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+}
+
+export interface CloseOptions extends AccessibilityOptions {}
+
 export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
+}
+
+export interface ChipSuffixSymbolGlyphOptions {
+  normalAccessibility?: AccessibilityOptions;
+  activatedAccessibility?: AccessibilityOptions;
+  action?: VoidCallback;
 }
 
 export interface LabelMarginOptions {
@@ -164,8 +188,18 @@ export const defaultTheme: ChipTheme = {
     fontColor: $r('sys.color.ohos_id_color_text_primary'),
     activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     fontFamily: "HarmonyOS Sans",
-    normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
-    smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+    normalMargin: {
+      left: 6,
+      right: 6,
+      top: 0,
+      bottom: 0
+    },
+    smallMargin: {
+      left: 4,
+      right: 4,
+      top: 0,
+      bottom: 0
+    },
     defaultFontSize: 14,
     localizedNormalMargin: {
       start: LengthMetrics.vp(6),
@@ -204,8 +238,8 @@ export const defaultTheme: ChipTheme = {
     activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
     focusOutlineMargin: 2,
-    normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
-    smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
+    normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
+    smallBorderRadius: $r('sys.float.chip_border_radius_small'),
     borderWidth: 2,
     localizedNormalPadding: {
       start: LengthMetrics.vp(16),
@@ -240,7 +274,9 @@ interface ChipOptions {
   label: LabelOptions;
   suffixIcon?: SuffixIconOptions;
   suffixSymbol?: ChipSymbolGlyphOptions;
+  suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
   allowClose?: boolean;
+  closeOptions?: CloseOptions;
   enabled?: boolean;
   activated?: boolean;
   backgroundColor?: ResourceColor;
@@ -248,6 +284,9 @@ interface ChipOptions {
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
+  accessibilitySelectedType?: AccessibilitySelectedType;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
   onClose?: () => void
   onClicked?: () => void
 }
@@ -261,13 +300,18 @@ export function Chip(options: ChipOptions) {
     label: options.label,
     suffixIcon: options.suffixIcon,
     suffixSymbol: options.suffixSymbol,
+    suffixSymbolOptions: options.suffixSymbolOptions,
     allowClose: options.allowClose,
+    closeOptions: options.closeOptions,
     chipEnabled: options.enabled,
     chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
     chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
     chipNodeRadius: options.borderRadius,
     chipDirection: options.direction,
+    chipAccessibilitySelectedType: options.accessibilitySelectedType,
+    chipAccessibilityDescription: options.accessibilityDescription,
+    chipAccessibilityLevel: options.accessibilityLevel,
     onClose: options.onClose,
     onClicked: options.onClicked,
   })
@@ -286,22 +330,52 @@ function isValidDimensionString(dimension: string): boolean {
   return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
 
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
   @Prop chipSize: ChipSize | SizeOptions = ChipSize.NORMAL
   @Prop allowClose: boolean = true
+  @Prop closeOptions?: CloseOptions
   @Prop chipDirection: Direction = Direction.Auto
   @Prop prefixIcon: PrefixIconOptions = { src: "" }
   @Prop prefixSymbol: ChipSymbolGlyphOptions
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: ChipSymbolGlyphOptions
+  @Prop suffixSymbol?: ChipSymbolGlyphOptions
+  @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
   @Prop chipEnabled: boolean = true
-  @Prop chipActivated: boolean = false
+  @Prop chipActivated?: boolean
+  @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType
+  @Prop chipAccessibilityDescription?: ResourceStr
+  @Prop chipAccessibilityLevel?: string
   @State isHover: boolean = false
   @State chipScale: ScaleOptions = { x: 1, y: 1 }
   @State chipOpacity: number = 1
@@ -328,9 +402,12 @@ export struct ChipComponent {
     }
   }
   private callbackId: number | undefined = undefined
-  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width);
-  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width);
-  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
+  @State prefixSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width);
+  @State suffixSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -388,8 +465,7 @@ export struct ChipComponent {
         case LengthUnit.VP:
           return lengthMetrics.value
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          return px2vp(fp2px(lengthMetrics.value))
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY
         case LengthUnit.LPX:
@@ -409,13 +485,9 @@ export struct ChipComponent {
       case 'object':
         try {
           let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
-          if (returnValue === 0) {
-            if ((value.type === RESOURCE_TYPE_STRING &&
-              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
-              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
-                value.type !== RESOURCE_TYPE_FLOAT)) {
-              return Number.NEGATIVE_INFINITY;
-            }
+          if (returnValue === 0 &&
+            !isValidResource(getContext(this), value)) {
+            return Number.NEGATIVE_INFINITY;
           }
           return returnValue;
         } catch (error) {
@@ -615,7 +687,8 @@ export struct ChipComponent {
   }
 
   private getChipNodePadding(): LocalizedPadding {
-    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.localizedSmallPadding : this.theme.chipNode.localizedNormalPadding
+    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.localizedSmallPadding :
+    this.theme.chipNode.localizedNormalPadding
   }
 
   private getChipNodeRadius(): Dimension {
@@ -719,6 +792,9 @@ export struct ChipComponent {
   }
 
   private getChipActive(): boolean {
+    if (typeof this.chipActivated === 'undefined') {
+      return false
+    }
     return this.chipActivated
   }
 
@@ -875,6 +951,8 @@ export struct ChipComponent {
   }
 
   aboutToAppear() {
+    let uiContent: UIContext = this.getUIContext();
+    this.fontSizeScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       if (mediaQueryResult.matches) {
         this.chipBreakPoints = BreakPointsType.SM
@@ -965,75 +1043,92 @@ export struct ChipComponent {
           .draggable(false)
 
         if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
-          SymbolGlyph()
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
-            .attributeModifier(this.getSuffixSymbolModifier())
-            .effectStrategy(SymbolEffectStrategy.NONE)
-            .symbolEffect(this.symbolEffect, false)
-            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
-            .onSizeChange((oldValue, newValue) => {
-              this.suffixSymbolWidth = newValue?.width
-            })
-            .key('SuffixSymbolGlyph')
+          Button({ type: ButtonType.Normal }) {
+            SymbolGlyph()
+              .fontSize(this.theme.defaultSymbol.fontSize)
+              .fontColor(this.getDefaultSymbolColor())
+              .attributeModifier(this.getSuffixSymbolModifier())
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(this.symbolEffect, false)
+              .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
+              .onSizeChange((oldValue, newValue) => {
+                this.suffixSymbolWidth = newValue?.width
+              })
+              .key('SuffixSymbolGlyph')
+          }
+          .onClick(this.getSuffixSymbolAction())
+          .accessibilityText(this.getSuffixSymbolAccessibilityText())
+          .accessibilityDescription(this.getSuffixSymbolAccessibilityDescription())
+          .accessibilityLevel(this.getSuffixSymbolAccessibilityLevel())
+          .backgroundColor(Color.Transparent)
+          .borderRadius(0)
+          .padding(0)
+          .stateEffect(false)
         } else if (this.suffixIcon?.src !== "") {
-          Image(this.getSuffixIconSrc())
-            .direction(this.chipDirection)
-            .opacity(this.getChipNodeOpacity())
-            .size(this.getSuffixIconSize())
-            .fillColor(this.getSuffixIconFilledColor())
-            .enabled(this.getChipEnable())
-            .focusable(this.getSuffixIconFocusable())
-            .objectFit(ImageFit.Cover)
-            .flexShrink(0)
-            .visibility(this.getVisibility())
-            .draggable(false)
-            .focusBox({
-              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-            })
-            .onFocus(() => {
-              this.suffixIconOnFocus = true
-            })
-            .onBlur(() => {
-              this.suffixIconOnFocus = false
-            })
-            .onClick(() => {
-              if (!this.getChipEnable()) {
-                return
-              }
-              if (this.suffixIcon?.action) {
-                this.suffixIcon.action()
-                return
-              }
-              if ((this.allowClose ?? true) && this.useDefaultSuffixIcon) {
-                this.onClose()
-                this.deleteChipNodeAnimate()
-                return
-              }
-              this.onClicked()
-            })
-        } else if (this.allowClose ?? true) {
-          SymbolGlyph($r('sys.symbol.xmark'))
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
-            .focusBox({
-              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-            })
-            .onSizeChange((oldValue, newValue) => {
-              this.allowCloseSymbolWidth = newValue?.width
-            })
-            .key('AllowCloseSymbolGlyph')
-            .onClick(() => {
-              if (!this.getChipEnable()) {
-                return
-              }
+          Button({ type: ButtonType.Normal }) {
+            Image(this.getSuffixIconSrc())
+              .direction(this.chipDirection)
+              .opacity(this.getChipNodeOpacity())
+              .size(this.getSuffixIconSize())
+              .fillColor(this.getSuffixIconFilledColor())
+              .enabled(this.getChipEnable())
+              .objectFit(ImageFit.Cover)
+              .flexShrink(0)
+              .visibility(this.getVisibility())
+              .draggable(false)
+              .onFocus(() => {
+                this.suffixIconOnFocus = true
+              })
+              .onBlur(() => {
+                this.suffixIconOnFocus = false
+              })
+          }
+          .backgroundColor(Color.Transparent)
+          .borderRadius(0)
+          .padding(0)
+          .size(this.getSuffixIconSize())
+          .accessibilityText(this.getSuffixIconAccessibilityText())
+          .accessibilityDescription(this.getSuffixIconAccessibilityDescription())
+          .accessibilityLevel(this.getSuffixIconAccessibilityLevel())
+          .onClick(() => {
+            if (!this.getChipEnable()) {
+              return
+            }
+            if (this.suffixIcon?.action) {
+              this.suffixIcon.action()
+              return
+            }
+            if ((this.allowClose ?? true) && this.useDefaultSuffixIcon) {
               this.onClose()
               this.deleteChipNodeAnimate()
-            })
+              return
+            }
+            this.onClicked()
+          })
+          .focusable(this.getSuffixIconFocusable())
+        } else if (this.allowClose ?? true) {
+          Button({ type: ButtonType.Normal }) {
+            SymbolGlyph($r('sys.symbol.xmark'))
+              .fontSize(this.theme.defaultSymbol.fontSize)
+              .fontColor(this.getDefaultSymbolColor())
+              .onSizeChange((oldValue, newValue) => {
+                this.allowCloseSymbolWidth = newValue?.width
+              })
+              .key('AllowCloseSymbolGlyph')
+          }
+          .backgroundColor(Color.Transparent)
+          .borderRadius(0)
+          .padding(0)
+          .accessibilityText(this.getCloseIconAccessibilityText())
+          .accessibilityDescription(this.getCloseIconAccessibilityDescription())
+          .accessibilityLevel(this.getCloseIconAccessibilityLevel())
+          .onClick(() => {
+            if (!this.getChipEnable()) {
+              return
+            }
+            this.onClose()
+            this.deleteChipNodeAnimate()
+          })
         }
 
       }
@@ -1053,11 +1148,12 @@ export struct ChipComponent {
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
-    .focusBox({
-      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-    })
+    .padding(0)
+    .accessibilityGroup(true)
+    .accessibilityDescription(this.getAccessibilityDescription())
+    .accessibilityLevel(this.getAccessibilityLevel())
+    .accessibilityChecked(this.getAccessibilityChecked())
+    .accessibilitySelected(this.getAccessibilitySelected())
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })
@@ -1084,6 +1180,132 @@ export struct ChipComponent {
       }
     })
     .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
+  }
+
+  getSuffixSymbolAccessibilityLevel(): string {
+    if (this.getChipActive()) {
+      if (!this.suffixSymbolOptions?.activatedAccessibility?.accessibilityLevel) {
+        return this.suffixSymbolOptions?.action ? 'yes' : 'no';
+      }
+      return this.suffixSymbolOptions.activatedAccessibility.accessibilityLevel;
+    }
+    if (!this.suffixSymbolOptions?.normalAccessibility?.accessibilityLevel) {
+      return this.suffixSymbolOptions?.action ? 'yes' : 'no';
+    }
+    return this.suffixSymbolOptions.normalAccessibility.accessibilityLevel;
+  }
+
+  getSuffixSymbolAccessibilityDescription(): Resource | undefined {
+    if (this.getChipActive()) {
+      if (typeof this.suffixSymbolOptions?.activatedAccessibility?.accessibilityDescription !== 'undefined') {
+        return this.suffixSymbolOptions.activatedAccessibility.accessibilityDescription as Resource;
+      }
+      return undefined;
+    }
+    if (typeof this.suffixSymbolOptions?.normalAccessibility?.accessibilityDescription !== 'undefined') {
+      return this.suffixSymbolOptions.normalAccessibility.accessibilityDescription as Resource;
+    }
+    return undefined;
+  }
+
+  getSuffixSymbolAccessibilityText(): Resource | undefined {
+    if (this.getChipActive()) {
+      if (typeof this.suffixSymbolOptions?.activatedAccessibility?.accessibilityText !== 'undefined') {
+        return this.suffixSymbolOptions.activatedAccessibility.accessibilityText as Resource;
+      }
+      return undefined;
+    }
+    if (typeof this.suffixSymbolOptions?.normalAccessibility?.accessibilityText !== 'undefined') {
+      return this.suffixSymbolOptions.normalAccessibility.accessibilityText as Resource;
+    }
+    return undefined;
+  }
+
+  getSuffixSymbolAction(): Callback<ClickEvent> | undefined {
+    if (typeof this.suffixSymbolOptions?.action === 'undefined') {
+      return undefined;
+    }
+    return () => {
+      if (!this.getChipEnable()) {
+        return;
+      }
+      this.suffixSymbolOptions?.action?.();
+    };
+  }
+
+  private getAccessibilitySelected(): boolean | undefined {
+    if (this.getChipAccessibilitySelectedType() === AccessibilitySelectedType.SELECTED) {
+      return this.getChipActive();
+    }
+    return undefined;
+  }
+
+  private getAccessibilityChecked(): boolean | undefined {
+    if (this.getChipAccessibilitySelectedType() === AccessibilitySelectedType.CHECKED) {
+      return this.getChipActive();
+    }
+    return undefined;
+  }
+
+  private getChipAccessibilitySelectedType(): AccessibilitySelectedType {
+    if (typeof this.chipActivated === 'undefined') {
+      return AccessibilitySelectedType.CLICKED;
+    }
+    return this.chipAccessibilitySelectedType ?? AccessibilitySelectedType.CHECKED;
+  }
+
+  private getCloseIconAccessibilityLevel(): string {
+    if (this.closeOptions?.accessibilityLevel) {
+      return this.closeOptions.accessibilityLevel;
+    }
+    return 'yes';
+  }
+
+  private getCloseIconAccessibilityDescription(): Resource | undefined {
+    if (typeof this.closeOptions?.accessibilityDescription === 'undefined') {
+      return undefined;
+    }
+    return this.closeOptions.accessibilityDescription as Resource;
+  }
+
+  private getCloseIconAccessibilityText(): Resource {
+    if (typeof this.closeOptions?.accessibilityText === 'undefined') {
+      return $r('sys.string.delete_used_for_accessibility_text')
+    }
+    return this.closeOptions.accessibilityText as ESObject as Resource;
+  }
+
+  private getSuffixIconAccessibilityLevel(): string {
+    if (!this.suffixIcon?.accessibilityLevel) {
+      return !this.suffixIcon?.action ? 'no' : 'yes';
+    }
+    return this.suffixIcon.accessibilityLevel;
+  }
+
+  private getSuffixIconAccessibilityDescription(): Resource | undefined {
+    if (typeof this.suffixIcon?.accessibilityDescription === 'undefined') {
+      return undefined;
+    }
+    return this.suffixIcon.accessibilityDescription as ESObject as Resource;
+  }
+
+  private getSuffixIconAccessibilityText(): Resource | undefined {
+    if (typeof this.suffixIcon?.accessibilityText === 'undefined') {
+      return undefined;
+    }
+
+    return this.suffixIcon.accessibilityText as ESObject as Resource;
+  }
+
+  private getAccessibilityLevel(): string | undefined {
+    return this.chipAccessibilityLevel;
+  }
+
+  private getAccessibilityDescription(): Resource | undefined {
+    if (typeof this.chipAccessibilityDescription === 'undefined') {
+      return undefined;
+    }
+    return this.chipAccessibilityDescription as ESObject as Resource;
   }
 
   build() {

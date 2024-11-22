@@ -35,7 +35,7 @@ AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, Sc
         // Straight to the end of the anmiation
     }
     float currentOffset = pattern_->GetTotalOffset();
-    pattern_->gridLayoutInfo_.currentOffset_ = 0; // for avoid some error
+    pattern_->info_.currentOffset_ = 0; // for avoid some error
     FlushLayoutTask(frameNode_);
     pattern_->ScrollTo(startOffset); // reset currentOffset_
     FlushLayoutTask(frameNode_);
@@ -1425,7 +1425,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1436,7 +1436,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 2;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT * 2;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1447,7 +1447,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = ITEM_HEIGHT;
+    pattern_->info_.currentOffset_ = ITEM_HEIGHT;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1458,7 +1458,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { -ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT * 3;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1492,7 +1492,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
     expectOffset = { ITEM_HEIGHT, ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1503,7 +1503,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT * 2 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 2;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT * 2;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { 0, ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1514,7 +1514,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = ITEM_HEIGHT;
+    pattern_->info_.currentOffset_ = ITEM_HEIGHT;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1525,7 +1525,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
     expectOffset = { -ITEM_HEIGHT, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
+    pattern_->info_.currentOffset_ = -ITEM_HEIGHT * 3;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
     expectOffset = { 0, ITEM_HEIGHT * 2 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -1847,7 +1847,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
@@ -1897,7 +1897,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
     ScrollAlign align = ScrollAlign::AUTO;
     pattern_->ScrollToIndex(targetIndex, false, align);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 1000.0f;
     info.synced_ = false;
@@ -1916,6 +1916,41 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetEndOffset002
+ * @tc.desc: Test GetEndOffset with updated offset on old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetEndOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateFixedItems(20, GridItemStyle::NONE);
+    model.SetLayoutOptions({});
+    CreateDone(frameNode_);
+
+    int32_t targetIndex = 19;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, false, align);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->info_;
+    info.prevOffset_ = info.currentOffset_;
+    info.currentOffset_ -= 799.0f;
+    info.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->GetScrollEdgeEffect()->ProcessScrollOver(-799.0f);
+    EXPECT_TRUE(info.synced_);
+    EXPECT_EQ(info.prevOffset_, -199.f);
+    EXPECT_EQ(info.currentOffset_, -199.f);
+    EXPECT_EQ(info.startIndex_, 18);
+    EXPECT_EQ(info.endIndex_, 19);
+    EXPECT_EQ(info.startMainLineIndex_, 9);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    EXPECT_EQ(pattern_->GetEndOffset(), 600.0f);
+}
+
+/**
  * @tc.name: MultiLineItemScroll001
  * @tc.desc: Test multiLine item in last line scroll end
  * @tc.type: FUNC
@@ -1930,7 +1965,7 @@ HWTEST_F(GridScrollerTestNg, MultiLineItemScroll001, TestSize.Level1)
 
     pattern_->ScrollBy(-10);
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->gridLayoutInfo_;
+    auto& info = pattern_->info_;
     EXPECT_TRUE(info.reachEnd_);
     EXPECT_FALSE(info.offsetEnd_);
 }

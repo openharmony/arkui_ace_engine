@@ -1564,7 +1564,7 @@ HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationEndImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

@@ -19,13 +19,18 @@ class stateMgmtDFX {
   private static readonly DUMP_MAX_PROPERTY_COUNT: number = 50;
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
+  public static enableDebug: boolean = false;
 
-  public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
+  public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
+    changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
     return {
-      decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+      decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+      changedTrackPropertyName: changedTrackPropertyName,
       value: stateMgmtDFX.getRawValue(observedProp),
-      inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
-      dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+      inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ?
+        -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+      dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ?
+        !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
       owningView: observedProp.getOwningView(),
       length: stateMgmtDFX.getRawValueLength(observedProp),
       syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
@@ -37,7 +42,7 @@ class stateMgmtDFX {
       return Object.prototype.toString.call(item);
     } catch (e) {
       stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
-      return "unknown type";
+      return 'unknown type';
     }
   }
 
@@ -158,3 +163,20 @@ class DumpInfo {
 
 // global function used to throw error in Promise
 declare function _arkUIUncaughtPromiseError(error: any);
+
+function setAceDebugMode(): void {
+  stateMgmtDFX.enableDebug = true;
+}
+
+class aceDebugTrace {
+  public static begin(...args: any): void {
+    if (stateMgmtDFX.enableDebug) {
+      aceTrace.begin(...args);
+    }
+  }
+  public static end(): void {
+    if (stateMgmtDFX.enableDebug) {
+      aceTrace.end();
+    }
+  }
+}

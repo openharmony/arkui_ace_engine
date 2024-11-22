@@ -19,18 +19,32 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
-void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle)
+void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideTitleBar(frameNode, hideTitle);
+    NavDestinationModelNG::SetHideTitleBar(frameNode, hideTitle, animated);
 }
 
 void ResetHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideTitleBar(frameNode, false);
+    NavDestinationModelNG::SetHideTitleBar(frameNode, false, false);
+}
+
+void SetNavDestinationHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, hide, animated);
+}
+
+void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
@@ -45,6 +59,20 @@ void ResetNavDestinationMode(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetNavDestinationMode(frameNode, NG::NavDestinationMode::STANDARD);
+}
+
+void SetNavDestinationSystemTransition(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetSystemTransitionType(frameNode, static_cast<NG::NavigationSystemTransitionType>(value));
+}
+
+void ResetNavDestinationSystemTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetSystemTransitionType(frameNode, NG::NavigationSystemTransitionType::DEFAULT);
 }
 
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
@@ -211,6 +239,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
     static const ArkUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
@@ -223,6 +253,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         SetMenuItemSymbol,
         SetNavDestinationRecoverable,
         ResetNavDestinationRecoverable,
+        SetNavDestinationSystemTransition,
+        ResetNavDestinationSystemTransition
     };
 
     return &modifier;
@@ -233,10 +265,14 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
     static const CJUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea
+        ResetIgnoreLayoutSafeArea,
+        SetNavDestinationSystemTransition,
+        ResetNavDestinationSystemTransition
     };
 
     return &modifier;

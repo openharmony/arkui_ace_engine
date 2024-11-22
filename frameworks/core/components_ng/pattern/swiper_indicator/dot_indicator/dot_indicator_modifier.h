@@ -182,6 +182,11 @@ public:
         currentIndex_ = index;
     }
 
+    void SetCurrentIndexActual(int32_t currentIndexActual)
+    {
+        currentIndexActual_ = currentIndexActual;
+    }
+
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
         normalToHoverIndex_ = normalToHoverIndex;
@@ -297,11 +302,6 @@ public:
         motionVelocity_ = motionVelocity;
     }
 
-    void SetIsOverlong(bool isOverlong)
-    {
-        isOverlong_ = isOverlong;
-    }
-
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -313,9 +313,9 @@ protected:
     }
 
     void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
-    void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
-        GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
-        const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+        TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX,
+        bool isNormal = true);
     void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
     void PlayOpacityAnimation();
@@ -324,6 +324,7 @@ protected:
     int32_t GetLoopOpacityDuration() const;
     float CalculateMinimumAmplitudeRatio(
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const;
+    RefPtr<InterpolatingSpring> GetTailCurve();
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -361,6 +362,7 @@ protected:
     bool indicatorMask_ = false;
     bool isCustomSize_ = false;
     int32_t currentIndex_ = 0;
+    int32_t currentIndexActual_ = 0;
     int32_t animationDuration_ = 0;
     OffsetF offset_;
     float itemWidth_ = 0.0f;
@@ -368,7 +370,6 @@ protected:
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
-    bool isOverlong_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

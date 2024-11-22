@@ -34,6 +34,7 @@ public:
     static void TearDownTestSuite();
     void ResetContentChangeCallbackState();
     void InitContentChangeCallback(RichEditorModelNG& richEditorModel);
+    void InitDeleteCallback(RichEditorModelNG& richEditorModel);
 };
 
 void RichEditorChangeCallbackTestNg::SetUp()
@@ -94,6 +95,16 @@ void RichEditorChangeCallbackTestNg::InitContentChangeCallback(RichEditorModelNG
         onDidChangeValue = changeValue;
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
+}
+
+void RichEditorChangeCallbackTestNg::InitDeleteCallback(RichEditorModelNG& richEditorModel)
+{
+    aboutToDeleteValue = RichEditorDeleteValue();
+    auto aboutToDelete = [](const RichEditorDeleteValue& deleteValue) {
+        aboutToDeleteValue = deleteValue;
+        return true;
+    };
+    richEditorModel.SetAboutToDelete(std::move(aboutToDelete));
 }
 
 /**
@@ -903,6 +914,172 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Lev
 }
 
 /**
+ * @tc.name: ChangeTextCallbackTest016
+ * @tc.desc: test for callback onWillchange/onDidChange, delete text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest016, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(onWillRangeBefore.start, 0);
+    EXPECT_EQ(onWillRangeBefore.end, 0);
+
+    richEditorPattern->DeleteForward(1);
+    EXPECT_EQ(onWillRangeBefore.start, 0);
+    EXPECT_EQ(onWillRangeBefore.end, 0);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest017
+ * @tc.desc: test for callback onWillchange/onDidChange, delete text
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest017, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+
+    richEditorPattern->SetCaretPosition(0);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 0);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(onWillRangeBefore.start, 0);
+    EXPECT_EQ(onWillRangeBefore.end, 0);
+
+    richEditorPattern->SetCaretPosition(6);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->DeleteForward(1);
+    EXPECT_EQ(onWillRangeBefore.start, 6);
+    EXPECT_EQ(onWillRangeBefore.end, 6);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: DeleteCallbackTest001
+ * @tc.desc: test for aboutToDelete callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitDeleteCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    ASSERT_EQ(richEditorPattern->caretPosition_, 6);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 5);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 1);
+
+    richEditorPattern->DeleteBackward(2);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 3);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 2);
+
+    richEditorPattern->DeleteBackward(3);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 0);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 3);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: DeleteCallbackTest002
+ * @tc.desc: test for aboutToDelete callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest002, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitDeleteCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 7);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 6);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 1);
+
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    richEditorPattern->UpdateSelector(3, 7);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 3);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 4);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: DeleteCallbackTest003
+ * @tc.desc: test for aboutToDelete callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, DeleteCallbackTest003, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitDeleteCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 8);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 6);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 2);
+
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    richEditorPattern->UpdateSelector(3, 7);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 8);
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(aboutToDeleteValue.GetOffset(), 3);
+    EXPECT_EQ(aboutToDeleteValue.GetLength(), 5);
+
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
  * @tc.name: HandleOnEditChanged001
  * @tc.desc: test Get focus edit status is true
  * @tc.type: FUNC
@@ -1034,6 +1211,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged004, TestSize.Level1
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
     richEditorPattern->HandleSingleClickEvent(info);
+    richEditorPattern->HandleFocusEvent();
     EXPECT_TRUE(richEditorController->IsEditing());
 }
 
@@ -1152,13 +1330,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
     TextInputAction action2 = TextInputAction::NEW_LINE;
     bool forceCloseKeyboard = false;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 0);
+    EXPECT_EQ(count, 1);
 
     action2 = TextInputAction::DONE;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 1);
-    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
     EXPECT_EQ(count, 2);
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 3);
     ClearSpan();
 }
 

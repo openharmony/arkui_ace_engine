@@ -22,12 +22,19 @@
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
 
+namespace {
+std::atomic<uint64_t> g_proxyNextAutoGenId = 0;
+}
+
 using namespace Framework;
 class NavigationTransitionProxy : public AceType {
     DECLARE_ACE_TYPE(NavigationTransitionProxy, AceType);
 
 public:
-    NavigationTransitionProxy() = default;
+    NavigationTransitionProxy()
+    {
+        proxyId_ = g_proxyNextAutoGenId.fetch_add(1);
+    }
     ~NavigationTransitionProxy() = default;
 
     RefPtr<NG::NavDestinationContext> GetPreDestinationContext() const
@@ -95,11 +102,6 @@ public:
     bool GetIsFinished() const
     {
         return hasFinished_;
-    }
-
-    void SetNavigationOperation(NavigationOperation operation)
-    {
-        operation_ = operation;
     }
 
     void SetCancelAnimationCallback(std::function<void()>&& cancelAnimation)
@@ -213,14 +215,19 @@ public:
         AnimationUtils::AddInteractiveAnimation(interactiveAnimation_, callback);
     }
 
+    uint64_t GetProxyId() const
+    {
+        return proxyId_;
+    }
+
 private:
+    uint64_t proxyId_ = 0;
     RefPtr<NavDestinationContext> preContext_;
     RefPtr<NavDestinationContext> topContext_;
     std::function<void()> finishCallback_; // finish transition callback to continue animation
     std::function<void()> cancelAnimation_; // cancel transition callback to reverse animation
     std::function<void(bool)> endCallback_;
     std::function<void()> interactiveFinishCallback_;
-    NavigationOperation operation_;
     std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation_;
     bool hasFinished_ = false; // current transition is finish or not
     bool isSuccess_ = true; // set current custom transition is start success or not

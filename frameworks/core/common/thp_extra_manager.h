@@ -25,7 +25,6 @@ public:
     THPExtraManager() = default;
     virtual ~THPExtraManager() = default;
     virtual bool Init(void) = 0;
-    virtual void Deinit(void) = 0;
     virtual const char* ThpExtraRunCommand(const char* command, const char* parameters) = 0;
     virtual int32_t GetHeight(void) const = 0;
     virtual int32_t GetWidth(void) const = 0;

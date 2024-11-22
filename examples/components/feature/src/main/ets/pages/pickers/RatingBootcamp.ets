@@ -15,7 +15,7 @@
 
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, SliderBlock, useEnabled } from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 
 @Component
 export struct RatingBootcamp {
@@ -30,6 +30,28 @@ export struct RatingBootcamp {
   @State enableStepSize: boolean = false;
   @State stepSize: number = 0.5;
   @State enableStarStyle: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
+  @State enableDirection: boolean = false;
+  @State ratingWidth: number = 80;
+  @State enableRatingWidth: boolean = false;
+  @State ratingHeight: number = 50;
+  @State enableRatingHeight: boolean = false;
+  @State ratingEnabled: boolean = true;
+  @State enableRatingEnabled: boolean = false;
+  @State ratingBorderRadius: number = 1;
+  @State enableRatingBorderRadius: boolean = false;
+  @State ratingBorderColor: ResourceColor = Color.Black;
+  @State enableRatingBorderColor: boolean = false;
+  @State ratingBorderWidth: number = 1;
+  @State enableRatingBorderWidth: boolean = false;
+  @State ratingBorderStyle: BorderStyle = BorderStyle.Solid;
+  @State enableRatingBorderStyle: boolean = false;
+  @State ratingBackgroundColor: ResourceColor = Color.White;
+  @State enableRatingBackgroundColor: boolean = false;
+  @State ratingOpacity: number = 1;
+  @State enableRatingOpacity: boolean = false;
+  @State ratingVisibility: Visibility = Visibility.Visible;
+  @State enableRatingVisibility: boolean = false;
 
   build() {
     NavDestination() {
@@ -59,6 +81,17 @@ export struct RatingBootcamp {
         .onChange((value: number) => {
           this.rating = value;
         })
+        .width(useEnabled(this.enableRatingWidth, this.ratingWidth))
+        .height(useEnabled(this.enableRatingHeight, this.ratingHeight))
+        .enabled(useEnabled(this.enableRatingEnabled, this.ratingEnabled))
+        .borderRadius(useEnabled(this.enableRatingBorderRadius, this.ratingBorderRadius))
+        .borderColor(useEnabled(this.enableRatingBorderColor, this.ratingBorderColor))
+        .borderWidth(useEnabled(this.enableRatingBorderWidth, this.ratingBorderWidth))
+        .borderStyle(useEnabled(this.enableRatingBorderStyle, this.ratingBorderStyle))
+        .backgroundColor(useEnabled(this.enableRatingBackgroundColor, this.ratingBackgroundColor))
+        .opacity(useEnabled(this.enableRatingOpacity, this.ratingOpacity))
+        .visibility(useEnabled(this.enableRatingVisibility, this.ratingVisibility))
+        .direction(useEnabled(this.enableDirection, this.compDirection))
     }
   }
 
@@ -67,7 +100,7 @@ export struct RatingBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         SliderBlock({
-          title: '当前评分为',
+          title: 'ratingAttribute.rating',
           isEnabled: this.enableRating,
           value: this.rating,
           min: 0,
@@ -75,17 +108,28 @@ export struct RatingBootcamp {
         })
 
         RadioBlock({
-          title: '是否作为指示器使用',
+          title: 'direction',
+          isEnabled: this.enableDirection,
+          value: this.compDirection,
+          dataSource: [
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Rtl', value: Direction.Rtl },
+            { label: 'Ltr', value: Direction.Ltr }
+          ]
+        })
+
+        RadioBlock({
+          title: 'ratingAttribute.indicator',
           isEnabled: this.enableIndicator,
           value: this.indicator,
           dataSource: [
-            { label: '是：不可进行评分', value: true },
-            { label: '否：可进行评分', value: false },
+            { label: 'true', value: true },
+            { label: 'false', value: false },
           ]
         })
 
         SliderBlock({
-          title: '评分总数',
+          title: 'stars',
           isEnabled: this.enableStars,
           value: this.stars,
           min: 0,
@@ -93,15 +137,101 @@ export struct RatingBootcamp {
         })
 
         SliderBlock({
-          title: '评分步长',
+          title: 'stepSize',
           isEnabled: this.enableStepSize,
           value: this.stepSize,
-          min: 0.1,
+          step: 0.5,
+          min: 0,
           max: this.stars
         })
 
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableRatingWidth,
+          value: $ratingWidth,
+          min: 60,
+          max: 300
+        })
+
+        SliderBlock({
+          title: 'height',
+          isEnabled: $enableRatingHeight,
+          value: $ratingHeight,
+          min: 50,
+          max: 80
+        })
+
+        RadioBlock({
+          title: 'enabled',
+          isEnabled: $enableRatingEnabled,
+          value: $ratingEnabled,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
+          ]
+        })
+
+        SliderBlock({
+          title: 'borderWidth',
+          isEnabled: $enableRatingBorderWidth,
+          value: $ratingBorderWidth,
+          min: 1,
+          max: 5
+        })
+
+        SliderBlock({
+          title: 'borderRadius',
+          isEnabled: $enableRatingBorderRadius,
+          value: $ratingBorderRadius,
+          min: 0,
+          max: 24
+        })
+
+        ColorBlock({
+          title: 'borderColor',
+          isEnabled: $enableRatingBorderColor,
+          color: $ratingBorderColor
+        })
+
+        RadioBlock({
+          title: 'borderStyle',
+          isEnabled: $enableRatingBorderStyle,
+          value: $ratingBorderStyle,
+          dataSource: [
+            { label: 'Dotted', value: BorderStyle.Dotted },
+            { label: 'Dashed', value: BorderStyle.Dashed },
+            { label: 'Solid', value: BorderStyle.Solid },
+          ]
+        })
+
+        ColorBlock({
+          title: 'backgroundColor',
+          isEnabled: $enableRatingBackgroundColor,
+          color: $ratingBackgroundColor
+        })
+
+        SliderBlock({
+          title: 'opacity',
+          isEnabled: $enableRatingOpacity,
+          value: $ratingOpacity,
+          step: 0.1,
+          min: 0,
+          max: 1
+        })
+
+        RadioBlock({
+          title: 'visibility',
+          isEnabled: $enableRatingVisibility,
+          value: $ratingVisibility,
+          dataSource: [
+            { label: 'Visible', value: Visibility.Visible },
+            { label: 'Hidden', value: Visibility.Hidden },
+          ]
+        })
+
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

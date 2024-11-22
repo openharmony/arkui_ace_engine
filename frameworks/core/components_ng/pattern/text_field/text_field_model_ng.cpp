@@ -71,6 +71,7 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
@@ -78,7 +79,7 @@ void TextFieldModelNG::CreateNode(
     }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
@@ -87,7 +88,6 @@ void TextFieldModelNG::CreateNode(
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
     SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node, id = %{public}d", nodeId);
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -526,12 +526,12 @@ void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 
 void TextFieldModelNG::AddDragFrameNodeToManager() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
@@ -691,11 +691,15 @@ void TextFieldModelNG::SetMargin()
     CHECK_NULL_VOID(layoutProperty);
     const auto& margin = layoutProperty->GetMarginProperty();
     CHECK_NULL_VOID(margin);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
     MarginProperty userMargin;
     userMargin.top = margin->top;
     userMargin.bottom = margin->bottom;
-    userMargin.left = margin->left;
-    userMargin.right = margin->right;
+    userMargin.left = margin->left.has_value() ? margin->left :
+        (isRTL ? margin->end : margin->start);
+    userMargin.right = margin->right.has_value() ? margin->right :
+        (isRTL ? margin->start : margin->end);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
@@ -707,13 +711,20 @@ void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge ol
     }
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetDefaultPadding()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto theme = pattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto themePadding = theme->GetPadding();
     PaddingProperty paddings;
@@ -723,6 +734,7 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
@@ -829,6 +841,20 @@ void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
 }
 
+void TextFieldModelNG::SetCancelButtonSymbol(bool isShowSymbol)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol);
+}
+
+void TextFieldModelNG::SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
+}
+
 void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
@@ -869,6 +895,30 @@ void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
 }
 
+void TextFieldModelNG::SetBackBorderRadius()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto radius = renderContext->GetBorderRadius().value();
+
+    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius);
+}
+
 void TextFieldModelNG::SetBackBorder()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -876,8 +926,7 @@ void TextFieldModelNG::SetBackBorder()
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasBorderRadius()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderRadiusFlagByUser, renderContext->GetBorderRadius().value());
+        SetBackBorderRadius();
     }
     if (renderContext->HasBorderColor()) {
         ACE_UPDATE_PAINT_PROPERTY(
@@ -1485,6 +1534,20 @@ void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const std::optio
     }
 }
 
+void TextFieldModelNG::SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol, frameNode);
+}
+
+void TextFieldModelNG::SetCancelSymbolIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
+}
+
 std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
 {
     std::string value;
@@ -2033,8 +2096,11 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
 void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
 {
     CHECK_NULL_VOID(frameNode);
-    NG::ViewAbstract::SetPadding(newPadding);
+    NG::ViewAbstract::SetPadding(frameNode, newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 RefPtr<UINode> TextFieldModelNG::GetCustomKeyboard(FrameNode* frameNode)
@@ -2095,6 +2161,9 @@ void TextFieldModelNG::SetBorderWidth(FrameNode* frameNode, NG::BorderWidthPrope
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderWidth(frameNode, borderWidth);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
@@ -2211,14 +2280,6 @@ void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePre
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
-void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetEnableHapticFeedback(state);
-}
-
 PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
 {
     NG::PaddingProperty paddings = NG::ViewAbstract::GetPadding(frameNode);
@@ -2232,5 +2293,13 @@ PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
         paddings.left = std::optional<CalcLength>(property.left);
     }
     return paddings;
+}
+
+void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG

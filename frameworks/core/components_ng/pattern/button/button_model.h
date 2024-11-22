@@ -39,7 +39,8 @@ public:
     virtual void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) = 0;
     virtual void CreateWithChild(const CreateWithPara& para) = 0;
     virtual void Padding(const NG::PaddingProperty& paddingNew, const Edge& paddingOld) = 0;
-    virtual void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
+    virtual void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        double distanceThreshold) = 0;
     virtual void BackgroundColor(const Color& color, const bool& colorFlag) = 0;
     virtual void SetWidth(const Dimension& width) {}
     virtual void SetHeight(const Dimension& height) {}
@@ -49,6 +50,9 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) {}
     virtual void ResetBorderRadius() {}
     virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
     virtual void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) {}

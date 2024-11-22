@@ -274,6 +274,7 @@ public:
     int GetMediaType() const override;
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
+    void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -582,6 +583,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -619,6 +621,54 @@ public:
 
 private:
     uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
+};
+
+class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
+public:
+    NWebMouseEventImpl(int32_t x, int32_t y,
+        int32_t buttton, int32_t action,
+        int32_t clickNum, std::vector<int32_t> pressedCodes)
+        : x_(x), y_(y), buttton_(buttton), action_(action),
+        clickNum_(clickNum), pressedCodes_(pressedCodes) {}
+    ~NWebMouseEventImpl() = default;
+
+    int32_t GetX() override
+    {
+        return x_;
+    }
+
+    int32_t GetY() override
+    {
+        return y_;
+    }
+
+    int32_t GetButton() override
+    {
+        return buttton_;
+    }
+
+    int32_t GetAction() override
+    {
+        return action_;
+    }
+
+    int32_t GetClickNum() override
+    {
+        return clickNum_;
+    }
+
+    std::vector<int32_t> GetPressKeyCodes() override
+    {
+        return pressedCodes_;
+    }
+
+private:
+    int32_t x_ = 0;
+    int32_t y_ = 0;
+    int32_t buttton_ = 0;
+    int32_t action_ = 0;
+    int32_t clickNum_ = 0;
+    std::vector<int32_t> pressedCodes_ {};
 };
 
 class WebDelegate : public WebResource {
@@ -684,6 +734,7 @@ public:
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
+    void UpdateLayoutMode(WebLayoutMode mode);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -727,6 +778,7 @@ public:
     void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
@@ -755,6 +807,7 @@ public:
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
+    void WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
     void OnBlur();
@@ -778,6 +831,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
+    void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -860,6 +914,7 @@ public:
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsDragging();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     std::string tempDir_;
@@ -1024,6 +1079,15 @@ public:
 
     void StartVibraFeedback(const std::string& vibratorType);
 
+    RefPtr<TaskExecutor> GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
+
+    void SetTransformHint(uint32_t rotation);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1105,9 +1169,10 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
-    void RegisterAvoidAreaChangeListener();
-    void UnregisterAvoidAreaChangeListener();
+    void RegisterAvoidAreaChangeListener(int32_t instanceId);
+    void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
+    void EnableHardware();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -1233,6 +1298,8 @@ private:
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
+    RefPtr<TaskExecutor> taskExecutor_;
+    bool isEnableHardwareComposition_ = false;
 #endif
 };
 

@@ -20,8 +20,9 @@ class RefInfo {
   private static objectProxy: ObjectProxyHandler = new ObjectProxyHandler(true);
 
   static get(target: Object): any {
-    if (typeof (target) !== 'object') {
-      throw new Error('target must be a object');
+    if (!target || typeof target !== 'object') {
+      stateMgmtConsole.warn(`makeObserved target is not a valid object, return target directly`);
+      return { proxy: target };
     }
     // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
     if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
@@ -32,8 +33,8 @@ class RefInfo {
     if (!ret) {
       if (Array.isArray(target) || SendableType.isArray(target)) {
         ret = { proxy: new Proxy(target, RefInfo.arrayProxy) };
-      } else if (target instanceof Set || SendableType.isSet(target) || 
-                 target instanceof Map || SendableType.isMap(target)) {
+      } else if (target instanceof Set || SendableType.isSet(target) ||
+        target instanceof Map || SendableType.isMap(target)) {
         ret = { proxy: new Proxy(target, RefInfo.setMapProxy) };
       } else {
         ret = { proxy: new Proxy(target, RefInfo.objectProxy) };

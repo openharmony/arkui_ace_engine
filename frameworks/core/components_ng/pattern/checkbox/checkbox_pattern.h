@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -227,6 +228,11 @@ public:
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
 
+    void SaveCheckboxSettingData(const CheckboxSettingData& checkboxSettingData)
+    {
+        checkboxSettingData_ = checkboxSettingData;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -265,6 +271,9 @@ private:
     void InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,
         const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
+    void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
+
+    CheckboxSettingData checkboxSettingData_;
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;

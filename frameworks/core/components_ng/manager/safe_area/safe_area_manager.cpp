@@ -118,7 +118,11 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
         res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
     }
-    if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+        return res;
+    }
+    if ((keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET) && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
     }
     return res;
@@ -163,14 +167,24 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     return true;
 }
 
-bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
 {
-    if (keyboardSafeAreaEnabled_ == value) {
+    if (keyboardAvoidMode_ == value) {
         return false;
     }
-    keyboardSafeAreaEnabled_ = value;
-    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE || value == KeyBoardAvoidMode::NONE) {
+        keyboardOffset_ = 0.0f;
+    }
+    keyboardAvoidMode_ = value;
+    keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
+        || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
+    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardAvoidMode_);
     return true;
+}
+
+KeyBoardAvoidMode SafeAreaManager::GetKeyBoardAvoidMode()
+{
+    return keyboardAvoidMode_;
 }
 
 bool SafeAreaManager::SetIsAtomicService(bool value)
@@ -252,9 +266,14 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
     return result;
 }
 
-float SafeAreaManager::GetKeyboardOffset() const
+float SafeAreaManager::GetKeyboardOffset(bool withoutProcess) const
 {
-    if (keyboardSafeAreaEnabled_) {
+    if (withoutProcess) {
+        return keyboardOffset_;
+    }
+    if (keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET ||
+        keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
         return 0.0f;
     }
     return keyboardOffset_;

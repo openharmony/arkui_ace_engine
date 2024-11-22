@@ -612,9 +612,7 @@ public:
         if (layoutProperty->IsPositionLocalizedEdges()) {
             layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
         }
-        if (layoutProperty->IsMarkAnchorPosition()) {
-            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
-        }
+        layoutProperty->CheckMarkAnchorPosition(layoutDirection);
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
@@ -627,6 +625,8 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        host->ResetSafeAreaPadding();
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -662,6 +662,11 @@ public:
     {
         return false;
     }
+
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+
+    virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

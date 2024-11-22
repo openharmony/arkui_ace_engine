@@ -87,6 +87,13 @@ public:
     {
         return magnifierNodeExist_;
     }
+
+    void SetHostViewPort(const RectF& viewPort)
+    {
+        hostViewPort_ = viewPort;
+    }
+
+    RectF GetViewPort(const RefPtr<FrameNode>& host);
 private:
     MagnifierParams params_;
     bool visible_ = false;
@@ -100,6 +107,7 @@ private:
     bool magnifierNodeExist_ = false;
     Dimension magnifierNodeWidth_;
     Dimension magnifierNodeHeight_;
+    std::optional<RectF> hostViewPort_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -96,6 +97,18 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
+void TextDragPattern::CalculateFloatTitleOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+{
+    auto pipeline = dragNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto stageOffset = stageNode->GetTransformRelativeOffset();
+    offset -= stageOffset;
+}
+
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
 {
     auto dragContext = dragNode->GetRenderContext();
@@ -107,6 +120,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto globalOffset = pattern->GetParentGlobalOffset();
+    CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);
@@ -320,7 +334,7 @@ void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_
 
 Color TextDragPattern::GetDragBackgroundColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));

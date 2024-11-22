@@ -1092,6 +1092,12 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
         sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
         contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
+
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -1619,11 +1625,11 @@ void JSUrlSpan::Constructor(const JSCallbackInfo& args)
     auto urlSpan = Referenced::MakeRefPtr<JSUrlSpan>();
     urlSpan->IncRefCount();
     RefPtr<UrlSpan> span;
-    if (args.Length() <= 0 || args[0]->IsObject() || args[0]->IsUndefined() || args[0]->IsNull()) {
-        span = AceType::MakeRefPtr<UrlSpan>();
-    } else  {
+    if (args.Length() > 0 && args[0]->IsString()) {
         auto address = args[0]->ToString();
         span = AceType::MakeRefPtr<UrlSpan>(address);
+    } else {
+        span = AceType::MakeRefPtr<UrlSpan>();
     }
     CHECK_NULL_VOID(span);
     urlSpan->urlContextSpan_ = span;

@@ -440,6 +440,16 @@ public:
         return customTitleNode_;
     }
 
+    void SetCustomButtonNode(const RefPtr<UINode>& customButtonNode)
+    {
+        customButtonNode_ = customButtonNode;
+    }
+
+    const RefPtr<UINode> GetCustomButtonNode() const
+    {
+        return customButtonNode_;
+    }
+
     void SetIsBuilderNode(bool isBuilderNode)
     {
         isBuilderNode_ = isBuilderNode;
@@ -483,6 +493,7 @@ private:
     RefPtr<FrameNode> currentPage_;
 
     RefPtr<UINode> customTitleNode_;
+    RefPtr<UINode> customButtonNode_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

@@ -71,7 +71,7 @@
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 
 namespace OHOS::Ace {
@@ -145,7 +145,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { ShadowTheme::TypeId(), &ThemeBuildFunc<ShadowTheme::Builder> },
     { NG::ContainerModalTheme::TypeId(), &ThemeBuildFunc<NG::ContainerModalTheme::Builder> },
     { AgingAdapationDialogTheme::TypeId(), &ThemeBuildFunc<AgingAdapationDialogTheme::Builder> },
-    { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
+    { NG::ScrollableTheme::TypeId(), &ThemeBuildFunc<NG::ScrollableTheme::Builder> },
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
 };
 } // namespace

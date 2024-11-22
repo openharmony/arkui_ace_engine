@@ -36,6 +36,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const Color COLOR_DEFAULT = Color::RED;
+const Color COLOR_DEFAULT_DARK = Color(0x99FFFFFF);
 } // namespace
 
 class LoadingProgressTestNg : public testing::Test {
@@ -160,7 +161,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest002, TestSize.Level1)
     layoutProperty->UpdateVisibility(VisibleType::GONE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    loadingProgressPattern->RegisterVisibleAreaChange();
+    loadingProgressPattern->isVisibleArea_ = true;
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
     EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     // Loading StartAnimation: isVisibleArea_ = true, isVisible_ = true, isShow_ = false, eableLoading_ = true
     loadingProgressPattern->OnWindowHide();
@@ -214,6 +217,9 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest003, TestSize.Level1)
     geometryNode->SetContentOffset(OffsetF());
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
     paintMethod->UpdateContentModifier(&paintWrapper);
+    loadingProgressPattern->isVisibleArea_ = true;
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
     EXPECT_TRUE(loadingProgressPattern->enableLoading_);
     EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
     EXPECT_TRUE(loadingProgressPattern->loadingProgressModifier_->enableLoading_->Get());
@@ -729,7 +735,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
     /**
      * @tc.cases: case1. ringColor == defaultColor.
      */
-    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT));
+    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT_DARK));
     EXPECT_CALL(rsCanvas, Save()).Times(2);
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
@@ -740,6 +746,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest010, TestSize.Level1)
      * @tc.cases: case2. ringColor != defaultColor.
      */
     loadingProgressModifier.SetColor(LinearColor(Color::BLUE));
+    loadingProgressModifier.loadingProgressOwner_ = LoadingProgressOwner::REFRESH;
     EXPECT_CALL(rsCanvas, Save()).Times(2);
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(2);
@@ -777,6 +784,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT_DARK));
     loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
     /**
      * @tc.cases: case3. date <= 0.
@@ -787,5 +795,59 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest011, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest012
+ * @tc.desc: Test LoadingProgressModifier CorrectNormalize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create LoadingProgressModifier pointer.
+     */
+    auto loadingProgressModifier = AceType::MakeRefPtr<LoadingProgressModifier>();
+    /**
+     * @tc.step: step2. set ratio 10.0f.
+     * @tc.expected: ratio is 1.0f.
+     */
+    float ratio = 10.0f;
+    auto res = loadingProgressModifier->CorrectNormalize(ratio);
+    EXPECT_EQ(res, 1.0f);
+}
+
+/**
+ * @tc.name: LoadingProgressRegisterVisibleAreaChangeTest001
+ * @tc.desc: Test LoadingProgress StartAnimation will fail in some scene.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressRegisterVisibleAreaChangeTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    loadingProgressPattern->CreateNodePaintMethod();
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    /**
+     * @tc.step: step1. set visible true and register visibleChange.
+     */
+    loadingProgressPattern->isVisible_ = true;
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
+    loadingProgressPattern->enableLoading_ = true;
+    loadingProgressPattern->RegisterVisibleAreaChange();
+    /**
+     * @tc.step: step2. register visibleChange again and stop animation.
+     */
+    loadingProgressPattern->RegisterVisibleAreaChange();
+    loadingProgressPattern->StopAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+    /**
+     * @tc.step: step3. stop animation again.
+     */
+    loadingProgressPattern->StopAnimation();
+    EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
 }
 } // namespace OHOS::Ace::NG

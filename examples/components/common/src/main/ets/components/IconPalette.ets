@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { BlockTag } from '../model/BlockTag';
+import { tagDesRule } from '../utils';
+import { formatDate } from '../utils/timeUtil';
 
 @Component
 export struct IconPalette {
@@ -25,7 +28,8 @@ export struct IconPalette {
     $r('sys.media.ohos_ic_public_device_soundx_filled'),
   ];
   @Prop isEnabled: boolean = false;
-  onChange?: (color: ResourceStr) => void;
+  @Prop title: string = '';
+  onChange?: (color: ResourceStr, index: number) => void;
 
   private equals(icon1: ResourceStr, icon2: ResourceStr) {
     const type1 = typeof icon1;
@@ -43,7 +47,7 @@ export struct IconPalette {
 
   build() {
     Row({ space: 12 }) {
-      ForEach(this.icons, (icon: ResourceStr) => {
+      ForEach(this.icons, (icon: ResourceStr, index: number) => {
         Button() {
           Image(icon)
             .size({ width: 24, height: 24 })
@@ -56,9 +60,7 @@ export struct IconPalette {
         .width(32)
         .height(32)
         .onClick(() => {
-          if (this.isEnabled) {
-            this.onChange?.(icon);
-          }
+          this.onChange?.(icon, index);
         })
       })
     }

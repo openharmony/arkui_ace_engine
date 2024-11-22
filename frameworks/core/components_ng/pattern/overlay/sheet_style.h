@@ -19,9 +19,11 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+
 namespace OHOS::Ace::NG {
 constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;
 constexpr float CURVE_MASS = 1.0f;
@@ -42,6 +44,7 @@ enum SheetType {
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
+    SHEET_BOTTOM_OFFSET,
 };
 
 struct SheetKey {
@@ -114,6 +117,7 @@ struct SheetStyle {
     std::optional<SheetType> sheetType;
     std::optional<Color> backgroundColor;
     std::optional<Color> maskColor;
+    std::optional<OffsetF> bottomOffset;
     std::optional<BlurStyleOption> backgroundBlurStyle;
     std::optional<std::string> sheetTitle;
     std::optional<std::string> sheetSubtitle;
@@ -128,6 +132,8 @@ struct SheetStyle {
     std::optional<Shadow> shadow;
     std::optional<Dimension> width;
     std::optional<int32_t> instanceId; // uiContext instanceId
+    std::optional<bool> enableHoverMode;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -141,7 +147,9 @@ struct SheetStyle {
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
-                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode);
+                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
+                bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
+                hoverModeArea == sheetStyle.hoverModeArea);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -175,6 +183,9 @@ struct SheetStyle {
         borderStyle = sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : borderStyle;
         shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
         width = sheetStyle.width.has_value() ? sheetStyle.width : width;
+        bottomOffset = sheetStyle.bottomOffset.has_value() ? sheetStyle.bottomOffset : bottomOffset;
+        enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
+        hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
     }
 };
 } // namespace OHOS::Ace::NG

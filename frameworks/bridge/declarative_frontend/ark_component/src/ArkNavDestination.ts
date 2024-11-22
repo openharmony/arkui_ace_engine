@@ -50,9 +50,40 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
         NavDestinationMenusModifier, value);
     return this;
   }
-  hideTitleBar(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
+  hideTitleBar(isHide: boolean, animated?: boolean): this {
+    let arkNavDestinationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideTitleBar.animated = animated;
+    }
+    if (arkNavDestinationHideTitleBar.isHide === undefined && arkNavDestinationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, arkNavDestinationHideTitleBar);
+    }
     return this;
+  }
+  hideToolBar(isHide: boolean, animated?: boolean): this {
+    let arkNavDestinationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideToolBar.animated = animated;
+    }
+    if (arkNavDestinationHideToolBar.isHide === undefined && arkNavDestinationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, arkNavDestinationHideToolBar);
+    }
+    return this;
+  }
+  toolbarConfiguration(value: any): this {
+    throw new Error('Method not implemented.');
   }
   backButtonIcon(value: any): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
@@ -62,6 +93,11 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   mode(value: number): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationModeModifier.identity,
       NavDestinationModeModifier, value);
+    return this;
+  }
+  systemTransition(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationSystemTransitionModifier.identity,
+      NavDestinationSystemTransitionModifier, value);
     return this;
   }
   onShown(callback: () => void): this {
@@ -171,8 +207,8 @@ class NavDestinationMenusModifier extends ModifierWithKey<Array<NavigationMenuIt
   }
 }
 
-class HideTitleBarModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class HideTitleBarModifier extends ModifierWithKey<ArkNavHideTitleBarOrToolBar | undefined> {
+  constructor(value: ArkNavHideTitleBarOrToolBar | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('hideTitleBar');
@@ -181,7 +217,22 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().navDestination.resetHideTitleBar(node);
     } else {
-      getUINativeModule().navDestination.setHideTitleBar(node, this.value!);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
+    }
+  }
+}
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey<ArkNavHideTitleBarOrToolBar | undefined> {
+  constructor(value: ArkNavHideTitleBarOrToolBar | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('hideToolBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    } else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
@@ -211,6 +262,21 @@ class NavDestinationModeModifier extends ModifierWithKey<number> {
       getUINativeModule().navDestination.resetMode(node);
     } else {
       getUINativeModule().navDestination.setMode(node, this.value);
+    }
+  }
+}
+
+class NavDestinationSystemTransitionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('systemTransition');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetSystemTransition(node);
+    } else {
+      getUINativeModule().navDestination.setSystemTransition(node, this.value);
     }
   }
 }

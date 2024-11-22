@@ -203,6 +203,9 @@ HWTEST_F(RichEditorPatternTestFiveNg, SelectionMenuInteraction001, TestSize.Leve
     info.deviceType_ = SourceType::TOUCH;
     info.localLocation_ = Offset(50, 50);
     info.globalLocation_ = Offset(50, 50);
+    auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->ShowOptionMenu();
     richEditorPattern->HandleClickSelection(info);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->GetSelectOverlayInfo()->menuInfo.menuIsShow);
     richEditorPattern->HandleClickSelection(info);
@@ -244,5 +247,294 @@ HWTEST_F(RichEditorPatternTestFiveNg, SelectionMenuInteraction002, TestSize.Leve
     richEditorPattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP);
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
     EXPECT_TRUE(richEditorPattern->caretTwinkling_);
+}
+
+/**
+ * @tc.name: GetUrlSpanColor001
+ * @tc.desc: Test get color in urlSpan theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanColor001, TestSize.Level1)
+{
+    // 0: Get richEditor Node and richEditor Pattern
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // 1: Get richEditorTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+
+    // 2: Backup old richEditorTheme and set new richEditorTheme
+    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    // 3: Test whether richEditor pattern->GetUrlHoverColor() and theme-GetUrlHoverColor() are the same color
+    RichEditorTheme richEditorTheme;
+    EXPECT_EQ(richEditorPattern->GetUrlHoverColor(), richEditorTheme.GetUrlHoverColor());
+
+    // 4: Test whether richEditor pattern->GetUrlPressColor() and theme-GetUrlPressColor() are the same color
+    EXPECT_EQ(richEditorPattern->GetUrlPressColor(), richEditorTheme.GetUrlPressColor());
+
+    // 5: Restore old richEditorTheme
+    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
+}
+
+/**
+ * @tc.name: GetUrlSpanShowShadow001
+ * @tc.desc: Test set urlSpan showShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanShowShadow001, TestSize.Level1)
+{
+    // 0: Get richEditor Node and richEditor Pattern
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // 1: Mock location
+    Offset localLocation = Offset(54.0, 20.0);
+    Offset globalLocation = Offset(54.0, 20.0);
+
+    // 2: Mock contentRect position and width and height
+    richEditorPattern->contentRect_.x_ = 25.0f;
+    richEditorPattern->contentRect_.y_ = 13.0f;
+    richEditorPattern->contentRect_.width_ = 526.0f;
+    richEditorPattern->contentRect_.height_ = 56.0f;
+
+    // 3: Create urlSpan with hyperlink address
+    std::string address = "https://www.example.com";
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(address);
+
+    // 4: Create spanItem and set to spans list
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    urlSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    spanItem->position = 2;
+    std::list<RefPtr<NG::SpanItem>> spans;
+    spans.push_back(spanItem);
+
+    // 5: Create ParagraphManager and set to richEditorPattern
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager, nullptr);
+    richEditorPattern->pManager_ = pManager;
+
+    // 6: Create MutableSpanString and set to richEditorPattern
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("click here");
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
+    richEditorPattern->SetStyledString(spanString);
+
+    // 7: Create TextOverlayModifier and set to richEditorPattern
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
+
+    // 8: Create Paragraph and set to richEditorPattern
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    // 9: spans list set to richEditorPattern
+    richEditorPattern->spans_ = spans;
+
+    // 10: call HandleUrlSpanShowShadow method
+    bool show = richEditorPattern->HandleUrlSpanShowShadow(localLocation, globalLocation, Color(Color::BLUE));
+
+    // 11: Asserts that the ShowShadow result is true
+    EXPECT_TRUE(show);
+}
+
+/**
+ * @tc.name: HandleExtendAction001
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_SELECT_ALL);
+    EXPECT_FALSE(richEditorPattern->selectMenuInfo_.showCopyAll);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: HandleExtendAction002
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_CUT);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+}
+
+/**
+ * @tc.name: HandleExtendAction003
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_COPY);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+}
+
+/**
+ * @tc.name: HandleExtendAction004
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextCommonEvent event;
+    eventHub->FireOnPaste(event);
+    richEditorPattern->HandleExtendAction(ACTION_PASTE);
+    EXPECT_EQ(richEditorPattern->clipboard_, nullptr);
+}
+
+/**
+ * @tc.name: HandleExtendAction005
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(2);
+    EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent001
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_NE(info.GetAction(), MouseAction::MOVE);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent002
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(info.GetAction(), MouseAction::MOVE);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent003
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent004
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    richEditorPattern->scrollBar_->SetHover(true);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_TRUE(richEditorPattern->scrollBar_->isHover_);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent005
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    richEditorPattern->scrollBar_->SetPressed(true);
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_TRUE(richEditorPattern->scrollBar_->isPressed_);
+}
+
+/**
+ * @tc.name: HandleAISpanHoverEvent006
+ * @tc.desc: test HandleAISpanHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleAISpanHoverEvent006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    MouseInfo info;
+    info.SetAction(MouseAction::MOVE);
+    AISpan aiSpan;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_.insert({ 11, aiSpan });
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->scrollBar_ = nullptr;
+    richEditorPattern->HandleAISpanHoverEvent(info);
+    EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
 }
 } // namespace OHOS::Ace::NG

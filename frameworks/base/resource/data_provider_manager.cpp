@@ -121,4 +121,22 @@ int64_t DataProviderManagerStandard::GetMovingPhotoDateModified(const std::strin
     CHECK_NULL_RETURN(helper_, -1);
     return helper_->GetMovingPhotoDateModified(uri);
 }
+
+int64_t DataProviderManagerStandard::GetMovingPhotoCoverPosition(const std::string& columnName,
+                                                                 const std::string& value,
+                                                                 std::vector<std::string>& columns)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->GetMovingPhotoCoverPosition(columnName, value, columns);
+}
+
+std::string DataProviderManagerStandard::GetMovingPhotoImagePath(const std::string& uri)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, "");
+    return helper_->GetMovingPhotoImagePath(uri);
+}
 } // namespace OHOS::Ace

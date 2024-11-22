@@ -21,27 +21,21 @@
 #include "frameworks/core/components_ng/pattern/grid_container/grid_container_model_ng.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<GridContainerModel> GridContainerModel::instance_;
-std::mutex GridContainerModel::mutex_;
 GridContainerModel* GridContainerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridContainerModelNG());
+    static NG::GridContainerModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridContainerModelNG());
-            } else {
-                instance_.reset(new Framework::GridContainerModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::GridContainerModelNG instance;
+        return &instance;
+    } else {
+        static Framework::GridContainerModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

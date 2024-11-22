@@ -58,6 +58,7 @@ struct FilterProperty {
 class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
 public:
+    CustomPaintPaintMethod();
     ~CustomPaintPaintMethod() override = default;
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
@@ -390,6 +391,8 @@ protected:
 
     WeakPtr<PipelineBase> context_;
 
+    bool isPathChanged_ = true;
+    bool isPath2dChanged_ = true;
     RSPath rsPath_;
     RSPath rsPath2d_;
     RSBrush imageBrush_;
@@ -423,6 +426,7 @@ protected:
     std::shared_ptr<RSImageFilter> blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
     std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
+    int32_t apiVersion_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

@@ -101,6 +101,7 @@ public:
     virtual void SetMargins(const NG::MarginProperty& margins) = 0;
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
+    virtual void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right) = 0;
@@ -159,7 +160,8 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(float value) = 0;
-    virtual void SetPixelRound(uint8_t value) = 0;
+    virtual void SetLayoutWeight(const NG::LayoutWeightPair& value) = 0;
+    virtual void SetPixelRound(uint16_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
@@ -249,7 +251,7 @@ public:
     virtual void SetSystemBarEffect(bool systemBarEffect) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
-    virtual void SetUseEffect(bool useEffect) = 0;
+    virtual void SetUseEffect(bool useEffect, EffectType effectType) = 0;
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
 
@@ -260,10 +262,11 @@ public:
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
-    virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
+    virtual void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
-    virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
-    virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
+    virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
@@ -320,13 +323,14 @@ public:
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
+    virtual void SetTabStop(bool tabStop) {}
     virtual void SetFocusNode(bool focus) = 0;
     virtual void SetTabIndex(int32_t index) = 0;
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {}
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
     virtual void SetAutoEventParam(const std::string& param) {}
@@ -382,6 +386,9 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
+    virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
+    virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
+    virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
@@ -410,13 +417,9 @@ public:
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
     virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
-    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
+    virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-
-private:
-    static std::unique_ptr<ViewAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +28,7 @@ using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
+constexpr float HALF = 2.0f;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -87,7 +90,7 @@ bool SecurityComponentHandler::CheckBrightness(const RefPtr<FrameNode>& node,
         !NearEqual(renderContext->GetFrontBrightness().value().Value(), 1.0f)) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s brightness = %{public}f, " \
             "security component is invalid", node->GetTag().c_str(),
-            renderContext->GetFrontBrightness().value().ConvertToVp());
+            renderContext->GetFrontBrightness().value().Value());
         return true;
     }
     return false;
@@ -119,12 +122,199 @@ bool SecurityComponentHandler::CheckForegroundBlurStyle(const RefPtr<FrameNode>&
     const RefPtr<RenderContext>& renderContext)
 {
     auto blurStyleOption = renderContext->GetFrontBlurStyle();
-    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL)) {
+    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL) &&
+        (!NearEqual(blurStyleOption->scale, 0.0))) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, " \
             "security component is invalid", node->GetTag().c_str());
         return true;
     }
     return false;
+}
+
+bool SecurityComponentHandler::CheckBlendMode(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto blendMode = renderContext->GetBackBlendMode();
+    if (blendMode.has_value() && blendMode != BlendMode::NONE && blendMode != BlendMode::SRC_OVER) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s blendMode is set, " \
+            "security component is invalid", node->GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+float SecurityComponentHandler::GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops)
+{
+    float ratio = 1.0;
+    int32_t size = static_cast<int32_t>(fractionStops.size());
+    for (auto i = 0; i < size; i++) {
+        auto fraction = fractionStops[i];
+        if (NearEqual(fraction.first, 0.0)) {
+            ratio = fraction.second;
+        } else {
+            break;
+        }
+    }
+    return ratio;
+}
+
+bool SecurityComponentHandler::CheckDistance(const float& deltaY, const float& radius, const float& distance,
+    const int32_t& multiplier)
+{
+    if (NearEqual(radius, 0.0)) {
+        if (GreatNotEqual(deltaY * multiplier, 0.0)) {
+            if (GreatNotEqual(distance, 1.0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (GreatOrEqual(deltaY * multiplier, 0.0)) {
+        return true;
+    }
+    if (LessNotEqual(distance, (radius - 1) * (radius - 1))) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckDiagonalLinearGradientBlur(const RectF& parentRect, const RectF& rect,
+    const NG::GradientDirection direction, const float& ratio, const float& radius)
+{
+    Point dest;
+    Point src;
+    float gradient;
+    int32_t multiplier = 0;
+    switch (direction) {
+        case GradientDirection::LEFT_TOP:
+            dest.SetX(rect.GetX() + radius);
+            dest.SetY(rect.GetY()+ radius);
+            src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
+            src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
+            gradient = (0 - parentRect.Width()) / parentRect.Height();
+            multiplier = 1;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            dest.SetX(rect.GetX() + radius);
+            dest.SetY(rect.GetY() + rect.Height() - radius);
+            src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
+            src.SetY(parentRect.GetY() + ratio * parentRect.Height());
+            gradient = parentRect.Width() / parentRect.Height();
+            multiplier = -1;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            dest.SetX(rect.GetX() + rect.Width() - radius);
+            dest.SetY(rect.GetY() + radius);
+            src.SetX(parentRect.GetX() + ratio * parentRect.Width());
+            src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
+            gradient = parentRect.Width() / parentRect.Height();
+            multiplier = 1;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            dest.SetX(rect.GetX() + rect.Width() - radius);
+            dest.SetY(rect.GetY() + rect.Height() - radius);
+            src.SetX(parentRect.GetX() + ratio * parentRect.Width());
+            src.SetY(parentRect.GetY() + ratio * parentRect.Height());
+            gradient = (0 - parentRect.Width()) / parentRect.Height();
+            multiplier = -1;
+            break;
+        default:
+            return false;
+    }
+
+    float deltaY = gradient * dest.GetX() + src.GetY() - gradient * src.GetX() - dest.GetY();
+    auto distance = (deltaY * deltaY) / (1 + gradient * gradient);
+    return CheckDistance(deltaY, radius, distance, multiplier);
+}
+
+float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction)
+{
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    auto maxRadius = std::min(rect.Width(), rect.Height()) / HALF;
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    if (layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE) ||
+        layoutProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE)) {
+        return maxRadius;
+    }
+
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+    CHECK_NULL_RETURN(buttonNode, false);
+    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(bgProp, false);
+    auto borderRadius = bgProp->GetBorderRadius();
+    float radius = 0.0;
+
+    switch (direction) {
+        case GradientDirection::LEFT_TOP:
+            if (borderRadius.has_value() && borderRadius->radiusTopLeft.has_value()) {
+                auto obtainedRadius = borderRadius->radiusTopLeft.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::LEFT_BOTTOM:
+            if (borderRadius.has_value() && borderRadius->radiusBottomLeft.has_value()) {
+                auto obtainedRadius = borderRadius->radiusBottomLeft.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::RIGHT_TOP:
+            if (borderRadius.has_value() && borderRadius->radiusTopRight.has_value()) {
+                auto obtainedRadius = borderRadius->radiusTopRight.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        case GradientDirection::RIGHT_BOTTOM:
+            if (borderRadius.has_value() && borderRadius->radiusBottomRight.has_value()) {
+                auto obtainedRadius = borderRadius->radiusBottomRight.value().ConvertToPx();
+                radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+            }
+            return radius;
+        default:
+            return radius;
+    }
+    return radius;
+}
+
+bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode,
+    RefPtr<FrameNode>& node)
+{
+    RectF parentRect = parentNode->GetTransformRectRelativeToWindow();
+    if (NearEqual(parentRect.Width(), 0.0) || NearEqual(parentRect.Height(), 0.0)) {
+        return false;
+    }
+
+    RectF rect = node->GetTransformRectRelativeToWindow();
+    const auto& parentRender = parentNode->GetRenderContext();
+    CHECK_NULL_RETURN(parentRender, false);
+    auto linearGradientBlurPara = parentRender->GetLinearGradientBlur();
+    CHECK_NULL_RETURN(linearGradientBlurPara, false);
+    float ratio = GetLinearGradientBlurRatio(linearGradientBlurPara->fractionStops_);
+    if (NearEqual(ratio, 1.0)) {
+        return false;
+    }
+
+    float radius = 0.0;
+    switch (linearGradientBlurPara->direction_) {
+        case GradientDirection::LEFT:
+            return GreatNotEqual((parentRect.GetX() + parentRect.Width() - rect.GetX()) / parentRect.Width(), ratio);
+        case GradientDirection::TOP:
+            return GreatNotEqual((parentRect.GetY() + parentRect.Height() - rect.GetY()) / parentRect.Height(), ratio);
+        case GradientDirection::RIGHT:
+            return GreatNotEqual((rect.GetX() + rect.Width() - parentRect.GetX()) / parentRect.Width(), ratio);
+        case GradientDirection::BOTTOM:
+            return GreatNotEqual((rect.GetY() + rect.Height() - parentRect.GetY()) / parentRect.Height(), ratio);
+        case GradientDirection::LEFT_TOP:
+        case GradientDirection::LEFT_BOTTOM:
+        case GradientDirection::RIGHT_TOP:
+        case GradientDirection::RIGHT_BOTTOM:
+            radius = GetBorderRadius(node, linearGradientBlurPara->direction_);
+            return CheckDiagonalLinearGradientBlur(parentRect, rect,
+                linearGradientBlurPara->direction_, ratio, radius);
+        default:
+            return false;
+    }
 }
 
 bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
@@ -276,35 +466,47 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
         CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext) ||
         CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext) ||
-        CheckForegroundBlurStyle(node, renderContext)) {
+        CheckForegroundBlurStyle(node, renderContext) || CheckBlendMode(node, renderContext)) {
         return true;
     }
     return false;
 }
 
-bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
     auto frameRect = renderContext->GetPaintRectWithTransform();
-    frameRect.SetOffset(node->GetOffsetRelativeToWindow());
+    frameRect.SetOffset(node->GetPositionToScreenWithTransform());
     auto visibleRect = frameRect;
     auto parent = node->GetParent();
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
         if (parentNode == nullptr) {
-            return false;
+            parent = parent->GetParent();
+            continue;
         }
         if (CheckRenderEffect(parentNode)) {
             return true;
         }
+        if (CheckLinearGradientBlur(parentNode, node)) {
+            SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
+                "security component is invalid", parentNode->GetTag().c_str());
+            return true;
+        }
         RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
-        if (!parentRenderContext->GetClipEdge().value_or(false)) {
+        if ((parentRenderContext == nullptr) ||
+            !parentRenderContext->GetClipEdge().value_or(false)) {
             parent = parent->GetParent();
             continue;
         }
         GetVisibleRect(parentNode, visibleRect);
-        double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
-        if (!NearEqual(currentVisibleRatio, 1) && (visibleRect.IsValid() || frameRect.IsValid())) {
+        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
+        buttonInfo.isClipped_ = isClipped;
+        buttonInfo.parentTag_ = parentNode->GetTag();
+
+        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parents clip is set, " \
                 "security component is not completely displayed.");
             SC_LOG_ERROR("visibleWidth: %{public}f, visibleHeight: %{public}f, " \
@@ -319,21 +521,34 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 
 void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
 {
-    RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
-    parentRect.SetOffset(node->GetOffsetRelativeToWindow());
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    RectF parentRect = renderContext->GetPaintRectWithTransform();
+    parentRect.SetOffset(node->GetPositionToScreenWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
-double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+bool SecurityComponentHandler::IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     if (!visibleRect.IsValid() || !renderRect.IsValid()) {
-        return 0.0;
+        return true;
     }
-    float divisor = renderRect.Width() * renderRect.Height();
-    if (NearEqual(divisor, 0.0)) {
-        return 0.0;
+
+    if (NearEqual(visibleRect.Width(), 0.0) || NearEqual(visibleRect.Height(), 0.0) ||
+        NearEqual(renderRect.Width(), 0.0) || NearEqual(renderRect.Height(), 0.0)) {
+        return true;
     }
-    return visibleRect.Width() * visibleRect.Height() / divisor;
+
+    buttonInfo.leftClip_ = visibleRect.Left() - renderRect.Left();
+    buttonInfo.rightClip_ = renderRect.Right() - visibleRect.Right();
+    buttonInfo.topClip_ = visibleRect.Top() - renderRect.Top();
+    buttonInfo.bottomClip_ = renderRect.Bottom() - visibleRect.Bottom();
+
+    return LessNotEqual(renderRect.Left() + 1.0, visibleRect.Left()) ||
+        GreatNotEqual(renderRect.Right(), visibleRect.Right() + 1.0) ||
+        LessNotEqual(renderRect.Top() + 1.0, visibleRect.Top()) ||
+        GreatNotEqual(renderRect.Bottom(), visibleRect.Bottom() + 1.0);
 }
 
 bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId)
@@ -363,7 +578,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     CHECK_NULL_RETURN(layoutProperty, false);
     buttonInfo.nodeId_ = node->GetId();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -405,25 +620,31 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     return true;
 }
 
-bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
-    RefPtr<FrameNode>& node)
+bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& iconNode)
 {
-    RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
         CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
-        buttonInfo.iconSize_ =
-            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp();
-        buttonInfo.iconColor_.value =
-            iconProp->GetImageSourceInfo().value().GetFillColor().value().GetValue();
+        CHECK_NULL_RETURN(iconProp->GetCalcLayoutConstraint(), false);
+        auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
+        CHECK_EQUAL_RETURN(width.has_value(), false, false);
+        buttonInfo.iconSize_ = width->GetDimension().ConvertToVp();
+        auto fillColor = iconProp->GetImageSourceInfo()->GetFillColor();
+        CHECK_EQUAL_RETURN(fillColor.has_value(), false, false);
+        buttonInfo.iconColor_.value = fillColor->GetValue();
     }
+    return true;
+}
 
-    RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& textNode)
+{
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProp, false);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = textNode->GetContextRefPtr();
         CHECK_NULL_RETURN(pipeline, false);
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
@@ -436,8 +657,12 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
             buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
         }
     }
+    return true;
+}
 
-    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+bool InitSCButtonInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& buttonNode)
+{
     if (buttonNode != nullptr) {
         const auto& renderContext = buttonNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
@@ -454,10 +679,42 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
             }
         }
     }
+    return true;
+}
+
+bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
+{
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
+    if (!InitSCIconInfo(buttonInfo, iconNode)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    if (!InitSCTextInfo(buttonInfo, textNode)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+    if (!InitSCButtonInfo(buttonInfo, buttonNode)) {
+        return false;
+    }
+
     if (!InitBaseInfo(buttonInfo, node)) {
         return false;
     }
     return true;
+}
+
+void SecurityComponentHandler::WriteButtonInfo(
+    const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
+    RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
+    buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
+    buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+    buttonInfo.bg_ = static_cast<SecCompBackground>(
+        layoutProperty->GetBackgroundType().value());
 }
 
 bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType)
@@ -468,11 +725,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     std::string type = node->GetTag();
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
         scType = SecCompType::LOCATION_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -481,11 +734,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
         scType = SecCompType::PASTE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -494,11 +743,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
         scType = SecCompType::SAVE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -565,7 +810,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
         "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
         "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
         "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-        "Counter", "Custom" };
+        "Counter", "Custom", "overlay" };
 
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -626,7 +871,8 @@ bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t sec
 {
     for (const auto& originRect : nodeId2Rect) {
         if (originRect.second.IsInnerIntersectWithRound(dest) &&
-            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
+            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first]) &&
+            (!NearEqual(originRect.second.Width(), 0.0) && !NearEqual(originRect.second.Height(), 0.0))) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Security component id = %{public}d " \
                 "is covered by id = %{public}d.", secNodeId, originRect.first);
             return true;
@@ -675,7 +921,7 @@ void SecurityComponentHandler::UpdateAllZindex(const RefPtr<UINode>& root,
 
 bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     RefPtr<UINode> root = pipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);

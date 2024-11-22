@@ -15,8 +15,10 @@
 
 #include "core/components/common/properties/color.h"
 
+#include <cstdlib>
 #include <regex>
 
+#include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {
@@ -61,6 +63,20 @@ const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
 const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
 const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
 
+unsigned long int HandleIncorrectColor(const std::string& newColorStr)
+{
+    errno = 0;
+    char* end = nullptr;
+    unsigned long int value = strtoul(newColorStr.c_str(), &end, COLOR_STRING_BASE);
+    if (errno == ERANGE) {
+        LOGE("%{public}s is out of range.", newColorStr.c_str());
+    }
+    if (value == 0 && end == newColorStr.c_str()) {
+        LOGW("input %{public}s can not be converted to number, use default color：0x00000000.", newColorStr.c_str());
+    }
+    return value;
+}
+
 Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultColor)
 {
     if (colorStr.empty()) {
@@ -75,7 +91,7 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
     // Regex match for #909090 or #90909090.
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
-        auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
+        unsigned long int value = HandleIncorrectColor(colorStr);
         if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
             // no alpha specified, set alpha to 0xff
             value |= maskAlpha;
@@ -91,7 +107,7 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
             newColorStr += c;
             newColorStr += c;
         }
-        auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+        unsigned long int value = HandleIncorrectColor(newColorStr);
         if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
             // no alpha specified, set alpha to 0xff
             value |= maskAlpha;
@@ -441,7 +457,7 @@ bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color
         return false;
     }
     colorStr.erase(0, 1);
-    auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
+    unsigned long int value = HandleIncorrectColor(colorStr);
     if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
         // no alpha specified, set alpha to 0xff
         value |= maskAlpha;
@@ -465,7 +481,8 @@ bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, C
         newColorStr += c;
         newColorStr += c;
     }
-    auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+    unsigned long int value = HandleIncorrectColor(newColorStr);
+    
     if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
         // no alpha specified, set alpha to 0xff
         value |= maskAlpha;

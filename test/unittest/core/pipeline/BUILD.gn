@@ -17,19 +17,16 @@ ace_unittest("pipeline_context_test_ng") {
   type = "pipeline"
   module_output = "pipeline"
   flutter_skia = true
-  if (ace_use_rosen_drawing) {
-    external_deps = [
-      "graphic_2d:2d_graphics",
-      "napi:ace_napi",
-    ]
-  } else {
-    external_deps = [ "napi:ace_napi" ]
-  }
+  external_deps = [
+    "graphic_2d:2d_graphics",
+    "napi:ace_napi",
+  ]
   sources = [
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
+    "$ace_root/frameworks/core/event/resample_algo.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",

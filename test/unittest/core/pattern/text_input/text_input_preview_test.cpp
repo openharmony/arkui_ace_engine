@@ -122,6 +122,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
 
@@ -132,6 +133,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward001, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node false
@@ -156,6 +158,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward002, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
 
@@ -166,6 +169,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward002, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node false
@@ -190,6 +194,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode001, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -199,6 +204,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode001, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true
@@ -223,6 +229,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode002, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -232,6 +239,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode002, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true
@@ -256,6 +264,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode003, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -265,6 +274,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode003, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true

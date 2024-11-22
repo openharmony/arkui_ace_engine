@@ -41,9 +41,11 @@ constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0f;
 constexpr float AGE_SCALE_NUMBER = 1.0f;
 constexpr float AGE_BUTTONS_LAYOUT_HEIGHT_RATE = 15.0f;
 
-OffsetF GetDisplayWindowRectOffset()
+OffsetF GetDisplayWindowRectOffset(int32_t popupNodeId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
+    CHECK_NULL_RETURN(popupNode, OffsetF());
+    auto pipelineContext = popupNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, OffsetF());
@@ -151,7 +153,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     popupProp->UpdateIsCaretMode(param->IsCaretMode());
     popupProp->UpdateEnableHoverMode(param->EnableHoverMode());
-    
+
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -161,11 +163,12 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     if (param->GetRadius().has_value()) {
         popupProp->UpdateRadius(param->GetRadius().value());
     }
+    popupProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
     }
-    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     if (param->GetArrowOffset().has_value()) {
@@ -249,24 +252,26 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
-    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
+    if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
@@ -304,8 +309,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetRadius().has_value()) {
         layoutProps->UpdateRadius(param->GetRadius().value());
     }
+    layoutProps->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
-    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
     layoutProps->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->GetTargetSpace().has_value()) {
@@ -344,22 +350,23 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
-    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
     columnLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
     if (param->GetChildWidth().has_value()) {
         columnLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (columnRenderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            columnRenderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             columnRenderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            columnRenderContext->UpdateBackgroundColor(
+                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
         if (param->GetShadow().has_value()) {
             columnRenderContext->UpdateBackShadow(param->GetShadow().value());
@@ -414,8 +421,8 @@ void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& 
         auto combinedChild = columnNode->GetFirstChild();
         CHECK_NULL_VOID(combinedChild);
         const auto& children = combinedChild->GetChildren();
-        for (const auto& child: children) {
-            if (child->GetTag() == V2::TEXT_ETS_TAG) {  // API10
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::TEXT_ETS_TAG) { // API10
                 auto textNode = AceType::DynamicCast<FrameNode>(child);
                 auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
                 layoutProperty->UpdateContent(message);
@@ -464,7 +471,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
             CHECK_NULL_VOID(pipelineContext);
             float popupMaxWidth = 0.0f;
             float popupMaxHeight = 0.0f;
-            GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+            GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
             auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
             CHECK_NULL_VOID(buttonTheme);
             auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
@@ -485,7 +492,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupProp->UpdateUseCustom(param->IsUseCustom());
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
-    auto displayWindowOffset = GetDisplayWindowRectOffset();
+    auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     // Update paint props
     popupPaintProp->UpdatePlacement(param->GetPlacement());
@@ -509,18 +516,37 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
 }
 
-void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight)
+void BubbleView::GetPopupMaxWidthAndHeight(
+    const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupNodeId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(popupNodeId);
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupNodeId);
+    CHECK_NULL_VOID(popupNode);
+    auto pipelineContext = popupNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetDisplayWindowRectInfo: %{public}s", windowGlobalRect.ToString().c_str());
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto maxHeight = windowGlobalRect.Height();
+    auto theme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    auto isExpandDisplay = theme->GetPopupDoubleBorderEnable() || isFreeMultiWindow;
     if (param->IsShowInSubWindow()) {
-        maxHeight = SystemProperties::GetDeviceHeight();
+        if (isExpandDisplay) {
+            maxHeight = SystemProperties::GetDeviceHeight();
+        } else if (container->IsUIExtensionWindow()) {
+            auto focusWindowId = pipelineContext->GetFocusWindowId();
+            auto rect = container->GetUIExtensionHostWindowRect(focusWindowId);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetUIExtensionHostWindowRect: %{public}s",
+                rect.ToString().c_str());
+            maxHeight = rect.Height();
+        }
     }
     popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
     popupMaxWidth = GetMaxWith().Value();
@@ -562,6 +588,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     if (param->GetRadius().has_value()) {
         popupLayoutProp->UpdateRadius(param->GetRadius().value());
     }
+    popupLayoutProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
@@ -585,27 +612,29 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     CHECK_NULL_VOID(childLayoutProperty);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
-    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
     if (custom) {
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
+    } else {
+        childLayoutProperty->ClearUserDefinedIdealSize(true, false);
     }
     if (renderContext) {
-        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
-        } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
+        } else {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
@@ -679,7 +708,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         message->MountToParent(columnNode);
     } else {
-        GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+        GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight, popupId);
         auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
         CHECK_NULL_RETURN(buttonTheme, nullptr);
         auto scrollNode = FrameNode::CreateFrameNode(
@@ -693,11 +722,11 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         if (fontScale == AGE_SCALE_NUMBER) {
             scrollProps->UpdateCalcMaxSize(CalcSize(
                 std::nullopt, CalcLength(Dimension(popupMaxHeight) - GetAgeFontSize(buttonFontSize) *
-                AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
+                                                                         AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
         } else {
             scrollProps->UpdateCalcMaxSize(
                 CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) -
-                GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+                                                  GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
         }
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);
@@ -717,7 +746,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         popupMaxWidth = GetMaxWith().Value();
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(popupMaxWidth), std::nullopt));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
@@ -833,7 +862,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonProp->UpdateType(ButtonType::CAPSULE);

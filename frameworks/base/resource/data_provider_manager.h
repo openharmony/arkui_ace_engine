@@ -108,6 +108,9 @@ public:
     int32_t ReadMovingPhotoVideo(const std::string &uri);
     std::string GetMovingPhotoImageUri(const std::string& uri);
     int64_t GetMovingPhotoDateModified(const std::string& uri);
+    int64_t GetMovingPhotoCoverPosition(const std::string& columnName, const std::string& value,
+        std::vector<std::string>& columns);
+    std::string GetMovingPhotoImagePath(const std::string& uri);
 
 private:
     void InitHelper();

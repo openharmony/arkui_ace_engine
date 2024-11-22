@@ -332,7 +332,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors002, TestSize.Level1)
     layoutProperty->CheckLocalizedEdgeColors(textDirection);
     ASSERT_NE(renderContext->GetBorder(), nullptr);
     EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().leftColor.value(), Color::BLUE);
-    EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().topColor.value(), Color::GREEN);
+    EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().topColor.value(), Color::RED);
 }
 
 /**
@@ -823,14 +823,14 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
 
     auto top = CalcDimension(1.0);
     auto bottom = CalcDimension(2.0);
-    auto left = CalcDimension(3.0);
-    auto right = CalcDimension(4.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
 
     EdgesParam edges;
     edges.SetTop(top);
     edges.SetBottom(bottom);
-    edges.SetLeft(left);
-    edges.SetRight(right);
+    edges.start = start;
+    edges.end = end;
 
     auto renderContext = frameNodeHost->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -839,12 +839,12 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckOffsetLocalizedEdges001, TestSize.Level1)
     auto textDirection = TextDirection::LTR;
     layoutProperty->CheckOffsetLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), left);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), start);
 
     textDirection = TextDirection::RTL;
     layoutProperty->CheckOffsetLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), right);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetOffsetEdgesValue().left.value(), end);
 }
 
 /**
@@ -884,14 +884,14 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level
 
     auto top = CalcDimension(1.0);
     auto bottom = CalcDimension(2.0);
-    auto left = CalcDimension(3.0);
-    auto right = CalcDimension(4.0);
+    auto start = CalcDimension(3.0);
+    auto end = CalcDimension(4.0);
 
     EdgesParam edges;
     edges.SetTop(top);
     edges.SetBottom(bottom);
-    edges.SetLeft(left);
-    edges.SetRight(right);
+    edges.start = start;
+    edges.end = end;
 
     auto renderContext = frameNodeHost->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -900,12 +900,12 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckPositionLocalizedEdges001, TestSize.Level
     auto textDirection = TextDirection::LTR;
     layoutProperty->CheckPositionLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), left);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), start);
 
     textDirection = TextDirection::RTL;
     layoutProperty->CheckPositionLocalizedEdges(textDirection);
     ASSERT_NE(renderContext->GetPositionProperty(), nullptr);
-    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), right);
+    EXPECT_EQ(renderContext->GetPositionProperty()->GetPositionEdgesValue().left.value(), end);
 }
 
 /**
@@ -1018,28 +1018,137 @@ HWTEST_F(LayoutPropertyTestNgTwo, PixelRoundToJsonValue001, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     const std::string VALUE = "PixelRoundCalcPolicy.FORCE_CEIL";
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
     auto res = layoutProperty->PixelRoundToJsonValue();
     auto jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("start"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("top"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("end"), VALUE);
 
-    layoutProperty->pixelRoundFlag_ = static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    layoutProperty->pixelRoundFlag_ = static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
     res = layoutProperty->PixelRoundToJsonValue();
     jsonValue = JsonUtil::ParseJsonString(res);
     ASSERT_NE(jsonValue, nullptr);
     EXPECT_EQ(jsonValue->GetString("bottom"), VALUE);
+}
+
+/**
+ * @tc.name: CheckLocalizedBorderImageSlice004
+ * @tc.desc: Test CheckLocalizedBorderImageSlice when Api is 12 and 14
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageSlice004, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    auto renderContext = frameNodeHost->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto borderImage = AceType::MakeRefPtr<BorderImage>();
+    auto sliceDimension = Dimension(5.0);
+    auto widthDimension = Dimension(5.0);
+    int32_t settingApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    borderImage->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
+    borderImage->SetEdgeWidth(BorderImageDirection::START, widthDimension);
+    renderContext->UpdateBorderImage(borderImage);
+
+    auto textDirection = TextDirection::RTL;
+    layoutProperty->CheckLocalizedBorderImageSlice(textDirection);
+    EXPECT_EQ(borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT).GetBorderImageSlice(), Dimension(0.0));
+
+    settingApiVersion = 14;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    auto borderImage1 = AceType::MakeRefPtr<BorderImage>();
+    borderImage1->SetEdgeSlice(BorderImageDirection::LEFT, sliceDimension);
+    borderImage1->SetEdgeWidth(BorderImageDirection::START, widthDimension);
+    renderContext->UpdateBorderImage(borderImage1);
+
+    layoutProperty->CheckLocalizedBorderImageSlice(textDirection);
+    EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageSlice(), sliceDimension);
+}
+
+/**
+ * @tc.name: CheckLocalizedBorderImageWidth004
+ * @tc.desc: Test CheckLocalizedBorderImageWidth when Api is 12 and 14
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageWidth004, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    auto renderContext = frameNodeHost->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto borderImage = AceType::MakeRefPtr<BorderImage>();
+    auto sliceDimension = Dimension(5.0);
+    auto widthDimension = Dimension(5.0);
+    int32_t settingApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    borderImage->SetEdgeSlice(BorderImageDirection::START, sliceDimension);
+    borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
+    renderContext->UpdateBorderImage(borderImage);
+
+    auto textDirection = TextDirection::RTL;
+    layoutProperty->CheckLocalizedBorderImageWidth(textDirection);
+    EXPECT_EQ(borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT).GetBorderImageWidth(), Dimension(0.0));
+
+    settingApiVersion = 14;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    auto borderImage1 = AceType::MakeRefPtr<BorderImage>();
+    borderImage1->SetEdgeSlice(BorderImageDirection::START, sliceDimension);
+    borderImage1->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
+    renderContext->UpdateBorderImage(borderImage);
+    layoutProperty->CheckLocalizedBorderImageWidth(textDirection);
+    EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageWidth(), widthDimension);
+}
+
+/**
+ * @tc.name: CheckLocalizedBorderImageOutset004
+ * @tc.desc: Test CheckLocalizedBorderImageOutset when Api is 12 and 14
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedBorderImageOutset004, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+
+    auto renderContext = frameNodeHost->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto borderImage = AceType::MakeRefPtr<BorderImage>();
+    auto outsetDimension = Dimension(5.0);
+    auto widthDimension = Dimension(5.0);
+    int32_t settingApiVersion = 12;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
+    borderImage->SetEdgeWidth(BorderImageDirection::START, widthDimension);
+    renderContext->UpdateBorderImage(borderImage);
+
+    auto textDirection = TextDirection::RTL;
+    layoutProperty->CheckLocalizedBorderImageOutset(textDirection);
+    EXPECT_EQ(borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT).GetBorderImageOutset(), Dimension(0.0));
+
+    settingApiVersion = 14;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    renderContext->UpdateBorderImage(borderImage);
+    auto borderImage1 = AceType::MakeRefPtr<BorderImage>();
+    borderImage1->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
+    borderImage1->SetEdgeWidth(BorderImageDirection::START, widthDimension);
+    layoutProperty->CheckLocalizedBorderImageOutset(textDirection);
+    EXPECT_EQ(borderImage1->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageOutset(), outsetDimension);
 }
 }

@@ -22,9 +22,9 @@
 
 extern "C" {
 struct FFiDatePickerResult {
-    int32_t year;
-    int32_t month;
-    int32_t day;
+    int64_t year;
+    int64_t month;
+    int64_t day;
 };
 
 struct FfiTime {
@@ -38,12 +38,13 @@ struct FfiTime {
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerCreate(FfiTime startDate, FfiTime endDate, FfiTime selectedDate);
+CJ_EXPORT void FfiOHOSAceFrameworkDatePickerCreateWithChangeEvent(
+    FfiTime startDate, FfiTime endDate, FfiTime selectedDate, void (*callback)(FfiTime selectedDate));
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetLunar(bool isLunar);
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerUseMilitaryTime(bool isUseMilitaryTime);
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetBackgroundColor(uint32_t color);
-CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int32_t year, int32_t month, int32_t day));
-CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetOnDateChange(
-    void (*callback)(int32_t year, int32_t month, int32_t day));
+CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int64_t month, int64_t day));
+CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetOnDateChange(void (*callback)(int64_t year, int64_t month, int64_t day));
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetDisappearTextStyle(uint32_t color, double size,
     int32_t unit, const char* weight, const char* family, uint32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkDatePickerSetTextStyle(uint32_t color, double size, int32_t unit,

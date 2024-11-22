@@ -219,7 +219,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 {
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
-    RefPtr<SwiperController> swiperController;
+    RefPtr<NG::TabsControllerNG> tabsController = AceType::MakeRefPtr<NG::TabsControllerNG>();
     int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     auto jsValue = info[0];
@@ -238,7 +238,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (jsTabsController) {
                 jsTabsController->SetInstanceId(Container::CurrentId());
                 tabController = jsTabsController->GetController();
-                swiperController = jsTabsController->GetSwiperController();
+                jsTabsController->SetTabsController(tabsController);
             }
         }
         JSRef<JSVal> indexVal = obj->GetProperty("index");
@@ -262,7 +262,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         }
     }
 
-    TabsModel::GetInstance()->Create(barPosition, index, tabController, swiperController);
+    TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseTabsIndexObject(info, changeEventVal);
     }
@@ -453,14 +453,22 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 
 void JSTabs::SetBarBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        auto barBlurStyle = info[0]->ToNumber<int32_t>();
-        if (barBlurStyle >= 0 && barBlurStyle < static_cast<int32_t>(BAR_BLURSTYLE.size())) {
-            blurStyle = BAR_BLURSTYLE[barBlurStyle];
+    if (info.Length() == 0) {
+        return;
+    }
+    BlurStyleOption styleOption;
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
-    TabsModel::GetInstance()->SetBarBackgroundBlurStyle(blurStyle);
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        ParseBlurStyleOption(jsOption, styleOption);
+    }
+    TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
 }
 
 void JSTabs::SetDivider(const JSCallbackInfo& info)
@@ -671,6 +679,19 @@ void JSTabs::SetEdgeEffect(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetEdgeEffect(edgeEffect);
 }
 
+void JSTabs::SetBarBackgroundEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    EffectOption option;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseEffectOption(jsOption, option);
+    }
+    TabsModel::GetInstance()->SetBarBackgroundEffect(option);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -713,6 +734,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
+    JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

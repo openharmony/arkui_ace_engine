@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,45 +74,41 @@ double ScrollFadeEffect::CalculateOverScroll(double oldPosition, bool isReachMax
 
 void ScrollFadeEffect::SetPaintDirection(Axis axis, float overScroll, bool isNotPositiveScrollableDistance)
 {
-    if (NearZero(overScroll) || !fadePainter_) {
-        return;
-    }
+    CHECK_NULL_VOID((!NearZero(overScroll)) && fadePainter_);
     auto const isVertical = axis == Axis::VERTICAL;
     auto scaleFactor = fadePainter_->GetScaleFactor();
     if (isNotPositiveScrollableDistance) {
-        if (isVertical && overScroll < 0.0f) {
-            if (fadePainter_->GetDirection() == OverScrollDirection::DOWN &&
-                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
-                             LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD)) {
-                return;
-            }
+        if (isVertical && Negative(overScroll)) {
+            auto isOverScrollAtDown = fadePainter_->GetDirection() == OverScrollDirection::DOWN &&
+                                      GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                                      LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD);
+            CHECK_NULL_VOID(!isOverScrollAtDown);
             fadePainter_->SetDirection(OverScrollDirection::UP);
-        } else if (isVertical && overScroll > 0.0f) {
-            if (fadePainter_->GetDirection() == OverScrollDirection::UP &&
-                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) && LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD)) {
-                return;
-            }
+        } else if (isVertical && Positive(overScroll)) {
+            auto isOverScrollAtUp = fadePainter_->GetDirection() == OverScrollDirection::UP &&
+                                    GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                                    LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD);
+            CHECK_NULL_VOID(!isOverScrollAtUp);
             fadePainter_->SetDirection(OverScrollDirection::DOWN);
-        } else if (overScroll < 0.0f) {
-            if (fadePainter_->GetDirection() == OverScrollDirection::RIGHT &&
-                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
-                             LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD)) {
-                return;
-            }
+        } else if (Negative(overScroll)) {
+            auto isOverScrollAtRight = fadePainter_->GetDirection() == OverScrollDirection::RIGHT &&
+                                       GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                                       LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD);
+            CHECK_NULL_VOID(!isOverScrollAtRight);
             fadePainter_->SetDirection(OverScrollDirection::LEFT);
         } else {
-            if (fadePainter_->GetDirection() == OverScrollDirection::LEFT &&
-                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) && LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD)) {
-                return;
-            }
+            auto isOverScrollAtLeft = fadePainter_->GetDirection() == OverScrollDirection::LEFT &&
+                                      GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                                      LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD);
+            CHECK_NULL_VOID(!isOverScrollAtLeft);
             fadePainter_->SetDirection(OverScrollDirection::RIGHT);
         }
     } else {
-        if (isVertical && overScroll < 0.0f) {
+        if (isVertical && Negative(overScroll)) {
             fadePainter_->SetDirection(OverScrollDirection::UP);
-        } else if (isVertical && overScroll > 0.0f) {
+        } else if (isVertical && Positive(overScroll)) {
             fadePainter_->SetDirection(OverScrollDirection::DOWN);
-        } else if (overScroll < 0.0f) {
+        } else if (Negative(overScroll)) {
             fadePainter_->SetDirection(OverScrollDirection::LEFT);
         } else {
             fadePainter_->SetDirection(OverScrollDirection::RIGHT);

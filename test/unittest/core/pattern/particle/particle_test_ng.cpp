@@ -180,4 +180,122 @@ HWTEST_F(ParticleTestNg, ParticleTest003, TestSize.Level1)
     EXPECT_EQ(pattern->GetDisturbance().size(), 2); // 2 is the size of disturbance_
     EXPECT_EQ(pattern->GetEmitterProperty().size(), 2); // 2 is the size of emitterProperty_
 }
+
+/**
+ * @tc.name: ParticleTest004
+ * @tc.desc: Test Particle color option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTest004, TestSize.Level1)
+{
+    std::list<ParticleOption> arrayValue;
+    ParticleOption option;
+    /**
+     * @tc.steps: step1. set color option.
+     */
+    ParticleColorPropertyOption colorOption;
+    auto range = std::pair<Color, Color>(Color::BLACK, Color::RED);
+    colorOption.SetRange(range);
+    auto distributionType = DistributionType::UNIFORM;
+    colorOption.SetDistribution(distributionType);
+    ParticleColorPropertyUpdater updater;
+    updater.SetUpdateType(UpdaterType::RANDOM);
+    ParticleColorPropertyUpdaterConfig config;
+    ColorParticleRandomUpdateConfig randomConfig;
+    auto random = std::pair<float, float>(0, 1);
+    randomConfig.SetRedRandom(random);
+    config.SetRandomConfig(randomConfig);
+    updater.SetConfig(config);
+    colorOption.SetUpdater(updater);
+    option.SetParticleColorOption(colorOption);
+    ParticleFloatPropertyOption opacityOption;
+    /**
+     * @tc.steps: step2. create frameNode and get pattern.
+     */
+    arrayValue.push_back(option);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
+    auto context = frameNode->GetRenderContext();
+    auto particleArray = context->GetParticleOptionArray();
+    EXPECT_EQ(particleArray->size(), 1);
+    auto colorOptionCache = particleArray->front();
+    EXPECT_TRUE(option == colorOptionCache);
+}
+
+/**
+ * @tc.name: ParticleTest005
+ * @tc.desc: Test Particle color option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTest005, TestSize.Level1)
+{
+    std::list<ParticleOption> arrayValue;
+    ParticleOption option;
+    /**
+     * @tc.steps: step1. set opacity option.
+     */
+    ParticleFloatPropertyOption opacityOption;
+    auto range = pair<float, float>(0.0, 1.0);
+    opacityOption.SetRange(range);
+    auto updaterType = UpdaterType::RANDOM;
+    ParticleFloatPropertyUpdater updater;
+    updater.SetUpdaterType(updaterType);
+    ParticleFloatPropertyUpdaterConfig config;
+    auto randomConfig = pair<float, float>(0.0, 1.0);
+    config.SetRandomConfig(randomConfig);
+    updater.SetConfig(config);
+    opacityOption.SetUpdater(updater);
+    option.SetParticleOpacityOption(opacityOption);
+    /**
+     * @tc.steps: step2. create frameNode and get pattern.
+     */
+    arrayValue.push_back(option);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
+    auto context = frameNode->GetRenderContext();
+    auto particleArray = context->GetParticleOptionArray();
+    EXPECT_EQ(particleArray->size(), 1);
+    auto opacityOptionCache = particleArray->front();
+    EXPECT_TRUE(option == opacityOptionCache);
+}
+
+/**
+ * @tc.name: ParticleTest006
+ * @tc.desc: Test Particle accelerate option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParticleTestNg, ParticleTest006, TestSize.Level1)
+{
+    std::list<ParticleOption> arrayValue;
+    ParticleOption option;
+    /**
+     * @tc.steps: step1. set accelerate option.
+     */
+    AccelerationProperty accelerationOption;
+    ParticleFloatPropertyOption speed;
+    auto range = pair<float, float>(0.0, 10.0);
+    speed.SetRange(range);
+    accelerationOption.SetSpeed(speed);
+    ParticleFloatPropertyOption angle;
+    angle.SetRange(range);
+    accelerationOption.SetAngle(angle);
+    option.SetParticleAccelerationOption(accelerationOption);
+    /**
+     * @tc.steps: step2. create frameNode and get pattern.
+     */
+    arrayValue.push_back(option);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PARTICLE_ETS_TAG, 1, [count = 1]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
+    auto context = frameNode->GetRenderContext();
+    auto particleArray = context->GetParticleOptionArray();
+    EXPECT_EQ(particleArray->size(), 1);
+    auto opacityOptionCache = particleArray->front();
+    EXPECT_TRUE(option == opacityOptionCache);
+}
 } // namespace OHOS::Ace::NG

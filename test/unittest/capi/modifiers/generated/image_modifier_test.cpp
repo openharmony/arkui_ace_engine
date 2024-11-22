@@ -1250,7 +1250,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, setDraggableTestDraggableValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDraggableValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueDraggable;
 

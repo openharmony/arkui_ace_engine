@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +36,7 @@ void MenuLayoutProperty::BindToJsonValue(std::unique_ptr<JsonValue>& json, const
     //     ]
     // }
     for (auto&&option : options) {
-        auto pattern = DynamicCast<FrameNode>(option)->GetPattern<OptionPattern>();
+        auto pattern = DynamicCast<FrameNode>(option)->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         auto jsonValue = JsonUtil::Create(true);
 

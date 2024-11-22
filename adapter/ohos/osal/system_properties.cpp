@@ -24,6 +24,7 @@
 #include "parameters.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -63,8 +64,6 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
-
-using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
@@ -146,6 +145,16 @@ bool IsSyncDebugTraceEnabled()
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
+}
+
+bool IsWindowRectResizeEnabled()
+{
+    return (system::GetParameter("persist.ace.windowresize.enabled", "true") == "true");
+}
+
+bool IsCacheNavigationNodeEnable()
+{
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
 }
 
 bool IsHookModeEnabled()
@@ -359,6 +368,12 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t GetPageCountProp()
+{
+    float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
+    return pageCount > 0.0f ? pageCount : 0.0f;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -366,6 +381,7 @@ bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
 std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
 std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -413,11 +429,13 @@ bool SystemProperties::imageFileCacheConvertAstc_ = GetImageFileCacheConvertToAs
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = GetImageFileCacheConvertAstcThresholdProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
+ACE_WEAK_SYM bool SystemProperties::windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
+float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
@@ -574,6 +592,7 @@ void SystemProperties::InitDeviceInfo(
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
+    windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -585,10 +604,7 @@ void SystemProperties::InitDeviceInfo(
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
-    int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
-                                 (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED)))
-                                 ? ORIENTATION_LANDSCAPE
-                                 : ORIENTATION_PORTRAIT;
+    auto newOrientation = static_cast<int32_t>(WindowUtils::GetDeviceOrientation(orientation));
     if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
@@ -734,6 +750,11 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
+bool SystemProperties::GetCacheNavigationNodeEnable()
+{
+    return cacheNavigationNodeEnable_;
+}
+
 bool SystemProperties::GetGridCacheEnabled()
 {
     return gridCacheEnabled_;
@@ -757,6 +778,11 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 void SystemProperties::AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback)
 {
     WatchParameter(key, callback, context);
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetWindowRectResizeEnabled()
+{
+    return windowRectResizeEnabled_;
 }
 
 void SystemProperties::RemoveWatchSystemParameter(
@@ -877,7 +903,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
     if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
-        auto type = std::stoi(foldScreenTypeStr);
+        auto type = StringUtils::StringToInt(foldScreenTypeStr);
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
@@ -885,5 +911,32 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
 std::string SystemProperties::GetWebDebugRenderMode()
 {
     return OHOS::system::GetParameter("web.debug.renderMode", "");
+}
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return system::GetParameter("ace.debug.inspectorId", INVALID_PARAM);
+}
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    auto ret = system::GetParameter("persist.scrollable.velocityScale", "");
+    return StringUtils::StringToDouble(ret);
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    auto ret = system::GetParameter("persist.scrollable.friction", "");
+    return StringUtils::StringToDouble(ret);
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
 }
 } // namespace OHOS::Ace

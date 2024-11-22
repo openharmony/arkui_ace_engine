@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_method.h"
 
 namespace OHOS::Ace::NG {
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
@@ -99,5 +100,13 @@ void ShapeContainerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     host->GetRenderContext()->SetClipToFrame(true);
+}
+
+RefPtr<NodePaintMethod> ShapeContainerPattern::CreateNodePaintMethod()
+{
+    if (!shapeContainerModifier_) {
+        shapeContainerModifier_ = MakeRefPtr<ShapeContainerModifier>();
+    }
+    return MakeRefPtr<ShapeContainerPaintMethod>(shapeContainerModifier_);
 }
 } // namespace OHOS::Ace::NG

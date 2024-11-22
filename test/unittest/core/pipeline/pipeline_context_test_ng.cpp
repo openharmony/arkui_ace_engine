@@ -1449,6 +1449,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
         context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
+        manager->SetClickPositionOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4], 0, 0);
         EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
@@ -1766,7 +1767,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.steps2: Set EnableAvoidKeyboardMode is true.
      * @tc.expected: get KeyboardSafeAreaEnabled is true.
      */
-    context_->SetEnableKeyBoardAvoidMode(true);
+    context_->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
 
     /**
@@ -2010,6 +2011,27 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     SystemProperties::SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg101
+ * @tc.desc: Test the function FlushDirtyPropertyNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushDirtyPropertyNodes.
+     * @tc.expected: The dirtyPropertyNodes_ is empty.
+     */
+    context_->FlushDirtyPropertyNodes();
+    EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
 }
 } // namespace NG
 } // namespace OHOS::Ace

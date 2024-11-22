@@ -748,6 +748,9 @@ void ListItemPattern::UpdateClickJudgeCallback()
         auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
             auto item = weak.Upgrade();
             CHECK_NULL_RETURN(item, false);
+            if (item->swipeActionState_ == SwipeActionState::COLLAPSED) {
+                return false;
+            }
             return item->ClickJudge(localPoint);
         };
         TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d AddClickJudgeCallback", frameNode->GetId());
@@ -799,7 +802,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
     }
 
-    if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
+    if ((GreatNotEqual(curOffset_, 0.0) || !HasEndNode()) && HasStartNode()) {
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
@@ -823,7 +826,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
         }
         end = width * static_cast<int32_t>(swiperIndex_);
-    } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
+    } else if ((LessNotEqual(curOffset_, 0.0) || !HasStartNode()) && HasEndNode()) {
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
@@ -960,7 +963,7 @@ void ListItemPattern::UpdateListItemAlignToCenter()
 Color ListItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, color);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_RETURN(theme, color);
@@ -1211,6 +1214,7 @@ void ListItemPattern::OnDetachFromMainTree()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+    swipeActionState_ = SwipeActionState::COLLAPSED;
 }
 
 bool ListItemPattern::RenderCustomChild(int64_t deadline)

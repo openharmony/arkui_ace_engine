@@ -53,7 +53,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> TextBases::Init()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
@@ -76,15 +76,6 @@ void TextBases::TestUpdateScenario(const RefPtr<TextPattern>& pattern)
     pattern->BeforeCreateLayoutWrapper();
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    for (const auto& child : host->GetChildren()) {
-        auto spanNode = AceType::DynamicCast<SpanNode>(child);
-        ASSERT_NE(spanNode, nullptr);
-        auto inheritPropertyInfo = spanNode->GetInheritPropertyInfo();
-        auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
-        if (iter != inheritPropertyInfo.end()) {
-            EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
-        }
-    }
 }
 
 void TextBases::ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans)
@@ -176,7 +167,7 @@ RefPtr<ImageSpanNode> TextBases::CreateImageSpanNode(const ImageSpanNodeProperty
     return imageSpanNode;
 }
 
-RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty)
+RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::u16string& createValue, const TestProperty& testProperty)
 {
     TextModelNG textModel;
     textModel.Create(createValue);

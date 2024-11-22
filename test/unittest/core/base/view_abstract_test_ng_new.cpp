@@ -270,8 +270,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetForegroundColor(BLUE);
     ViewAbstract::SetForegroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
-    ViewAbstract::SetUseEffect(false);
-    ViewAbstract::SetUseEffect(nullptr, false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderGroup(nullptr, false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
@@ -905,7 +903,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -929,7 +927,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnKeyCallbackFunc onKeyCallback2 = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback2 = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback2));
     EXPECT_TRUE(callback);
     ViewStackProcessor::GetInstance()->instance = nullptr;
@@ -1453,7 +1451,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyByFrameNodeTest, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(AceType::RawPtr(node), std::move(onKeyCallback));
     auto focusHub = node->GetOrCreateFocusHub();
     auto& callback = focusHub->focusCallbackEvents_->onKeyEventCallback_;

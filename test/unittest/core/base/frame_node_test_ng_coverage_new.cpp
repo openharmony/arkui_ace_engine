@@ -37,7 +37,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset01, T
     frameNode->isLayoutNode_ = true;
     frameNode->isActive_ = true;
     frameNode->overlayNode_ = nullptr;
-
+    EXPECT_EQ(frameNode->overlayNode_, nullptr);
     /**
      * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithOffset.
      */
@@ -47,6 +47,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset01, T
     frameNode->OnGenerateOneDepthVisibleFrameWithOffset(children, Offset);
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     frameNode->OnGenerateOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
+    EXPECT_EQ(frameNode->overlayNode_->GetNodeName(), "");
 }
 
 /**
@@ -64,7 +66,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset02, T
     frameNode->isLayoutNode_ = false;
     frameNode->isActive_ = true;
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
+    EXPECT_EQ(frameNode->overlayNode_->GetNodeName(), "");
     /**
      * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithOffset.
      */
@@ -75,6 +78,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset02, T
     children.push_back(childNode);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->OnGenerateOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_EQ(frameNode->GetLayoutProperty(), layoutProperty);
 }
 
 /**
@@ -92,7 +96,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset03, T
     frameNode->isLayoutNode_ = false;
     frameNode->isActive_ = true;
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
+    EXPECT_EQ(frameNode->overlayNode_->GetNodeName(), "");
     /**
      * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithOffset.
      */
@@ -103,6 +108,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset03, T
     children.push_back(childNode);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->OnGenerateOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, layoutProperty->propVisibility_);
 }
 
 /**
@@ -120,7 +126,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset04, T
     frameNode->isLayoutNode_ = false;
     frameNode->isActive_ = false;
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
+    EXPECT_EQ(frameNode->overlayNode_->GetNodeName(), "");
     /**
      * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithOffset.
      */
@@ -131,6 +138,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithOffset04, T
     children.push_back(childNode);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->OnGenerateOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_EQ(frameNode->GetLayoutProperty(), layoutProperty);
 }
 
 /**
@@ -153,9 +161,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion01, TestSize.Level1)
     frameNode->renderContext_->UpdateClipEdge(true);
     TouchEvent touchEvent;
     touchEvent.sourceType = static_cast<SourceType>(1);
-    frameNode->IsOutOfTouchTestRegion(point, touchEvent);
+    EXPECT_TRUE(frameNode->IsOutOfTouchTestRegion(point, touchEvent));
     testNode->renderContext_->UpdateClipEdge(false);
-    testNode->IsOutOfTouchTestRegion(point, touchEvent);
+    EXPECT_TRUE(testNode->IsOutOfTouchTestRegion(point, touchEvent));
 }
 
 /**
@@ -181,6 +189,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent01, TestSize.Level1)
     gestureHub->SetOnGestureJudgeNativeBegin(gestureJudgeFunc);
     RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     frameNode->AddJudgeToTargetComponent(targetComponent);
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -201,6 +210,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAddJudgeToTargetComponent02, TestSize.Level1)
     frameNode->eventHub_->gestureEventHub_ = nullptr;
     RefPtr<TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
     frameNode->AddJudgeToTargetComponent(targetComponent);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->eventHub_->gestureEventHub_, nullptr);
 }
 
 /**

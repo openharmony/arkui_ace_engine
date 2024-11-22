@@ -52,6 +52,10 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/render/adapter/rosen_window.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_rosen_render_context.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -63,6 +67,8 @@ namespace {
     const std::string MSG = "Test msg";
     constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
     constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
+    constexpr double SHOW_START = 0.0;
+    constexpr double SHOW_FULL = 1.0;
 } // namespace
 
 class UIExtensionComponentTestNg : public testing::Test {
@@ -73,6 +79,8 @@ public:
     {
         MockPipelineContext::SetUp();
         MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+        MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
     }
     static void TearDownTestSuite()
     {
@@ -154,7 +162,8 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
 
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "123", "123");
-    auto uiExtNode = UIExtensionModelNG::Create(want, callbacks);
+    InnerModalUIExtensionConfig config;
+    auto uiExtNode = UIExtensionModelNG::Create(want, callbacks, config);
     return uiExtNode;
 }
 
@@ -269,9 +278,11 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     };
 
     RefPtr<WantWrap> want = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    RefPtr<WantWrap> want2 = AceType::MakeRefPtr<WantWrapOhos>("1234", "1234");
     UIExtensionModelNG uecNG;
     std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     uecNG.Create(want, placeholderMap);
+    uecNG.Create(want2, placeholderMap);
     uecNG.SetOnError(onError);
     uecNG.SetOnError(onError, NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     uecNG.SetOnReceive(onReceive);
@@ -318,6 +329,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
 
     // Fire CallBack
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION;
+    OHOS::AAFwk::Want want;
+    pattern->FireOnResultCallback(1, want);
     FireCallbacks(pattern);
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
     InValidSessionWrapper(pattern);
@@ -326,6 +339,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     ValidSession(pattern);
     FireCallbacks(pattern);
     InValidSession(pattern);
+    FireCallbacks(pattern);
+
+    pattern->onResultCallback_ = nullptr;
+    pattern->onReceiveCallback_ = nullptr;
+    pattern->bindModalCallback_ = nullptr;
+    pattern->onModalRemoteReadyCallback_ = nullptr;
+    pattern->onRemoteReadyCallback_ = nullptr;
+    pattern->onReleaseCallback_ = nullptr;
     FireCallbacks(pattern);
 
     EXPECT_EQ(pattern->ToString(OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND), "FOREGROUND");
@@ -360,10 +381,12 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND);
     OHOS::AAFwk::Want want2;
     want2.SetElementName("123", "456", "");
-    EXPECT_EQ(pattern->CheckConstraint(), false);
+    pattern->instanceId_= 2;
+    EXPECT_EQ(pattern->CheckConstraint(), true);
     pattern->UpdateWant(want2);
     pattern->NotifyBackground();
     EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND);
+    pattern->NotifyBackground();
     OHOS::AAFwk::Want want3;
     want3.SetElementName("123", "789", "");
     pattern->UpdateWant(want3);
@@ -398,6 +421,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::NONE);
     OHOS::AAFwk::Want want2;
     want2.SetElementName("123", "456", "");
+    pattern->instanceId_= 1;
     EXPECT_EQ(pattern->CheckConstraint(), false);
     pattern->UpdateWant(want2);
     pattern->NotifyBackground();
@@ -433,7 +457,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionUpdateWantTest2, TestSize.Level1
     ASSERT_NE(uiExtNode, nullptr);
     auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    pattern->instanceId_= 2;
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "456", "123");
     InValidSession(pattern);
@@ -441,7 +465,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionUpdateWantTest2, TestSize.Level1
     ValidSession(pattern);
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND;
     pattern->UpdateWant(want);
-    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION);
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
     pattern->UpdateWant(want);
     EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND);
@@ -510,6 +534,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionUsageTest, TestSize.Level1)
 HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -523,6 +550,39 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtensionNode);
     pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. prepare focusHub and test func
+     */
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    pattern->InitKeyEvent(focusHub);
+    focusHub->onFocusInternal_();
+    focusHub->onBlurInternal_();
+    focusHub->onClearFocusStateCallback_();
+    focusHub->onPaintFocusStateCallback_();
+    KeyEvent keyEvent;
+    focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+
+    ASSERT_NE(pattern->mouseEvent_, nullptr);
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    pattern->mouseEvent_->GetOnMouseEventFunc()(info);
+
+    ASSERT_NE(pattern->hoverEvent_, nullptr);
+    pattern->hoverEvent_->GetOnHoverEventFunc()(false);
+
+    pattern->OnModifyDone();
+
+    pattern = nullptr;
+    uiExtensionNode->pattern_ = nullptr;
+    focusHub->onFocusInternal_();
+    focusHub->onBlurInternal_();
+    focusHub->onClearFocusStateCallback_();
+    focusHub->onPaintFocusStateCallback_();
+    focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+    uiExtensionNode->pattern_ = AceType::MakeRefPtr<UIExtensionPattern>();
+    ASSERT_NE(uiExtensionNode->pattern_, nullptr);
 #endif
 }
 
@@ -563,6 +623,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest002, TestSize.Level1)
     pattern->OnAccessibilityDumpChildInfo(params, info);
     EXPECT_EQ(params.size(), 0);
     pattern->accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
+    pattern->InitializeAccessibility();
 #endif
 }
 
@@ -574,10 +635,12 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest002, TestSize.Level1)
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionOnConnectTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -587,6 +650,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionOnConnectTest, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<UIExtensionPattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
+    /**
+     * @tc.steps: step2. test OnConnect
+     */
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
     auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
@@ -604,21 +671,27 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionOnConnectTest, TestSize.Level1)
     layoutProperty->safeAreaExpandOpts_->edges = SAFE_AREA_EDGE_ALL;
     EXPECT_EQ(opts->Expansive(), true);
     pattern->OnConnect();
-    InValidSession(pattern);
-    pattern->OnConnect();
     ValidSession(pattern);
     pattern->OnConnect();
-    pattern->isModal_ = false;
-    pattern->OnConnect();
-    pattern->isModal_ = true;
-    pattern->OnConnect();
+
+    pattern->usage_ = UIExtensionUsage::MODAL;
     auto focusHub = uiExtensionNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pattern->OnConnect();
-    focusHub->currentFocus_ = true;
+
+    pattern->usage_ = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    pattern->OnConnect();
+
+    focusHub->currentFocus_ = false;
+    pattern->OnConnect();
+
+    focusHub = nullptr;
+    pattern->OnConnect();
+
+    pattern->sessionWrapper_  = nullptr;
     pattern->OnConnect();
 #endif
 }
@@ -655,6 +728,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     pattern->DispatchFocusState(true);
     EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
     pattern->HandleBlurEvent();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    ASSERT_TRUE(pipeline->GetIsFocusActive());
+    pattern->HandleFocusEvent();
+    pattern->isKeyAsync_ = true;
+    event.code = KeyCode::KEY_TAB;
+    pattern->DispatchKeyEventSync(event);
 #endif
 }
 
@@ -696,6 +777,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventInValidSession, Te
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
     auto uiExtNode = CreateUecNode();
     ASSERT_NE(uiExtNode, nullptr);
     auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
@@ -703,6 +787,11 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     pattern->AttachToFrameNode(uiExtNode);
     ValidSession(pattern);
     pattern->canFocusSendToUIExtension_ = true;
+    pattern->needReSendFocusToUIExtension_ = false;
+
+    /**
+     * @tc.steps: step2. test HandleTouchEvent
+     */
     TouchEventInfo touchEventInfo("onTouch");
     touchEventInfo.SetSourceDevice(SourceType::MOUSE);
     pattern->HandleTouchEvent(touchEventInfo);
@@ -713,21 +802,26 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
     touchEventInfo.SetPointerEvent(pointerEvent);
     pattern->HandleTouchEvent(touchEventInfo);
+
     auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->onFocus_ = false;
     ASSERT_NE(pipeline, nullptr);
     pipeline->window_ = nullptr;
+    ASSERT_FALSE(pipeline->IsWindowFocused());
     pattern->HandleTouchEvent(touchEventInfo);
-    pipeline->onFocus_ = false;
-    pattern->HandleTouchEvent(touchEventInfo);
+
     pipeline->onFocus_ = true;
-    pattern->HandleTouchEvent(touchEventInfo);
+    ASSERT_TRUE(pipeline->IsWindowFocused());
     auto focusHub = uiExtNode->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    pattern->HandleTouchEvent(touchEventInfo);
     focusHub->currentFocus_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
-    focusHub->currentFocus_ = true;
-    pattern->needReSendFocusToUIExtension_ = false;
-    pattern->HandleTouchEvent(touchEventInfo);
+    
     pattern->needReSendFocusToUIExtension_ = true;
+    pattern->HandleTouchEvent(touchEventInfo);
+    
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN);
     pattern->HandleTouchEvent(touchEventInfo);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
     pattern->HandleTouchEvent(touchEventInfo);
@@ -782,16 +876,23 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventInValidSession, 
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventValidSession, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
     auto uiExtNode = CreateUecNode();
     ASSERT_NE(uiExtNode, nullptr);
     auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     ValidSession(pattern);
+
+    /**
+     * @tc.steps: step2. test HandleMouseEvent
+     */
     MouseInfo mouseInfo;
-    mouseInfo.SetSourceDevice(SourceType::MOUSE);
-    pattern->HandleMouseEvent(mouseInfo);
     mouseInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->HandleMouseEvent(mouseInfo);
+    mouseInfo.SetSourceDevice(SourceType::MOUSE);
     pattern->HandleMouseEvent(mouseInfo);
     mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
     pattern->HandleMouseEvent(mouseInfo);
@@ -799,6 +900,19 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventValidSession, Te
     pattern->HandleMouseEvent(mouseInfo);
     mouseInfo.SetPullAction(MouseAction::PRESS);
     pattern->HandleMouseEvent(mouseInfo);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    mouseInfo.SetPointerEvent(pointerEvent);
+    pattern->HandleMouseEvent(mouseInfo);
+
+    mouseInfo.SetAction(MouseAction::HOVER);
+    pattern->HandleMouseEvent(mouseInfo);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern->HandleMouseEvent(mouseInfo);
+
+    /**
+     * @tc.steps: step3. test DispatchDisplayArea
+     */
     pattern->HandleHoverEvent(true);
     pattern->HandleHoverEvent(false);
     EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
@@ -895,7 +1009,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1
     pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
     EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
-    pattern->OnAreaUpdated();
+    pattern->ReplacePlaceholderByContent();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
@@ -904,6 +1018,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->RemovePlaceholderNode();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
+    pattern->curPlaceholderType_ = PlaceholderType::NONE;
+    pattern->ReplacePlaceholderByContent();
 #endif
 }
 
@@ -992,6 +1108,480 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest003, TestSize.Level
         };
     pattern->SetOnErrorCallback(std::move(onError));
     pattern->FireOnErrorCallback(CODE, NAME, MSG);
+    auto onError2 =
+        [](int32_t code, const std::string& name, const std::string& message) {
+            EXPECT_EQ(code, 0);
+            EXPECT_EQ(name, "extension_node_transparent");
+            EXPECT_EQ(message, MSG);
+        };
+    pattern->SetOnErrorCallback(std::move(onError2));
+    pattern->onReleaseCallback_ = nullptr;
+    pattern->curPlaceholderType_ = PlaceholderType::UNDEFINED;
+    pattern->lastError_.code = 0;
+    pattern->FireOnErrorCallback(0, "extension_node_transparent", MSG);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest004
+ * @tc.desc: Test UIExtensionAccessibilityChildTreeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct an UIExtensionAccessibilityChildTreeCallback
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetAccessibilitySessionAdapter(), nullptr);
+    ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
+    ASSERT_FALSE(pattern->IsModalUec());
+    ASSERT_FALSE(pattern->IsForeground());
+    UIExtensionAccessibilityChildTreeCallback callback = UIExtensionAccessibilityChildTreeCallback(pattern, 1);
+    ASSERT_FALSE(callback.isReg_);
+
+    /**
+     * @tc.steps: step2. Test OnRegister
+     */
+    ASSERT_TRUE(callback.OnRegister(1, 1));
+    ASSERT_TRUE(callback.isReg_);
+    ASSERT_TRUE(callback.OnRegister(1, 1));
+    auto weakPtr = WeakPtr<UIExtensionPattern>(nullptr);
+    UIExtensionAccessibilityChildTreeCallback callbackNull = UIExtensionAccessibilityChildTreeCallback(weakPtr, 1);
+    ASSERT_FALSE(callbackNull.OnRegister(1, 1));
+
+    /**
+     * @tc.steps: step3. Test OnDeregister
+     */
+    ASSERT_FALSE(callbackNull.OnDeregister());
+    ASSERT_TRUE(callback.OnDeregister());
+    ASSERT_FALSE(callbackNull.isReg_);
+    ASSERT_TRUE(callback.OnDeregister());
+
+    /**
+     * @tc.steps: step4. Test OnSetChildTree
+     */
+    ASSERT_FALSE(callbackNull.OnSetChildTree(1, 1));
+    ASSERT_TRUE(callback.OnSetChildTree(1, 1));
+
+    /**
+     * @tc.steps: step5. Test OnDumpChildInfo
+     */
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    ASSERT_FALSE(callbackNull.OnDumpChildInfo(params, info));
+    ASSERT_TRUE(callback.OnDumpChildInfo(params, info));
+
+    /**
+     * @tc.steps: step6. Test OnClearRegisterFlag
+     */
+    callbackNull.OnClearRegisterFlag();
+    callback.OnClearRegisterFlag();
+    ASSERT_FALSE(callback.isReg_);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest005
+ * @tc.desc: Test pattern Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->AttachToFrameNode(uiExtNode);
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. Test DumpInfo
+     */
+    pattern->DumpInfo();
+
+    std::string testJson = "";
+    std::unique_ptr<JsonValue> testValue = JsonUtil::ParseJsonString(testJson);
+    pattern->DumpInfo(testValue);
+
+    /**
+     * @tc.steps: step3. Test WrapExtensionAbilityId
+     */
+    ASSERT_EQ(pattern->WrapExtensionAbilityId(0, 0), 0);
+
+    /**
+     * @tc.steps: step4. Test SetWantWrap
+     */
+    RefPtr<WantWrap> wantOhos = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    pattern->SetWantWrap(wantOhos);
+    ASSERT_NE(pattern->GetWantWrap(), nullptr);
+
+    /**
+     * @tc.steps: step5. Test DispatchOriginAvoidArea
+     */
+    Rosen::AvoidArea avoidArea;
+    pattern->DispatchOriginAvoidArea(avoidArea, 1);
+    pattern->OnColorConfigurationUpdate();
+    pattern->OnLanguageConfigurationUpdate();
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest006
+ * @tc.desc: Test pattern Test UpdateWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtNode);
+
+    /**
+     * @tc.steps: step2. prepare the param
+     */
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123", "456", "");
+
+    RefPtr<WantWrap> wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    auto want2 = wantWrapOhos->GetWant();
+
+    pattern->instanceId_ = 1;
+    ASSERT_FALSE(pattern->CheckConstraint());
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step3. test UpdateWant
+     */
+    pattern->UpdateWant(want);
+    pattern->instanceId_ = 2;
+    ASSERT_TRUE(pattern->CheckConstraint());
+
+    ASSERT_TRUE(pattern->sessionWrapper_->IsSessionValid());
+    ASSERT_TRUE(pattern->sessionWrapper_->GetWant()->IsEquals(want2));
+    pattern->UpdateWant(want);
+    ASSERT_FALSE(pattern->sessionWrapper_->GetWant()->IsEquals(want));
+    pattern->UpdateWant(want2);
+
+    InValidSession(pattern);
+    ASSERT_FALSE(pattern->sessionWrapper_->IsSessionValid());
+
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND;
+    pattern->UpdateWant(want);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND);
+
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->UpdateWant(want);
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND);
+
+    pattern->instanceId_ = 6;
+    pattern->UpdateWant(want);
+
+    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+
+    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
+    pattern->hasMountToParent_ = false;
+    pattern->UpdateWant(want);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest007
+ * @tc.desc: Test pattern Test AfterMountToParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->AttachToFrameNode(uiExtNode);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+
+    ASSERT_FALSE(pattern->needReNotifyForeground_);
+    pattern->AfterMountToParent();
+
+    DirtySwapConfig config;
+    pattern->OnSyncGeometryNode(config);
+    pattern->needReDispatchDisplayArea_ = true;
+    pattern->ReDispatchDisplayArea();
+    ASSERT_FALSE(pattern->needReDispatchDisplayArea_);
+    pattern->ReDispatchDisplayArea();
+
+    pattern->needReNotifyForeground_= true;
+    pattern->AfterMountToParent();
+
+    pattern->needReNotifyForeground_= true;
+    pattern->OnSyncGeometryNode(config);
+
+    /**
+     * @tc.steps: step2. test OnMountToParentDone
+     */
+    ASSERT_FALSE(pattern->needReNotifyForeground_);
+    pattern->OnMountToParentDone();
+    ASSERT_FALSE(pattern->needReNotifyForeground_);
+    pattern->OnMountToParentDone();
+
+    /**
+     * @tc.steps: step3. test HandleVisibleAreaChange
+     */
+    pattern->curVisible_ = true;
+    pattern->HandleVisibleAreaChange(true, SHOW_FULL);
+    pattern->HandleVisibleAreaChange(true, SHOW_START);
+
+    /**
+     * @tc.steps: step4. test DispatchPointerEvent
+     */
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    pattern->DispatchPointerEvent(pointerEvent);
+
+    pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->DispatchPointerEvent(pointerEvent);
+
+    pattern->sessionWrapper_ = nullptr;
+    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
+    pattern->DispatchPointerEvent(pointerEvent);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest008
+ * @tc.desc: Test pattern Test GetSizeChangeReason, DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->AttachToFrameNode(uiExtNode);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetSizeChangeReason
+     */
+    pattern->isFoldStatusChanged_ = false;
+    pattern->isRotateStatusChanged_ = true;
+    ASSERT_EQ(pattern->GetSizeChangeReason(), PlaceholderType::ROTATION);
+    pattern->isRotateStatusChanged_ = false;
+    ASSERT_EQ(pattern->GetSizeChangeReason(), PlaceholderType::UNDEFINED);
+    pattern->isFoldStatusChanged_ = true;
+    ASSERT_EQ(pattern->GetSizeChangeReason(), PlaceholderType::FOLD_TO_EXPAND);
+
+    pattern->OnWindowSizeChanged(0, 0, OHOS::Ace::WindowSizeChangeReason::UNDEFINED);
+    pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+
+    /**
+     * @tc.steps: step3. test DumpInfo
+     */
+    std::string testJson = "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]";
+    std::unique_ptr<JsonValue> arrayValue = JsonUtil::ParseJsonString(testJson);
+    pattern->instanceId_ = 2;
+    pattern->DumpInfo();
+    pattern->DumpInfo(arrayValue);
+    pattern->instanceId_ = 1;
+    pattern->DumpInfo();
+    pattern->DumpInfo(arrayValue);
+    pattern->instanceId_ = 4;
+    pattern->DumpInfo();
+    pattern->DumpInfo(arrayValue);
+    pattern->instanceId_ = 3;
+    pattern->DumpInfo();
+    pattern->DumpInfo(arrayValue);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest009
+ * @tc.desc: Test pattern Test UpdateWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtNode);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. prepare the param
+     */
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123", "456", "");
+    
+    /**
+     * @tc.steps: step3. test UpdateWant
+     */
+    ASSERT_TRUE(pattern->CheckConstraint());
+    InValidSession(pattern);
+    ASSERT_FALSE(pattern->sessionWrapper_->IsSessionValid());
+
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND;
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND);
+
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
+    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND);
+
+    pattern->instanceId_ = 6;
+
+    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
+    pattern->hasMountToParent_ = true;
+
+    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
+    pattern->hasMountToParent_ = false;
+
+    pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    pattern->isModal_ = true;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+
+    pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    pattern->isModal_ = false;
+    pattern->hasMountToParent_ = true;
+    pattern->UpdateWant(want);
+
+    pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    pattern->isModal_ = true;
+    pattern->hasMountToParent_ = false;
+    pattern->UpdateWant(want);
+
+    pattern->instanceId_ = -2;
+    pattern->UpdateWant(want);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentNgTest001
+ * @tc.desc: Test the method of GetUiExtensionType in UIExtensionModelNG and SecurityUIExtensionPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    UIExtensionModelNG uecNG;
+    UIExtensionConfig config;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode =
+        FrameNode::GetOrCreateFrameNode("placeholder", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    config.placeholderNode = placeholderNode;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    uecNG.Create(config);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    /**
+     * @tc.steps: step2. Expected SecurityUIExtension Node create success
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    /**
+     * @tc.steps: step3. Expect UiExtensionType to get successfully under different SessionType
+     */
+    EXPECT_EQ(uecNG.GetUiExtensionType(SessionType::SECURITY_UI_EXTENSION_ABILITY), "sys/CommonUI");
+    EXPECT_EQ(uecNG.GetUiExtensionType(SessionType::EMBEDDED_UI_EXTENSION), "");
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentNgTest
+ * @tc.desc: Test the method of pattern CheckConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    UIExtensionModelNG uecNG;
+    UIExtensionConfig config;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("com.example", "testuea");
+    want.SetParam("ability.want.params.uiExtensionType", std::string("sysPicker/PhotoPicker"));
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode =
+        FrameNode::GetOrCreateFrameNode("placeholder", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    config.placeholderNode = placeholderNode;
+    config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
+    config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    uecNG.Create(config);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Expected CheckConstraint false under container type in SECURITY_UI_EXTENSION
+     */
+    auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+    pattern->instanceId_ = 1;
+    EXPECT_EQ(pattern->CheckConstraint(), false);
+    /**
+     * @tc.steps: step3. Expected CheckConstraint true under container type not in SECURITY_UI_EXTENSION and
+     * IsUIExtensionWindow is false
+     */
+    pattern->instanceId_ = 2;
+    EXPECT_EQ(pattern->CheckConstraint(), true);
+    /**
+     * @tc.steps: step4. Expected CheckConstraint false under PREVIEW
+     */
+    #ifdef PREVIEW
+    EXPECT_EQ(pattern->CheckConstraint(), false);
+    #endif
+    /**
+     * @tc.steps: step5. Expected CheckConstraint false IsUIExtensionWindow is true
+     */
+    pattern->instanceId_ = 4;
+    EXPECT_EQ(pattern->CheckConstraint(), false);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -79,6 +79,13 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 {
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
+    if (GetIsShowInDialog()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto parentNode = host->GetParent();
+        CHECK_NULL_RETURN(parentNode, false);
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     return true;
 }
 
@@ -180,6 +187,12 @@ void TextPickerPattern::OnFontConfigurationUpdate()
     closeDialogEvent_();
 }
 
+void TextPickerPattern::OnFontScaleConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
 void TextPickerPattern::SetButtonIdeaSize()
 {
     auto host = GetHost();
@@ -255,6 +268,11 @@ void TextPickerPattern::OnModifyDone()
         CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
+    SetScrollStopEventCallback([weak = WeakClaim(this)](bool refresh) {
+        auto refPtr = weak.Upgrade();
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireScrollStopEvent(refresh);
+    });
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -304,6 +322,45 @@ void TextPickerPattern::FireChangeEvent(bool refresh)
     std::string idx_str;
     idx_str.assign(selectedIdx.begin(), selectedIdx.end());
     firedSelectsStr_ = idx_str;
+}
+
+void TextPickerPattern::SetScrollStopEventCallback(EventCallback&& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetScrollStopEventCallback(std::move(value));
+    }
+}
+
+void TextPickerPattern::FireScrollStopEvent(bool refresh)
+{
+    auto frameNodes = GetColumnNodes();
+    std::vector<std::string> value;
+    std::vector<double> index;
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        if (refresh) {
+            auto currentIndex = textPickerColumnPattern->GetCurrentIndex();
+            index.emplace_back(currentIndex);
+            auto currentValue = textPickerColumnPattern->GetOption(currentIndex);
+            value.emplace_back(currentValue);
+        }
+    }
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(textPickerEventHub);
+    textPickerEventHub->FireScrollStopEvent(value, index);
+    textPickerEventHub->FireDialogScrollStopEvent(GetSelectedObject(true, 1));
 }
 
 void TextPickerPattern::InitDisabled()
@@ -565,17 +622,17 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
         centerX = centerX + FOUCS_WIDTH.ConvertToPx();
     }
-    if (piantRectWidth > columnWidth) {
-        if (!GetIsShowInDialog()) {
+    if (!GetIsShowInDialog()) {
+        if (piantRectWidth > columnWidth) {
             piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
             centerX = currentFocusIndex * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
                       FOUCS_WIDTH.ConvertToPx();
         } else {
-            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
-            centerX = currentFocusIndex * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+            centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
         }
     } else {
-        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
+        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - piantRectWidth) / HALF;
     }
     return RectF(centerX, centerY, piantRectWidth, piantRectHeight);
 }
@@ -829,10 +886,14 @@ bool TextPickerPattern::ParseDirectionKey(
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     switch (code) {
         case KeyCode::KEY_DPAD_UP:
-            textPickerColumnPattern->InnerHandleScroll(0, false);
+            if (textPickerColumnPattern->InnerHandleScroll(0, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
         case KeyCode::KEY_DPAD_DOWN:
-            textPickerColumnPattern->InnerHandleScroll(1, false);
+            if (textPickerColumnPattern->InnerHandleScroll(1, false)) {
+                textPickerColumnPattern->HandleScrollStopEventCallback(true);
+            }
             break;
 
         case KeyCode::KEY_ENTER:
@@ -1095,7 +1156,7 @@ void TextPickerPattern::OnDirectionConfigurationUpdate()
     isNeedUpdateSelectedIndex_ = false;
 }
 
-void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
+void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, bool isNeedAdaptForAging)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1130,7 +1191,11 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     auto version10OrLarger = context->GetMinPlatformVersion() > 9;
     pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
-    size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
+    if (isNeedAdaptForAging && GetIsShowInDialog()) {
+        size.SetWidth(pickerContentSize.Width());
+    } else {
+        size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
+    }
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
 
@@ -1151,5 +1216,20 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
         CHECK_NULL_VOID(pickerColumnPattern);
         pickerColumnPattern->SetCanLoop(isLoop);
     }
+}
+
+bool TextPickerPattern::NeedAdaptForAging()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

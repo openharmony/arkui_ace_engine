@@ -410,6 +410,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
         GetFullAPI()->getEventsAPI()->getListEventsReceiver()->onItemMove(frameNode->GetId(), arkFrom, arkTo);
         // onItemMove should return bool value but it is a void
         LOGE("ARKOALA onItemMove doesn`t handle bool returned value");
+        return false;
     };
     ListModelNG::SetOnItemMove(frameNode, std::move(onItemMove));
 }
@@ -426,6 +427,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
             frameNode->GetId(), arkDragInfo, arkItemIndex);
         // onItemDragStart should return value [builder] but it is a void
         LOGE("ARKOALA onItemDragStart doesn`t handle builder returned value");
+        return nullptr;
     };
     ListModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }

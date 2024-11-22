@@ -227,7 +227,6 @@ void JSRenderingContext::OnDetachFromCanvas()
             callback();
         }
     }
-    ResetPaintState();
 }
 
 void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)

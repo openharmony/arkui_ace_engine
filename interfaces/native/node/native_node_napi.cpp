@@ -45,7 +45,10 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
         uiNodePtr->IncRefCount();
-        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr) });
+        *handle = new ArkUI_Node({ .type = -1,
+            .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr),
+            .cNode = false,
+            .buildNode = true });
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
@@ -92,7 +95,10 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(child);
         }
         frameNode->IncRefCount();
-        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode) });
+        *handle = new ArkUI_Node({ .type = -1,
+            .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode),
+            .cNode = false,
+            .buildNode = true });
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }

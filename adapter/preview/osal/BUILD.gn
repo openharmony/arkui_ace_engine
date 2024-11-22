@@ -50,6 +50,7 @@ ohos_source_set("preview_osal_source") {
       defines += config.defines
     }
 
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
     sources = [
       "${ace_root}/adapter/ohos/osal/log_wrapper.cpp",
       "ace_checker.cpp",
@@ -89,6 +90,7 @@ ohos_source_set("preview_osal_source") {
       "system_bar_style_ohos.cpp",
       "system_properties.cpp",
       "task/task_runner_adapter_impl.cpp",
+      "thread_priority.cpp",
       "time_event_proxy_preview.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_impl.cpp",
@@ -145,7 +147,7 @@ ohos_source_set("preview_osal_source") {
         "frame_trace_adapter_impl.cpp",
         "resource_adapter_impl.cpp",
       ]
-      include_dirs = [ "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include" ]
+      include_dirs += [ "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include" ]
       if (platform == "windows") {
         defines += [ "NOGDI" ]
         libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.lib" ]

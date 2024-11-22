@@ -265,6 +265,19 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.pinchCenterY = info.GetPinchCenter().GetY();
     ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
+    switch (info.GetInputEventType()) {
+        case InputEventType::TOUCH_SCREEN :
+            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
+            break;
+        case InputEventType::MOUSE_BUTTON:
+            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE);
+            break;
+        case InputEventType::AXIS :
+            ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS);
+            break;
+        default:
+            break;
+    }
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
@@ -378,6 +391,28 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
 }
 
+void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
+{
+    CHECK_NULL_VOID(info.GetPointerEvent());
+    AxisEvent tempAxisEvent;
+    NG::ConvertToAxisEvent(tempAxisEvent, info.GetPointerEvent());
+    auto fingureBegin = std::begin(info.GetFingerList());
+    auto fingureEnd = std::end(info.GetFingerList());
+    axisEvent.action = static_cast<int32_t>(tempAxisEvent.action);
+    axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
+    axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
+    axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;
+    axisEvent.verticalAxis = tempAxisEvent.verticalAxis;
+    axisEvent.pinchAxisScale = tempAxisEvent.pinchAxisScale;
+    axisEvent.actionTouchPoint.nodeX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetX();
+    axisEvent.actionTouchPoint.nodeY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->localLocation_.GetY();
+    axisEvent.actionTouchPoint.windowX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetX();
+    axisEvent.actionTouchPoint.windowY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->globalLocation_.GetY();
+    axisEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
+    axisEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
+    axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
+}
+
 void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
 {
     ArkUINodeEvent eventData;
@@ -386,7 +421,14 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
     eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
     eventData.gestureAsyncEvent.subKind = eventKind;
     GetGestureEvent(eventData.gestureAsyncEvent, info);
-    if (info.GetSourceDevice() == SourceType::MOUSE) {
+    if (info.GetInputEventType() == InputEventType::AXIS) {
+        ArkUIAxisEvent rawInputEvent;
+        ConvertIMMEventToAxisEvent(info, rawInputEvent);
+        eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
+        SendArkUIAsyncEvent(&eventData);
+        return;
+    }
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         ArkUIMouseEvent rawInputEvent;
         ConvertIMMEventToMouseEvent(info, rawInputEvent);
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;

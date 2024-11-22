@@ -30,8 +30,11 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return 0;
   }
   initialize(value: Object[]): this {
-    if (isObject(value[0])) {
-      this.toggleType = value[0].type;
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      this.toggleType = (value[0] as ToggleOptions).type;
       modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, undefined);

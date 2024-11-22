@@ -383,9 +383,6 @@ void RatingPattern::FireChangeEvent()
 void RatingPattern::HandleDragEnd()
 {
     CHECK_NULL_VOID(!IsIndicator());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     FireChangeEvent();
 }
 
@@ -903,6 +900,8 @@ void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     // pause animation if prop is initially set to invisible
     if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         image->ControlAnimation(false);
+    } else {
+        image->ControlAnimation(true);
     }
 }
 

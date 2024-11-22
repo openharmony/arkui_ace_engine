@@ -49,8 +49,7 @@ public:
         if (!property || property->IgnoreItemSpace()) {
             return 0.0f;
         }
-        auto scale = property->GetLayoutConstraint()->scaleProperty;
-        return ConvertToPx(property->GetItemSpace().value_or(0.0_px), scale).value_or(0);
+        return property->GetItemSpace().value_or(0.0_px).ConvertToPx();
     }
 
     static LayoutConstraintF CreateChildConstraint(
@@ -165,6 +164,17 @@ public:
         if (displayCountProperty != displayCount) {
             swiperLayoutProperty->UpdateDisplayCount(displayCount);
         }
+    }
+
+    static bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property)
+    {
+        bool hasMinSize = property->GetMinSize().has_value() && !LessOrEqual(property->GetMinSizeValue().Value(), 0);
+        bool hasPrevMargin = Positive(property->GetCalculatedPrevMargin());
+        bool hasNextMargin = Positive(property->GetCalculatedNextMargin());
+
+        return !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
+               ((property->GetDisplayCount().has_value() && property->GetDisplayCountValue() == 1) ||
+                   (!property->GetDisplayCount().has_value() && SwiperUtils::IsStretch(property)));
     }
 
 private:

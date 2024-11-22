@@ -41,6 +41,7 @@ struct ToastInfo {
     std::optional<Shadow> shadow;
     bool enableHoverMode = false;
     HoverModeAreaType hoverModeArea = HoverModeAreaType::BOTTOM_SCREEN;
+    bool isTypeStyleShadow = true;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);

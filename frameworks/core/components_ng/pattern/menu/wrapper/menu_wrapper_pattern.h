@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -65,6 +67,16 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuWrapperPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return AceType::MakeRefPtr<MenuWrapperPaintMethod>();
     }
 
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
@@ -111,7 +123,7 @@ public:
     void HideSubMenu();
     RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
-
+    void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
     {
         auto host = GetHost();
@@ -315,6 +327,7 @@ public:
     void SetMenuStatus(MenuStatus value)
     {
         menuStatus_ = value;
+        RequestPathRender();
     }
 
     MenuStatus GetMenuStatus() const
@@ -344,6 +357,16 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    bool HasFoldModeChangedTransition() const
+    {
+        return hasFoldModeChangeTransition_;
+    }
+
+    void SetHasFoldModeChangedTransition(bool hasTransition)
+    {
+        hasFoldModeChangeTransition_ = hasTransition;
+    }
+
     void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
     {
         filterColumnNode_ = columnNode;
@@ -371,13 +394,17 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
         dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
         dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.left = dumpInfo.left;
+        dumpInfo_.right = dumpInfo.right;
         dumpInfo_.globalLocation = dumpInfo.globalLocation;
         dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
     }
@@ -420,26 +447,41 @@ public:
     bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
-    void StopHoverImageToPreviewAnimation();
+    void StopPreviewMenuAnimation();
 
-    void SetHoverImageToPreviewScale(float scale)
+    void SetAnimationPreviewScale(float scale)
     {
-        hoverImageToPreviewScale_ = scale;
+        animationInfo_.previewScale = scale;
     }
 
-    float GetHoverImageToPreviewScale() const
+    void SetAnimationMenuScale(float scale)
     {
-        return hoverImageToPreviewScale_;
+        animationInfo_.menuScale = scale;
     }
 
-    void SetHoverImageToPreviewRate(float rate)
+    void SetAnimationPreviewOffset(OffsetF offset)
     {
-        hoverImageToPreviewRate_ = rate;
+        animationInfo_.previewOffset = offset;
     }
 
-    float GetHoverImageToPreviewRate() const
+    void SetAnimationMenuOffset(OffsetF offset)
     {
-        return hoverImageToPreviewRate_;
+        animationInfo_.menuOffset = offset;
+    }
+
+    void SetAnimationClipRate(float rate)
+    {
+        animationInfo_.clipRate = rate;
+    }
+
+    void SetAnimationBorderRadius(float radius)
+    {
+        animationInfo_.borderRadius = radius;
+    }
+
+    PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
+    {
+        return animationInfo_;
     }
 
     void SetMenuParam(const MenuParam& param)
@@ -451,6 +493,18 @@ public:
     {
         return menuParam_;
     }
+
+    void SetIsShowFromUser(bool isShow)
+    {
+        isShowFromUser_ = isShow;
+    }
+
+    bool GetIsShowFromUser() const
+    {
+        return isShowFromUser_;
+    }
+
+    void RequestPathRender();
 
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
@@ -470,9 +524,13 @@ private:
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    // mark self and all children no-draggable
+    void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
+    void MarkAllMenuNoDraggable();
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
@@ -503,12 +561,14 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    bool hasFoldModeChangeTransition_ = false;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
-    float hoverImageToPreviewRate_ = -1.0;
-    float hoverImageToPreviewScale_ = -1.0;
+    PreviewMenuAnimationInfo animationInfo_;
     MenuParam menuParam_;
+    bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

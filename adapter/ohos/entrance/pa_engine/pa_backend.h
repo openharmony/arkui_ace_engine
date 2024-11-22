@@ -41,7 +41,7 @@ class PaBackend : public Backend {
 public:
 
     PaBackend() = default;
-    ~PaBackend() override;
+    ~PaBackend() noexcept override;
 
     bool Initialize(BackendType type, SrcLanguage language) override;
 

@@ -90,6 +90,22 @@ public:
         return transform_;
     }
 
+    bool operator==(const ViewportConfig& other) const
+    {
+        return width_ == other.Width() &&
+            height_ == other.Height() &&
+            posX_ == other.Left() &&
+            posY_ == other.Top() &&
+            density_ == other.Density() &&
+            orientation_ == other.Orientation() &&
+            transform_ == other.TransformHint();
+    }
+
+    bool operator!=(const ViewportConfig& other) const
+    {
+        return !operator==(other);
+    }
+
     std::string ToString() const
     {
         std::string config = "Viewport config:";

@@ -24,5 +24,4 @@ TextInputAction CastToTextInputAction(int32_t value)
     }
     return static_cast<TextInputAction>(value);
 }
-
 } // namespace OHOS::Ace

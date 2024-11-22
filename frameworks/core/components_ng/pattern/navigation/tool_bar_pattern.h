@@ -62,6 +62,16 @@ public:
 
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
+    RefPtr<FrameNode> GetDialogNode()
+    {
+        return dialogNode_;
+    }
+
+    void SetToolBarItemDialogNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
+
 private:
     void OnModifyDone() override;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

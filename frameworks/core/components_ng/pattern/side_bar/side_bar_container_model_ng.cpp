@@ -24,6 +24,9 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 
 ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
 {
@@ -451,16 +454,9 @@ void SideBarContainerModelNG::ResetControlButtonIconInfo(FrameNode* frameNode)
 
 void SideBarContainerModelNG::ResetControlButton()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sideBarTheme = pipeline->GetTheme<NG::SideBarTheme>();
-    CHECK_NULL_VOID(sideBarTheme);
-    auto defaultControlButtonWidthSmall = sideBarTheme->GetControlButtonWidthSmall();
-    auto defaultControlButtonHeightSmall = sideBarTheme->GetControlButtonHeightSmall();
-    auto controlButtonTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, defaultControlButtonWidthSmall);
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, defaultControlButtonHeightSmall);
-    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, controlButtonTopSmall);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, DEFAULT_CONTROL_BUTTON_WIDTH);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, DEFAULT_CONTROL_BUTTON_HEIGHT);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, DEFAULT_CONTROL_BUTTON_TOP);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft, PROPERTY_UPDATE_LAYOUT);
     ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
         SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);

@@ -27,7 +27,7 @@ public:
     void SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg) override;
     void SetConfirm(GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc,
         ButtonInfo& buttonInfo, DialogProperties& arg) override;
-    void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
+    void SetOnWillDismiss(std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
         DialogProperties& arg) override;
 };
 } // namespace OHOS::Ace::NG

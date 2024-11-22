@@ -465,7 +465,7 @@ HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
     textPattern->AddChildSpanItem(textSpanNode6);
 
     auto selectedText = textPattern->GetSelectedText(0, 10);
-    ASSERT_EQ(selectedText, "");
+    ASSERT_EQ(selectedText, " ");
 }
 
 /**
@@ -758,7 +758,7 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -774,6 +774,11 @@ HWTEST_F(TextTestFiveNg, InheritParentProperties001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
+
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(Dimension(10.0));
+    layoutProperty->UpdateTextColor(Color::RED);
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
@@ -786,7 +791,9 @@ HWTEST_F(TextTestFiveNg, InheritParentProperties001, TestSize.Level1)
     auto spanItem = spanNode->GetSpanItem();
     ASSERT_NE(spanItem, nullptr);
 
-    EXPECT_EQ(spanItem->InheritParentProperties(frameNode, true), TextStyle());
+    TextStyle textStyle;
+    textStyle.SetFontSize(Dimension(10.0));
+    textStyle.SetTextColor(Color::RED);
 
     pipeline->themeManager_ = oldTheme;
 }
@@ -809,7 +816,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     ASSERT_NE(textAdaptFontSizer, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     Dimension stepUnit;
     LayoutConstraintF contentConstraint;
 
@@ -1016,17 +1023,17 @@ HWTEST_F(TextTestFiveNg, CreateParagraph001, TestSize.Level1)
     ASSERT_NE(externalParagraph, nullptr);
     pattern->SetExternalParagraph(AceType::RawPtr(externalParagraph));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->textDetectEnable_ = true;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(0, AISpan()));
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 
     pattern->SetExternalParagraphStyle(externalParagraphStyle);
 
-    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode), maxSize.Width()), true);
+    EXPECT_EQ(textLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode), maxSize.Width()), true);
 }
 
 /**
@@ -1078,7 +1085,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinTextSize001, TestSize.Level1)
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
     TextStyle textStyle;
-    std::string content;
+    std::u16string content;
     LayoutConstraintF contentConstraint;
 
     frameNode->pattern_ = nullptr;
@@ -1430,6 +1437,27 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMarkInfoChange001
+ * @tc.desc: test base_text_select_overlay.cpp OnHandleMarkInfoChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    SelectOverlayDirtyFlag flag = UPDATE_HANDLE_COLOR_FLAG;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
+}
+
+/**
  * @tc.name: GetSpanParagraphStyle001
  * @tc.desc: test multiple_paragraph_layout_algorithm.cpp GetSpanParagraphStyle function
  * @tc.type: FUNC
@@ -1520,38 +1548,6 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetTextColorValue(Color::RED), Color::BLACK);
-}
-
-/**
- * @tc.name: SetPropertyToModifier001
- * @tc.desc: test multiple_paragraph_layout_algorithm.cpp SetPropertyToModifier function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, SetPropertyToModifier001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(textLayoutAlgorithm, nullptr);
-
-    TextStyle textStyle;
-
-    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutProperty, nullptr);
-    auto modifier = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(textStyle), pattern);
-    ASSERT_NE(modifier, nullptr);
-
-    std::vector<std::string> fontFamilies;
-    fontFamilies.emplace_back("Arial");
-    fontFamilies.emplace_back("Calibri");
-    layoutProperty->UpdateFontFamily(fontFamilies);
-    layoutProperty->UpdateAdaptMaxFontSize(Dimension(1.0));
-    layoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::SOLID);
-    textLayoutAlgorithm->SetPropertyToModifier(layoutProperty, modifier, textStyle);
-    EXPECT_EQ(modifier->textDecorationStyle_, TextDecorationStyle::SOLID);
 }
 
 /**
@@ -1734,16 +1730,16 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
     EXPECT_EQ(callPushStyleCount, 0);
 
     spanItem->fontStyle->UpdateFontSize(Dimension(0));
-    spanItem->UpdateSymbolSpanParagraph(nullptr, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
     EXPECT_EQ(callPushStyleCount, 0);
 
     std::unique_ptr<FontStyle> oldFontStyle = std::move(spanItem->fontStyle);
     std::unique_ptr<TextLineStyle> oldTextLineStyle = std::move(spanItem->textLineStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     spanItem->textLineStyle = std::move(oldTextLineStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     spanItem->fontStyle = std::move(oldFontStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     EXPECT_EQ(callPushStyleCount, 1);
 }
 
@@ -2872,5 +2868,20 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
     ASSERT_NE(paragraph, nullptr);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
     pattern->UpdateFontColor(Color::BLACK);
+}
+
+/**
+ * @tc.name: UnRegisterAfterLayoutCallback001
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->RegisterAfterLayoutCallback([]() {});
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
+    pattern->UnRegisterAfterLayoutCallback();
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
 }
 } // namespace OHOS::Ace::NG

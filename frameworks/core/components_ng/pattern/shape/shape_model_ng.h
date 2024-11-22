@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,12 +26,13 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ShapeModelNG : public ShapeModel {
 public:
     void Create() override;
-    void SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row) override;
+    void SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row) override;
     void SetViewPort(const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth,
         const Dimension& dimHeight) override;
-    void InitBox(RefPtr<PixelMap>& pixMap) override {}
+    void InitBox(const RefPtr<PixelMap>& pixMap) override;
     void SetStroke(const Color& color) override;
     void SetFill(const Color& color) override;
+    void SetForegroundColor(const Color& color) override;
     void SetStrokeDashOffset(const Ace::Dimension& dashOffset) override;
     void SetStrokeLineCap(int lineCapStyle) override;
     void SetStrokeLineJoin(int lineJoinStyle) override;
@@ -57,7 +58,7 @@ public:
     static void SetViewPort(FrameNode* frameNode,
         const std::optional<Dimension>& dimLeft, const std::optional<Dimension>& dimTop,
         const std::optional<Dimension>& dimWidth, const std::optional<Dimension>& dimHeight);
-    static void SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row);
+    static void SetBitmapMesh(FrameNode* frameNode, const std::vector<float>& mesh, int32_t column, int32_t row);
     static void SetWidth(FrameNode* frameNode) {}
     static void SetHeight(FrameNode* frameNode) {}
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);

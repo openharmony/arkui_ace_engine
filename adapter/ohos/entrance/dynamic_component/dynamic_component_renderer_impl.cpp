@@ -117,7 +117,7 @@ void DynamicComponentRendererImpl::InitUiContent()
     CHECK_NULL_VOID(uiContent_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();
 
-    uiContent_->InitializeDynamic(
+    uiContent_->InitializeDynamic(hostInstanceId_,
         isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
@@ -526,6 +526,19 @@ void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(float pointX,
     int32_t eventType, int64_t timeMs)
 {
     CHECK_NULL_VOID(uiContent_);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto jsAccessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    auto uiExtensionId = pattern->GetUiExtensionId();
+    TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "uiExtensionId: %{public}d", uiExtensionId);
+    jsAccessibilityManager->SetUiextensionId(uiExtensionId);
     uiContent_->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
 }
 

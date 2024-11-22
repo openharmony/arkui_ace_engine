@@ -56,6 +56,12 @@ napi_value HspSilentInstallNapi::IsHspExist(napi_env env, napi_callback_info inf
     return jsResult;
 }
 
+napi_value HspSilentInstallNapi::InitRouteMap(napi_env env, napi_callback_info info)
+{
+    HspSilentInstall::InitRouteMap();
+    return nullptr;
+}
+
 napi_value HspSilentInstallNapi::SilentInstall(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
@@ -69,28 +75,35 @@ napi_value HspSilentInstallNapi::SilentInstall(napi_env env, napi_callback_info 
     std::string moduleName;
     getModuleName(env, args[0], moduleName);
 
-    auto callbackData = new CallbackData();
+    auto callbackData = new (std::nothrow) CallbackData();
+    if (callbackData == nullptr) {
+        return result;
+    }
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        delete callbackData;
+        callbackData = nullptr;
+        return result;
+    }
     int parameterNum = 1;
     const int indexTwo = 2;
     napi_create_reference(env, args[1], parameterNum, &(callbackData->successCallback));
     napi_create_reference(env, args[indexTwo], parameterNum, &(callbackData->failCallback));
     callbackData->env = env;
 
-    auto successCallback = [callbackData]() {
+    auto successCallback = [callbackData, work]() {
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(callbackData->env, &loop);
-        uv_work_t *work = new (std::nothrow) uv_work_t;
         work->data = reinterpret_cast<void *>(callbackData);
         uv_queue_work(loop, work, [](uv_work_t *work) { (void)work; }, SendSuccessBackWork);
     };
 
-    auto failCallback = [callbackData](int32_t errorCode, const std::string& errorMessage) {
+    auto failCallback = [callbackData, work](int32_t errorCode, const std::string& errorMessage) {
         callbackData->errCode = errorCode;
         callbackData->errorMessage = errorMessage;
 
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(callbackData->env, &loop);
-        uv_work_t *work = new (std::nothrow) uv_work_t;
         work->data = reinterpret_cast<void *>(callbackData);
         uv_queue_work(loop, work, [](uv_work_t *work) { (void)work; }, SendFailBackWork);
     };
@@ -117,6 +130,10 @@ napi_value HspSilentInstallNapi::getModuleName(napi_env env, napi_value args, st
 
 void HspSilentInstallNapi::SendSuccessBackWork(uv_work_t *work, int statusIn)
 {
+    if (work == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "SendSuccessBackWork -> work is null");
+        return;
+    }
     (void)statusIn;
     napi_status status;
     napi_handle_scope scope = nullptr;
@@ -163,6 +180,10 @@ void HspSilentInstallNapi::SendSuccessBackWork(uv_work_t *work, int statusIn)
 
 void HspSilentInstallNapi::SendFailBackWork(uv_work_t *work, int statusIn)
 {
+    if (work == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "SendSuccessBackWork -> work is null");
+        return;
+    }
     (void)statusIn;
     napi_status status;
     napi_handle_scope scope = nullptr;

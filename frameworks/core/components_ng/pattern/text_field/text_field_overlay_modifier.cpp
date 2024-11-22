@@ -189,7 +189,9 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -199,7 +201,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
     auto paintOffset = textFieldPattern->GetContentRect().GetOffset();
-    auto textBoxes = textFieldPattern->GetTextBoxes();
+    auto textBoxes = textFieldPattern->GetTextBoxesForSelect();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
     float clipRectHeight = 0.0f;
@@ -302,7 +304,9 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

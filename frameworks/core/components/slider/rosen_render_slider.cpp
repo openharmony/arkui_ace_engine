@@ -348,23 +348,6 @@ void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& of
         trackFocusHeight = track->GetTrackThickness() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
         trackFocusRadius = trackFocusHeight * HALF;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPaint paint;
-    paint.setColor(FOCUS_BORDER_COLOR);
-    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
-    paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setAntiAlias(true);
-    SkRRect rRect;
-    rRect.setRectXY(SkRect::MakeIWH(trackFocusWidth, trackFocusHeight), trackFocusRadius, trackFocusRadius);
-    if (direction_ == Axis::VERTICAL) {
-        rRect.offset(track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
-            NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF));
-    } else {
-        rRect.offset(NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF),
-            track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
-    }
-    canvas->drawRRect(rRect, paint);
-#else
     RSPen pen;
     pen.SetColor(FOCUS_BORDER_COLOR);
     pen.SetWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
@@ -383,7 +366,6 @@ void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& of
     canvas->AttachPen(pen);
     canvas->DrawRoundRect(rRect);
     canvas->DetachPen();
-#endif
 }
 
 } // namespace OHOS::Ace

@@ -27,8 +27,6 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr int32_t PERCISION = 2;
-
 template<typename T>
 class SizeT {
 public:
@@ -383,13 +381,14 @@ public:
 
     std::string ToString() const
     {
-        auto heightStr = std::to_string(height_);
-        auto widthStr = std::to_string(width_);
-        std::string output = "[";
-        output += widthStr.substr(0, widthStr.find(".") + PERCISION + 1);
-        output += " x ";
-        output += heightStr.substr(0, heightStr.find(".") + PERCISION + 1);
-        output += "]";
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision);
+        ss << width_;
+        ss << " x ";
+        ss << height_;
+        ss << "]";
+        std::string output = ss.str();
         return output;
     }
 

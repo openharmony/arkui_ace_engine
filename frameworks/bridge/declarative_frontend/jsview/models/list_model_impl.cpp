@@ -106,7 +106,7 @@ void ListModelImpl::SetLaneConstrain(const Dimension& laneMinLength, const Dimen
     component->SetLaneConstrain(laneMinLength, laneMaxLength);
 }
 
-void ListModelImpl::SetCachedCount(int32_t cachedCount)
+void ListModelImpl::SetCachedCount(int32_t cachedCount, bool show)
 {
     JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
 }

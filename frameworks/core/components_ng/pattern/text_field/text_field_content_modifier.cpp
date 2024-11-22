@@ -44,29 +44,11 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
-constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
-constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
 constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
     return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
-}
-
-float CalCounterWidth(const RefPtr<TextFieldPattern>& textFieldPattern)
-{
-    float counterWidth = 0.0f;
-    RefPtr<LayoutWrapper> counterNode = textFieldPattern->GetCounterNode().Upgrade();
-    auto counterFrameNode = counterNode->GetHostNode();
-    CHECK_NULL_RETURN(counterFrameNode, 0.0f);
-    auto counterTextPattern = counterFrameNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(counterTextPattern, 0.0f);
-    auto counterParagraphs = counterTextPattern->GetParagraphs();
-    for (auto &&info : counterParagraphs) {
-        float width = info.paragraph->GetLongestLine();
-        counterWidth = std::max(counterWidth, width);
-    }
-    return counterWidth;
 }
 } // namespace
 
@@ -86,21 +68,10 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto contentOffset = contentOffset_->Get();
     auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;
-    auto errorMargin = 0.0f;
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else if (showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else {
-        errorMargin = 0;
-    }
-    ProcessErrorParagraph(context, errorMargin);
     clipRectHeight = contentRect.GetY() + contentRect.Height();
     canvas.Save();
     RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
@@ -325,7 +296,9 @@ void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& v
 
 void TextFieldContentModifier::SetFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
@@ -333,7 +306,9 @@ void TextFieldContentModifier::SetFontSize(const Dimension& value)
 
 void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     adaptMinFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(valPx);
@@ -341,7 +316,9 @@ void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
 
 void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value)
 {
-    auto valPx = static_cast<float>(value.ConvertToPx());
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
     adaptMaxFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(valPx);
@@ -510,55 +487,6 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateTextDecorationMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
-}
-
-void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, float errorMargin)
-{
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto offset = contentOffset_->Get();
-    auto textFrameRect = textFieldPattern->GetFrameRect();
-    auto errorParagraph = textFieldPattern->GetErrorParagraph();
-    auto errorValue = textFieldPattern->GetErrorTextString();
-    auto frameNode = textFieldPattern->GetHost();
-    auto& canvas = context.canvas;
-    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled() && !errorValue.empty()) {
-        auto property = frameNode->GetLayoutProperty();
-        float padding = 0.0f;
-        if (property && property->GetPaddingProperty()) {
-            const auto& paddingProperty = property->GetPaddingProperty();
-            padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
-                paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
-        }
-        float layoutWidth = textFrameRect.Width() - padding;
-        // subtract border width
-        float borderWidth = textFieldPattern->GetBorderLeft() + textFieldPattern->GetBorderRight();
-        borderWidth = std::max(borderWidth, 0.0f);
-        layoutWidth -= borderWidth;
-        if (textFieldPattern->IsShowCount()) {
-            // subtract counter length
-            float counterWidth = CalCounterWidth(textFieldPattern);
-            layoutWidth -= counterWidth;
-        }
-        if (layoutWidth <= 0) {
-            return; // no enough space
-        }
-        errorParagraph->Layout(layoutWidth);
-        if (errorParagraph->GetLongestLine() > layoutWidth) {
-            return; // no enough space
-        }
-        auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
-        auto offSetX = offset.GetX();
-        if (isRTL) {
-            if (textFieldPattern->GetResponseArea()) {
-                offSetX -= textFieldPattern->GetResponseArea()->GetAreaRect().Width();
-            }
-            if (textFieldPattern->GetCleanNodeResponseArea()) {
-                offSetX -= textFieldPattern->GetCleanNodeResponseArea()->GetAreaRect().Width();
-            }
-        }
-        errorParagraph->Paint(canvas, offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
-    }
 }
 
 void TextFieldContentModifier::SetTextDecoration(const TextDecoration& value, const Color& color,

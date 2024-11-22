@@ -33,8 +33,10 @@ public:
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
+    void SetInstanceId(int32_t instanceId);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
+    MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
     MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
     MOCK_METHOD(float, GetFontScale, ());
     MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));
@@ -50,7 +52,10 @@ public:
     };
 
     static RefPtr<MockPipelineContext> pipeline_;
-
+    bool IsWindowFocused() const
+    {
+        return onFocus_;
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
@@ -58,4 +63,8 @@ protected:
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+    void SetBoolStatus(bool value);
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H

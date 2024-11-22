@@ -22,7 +22,8 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -448,6 +449,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -459,11 +461,19 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using CalcPredictSnapOffsetCallback =
-                std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
-using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
+using StartSnapAnimationCallback =
+    std::function<bool(float delta, float animationVelocity, float predictVelocity, float dragDistance)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
+
+struct ScrollerObserver {
+    RefPtr<NG::TouchEventImpl> onTouchEvent;
+    OnReachEvent onReachStartEvent;
+    OnReachEvent onReachEndEvent;
+    OnScrollStartEvent onScrollStartEvent;
+    OnScrollStopEvent onScrollStopEvent;
+    OnDidScrollEvent onDidScrollEvent;
+};
 } // namespace OHOS::Ace
 
 #endif

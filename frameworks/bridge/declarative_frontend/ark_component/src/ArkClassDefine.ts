@@ -62,12 +62,16 @@ class ArkBorderStyle {
 }
 
 class ArkBorderColor {
+  startColor: LocalizedEdgeColors;
+  endColor: LocalizedEdgeColors;
   leftColor: EdgeColors | ResourceColor;
   rightColor: EdgeColors | ResourceColor;
-  topColor: EdgeColors | ResourceColor;
-  bottomColor: EdgeColors | ResourceColor;
+  topColor: EdgeColors | ResourceColor | LocalizedEdgeColors;
+  bottomColor: EdgeColors | ResourceColor | LocalizedEdgeColors;
 
   constructor() {
+    this.startColor = undefined;
+    this.endColor = undefined;
     this.leftColor = undefined;
     this.rightColor = undefined;
     this.topColor = undefined;
@@ -76,6 +80,8 @@ class ArkBorderColor {
 
   isEqual(another: ArkBorderColor): boolean {
     return (
+      this.startColor === another.startColor &&
+      this.endColor === another.endColor &&
       this.leftColor === another.leftColor &&
       this.rightColor === another.rightColor &&
       this.topColor === another.topColor &&
@@ -87,14 +93,18 @@ class ArkBorderColor {
 class ArkBorderWidth {
   left: EdgeWidths | Length;
   right: EdgeWidths | Length;
-  top: EdgeWidths | Length;
-  bottom: EdgeWidths | Length;
+  top: EdgeWidths | Length | LocalizedEdgeWidths;
+  bottom: EdgeWidths | Length | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderWidth): boolean {
@@ -102,7 +112,9 @@ class ArkBorderWidth {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
@@ -112,20 +124,32 @@ class ArkBorderRadius {
   topRight: BorderRadiuses | Length;
   bottomLeft: BorderRadiuses | Length;
   bottomRight: BorderRadiuses | Length;
+  topStart: LocalizedBorderRadius;
+  topEnd: LocalizedBorderRadius;
+  bottomStart: LocalizedBorderRadius;
+  bottomEnd: LocalizedBorderRadius;
 
   constructor() {
     this.topLeft = undefined;
     this.topRight = undefined;
     this.bottomLeft = undefined;
     this.bottomRight = undefined;
+    this.topStart = undefined;
+    this.topEnd = undefined;
+    this.bottomStart = undefined;
+    this.bottomEnd = undefined;
   }
 
   isEqual(another: ArkBorderRadius): boolean {
     return (
-      this.topLeft === another.topLeft &&
-      this.topRight === another.topRight &&
-      this.bottomLeft === another.bottomLeft &&
-      this.bottomRight === another.bottomRight
+      (this.topLeft === another.topLeft &&
+        this.topRight === another.topRight &&
+        this.bottomLeft === another.bottomLeft &&
+        this.bottomRight === another.bottomRight) ||
+      (this.topStart === another.topStart &&
+        this.topEnd === another.topEnd &&
+        this.bottomStart === another.bottomStart &&
+        this.bottomEnd === another.bottomEnd)
     );
   }
 }
@@ -502,12 +526,16 @@ class ArkBorderDashGap {
   right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderDashGap): boolean {
@@ -515,7 +543,9 @@ class ArkBorderDashGap {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
@@ -525,12 +555,16 @@ class ArkBorderDashWidth {
   right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
   bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  start: LocalizedEdgeWidths;
+  end: LocalizedEdgeWidths;
 
   constructor() {
     this.left = undefined;
     this.right = undefined;
     this.top = undefined;
     this.bottom = undefined;
+    this.start = undefined;
+    this.end = undefined;
   }
 
   isEqual(another: ArkBorderDashWidth): boolean {
@@ -538,7 +572,9 @@ class ArkBorderDashWidth {
       this.left === another.left &&
       this.right === another.right &&
       this.top === another.top &&
-      this.bottom === another.bottom
+      this.bottom === another.bottom &&
+      this.start === another.start &&
+      this.end === another.end
     );
   }
 }
@@ -856,15 +892,18 @@ class ArkSearchButton {
   value: string | undefined;
   fontSize: Length | undefined;
   fontColor: ResourceColor | undefined;
+  autoDisable: boolean | undefined;
   constructor() {
     this.value = undefined;
     this.fontSize = undefined;
     this.fontColor = undefined;
+    this.autoDisable = undefined;
   }
   isEqual(another: ArkSearchButton): boolean {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
-      (this.fontColor === another.fontColor);
+      (this.fontColor === another.fontColor) &&
+      (this.autoDisable === another.autoDisable);
   }
 }
 
@@ -942,6 +981,18 @@ class ArkCustomProperty {
   constructor() {
     this.key = undefined;
     this.value = undefined;
+  }
+}
+
+class ArkUseEffect {
+  useEffect: boolean;
+  effectType: EffectType;
+  constructor() {
+    this.useEffect = undefined;
+    this.effectType = undefined;
+  }
+  isEqual(another: ArkUseEffect): boolean {
+    return (this.useEffect === another.useEffect) && (this.effectType === another.effectType);
   }
 }
 
@@ -1268,10 +1319,10 @@ class ArkScrollSnapOptions {
 class ArkGeometryTransition {
   id: string | undefined;
   options: GeometryTransitionOptions | undefined;
-  
+
   constructor() {
     this.id = undefined;
-    this.options = undefined;   
+    this.options = undefined;
   }
 
   isEqual(another: ArkGeometryTransition): boolean {
@@ -1359,6 +1410,19 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
+class ArkScrollableCacheOptions {
+  count: number;
+  show: boolean;
+  constructor(count: number, show: boolean) {
+    this.count = count;
+    this.show = show;
+  }
+  isEqual(other: ArkScrollableCacheOptions): boolean {
+    return (this.count === other.count) &&
+      (this.show === other.show);
+  }
+}
+
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1409,12 +1473,12 @@ class ArkDragPreviewOptions {
 }
 
 class ArkDragPreview {
-  inspetorId : string;
+  inspetorId: string;
   constructor() {
     this.inspetorId = undefined;
   }
 
-  isEqual(another: ArkDragPreview) : boolean {
+  isEqual(another: ArkDragPreview): boolean {
     return this.inspetorId === another.inspetorId;
   }
 }
@@ -1462,12 +1526,15 @@ class ArkRelativeContainerBarrier {
 class ArkFocusScopeId {
   id: string | undefined;
   isGroup: boolean | undefined;
+  arrowStepOut: boolean | undefined;
   constructor() {
     this.id = undefined;
     this.isGroup = undefined;
+    this.arrowStepOut = undefined;
   }
   isEqual(another: ArkFocusScopeId): boolean {
-    return (this.id === another.id) && (this.isGroup === another.isGroup);
+    return ((this.id === another.id) && (this.isGroup === another.isGroup) &&
+      (this.arrowStepOut === another.arrowStepOut));
   }
 }
 
@@ -1529,5 +1596,18 @@ class ArkNavigationTitle {
   }
   isEqual(another: ArkNavigationTitle): boolean {
     return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
+  }
+}
+
+class ArkNavHideTitleBarOrToolBar {
+  isHide: boolean;
+  animated: boolean;
+
+  constructor() {
+    this.isHide = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
+    return (this.isHide === another.isHide) && (this.animated === another.animated);
   }
 }

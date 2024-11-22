@@ -24,29 +24,23 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<RelativeContainerModel> RelativeContainerModel::instance_ = nullptr;
-std::mutex RelativeContainerModel::mutex_;
 constexpr int32_t LOCALIZED_BARRIER_DIRECTION_START = 4;
 
 RelativeContainerModel* RelativeContainerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RelativeContainerModelNG());
+    static NG::RelativeContainerModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RelativeContainerModelNG());
-            } else {
-                instance_.reset(new Framework::RelativeContainerModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RelativeContainerModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RelativeContainerModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

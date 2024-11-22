@@ -90,9 +90,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-    (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE)
-        ? textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE)
-        : textLayoutProperty->ResetMaxFontScale();
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -206,12 +204,61 @@ void ButtonPattern::InitButtonLabel()
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
     HandleBackgroundColor();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
+}
+
+void ButtonPattern::CheckLocalizedBorderRadiuses()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& property = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto direction = property->GetNonAutoLayoutDirection();
+    BorderRadiusProperty borderRadius;
+    BorderRadiusProperty borderRadiusProperty = property->GetBorderRadiusValue(BorderRadiusProperty {});
+    if (!borderRadiusProperty.radiusTopStart.has_value() && !borderRadiusProperty.radiusTopEnd.has_value() &&
+        !borderRadiusProperty.radiusBottomStart.has_value() && !borderRadiusProperty.radiusBottomEnd.has_value()) {
+        return;
+    }
+    if (borderRadiusProperty.radiusTopStart.has_value()) {
+        borderRadius.radiusTopStart = borderRadiusProperty.radiusTopStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
+        } else {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopStart;
+        }
+    }
+    if (borderRadiusProperty.radiusTopEnd.has_value()) {
+        borderRadius.radiusTopEnd = borderRadiusProperty.radiusTopEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
+        } else {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopEnd;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomStart.has_value()) {
+        borderRadius.radiusBottomStart = borderRadiusProperty.radiusBottomStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
+        } else {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomStart;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomEnd.has_value()) {
+        borderRadius.radiusBottomEnd = borderRadiusProperty.radiusBottomEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
+        } else {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomEnd;
+        }
+    }
+    property->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonPattern::InitTouchEvent()
@@ -558,5 +605,49 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        textLayoutProperty->ResetMaxFontScale();
+    }
+}
+
+void ButtonPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        if (!layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (!layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    } else {
+        if (layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    }
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

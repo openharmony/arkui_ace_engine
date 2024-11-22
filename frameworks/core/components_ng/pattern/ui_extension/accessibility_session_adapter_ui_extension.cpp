@@ -31,4 +31,9 @@ void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &po
     sessionWrapper->TransferAccessibilityHoverEvent(point.GetX(), point.GetY(),
         static_cast<int32_t>(source), static_cast<int32_t>(eventType), timeMs);
 }
+
+bool AccessibilitySessionAdapterUIExtension::IgnoreHostNode() const
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

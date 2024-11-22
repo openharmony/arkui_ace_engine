@@ -71,10 +71,17 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
+    void FlushLayoutSize(int32_t width, int32_t height) override;
+
     bool FlushAnimation(uint64_t timeStamp) override
     {
         int64_t vsyncPeriod = GetVSyncPeriod();
         return rsUIDirector_->FlushAnimation(timeStamp, vsyncPeriod);
+    }
+
+    bool HasFirstFrameAnimation() override
+    {
+        return rsUIDirector_->HasFirstFrameAnimation();
     }
 
     void FlushAnimationStartTime(uint64_t timeStamp) override
@@ -120,6 +127,8 @@ public:
     void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
     uint32_t GetStatusBarHeight() const override;
+
+    bool GetIsRequestVsync() override;
 
     void NotifyExtensionTimeout(int32_t errorCode) override;
 private:

@@ -87,22 +87,16 @@ void ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, T
     event.sourceType = static_cast<SourceType>(static_cast<int32_t>(pointerEvent->sourceType));
     event.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(pointerEvent->sourceTool));
     event.pointerEvent = pointerEvent;
-    for (auto& item : pointerEvent->pointers) {
-        TouchPoint pointer;
-        pointer.id = item.id;
-        pointer.x = item.x;
-        pointer.y = item.y;
-        pointer.screenX = item.screenX;
-        pointer.screenY = item.screenY;
-        pointer.downTime = item.downTime;
-        pointer.size = item.size;
-        pointer.force = item.force;
-        pointer.tiltX = item.tiltX;
-        pointer.tiltY = item.tiltY;
-        pointer.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(item.sourceTool));
-        pointer.isPressed = item.isPressed;
-        event.pointers.emplace_back(pointer);
-    }
+    TouchPoint pointer { .id = event.id,
+        .x = event.x,
+        .y = event.y,
+        .screenX = event.screenX,
+        .screenY = event.screenY,
+        .downTime = event.time,
+        .size = event.size,
+        .force = event.force,
+        .isPressed = (event.type == TouchType::DOWN) };
+    event.pointers.emplace_back(pointer);
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)

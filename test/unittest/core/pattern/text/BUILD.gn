@@ -25,9 +25,27 @@ ace_unittest("text_test_ng") {
     "text_test_ng.cpp",
     "text_testfive_ng.cpp",
     "text_testfour_ng.cpp",
+    "text_testseven_ng.cpp",
     "text_testsix_ng.cpp",
     "text_testthree_ng.cpp",
     "text_testtwo_ng.cpp",
     "typed_text_test_ng.cpp",
+  ]
+}
+
+ace_unittest("text_test_nullptr") {
+  type = "new"
+  sources = [
+    "text_base.cpp",
+    "text_nullptr_ng.cpp",
+  ]
+  defines = [ "NEED_PIPELINE_CONTEXT_BE_NULLPTR" ]
+}
+
+group("text_tests_ng") {
+  testonly = true
+  deps = [
+    ":text_test_ng",
+    ":text_test_nullptr",
   ]
 }

@@ -263,6 +263,7 @@ template("declarative_js_engine") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
@@ -291,14 +292,13 @@ template("declarative_js_engine") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
-      "jsview/js_linear_indicator.cpp",
-      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -313,6 +313,7 @@ template("declarative_js_engine") {
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
+      "jsview/js_navdestination_scrollable_processor.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigation_utils.cpp",
@@ -368,6 +369,7 @@ template("declarative_js_engine") {
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -638,13 +640,17 @@ template("declarative_js_engine") {
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      deps += [
+        "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
+        "$ark_ets_path:libark_jsruntime_static",
+      ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
+        "graphic_2d:librender_service_base",
         "napi:ace_napi",
       ]
     }
@@ -804,6 +810,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
@@ -830,6 +837,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
@@ -849,6 +857,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
+      "jsview/js_navdestination_scrollable_processor.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigation_utils.cpp",
@@ -897,6 +906,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -1062,6 +1072,7 @@ template("declarative_js_engine_ng") {
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
+        "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
         "$ark_ets_path:libark_jsruntime_static",
         "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
       ]
@@ -1071,6 +1082,7 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
+        "graphic_2d:librender_service_base",
         "napi:ace_napi",
       ]
     }

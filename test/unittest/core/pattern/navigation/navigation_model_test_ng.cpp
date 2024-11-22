@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -1222,7 +1223,9 @@ HWTEST_F(NavigationModelTestNg, NavigationLoadPage003, TestSize.Level1)
      * @tc.expected: step3. navigation name is empty
      */
     EXPECT_NE(pattern, nullptr);
-    auto destinationNode = AceType::DynamicCast<FrameNode>(pattern->GenerateUINodeByIndex(0));
+    RefPtr<UINode> curNode;
+    pattern->GenerateUINodeByIndex(0, curNode);
+    auto destinationNode = AceType::DynamicCast<FrameNode>(curNode);
     EXPECT_NE(destinationNode, nullptr);
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
     EXPECT_NE(destinationPattern, nullptr);
@@ -1269,7 +1272,9 @@ HWTEST_F(NavigationModelTestNg, NavigationLoadPage004, TestSize.Level1)
      * @tc.steps: step3. create pageOne destination
      * @tc.expected: step3. navdestination name is pageOne
      */
-    auto destinationNode = AceType::DynamicCast<FrameNode>(pattern->GenerateUINodeByIndex(0));
+    RefPtr<UINode> curNode;
+    pattern->GenerateUINodeByIndex(0, curNode);
+    auto destinationNode = AceType::DynamicCast<FrameNode>(curNode);
     EXPECT_NE(destinationNode, nullptr);
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
     EXPECT_NE(destinationPattern, nullptr);
@@ -1956,5 +1961,80 @@ HWTEST_F(NavigationModelTestNg, SetTitlebarOptions002, TestSize.Level1)
 
     EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
     EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/**
+ * @tc.name: SetTitlebarOptions003
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetTitlebarOptions003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize NavigationTitlebarOptions.
+     * @tc.expected: All pointer is non-null.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->pageNode_ = WeakPtr<FrameNode>(frameNode_);
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    opt.enableHoverMode = true;
+
+    NavigationModelNG::SetTitlebarOptions(&(*frameNode), std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
+    EXPECT_TRUE(options.enableHoverMode);
+
+    /**
+     * @tc.steps2: initialize titleMode.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::MINI);
+
+    /**
+     * @tc.steps3: initialize isHalfFoldHoverStatus_.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->isHalfFoldHoverStatus_ = true;
+
+    /**
+     * @tc.steps: step4. Set fold crease region.
+     */
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    titleBarPattern->currentFoldCreaseRegion_ = rects;
+
+    float offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    EXPECT_NE(offsetY, 0.0f);
 }
 } // namespace OHOS::Ace::NG

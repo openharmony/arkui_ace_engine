@@ -65,7 +65,8 @@ private:
     TouchEvent curTouchEvent_;
     TouchEvent lastTouchEvent_;
     Offset averageDistance_;
-    bool isInSilde = false;
+    bool isInSlide_ = false;
+    bool isInTouch_ = false;
     double dpi_ = PipelineBase::GetCurrentDensity();
 };
 

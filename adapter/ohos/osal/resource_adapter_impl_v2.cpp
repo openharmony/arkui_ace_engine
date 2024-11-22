@@ -205,7 +205,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     
-    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    constexpr char flag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     {
         auto manager = GetResourceManager();
         if (manager) {
@@ -213,7 +213,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
             for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
                 ResourceThemeStyle::RawAttrMap attrMap;
                 std::string patternTag = PATTERN_MAP[i];
-                std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
+                std::string patternName = std::string(flag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
                 if (attrMap.empty()) {
                     continue;
@@ -280,11 +280,11 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
 {
     auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     patternStyle->SetName(patternName);
-    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    constexpr char flag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     auto manager = GetResourceManager();
     if (manager) {
         ResourceThemeStyle::RawAttrMap attrMap;
-        std::string patternTag = std::string(OHFlag) + patternName;
+        std::string patternTag = std::string(flag) + patternName;
         auto state = manager->GetPatternByName(patternTag.c_str(), attrMap);
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternTag.c_str());
@@ -768,6 +768,18 @@ bool ResourceAdapterImplV2::GetRawFileDescription(
     rawfileDescription.fd = descriptor.fd;
     rawfileDescription.offset = descriptor.offset;
     rawfileDescription.length = descriptor.length;
+    return true;
+}
+
+bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileName) const
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto state = manager->CloseRawFileDescriptor(rawfileName);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("Close RawFile Description error, error:%{public}u", state);
+        return false;
+    }
     return true;
 }
 

@@ -36,16 +36,6 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
-{
-    CHECK_NULL_VOID(row);
-    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-}
-
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerNode = GetHost();
@@ -75,7 +65,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     if (!hasDeco_) {
         isShow = false;
     }
-
+    isTitleShow_ = isShow;
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -104,17 +94,9 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto stackLayoutProperty = stackNode->GetLayoutProperty();
     CHECK_NULL_VOID(stackLayoutProperty);
     stackLayoutProperty->UpdateLayoutWeight(1.0f);
-
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
-    BorderRadiusProperty stageBorderRadius;
-    auto contentBorderRadius = isShow ? GetStackNodeRadius() : 0.0_vp;
-    stageBorderRadius.SetRadius(contentBorderRadius);
-    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
-
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow, isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
@@ -128,7 +110,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(controlButtonsNode);
     auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
-    AddOrRemovePanEvent(controlButtonsNode);
+    AddPanEvent(controlButtonsNode);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
 
@@ -277,31 +259,61 @@ void ContainerModalPattern::InitContainerEvent()
     });
 }
 
-void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsNode)
 {
     auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventHub);
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
 
-    if (!panEvent_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto windowManager = pipeline->GetWindowManager();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    // touch the title to move the floating window
+    auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
+        auto windowManager = wk.Upgrade();
         CHECK_NULL_VOID(windowManager);
-        // touch the title to move the floating window
-        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
-            auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID(windowManager);
-            if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
-                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
-                windowManager->WindowStartMove();
-                SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
+            (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
+            windowManager->WindowStartMove();
+            SubwindowManager::GetInstance()->ClearToastInSubwindow();
+        }
+    };
+
+    std::vector<RefPtr<Gesture>> gestures;
+    auto mousePanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0);
+    mousePanGesture->SetTag("mousePanGesture");
+    gestures.emplace_back(mousePanGesture);
+    auto fingerPanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 5);
+    fingerPanGesture->SetTag("fingerPanGesture");
+    gestures.emplace_back(fingerPanGesture);
+    auto gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    mousePanGesture->SetOnActionStartId(panActionStart);
+    fingerPanGesture->SetOnActionStartId(panActionStart);
+    eventHub->AddGesture(gestureGroup);
+    eventHub->SetOnGestureJudgeNativeBegin([](
+        const RefPtr<NG::GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info)->GestureJudgeResult {
+            // MousePanGesture has higher priority. When using touch, should reject mousePanGesture.
+            // This means only fingerPanGesture or SourceTool::MOUSE are accepted.
+            if (gestureInfo->GetTag() == "mousePanGesture" && info->GetSourceTool() != SourceTool::MOUSE) {
+                TAG_LOGD(AceLogTag::ACE_APPBAR, "AddPanEvent: GestureJudgeResult REJECT");
+                return GestureJudgeResult::REJECT;
             }
-        };
-        panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
+            return GestureJudgeResult::CONTINUE;
+    });
+}
+
+void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+{
+    auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+
+    if (!panEvent_) {
+        return;
     }
-    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    eventHub->RemovePanEvent(panEvent_);
 }
 
 void ContainerModalPattern::OnWindowFocused()
@@ -371,9 +383,9 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId;
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        maxId = InternalResource::ResourceId::IC_WINDOW_RESTORES;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER;
     } else {
-        maxId = InternalResource::ResourceId::IC_WINDOW_MAX;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     }
 
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
@@ -381,12 +393,12 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
-        InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
-        InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
 }
 
 void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
@@ -527,19 +539,16 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     activeColor_ = activeColor;
     inactiveColor_ = inactiveColor;
+    isCustomColor_ = true;
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-
-    if (isFocus) {
-        return activeColor_;
-    } else {
-        return inactiveColor_;
-    }
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    return isCustomColor_ ? (isFocus ? activeColor_ : inactiveColor_) : theme->GetBackGroundColor(isFocus);
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
@@ -675,13 +684,13 @@ void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& r
         rect.Height() - padding.Height() - titleHeight);
 }
 
-void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect, bool isContainerModal)
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto titleHeight = GetCustomTitleHeight().ConvertToPx();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     rect.SetRect(
         padding.Offset().GetX(),
@@ -882,14 +891,6 @@ Dimension ContainerModalPattern::GetCustomTitleHeight()
     return titleHeight_;
 }
 
-Dimension ContainerModalPattern::GetStackNodeRadius()
-{
-    Dimension radius = customTitleSettedShow_ ? CONTAINER_INNER_RADIUS : CONTAINER_OUTER_RADIUS;
-    auto trimRadiusPx = Dimension(round(radius.ConvertToPx() * 2) / 2.0);
-    auto trimRadiusVp = Dimension(trimRadiusPx.ConvertToVp(), DimensionUnit::VP);
-    return trimRadiusVp;
-}
-
 bool ContainerModalPattern::CanShowCustomTitle()
 {
     auto buttonsRow = GetControlButtonRow();
@@ -905,10 +906,6 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     }
     auto stack = GetStackNode();
     CHECK_NULL_VOID(stack);
-    auto stackRender = stack->GetRenderContext();
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(GetStackNodeRadius());
-    stackRender->UpdateBorderRadius(borderRadius);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hostProp = host->GetLayoutProperty();
@@ -922,4 +919,56 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
     }
     hostProp->UpdatePadding(padding);
 }
+
+bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty,
+    const DirtySwapConfig& config)
+{
+    CallButtonsRectChange();
+
+    auto considerFloatingWindow = false;
+    CallSetContainerWindow(considerFloatingWindow);
+    
+    return false;
+}
+
+void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto curWindowRect = pipelineContext->GetCurrentWindowRect();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
+    GetWindowPaintRectWithoutMeasureAndLayout(curWindowRect, isContainerModal);
+
+    auto borderRadius = 0.0_vp;
+    if (considerFloatingWindow) {
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        borderRadius = (isFloatingWindow && isTitleShow_) ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    } else {
+        borderRadius = isTitleShow_ ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    }
+    auto borderRadiusValue = borderRadius.ConvertToPx();
+
+    auto expectRect = RRect::MakeRect(curWindowRect);
+    expectRect.SetRectWithSimpleRadius(curWindowRect, borderRadiusValue, borderRadiusValue);
+    if (windowPaintRect_ == expectRect) {
+        return;
+    }
+
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
+    windowPaintRect_ = expectRect;
+}
+void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
+{
+    CHECK_NULL_VOID(row);
+    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
+}
+
 } // namespace OHOS::Ace::NG

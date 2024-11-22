@@ -90,6 +90,23 @@ public:
             value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("popupItemBackground", propPopupItemBackground_.
             value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str(), filter);
+        BorderRadiusToJsonValue(json, filter);
+        BlurStyleOption blurStyleOption;
+        if (propPopupBackgroundBlurStyle_.has_value()) {
+            blurStyleOption = propPopupBackgroundBlurStyle_.value();
+        } else {
+            blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+        }
+        auto jsonValue = JsonUtil::Create(true);
+        blurStyleOption.ToJsonValue(jsonValue, filter);
+        json->PutExtAttr("popupBackgroundBlurStyle",
+            jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
+        json->PutExtAttr("popupTitleBackground", propPopupTitleBackground_.
+            value_or(indexerTheme->GetPopupTitleBackground()).ColorToString().c_str(), filter);
+    }
+
+    void BorderRadiusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+    {
         if (propPopupBorderRadius_.has_value()) {
             json->PutExtAttr("popupBorderRadius", propPopupBorderRadius_.value().ToString().c_str(), filter);
         } else {
@@ -115,18 +132,6 @@ public:
             json->PutExtAttr("indexerBorderRadius",
                 Dimension(NG::INDEXER_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str(), filter);
         }
-        BlurStyleOption blurStyleOption;
-        if (propPopupBackgroundBlurStyle_.has_value()) {
-            blurStyleOption = propPopupBackgroundBlurStyle_.value();
-        } else {
-            blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
-        }
-        auto jsonValue = JsonUtil::Create(true);
-        blurStyleOption.ToJsonValue(jsonValue, filter);
-        json->PutExtAttr("popupBackgroundBlurStyle",
-            jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
-        json->PutExtAttr("popupTitleBackground", propPopupTitleBackground_.
-            value_or(indexerTheme->GetPopupTitleBackground()).ColorToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupSelectedColor, Color, PROPERTY_UPDATE_RENDER);

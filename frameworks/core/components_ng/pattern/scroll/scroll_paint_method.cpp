@@ -33,6 +33,7 @@ void ScrollPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     UpdateFadingGradient(renderContext);
+    TryContentClip(paintWrapper);
 }
 
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const

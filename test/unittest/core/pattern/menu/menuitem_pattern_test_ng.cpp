@@ -541,7 +541,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "content");
+    EXPECT_EQ(content.value(), u"content");
 }
 
 /**
@@ -579,7 +579,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "label");
+    EXPECT_EQ(content.value(), u"label");
 }
 
 /**
@@ -629,7 +629,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContent();
     ASSERT_TRUE(content.has_value());
-    EXPECT_EQ(content.value(), "item content");
+    EXPECT_EQ(content.value(), u"item content");
     auto textRenderContext = contentNode->GetRenderContext();
     EXPECT_EQ(textRenderContext->GetOpacity(), selectTheme->GetDisabledFontColorAlpha());
 }
@@ -1121,7 +1121,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg010, TestSize.Level1)
      * @tc.cases: case1. the hierarchicalParameter is true.
      * @tc.expected: algorithm is not null and sub menu show correctly.
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     subMenuPattern->SetParentMenuItem(menuItemNode);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
@@ -1191,7 +1191,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg011, TestSize.Level1)
      * @tc.cases: case1. the hierarchicalParameter is false.
      * @tc.expected: algorithm is not null and sub menu show correctly.
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     subMenuPattern->SetParentMenuItem(menuItemNode);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));

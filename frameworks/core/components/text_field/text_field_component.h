@@ -294,7 +294,7 @@ public:
 
     ACE_DEFINE_COMPONENT_EVENT(OnClick, void(const ClickInfo& clickInfo));
 
-    ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOptions, CopyOptions::Distributed);
+    ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOptions, CopyOptions::Local);
 
     ACE_DEFINE_COMPONENT_PROP(ScrollBar, DisplayMode, DisplayMode::OFF);
 

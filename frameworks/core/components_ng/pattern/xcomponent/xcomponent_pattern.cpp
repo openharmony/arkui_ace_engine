@@ -229,6 +229,9 @@ void XComponentPattern::InitSurface()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->RegisterBufferCallback();
     }
+    if (isTypedNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
 
     UpdateTransformHint();
@@ -291,9 +294,10 @@ void XComponentPattern::InitializeRenderContext()
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
                                                         : RenderContext::ContextType::HARDWARE_SURFACE;
-    RenderContext::ContextParam param = { contextType, GetId() + "Surface" };
+    RenderContext::ContextParam param = { contextType, GetId() + "Surface", RenderContext::PatternType::XCOM };
 #else
-    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                                          GetId() + "Surface", RenderContext::PatternType::XCOM };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -361,6 +365,7 @@ void XComponentPattern::OnAttachToFrameNode()
 
 void XComponentPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // if surface has been reset by pip, do not set backgourndColor
     if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
         return;
@@ -371,8 +376,9 @@ void XComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value() && bkColor.value() != Color::BLACK) {
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    if (bkColor.has_value()) {
+        bool isTransparent = bkColor.value().GetAlpha() < UINT8_MAX;
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(isTransparent ? Color::TRANSPARENT : bkColor.value());
     } else {
         handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
@@ -543,6 +549,16 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     context->RemoveWindowStateChangedCallback(host->GetId());
 }
 
+void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
+}
+
 void XComponentPattern::SetRotation(uint32_t rotation)
 {
     if (type_ != XComponentType::SURFACE || isSurfaceLock_ || rotation_ == rotation) {
@@ -576,11 +592,11 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     }
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = UpdateSurfaceRect();
     if (!hasXComponentInit_) {
-        initSize_ = drawSize_;
+        initSize_ = paintRect_.GetSize();
         if (!SystemProperties::GetExtSurfaceEnabled() && !isTypedNode_) {
             XComponentSizeInit();
         }
-        auto offset = globalPosition_ + localPosition_;
+        auto offset = globalPosition_ + paintRect_.GetOffset();
         NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
     }
@@ -609,8 +625,7 @@ void XComponentPattern::DumpInfo()
 
 void XComponentPattern::DumpAdvanceInfo()
 {
-    DumpLog::GetInstance().AddDesc(
-        std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -967,6 +982,10 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto keyEventCallbackWithResult = nativeXComponentImpl_->GetKeyEventCallbackWithResult();
+    if (keyEventCallbackWithResult) {
+        return keyEventCallbackWithResult(nativeXComponent_.get(), surface);
+    }
     const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
     CHECK_NULL_RETURN(keyEventCallback, false);
     keyEventCallback(nativeXComponent_.get(), surface);
@@ -1297,15 +1316,8 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
-        handlingSurfaceRenderContext_->SetBounds(
-            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-    } else {
-        handlingSurfaceRenderContext_->SetBounds(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
-    }
+    handlingSurfaceRenderContext_->SetBounds(
+        paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     host->MarkModifyDone();
 }
 
@@ -1528,26 +1540,19 @@ void XComponentPattern::HandleSurfaceChangeEvent(
         return;
     }
     if (frameOffsetChange || offsetChanged) {
-        auto offset = globalPosition_ + localPosition_;
+        auto offset = globalPosition_ + paintRect_.GetOffset();
         NativeXComponentOffset(offset.GetX(), offset.GetY());
     }
     if (sizeChanged) {
-        XComponentSizeChange({ localPosition_, surfaceSize_ }, needFireNativeEvent);
+        XComponentSizeChange(paintRect_, needFireNativeEvent);
     }
     if (handlingSurfaceRenderContext_) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto paintRect = AdjustPaintRect(
-                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
-            handlingSurfaceRenderContext_->SetBounds(
-                paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
-        } else {
-            handlingSurfaceRenderContext_->SetBounds(
-                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
-        }
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     }
     if (renderSurface_) {
         renderSurface_->SetSurfaceDefaultSize(
-            static_cast<int32_t>(surfaceSize_.Width()), static_cast<int32_t>(surfaceSize_.Height()));
+            static_cast<int32_t>(paintRect_.Width()), static_cast<int32_t>(paintRect_.Height()));
     }
     if (needForceRender) {
         auto host = GetHost();
@@ -1562,21 +1567,31 @@ std::tuple<bool, bool, bool> XComponentPattern::UpdateSurfaceRect()
         return { false, false, false };
     }
     auto preSurfaceSize = surfaceSize_;
-    auto preLocalPosition = localPosition_;
+    auto preSurfaceOffset = surfaceOffset_;
     if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
         selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
-        localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
+        surfaceOffset_.SetX(selfIdealSurfaceOffsetX_.has_value()
                                 ? selfIdealSurfaceOffsetX_.value()
                                 : (drawSize_.Width() - selfIdealSurfaceWidth_.value()) / 2.0f);
 
-        localPosition_.SetY(selfIdealSurfaceOffsetY_.has_value()
+        surfaceOffset_.SetY(selfIdealSurfaceOffsetY_.has_value()
                                 ? selfIdealSurfaceOffsetY_.value()
                                 : (drawSize_.Height() - selfIdealSurfaceHeight_.value()) / 2.0f);
         surfaceSize_ = { selfIdealSurfaceWidth_.value(), selfIdealSurfaceHeight_.value() };
     } else {
         surfaceSize_ = drawSize_;
+        surfaceOffset_ = localPosition_;
     }
-    return { preLocalPosition != localPosition_, preSurfaceSize != surfaceSize_, preSurfaceSize.IsPositive() };
+    auto offsetChanged = preSurfaceOffset != surfaceOffset_;
+    auto sizeChanged = preSurfaceSize != surfaceSize_;
+    if (offsetChanged || sizeChanged) {
+        paintRect_ = { surfaceOffset_, surfaceSize_ };
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            paintRect_ = AdjustPaintRect(
+                surfaceOffset_.GetX(), surfaceOffset_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
+        }
+    }
+    return { offsetChanged, sizeChanged, preSurfaceSize.IsPositive() };
 }
 
 void XComponentPattern::LoadNative()
@@ -1623,7 +1638,6 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(nativeXComponent_);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
-        InitNativeWindow(width, height);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
@@ -2002,7 +2016,7 @@ void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
 void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("surfaceRect", RectF { localPosition_, surfaceSize_ }.ToString().c_str());
+    json->Put("surfaceRect", paintRect_.ToString().c_str());
     if (renderSurface_) {
         renderSurface_->DumpInfo(json);
     }
@@ -2019,7 +2033,8 @@ void XComponentPattern::EnableSecure(bool isSecure)
     if (type_ != XComponentType::SURFACE) {
         return;
     }
-    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    handlingSurfaceRenderContext_->SetSecurityLayer(isSecure);
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetSecurityLayer(isSecure);
+    isEnableSecure_ = isSecure;
 }
 } // namespace OHOS::Ace::NG

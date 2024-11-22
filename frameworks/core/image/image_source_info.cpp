@@ -158,12 +158,13 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     if (count > 1) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
-    GenerateCacheKey();
 
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }
+
+    GenerateCacheKey();
 }
 
 ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, std::string bundleName,
@@ -191,12 +192,13 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     if (count > 1) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
-    GenerateCacheKey();
 
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }
+
+    GenerateCacheKey();
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
@@ -216,28 +218,17 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
-    auto colorMode = GetColorModeToString();
-    auto name = ToString(false) + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
-    cacheKey_ =
-        std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
+    auto name = ToString(false);
+    name.append(AceApplicationInfo::GetInstance().GetAbilityName())
+        .append(bundleName_)
+        .append(moduleName_)
+        .append(std::to_string(static_cast<int32_t>(resourceId_)))
+        .append(std::to_string(static_cast<int32_t>(SystemProperties::GetColorMode())))
+        .append(std::to_string(static_cast<int32_t>(localColorMode_)));
     if (srcType_ == SrcType::BASE64) {
-        cacheKey_ += "SrcType:BASE64";
+        name.append("SrcType:BASE64");
     }
-}
-
-const std::string ImageSourceInfo::GetColorModeToString()
-{
-    auto colorMode = SystemProperties::GetColorMode();
-    switch (colorMode) {
-        case ColorMode::LIGHT:
-            return "LIGHT";
-        case ColorMode::DARK:
-            return "DARK";
-        case ColorMode::COLOR_MODE_UNDEFINED:
-            return "COLOR_MODE_UNDEFINED";
-        default:
-            return "LIGHT";
-    }
+    cacheKey_ = std::to_string(std::hash<std::string> {}(name));
 }
 
 void ImageSourceInfo::SetFillColor(const Color& color)
@@ -247,6 +238,9 @@ void ImageSourceInfo::SetFillColor(const Color& color)
 
 bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 {
+    if (localColorMode_ != info.localColorMode_) {
+        return false;
+    }
     // only svg uses fillColor
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;

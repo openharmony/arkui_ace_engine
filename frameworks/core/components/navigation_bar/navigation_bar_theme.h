@@ -175,6 +175,12 @@ public:
                 Color(0x19000000));
             theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
             theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
+            theme->dragBarDefaultColor_ = pattern->GetAttr<Color>("drag_bar_default_color", Color(0xff182431));
+            theme->dragBarItemDefaultColor_ = pattern->GetAttr<Color>("drag_bar_item_default_color", Color(0xffffffff));
+            theme->dragBarActiveColor_ = pattern->GetAttr<Color>("drag_bar_active_color", Color(0x330A59F7));
+            theme->dragBarItemActiveColor_ = pattern->GetAttr<Color>("drag_bar_item_active_color", Color(0xFF007DFF));
+            theme->dividerGradientLightBlue_ = pattern->GetAttr<Color>("divider_light_blue", Color(0x7FCEDEFE));
+            theme->dividerGradientDarkBlue_ = pattern->GetAttr<Color>("divider_dark_blue", Color(0xFF0A59F7));
         }
     };
 
@@ -555,6 +561,30 @@ public:
     {
         return toolbarBackgroundBlurStyle_;
     }
+    const Color& GetDragBarDefaultColor() const
+    {
+        return dragBarDefaultColor_;
+    }
+    const Color& GetDragBarItemDefaultColor() const
+    {
+        return dragBarItemDefaultColor_;
+    }
+    const Color& GetDragBarActiveColor() const
+    {
+        return dragBarActiveColor_;
+    }
+    const Color& GetDragBarItemActiveColor() const
+    {
+        return dragBarItemActiveColor_;
+    }
+    const Color& GetDviderLightBlueColor() const
+    {
+        return dividerGradientLightBlue_;
+    }
+    const Color& GetDviderDarkBlueColor() const
+    {
+        return dividerGradientDarkBlue_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -654,6 +684,12 @@ private:
     Color backgroundPressedColor_;
     int titlebarBackgroundBlurStyle_;
     int toolbarBackgroundBlurStyle_;
+    Color dragBarDefaultColor_;
+    Color dragBarItemDefaultColor_;
+    Color dragBarActiveColor_;
+    Color dragBarItemActiveColor_;
+    Color dividerGradientLightBlue_;
+    Color dividerGradientDarkBlue_;
 };
 
 } // namespace OHOS::Ace

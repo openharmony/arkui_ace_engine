@@ -25,7 +25,7 @@ const char FILE_TYPE_JSON[] = ".json";
 
 CardFrontend::~CardFrontend()
 {
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "CardFrontend Destroyed");
 }
 
 bool CardFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)

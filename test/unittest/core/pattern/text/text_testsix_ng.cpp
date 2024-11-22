@@ -24,7 +24,11 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+constexpr float DEFAULT_CONTENT_WIDTH = 800.0f;
+constexpr float DEFAULT_TEXT_HEIGHT = 50.0f;
+constexpr float DEFAULT_BLANK_LINE_WIDTH = 3.0f;
+} // namespace
 
 class TextTestSixNg : public TextBases {
 public:
@@ -218,5 +222,265 @@ HWTEST_F(TextTestSixNg, TextDragOverlayModifierTestNG002, TestSize.Level1)
     RSPath path = RSPath();
     EXPECT_EQ(modifier.type_, type);
     modifier.PaintBackground(path, rsCanvas, mockPattern);
+}
+
+/**
+ * @tc.name: TextBaseTestNG001
+ * @tc.desc: test text_base.cpp UpdateSelectedBlankLineRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextBaseTestNG001, TestSize.Level1)
+{
+    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
+    TextAlign textAlign = TextAlign::START;
+    bool result = false;
+
+    rect.SetWidth(1.0f);
+    textAlign = TextAlign::START;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, false);
+
+    rect.SetWidth(1.0f);
+    textAlign = TextAlign::END;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, false);
+
+    rect.SetWidth(1.0f);
+    textAlign = TextAlign::CENTER;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, false);
+
+    rect.SetWidth(1.0f);
+    textAlign = TextAlign::JUSTIFY;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: TextBaseTestNG002
+ * @tc.desc: test text_base.cpp UpdateSelectedBlankLineRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextBaseTestNG002, TestSize.Level1)
+{
+    RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
+    TextAlign textAlign = TextAlign::START;
+    bool result = false;
+
+    rect.SetWidth(0.0f);
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(rect.Width(), 0.0f);
+
+    rect.SetWidth(0.0f);
+    textAlign = TextAlign::END;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(rect.Width(), 0.0f);
+
+    rect.SetWidth(0.0f);
+    textAlign = TextAlign::CENTER;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(rect.Width(), 0.0f);
+
+    rect.SetWidth(0.0f);
+    textAlign = TextAlign::JUSTIFY;
+    result = TextBase::UpdateSelectedBlankLineRect(rect, DEFAULT_BLANK_LINE_WIDTH, textAlign, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(rect.Width(), 0.0f);
+}
+
+/**
+ * @tc.name: TextBaseTestNG003
+ * @tc.desc: test text_base.cpp CheckTextAlignByDirection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextBaseTestNG003, TestSize.Level1)
+{
+    TextAlign textAlign = TextAlign::START;
+    TextDirection direction = TextDirection::AUTO;
+    TextAlign result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::START);
+
+    textAlign = TextAlign::END;
+    direction = TextDirection::AUTO;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::END);
+
+    textAlign = TextAlign::CENTER;
+    direction = TextDirection::AUTO;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::CENTER);
+
+    textAlign = TextAlign::JUSTIFY;
+    direction = TextDirection::AUTO;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::JUSTIFY);
+
+    textAlign = TextAlign::START;
+    direction = TextDirection::LTR;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::START);
+
+    textAlign = TextAlign::END;
+    direction = TextDirection::LTR;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::END);
+
+    textAlign = TextAlign::CENTER;
+    direction = TextDirection::LTR;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::CENTER);
+
+    textAlign = TextAlign::JUSTIFY;
+    direction = TextDirection::LTR;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::JUSTIFY);
+}
+
+/**
+ * @tc.name: TextBaseTestNG004
+ * @tc.desc: test text_base.cpp CheckTextAlignByDirection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextBaseTestNG004, TestSize.Level1)
+{
+    TextAlign textAlign = TextAlign::START;
+    TextDirection direction = TextDirection::INHERIT;
+    TextAlign result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::START);
+
+    textAlign = TextAlign::END;
+    direction = TextDirection::INHERIT;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::END);
+
+    textAlign = TextAlign::CENTER;
+    direction = TextDirection::INHERIT;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::CENTER);
+
+    textAlign = TextAlign::JUSTIFY;
+    direction = TextDirection::INHERIT;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::JUSTIFY);
+
+    textAlign = TextAlign::START;
+    direction = TextDirection::RTL;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::END);
+
+    textAlign = TextAlign::END;
+    direction = TextDirection::RTL;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::START);
+
+    textAlign = TextAlign::CENTER;
+    direction = TextDirection::RTL;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::CENTER);
+
+    textAlign = TextAlign::JUSTIFY;
+    direction = TextDirection::RTL;
+    result = TextBase::CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(result, TextAlign::JUSTIFY);
+}
+
+/**
+ * @tc.name: TextPaintMethodTestNG001
+ * @tc.desc: test text_paint_method.cpp CalculateSelectedRect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPaintMethodTestNG001, TestSize.Level1)
+{
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    auto result = TextPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    std::vector<RectF> rects;
+    ParagraphStyle paragraphStyle;
+    std::pair<std::vector<RectF>, ParagraphStyle> paragraphRects;
+
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = TextPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = TextPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT + DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = TextPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+}
+
+/**
+ * @tc.name: ParagraphManagerTestNG001
+ * @tc.desc: test paragraph_manager.cpp IsRectOutByHandler function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, ParagraphManagerTestNG001, TestSize.Level1)
+{
+    ParagraphManager::SelectData selectData;
+    RectF rect;
+    float y = 0.0f;
+    selectData.y = DEFAULT_TEXT_HEIGHT;
+    selectData.secondResult = true;
+    selectData.secondMetrics =
+        CaretMetricsF(OffsetF(0.0f, DEFAULT_TEXT_HEIGHT + DEFAULT_TEXT_HEIGHT), DEFAULT_TEXT_HEIGHT);
+
+    rect = RectF(0.0f, y, DEFAULT_BLANK_LINE_WIDTH, DEFAULT_TEXT_HEIGHT);
+    auto result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_FALSE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, DEFAULT_BLANK_LINE_WIDTH, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_FALSE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, DEFAULT_BLANK_LINE_WIDTH, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_FALSE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, DEFAULT_BLANK_LINE_WIDTH, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_FALSE(result);
+
+    y = 0.0f;
+    rect = RectF(0.0f, y, 0.0f, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_FALSE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, 0.0f, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_TRUE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, 0.0f, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_TRUE(result);
+
+    y += DEFAULT_TEXT_HEIGHT;
+    rect = RectF(0.0f, y, 0.0f, DEFAULT_TEXT_HEIGHT);
+    result = ParagraphManager::IsRectOutByHandler(rect, selectData);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

@@ -117,6 +117,7 @@ private:
     static bool IsBackgroundVisible();
     static bool IsBackgroundVisible(FrameNode* frameNode);
     static bool IsArkuiComponent();
+    static void NotifyFontColorSet();
     static bool IsArkuiComponent(FrameNode* frameNode);
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);

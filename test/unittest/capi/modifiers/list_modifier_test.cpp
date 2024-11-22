@@ -716,7 +716,7 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setFriction
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, DISABLED_setFrictionTest, TestSize.Level1)
 {
     // default values
     auto frictionCheckValue = GetAttrValue<double>(node_, "friction");

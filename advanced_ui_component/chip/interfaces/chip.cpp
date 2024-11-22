@@ -13,20 +13,35 @@
  * limitations under the License.
  */
 
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_node_api.h"
 
 extern const char _binary_chip_abc_start[];
 extern const char _binary_chip_abc_end[];
 
+extern const char _binary_chip_v14_abc_start[];
+extern const char _binary_chip_v14_abc_end[];
+
+namespace OHOS::Ace::Napi {
+
 // Napi get abc code function
 extern "C" __attribute__((visibility("default"))) void NAPI_arkui_advanced_Chip_GetABCCode(
     const char** buf, int* buflen)
 {
-    if (buf != nullptr) {
-        *buf = _binary_chip_abc_start;
-    }
-    if (buflen != nullptr) {
-        *buflen = _binary_chip_abc_end - _binary_chip_abc_start;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (buf != nullptr) {
+            *buf = _binary_chip_v14_abc_start;
+        }
+        if (buflen != nullptr) {
+            *buflen = _binary_chip_v14_abc_end - _binary_chip_v14_abc_start;
+        }
+    } else {
+        if (buf != nullptr) {
+            *buf = _binary_chip_abc_start;
+        }
+        if (buflen != nullptr) {
+            *buflen = _binary_chip_abc_end - _binary_chip_abc_start;
+        }
     }
 }
 
@@ -45,3 +60,5 @@ extern "C" __attribute__((constructor)) void ChipsRegisterModule(void)
 {
     napi_module_register(&ChipsModule);
 }
+
+} // namespace OHOS::Ace::Napi

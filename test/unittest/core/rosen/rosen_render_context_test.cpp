@@ -850,4 +850,66 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest034, TestSize.Level1)
     efffectOption->isWindowFocused = false;
     EXPECT_FALSE(rosenRenderContext->UpdateBlurBackgroundColor(efffectOption));
 }
+
+/**
+ * @tc.name: RosenRenderContextTest035
+ * @tc.desc: UpdateAccessibilityRoundRect().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest035, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+
+    rosenRenderContext->accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
+    if (!rosenRenderContext->accessibilityFocusStateModifier_) {
+        return;
+    }
+
+    RoundRect frameRect;
+    frameRect.SetRect(RectF(6, 6, 6, 6));
+    const constexpr double accessibilityFocusWidth = 4.0;
+    double lineWidth = accessibilityFocusWidth * PipelineBase::GetCurrentDensity();
+    Dimension paintWidth(lineWidth, DimensionUnit::PX);
+    auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
+    (void)paintWidthPx;
+    rosenRenderContext->accessibilityFocusStateModifier_->SetRoundRect(frameRect, paintWidthPx);
+    if (!rosenRenderContext->accessibilityFocusStateModifier_->animationRect_) {
+        return;
+    }
+    frameNode->geometryNode_->SetFrameSize(SizeF(10.0f, 10.0f));
+    rosenRenderContext->UpdateAccessibilityRoundRect();
+    auto rectBeforeUpdate = rosenRenderContext->accessibilityFocusStateModifier_->roundRect_.GetRect();
+    EXPECT_EQ(rectBeforeUpdate.GetLeft(), 2.0f);
+    EXPECT_EQ(rectBeforeUpdate.GetTop(), 2.0f);
+    EXPECT_EQ(rectBeforeUpdate.GetRight(), 8.0f);
+    EXPECT_EQ(rectBeforeUpdate.GetBottom(), 8.0f);
+
+    frameNode->geometryNode_->SetFrameSize(SizeF(20.0f, 20.0f));
+    rosenRenderContext->UpdateAccessibilityRoundRect();
+    auto rectAfterUpdate = rosenRenderContext->accessibilityFocusStateModifier_->roundRect_.GetRect();
+
+    EXPECT_EQ(rectAfterUpdate.GetLeft(), 2.0f);
+    EXPECT_EQ(rectAfterUpdate.GetTop(), 2.0f);
+    EXPECT_EQ(rectAfterUpdate.GetRight(), 18.0f);
+    EXPECT_EQ(rectAfterUpdate.GetBottom(), 18.0f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest036
+ * @tc.desc: UpdateWindowBlur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest036, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    rosenRenderContext->UpdateWindowBlur();
+}
 } // namespace OHOS::Ace::NG

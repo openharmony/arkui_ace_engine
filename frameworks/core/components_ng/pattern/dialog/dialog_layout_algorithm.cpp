@@ -49,13 +49,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    expandDisplay_ = dialogTheme->GetExpandDisplay();
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
@@ -73,14 +73,16 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
+    auto dialogContext = dialogPattern->GetContext();
+    CHECK_NULL_VOID(dialogContext);
     isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
-                            GreatOrEqual(pipeline->GetFontScale(), 1.75f);
-    auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
-    if (isPickekDiaglog || customSize_) {
+                            GreatOrEqual(dialogContext->GetFontScale(), 1.75f);
+    auto isPickerDialog = dialogPattern->GetIsPickerDialog();
+    if (isPickerDialog || customSize_) {
         isSuitableForElderly_ = false;
     }
-    if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
+    if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
@@ -542,7 +544,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+        auto currentId = Container::CurrentIdSafely();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
         CHECK_NULL_VOID(subWindow);
         auto subOverlayManager = subWindow->GetOverlayManager();
         CHECK_NULL_VOID(subOverlayManager);
@@ -932,7 +936,7 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
         const auto& children = layoutWrapper->GetAllChildrenWithBuild();
         auto child = children.front();
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        if (childSize.Height() == dialogMaxHeight_) {
+        if (childSize.Height() == dialogMaxHeight_ && childSize.Height() > 0) {
             auto hostNode = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(hostNode);
             auto dialogPattern = hostNode->GetPattern<DialogPattern>();

@@ -19,7 +19,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -64,6 +63,7 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
+            theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff006cde));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
@@ -89,6 +89,11 @@ public:
     const TextStyle& GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    const Color& GetCaretColor() const
+    {
+        return caretColor_;
     }
 
     const Color& GetSelectedColor() const
@@ -134,11 +139,13 @@ public:
     {
         return urlPressColor_;
     }
+
 protected:
     TextTheme() = default;
 
 private:
     TextStyle textStyle_;
+    Color caretColor_;
     Color selectedColor_;
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;

@@ -282,7 +282,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->isSelectMenu_ = true;
@@ -330,7 +330,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT,
         Placement::TOP_LEFT, Placement::BOTTOM_LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
         Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT };
@@ -528,7 +528,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -602,7 +602,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -644,9 +644,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(POSITION_OFFSET, POSITION_OFFSET));
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
+    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -1572,7 +1572,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     /**
      * @tc.steps: step4. layoutWrapper, target and the geometry node of target is not null, isContextMenu and
      * isContainerModal is true
-     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
+     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -1.0f)
      */
     MockPipelineContext::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
     MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -1580,21 +1580,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true, menuPattern);
-    auto pipelineContext = menuLayoutAlgorithm->GetCurrentPipelineContext();
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    OffsetF offset = OffsetF(windowsOffsetX, windowsOffsetY);
-    OffsetF offset2 = menuLayoutAlgorithm->GetMenuWrapperOffset(layoutWrapper);
-    offset -= offset2;
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, offset);
-
-    /**
-     * @tc.steps: step5. layoutWrapper, target and the geometry node of target is not null, isContextMenu is false
-     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
-     */
-    layoutProp->UpdateIsRectInTarget(true);
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(-5.0f, -1.0f));
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }
@@ -1735,19 +1721,19 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
             EXPECT_EQ(result, OffsetF(arrowOffsetValue, menuSize.Height() + ARROW_HIGHT.ConvertToPx()));
         }
         if (positionCondition2.find(placementValue) != positionCondition2.end()) {
-            EXPECT_EQ(result, OffsetF(arrowOffsetValue, -ARROW_HIGHT.ConvertToPx()));
+            EXPECT_EQ(result, OffsetF(arrowOffsetValue, 0));
         }
         if (positionCondition3.find(placementValue) != positionCondition3.end()) {
             EXPECT_EQ(result, OffsetF(menuSize.Width() + ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
         }
         if (positionCondition4.find(placementValue) != positionCondition4.end()) {
-            EXPECT_EQ(result, OffsetF(-ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
+            EXPECT_EQ(result, OffsetF(0, arrowOffsetValue));
         }
     }
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg044
- * @tc.desc: Verify InitHierarchicalParameters.
+ * @tc.desc: Verify InitCanExpandCurrentWindow.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
@@ -1788,14 +1774,14 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
 
     selectTheme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 
     menuPattern->isSelectMenu_ = true;
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg045
- * @tc.desc: Verify InitHierarchicalParameters.
+ * @tc.desc: Verify InitCanExpandCurrentWindow.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
@@ -1827,9 +1813,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->Layout(&layoutWrapper);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 }
 
 /**
@@ -1860,7 +1844,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg046, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1906,7 +1890,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg047, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1953,7 +1937,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg048, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(

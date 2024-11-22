@@ -270,7 +270,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [frameNode](const std::string& value) {
+    auto onSubmit = [frameNode](const std::string& value, NG::TextFieldCommonEvent&) {
         auto arkStringValue = Converter::ArkValue<Ark_String>(value);
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit(frameNode->GetId(), arkStringValue);
     };

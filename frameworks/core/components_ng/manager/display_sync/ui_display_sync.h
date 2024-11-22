@@ -46,9 +46,12 @@ class PipelineBase;
 class FrameRateRange : public AceType {
     DECLARE_ACE_TYPE(FrameRateRange, AceType)
 public:
-    FrameRateRange() : min_(0), max_(0), preferred_(0) {}
+    FrameRateRange() : min_(0), max_(0), preferred_(0), componentScene_(0) {}
 
     FrameRateRange(int min, int max, int preferred) : min_(min), max_(max), preferred_(preferred) {}
+
+    FrameRateRange(int min, int max, int preferred, int componentScene)
+        : min_(min), max_(max), preferred_(preferred), componentScene_(componentScene) {}
 
     bool IsZero() const
     {
@@ -71,6 +74,7 @@ public:
         this->min_ = 0;
         this->max_ = 0;
         this->preferred_ = 0;
+        this->componentScene_ = 0;
     }
 
     void Set(int min, int max, int preferred)
@@ -102,6 +106,7 @@ public:
     int min_ = 0;
     int max_ = 0;
     int preferred_ = 0;
+    int componentScene_ = 0;
     const int32_t rangeMaxRefreshrate = 144;
 };
 

@@ -43,6 +43,7 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto qrCode = qrcodegen::QrCode::encodeText(value.c_str(), qrcodegen::QrCode::Ecc::LOW);
     if (!qrCode.getFlag() || qrCode.getSize() == 0 || qrCodeSize <= 0 ||
         qrCodeSize < static_cast<float>(qrCode.getSize())) {
+        TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeSize is too small. QRCodeSize: %{public}f", qrCodeSize);
         return;
     }
     color = color.BlendOpacity(opacity);

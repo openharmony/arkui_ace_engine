@@ -182,6 +182,19 @@ int32_t SheetManager::CloseBindSheetByUIContext(
     return ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND;
 }
 
+void SheetManager::DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (rootNodeType == RootNodeType::WINDOW_SCENE_ETS_TAG) {
+        auto windowSceneNode = FrameNode::GetFrameNode(V2::WINDOW_SCENE_ETS_TAG, rootNodeId);
+        CHECK_NULL_VOID(windowSceneNode);
+        auto pattern = windowSceneNode->GetPattern<SystemWindowScene>();
+        CHECK_NULL_VOID(pattern);
+        pattern->DeleteOverlayManager();
+    }
+#endif
+}
+
 RefPtr<OverlayManager> SheetManager::FindPageNodeOverlay(
     const RefPtr<FrameNode>& targetNode, bool isShow, bool isStartByUIContext)
 {

@@ -67,6 +67,9 @@ bool SwiperAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(swiperPattern, false);
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    if (swiperLayoutProperty->GetDisableSwipeValue(false)) {
+        return false;
+    }
     bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
     if (!isLoop && swiperPattern->TotalCount() <= 1) {
         return false;
@@ -90,13 +93,14 @@ void SwiperAccessibilityProperty::SetSpecificSupportAction()
     auto swiperLayoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     if (IsScrollable()) {
         if (!isLoop) {
             if (GetCurrentIndex() > 0) {
                 AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
             }
 
-            if (GetCurrentIndex() < GetCollectionItemCounts() - 1) {
+            if (GetCurrentIndex() < GetCollectionItemCounts() - displayCount) {
                 AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
             }
         } else {

@@ -74,7 +74,7 @@ class MonitorValueV2<T> {
 
 /**
  * MonitorV2
- * one MonitorV2 object per @monitor function
+ * one MonitorV2 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV2 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
  * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
@@ -91,7 +91,7 @@ class MonitorV2 {
 
 
   private values_: Array<MonitorValueV2<unknown>> = new Array<MonitorValueV2<unknown>>();
-  private target_: object; // @monitor function 'this': data object or ViewV2
+  private target_: object; // @Monitor function 'this': data object or ViewV2
   private monitorFunction: (m: IMonitor) => void;
   private watchId_: number; // unique id, similar to elmtId but identifies this object
 
@@ -106,7 +106,7 @@ class MonitorV2 {
 
     // add watchId to owning ViewV2 or view model data object
     // ViewV2 uses to call clearBinding(id)
-    // FIXME data object leave data inside ObservedV3, because they can not 
+    // FIXME data object leave data inside ObservedV2, because they can not 
     // call clearBinding(id) before they get deleted.
     const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX] ??= {};
     meta[pathsString] = this.watchId_;

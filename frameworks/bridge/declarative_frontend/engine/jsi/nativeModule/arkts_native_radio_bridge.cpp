@@ -23,6 +23,7 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
 const char* RADIO_BUILDER_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsRadioChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -368,19 +369,20 @@ ArkUINativeModuleValue RadioBridge::SetRadioOptions(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> indicatorTypeArg = runtimeCallInfo->GetCallArgRef(3);
-    ArkUI_CharPtr value = "";
-    ArkUI_CharPtr group = "";
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() != NUM_4, true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> indicatorTypeArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    std::string value;
+    std::string group;
     auto indicatorType = RadioIndicatorType::TICK;
 
     if (!valueArg.IsNull() && valueArg->IsString(vm)) {
-        value = valueArg->ToString(vm)->ToString(vm).c_str();
+        value = valueArg->ToString(vm)->ToString(vm);
     }
     if (!groupArg.IsNull() && groupArg->IsString(vm)) {
-        group = groupArg->ToString(vm)->ToString(vm).c_str();
+        group = groupArg->ToString(vm)->ToString(vm);
     }
     if (!indicatorTypeArg.IsNull() && indicatorTypeArg->IsNumber()) {
         indicatorType = static_cast<RadioIndicatorType>(indicatorTypeArg->Int32Value(vm));
@@ -388,9 +390,14 @@ ArkUINativeModuleValue RadioBridge::SetRadioOptions(ArkUIRuntimeCallInfo* runtim
             indicatorType = RadioIndicatorType::TICK;
         }
     }
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioOptions(nativeNode, value, group,
-        static_cast<int32_t>(indicatorType));
+    if (!firstArg.IsNull() && !firstArg->IsUndefined()) {
+        auto pointer = firstArg->ToNativePointer(vm);
+        CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(pointer->Value());
+        CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+        GetArkUINodeModifiers()->getRadioModifier()->setRadioOptions(
+            nativeNode, value.c_str(), group.c_str(), static_cast<int32_t>(indicatorType));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 }

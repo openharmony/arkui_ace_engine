@@ -319,9 +319,9 @@ void NavigationStack::Clear()
     cacheNodes_.clear();
 }
 
-RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& node)
+bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
 {
-    return nullptr;
+    return false;
 }
 
 RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node)

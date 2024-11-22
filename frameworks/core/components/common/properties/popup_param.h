@@ -500,6 +500,16 @@ public:
         doubleBindCallback_ = callback;
     }
 
+    void SetFollowTransformOfTarget (bool followTransformOfTarget)
+    {
+        followTransformOfTarget_ = followTransformOfTarget;
+    }
+
+    bool IsFollowTransformOfTarget() const
+    {
+        return followTransformOfTarget_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -516,6 +526,7 @@ private:
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
+    bool followTransformOfTarget_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

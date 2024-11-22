@@ -21,8 +21,15 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
+#define protected public
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef protected
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -240,8 +247,10 @@ HWTEST_F(WebModelTestNg, SetCustomScheme001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto webModelNG = std::make_shared<WebModelNG>();
-    webModelNG->SetCustomScheme("");
-    EXPECT_NE(webModelNG, nullptr);
+    webModelNG->SetCustomScheme("abc");
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_EQ(webPattern->customScheme_, "abc");
 #endif
 }
 
@@ -253,10 +262,16 @@ HWTEST_F(WebModelTestNg, SetCustomScheme001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnCommonDialog001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto webModelNG = std::make_shared<WebModelNG>();
-    auto onCommon = [](const BaseEventInfo* info) -> bool { return true; };
+    auto onCommon = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     webModelNG->SetOnCommonDialog(onCommon, 1);
-    EXPECT_NE(webModelNG, nullptr);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->onBeforeUnloadImpl_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -268,10 +283,13 @@ HWTEST_F(WebModelTestNg, SetOnCommonDialog001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnFullScreenEnter001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto webModelNG = std::make_shared<WebModelNG>();
-    auto fullScreenEnterEventId = [](const BaseEventInfo* info) {};
+    auto fullScreenEnterEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG->SetOnFullScreenEnter(fullScreenEnterEventId);
-    EXPECT_NE(webModelNG, nullptr);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnFullScreenEnterEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -283,9 +301,16 @@ HWTEST_F(WebModelTestNg, SetOnFullScreenEnter001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnAllSslErrorRequest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    int callCount = 0;
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnAllSslErrorRequest(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnAllSslErrorRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -298,14 +323,12 @@ HWTEST_F(WebModelTestNg, SetOnAllSslErrorRequest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-
+    stack->ClearStack();
     auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+
     WebModelNG webModelNG;
     webModelNG.SetOnAllSslErrorRequest(callback);
+    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>(), nullptr);
 #endif
 }
 
@@ -317,9 +340,23 @@ HWTEST_F(WebModelTestNg, SetOnAllSslErrorRequest002, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnOverrideUrlLoading001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnOverrideUrlLoading(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnOverrideUrlLoadingEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -332,14 +369,12 @@ HWTEST_F(WebModelTestNg, SetOnOverrideUrlLoading002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
+    stack->ClearStack();
 
     auto callback = [](const BaseEventInfo* info) -> bool { return true; };
     WebModelNG webModelNG;
     webModelNG.SetOnOverrideUrlLoading(callback);
+    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>(), nullptr);
 #endif
 }
 
@@ -351,9 +386,23 @@ HWTEST_F(WebModelTestNg, SetOnOverrideUrlLoading002, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnContextMenuHide001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnContextMenuHide(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnContextMenuHideEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -366,14 +415,12 @@ HWTEST_F(WebModelTestNg, SetOnContextMenuHide002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
+    stack->ClearStack();
 
     auto callback = [](const BaseEventInfo* info) -> bool { return true; };
     WebModelNG webModelNG;
     webModelNG.SetOnContextMenuHide(callback);
+    EXPECT_EQ(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>(), nullptr);
 #endif
 }
 
@@ -385,15 +432,23 @@ HWTEST_F(WebModelTestNg, SetOnContextMenuHide002, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnHttpAuthRequest(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnHttpAuthRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -405,15 +460,23 @@ HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnSslErrorRequest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnSslErrorRequest(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnSslErrorRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -425,15 +488,23 @@ HWTEST_F(WebModelTestNg, SetOnSslErrorRequest001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnSslSelectCertRequest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnSslSelectCertRequest(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnSslSelectCertRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -448,11 +519,14 @@ HWTEST_F(WebModelTestNg, SetMediaPlayGestureAccess001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetMediaPlayGestureAccess(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMediaPlayGestureAccess(true), true);
 #endif
 }
 
@@ -464,15 +538,23 @@ HWTEST_F(WebModelTestNg, SetMediaPlayGestureAccess001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnErrorReceive001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnErrorReceive(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnErrorReceiveEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -484,15 +566,23 @@ HWTEST_F(WebModelTestNg, SetOnErrorReceive001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnHttpErrorReceive001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnHttpErrorReceive(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnHttpErrorReceiveEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -504,15 +594,23 @@ HWTEST_F(WebModelTestNg, SetOnHttpErrorReceive001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnUrlLoadIntercept001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnUrlLoadIntercept(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnUrlLoadInterceptEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -524,15 +622,23 @@ HWTEST_F(WebModelTestNg, SetOnUrlLoadIntercept001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnLoadIntercept001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnLoadIntercept(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnLoadInterceptEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -544,15 +650,23 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnInterceptRequest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> RefPtr<WebResponse> { return AceType::MakeRefPtr<WebResponse>(); };
+    auto callback = [&callCount](const BaseEventInfo* info) -> RefPtr<WebResponse> {
+        callCount++;
+        return AceType::MakeRefPtr<WebResponse>();
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnInterceptRequest(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnInterceptRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -564,15 +678,23 @@ HWTEST_F(WebModelTestNg, SetOnInterceptRequest001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnFileSelectorShow001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnFileSelectorShow(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnFileSelectorShowEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -584,15 +706,23 @@ HWTEST_F(WebModelTestNg, SetOnFileSelectorShow001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnContextMenuShow001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    auto callback = [](const BaseEventInfo* info) -> bool { return true; };
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
     WebModelNG webModelNG;
     webModelNG.SetOnContextMenuShow(callback);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnContextMenuShowEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -607,11 +737,14 @@ HWTEST_F(WebModelTestNg, SetJsEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetJsEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckJsEnabled(true), true);
 #endif
 }
 
@@ -626,11 +759,14 @@ HWTEST_F(WebModelTestNg, SetTextZoomRatio001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetTextZoomRatio(1);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckTextZoomRatio(1), true);
 #endif
 }
 
@@ -645,11 +781,14 @@ HWTEST_F(WebModelTestNg, SetFileAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetFileAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFileAccessEnabled(true), true);
 #endif
 }
 
@@ -664,11 +803,14 @@ HWTEST_F(WebModelTestNg, SetOnLineImageAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetOnLineImageAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOnLineImageAccessEnabled(true), true);
 #endif
 }
 
@@ -683,11 +825,14 @@ HWTEST_F(WebModelTestNg, SetDomStorageAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetDomStorageAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDomStorageAccessEnabled(true), true);
 #endif
 }
 
@@ -702,11 +847,14 @@ HWTEST_F(WebModelTestNg, SetImageAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetImageAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckImageAccessEnabled(true), true);
 #endif
 }
 
@@ -721,11 +869,15 @@ HWTEST_F(WebModelTestNg, SetMixedMode001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetMixedMode(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMixedMode(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW),
+        MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
 #endif
 }
 
@@ -740,11 +892,14 @@ HWTEST_F(WebModelTestNg, SetZoomAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetZoomAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckZoomAccessEnabled(true), true);
 #endif
 }
 
@@ -759,11 +914,14 @@ HWTEST_F(WebModelTestNg, SetGeolocationAccessEnabled001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StagePattern>(); });
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
     webModelNG.SetGeolocationAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckGeolocationAccessEnabled(true), true);
 #endif
 }
 
@@ -775,8 +933,17 @@ HWTEST_F(WebModelTestNg, SetGeolocationAccessEnabled001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetDefaultTextEncodingFormat006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetDefaultTextEncodingFormat("test");
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDefaultTextEncodingFormat("test"), true);
 #endif
 }
 
@@ -788,8 +955,17 @@ HWTEST_F(WebModelTestNg, SetDefaultTextEncodingFormat006, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetNativeEmbedModeEnabled007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetNativeEmbedModeEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeEmbedModeEnabled(true), true);
 #endif
 }
 
@@ -801,8 +977,18 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedModeEnabled007, TestSize.Level1)
 HWTEST_F(WebModelTestNg, RegisterNativeEmbedRule008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.RegisterNativeEmbedRule("test", "111");
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeEmbedRuleTag("test"), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeEmbedRuleType("111"), true);
 #endif
 }
 
@@ -814,9 +1000,23 @@ HWTEST_F(WebModelTestNg, RegisterNativeEmbedRule008, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnControllerAttached009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount]() {
+        callCount++;
+        return;
+    };
     WebModelNG webModelNG;
-    auto Callback = []() {};
-    webModelNG.SetOnControllerAttached(Callback);
+    webModelNG.SetOnControllerAttached(callback);
+    AceType::DynamicCast<WebPattern>(ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>())
+        ->onControllerAttachedCallback_();
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -830,6 +1030,8 @@ HWTEST_F(WebModelTestNg, NotifyPopupWindowResult010, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     webModelNG.NotifyPopupWindowResult(0, true);
+    auto nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(0);
+    EXPECT_EQ(nweb, nullptr);
 #endif
 }
 
@@ -843,6 +1045,8 @@ HWTEST_F(WebModelTestNg, NotifyPopupWindowResult011, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     webModelNG.NotifyPopupWindowResult(-1, true);
+    auto nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(-1);
+    EXPECT_EQ(nweb, nullptr);
 #endif
 }
 
@@ -856,6 +1060,8 @@ HWTEST_F(WebModelTestNg, NotifyPopupWindowResult012, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     webModelNG.NotifyPopupWindowResult(1, true);
+    auto nweb = OHOS::NWeb::NWebHelper::Instance().GetNWeb(1);
+    EXPECT_EQ(nweb, nullptr);
 #endif
 }
 
@@ -867,8 +1073,12 @@ HWTEST_F(WebModelTestNg, NotifyPopupWindowResult012, TestSize.Level1)
 HWTEST_F(WebModelTestNg, AddDragFrameNodeToManager013, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
     WebModelNG webModelNG;
     webModelNG.AddDragFrameNodeToManager();
+    auto ret = PipelineContext::GetCurrentContext()->GetDragDropManager()->dragFrameNodes_.empty();
+    EXPECT_EQ(ret, false);
+    MockPipelineContext::TearDown();
 #endif
 }
 
@@ -880,8 +1090,17 @@ HWTEST_F(WebModelTestNg, AddDragFrameNodeToManager013, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetAudioResumeInterval014, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetAudioResumeInterval(0);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckAudioResumeInterval(0), true);
 #endif
 }
 
@@ -893,8 +1112,17 @@ HWTEST_F(WebModelTestNg, SetAudioResumeInterval014, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetAudioExclusive015, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetAudioExclusive(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
 #endif
 }
 
@@ -906,9 +1134,13 @@ HWTEST_F(WebModelTestNg, SetAudioExclusive015, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOverScrollId016, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto OverScrollId = [](const BaseEventInfo* info) {};
+    auto OverScrollId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG.SetOverScrollId(std::move(OverScrollId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnOverScrollEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -920,9 +1152,13 @@ HWTEST_F(WebModelTestNg, SetOverScrollId016, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetNativeEmbedLifecycleChangeId017, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto NativeEmbedLifecycleChangeId = [](const BaseEventInfo* info) {};
+    auto NativeEmbedLifecycleChangeId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG.SetNativeEmbedLifecycleChangeId(std::move(NativeEmbedLifecycleChangeId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedLifecycleChangeEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -934,9 +1170,13 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedLifecycleChangeId017, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetNativeEmbedGestureEventId018, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto NativeEmbedGestureEventId = [](const BaseEventInfo* info) {};
+    auto NativeEmbedGestureEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG.SetNativeEmbedGestureEventId(NativeEmbedGestureEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedGestureEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -948,8 +1188,17 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedGestureEventId018, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetLayoutMode019, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
-    webModelNG.SetLayoutMode(WebLayoutMode::NONE);
+    webModelNG.SetLayoutMode(WebLayoutMode::FIT_CONTENT);
+    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -962,8 +1211,12 @@ HWTEST_F(WebModelTestNg, SetNestedScroll020, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
-    NestedScrollOptions NestedScrollOptions;
+    NestedScrollOptions NestedScrollOptions = {};
+    NestedScrollOptions.forward = NestedScrollMode::SELF_FIRST;
     webModelNG.SetNestedScroll(NestedScrollOptions);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_EQ(webPattern->GetNestedScroll().forward, NestedScrollMode::SELF_FIRST);
 #endif
 }
 
@@ -976,8 +1229,12 @@ HWTEST_F(WebModelTestNg, SetNestedScrollExt021, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
-    NestedScrollOptionsExt NestedScrollOptionsExt;
+    NestedScrollOptionsExt NestedScrollOptionsExt = {};
+    NestedScrollOptionsExt.scrollUp = NestedScrollMode::SELF_FIRST;
     webModelNG.SetNestedScrollExt(NestedScrollOptionsExt);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_EQ(webPattern->nestedScroll_.scrollUp, NestedScrollMode::SELF_FIRST);
 #endif
 }
 
@@ -989,8 +1246,17 @@ HWTEST_F(WebModelTestNg, SetNestedScrollExt021, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetMetaViewport022, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetMetaViewport(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMetaViewport(true), true);
 #endif
 }
 
@@ -1005,6 +1271,8 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentStart023, TestSize.Level1)
     WebModelNG webModelNG;
     ScriptItems scriptItems;
     webModelNG.JavaScriptOnDocumentStart(scriptItems);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentStartScriptItems_, std::nullopt);
 #endif
 }
 
@@ -1019,6 +1287,8 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd024, TestSize.Level1)
     WebModelNG webModelNG;
     ScriptItems scriptItemsEnd;
     webModelNG.JavaScriptOnDocumentEnd(scriptItemsEnd);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentEndScriptItems_, std::nullopt);
 #endif
 }
 
@@ -1030,9 +1300,14 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd024, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetPermissionClipboard025, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto SetPermissionClipboard = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto SetPermissionClipboard = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     webModelNG.SetPermissionClipboard(std::move(SetPermissionClipboard));
+    webPattern->permissionClipboardCallback_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1044,9 +1319,14 @@ HWTEST_F(WebModelTestNg, SetPermissionClipboard025, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOpenAppLinkFunction026, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto SetOpenAppLinkFunction = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto SetOpenAppLinkFunction = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     webModelNG.SetOpenAppLinkFunction(std::move(SetOpenAppLinkFunction));
+    webPattern->onOpenAppLinkCallback_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1058,9 +1338,14 @@ HWTEST_F(WebModelTestNg, SetOpenAppLinkFunction026, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetPermissionRequestEventId027, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto SetPermissionRequestEventId = [](const BaseEventInfo* info) {};
+    auto SetPermissionRequestEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+
     webModelNG.SetPermissionRequestEventId(std::move(SetPermissionRequestEventId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnPermissionRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1072,8 +1357,17 @@ HWTEST_F(WebModelTestNg, SetPermissionRequestEventId027, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetTextAutosizing028, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetTextAutosizing(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckTextAutosizing(true), true);
 #endif
 }
 
@@ -1085,8 +1379,17 @@ HWTEST_F(WebModelTestNg, SetTextAutosizing028, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetNativeVideoPlayerConfig029, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetNativeVideoPlayerConfig(true, true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeVideoPlayerConfig(std::make_tuple(true, true)), true);
 #endif
 }
 
@@ -1098,9 +1401,14 @@ HWTEST_F(WebModelTestNg, SetNativeVideoPlayerConfig029, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetFirstMeaningfulPaintId001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto firstMeaningfulPaintId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto firstMeaningfulPaintId = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+
     webModelNG.SetFirstMeaningfulPaintId(std::move(firstMeaningfulPaintId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnFirstMeaningfulPaintEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1112,9 +1420,14 @@ HWTEST_F(WebModelTestNg, SetFirstMeaningfulPaintId001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetLargestContentfulPaintId001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto largestContentfulPaintId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto largestContentfulPaintId = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+
     webModelNG.SetLargestContentfulPaintId(std::move(largestContentfulPaintId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnLargestContentfulPaintEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1126,9 +1439,14 @@ HWTEST_F(WebModelTestNg, SetLargestContentfulPaintId001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetNavigationEntryCommittedId001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto navigationEntryCommittedId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto navigationEntryCommittedId = [&callCount](const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+
     webModelNG.SetNavigationEntryCommittedId(std::move(navigationEntryCommittedId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNavigationEntryCommittedEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1140,9 +1458,15 @@ HWTEST_F(WebModelTestNg, SetNavigationEntryCommittedId001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetIntelligentTrackingPreventionResultId001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto intelligentTrackingPreventionResultId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    auto intelligentTrackingPreventionResultId = [&callCount](
+                                                     const std::shared_ptr<BaseEventInfo>& info) { callCount++; };
+
     webModelNG.SetIntelligentTrackingPreventionResultId(std::move(intelligentTrackingPreventionResultId));
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnIntelligentTrackingPreventionResultEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1154,9 +1478,17 @@ HWTEST_F(WebModelTestNg, SetIntelligentTrackingPreventionResultId001, TestSize.L
 HWTEST_F(WebModelTestNg, SetSmoothDragResizeEnabled001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetSmoothDragResizeEnabled(true);
-    webModelNG.SetSmoothDragResizeEnabled(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckSmoothDragResizeEnabled(true), true);
 #endif
 }
 
@@ -1168,9 +1500,14 @@ HWTEST_F(WebModelTestNg, SetSmoothDragResizeEnabled001, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetRenderProcessNotRespondingId002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto renderProcessNotRespondingId = [](const BaseEventInfo* info) {};
+    auto renderProcessNotRespondingId = [&callCount](const BaseEventInfo* info) { callCount++; };
+
     webModelNG.SetRenderProcessNotRespondingId(renderProcessNotRespondingId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnRenderProcessNotRespondingEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1182,9 +1519,14 @@ HWTEST_F(WebModelTestNg, SetRenderProcessNotRespondingId002, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetRenderProcessRespondingId003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto renderProcessRespondingId = [](const BaseEventInfo* info) {};
+    auto renderProcessRespondingId = [&callCount](const BaseEventInfo* info) { callCount++; };
+
     webModelNG.SetRenderProcessRespondingId(renderProcessRespondingId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnRenderProcessRespondingEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1197,8 +1539,16 @@ HWTEST_F(WebModelTestNg, SetSelectionMenuOptions004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
-    WebMenuOptionsParam webMenuOption;
+    WebMenuOptionsParam webMenuOption = {};
+    MenuOptionsParam menuOptionsParam = {};
+    menuOptionsParam.id = "test";
+    webMenuOption.menuOption.push_back(menuOptionsParam);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     webModelNG.SetSelectionMenuOptions(webMenuOption);
+    EXPECT_FALSE(webPattern->menuOptionParam_.empty());
+    EXPECT_EQ(webPattern->menuOptionParam_.size(), 1);
+    EXPECT_EQ(webPattern->menuOptionParam_[0].id, "test");
 #endif
 }
 
@@ -1210,13 +1560,21 @@ HWTEST_F(WebModelTestNg, SetSelectionMenuOptions004, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetEditMenuOptions005, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
     auto onCreateMenuCallback =
         [](const std::vector<OHOS::Ace::NG::MenuItemParam>& /*items*/) -> std::vector<OHOS::Ace::NG::MenuOptionsParam> {
         return {};
     };
-    auto onMenuItemClick = [](const OHOS::Ace::NG::MenuItemParam& /*item*/) -> bool { return false; };
+    auto onMenuItemClick = [&callCount](const OHOS::Ace::NG::MenuItemParam& /*item*/) -> bool {
+        callCount++;
+        return false;
+    };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     webModelNG.SetEditMenuOptions(onCreateMenuCallback, onMenuItemClick);
+    webPattern->onMenuItemClick_({});
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1228,9 +1586,14 @@ HWTEST_F(WebModelTestNg, SetEditMenuOptions005, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetViewportFitChangedId006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto viewportFitChangedId = [](const BaseEventInfo* info) {};
+    auto viewportFitChangedId = [&callCount](const BaseEventInfo* info) { callCount++; };
+
     webModelNG.SetViewportFitChangedId(viewportFitChangedId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnViewportFitChangedEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1242,9 +1605,16 @@ HWTEST_F(WebModelTestNg, SetViewportFitChangedId006, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOnInterceptKeyboardAttach007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto onInterceptKeyboardAttach = [](const BaseEventInfo* info) -> WebKeyboardOption { return {}; };
+    auto onInterceptKeyboardAttach = [&callCount](const BaseEventInfo* info) -> WebKeyboardOption {
+        callCount++;
+        return {};
+    };
     webModelNG.SetOnInterceptKeyboardAttach(onInterceptKeyboardAttach);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnInterceptKeyboardAttachEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1256,9 +1626,13 @@ HWTEST_F(WebModelTestNg, SetOnInterceptKeyboardAttach007, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetAdsBlockedEventId008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto adsBlockedEventId = [](const BaseEventInfo* info) {};
+    auto adsBlockedEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG.SetAdsBlockedEventId(adsBlockedEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnAdsBlockedEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1270,9 +1644,14 @@ HWTEST_F(WebModelTestNg, SetAdsBlockedEventId008, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetUpdateInstanceIdCallback009, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto updateInstanceIdCallback = [](int32_t) -> void {};
+    auto updateInstanceIdCallback = [&callCount](int32_t) -> void { callCount++; };
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     webModelNG.SetUpdateInstanceIdCallback(updateInstanceIdCallback);
+    webPattern->updateInstanceIdCallback_(0);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1284,9 +1663,17 @@ HWTEST_F(WebModelTestNg, SetUpdateInstanceIdCallback009, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOverlayScrollbarEnabled010, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetOverlayScrollbarEnabled(true);
-    webModelNG.SetOverlayScrollbarEnabled(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOverlayScrollbarEnabled(true), true);
 #endif
 }
 
@@ -1298,8 +1685,17 @@ HWTEST_F(WebModelTestNg, SetOverlayScrollbarEnabled010, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetKeyboardAvoidMode011, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
     webModelNG.SetKeyboardAvoidMode(WebKeyboardAvoidMode::RESIZE_VISUAL);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckKeyboardAvoidMode(WebKeyboardAvoidMode::RESIZE_VISUAL), true);
 #endif
 }
 
@@ -1311,8 +1707,17 @@ HWTEST_F(WebModelTestNg, SetKeyboardAvoidMode011, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetOverScrollMode006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
-    webModelNG.SetOverScrollMode(OverScrollMode::NEVER);
+    webModelNG.SetOverScrollMode(OverScrollMode::ALWAYS);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOverScrollMode(OverScrollMode::ALWAYS), true);
 #endif
 }
 
@@ -1324,8 +1729,17 @@ HWTEST_F(WebModelTestNg, SetOverScrollMode006, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetCopyOptionMode007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
     WebModelNG webModelNG;
-    webModelNG.SetCopyOptionMode(CopyOptions::None);
+    webModelNG.SetCopyOptionMode(CopyOptions::InApp);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckCopyOptionMode(1), true);
 #endif
 }
 
@@ -1337,9 +1751,13 @@ HWTEST_F(WebModelTestNg, SetCopyOptionMode007, TestSize.Level1)
 HWTEST_F(WebModelTestNg, SetScreenCaptureRequestEventId008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
     WebModelNG webModelNG;
-    auto screenCaptureRequestEventId = [](const BaseEventInfo* info) {};
+    auto screenCaptureRequestEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
     webModelNG.SetScreenCaptureRequestEventId(screenCaptureRequestEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnScreenCaptureRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 
@@ -1353,8 +1771,14 @@ HWTEST_F(WebModelTestNg, SetOnDragStart009, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     WebModelNG webModelNG;
     auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event,
-                           const std::string& extraParams) -> DragDropBaseInfo { return {}; };
+                           const std::string& extraParams) -> DragDropBaseInfo {
+        return DragDropBaseInfo { nullptr, nullptr, "" };
+    };
     webModelNG.SetOnDragStart(onDragStart);
+    auto dragEvent = RefPtr<OHOS::Ace::DragEvent>();
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    auto info = eventHub->onDragStart_(dragEvent, "");
+    EXPECT_EQ(info.pixelMap, nullptr);
 #endif
 }
 
@@ -1425,6 +1849,240 @@ HWTEST_F(WebModelTestNg, SetOnDrop014, TestSize.Level1)
     WebModelNG webModelNG;
     auto onDrop = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
     webModelNG.SetOnDrop(onDrop);
+#endif
+}
+
+/**
+ * @tc.name: SetOnRequestFocus001
+ * @tc.desc: Test OnRequestFoscus with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnRequestFocus001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onRequestFocus = [](const BaseEventInfo *) {};
+    webModelNG.SetOnRequestFocus(std::move(onRequestFocus));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto focusEvent = std::make_shared<LoadWebRequestFocusEvent>("");
+    ASSERT_NE(focusEvent, nullptr);
+    webEventHub->FireOnRequestFocusEvent(focusEvent);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnRequestFocus002
+ * @tc.desc: Test OnRequestFoscus without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnRequestFocus002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onRequestFocus = [](const BaseEventInfo *) {};
+    webModelNG.SetOnRequestFocus(std::move(onRequestFocus));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto focusEvent = std::make_shared<LoadWebRequestFocusEvent>("");
+    ASSERT_NE(focusEvent, nullptr);
+    webEventHub->FireOnRequestFocusEvent(focusEvent);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnKeyEvent001
+ * @tc.desc: Test OnKeyEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnKeyEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onKeyEvent = [](KeyEventInfo& keyEventInfo) {};
+    webModelNG.SetOnKeyEvent(std::move(onKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto keyEventCallback = webEventHub->GetOnKeyEvent();
+    ASSERT_NE(keyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    keyEventCallback(keyEventInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnKeyEvent002
+ * @tc.desc: Test OnKeyEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnKeyEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onKeyEvent = [](KeyEventInfo& keyEventInfo) {};
+    webModelNG.SetOnKeyEvent(std::move(onKeyEvent));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto keyEventCallback = webEventHub->GetOnKeyEvent();
+    ASSERT_NE(keyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    keyEventCallback(keyEventInfo);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnMouseEvent001
+ * @tc.desc: Test OnMouseEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnMouseEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onMouseEvent = [](MouseInfo &info) {};
+    webModelNG.SetOnMouseEvent(std::move(onMouseEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mouseEventCallback = webEventHub->GetOnMouseEvent();
+    ASSERT_NE(mouseEventCallback, nullptr);
+    MouseInfo mouseInfo;
+    mouseEventCallback(mouseInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnMouseEvent002
+ * @tc.desc: Test OnMouseEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnMouseEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onMouseEvent = [](MouseInfo& info) {};
+    webModelNG.SetOnMouseEvent(std::move(onMouseEvent));
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto mouseEventCallback = webEventHub->GetOnMouseEvent();
+    ASSERT_NE(mouseEventCallback, nullptr);
+    MouseInfo mouseInfo;
+    mouseEventCallback(mouseInfo);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyEvent001
+ * @tc.desc: Test OnInterceptKeyEvent with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onInterceptKeyEvent = [](KeyEventInfo& keyEventInfo) -> bool {
+        return true;
+    };
+    webModelNG.SetOnInterceptKeyEventCallback(std::move(onInterceptKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto interceptKeyEventCallback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(interceptKeyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    interceptKeyEventCallback(keyEventInfo);
+    // Clear the FrameNode in ViewStackProcessor.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyEvent002
+ * @tc.desc: Test OnInterceptKeyEvent without frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptKeyEvent002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MockPipelineContext::SetUp();
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    WebModelNG webModelNG;
+    webModelNG.Create("page/index", controller);
+    NG::FrameNode* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto onInterceptKeyEvent = [](KeyEventInfo& keyEventInfo) -> bool {
+        return true;
+    };
+    webModelNG.SetOnInterceptKeyEventCallback(std::move(onInterceptKeyEvent));
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    // Pop the webNode to let it destruct.
+    NG::ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    auto interceptKeyEventCallback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(interceptKeyEventCallback, nullptr);
+    KeyEvent keyEvent;
+    KeyEventInfo keyEventInfo(keyEvent);
+    interceptKeyEventCallback(keyEventInfo);
+    MockPipelineContext::TearDown();
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,19 +70,10 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
-#ifndef USE_ROSEN_DRAWING
-    std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
-    RSCanvas canvas(&skCanvas);
-#else
     CHECK_NULL_VOID(context.canvas);
-#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID(modifier);
-#ifndef USE_ROSEN_DRAWING
-    DrawingContext context_ = { canvas, context.width, context.height };
-#else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
-#endif
     modifier->Draw(context_);
 }
 
@@ -91,7 +82,8 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto castProp = AceType::DynamicCast<srcType>(prop);                       \
         auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());     \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); }, \
-            [rsProp](const propType& value) { rsProp->Set(value); });              \
+            [rsProp](const propType& value) { rsProp->Set(value); },               \
+            [rsProp]() -> propType { return rsProp->Get(); });                     \
         return rsProp;                                                             \
     }
 
@@ -117,6 +109,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
     CONVERT_PROP(property, PropertyRectF, RectF);
+    CONVERT_PROP(property, PropertyVectorFloat, LinearVector<float>);
     CONVERT_PROP(property, PropertyCanvasImageModifierWrapper, CanvasImageModifierWrapper);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
@@ -167,19 +160,10 @@ void ContentModifierAdapter::AttachProperties()
 void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
-#ifndef USE_ROSEN_DRAWING
-    std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
-    RSCanvas canvas(&skCanvas);
-#else
     CHECK_NULL_VOID(context.canvas);
-#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID(modifier);
-#ifndef USE_ROSEN_DRAWING
-    DrawingContext context_ = { canvas, context.width, context.height };
-#else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
-#endif
     modifier->Draw(context_);
 }
 
@@ -198,19 +182,10 @@ void OverlayModifierAdapter::AttachProperties()
 void ForegroundModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
-#ifndef USE_ROSEN_DRAWING
-    std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
-    RSCanvas canvas(&skCanvas);
-#else
     CHECK_NULL_VOID(context.canvas);
-#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID(modifier);
-#ifndef USE_ROSEN_DRAWING
-    DrawingContext context_ = { canvas, context.width, context.height };
-#else
     DrawingContext context_ = { *context.canvas, context.width, context.height };
-#endif
     modifier->Draw(context_);
 }
 

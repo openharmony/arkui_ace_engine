@@ -2,6 +2,7 @@
     "files": [
         "src/ArkLog.ts",
         "src/ArkComponent.ts",
+        "src/ArkScrollable.ts",
         "src/ArkBlank.ts",
         "src/ArkColumn.ts",
         "src/ArkColumnSplit.ts",
@@ -99,8 +100,7 @@
         "src/ArkSymbolGlyph.ts",
         "src/ArkSymbolSpan.ts",
         "src/ArkComponent3D.ts",
-        "src/ArkContainerSpan.ts",
-        "src/ArkLinearIndicator.ts"
+        "src/ArkContainerSpan.ts"
     ],
     "compilerOptions": {
         "module": "none",
@@ -109,7 +109,7 @@
         "outFile": "../engine/arkComponent.js",
         "rootDir": "./src/",
         "declaration": false,
-        "noEmitOnError": true,
+        "noEmitOnError": false,
         "experimentalDecorators": true,
         "lib": [
             "ES2016"

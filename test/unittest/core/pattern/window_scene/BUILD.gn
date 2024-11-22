@@ -1,0 +1,61 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("window_scene_test") {
+  type = "new"
+  module_out_path = pattern_test_output_path
+
+  sources = [
+    # mock
+    "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
+    "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_container.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_rosen_render_context.cpp",
+
+    # self
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/window_scene_helper.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/input_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/panel_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/transform_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_event_process.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene_model.cpp",
+
+    # test
+    "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
+  ]
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+    "window_manager:screen_session",
+    "window_manager:screen_session_manager",
+  ]
+}

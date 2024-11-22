@@ -100,6 +100,8 @@ public:
     void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override;
     void SetCancelIconColor(const Color& iconColor) override;
+    void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override;
+    void SetCancelButtonSymbol(bool isShowSymbol) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
@@ -189,6 +191,9 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const std::optional<CalcDimension>& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::optional<std::string>& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);
+    static void SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol);
+    static void SetCancelSymbolIcon(FrameNode* frameNode,
+        const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
@@ -273,13 +278,13 @@ public:
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
     static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
-    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static PaddingProperty GetPadding(FrameNode* frameNode);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static RefPtr<TextFieldControllerBase> GetController(FrameNode* frameNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
 
@@ -288,6 +293,7 @@ private:
     void SetDraggable(bool draggable);
     void SetTextRectWillChange();
     void SetDefaultPadding();
+    void SetBackBorderRadius();
 };
 
 } // namespace OHOS::Ace::NG

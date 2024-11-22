@@ -423,8 +423,10 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
+    CHECK_NULL_VOID(keyEvent);
     event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
+    event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
     event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
@@ -456,6 +458,8 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
+    event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
+    event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
 }
 
 void GetPointerEventAction(int32_t action, PointerEvent& event)
@@ -519,6 +523,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.rawPointerEvent = pointerEvent;
     event.pointerEventId = pointerEvent->GetId();
     event.pointerId = pointerEvent->GetPointerId();
+    event.pullId = pointerEvent->GetPullId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();
@@ -580,6 +585,31 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
     }
 }
 
+void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
+    bool useRealtimeMatrix)
+{
+    CHECK_NULL_VOID(point);
+    int32_t pointerId = point->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = point->GetPointerItem(pointerId, item);
+    if (ret) {
+        float xRelative = item.GetWindowX();
+        float yRelative = item.GetWindowY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetWindowXPos();
+            yRelative = item.GetWindowYPos();
+        }
+        NG::PointF transformPoint(xRelative, yRelative);
+        NG::NGGestureRecognizer::Transform(transformPoint, frameNode, useRealtimeMatrix);
+        item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
+        item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
+        item.SetWindowXPos(transformPoint.GetX());
+        item.SetWindowYPos(transformPoint.GetY());
+        point->UpdatePointerItem(pointerId, item);
+    }
+}
+
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree)
 {
@@ -597,7 +627,7 @@ void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI
         }
         auto windowX = xRelative;
         auto windowY = yRelative;
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
         auto windowWidth = displayWindowRect.Width();

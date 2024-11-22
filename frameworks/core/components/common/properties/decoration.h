@@ -91,11 +91,6 @@ enum class SpreadMethod {
     REPEAT,
 };
 
-enum class GradientSpreadMethodNG {
-    PAD,
-    REPEAT,
-    REFLECT,
-};
 
 enum class ThemeColorMode {
     SYSTEM = 0,
@@ -566,7 +561,7 @@ public:
         }
     }
 
-    void SetSpreadMethod(GradientSpreadMethodNG spreadMethod)
+    void SetSpreadMethod(SpreadMethod spreadMethod)
     {
         spreadMethod_ = spreadMethod;
     }
@@ -576,7 +571,7 @@ public:
         gradientTransform_ = gradientTransform;
     }
 
-    GradientSpreadMethodNG GetSpreadMethod() const
+    SpreadMethod GetSpreadMethod() const
     {
         return spreadMethod_;
     }
@@ -624,7 +619,7 @@ private:
     // used for CanvasRadialGradient
     double innerRadius_ = 0.0;
     double outerRadius_ = 0.0;
-    GradientSpreadMethodNG spreadMethod_ = GradientSpreadMethodNG::PAD;
+    SpreadMethod spreadMethod_ = SpreadMethod::PAD;
     std::string gradientTransform_;
     LinearGradientInfo linearGradientInfo_;
     RadialGradientInfo radialGradientInfo_;

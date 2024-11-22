@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
+#include "gtest/gtest.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -980,9 +981,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
      */
     const PointF globalPoint;
     const PointF parentLocalPoint;
+    const PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
     FRAME_NODE2->eventHub_->GetOrCreateInputEventHub();
-    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_NE(FRAME_NODE2->eventHub_->inputEventHub_, nullptr);
 }
 
@@ -1664,19 +1667,298 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Le
     node->renderContext_ = mockRenderContext;
 
     mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    mockRenderContext->paintRect_ = RectF(0, 0, 0, 10);
     auto test1 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test1);
 
     mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 0);
     auto test2 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test2);
 
     mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    mockRenderContext->paintRect_ = RectF(0, 0, 10, 10);
     auto test3 = node->IsPaintRectWithTransformValid();
     EXPECT_FALSE(test3);
 
     mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    mockRenderContext->paintRect_ = RectF(0, 0, 0, 0);
     auto test4 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test4);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_Predict001
+ * @tc.desc: Test frame node method ResetPredictNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodePredict001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. add predictNode to main node and delete main node.
+     * @tc.expected: expect the predictNode is not layout dirty marked after main node desconstructed.
+     */
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto predictNode = FrameNode::CreateFrameNode("predict", 1, AceType::MakeRefPtr<Pattern>(), false);
+    predictNode->SetLayoutDirtyMarked(true);
+    node->AddPredictLayoutNode(predictNode);
+    node.Reset();
+    EXPECT_FALSE(predictNode->IsLayoutDirtyMarked());
+}
+
+/**
+ * @tc.name: FrameNodeSetJSCustomProperty055
+ * @tc.desc: Test SetJSCustomProperty isCNode true, expect result updateFlag is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set isCNode true
+     * @tc.expected: expect result updateFlag is false.
+     */
+    frameNode->setIsCNode(true);
+    std::function<bool()> func = []() -> bool { return true; };
+    std::function<std::string(const std::string&)> getFuncA = [](const std::string& key) -> std::string {
+        return "getFuncA";
+    };
+    frameNode->SetJSCustomProperty(func, getFuncA);
+    std::string value;
+    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", value);
+    EXPECT_EQ(updateFlagValue, false);
+}
+
+/**
+ * @tc.name: FrameNodeSetJSCustomProperty056
+ * @tc.desc: Test SetJSCustomProperty isCNode false and func true, expect result updateFlag is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set isCNode false and func true.
+     * @tc.expected: expect result updateFlag is true.
+     */
+    frameNode->setIsCNode(false);
+    std::function<bool()> func = []() -> bool { return true; };
+    std::function<std::string(const std::string&)> getFuncA = [](const std::string& key) -> std::string {
+        return "getFuncA";
+    };
+    frameNode->SetJSCustomProperty(func, getFuncA);
+    frameNode->setIsCNode(true);
+    std::string flagValue;
+    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
+    EXPECT_EQ(updateFlagValue, true);
+    EXPECT_EQ(flagValue, "1");
+}
+
+/**
+ * @tc.name: FrameNodeSetJSCustomProperty057
+ * @tc.desc: Test SetJSCustomProperty isCNode false and func false, expect result updateFlag is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetJSCustomProperty057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set isCNode false and func false.
+     * @tc.expected: expect result updateFlag is false.
+     */
+    frameNode->setIsCNode(false);
+    std::function<bool()> func = []() -> bool { return false; };
+    std::function<std::string(const std::string&)> getFuncA = [](const std::string& key) -> std::string {
+        return "getFuncA";
+    };
+    frameNode->SetJSCustomProperty(func, getFuncA);
+    frameNode->setIsCNode(true);
+    std::string flagValue;
+    bool updateFlagValue = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
+    EXPECT_EQ(updateFlagValue, false);
+}
+
+/**
+ * @tc.name: FrameNodeGetJSCustomProperty058
+ * @tc.desc: Test GetJSCustomProperty getCustomProperty_ value getFuncA, expect result value getFuncA.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set getCustomProperty_ value getFuncA.
+     * @tc.expected: expect result value getFuncA.
+     */
+    std::function<bool()> func = []() -> bool { return true; };
+    std::function<std::string(const std::string&)> getFuncA = [](const std::string& key) -> std::string {
+        return "getFuncA";
+    };
+    frameNode->SetJSCustomProperty(func, getFuncA);
+    std::string getValue;
+    bool result = frameNode->GetJSCustomProperty("key", getValue);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(getValue, "getFuncA");
+}
+
+/**
+ * @tc.name: FrameNodeGetJSCustomProperty059
+ * @tc.desc: Test GetJSCustomProperty getCustomProperty_ nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetJSCustomProperty059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set getCustomProperty_ nullptr
+     * @tc.expected: expect result GetJSCustomProperty false.
+     */
+    std::function<bool()> func = []() -> bool { return true; };
+    frameNode->SetJSCustomProperty(func, nullptr);
+    std::string getValue;
+    bool result = frameNode->GetJSCustomProperty("key", getValue);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeGetCapiCustomProperty060
+ * @tc.desc: Test GetCapiCustomProperty no key value value value added.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. GetCapiCustomProperty
+     * @tc.expected: expect result value false.
+     */
+    frameNode->setIsCNode(false);
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key", value);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeGetCapiCustomProperty061
+ * @tc.desc: Test GetCapiCustomProperty the key value value value exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. add the key value as value1.
+     * @tc.expected: expect result value1.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->AddCustomProperty("key", "value1");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key", value);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(value, "value1");
+}
+
+/**
+ * @tc.name: FrameNodeGetCapiCustomProperty062
+ * @tc.desc: Test GetCapiCustomProperty the key value does not exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetCapiCustomProperty062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set key is value1
+     * @tc.expected: expect result value.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->AddCustomProperty("key", "value1");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key1", value);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeRemoveCustomProperty063
+ * @tc.desc: Test RemoveCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeRemoveCustomProperty063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set key is value1, remove key.
+     * @tc.expected: expect result false.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->AddCustomProperty("key", "value1");
+    frameNode->RemoveCustomProperty("key");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key", value);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_OnAutoEventParamUpdate
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg_OnAutoEventParamUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+    node->AttachToMainTree();
+    node->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(node->IsOnMainTree());
+
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> parentNode =
+        FrameNode::CreateFrameNode("RelativeContainer", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    node->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step2. call OnAutoEventParamUpdate.
+     * @tc.expect: this parentNode is MarkDirtyNode, but this Tag() != "RelativeContainer"
+     * this parentNode is not MarkDirtyNode
+     */
+    node->OnAutoEventParamUpdate("{\"$origin\":\"Tom\",\"$exposureCfg\":{\"ratio\":0.8,\"duration\":3000}}");
+    EXPECT_EQ(parentNode->GetTag(), "RelativeContainer");
 }
 } // namespace OHOS::Ace::NG

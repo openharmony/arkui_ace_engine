@@ -20,139 +20,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperIndicatorCommon : public SwiperTestNg {
 public:
 };
-
-/**
- * @tc.name: SwiperIndicatorAccessibilityProperty001
- * @tc.desc: Test GetCurrentIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorAccessibilityProperty001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create SwiperIndicator
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    /**
-     * @tc.steps: step2. Change currentIndex
-     * @tc.expected: currentIndex eq changeIndex
-     */
-    ChangeIndex(1);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
-    /**
-     * @tc.steps: step3. Get GetCurrentIndex
-     * @tc.expected: currentIndex eq changeIndex
-     */
-    int32_t index = accessibilityProperty->GetCurrentIndex();
-    EXPECT_EQ(index, 1);
-}
-
-/**
- * @tc.name: SwiperIndicatorAccessibilityProperty002
- * @tc.desc: Test GetBeginIndex GetEndIndex
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorAccessibilityProperty002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create SwiperIndicator
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    /**
-     * @tc.steps: step2. Change currentIndex
-     * @tc.expected: currentIndex eq changeIndex
-     */
-    ChangeIndex(2);
-    /**
-     * @tc.steps: step3. Change currentIndex to end item
-     * @tc.expected: BeginIndex and EndIndex eq 2
-     */
-    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), 2);
-    EXPECT_EQ(accessibilityProperty->GetEndIndex(), 2);
-}
-
-/**
- * @tc.name: SwiperIndicatorAccessibilityProperty003
- * @tc.desc: Test GetCollectionItemCounts
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorAccessibilityProperty003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create SwiperIndicator
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    /**
-     * @tc.steps: step2. Get GetCollectionItemCounts
-     * @tc.expected: GetCollectionItemCounts eq ITEM_NUMBER
-     */
-    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), ITEM_NUMBER);
-}
-
-/**
- * @tc.name: SwiperIndicatorAccessibilityProperty004
- * @tc.desc: Test GetCollectionItemCounts
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorAccessibilityProperty004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create SwiperIndicator
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    /**
-     * @tc.steps: step2. Get GetCollectionItemCounts
-     * @tc.expected: GetCollectionItemCounts eq ITEM_NUMBER
-     */
-    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), ITEM_NUMBER);
-}
-
-/**
- * @tc.name: SwiperIndicatorAccessibilityProperty005
- * @tc.desc: Test GetAccessibilityText
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorAccessibilityProperty005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create SwiperIndicator and set parent AccessibilityProperty text
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
-    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    auto parent = indicatorNode_->GetParent();
-    ASSERT_NE(parent, nullptr);
-    auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
-    auto swiperAccessibilityProperty = parentFrame->GetAccessibilityProperty<SwiperAccessibilityProperty>();
-    ASSERT_NE(swiperAccessibilityProperty, nullptr);
-    swiperAccessibilityProperty->SetAccessibilityText("IndicatorccessibilityProperty");
-    auto resultText = accessibilityProperty->GetAccessibilityText();
-    auto resultValue = accessibilityProperty->GetAccessibilityValue();
-    /**
-     * @tc.steps: step2. Get GetAccessibilityText
-     * @tc.expected: GetAccessibilityText eq IndicatorccessibilityProperty and resultValue min eq 0
-     */
-    EXPECT_EQ(resultText, "IndicatorccessibilityProperty");
-    EXPECT_EQ(resultValue.min, 0);
-}
 
 /**
  * @tc.name: SwiperIndicatorPattern001
@@ -164,10 +34,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create indicatorPattern and init params
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     indicatorPattern->dotIndicatorModifier_ = modifier;
@@ -188,10 +58,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto eventHub = indicatorNode_->GetOrCreateGestureEventHub();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     /**
@@ -232,10 +102,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern002, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern003, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto eventHub = indicatorNode_->GetOrCreateGestureEventHub();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto actuator = eventHub->clickEventActuator_;
@@ -285,12 +155,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern003, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern004, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     /**
      * @tc.steps: step1. Simulate touch event with TouchType::CANCEL
      * @tc.expected: HandleTouchEvent correctly handles touch cancel event
@@ -308,10 +177,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern004, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern005, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     /**
      * @tc.steps: step1. Test GetCurrentIndex with SwipeByGroup
@@ -331,7 +200,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern005, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     auto firstTextNode = FrameNode::CreateFrameNode(
@@ -346,7 +215,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 
     /**
      * @tc.steps: step2. Test swiperLayoutProperty->HasIndex() and currentIndex > swiperPattern->RealTotalCount()
@@ -356,7 +225,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
     indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
     firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(firstTextLayoutProperty, nullptr);
-    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(""), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 }
 
 /**
@@ -366,14 +235,13 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     pattern_->isIndicatorLongPress_ = true;
-    ASSERT_NE(swiperPaintProperty, nullptr);
     /**
      * @tc.steps: step1. Set AutoPlay to true and call HandleDragEnd
      * @tc.expected: HandleDragEnd correctly handles AutoPlay case
@@ -390,7 +258,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -436,7 +304,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->dragStartPoint_.SetX(0.0f);
     indicatorPattern->dragStartPoint_.SetY(0.0f);
@@ -472,7 +340,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -511,7 +379,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern011, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -550,10 +418,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern011, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern012, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::HORIZONTAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto eventHub = indicatorNode_->GetOrCreateGestureEventHub();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->isPressed_ = false;
@@ -566,7 +434,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern012, TestSize.Level1)
      * @tc.expected: LongPress event is set and handled correctly with autoPlay true
      */
     auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
-    ASSERT_NE(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateAutoPlay(true);
     indicatorPattern->InitLongPressEvent(eventHub);
     ASSERT_NE(indicatorPattern->longPressEvent_, nullptr);
@@ -586,9 +453,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern012, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern013, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(4); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(4);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     pattern_->indicatorAnimationIsRunning_ = true;
     TouchLocationInfo touchLocationInfo("down", 0);
     /**
@@ -624,9 +493,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern013, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     /**
      * @tc.steps: step1. set boolean values.
      */
@@ -634,7 +505,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = false;
     indicatorPattern->isClicked_ = true;
     indicatorPattern->isRepeatClicked_ = false;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DOT;
     /**
      * @tc.steps: step2. call the function DumpAdvanceInfo.
      * @tc.expected: verify the size dumped correctly.
@@ -651,7 +521,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = true;
     indicatorPattern->isClicked_ = false;
     indicatorPattern->isRepeatClicked_ = true;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DIGIT;
     indicatorPattern->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
 }
@@ -663,18 +532,19 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     /**
      * @tc.steps: step1. Test when dotIndicatorModifier_ is not null and overlongDotIndicatorModifier_ is null.
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is created.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = nullptr;
     auto result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
     /**
@@ -682,10 +552,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is reused.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
 
@@ -716,17 +585,18 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern016, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     /**
      * @tc.steps: step1. Test when overlongDotIndicatorModifier_ is not null
      * @tc.expected: overlongDotIndicatorModifier_ methods are called
      */
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
-    indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_ = false;
     indicatorPattern->CreateDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
 }
 
 /**
@@ -736,9 +606,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern016, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern017, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto overlongPaintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     indicatorPattern->overlongDotIndicatorModifier_ = modifier;
@@ -771,9 +643,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern017, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern018, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto overlongPaintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     indicatorPattern->overlongDotIndicatorModifier_ = modifier;
@@ -813,9 +687,11 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern018, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DOT); });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto overlongPaintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     indicatorPattern->overlongDotIndicatorModifier_ = modifier;
@@ -854,13 +730,16 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(2);
-        model.SetSwipeByGroup(true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    ASSERT_NE(indicatorPattern, nullptr);
-    ASSERT_NE(pattern_, nullptr);
+
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
     TouchEventInfo touchEventInfo("default");
     TouchLocationInfo touchLocationInfo("down", 0);
@@ -873,5 +752,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     indicatorPattern->HandleDragStart(info);
     indicatorPattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

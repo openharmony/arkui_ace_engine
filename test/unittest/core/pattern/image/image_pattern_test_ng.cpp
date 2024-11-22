@@ -391,6 +391,8 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
      * @tc.steps: step2. call OnVisibleAreaChange.
      * @tc.expected:
      */
+    auto pipeline = frameNode->GetContextRefPtr();
+    imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
     imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;
@@ -478,48 +480,6 @@ HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateFillColorIfForegroundColor001
- * @tc.desc: Test function for ImagePattern.
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternTestNg, UpdateFillColorIfForegroundColor001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = CreatePixelMapAnimator();
-    ASSERT_NE(frameNode, nullptr);
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    /**
-     * @tc.steps: step2. call UpdateFillColorIfForegroundColor.
-     * @tc.expected:
-     */
-    const RefPtr<RenderContext>& renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    ForegroundColorStrategy value2 = ForegroundColorStrategy::NONE;
-    renderContext->UpdateForegroundColorStrategy(value2);
-
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    ImageSourceInfo value1;
-    value1.isSvg_ = true;
-    imageLayoutProperty->UpdateImageSourceInfo(value1);
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-    ASSERT_NE(imageRenderProperty, nullptr);
-    imagePattern->UpdateFillColorIfForegroundColor();
-
-    Color value(10);
-    renderContext->UpdateForegroundColor(value);
-    ImageSourceInfo value3;
-    value3.isSvg_ = true;
-    imageLayoutProperty->UpdateImageSourceInfo(value3);
-    renderContext->ResetForegroundColorStrategy();
-    imagePattern->UpdateFillColorIfForegroundColor();
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    EXPECT_EQ(imageSourceInfo.fillColor_.value_or(Color::TRANSPARENT), Color::FOREGROUND);
-}
-
-/**
  * @tc.name: TriggerFirstVisibleAreaChange001
  * @tc.desc: call TriggerFirstVisibleAreaChange.
  * @tc.type: FUNC
@@ -563,7 +523,6 @@ HWTEST_F(ImagePatternTestNg, DumpRenderInfo001, TestSize.Level1)
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
 
     imagePattern->TriggerFirstVisibleAreaChange();
-    EXPECT_EQ(imagePattern->gifAnimation_, false);
     imagePattern->imageAnalyzerManager_ = nullptr;
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
@@ -575,8 +534,11 @@ HWTEST_F(ImagePatternTestNg, DumpRenderInfo001, TestSize.Level1)
     imagePattern->SetColorFilter(frameNodePtr);
     imagePattern->DumpRenderInfo();
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), matrix);
+    imageLayoutProperty->UpdateSourceSize(SizeF());
+    imageLayoutProperty->UpdateAutoResize(false);
     auto renderProp = frameNode->GetPaintProperty<ImageRenderProperty>();
     renderProp->UpdateSmoothEdge(10.0f);
+    imagePattern->DumpLayoutInfo();
     imagePattern->DumpRenderInfo();
     auto smoothEdge = renderProp->GetSmoothEdge();
     EXPECT_TRUE(smoothEdge.has_value());
@@ -641,6 +603,8 @@ HWTEST_F(ImagePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     layoutWrapper->skipMeasureContent_ = true;
+    ImagePattern::CacheImageStruct cacheImageStruct(frameNode);
+    imagePattern->cacheImages_.emplace_back(cacheImageStruct);
     DirtySwapConfig config;
     config.skipMeasure = false;
     EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
@@ -760,5 +724,113 @@ HWTEST_F(ImagePatternTestNg, CheckHandles001, TestSize.Level1)
     renderContext->UpdateClipEdge(false);
     imagePattern->CheckHandles(handleInfo);
     EXPECT_FALSE(renderContext->GetClipEdge().value());
+}
+
+
+/**
+ * @tc.name: ImagePatternInitOnKeyEvent001
+ * @tc.desc: Test Image InitOnKeyEvent method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternInitOnKeyEvent001, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+    imagePattern->InitOnKeyEvent();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ImagePatternOnKeyEvent001
+ * @tc.desc: Test Image OnKeyEvent method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    imagePattern->OnKeyEvent();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ImageDumpInfo001
+ * @tc.desc: Output the dump info of ImagePattern object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImageDumpInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Out dump info.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern->DumpInfo(json);
+    ASSERT_NE(json, nullptr);
+
+    /**
+     * @tc.steps: step2. Out other dump info.
+     */
+    pattern->OnRecycle();
+    EXPECT_EQ(pattern->loadingCtx_, nullptr);
+    auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateSourceSize(SizeF());
+    auto imageRenderProperty = pattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    DynamicRangeMode value3 = DynamicRangeMode::CONSTRAINT;
+    imageRenderProperty->UpdateDynamicMode(value3);
+    imageRenderProperty->UpdateSmoothEdge(10.0f);
+    std::vector<std::vector<int>> cases = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8}
+    };
+    ImageResizableSlice defaultImageResizableSlice = ImageResizableSlice {
+        .left = Dimension(-1),
+        .right = Dimension(-1),
+        .top = Dimension(-1),
+        .bottom = Dimension(-1)
+    };
+    for (uint32_t i = 0; i < cases.size(); ++i) {
+        ImageResizableSlice tmp;
+        tmp.bottom = Dimension(cases[i][0]);
+        tmp.top = Dimension(cases[i][1]);
+        tmp.left = Dimension(cases[i][2]);
+        tmp.right = Dimension(cases[i][3]);
+        imageRenderProperty->UpdateImageResizableSlice(tmp);
+        frameNode->MarkModifyDone();
+        EXPECT_EQ(imageRenderProperty->GetImageResizableSliceValue(defaultImageResizableSlice), tmp);
+    }
+    pattern->DumpInfo(json);
+    ASSERT_NE(json, nullptr);
+}
+
+/**
+ * @tc.name: ImageDumpAdvanceInfo001
+ * @tc.desc: Output the dump advance info of ImagePattern object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImageDumpAdvanceInfo001, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern->DumpAdvanceInfo(json);
+    ASSERT_NE(json, nullptr);
 }
 } // namespace OHOS::Ace::NG

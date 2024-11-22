@@ -87,6 +87,7 @@ public:
     static void SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetShowCached(FrameNode* frameNode, bool show);
     static void SetLayoutDirection(FrameNode* frameNode, const std::optional<FlexDirection>& layoutDirection);
     static void SetMaxCount(FrameNode* frameNode, int32_t maxCount);
     static void SetMinCount(FrameNode* frameNode, int32_t minCount);
@@ -106,6 +107,7 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static bool GetShowCached(FrameNode* frameNode);
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);

@@ -15,27 +15,35 @@
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 
-#define ACE_UPDATE_SPAN_PROPERTY(name, value, flag)                                                              \
+#define ACE_UPDATE_SPAN_PROPERTY(name, value)                                                                    \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
         CHECK_NULL_VOID(spanNode);                                                                               \
         spanNode->Update##name(value);                                                                           \
-        spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
-#define ACE_UPDATE_NODE_SPAN_PROPERTY(name, value, flag, frameNode)                                              \
+#define ACE_RESET_SPAN_PROPERTY(name)                                                                            \
+    do {                                                                                                         \
+        auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        if (spanNode->Has##name()) {                                                                             \
+            spanNode->MarkTextDirty();                                                                           \
+        }                                                                                                        \
+        spanNode->Reset##name();                                                                                 \
+    } while (false)
+#define ACE_UPDATE_NODE_SPAN_PROPERTY(name, value, frameNode)                                                    \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
         CHECK_NULL_VOID(spanNode);                                                                               \
         spanNode->Update##name(value);                                                                           \
-        spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
-#define ACE_RESET_NODE_SPAN_PROPERTY(name, flag, frameNode)                                                      \
+#define ACE_RESET_NODE_SPAN_PROPERTY(name, frameNode)                                                            \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
         CHECK_NULL_VOID(spanNode);                                                                               \
+        if (spanNode->Has##name()) {                                                                             \
+            spanNode->MarkTextDirty();                                                                           \
+        }                                                                                                        \
         spanNode->Reset##name();                                                                                 \
-        spanNode->ResetPropertyInfo(flag);                                                                       \
-        spanNode->MarkTextDirty();                                                                               \
     } while (false)
 namespace OHOS::Ace::NG {
 
@@ -46,7 +54,7 @@ void SpanModelNG::Create(const std::string& content)
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     stack->Push(spanNode);
 
-    ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
+    ACE_UPDATE_SPAN_PROPERTY(Content, content);
 }
 
 RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content)
@@ -54,7 +62,6 @@ RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& 
     auto spanNode = SpanNode::CreateSpanNode(nodeId);
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->UpdateContent(content);
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
     return spanNode;
 }
 
@@ -69,21 +76,42 @@ void SpanModelNG::SetFont(const Font& value)
 {
     if (value.fontSize.has_value()) {
         SetFontSize(value.fontSize.value());
+    } else {
+        ResetFontSize();
     }
     if (value.fontWeight.has_value()) {
         SetFontWeight(value.fontWeight.value());
+    } else {
+        ResetFontWeight();
     }
     if (!value.fontFamilies.empty()) {
         SetFontFamily(value.fontFamilies);
+    } else {
+        ResetFontFamily();
     }
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(value.fontStyle.value());
+    } else {
+        ResetItalicFontStyle();
     }
+}
+
+void SpanModelNG::ResetFont()
+{
+    ResetFontSize();
+    ResetFontWeight();
+    ResetFontFamily();
+    ResetItalicFontStyle();
 }
 
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontSize, value, PropertyInfo::FONTSIZE);
+    ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
+}
+
+void SpanModelNG::ResetFontSize()
+{
+    ACE_RESET_SPAN_PROPERTY(FontSize);
 }
 
 void SpanModelNG::SetTextColor(const Color& value)
@@ -91,100 +119,116 @@ void SpanModelNG::SetTextColor(const Color& value)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateSpanTextColor(value);
-    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+}
+
+void SpanModelNG::ResetTextColor()
+{
+    ACE_RESET_SPAN_PROPERTY(TextColor);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value, PropertyInfo::FONTSTYLE);
+    ACE_UPDATE_SPAN_PROPERTY(ItalicFontStyle, value);
+}
+
+void SpanModelNG::ResetItalicFontStyle()
+{
+    ACE_RESET_SPAN_PROPERTY(ItalicFontStyle);
 }
 
 void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    CHECK_NULL_VOID(spanNode);
-    spanNode->UpdateUserFontWeight(true);
+    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value);
+}
+
+void SpanModelNG::ResetFontWeight()
+{
+    ACE_RESET_SPAN_PROPERTY(FontWeight);
 }
 
 void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontFamily, value, PropertyInfo::FONTFAMILY);
+    ACE_UPDATE_SPAN_PROPERTY(FontFamily, value);
+}
+
+void SpanModelNG::ResetFontFamily()
+{
+    ACE_RESET_SPAN_PROPERTY(FontFamily);
 }
 
 void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value, PropertyInfo::TEXTDECORATION);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value);
 }
 
 void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecorationStyle, value, PropertyInfo::NONE);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecorationStyle, value);
 }
 
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value, PropertyInfo::NONE);
+    ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
 }
 
 void SpanModelNG::SetTextCase(Ace::TextCase value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextCase, value, PropertyInfo::TEXTCASE);
+    ACE_UPDATE_SPAN_PROPERTY(TextCase, value);
 }
 
 void SpanModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(TextShadow, value, PropertyInfo::TEXTSHADOW);
+    ACE_UPDATE_SPAN_PROPERTY(TextShadow, value);
 }
 
 void SpanModelNG::SetTextShadow(UINode* uiNode, const std::optional<std::vector<Shadow>>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextShadow, value.value(), PropertyInfo::TEXTSHADOW, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextShadow, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextShadow, PropertyInfo::TEXTSHADOW, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextShadow, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextShadow(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextShadow, PropertyInfo::TEXTSHADOW, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextShadow, uiNode);
 }
 
 void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);
+    ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value);
 }
 
 void SpanModelNG::SetBaselineOffset(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(BaselineOffset, value, PropertyInfo::BASELINE_OFFSET);
+    ACE_UPDATE_SPAN_PROPERTY(BaselineOffset, value);
 }
 
 void SpanModelNG::SetLineHeight(const Dimension& value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(LineHeight, value, PropertyInfo::LINEHEIGHT);
+    ACE_UPDATE_SPAN_PROPERTY(LineHeight, value);
 }
 
 void SpanModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
-    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc));
 }
 
 void SpanModelNG::SetOnClick(UINode* uiNode, GestureEventFunc&& click)
 {
-    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, std::move(click), PropertyInfo::NONE, uiNode);
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, std::move(click), uiNode);
 }
 
 void SpanModelNG::ClearOnClick()
 {
-    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr);
 }
 
 void SpanModelNG::ClearOnClick(UINode* uiNode)
 {
-    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE, uiNode);
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, uiNode);
 }
 
 void SpanModelNG::SetAccessibilityText(const std::string& text)
@@ -220,7 +264,7 @@ void SpanModelNG::SetAccessibilityImportance(const std::string& importance)
 void SpanModelNG::InitSpan(UINode* uiNode, const std::optional<std::string>& content)
 {
     if (content) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content.value(), PropertyInfo::NONE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content.value(), uiNode);
     }
 }
 
@@ -229,164 +273,163 @@ void SpanModelNG::SetFontWeight(UINode* uiNode, const std::optional<FontWeight>&
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_VOID(spanNode);
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(FontWeight, value.value(), PropertyInfo::FONTWEIGHT, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(FontWeight, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, PropertyInfo::FONTWEIGHT, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, uiNode);
     }
-    spanNode->UpdateUserFontWeight(true);
 }
 
 void SpanModelNG::ResetFontWeight(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, PropertyInfo::FONTWEIGHT, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, uiNode);
 }
 
 void SpanModelNG::SetTextCase(UINode* uiNode, const std::optional<TextCase>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextCase, value.value(), PropertyInfo::TEXTCASE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextCase, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextCase, PropertyInfo::TEXTCASE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextCase, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextCase(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextCase, PropertyInfo::TEXTCASE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextCase, uiNode);
 }
 
 void SpanModelNG::SetItalicFontStyle(UINode* uiNode, const std::optional<Ace::FontStyle>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(ItalicFontStyle, value.value(), PropertyInfo::FONTSTYLE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(ItalicFontStyle, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(ItalicFontStyle, PropertyInfo::FONTSTYLE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(ItalicFontStyle, uiNode);
     }
 }
 
 void SpanModelNG::ResetItalicFontStyle(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(ItalicFontStyle, PropertyInfo::FONTSTYLE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(ItalicFontStyle, uiNode);
 }
 
 void SpanModelNG::SetLineHeight(UINode* uiNode, const std::optional<Dimension>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(LineHeight, value.value(), PropertyInfo::LINEHEIGHT, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(LineHeight, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(LineHeight, PropertyInfo::LINEHEIGHT, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(LineHeight, uiNode);
     }
 }
 
 void SpanModelNG::ResetLineHeight(UINode* uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(LineHeight, PropertyInfo::LINEHEIGHT, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(LineHeight, uiNode);
 }
 
 void SpanModelNG::SetFontSize(UINode* uiNode, const std::optional<Dimension>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(FontSize, value.value(), PropertyInfo::FONTSIZE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(FontSize, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(FontSize, PropertyInfo::FONTSIZE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(FontSize, uiNode);
     }
 }
 
 void SpanModelNG::ResetFontSize(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(FontSize, PropertyInfo::FONTSIZE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(FontSize, uiNode);
 }
 
 void SpanModelNG::SetFontFamily(UINode* uiNode, const std::optional<std::vector<std::string>>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(FontFamily, value.value(), PropertyInfo::FONTFAMILY, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(FontFamily, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(FontFamily, PropertyInfo::FONTFAMILY, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(FontFamily, uiNode);
     }
 }
 
 void SpanModelNG::ResetFontFamily(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(FontFamily, PropertyInfo::FONTFAMILY, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(FontFamily, uiNode);
 }
 
 void SpanModelNG::SetTextDecoration(UINode* uiNode, const std::optional<TextDecoration>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecoration, value.value(), PropertyInfo::TEXTDECORATION, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecoration, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextDecoration, PropertyInfo::TEXTDECORATION, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextDecoration, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextDecoration(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextDecoration, PropertyInfo::TEXTDECORATION, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextDecoration, uiNode);
 }
 
 void SpanModelNG::SetTextDecorationStyle(UINode* uiNode, const std::optional<TextDecorationStyle>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecorationStyle, value.value(), PropertyInfo::NONE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecorationStyle, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationStyle, PropertyInfo::NONE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationStyle, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextDecorationStyle(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationStyle, PropertyInfo::NONE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationStyle, uiNode);
 }
 
 void SpanModelNG::SetTextDecorationColor(UINode* uiNode, const std::optional<Color>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecorationColor, value.value(), PropertyInfo::NONE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(TextDecorationColor, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, PropertyInfo::NONE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextDecorationColor(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, PropertyInfo::NONE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
 }
 
 void SpanModelNG::SetTextColor(UINode* uiNode, const std::optional<Color>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(SpanTextColor, value.value(), PropertyInfo::FONTCOLOR, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(SpanTextColor, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(TextColor, PropertyInfo::FONTCOLOR, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(TextColor, uiNode);
     }
 }
 
 void SpanModelNG::ResetTextColor(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(TextColor, PropertyInfo::FONTCOLOR, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(TextColor, uiNode);
 }
 
 void SpanModelNG::SetLetterSpacing(UINode* uiNode, const std::optional<Dimension>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(LetterSpacing, value.value(), PropertyInfo::LETTERSPACE, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(LetterSpacing, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(LetterSpacing, PropertyInfo::LETTERSPACE, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(LetterSpacing, uiNode);
     }
 }
 
 void SpanModelNG::ResetLetterSpacing(UINode *uiNode)
 {
-    ACE_RESET_NODE_SPAN_PROPERTY(LetterSpacing, PropertyInfo::LETTERSPACE, uiNode);
+    ACE_RESET_NODE_SPAN_PROPERTY(LetterSpacing, uiNode);
 }
 
 void SpanModelNG::SetBaselineOffset(UINode* uiNode, const std::optional<Dimension>& value)
 {
     if (value) {
-        ACE_UPDATE_NODE_SPAN_PROPERTY(BaselineOffset, value.value(), PropertyInfo::BASELINE_OFFSET, uiNode);
+        ACE_UPDATE_NODE_SPAN_PROPERTY(BaselineOffset, value.value(), uiNode);
     } else {
-        ACE_RESET_NODE_SPAN_PROPERTY(BaselineOffset, PropertyInfo::BASELINE_OFFSET, uiNode);
+        ACE_RESET_NODE_SPAN_PROPERTY(BaselineOffset, uiNode);
     }
 }
 
@@ -394,15 +437,23 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
         SetFontSize(uiNode, value.fontSize.value());
+    } else {
+        ResetFontSize(uiNode);
     }
     if (value.fontWeight.has_value()) {
         SetFontWeight(uiNode, value.fontWeight.value());
+    } else {
+        ResetFontWeight(uiNode);
     }
     if (!value.fontFamilies.empty()) {
         SetFontFamily(uiNode, value.fontFamilies);
+    } else {
+        ResetFontFamily(uiNode);
     }
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(uiNode, value.fontStyle.value());
+    } else {
+        ResetItalicFontStyle(uiNode);
     }
 }
 
@@ -476,7 +527,7 @@ Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
 TextStyle SpanModelNG::GetDefaultTextStyle()
 {
     TextStyle textStyle;
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, textStyle);
     auto textTheme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, textStyle);

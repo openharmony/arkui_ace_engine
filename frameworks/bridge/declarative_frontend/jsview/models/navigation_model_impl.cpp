@@ -78,7 +78,7 @@ void NavigationModelImpl::SetSubtitle(const std::string& subtitle)
     navigationContainer->GetDeclaration()->subTitle = subtitle;
 }
 
-void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar)
+void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
@@ -114,7 +114,7 @@ void NavigationModelImpl::SetHideBackButton(bool hideBackButton)
     navigationContainer->GetDeclaration()->hideBarBackButton = hideBackButton;
 }
 
-void NavigationModelImpl::SetHideToolBar(bool hideToolBar)
+void NavigationModelImpl::SetHideToolBar(bool hideToolBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);

@@ -32,9 +32,6 @@
 namespace OHOS::Ace {
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
-using ToastWindowArray = std::array<RefPtr<Subwindow>,
-    static_cast<int32_t>(ToastWindowType::TOAST_WINDOW_COUNT)>;
-using ToastWindowMap = std::unordered_map<int32_t, ToastWindowArray>;
 
 class ACE_EXPORT SubwindowManager final : public NonCopyable {
 public:
@@ -111,8 +108,8 @@ public:
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
-    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId, const ToastWindowType& windowType);
-    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow, const ToastWindowType& windowType);
+    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
+    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void HideToastSubWindowNG();
     ToastWindowType GetToastWindowType(int32_t instanceId);
     ACE_FORCE_EXPORT void CloseToast(
@@ -134,14 +131,8 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
     void HideSystemTopMostWindow();
-    RefPtr<Subwindow> GetSystemToastWindow()
-    {
-        return systemToastWindow_;
-    }
-    void SetSystemToastWindow(RefPtr<Subwindow> systemToastWindow)
-    {
-        systemToastWindow_ = systemToastWindow;
-    }
+    const RefPtr<Subwindow> GetSystemToastWindow(int32_t instanceId);
+    void AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void ClearToastInSystemSubwindow();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     bool IsFreeMultiWindow(int32_t instanceId) const;
@@ -152,10 +143,11 @@ public:
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
-    RefPtr<Subwindow> GetOrCreateSystemSubWindow();
+    RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
+    const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -171,13 +163,14 @@ private:
     static thread_local RefPtr<Subwindow> currentSubwindow_;
 
     std::mutex toastMutex_;
-    ToastWindowMap toastWindowMap_;
+    SubwindowMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    RefPtr<Subwindow> systemToastWindow_;
+    std::mutex systemToastMutex_;
+    SubwindowMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
 };
 

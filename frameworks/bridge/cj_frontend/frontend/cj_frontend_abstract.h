@@ -50,7 +50,7 @@ public:
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
     void Destroy() override;
     void FlushReload() override;
-    bool LoadAppLibrary();
+    bool CheckLoadAppLibrary();
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;

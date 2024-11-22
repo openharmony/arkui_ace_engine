@@ -78,6 +78,12 @@ struct CacheVisibleRectResult {
     RectF innerBoundaryRect = RectF();
 };
 
+struct CacheMatrixInfo {
+    Matrix4 revertMatrix = Matrix4::CreateIdentity();
+    Matrix4 localMatrix = Matrix4::CreateIdentity();
+    RectF paintRectWithTransform;
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -146,6 +152,8 @@ public:
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
+    void OnAutoEventParamUpdate(const std::string& value) override;
+
     void UpdateGeometryTransition() override;
 
     struct ZIndexComparator {
@@ -174,7 +182,7 @@ public:
 
     void ProcessFreezeNode();
 
-    void onFreezeStateChange() override;
+    void OnFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -247,6 +255,11 @@ public:
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
+    }
+
+    void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -368,8 +381,12 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
-    HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
+        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+
+    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+        const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+        TouchRestrict& touchRestrict);
 
     void AnimateHoverEffect(bool isHovered) const;
 
@@ -438,7 +455,7 @@ public:
 
     OffsetF GetPositionToScreenWithTransform();
 
-    OffsetF GetPositionToWindowWithTransform() const;
+    OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
     OffsetF GetTransformRelativeOffset() const;
 
@@ -453,8 +470,6 @@ public:
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();
-
-    OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -532,7 +547,8 @@ public:
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
 
-    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent);
+    virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
+        std::vector<RectF>* regionList = nullptr);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -581,9 +597,15 @@ public:
         customerSet_ = true;
     }
 
-    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        previewOption_ = previewOption;
+        if (isResetOptions) {
+            previewOption_ = previewOption;
+        } else {
+            auto options = previewOption_.options;
+            previewOption_ = previewOption;
+            previewOption_.options = options;
+        }
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
@@ -665,6 +687,9 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // new function will ignore child's position and translate properties.
+    RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
@@ -902,7 +927,7 @@ public:
 
     void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
 
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
 
     bool GetMonopolizeEvents() const;
 
@@ -937,7 +962,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -966,7 +991,7 @@ public:
     // this flag will be used to refresh the transform matrix cache if it's dirty
     void NotifyTransformInfoChanged()
     {
-        isLocalRevertMatrixAvailable_ = false;
+        isTransformNotChanged_ = false;
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -1012,7 +1037,7 @@ public:
 
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
-    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+    CacheMatrixInfo& GetOrRefreshMatrixFromCache(bool forceRefresh = false);
 
     // apply the matrix to the given point specified by dst
     static void MapPointTo(PointF& dst, Matrix4& matrix);
@@ -1087,16 +1112,32 @@ public:
     void OnForegroundColorUpdate(const Color& value);
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
-    std::string GetJSCustomProperty(const std::string& key);
-    std::string GetCapiCustomProperty(const std::string& key);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);
 
-    void setIsCNode(bool createByCapi)
+    LayoutConstraintF GetLayoutConstraint() const;
+
+    WeakPtr<TargetComponent> GetTargetComponent() const
     {
-        isCNode_ = createByCapi;
+        return targetComponent_;
     }
+
+    void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
+    {
+        exposeInnerGestureFlag_ = exposeInnerGestureFlag;
+    }
+
+    bool GetExposeInnerGestureFlag() const
+    {
+        return exposeInnerGestureFlag_;
+    }
+
+    RefPtr<UINode> GetCurrentPageRootNode();
+
+    std::list<RefPtr<FrameNode>> GetActiveChildren();
 
 protected:
     void DumpInfo() override;
@@ -1124,7 +1165,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
@@ -1185,7 +1225,7 @@ private:
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
-    bool IsFrameDisappear();
+    bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
@@ -1200,13 +1240,13 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1227,7 +1267,7 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
@@ -1240,6 +1280,8 @@ private:
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     void ResetPredictNodes();
+
+    bool IsDebugInspectorId();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1321,9 +1363,9 @@ private:
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();
     // this is just used for the hit test process of event handling, do not used for other purpose
-    Matrix4 localRevertMatrix_ = Matrix4::CreateIdentity();
+    CacheMatrixInfo cacheMatrixInfo_;
     // control the localMat_ and localRevertMatrix_ available or not, set to false when any transform info is set
-    bool isLocalRevertMatrixAvailable_ = false;
+    bool isTransformNotChanged_ = false;
     bool isFind_ = false;
 
     bool isRestoreInfoUsed_ = false;
@@ -1336,16 +1378,15 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
-    bool isCNode_ = false;
+    bool exposeInnerGestureFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex mutex_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

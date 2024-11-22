@@ -110,7 +110,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 
 void EventHub::PostEnabledTask()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -160,7 +160,7 @@ void EventHub::SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onD
             customerOnDrop_ = std::move(onDragFunc);
             break;
         default:
-            LOGW("unsuport dragFuncType");
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Unsupported DragFuncType");
             break;
     }
 }
@@ -213,7 +213,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
             break;
         }
         default:
-            LOGW("unsuport DragFuncType");
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Unsupported DragFuncType");
             break;
     }
 }
@@ -276,6 +276,7 @@ bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
+    CHECK_NULL_VOID(info);
     if (IsFireOnDrop(info)) {
         FireOnDrop(info, extraParams);
     } else {
@@ -285,13 +286,14 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
 
 void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
     frameNode->InitLastArea();
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
+    hasInnerAreaChangeUntriggered_.emplace_back(id);
 }
 
 void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
@@ -306,6 +308,36 @@ void EventHub::ClearCustomerOnDragFunc()
     customerOnDragLeave_ = nullptr;
     customerOnDragMove_ = nullptr;
     customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
     customerOnDragEnd_ = nullptr;
 }
 
@@ -386,7 +418,7 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
@@ -474,6 +506,11 @@ void EventHub::SetOnDetach(std::function<void()>&& onDetach)
 void EventHub::ClearOnDetach()
 {
     onDetach_ = nullptr;
+}
+
+void EventHub::ClearOnPreDrag()
+{
+    onPreDragFunc_ = nullptr;
 }
 
 void EventHub::FireOnDetach()
@@ -617,6 +654,7 @@ void EventHub::FireInnerOnAreaChanged(
             innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
         }
     }
+    hasInnerAreaChangeUntriggered_.clear();
 }
 
 bool EventHub::HasOnAreaChanged() const
@@ -736,6 +774,10 @@ bool EventHub::IsDeveloperEnabled() const
 
 void EventHub::SetEnabled(bool enabled)
 {
+    auto host = GetFrameNode();
+    if (enabled_ != enabled && host) {
+        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
     enabled_ = enabled;
     developerEnabled_ = enabled;
 }
@@ -885,4 +927,43 @@ bool EventHub::HasVisibleAreaCallback(bool isUser)
     }
 }
 
+void EventHub::HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+    const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
+    const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    if (currFrameRect != *lastFrameRect || currParentOffsetToWindow != *lastParentOffsetToWindow) {
+        if (HasInnerOnAreaChanged()) {
+            FireInnerOnAreaChanged(
+                *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);
+        }
+        if (HasOnAreaChanged()) {
+            FireOnAreaChanged(*lastFrameRect, *lastParentOffsetToWindow,
+                host->GetFrameRectWithSafeArea(true), host->GetParentGlobalOffsetWithSafeArea(true, true));
+        }
+        *lastFrameRect = currFrameRect;
+        *lastParentOffsetToWindow = currParentOffsetToWindow;
+    }
+
+    if (!hasInnerAreaChangeUntriggered_.empty()) {
+        FireUntriggeredInnerOnAreaChanged(
+            *lastFrameRect, *lastParentOffsetToWindow, currFrameRect, currParentOffsetToWindow);
+    }
+}
+
+void EventHub::FireUntriggeredInnerOnAreaChanged(
+    const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+{
+    for (auto& id : hasInnerAreaChangeUntriggered_) {
+        auto it = onAreaChangedInnerCallbacks_.find(id);
+        if (it != onAreaChangedInnerCallbacks_.end()) {
+            auto innerOnAreaCallback = it->second;
+            if (innerOnAreaCallback) {
+                innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
+            }
+        }
+    }
+    hasInnerAreaChangeUntriggered_.clear();
+}
 } // namespace OHOS::Ace::NG

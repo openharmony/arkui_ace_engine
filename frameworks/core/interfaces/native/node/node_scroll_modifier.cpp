@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -492,6 +492,16 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     controller->ScrollBy(x, y, false);
 }
 
+void SetScrollFling(ArkUINodeHandle node, ArkUI_Float64 value)
+{
+    if (NearZero(value)) {
+        return;
+    }
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->Fling(value);
+}
+
 ArkUINodeHandle GetScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -531,6 +541,25 @@ void ResetScrollFadingEdge(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
+
+void GetScrollFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[0].i32 = static_cast<int32_t>(NG::ScrollableModelNG::GetFadingEdge(frameNode));
+    (*values)[1].f32 = NG::ScrollableModelNG::GetFadingEdgeLength(frameNode);
+}
+
+void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    SizeF size = pattern->GetChildrenExpandedSize();
+    (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
+    (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
 }
 } // namespace
 
@@ -573,8 +602,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
         SetScrollOnWillScrollCallBack, ResetScrollOnWillScrollCallBack,
         SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
-        SetScrollFadingEdge,
-        ResetScrollFadingEdge,
+        SetScrollFadingEdge, ResetScrollFadingEdge, GetScrollFadingEdge,
+        SetScrollFling,
+        GetScrollContentSize,
     };
     /* clang-format on */
     return &modifier;

@@ -141,6 +141,14 @@ class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override
+    {
+        testProperty.loadEvent = std::nullopt;
+        testProperty.destroyEvent = std::nullopt;
+        testProperty.surfaceCreatedEvent = std::nullopt;
+        testProperty.surfaceChangedEvent = std::nullopt;
+        testProperty.surfaceDestroyedEvent = std::nullopt;
+    }
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
@@ -1144,7 +1152,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
     auto surfaceOffsetX = 0.0f;
     auto surfaceOffsetY = 0.0f;
     xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
-    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    xcomponentController->GetSurfaceOffset(surfaceOffsetX, surfaceOffsetY);
     EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
     EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
     EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
@@ -1361,5 +1369,73 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
+}
+
+/**
+ * @tc.name: XComponentCreateTypeNodeTest001
+ * @tc.desc: Test create typeNode xcomponent, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentCreateTypeNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create typeNode xcomponent.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    ArkUI_XComponent_Params xcParams = {
+        .id = XCOMPONENT_ID,
+        .type = XCOMPONENT_SURFACE_TYPE_VALUE,
+        .libraryName = XCOMPONENT_LIBRARY_NAME,
+        .controller = xComponentController
+    };
+    ArkUI_Int32 nodeId = 0;
+
+    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, &xcParams);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+    
+    /**
+     * @tc.steps: step2. get xcomponent type.
+     * @tc.expected: xcomponent type is XComponentType::SURFACE
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xcType = pattern->GetType();
+    EXPECT_EQ(xcType, XComponentType::SURFACE);
+}
+
+/**
+ * @tc.name: XComponentCreateTypeNodeTest002
+ * @tc.desc: Test create typeNode xcomponent, type = XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentCreateTypeNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create typeNode xcomponent.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    ArkUI_XComponent_Params xcParams = {
+        .id = XCOMPONENT_ID,
+        .type = XCOMPONENT_TEXTURE_TYPE_VALUE,
+        .libraryName = XCOMPONENT_LIBRARY_NAME,
+        .controller = xComponentController
+    };
+    ArkUI_Int32 nodeId = 0;
+
+    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, &xcParams);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+    
+    /**
+     * @tc.steps: step2. get xcomponent type.
+     * @tc.expected: xcomponent type is XComponentType::TEXTURE
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xcType = pattern->GetType();
+    EXPECT_EQ(xcType, XComponentType::TEXTURE);
 }
 } // namespace OHOS::Ace::NG

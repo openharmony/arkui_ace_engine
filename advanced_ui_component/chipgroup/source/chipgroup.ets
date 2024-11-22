@@ -13,12 +13,21 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
+import {
+  AccessibilitySelectedType,
+  Chip,
+  ChipSize,
+  ChipSuffixSymbolGlyphOptions,
+  ChipSymbolGlyphOptions,
+  CloseOptions,
+  PrefixIconOptions,
+  SuffixIconOptions
+} from '@ohos.arkui.advanced.Chip';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
-  chipGroupPadding?: ChipGroupPaddingOptions
+  chipGroupPadding: ChipGroupPaddingOptions
 }
 
 const noop = (selectedIndexes: Array<number>) => {
@@ -80,13 +89,25 @@ interface LabelOptions {
   text: string;
 }
 
+export interface SuffixImageIconOptions extends IconOptions {
+  action?: VoidCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
   prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
+  suffixImageIcon?: SuffixImageIconOptions;
   suffixSymbol?: ChipSymbolGlyphOptions;
+  suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
   allowClose?: boolean;
+  closeOptions?: CloseOptions;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
 export interface ChipItemStyle {
@@ -106,6 +127,17 @@ interface ChipGroupSpaceOptions {
 export interface IconItemOptions {
   icon: IconOptions;
   action: Callback<void>;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
+}
+
+export interface SymbolItemOptions {
+  symbol: SymbolGlyphModifier;
+  action: VoidCallback;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string;
 }
 
 interface IconGroupSuffixTheme {
@@ -131,7 +163,10 @@ function parseDimension<T>(
     return defaultValue;
   }
   const resourceManager = uiContext.getHostContext()?.resourceManager;
-  if (typeof value === "object") {
+  if (!resourceManager) {
+    return defaultValue;
+  }
+  if (typeof value === 'object') {
     let temp: Resource = value as Resource;
     if (temp.type === 10002 || temp.type === 10007) {
       if (resourceManager.getNumber(temp.id) >= 0) {
@@ -142,11 +177,11 @@ function parseDimension<T>(
         return value as T;
       }
     }
-  } else if (typeof value === "number") {
+  } else if (typeof value === 'number') {
     if (value >= 0) {
       return value as T;
     }
-  } else if (typeof value === "string") {
+  } else if (typeof value === 'string') {
     if (isValid(value)) {
       return value as T;
     }
@@ -164,17 +199,17 @@ function isValidString(dimension: string, regex: RegExp): boolean {
 }
 
 function isValidDimensionString(dimension: string): boolean {
-  return isValidString(dimension, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
 
 function isValidDimensionNoPercentageString(dimension: string): boolean {
-  return isValidString(dimension, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
 }
 
 @Component
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
-  @Prop items: Array<IconItemOptions | SymbolGlyphModifier> = [];
+  @Prop items: Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions> = [];
   symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
@@ -200,9 +235,32 @@ export struct IconGroupSuffix {
     return value;
   }
 
+  @Builder
+  SymbolItemBuilder(item: SymbolItemOptions) {
+    SymbolGlyph()
+      .fontColor([iconGroupSuffixTheme.fillColor])
+      .fontSize(this.getIconSize())
+      .attributeModifier(item.symbol)
+      .focusable(true)
+      .effectStrategy(SymbolEffectStrategy.NONE)
+      .symbolEffect(this.symbolEffect, false)
+      .symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect)
+  }
+
+  @Builder
+  IconItemBuilder(item: IconItemOptions) {
+    Image(item.icon.src)
+      .fillColor(iconGroupSuffixTheme.fillColor)
+      .size({
+        width: this.getIconSize(item.icon.size?.width),
+        height: this.getIconSize(item.icon.size?.height)
+      })
+      .focusable(true)
+  }
+
   build() {
     Row({ space: 8 }) {
-      ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier) => {
+      ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions) => {
         Button() {
           if (suffixItem instanceof SymbolGlyphModifier) {
             SymbolGlyph()
@@ -213,14 +271,10 @@ export struct IconGroupSuffix {
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(this.symbolEffect, false)
               .symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect)
+          } else if (this.isSymbolItem(suffixItem)) {
+            this.SymbolItemBuilder(suffixItem as SymbolItemOptions)
           } else {
-            Image(suffixItem.icon.src)
-              .fillColor(iconGroupSuffixTheme.fillColor)
-              .size({
-                width: this.getIconSize(suffixItem.icon?.size?.width),
-                height: this.getIconSize(suffixItem.icon?.size?.height)
-              })
-              .focusable(true)
+            this.IconItemBuilder(suffixItem as IconItemOptions)
           }
         }
         .size({
@@ -229,6 +283,9 @@ export struct IconGroupSuffix {
         })
         .backgroundColor(iconGroupSuffixTheme.backgroundColor)
         .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .accessibilityText(this.getAccessibilityText(suffixItem))
+        .accessibilityDescription(this.getAccessibilityDescription(suffixItem))
+        .accessibilityLevel(this.getAccessibilityLevel(suffixItem))
         .onClick(() => {
           if (!(suffixItem instanceof SymbolGlyphModifier)) {
             suffixItem.action();
@@ -237,6 +294,33 @@ export struct IconGroupSuffix {
         .borderRadius(iconGroupSuffixTheme.borderRadius)
       })
     }
+  }
+
+  private isSymbolItem(item: IconItemOptions | SymbolItemOptions): boolean {
+    return typeof (item as SymbolItemOptions).symbol !== 'undefined';
+  }
+
+  private getAccessibilityLevel(item: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions): string {
+    if (item instanceof SymbolGlyphModifier) {
+      return 'auto';
+    }
+    return item.accessibilityLevel ?? 'auto';
+  }
+
+  private getAccessibilityDescription(
+    item: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions
+  ): Resource | undefined {
+    if (item instanceof SymbolGlyphModifier || typeof item.accessibilityDescription === 'undefined') {
+      return undefined;
+    }
+    return item.accessibilityDescription as ESObject as Resource;
+  }
+
+  private getAccessibilityText(item: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions): Resource | undefined {
+    if (item instanceof SymbolGlyphModifier || typeof item.accessibilityText === 'undefined') {
+      return undefined;
+    }
+    return item.accessibilityText as ESObject as Resource;
   }
 }
 
@@ -483,31 +567,27 @@ export struct ChipGroup {
             ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
               if (chipItem) {
                 Chip({
-                  prefixIcon: {
-                    src: chipItem.prefixIcon?.src ?? "",
-                    size: chipItem.prefixIcon?.size ?? undefined,
-                    fillColor: this.getFillColor(),
-                    activatedFillColor: this.getSelectedFillColor()
-                  },
+                  prefixIcon: this.getPrefixIcon(chipItem),
                   prefixSymbol: chipItem?.prefixSymbol,
                   label: {
-                    text: chipItem?.label?.text ?? " ",
+                    text: chipItem?.label?.text ?? ' ',
                     fontColor: this.getFontColor(),
                     activatedFontColor: this.getSelectedFontColor(),
                   },
-                  suffixIcon: {
-                    src: chipItem.suffixIcon?.src ?? "",
-                    size: chipItem.suffixIcon?.size ?? undefined,
-                    fillColor: this.getFillColor(),
-                    activatedFillColor: this.getSelectedFillColor()
-                  },
+                  suffixIcon: this.getSuffixIcon(chipItem),
                   suffixSymbol: chipItem?.suffixSymbol,
+                  suffixSymbolOptions: chipItem.suffixSymbolOptions,
                   allowClose: chipItem.allowClose ?? false,
+                  closeOptions: chipItem.closeOptions,
                   enabled: true,
                   activated: this.isSelected(index),
                   backgroundColor: this.getBackgroundColor(),
                   size: this.getChipSize(),
                   activatedBackgroundColor: this.getSelectedBackgroundColor(),
+                  accessibilitySelectedType:
+                  this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
+                  accessibilityDescription: chipItem.accessibilityDescription,
+                  accessibilityLevel: chipItem.accessibilityLevel,
                   onClicked: () => {
                     if (this.isSelected(index)) {
                       if (!(!this.isMultiple())) {
@@ -532,7 +612,8 @@ export struct ChipGroup {
               return JSON.stringify(this.isRefresh);
             });
           }
-          .padding({ left: this.getChipGroupStartSpace(),
+          .padding({
+            left: this.getChipGroupStartSpace(),
             right: this.getChipGroupEndSpace()
           })
           .constraintSize({ minWidth: '100%' })
@@ -563,12 +644,43 @@ export struct ChipGroup {
       if (this.suffix) {
         Row() {
           this.suffix();
-        }.padding({ left: iconGroupSuffixTheme.marginLeft,
+        }.padding({
+          left: iconGroupSuffixTheme.marginLeft,
           right: iconGroupSuffixTheme.marginRight
         })
       }
     }
     .align(Alignment.End)
-    .width("100%")
+    .width('100%')
+  }
+
+  getPrefixIcon(chipItem: ChipGroupItemOptions): PrefixIconOptions {
+    return {
+      src: chipItem.prefixIcon?.src ?? '',
+      size: chipItem.prefixIcon?.size ?? undefined,
+      fillColor: this.getFillColor(),
+      activatedFillColor: this.getSelectedFillColor()
+    };
+  }
+
+  private getSuffixIcon(chipItem: ChipGroupItemOptions): SuffixIconOptions {
+    if (typeof chipItem.suffixImageIcon !== 'undefined') {
+      return {
+        src: chipItem.suffixImageIcon.src,
+        size: chipItem.suffixImageIcon.size,
+        fillColor: this.getFillColor(),
+        activatedFillColor: this.getSelectedFillColor(),
+        action: chipItem.suffixImageIcon.action,
+        accessibilityText: chipItem.suffixImageIcon.accessibilityText,
+        accessibilityDescription: chipItem.suffixImageIcon.accessibilityDescription,
+        accessibilityLevel: chipItem.suffixImageIcon.accessibilityLevel,
+      };
+    }
+    return {
+      src: chipItem.suffixIcon?.src ?? '',
+      size: chipItem.suffixIcon?.size ?? undefined,
+      fillColor: this.getFillColor(),
+      activatedFillColor: this.getSelectedFillColor()
+    };
   }
 }

@@ -120,32 +120,6 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
     }
     return velocity;
 }
-
-void RemoveDumplicateHead(LeastSquareImpl& xAxis, LeastSquareImpl& yAxis)
-{
-    int32_t trackNum = xAxis.GetTrackNum();
-    if (trackNum <= 2 || trackNum >= VelocityTracker::POINT_NUMBER) { // 2: use linear slope
-        return;
-    }
-    const auto& tvals = xAxis.GetXVals();
-    const auto& xvals = xAxis.GetYVals();
-    const auto& yvals = yAxis.GetYVals();
-    if (!NearEqual(xvals[0], xvals[1]) || !NearEqual(yvals[0], yvals[1])) {
-        return;
-    }
-    if (!NearEqual(tvals[0], tvals[1], 0.007)) { // 0.007 less than vsync period
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Trunked time inverval: %{public}f", tvals[1]);
-    LeastSquareImpl trunkedX;
-    LeastSquareImpl trunkedY;
-    for (int32_t i = 1; i < trackNum; ++i) {
-        trunkedX.UpdatePoint(tvals[i], xvals[i]);
-        trunkedY.UpdatePoint(tvals[i], yvals[i]);
-    }
-    xAxis = std::move(trunkedX);
-    yAxis = std::move(trunkedY);
-}
 } // namespace
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
@@ -219,7 +193,7 @@ void VelocityTracker::UpdateVelocity()
     if (xAxis_.GetTrackNum() < 2) { // Velocity is calculated from at least 2 points.
         return;
     }
-    RemoveDumplicateHead(xAxis_, yAxis_);
+
     double xVelocity = UpdateAxisVelocity(xAxis_);
     double yVelocity = UpdateAxisVelocity(yAxis_);
     velocity_.SetOffsetPerSecond({ xVelocity, yVelocity });

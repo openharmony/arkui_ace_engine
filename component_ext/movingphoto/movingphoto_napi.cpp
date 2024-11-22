@@ -76,6 +76,10 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
 
+    napi_value jsImageAIOptions = nullptr;
+    napi_get_named_property(env, argv[0], "imageAIOptions", &jsImageAIOptions);
+    NG::MovingPhotoModelNG::GetInstance()->SetImageAIOptions(jsImageAIOptions);
+
     napi_value getUri = nullptr;
     napi_get_named_property(env, jsData, "getUri", &getUri);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, getUri, napi_function)) {
@@ -244,6 +248,7 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("autoPlayPeriod", JsAutoPlayPeriod),
         DECLARE_NAPI_FUNCTION("autoPlay", JsAutoPlay),
         DECLARE_NAPI_FUNCTION("repeatPlay", JsRepeatPlay),
+        DECLARE_NAPI_FUNCTION("enableAnalyzer", JsEnableAnalyzer),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -275,6 +280,19 @@ napi_value StopPlayback(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
+napi_value RefreshMovingPhoto(napi_env env, napi_callback_info info)
+{
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
+    NG::MovingPhotoController* controller = nullptr;
+    napi_unwrap(env, thisVar, (void**)&controller);
+    if (controller == nullptr) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    controller->RefreshMovingPhoto();
+    return ExtNapiUtils::CreateNull(env);
+}
+
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
@@ -300,6 +318,7 @@ napi_value InitController(napi_env env, napi_value exports)
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("startPlayback", StartPlayback),
         DECLARE_NAPI_FUNCTION("stopPlayback", StopPlayback),
+        DECLARE_NAPI_FUNCTION("refreshMovingPhoto", RefreshMovingPhoto),
     };
     NAPI_CALL(env, napi_define_class(env, "MovingPhotoViewController", NAPI_AUTO_LENGTH,
         MovingPhotoControllerConstructor, nullptr, sizeof(properties) / sizeof(*properties), properties,
@@ -347,6 +366,22 @@ napi_value JsAutoPlay(napi_env env, napi_callback_info info)
         isAutoPlay = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
     }
     NG::MovingPhotoModelNG::GetInstance()->AutoPlay(isAutoPlay);
+
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsEnableAnalyzer(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+
+    bool enabled = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
+        enabled = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
+    }
+    NG::MovingPhotoModelNG::GetInstance()->EnableAnalyzer(enabled);
 
     return ExtNapiUtils::CreateNull(env);
 }

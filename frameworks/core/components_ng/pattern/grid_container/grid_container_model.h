@@ -30,11 +30,6 @@ public:
 
     virtual void Create(const RefPtr<GridContainerInfo>& containerInfo) = 0;
     virtual void Pop() {}
-
-private:
-    static std::unique_ptr<GridContainerModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif

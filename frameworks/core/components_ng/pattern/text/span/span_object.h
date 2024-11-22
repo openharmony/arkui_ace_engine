@@ -274,6 +274,7 @@ class ImageSpan : public SpanBase {
 
 public:
     explicit ImageSpan(const ImageSpanOptions& options);
+    ImageSpan(const ImageSpanOptions& options, int32_t position);
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     SpanType GetSpanType() const override;

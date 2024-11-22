@@ -27,6 +27,7 @@ public:
     static RefPtr<DrawingLattice> CreateDrawingLattice(void* sptrAddr);
     static RefPtr<DrawingLattice> CreateDrawingLatticeFromNative(void* sptrAddr);
     virtual void* GetDrawingLatticeSptrAddr() = 0; //define the return value as void is for tdd compilation
+    virtual std::string DumpToString() = 0;
 };
 
 } // namespace Ace

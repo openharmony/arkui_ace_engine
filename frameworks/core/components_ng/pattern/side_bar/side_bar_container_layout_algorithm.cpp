@@ -21,7 +21,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;   // less than version 13
+constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
@@ -35,7 +36,6 @@ static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 constexpr Dimension CONTROL_BUTTON_PADDING = 12.0_vp;
-constexpr Dimension CONTROL_BUTTON_PADDING_SMALL = 8.0_vp;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -514,13 +514,9 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
-    Dimension buttonPadding = CONTROL_BUTTON_PADDING;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonPadding = CONTROL_BUTTON_PADDING_SMALL;
-    }
 
-    auto controlButtonWidth = controlImageWidth_ + buttonPadding * 2;
-    auto controlButtonHeight = controlImageHeight_ + buttonPadding * 2;
+    auto controlButtonWidth = controlImageWidth_ + CONTROL_BUTTON_PADDING * 2;
+    auto controlButtonHeight = controlImageHeight_ + CONTROL_BUTTON_PADDING * 2;
     auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
     auto controlButtonHeightPx = ConvertToPx(controlButtonHeight, scaleProperty, parentWidth).value_or(0);
 
@@ -571,52 +567,25 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto scaleProperty = constraint->scaleProperty;
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
-    CHECK_NULL_VOID(sideBarTheme);
-    auto controlButtonMarginTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
-    auto controlButtonMarginLeftSmall = sideBarTheme->GetControlButtonMarginLeftSmall();
-    auto controlButtonMarginLeftMiddle = sideBarTheme->GetControlButtonMarginLeftMiddle();
-    auto controlButtonMarginLeftLarge = sideBarTheme->GetControlButtonMarginLeftLarge();
-    auto breakPointSmall = sideBarTheme->GetBreakPointHorizontalSmall();
-    auto breakPointMiddle = sideBarTheme->GetBreakPointHorizontalMiddle();
-    auto buttonPadding = CONTROL_BUTTON_PADDING;
-    Dimension expectedLeft = 0.0_vp;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonPadding = CONTROL_BUTTON_PADDING_SMALL;
-        if (LessNotEqual(parentWidth, breakPointSmall.ConvertToPx())) {
-            expectedLeft = controlButtonMarginLeftSmall;
-        } else if (LessNotEqual(parentWidth, breakPointMiddle.ConvertToPx())) {
-            expectedLeft = controlButtonMarginLeftMiddle;
-        } else {
-            expectedLeft = controlButtonMarginLeftLarge;
-        }
-    } else {
-        expectedLeft = controlButtonMarginLeftSmall - buttonPadding;
-    }
-    auto controlButtonLeft = layoutProperty->GetControlButtonLeft().value_or(expectedLeft);
-    auto controlButtonTop = layoutProperty->GetControlButtonTop().value_or(
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ?
-        controlButtonMarginTopSmall : DEFAULT_CONTROL_BUTTON_TOP - buttonPadding);
+    auto controlImageLeft = layoutProperty->GetControlButtonLeft().value_or(DEFAULT_CONTROL_BUTTON_LEFT);
+    auto controlImageTop = layoutProperty->GetControlButtonTop().value_or(DEFAULT_CONTROL_BUTTON_TOP);
 
-    if (LessNotEqual(controlButtonLeft.Value(), 0.0)) {
-        controlButtonLeft = expectedLeft;
+    if (LessNotEqual(controlImageLeft.Value(), 0.0)) {
+        controlImageLeft = DEFAULT_CONTROL_BUTTON_LEFT;
     }
 
-    if (LessNotEqual(controlButtonTop.Value(), 0.0)) {
-        controlButtonTop =
-            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ?
-            controlButtonMarginTopSmall : DEFAULT_CONTROL_BUTTON_TOP - buttonPadding;
+    if (LessNotEqual(controlImageTop.Value(), 0.0)) {
+        controlImageTop = DEFAULT_CONTROL_BUTTON_TOP;
     }
+    auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
+    auto controlButtonTop = controlImageTop - CONTROL_BUTTON_PADDING;
     auto sideBarPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(sideBarPattern);
-    if (controlButtonLeft != expectedLeft || controlButtonTop != controlButtonMarginTopSmall) {
+    if (controlImageLeft != DEFAULT_CONTROL_BUTTON_LEFT || controlImageTop != DEFAULT_CONTROL_BUTTON_TOP) {
         sideBarPattern->SetControlButtonPosCustom(true);
     } else {
         sideBarPattern->SetControlButtonPosCustom(false);
     }
-    auto controlImageLeft = controlButtonLeft + buttonPadding;
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
@@ -632,11 +601,11 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
      *   control button offset the left, if value invalid set to default 16vp
      */
     auto sideBarPosition = GetSideBarPositionWithRtl(layoutProperty);
-    auto controlButtonWidth = controlImageWidth_ + buttonPadding * 2;
+    auto controlButtonWidth = controlImageWidth_ + CONTROL_BUTTON_PADDING * 2;
 
     if ((sideBarPosition == SideBarPosition::END) &&             // sideBarPosition is End, other pass
         (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
-        auto defaultControlButtonLeft = controlImageLeft - buttonPadding;
+        auto defaultControlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT - CONTROL_BUTTON_PADDING;
         auto defaultControlButtonLeftPx = ConvertToPx(defaultControlButtonLeft, scaleProperty, parentWidth).value_or(0)
             + padding.right.value_or(0);
         auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);

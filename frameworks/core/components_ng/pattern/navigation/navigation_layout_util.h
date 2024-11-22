@@ -30,6 +30,20 @@ class NavigationLayoutUtil {
 public:
     static bool CheckWhetherNeedToHideToolbar(
         const RefPtr<NavDestinationNodeBase>& nodeBase, const SizeF& navigationSize);
+    static void UpdateTitleBarMenuNode(const RefPtr<NavDestinationNodeBase>& nodeBase, const SizeF& navigationSize);
+    static float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, const SizeF& navigationSize);
+    static float MeasureToolBarDivider(
+        LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase,
+        const SizeF& navigationSize, float toolBarHeight);
+    static float LayoutToolBar(
+        LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, bool isNeedToCreatePaddingAndBorder);
+    static void LayoutToolBarDivider(
+        LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
+        bool isNeedToCreatePaddingAndBorder);
 };
 
 } // namespace OHOS::Ace::NG

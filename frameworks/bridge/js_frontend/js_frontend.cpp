@@ -238,7 +238,7 @@ RefPtr<Frontend> Frontend::Create()
 
 JsFrontend::~JsFrontend() noexcept
 {
-    LOG_DESTROY();
+    LOGI("Frontend destroyed");
 }
 
 void JsFrontend::Destroy()

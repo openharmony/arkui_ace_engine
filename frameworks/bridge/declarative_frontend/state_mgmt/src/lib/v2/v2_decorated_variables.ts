@@ -21,7 +21,7 @@
  *
  * Helper class for handling V2 decorated variables
  */
-class VariableUtilV3 {
+class VariableUtilV2 {
     /**
        * setReadOnlyAttr - helper function used to update @param
        * from parent @Component. Not allowed for @param @once .
@@ -31,14 +31,14 @@ class VariableUtilV3 {
        */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@param') {
-        const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use initParam(${attrName}) only to init @Param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
       }
       // prevent update for @param @once
       const storeProp = ObserveV2.OB_PREFIX + attrName;
-      stateMgmtConsole.propertyAccess(`initParam '@param ${attrName}' - setting backing store`);
+      stateMgmtConsole.propertyAccess(`initParam '@Param ${attrName}' - setting backing store`);
       target[storeProp] = newValue;
       ObserveV2.getObserve().addRef(target, attrName);
     }
@@ -53,23 +53,23 @@ class VariableUtilV3 {
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
       const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
-      if (!meta || meta.deco !== '@param') {
-        const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
+      if (!meta || meta.deco !== '@Param') {
+        const error = `Use updateParm(${attrName}) only to update @Param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
       }
 
       const storeProp = ObserveV2.OB_PREFIX + attrName;
-      // @observed class and @track attrName
+      // @Observed class and @Track attrName
       if (newValue === target[storeProp]) {
-        stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' unchanged. Doing nothing.`);
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' unchanged. Doing nothing.`);
         return;
       }
-      if (meta.deco2 === '@once') {
+      if (meta.deco2 === '@Once') {
         // @param @once - init but no update
-        stateMgmtConsole.log(`updateParm: '@param @once ${attrName}' - Skip updating.`);
+        stateMgmtConsole.log(`updateParm: '@Param @Once ${attrName}' - Skip updating.`);
       } else {
-        stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' - updating backing store and fireChange.`);
+        stateMgmtConsole.propertyAccess(`updateParm '@Param ${attrName}' - updating backing store and fireChange.`);
         target[storeProp] = newValue;
         ObserveV2.getObserve().fireChange(target, attrName);
       }
@@ -93,7 +93,7 @@ class VariableUtilV3 {
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@Provider' | '@Consumer'): void {
       // add decorator meta data to prototype
@@ -117,12 +117,6 @@ class VariableUtilV3 {
       let checkView : IView | undefined = view?.getParent();
       const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
       stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
-
-      // Check if the view is a JSBuilderNode
-      if (!checkView && view.isJSBuilderNode) {
-        const error = `Application Error: @Provider/@Consumer is not supported in BuilderNode. Use @Local/@Param instead.`;
-        throw new Error(error);
-      }
 
       while (checkView) {
         const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
@@ -153,13 +147,13 @@ class VariableUtilV3 {
    * @param provideVarName - The name of the property in the provider view that the consumer will access.
    *
    */
-    public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
+    public static connectConsumer2Provider<T>(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): T {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
-      const view = weakView.deref();
 
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
+          let view = weakView.deref();
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
           if (!view) {
@@ -170,6 +164,7 @@ class VariableUtilV3 {
           return view[provideVarName];
         },
         set(val) {
+          let view = weakView.deref();
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} set`);
           if (!view) {
@@ -188,10 +183,10 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
-      return view[provideVarName];
+      return provideView[provideVarName];
     }
 
-    public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): any {
+    public static defineConsumerWithoutProvider<T>(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: T): T {
       stateMgmtConsole.debug(`defineConsumerWithoutProvider: ${consumeView.debugInfo__()} @Consumer ${consumeVarName} does not have @Provider counter part, will use local init value`);
 
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
@@ -236,23 +231,23 @@ function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
 */
 function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
-  // prevent @Track inside @observed class
+  // prevent @Track inside @ObservedV2 class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
     // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
+    stateMgmtConsole.warn(`'@Observed class ${BaseClass?.name}': no @Track property inside. Is this intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
   const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
   if (count > 5) {
-    stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
+    stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
     BaseClass.prototype[ObserveV2.ID_REFS] = {};
   }
   const observedClass =  class extends BaseClass {

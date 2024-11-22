@@ -504,7 +504,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     ViewAbstract::SetJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onHoverEventFunc));
     ViewAbstract::ClearJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER));
-    OnKeyCallbackFunc onKeyCallback;
+    OnKeyConsumeFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     DragPreviewOption dragPreviewOption;
     ViewAbstract::SetDragPreviewOptions(dragPreviewOption);
@@ -550,7 +550,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     OnHoverFunc onHoverEventFunc;
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
-    OnKeyCallbackFunc onKeyCallback;
+    OnKeyConsumeFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
 
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);
@@ -994,8 +994,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetBrightness(RADIUS);
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
-    OHOS::Rosen::BrightnessBlender* brightnessBlender;
-    ViewAbstract::SetBrightnessBlender(brightnessBlender);
+    ViewAbstract::SetBrightnessBlender(nullptr);
 
     /**
      * @tc.expected: Return expected results.
@@ -1045,8 +1044,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetColorBlend(BLUE);
     ViewAbstract::SetColorBlend(nullptr, BLUE);
     ViewAbstract::SetBorderImageSource(srcimages);
-    OHOS::Rosen::BrightnessBlender* brightnessBlender;
-    ViewAbstract::SetBrightnessBlender(brightnessBlender);
+    ViewAbstract::SetBrightnessBlender(nullptr);
 
     /**
      * @tc.expected: Return expected results.
@@ -1092,7 +1090,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     ViewAbstract::SetSharedTransition(AceType::RawPtr(FRAME_NODE_REGISTER), "", nullptr);
     ViewAbstract::SetSphericalEffect(RATIO);
     ViewAbstract::SetLightUpEffect(RATIO);
-    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
@@ -1138,7 +1136,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetDraggable(false);
     ViewAbstract::SetDraggable(AceType::RawPtr(FRAME_NODE_REGISTER), false);
-    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(false, EffectType::WINDOW_EFFECT);
+    ViewAbstract::SetUseEffect(true, EffectType::DEFAULT);
+    ViewAbstract::SetUseEffect(true, EffectType::WINDOW_EFFECT);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
@@ -1408,7 +1409,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest026, TestSize.Level1)
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_X, std::move(keys), callback);
     ViewAbstract::SetKeyboardShortcut(AceType::RawPtr(FRAME_NODE_REGISTER), VALUE_X, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
     /**
      * @tc.steps: step3. call SetKeyboardShortcut with other wrong type.

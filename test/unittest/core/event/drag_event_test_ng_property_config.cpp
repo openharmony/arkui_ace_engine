@@ -1152,10 +1152,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest012, TestSize.Leve
     SystemProperties::debugEnabled_ = true;
     GestureEvent info = GestureEvent();
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     dragEventActuator->userCallback_ = nullptr;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1206,7 +1206,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest013, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1518,7 +1518,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Leve
     gestureHub->SetPixelMap(pixelMap);
     ASSERT_NE(frameNode->GetPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
+    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     ASSERT_NE(imageNode, nullptr);
     MockContainer::SetUp();
     auto container = MockContainer::Current();

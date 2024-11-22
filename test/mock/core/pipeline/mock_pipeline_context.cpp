@@ -18,6 +18,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -25,6 +27,105 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+
+static bool g_setBoolStatus = false;
+class MockAccessibilityManager : public AccessibilityManager {
+public:
+    MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
+    MOCK_METHOD(void, SendWebAccessibilityAsyncEvent,
+        (const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::WebPattern>& webPattern), (override));
+    MOCK_METHOD(void, UpdateVirtualNodeFocus, (), (override));
+    MOCK_METHOD(int64_t, GenerateNextAccessibilityId, (), (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, CreateSpecializedNode,
+        (const std::string& tag, int32_t nodeId, int32_t parentNodeId), (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, CreateAccessibilityNode,
+        (const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex), (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, GetAccessibilityNodeById, (NodeId nodeId), (const, override));
+    MOCK_METHOD(std::string, GetInspectorNodeById, (NodeId nodeId), (const, override));
+    MOCK_METHOD(void, RemoveAccessibilityNodes, (RefPtr<AccessibilityNode> & node), (override));
+    MOCK_METHOD(void, RemoveAccessibilityNodeById, (NodeId nodeId), (override));
+    MOCK_METHOD(void, ClearPageAccessibilityNodes, (int32_t pageId), (override));
+    MOCK_METHOD(void, SetRootNodeId, (int32_t nodeId), (override));
+    MOCK_METHOD(void, TrySaveTargetAndIdNode,
+        (const std::string& id, const std::string& target, const RefPtr<AccessibilityNode>& node), (override));
+    MOCK_METHOD(void, HandleComponentPostBinding, (), (override));
+    MOCK_METHOD(void, OnDumpInfo, (const std::vector<std::string>& params), (override));
+    MOCK_METHOD(
+        void, OnDumpInfoNG, (const std::vector<std::string>& params, uint32_t windowId, bool hasJson), (override));
+    MOCK_METHOD(void, SetCardViewPosition, (int id, float offsetX, float offsetY), (override));
+    MOCK_METHOD(void, SetCardViewParams, (const std::string& key, bool focus), (override));
+    MOCK_METHOD(void, SetSupportAction, (uint32_t action, bool isEnable), (override));
+    MOCK_METHOD(void, ClearNodeRectInfo, (RefPtr<AccessibilityNode> & node, bool isPopDialog), (override));
+    MOCK_METHOD(void, AddComposedElement, (const std::string& key, const RefPtr<ComposedElement>& node), (override));
+    MOCK_METHOD(void, RemoveComposedElementById, (const std::string& key), (override));
+    MOCK_METHOD(WeakPtr<ComposedElement>, GetComposedElementFromPage, (NodeId nodeId), (override));
+    MOCK_METHOD(void, TriggerVisibleChangeEvent, (), (override));
+    MOCK_METHOD(void, AddVisibleChangeNode, (NodeId nodeId, double ratio, VisibleRatioCallback callback), (override));
+    MOCK_METHOD(void, RemoveVisibleChangeNode, (NodeId nodeId), (override));
+    MOCK_METHOD(bool, IsVisibleChangeNodeExists, (NodeId nodeId), (override));
+    MOCK_METHOD(void, UpdateEventTarget, (NodeId id, BaseEventInfo& info), (override));
+    MOCK_METHOD(void, SetWindowPos, (int32_t left, int32_t top, int32_t windowId), (override));
+#ifdef WINDOW_SCENE_SUPPORTED
+    MOCK_METHOD(void, SearchElementInfoByAccessibilityIdNG,
+        (int64_t elementId, int32_t mode, std::list<Accessibility::AccessibilityElementInfo>& infos,
+            const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset),
+        (override));
+    MOCK_METHOD(void, SearchElementInfosByTextNG,
+        (int64_t elementId, const std::string& text, std::list<Accessibility::AccessibilityElementInfo>& infos,
+            const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
+        (override));
+    MOCK_METHOD(void, FindFocusedElementInfoNG,
+        (int64_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info,
+            const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
+        (override));
+    MOCK_METHOD(void, FocusMoveSearchNG,
+        (int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+            const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset),
+        (override));
+    MOCK_METHOD(bool, ExecuteExtensionActionNG,
+        (int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action,
+            const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset),
+        (override));
+    MOCK_METHOD(bool, TransferAccessibilityAsyncEvent,
+        (const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset), (override));
+    MOCK_METHOD(void, SendExtensionAccessibilityEvent,
+        (const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset), (override));
+#endif
+#ifdef WEB_SUPPORTED
+    MOCK_METHOD(bool, RegisterWebInteractionOperationAsChildTree,
+        (int64_t accessibilityId, const WeakPtr<NG::WebPattern>& webPattern), (override));
+    MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
+#endif
+    void RegisterAccessibilityChildTreeCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override {}
+    void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override {}
+    void RegisterInteractionOperationAsChildTree(
+        uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override
+    {
+        Register(g_setBoolStatus);
+    }
+    void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override {}
+    void SetAccessibilityGetParentRectHandler(std::function<void(AccessibilityParentRectInfo&)>&& callback) override {}
+    MOCK_METHOD(void, DeregisterInteractionOperationAsChildTree, (), (override));
+    MOCK_METHOD(void, SendEventToAccessibilityWithNode,
+        (const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node,
+            const RefPtr<PipelineBase>& context),
+        (override));
+    MOCK_METHOD(void, RegisterAccessibilitySAObserverCallback,
+        (int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback>& callback), (override));
+    MOCK_METHOD(void, DeregisterAccessibilitySAObserverCallback, (int64_t elementId), (override));
+    MOCK_METHOD(bool, RegisterInteractionOperationAsChildTree, (const Registration& registration), (override));
+    MOCK_METHOD(bool, DeregisterInteractionOperationAsChildTree, (uint32_t windowId, int32_t treeId), (override));
+    MOCK_METHOD(void, TransferThirdProviderHoverEvent,
+        (const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
+            NG::AccessibilityHoverEventType eventType, TimeStamp time),
+        (override));
+    MOCK_METHOD(bool, OnDumpChildInfoForThird,
+        (int64_t hostElementId, const std::vector<std::string>& params, std::vector<std::string>& info), (override));
+};
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -67,6 +168,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetInstanceId(int32_t instanceId)
+{
+    pipeline_->instanceId_ = instanceId;
 }
 
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
@@ -207,7 +313,11 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
+void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
@@ -265,7 +375,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
 
-void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius) {}
+void PipelineContext::SetContainerWindow(bool isShow, RRect& rRect) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
@@ -316,6 +426,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
+
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
@@ -452,7 +564,7 @@ void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
-void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
+void UITaskScheduler::FlushTaskWithCheck(bool triggeredByImplicitAnimation) {}
 
 UITaskScheduler::UITaskScheduler() {}
 
@@ -487,6 +599,8 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
         task();
     }
 }
+
+void PipelineContext::StopWindowAnimation() {}
 
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
@@ -560,7 +674,15 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
 }
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return KeyBoardAvoidMode::OFFSET;
+}
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
+bool PipelineContext::UsingCaretAvoidMode()
+{
+    return false;
+}
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
@@ -617,12 +739,12 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom) {}
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     return nullptr;
 }
 
-bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
     return false;
 }
@@ -860,7 +982,7 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
-    return nullptr;
+    return AceType::MakeRefPtr<MockAccessibilityManager>();
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -911,6 +1033,11 @@ bool PipelineBase::HasFloatTitle() const
     return true;
 }
 
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
@@ -932,5 +1059,62 @@ bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
 }
+
+#ifdef NEED_PIPELINE_CONTEXT_BE_NULLPTR
+PipelineContext* TextPattern::GetContext()
+{
+    return nullptr;
+}
+#endif
+
+void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        node->Measure(layoutConstraint);
+        node->Layout();
+    }
+}
+
+void SetBoolStatus(bool value)
+{
+    g_setBoolStatus = value;
+}
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
+
+void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::EnableContainerModalGesture(bool isEnable) {}
+
+bool NG::PipelineContext::GetContainerFloatingTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerCustomTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerControlButtonVisible() 
+{
+    return false;
+}
+
+NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
+NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

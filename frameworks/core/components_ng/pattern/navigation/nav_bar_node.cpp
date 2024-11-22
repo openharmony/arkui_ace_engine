@@ -106,4 +106,13 @@ void NavBarNode::StartSystemTransitionPop()
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
+
+bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigation = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigation, false);
+    auto lastStandardIndex = navigation->GetLastStandardIndex();
+    bool isInvisible = navigation->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0;
+    return isInvisible;
+}
 } // namespace OHOS::Ace::NG

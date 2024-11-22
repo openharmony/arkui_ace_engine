@@ -23,6 +23,7 @@
 #include "resource_manager.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
@@ -138,6 +139,7 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    NG::RectF GetWindowRect() const override;
     bool IsFreeMultiWindow() const override;
     void OnFreeMultiWindowSwitch(bool enable) override;
     int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
@@ -200,6 +202,10 @@ private:
     void HideEventColumn();
     Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
 
+    void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+        OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+        const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
@@ -212,7 +218,6 @@ private:
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;

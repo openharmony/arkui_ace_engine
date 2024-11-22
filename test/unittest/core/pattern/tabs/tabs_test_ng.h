@@ -67,7 +67,6 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t TABBAR_DEFAULT_WIDTH = 56.f;
 constexpr int32_t TABBAR_DEFAULT_HEIGHT = 56.f;
-constexpr Dimension BAR_SATURATE = 1.3_vp;
 constexpr float BARITEM_SIZE = 10.f;
 constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;

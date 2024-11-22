@@ -131,6 +131,10 @@ public:
      */
     SafeAreaInsets::Inset GetKeyboardInset() const
     {
+        if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
+            SafeAreaInsets::Inset inset;
+            return inset;
+        }
         return keyboardInset_;
     }
 
@@ -138,7 +142,23 @@ public:
     {
         keyboardOffset_ = offset;
     }
-    float GetKeyboardOffset() const;
+
+    float GetKeyboardOffset(bool withoutProcess = false) const;
+
+    float GetKeyboardOffsetDirectly() const
+    {
+        return keyboardOffset_;
+    }
+
+    float GetRawKeyboardHeight() const
+    {
+        return rawKeyboardHeight_;
+    }
+
+    void SetRawKeyboardHeight(float height)
+    {
+        rawKeyboardHeight_ = height;
+    }
 
     bool KeyboardSafeAreaEnabled() const
     {
@@ -189,7 +209,8 @@ public:
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
-    bool SetKeyBoardAvoidMode(bool value);
+    bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
+    KeyBoardAvoidMode GetKeyBoardAvoidMode();
     bool IsIgnoreAsfeArea()
     {
         return ignoreSafeArea_;
@@ -274,6 +295,8 @@ private:
      */
     bool keyboardSafeAreaEnabled_ = false;
 
+    KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
     SafeAreaInsets navSafeArea_;
@@ -308,6 +331,7 @@ private:
     float keyboardOffset_ = 0.0f;
 
     float lastKeyboardY_ = 0.0f;
+    float rawKeyboardHeight_ = 0.0f;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;

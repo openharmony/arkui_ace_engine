@@ -14,9 +14,13 @@
  */
 
 
+#include <cstdlib>
 #include "node_model.h"
+#include "node_extened.h"
 
+#include "base/utils/utils.h"
 #include "base/error/error_code.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,6 +169,10 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
     if (node == nullptr) {
         return;
     }
+    if (name == nullptr || value == nullptr) {
+        LOGF("AddCustomProperty input params name or value is nullptr");
+        abort();
+    }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
 }
@@ -174,8 +182,179 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
     if (node == nullptr) {
         return;
     }
+    if (name == nullptr) {
+        LOGF("RemoveCustomProperty input params name is nullptr");
+        abort();
+    }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);
+}
+
+int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* name, ArkUI_CustomProperty** handle)
+{
+    if (node == nullptr || name == nullptr) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    char* value = nullptr;
+    impl->getNodeModifiers()->getFrameNodeModifier()->getCustomProperty(node->uiNodeHandle, name, &value);
+    *handle  = new ArkUI_CustomProperty({ .value = value });
+    
+    return 0;
+}
+
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    void* attachNode = impl->getExtendedAPI()->getAttachNodePtr(node);
+    if (attachNode) {
+        return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
+    }
+    ArkUI_Node* arkUINode = new ArkUI_Node({ 0, node, false });
+    impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
+    return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
+}
+
+int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_ActiveChildrenInfo** handle)
+{
+    CHECK_NULL_RETURN(head, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUINodeHandle* innerNodes = nullptr;
+    uint32_t totalSize = 0;
+    impl->getNodeModifiers()->getFrameNodeModifier()->getActiveChildrenInfo(
+        head->uiNodeHandle, &innerNodes, &totalSize);
+    if (totalSize == 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *handle = new ArkUI_ActiveChildrenInfo({ .nodeList = nullptr, .nodeCount = totalSize });
+    (*handle)->nodeCount = totalSize;
+    (*handle)->nodeList = new ArkUI_NodeHandle[totalSize] {};
+    for (uint32_t i = 0; i < totalSize; i++) {
+        ((*handle)->nodeList[i]) = GetArkUINode(innerNodes[i]);
+    }
+    delete[] innerNodes;
+    return 0;
+}
+
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return nullptr;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getParent(node->uiNodeHandle);
+    return GetArkUINode(attachNode);
+}
+
+ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return nullptr;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* attachNode = impl->getNodeModifiers()->getFrameNodeModifier()->getCurrentPageRootNode(node->uiNodeHandle);
+    return GetArkUINode(attachNode);
+}
+
+bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return 0;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    return impl->getNodeModifiers()->getFrameNodeModifier()->getNodeTag(node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return 0;
+    }
+
+    static const std::unordered_map<std::string, ArkUI_NodeType> nodeTypeMap = {
+        { OHOS::Ace::V2::TEXT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT },
+        { OHOS::Ace::V2::SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SPAN },
+        { OHOS::Ace::V2::IMAGE_SPAN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_SPAN },
+        { OHOS::Ace::V2::IMAGE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE },
+        { OHOS::Ace::V2::TOGGLE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TOGGLE },
+        { OHOS::Ace::V2::LOADING_PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LOADING_PROGRESS },
+        { OHOS::Ace::V2::TEXTINPUT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_INPUT },
+        { OHOS::Ace::V2::TEXTAREA_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_AREA },
+        { OHOS::Ace::V2::BUTTON_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_BUTTON },
+        { OHOS::Ace::V2::PROGRESS_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PROGRESS },
+        { OHOS::Ace::V2::CHECK_BOX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CHECKBOX },
+        { OHOS::Ace::V2::XCOMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_XCOMPONENT },
+        { OHOS::Ace::V2::DATE_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_DATE_PICKER },
+        { OHOS::Ace::V2::TIME_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TIME_PICKER },
+        { OHOS::Ace::V2::TEXT_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_PICKER },
+        { OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CALENDAR_PICKER },
+        { OHOS::Ace::V2::SLIDER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SLIDER },
+        { OHOS::Ace::V2::RADIO_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RADIO },
+        { OHOS::Ace::V2::IMAGE_ANIMATOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_IMAGE_ANIMATOR },
+        { OHOS::Ace::V2::STACK_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_STACK },
+        { OHOS::Ace::V2::SWIPER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SWIPER },
+        { OHOS::Ace::V2::SCROLL_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_SCROLL },
+        { OHOS::Ace::V2::LIST_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST },
+        { OHOS::Ace::V2::LIST_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM },
+        { OHOS::Ace::V2::LIST_ITEM_GROUP_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_LIST_ITEM_GROUP },
+        { OHOS::Ace::V2::COLUMN_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_COLUMN },
+        { OHOS::Ace::V2::ROW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_ROW },
+        { OHOS::Ace::V2::FLEX_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLEX },
+        { OHOS::Ace::V2::REFRESH_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_REFRESH },
+        { OHOS::Ace::V2::WATERFLOW_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_WATER_FLOW },
+        { OHOS::Ace::V2::FLOW_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_FLOW_ITEM },
+        { OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RELATIVE_CONTAINER },
+        { OHOS::Ace::V2::GRID_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID },
+        { OHOS::Ace::V2::GRID_ITEM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_GRID_ITEM },
+        { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
+    };
+
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto value = impl->getNodeModifiers()->getFrameNodeModifier()->getNodeType(node->uiNodeHandle);
+    auto iter = nodeTypeMap.find(value);
+    if (iter != nodeTypeMap.end()) {
+        return iter->second;
+    }
+    return -1;
+}
+
+void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
+{
+    delete[] handle->value;
+    handle->value = nullptr;
+    delete handle;
+    handle = nullptr;
+}
+
+const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle)
+{
+    CHECK_NULL_RETURN(handle, nullptr);
+    return handle->value;
+}
+
+void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle)
+{
+    delete[] handle->nodeList;
+    handle->nodeList = nullptr;
+    delete handle;
+    handle = nullptr;
+}
+
+ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index)
+{
+    CHECK_NULL_RETURN(handle, nullptr);
+    if (index < handle->nodeCount) {
+        return handle->nodeList[index];
+    }
+    return nullptr;
+}
+
+int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
+{
+    CHECK_NULL_RETURN(handle, 0);
+    return handle->nodeCount;
 }
 
 #ifdef __cplusplus

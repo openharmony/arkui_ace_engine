@@ -112,4 +112,49 @@ void AddOrChangeQuaternionModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
         rsNode->AddModifier(modifier);
     }
 }
+
+void WindowBlurModifier::AddOrChangeRadiusModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeSaturationModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterSaturationModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeBrightnessModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterBrightnessModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeMaskColorModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>>& property, const Rosen::RSColor& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
 } // namespace OHOS::Ace::NG

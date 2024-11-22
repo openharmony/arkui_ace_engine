@@ -16,7 +16,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
-#include "node_api.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -322,9 +322,10 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmitTest, TestSize.Level1)
     auto searchEventHub = frameNode->GetEventHub<SearchEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(searchEventHub, nullptr);
-    searchEventHub->UpdateSubmitEvent(CHECK_TEXT);
+    NG::TextFieldCommonEvent event;
+    searchEventHub->FireOnSubmit(CHECK_TEXT, event);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-    searchEventHub->UpdateSubmitEvent(EMPTY_TEXT);
+    searchEventHub->FireOnSubmit(EMPTY_TEXT, event);
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
 }
 

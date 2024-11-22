@@ -384,7 +384,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         ActionSheetModel::GetInstance()->SetCancel(eventFunc, properties);
     }
 
-    std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
     ParseDialogCallback(obj, onWillDismissFunc);
     ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
 

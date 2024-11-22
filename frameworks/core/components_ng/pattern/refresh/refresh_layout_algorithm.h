@@ -62,6 +62,7 @@ private:
     OptionalSizeF CalculateBuilderSize(
         RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint, float customBaseHeight);
     void PerformLayout(LayoutWrapper* layoutWrapper);
+    void UpdateChildPosition(LayoutWrapper* layoutWrapper, int32_t index, OffsetF& paddingOffsetChild);
 
     float builderBaseHeight_ = 0.0f;
     float customBuilderOffset_ = 0.0f;

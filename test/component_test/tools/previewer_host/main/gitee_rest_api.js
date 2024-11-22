@@ -18,7 +18,9 @@ const path = require('path');
 const { JSDOM } = require('jsdom');
 const os = require('os');
 const unzipper = require('unzipper');
-const { clearDir, deleteDir, existDir, mkdir, moveDir, readDir, renameDir } = require('../utils/file.js');
+const {
+    clearDir, deleteDir, existDir, mkdir, moveDir, readDir, renameDir, isExistFile, copyFile
+} = require('../utils/file.js');
 const http = require("http");
 
 module.exports = { prepareHostEnv };
@@ -28,7 +30,6 @@ async function getPullsNumberComments(url) {
     if (response.ok) {
         const data = await response.json();
         for (let i = 0; i < data.length; i++) {
-            const date = new Date(data[i].updated_at);
             if (data[i].body.includes("代码门禁通过")) {
                 const dom = new JSDOM(data[i].body);
                 const document = dom.window.document;
@@ -49,21 +50,30 @@ async function getPullsNumberComments(url) {
 }
 
 async function downloadFile(url, destinationPath) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const fileStream = fs.createWriteStream(destinationPath);
-        const request = http.get(url, (response) => {
-            if (response.statusCode !== 200) {
+        const request = await http.get(url, (response) => {
+            if (response.statusCode === 404) {
+                console.error("当前PR地址已失效，请更换可用的PR地址后重试");
                 reject(false);
-            } else {
-                console.log("开始下载");
-                response.pipe(fileStream);
-                fileStream.on('finish', () => {
-                    fileStream.close();
-                    resolve(true);
-                });
+                return;
             }
+            if (response.statusCode !== 200) {
+                console.error("下载失败");
+                reject(false);
+                return;
+            }
+            response.pipe(fileStream);
+            fileStream.on('finish', () => {
+                fileStream.close(() => resolve(true));
+            });
+            fileStream.on('error', (error) => {
+                console.error("下载文件错误", error);
+                reject(false);
+            });
         });
         request.on('error', (error) => {
+            console.error("请求出错", error);
             reject(false);
         });
     });
@@ -89,7 +99,6 @@ async function extractLargeZip(zipFilePath, outputDir) {
                 throw error;
             })
             .on('close', () => {
-                console.log('解压完成');
                 resolve();
             });
     });
@@ -100,15 +109,12 @@ function judgePlatform() {
 }
 
 async function extractZipFile(zipFilePath, outputDirectory) {
-    console.log('zip 文件路径:', zipFilePath);
-    console.log('输出目录:', outputDirectory);
     try {
         await new Promise((resolve, reject) => {
             fs.createReadStream(zipFilePath)
                 .pipe(unzipper.Extract({ path: outputDirectory }))
                 .on('error', reject)
                 .on('finish', () => {
-                    console.log('解压完成');
                     resolve();
                 });
         });
@@ -125,52 +131,55 @@ async function downloadSdk(url, downloadPath) {
         try {
             const pullsNumberCommentsResponse = await getPullsNumberComments(url);
             if (pullsNumberCommentsResponse !== null && pullsNumberCommentsResponse.hrefValue !== "") {
-                const downloadResult = await downloadFile(
-                    pullsNumberCommentsResponse.hrefValue, path.join(downloadPath, "ohos-sdk.zip"));
-                resolve(downloadResult);
+                await downloadFile(pullsNumberCommentsResponse.hrefValue,
+                    path.join(downloadPath, "ohos-sdk.zip")).then((res, rej) => {
+                        if (res) {
+                            resolve(true);
+                        } else {
+                            reject(false);
+                        }
+                    })
             } else {
-                console.warn("暂时没有ohos-sdk");
+                console.error("暂无可用sdk");
+                reject(false);
             }
         } catch (error) {
-            throw error;
+            console.error("下载过程中发生错误");
+            reject(false);
         }
     });
 }
 
 async function prepareHostEnv(url, downloadPath, sdkPath) {
     try {
+        let ohosSdkPath;
+        let etsPath = path.join(sdkPath, "ets\\api");
         const existSdk = await existDir(downloadPath);
         if (existSdk) {
-            console.log(`清空${downloadPath}文件夹`);
             await clearDir(downloadPath);
         } else {
-            console.log(`创建${downloadPath}文件夹`);
             await mkdir(downloadPath);
         }
 
         const existSdkPath = await existDir(sdkPath);
+        const existBackUpSdkPath = await existDir(`${sdkPath}-backup`);
+        if (existBackUpSdkPath) {
+            await deleteDir(`${sdkPath}-backup`);
+        }
         if (existSdkPath) {
-            console.log(`备份${sdkPath}文件夹`);
             await renameDir(sdkPath, `${sdkPath}-backup`);
             await mkdir(sdkPath);
         } else {
-            console.log(`创建${sdkPath}文件夹`);
             await mkdir(sdkPath);
         }
-
-        const downloadResult = await downloadSdk(url, downloadPath);
-        console.log("SDK下载成功:", downloadResult);
-        console.log("解压下载的文件");
-
+        await downloadSdk(url, downloadPath);
         await extractLargeZip(path.join(downloadPath, "ohos-sdk.zip"), downloadPath);
 
-        let ohosSdkPath;
         if (judgePlatform) {
-            ohosSdkPath = path.join(downloadPath, 'ohos-sdk\\windows');
+            ohosSdkPath = path.join(downloadPath, 'windows');
         } else {
-            ohosSdkPath = path.join(downloadPath, 'ohos-sdk\\linux');
+            ohosSdkPath = path.join(downloadPath, 'linux');
         }
-        console.log(`当前操作系统是${os.platform()}`);
 
         let zipFiles = await readDir(ohosSdkPath);
         for (let i = 0; i < zipFiles.length; i++) {
@@ -183,8 +192,25 @@ async function prepareHostEnv(url, downloadPath, sdkPath) {
                 await moveDir(sdks[i], sdkPath);
             }
         }
-        await deleteDir(downloadPath);
+        let etsFile = path.join(etsPath, "@ohos.arkui.componentTest.d.ts");
+        if (await isExistFile(etsFile)) {
+            await copyFile("previewer_host\\resource\\componentTest.ts", etsFile)
+        }
     } catch (error) {
+        console.log("准备环境过程出错,恢复初始状态");
+
+        if (await isExistFile(downloadPath)) {
+            await clearDir(downloadPath);
+        }
+
+        if (await isExistFile(sdkPath)) {
+            await deleteDir(sdkPath);
+        }
+
+        if (await isExistFile(`${sdkPath}-backup`)) {
+            await renameDir(`${sdkPath}-backup`, sdkPath);
+        }
+        console.log("环境清理完成");
         throw error;
     }
 }

@@ -36,7 +36,7 @@ void MultipleClickRecognizer::Start(const GestureEvent& event)
     }
     lastClickTimeStamp_ = event.GetTimeStamp();
     lastClickPosition_ = event.GetGlobalLocation();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!context || !context->GetTaskExecutor()) {
         Stop();
         return;

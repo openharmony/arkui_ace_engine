@@ -22,7 +22,7 @@ CardFrontendDelegate::CardFrontendDelegate() : jsAccessibilityManager_(Accessibi
 CardFrontendDelegate::~CardFrontendDelegate()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "CardDelegate Destroyed");
 }
 
 void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const std::string& params)

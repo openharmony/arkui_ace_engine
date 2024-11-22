@@ -46,6 +46,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -159,7 +160,7 @@ public:
         const std::function<void()>& finishCallback = nullptr);
 
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallback = nullptr);
+        const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
     void PrepareCloseImplicitAnimation();
 
@@ -196,6 +197,8 @@ public:
 
     // Called by ohos AceContainer when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
+
+    virtual void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
 
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
@@ -270,6 +273,19 @@ public:
         accessibilityManager->UpdateVirtualNodeFocus();
     }
 
+    void RegisterWindowDensityCallback(std::function<double()>&& callback)
+    {
+        windowDensityCallback_ = callback;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (windowDensityCallback_) {
+            return windowDensityCallback_();
+        }
+        return 1.0;
+    }
+
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
@@ -323,6 +339,8 @@ public:
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
+    virtual void DumpUIExt() const {}
+
     virtual bool IsLastPage()
     {
         return false;
@@ -367,6 +385,23 @@ public:
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
+
+    virtual void EnableContainerModalGesture(bool isEnable) {}
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
 
     virtual void RefreshRootBgColor() const {}
 
@@ -886,6 +921,7 @@ public:
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
+
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -995,7 +1031,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1228,22 +1268,6 @@ public:
         return onFocus_;
     }
 
-    void SetSurfaceChangeMsg(int32_t width, int32_t height,
-                                WindowSizeChangeReason type,
-                                const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
-    {
-        width_ = width;
-        height_ = height;
-        type_ = type;
-        rsTransaction_ = rsTransaction;
-        delaySurfaceChange_ = true;
-    }
-
-    void ResetSurfaceChangeMsg()
-    {
-        delaySurfaceChange_ = false;
-    }
-
     uint64_t GetVsyncTime() const
     {
         return vsyncTime_;
@@ -1383,42 +1407,50 @@ public:
         return dragNodeGrayscale_;
     }
 
-    bool IsWaitFlushFinish() const
+    virtual bool IsDirtyNodesEmpty() const
     {
-        return isWaitFlushFinish_;
+        return true;
     }
 
-    void EnWaitFlushFinish()
+    virtual bool IsDirtyLayoutNodesEmpty() const
     {
-        isWaitFlushFinish_ = true;
+        return true;
     }
 
-    void UnWaitFlushFinish()
-    {
-        isWaitFlushFinish_ = false;
-    }
-
-    void SetUIExtensionFlushFinishCallback(std::function<void(void)>&& callback)
-    {
-        uiExtensionFlushFinishCallback_ = callback;
-    }
-
-    void FireUIExtensionFlushFinishCallback()
-    {
-        if (uiExtensionFlushFinishCallback_) {
-            uiExtensionFlushFinishCallback_();
-        }
-    }
+    void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
+    void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
+    void FireAllUIExtensionEvents();
+    void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
         isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
     }
 
-    bool IsOpenInvisibleFreeze()
+    bool IsOpenInvisibleFreeze() const
     {
         return isOpenInvisibleFreeze_;
     }
+
+    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
+    {
+        visibleAreaRealTime_ = visibleAreaRealTime;
+    }
+
+    bool GetVisibleAreaRealTime() const
+    {
+        return visibleAreaRealTime_;
+    }
+
+    // Prints out the count of the unexecuted finish callback
+    std::string GetUnexecutedFinishCount() const;
+
+    void SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback);
+
+    void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
+
+    void FireAccessibilityEvents();
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1452,8 +1484,10 @@ protected:
     {
         isReloading_ = isReloading;
     }
+    bool FireUIExtensionEventValid();
 
-    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+    std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
+        const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1490,6 +1524,8 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1544,6 +1580,8 @@ protected:
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
+    uint64_t lastMouseTime_ = 0;
+    uint64_t lastDragTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
         std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
@@ -1579,6 +1617,7 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    std::unordered_set<int32_t> finishCount_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
@@ -1586,14 +1625,11 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
+    // whether visible area need to be calculate at each vsync after approximate timeout.
+    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
 
-    bool delaySurfaceChange_ = false;
     bool destroyed_ = false;
-    int32_t width_ = -1;
-    int32_t height_ = -1;
-    WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
@@ -1603,8 +1639,11 @@ private:
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
-    bool isWaitFlushFinish_ = false;
-    std::function<void(void)> uiExtensionFlushFinishCallback_;
+    std::function<double()> windowDensityCallback_;
+    std::function<void(uint32_t)> uiExtensionEventCallback_;
+    std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
+    std::function<void(uint32_t, int64_t)> accessibilityCallback_;
+    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

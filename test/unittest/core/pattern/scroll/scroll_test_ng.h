@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -32,15 +33,17 @@ constexpr float CONTENT_MAIN_SIZE = 1000.f;
 constexpr float ITEM_MAIN_SIZE = 100.f;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
 constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_WIDTH;
+
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float NORMAL_WIDTH = 4.f;
+
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t TICK = 2;
-constexpr float DRAG_VELOCITY = 1200.f;
 constexpr float BAR_WIDTH = 10.f;
+constexpr char SCROLL_BAR_COLOR[] = "#66182431";
 
 class ScrollTestNg : public TestNG {
 public:
@@ -50,23 +53,18 @@ public:
     void TearDown() override;
     void GetScroll();
     RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
-
     ScrollModelNG CreateScroll();
-    void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateContentChild(int32_t childNumber = 10);
-    bool OnScrollCallback(float offset, int32_t source);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
     void ScrollBy(float pixelX, float pixelY);
-    Axis GetAxis();
-    AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
-    AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
-    AssertionResult VerifyTickPosition(float expectOffset);
-    void DragStart(GestureEvent& gesture);
-    void DragUpdate(GestureEvent& gesture);
-    void DragEnd(GestureEvent& gesture);
+    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset);
+    AssertionResult TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset);
+    AssertionResult TickByVelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
+    AssertionResult Position(float expectOffset);
+    AssertionResult TickPosition(float expectOffset);
+    AssertionResult TickByVelocityPosition(float velocity, float expectOffset);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;

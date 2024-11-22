@@ -20,7 +20,11 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -34,17 +38,43 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr Color FRONT_COLOR = Color(0xff0000ff);
+constexpr Color FRONT_COLOR = Color(0xff0000ff);
+const std::string BAR_ITEM_ETS_TAG = "BarItem";
+const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
+const std::string EMPTY_STRING = "";
+const std::string NAV_BAR_NODE_TITLE = "title";
+const std::string NAV_BAR_NODE_MENU = "menu";
+const std::string NAV_BAR_NODE_BACK_BUTTON = "back_button";
+const std::string NAVIGATION_GROUP_NODE = "navigation_group_node";
+const std::string MENU_ITEM_ICON = "menu_item_icon";
+const std::string MENU_ITEM_TEXT = "menu_item";
+struct TestParameters {
+    RefPtr<MockPipelineContext> pipeline = nullptr;
+    RefPtr<NavigationBarTheme> theme = nullptr;
+    RefPtr<NavBarLayoutProperty> navBarLayoutProperty = nullptr;
+    RefPtr<NavigationGroupNode> navigationGroupNode = nullptr;
+    NG::BarItem menuItem;
+    std::vector<NG::BarItem> menuItems;
+};
 } // namespace
 class ToolBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static void MockPipelineContextGetTheme();
+    void CreateNavBar();
+    void CreateTitlebar();
+    void CreateToolbar();
+    void InitializationParameters(TestParameters& testParameters);
     void SetUp() override;
     void TearDown() override;
+    void InitToolBarItemInfos(std::vector<NG::BarItem>& toolBarItems);
+    void UpdateBarItemNodeWithItem(const RefPtr<NavToolbarNode>& toolBarNode, std::vector<NG::BarItem>& toolBarItems);
     RefPtr<NavToolbarPattern> toolBarPattern_;
     RefPtr<NavToolbarNode> toolBarNode_;
+    RefPtr<NavBarPattern> navBarpattern_;
+    RefPtr<NavBarNode> navBarNode_;
+    RefPtr<TitleBarNode> titleBarNode_;
 };
 
 void ToolBarTestNg::SetUpTestSuite()
@@ -74,6 +104,173 @@ void ToolBarTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
+void ToolBarTestNg::CreateNavBar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    navBarNode_ = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode_, nullptr);
+    navBarpattern_ = navBarNode_->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern_, nullptr);
+}
+
+void ToolBarTestNg::CreateTitlebar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode_, nullptr);
+}
+
+void ToolBarTestNg::CreateToolbar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    toolBarNode_ = NavToolbarNode::GetOrCreateToolbarNode(
+        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolBarNode_, nullptr);
+}
+
+void ToolBarTestNg::InitializationParameters(TestParameters& testParameters)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    testParameters.pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(testParameters.pipeline, nullptr);
+    testParameters.pipeline->SetThemeManager(themeManager);
+    testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(testParameters.theme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
+
+    CreateNavBar();
+    CreateTitlebar();
+    CreateToolbar();
+
+    testParameters.navBarLayoutProperty = navBarNode_->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(testParameters.navBarLayoutProperty, nullptr);
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+    auto title = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(title, nullptr);
+    titleBarNode_->SetTitle(title);
+    navBarNode_->SetToolBarNode(toolBarNode_);
+    auto menu = AceType::MakeRefPtr<FrameNode>(
+        NAV_BAR_NODE_MENU, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menu, nullptr);
+    navBarNode_->SetMenu(menu);
+    auto backButton = AceType::MakeRefPtr<FrameNode>(
+        NAV_BAR_NODE_BACK_BUTTON, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(backButton, nullptr);
+    titleBarNode_->SetBackButton(backButton);
+    testParameters.navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(NAVIGATION_GROUP_NODE,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
+    ASSERT_NE(testParameters.navigationGroupNode, nullptr);
+    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    navigationPattern->SetNavigationMode(NavigationMode::AUTO);
+    navBarNode_->SetParent(testParameters.navigationGroupNode);
+    testParameters.menuItem.action = []() {};
+    testParameters.menuItem.icon = MENU_ITEM_ICON;
+    testParameters.menuItems.push_back(testParameters.menuItem);
+    navBarpattern_->SetTitleBarMenuItems(testParameters.menuItems);
+}
+
+void ToolBarTestNg::InitToolBarItemInfos(std::vector<NG::BarItem>& toolBarItems)
+{
+    bool isEnabled = true;
+    std::function<void()> menuAction = [&isEnabled]() {
+        isEnabled = !isEnabled;
+    };
+    BarItem toolBarItemOne = {
+        .text = "toolBarItemOne",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemOne);
+    BarItem toolBarItemTwo = {
+        .text = "toolBarItemTwo",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemTwo);
+    BarItem toolBarItemThree = {
+        .text = "toolBarItemThree",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemThree);
+    BarItem toolBarItemFour = {
+        .text = "toolBarItemFour",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemFour);
+    BarItem toolBarItemFive = {
+        .text = "toolBarItemFive",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemFive);
+    BarItem toolBarItemSix = {
+        .text = "toolBarItemSix",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemSix);
+}
+
+void ToolBarTestNg::UpdateBarItemNodeWithItem(const RefPtr<NavToolbarNode>& toolBarNode,
+    std::vector<NG::BarItem>& toolBarItems)
+{
+    for (const auto& barItem : toolBarItems) {
+        int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+        if (barItem.text.has_value() && !barItem.text.value().empty()) {
+            int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent(barItem.text.value());
+            textLayoutProperty->UpdateFontSize(10.0_vp);
+            textLayoutProperty->UpdateTextColor(Color(0xE6000000));
+            textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+            barItemNode->SetTextNode(textNode);
+            barItemNode->AddChild(textNode);
+        }
+        if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
+            int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            ImageSourceInfo info(barItem.icon.value());
+            auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+            auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            auto theme = NavigationGetTheme();
+            CHECK_NULL_VOID(theme);
+            auto iconSize = theme->GetMenuIconSize();
+            imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+            iconNode->MarkModifyDone();
+            barItemNode->SetIconNode(iconNode);
+            barItemNode->AddChild(iconNode);
+        }
+        if (barItem.action) {
+            auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->SetItemAction(barItem.action);
+        }
+        auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+        barItemNode->MarkModifyDone();
+        toolBarNode->AddChild(barItemNode);
+    }
 }
 
 /**
@@ -384,7 +581,7 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     auto textNode = FrameNode::CreateFrameNode("Text", 0, AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->propContent_ = "";
+    textLayoutProperty->propContent_ = u"";
     barItem1->SetTextNode(textNode);
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         "Image", 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -396,7 +593,7 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     EXPECT_NE(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
     toolbarPattern->ShowDialogWithNode(barItem1);
 
-    textLayoutProperty->propContent_ = "test";
+    textLayoutProperty->propContent_ = u"test";
     imageNode->tag_ = V2::SYMBOL_ETS_TAG;
     ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
     EXPECT_FALSE(textLayoutProperty->GetContent().value().empty());
@@ -413,5 +610,412 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
     toolbarPattern->ShowDialogWithNode(barItem1);
+}
+
+/**
+ * @tc.name: HandleTitleBarAndToolBarAnimation001
+ * @tc.desc: Test HandleTitleBarAndToolBarAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HandleTitleBarAndToolBarAnimation001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    auto navBarLayoutProperty = navBarNode_->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateHideTitleBar(false);
+    navBarLayoutProperty->UpdateHideToolBar(false);
+    bool needRunTitleBarAnimation = true;
+    bool needRunToolBarAnimation = true;
+    navBarpattern_->HandleTitleBarAndToolBarAnimation(navBarNode_, needRunTitleBarAnimation, needRunToolBarAnimation);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode_->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarLayoutProperty->propVisibility_, VisibleType::VISIBLE);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode_->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
+    ASSERT_NE(toolBarLayoutProperty, nullptr);
+    EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: HideOrShowTitleBarImmediately001
+ * @tc.desc: Test HideOrShowTitleBarImmediately function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HideOrShowTitleBarImmediately001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    navBarpattern_->HideOrShowTitleBarImmediately(navBarNode_, true);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode_->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: HideOrShowToolBarImmediately001
+ * @tc.desc: Test HideOrShowToolBarImmediately function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HideOrShowToolBarImmediately001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    navBarpattern_->HideOrShowToolBarImmediately(navBarNode_, true);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode_->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
+    ASSERT_NE(toolBarLayoutProperty, nullptr);
+    EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest001
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 1.75 and more than five toolbar nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 1.75.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest002
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 2.0 and more than five toolbar nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 2.0.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest003
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 3.2 and more than five toolbar nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 3.2.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest004
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 1.75 and single toolbar node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 1.75.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create single toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    bool isEnabled = true;
+    std::function<void()> menuAction = [&isEnabled]() {
+        isEnabled = !isEnabled;
+    };
+    BarItem toolBarItemOne = {
+        .text = "toolBarItemOne",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemOne);
+    EXPECT_EQ(toolBarItems.size(), 1);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest005
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 2.0 and single toolbar node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 2.0.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create single toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    bool isEnabled = true;
+    std::function<void()> menuAction = [&isEnabled]() {
+        isEnabled = !isEnabled;
+    };
+    BarItem toolBarItemOne = {
+        .text = "toolBarItemOne",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemOne);
+    EXPECT_EQ(toolBarItems.size(), 1);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest006
+ * @tc.desc: Test the HandleLongPressEvent function with fontScale 3.2 and single toolbar node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 3.2.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create single toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    bool isEnabled = true;
+    std::function<void()> menuAction = [&isEnabled]() {
+        isEnabled = !isEnabled;
+    };
+    BarItem toolBarItemOne = {
+        .text = "toolBarItemOne",
+        .icon = "file://data/data/com.example.test/res/example.svg",
+        .isEnabled = isEnabled,
+        .action = menuAction };
+    toolBarItems.push_back(toolBarItemOne);
+    EXPECT_EQ(toolBarItems.size(), 1);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
 }
 } // namespace OHOS::Ace::NG

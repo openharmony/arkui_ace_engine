@@ -147,26 +147,6 @@ public:
         return preferredLanguage_;
     }
 
-    void SetPreferredCountry(const std::string& preferredCountry)
-    {
-        preferredCountry_ = preferredCountry;
-    }
-
-    const std::string& GetPreferredCountry() const
-    {
-        return preferredCountry_;
-    }
-
-    void SetPreferredScript(const std::string& preferredScript)
-    {
-        preferredScript_ = preferredScript;
-    }
-
-    const std::string& GetPreferredScript() const
-    {
-        return preferredScript_;
-    }
-
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -183,8 +163,6 @@ private:
     uint32_t mcc_ = 0;
     uint32_t mnc_ = 0;
     std::string preferredLanguage_;
-    std::string preferredCountry_;
-    std::string preferredScript_;
 };
 
 class ResourceInfo {

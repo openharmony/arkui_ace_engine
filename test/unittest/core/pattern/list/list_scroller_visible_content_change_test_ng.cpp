@@ -14,12 +14,10 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-} // namespace
-
 class ListScrollVisibleContentChangeTestNg : public ListTestNg {
 public:
 };
@@ -484,7 +482,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange007, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -559,9 +557,9 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange008, 
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
-    startExpect = { 0, 1, 0};
+    startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -570,7 +568,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange008, 
      * @tc.cases: startChanged == endChanged == true and indexChanged == false
      * @tc.expected: startExpect.index = 0
      */
-    startExpect = { 0, 2, -1};
+    startExpect = { 0, 2, -1 };
     endExpect = { 1, 1, 0 };
     pattern_->ScrollTo(20);
     FlushLayoutTask(frameNode_);
@@ -594,7 +592,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange008, 
      * @tc.cases: startChanged == true and indexChanged == endChanged == false
      * @tc.expected: endExpect.indexInGroup = 0
      */
-    startExpect = { 0, 1, 0};
+    startExpect = { 0, 1, 0 };
     pattern_->ScrollTo(60);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 60);
@@ -640,7 +638,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange009, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -720,7 +718,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange010, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -798,9 +796,9 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange011, 
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
-    startExpect = { 0, 1, 0};
+    startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -877,9 +875,9 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange012, 
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
-    startExpect = { 0, 1, 0};
+    startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollTo(ITEM_HEIGHT);
+    ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -932,4 +930,25 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange012, 
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 }
 
+/**
+ * @tc.name: ContentClip001
+ * @tc.desc: Test ContentClip
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollVisibleContentChangeTestNg, ContentClip001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::DEFAULT, nullptr });
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    FlushLayoutTask(frameNode_);
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    FlushLayoutTask(frameNode_);
+}
 } // namespace OHOS::Ace::NG

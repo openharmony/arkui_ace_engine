@@ -139,6 +139,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea001, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     auto passwordArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, false);
     passwordArea->InitResponseArea();
@@ -168,6 +169,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea002, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
     auto convertedArea = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
@@ -427,6 +429,42 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
      */
     GetFocus();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
+    std::string inputPartOne = "tes";
+    std::string inputPartTwo = "t";
+    std::string input = inputPartOne + inputPartTwo;
+    auto outputOne = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(input).length()));
+    auto res = pattern_->CreateDisplayText(input, 3, true, true);
+    EXPECT_EQ(outputOne, res);
+
+    /**
+     * @tc.steps: step3. call CreateDisplayText with showPasswordDirectly is false
+     * tc.expected: step3. Check the CreateDisplayText return.
+     */
+    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(inputPartOne).length()));
+    outputTwo += StringUtils::Str8ToStr16(inputPartTwo);
+    res = pattern_->CreateDisplayText(input, 3, true, false);
+    EXPECT_EQ(outputTwo, res);
+}
+
+/**
+ * @tc.name: CreateDisplayText002
+ * @tc.desc: Test textInput display of context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateDisplayText002, TestSize.Level1)
+{
+    SystemProperties::debugEnabled_ = true;
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CreateDisplayText with showPasswordDirectly is true
+     * tc.expected: step2. Check the CreateDisplayText return.
+     */
+    GetFocus();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_THIRTEEN);
     std::string inputPartOne = "tes";
     std::string inputPartTwo = "t";
     std::string input = inputPartOne + inputPartTwo;

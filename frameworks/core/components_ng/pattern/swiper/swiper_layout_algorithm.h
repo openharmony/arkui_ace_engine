@@ -97,6 +97,7 @@ public:
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
+        oldContentMainSize_ = contentMainSize;
     }
 
     float GetContentCrossSize() const
@@ -286,14 +287,24 @@ public:
         return childLayoutConstraint_;
     }
 
-    void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
+    float GetIgnoreBlankOffset() const
     {
-        nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
+        return ignoreBlankOffset_;
     }
 
     void SetIgnoreBlankOffset(float ignoreBlankOffset)
     {
         ignoreBlankOffset_ = ignoreBlankOffset;
+    }
+
+    void SetDuringInteraction(bool duringInteraction)
+    {
+        duringInteraction_ = duringInteraction;
+    }
+
+    std::optional<int32_t> GetJumpIndex() const
+    {
+        return jumpIndex_;
     }
 
 private:
@@ -336,7 +347,6 @@ private:
     void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
-    bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
     void UpdateLayoutInfoBeforeMeasureSwiper(
         const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
@@ -361,6 +371,7 @@ private:
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
@@ -372,9 +383,11 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool crossMatchChild_ = false;
     bool measured_ = false; // to distinguish first and second measure in flex layout
+    bool duringInteraction_ = false; // user interacting, include touching and translating animation.
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> currentJumpIndex_;
     std::optional<int32_t> currentTargetIndex_;
     std::optional<int32_t> customAnimationToIndex_;
     std::optional<int32_t> removeFromRSTreeIndex_;
@@ -394,8 +407,8 @@ private:
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
-    bool nextMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    float currentIgnoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;

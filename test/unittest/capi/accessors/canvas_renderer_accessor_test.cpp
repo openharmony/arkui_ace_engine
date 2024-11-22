@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../stubs/stub_canvas_pattern.h"
+#include "test/mock/core/pattern/mock_canvas_pattern.h"
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 

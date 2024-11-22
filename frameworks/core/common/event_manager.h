@@ -28,10 +28,12 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/pointer_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
 namespace NG {
@@ -177,6 +179,22 @@ public:
         return refereeNG_;
     }
 
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
+
+    TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp);
+
+    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
+        const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp);
+
+    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp);
+
+    MouseEvent GetResampleMouseEvent(
+        const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp);
+
+    MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp);
+
+
     bool DispatchKeyboardShortcut(const KeyEvent& event);
 
     void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
@@ -224,14 +242,20 @@ public:
         return isLastMoveBeforeUp_;
     }
 
-    NG::EventTreeRecord& GetEventTreeRecord()
+    NG::EventTreeRecord& GetEventTreeRecord(NG::EventTreeType treeType)
     {
-        return eventTree_;
+        switch (treeType) {
+            case NG::EventTreeType::TOUCH :
+                return eventTree_;
+            case NG::EventTreeType::POST_EVENT :
+                return postEventTree_;
+        }
     }
 
-    void DumpEvent(bool hasJson = false) const;
+    void DumpEvent(NG::EventTreeType type, bool hasJson = false);
 
-    void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target);
+    void AddGestureSnapshot(
+        int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
     RefPtr<NG::ResponseCtrl> GetResponseCtrl()
     {
@@ -287,6 +311,28 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, TouchEvent>& GetIdToTouchPoint() const
+    {
+        return idToTouchPoints_;
+    }
+
+    inline void SetIdToTouchPoint(std::unordered_map<int32_t, TouchEvent>&& idToTouchPoint)
+    {
+        idToTouchPoints_ = std::move(idToTouchPoint);
+    }
+
+    inline const std::unordered_map<int32_t, uint64_t>& GetLastDispatchTime() const
+    {
+        return lastDispatchTime_;
+    }
+
+    inline void SetLastDispatchTime(std::unordered_map<int32_t, uint64_t>&& lastDispatchTime)
+    {
+        lastDispatchTime_ = std::move(lastDispatchTime);
+    }
+
+    TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -318,10 +364,20 @@ private:
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
+    void DoSingleMouseActionRelease(MouseButton button);
+    bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
+    bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
+    void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
+        MouseTestResult& handledResults, bool& isStopPropagation);
+    bool DispatchMouseEventToCurResults(
+        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
+    // used less than API13
     MouseTestResult pressMouseTestResults_;
+    // used great or equal API13
+    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;
@@ -351,6 +407,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;
+    NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
@@ -362,6 +419,8 @@ private:
     SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
     // used to pseudo cancel event.
     TouchEvent lastTouchEvent_;
+    std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 };
 
 } // namespace OHOS::Ace

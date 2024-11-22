@@ -42,6 +42,8 @@ bool InputMethodManager::NeedSoftKeyboard() const
 
 void InputMethodManager::CloseKeyboard() {}
 
+void InputMethodManager::CloseKeyboardInProcess() {}
+
 void InputMethodManager::CloseKeyboardInPipelineDestroy() { lastKeep_ = false; }
 
 void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode) {}

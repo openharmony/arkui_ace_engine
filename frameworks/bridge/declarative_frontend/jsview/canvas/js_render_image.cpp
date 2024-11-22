@@ -18,6 +18,8 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/container.h"
@@ -63,8 +65,8 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
         LOGW("Invalid parameter.");
         return nullptr;
     }
-    auto* image = (JSRenderImage*)value;
-    if (image == nullptr) {
+    auto* wrapper = (JSRenderImage*)value;
+    if (wrapper == nullptr) {
         LOGW("Invalid context.");
         return nullptr;
     }
@@ -82,8 +84,8 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
     napi_define_properties(env, imageBitmap, sizeof(desc) / sizeof(*desc), desc);
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
-    napi_wrap_with_size(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr, image->GetBindingSize());
-    image->AddNativeRef();
+    napi_wrap_with_size(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
+    wrapper->IncRefCount();
     return imageBitmap;
 }
 
@@ -93,7 +95,7 @@ void JSRenderImage::Finalizer(napi_env env, void* data, void* hint)
 {
     auto wrapper = reinterpret_cast<JSRenderImage*>(data);
     if (wrapper) {
-        wrapper->Release();
+        wrapper->DecRefCount();
     }
 }
 
@@ -103,17 +105,18 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     size_t argc = 0;
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
-    auto wrapper = new (std::nothrow) JSRenderImage();
+    auto wrapper = AceType::MakeRefPtr<JSRenderImage>();
     wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
     if (argc <= 0) {
-        napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
-        napi_wrap(env, thisVar, wrapper, Finalizer, nullptr, nullptr);
-        wrapper->AddNativeRef();
+        napi_coerce_to_native_binding_object(
+            env, thisVar, DetachImageBitmap, AttachImageBitmap, AceType::RawPtr(wrapper), nullptr);
+        napi_wrap(env, thisVar, AceType::RawPtr(wrapper), Finalizer, nullptr, nullptr);
+        wrapper->IncRefCount();
         return thisVar;
     }
-    napi_value argv[2] = { nullptr };
+    napi_value argv[2] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc == 2) { // 2: args count
+    if (argc == 2) {  // 2: args count
         int32_t unit = 0;
         napi_get_value_int32(env, argv[1], &unit);
         if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
@@ -124,29 +127,24 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     auto status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
     if (status == napi_ok) {
         auto context = PipelineBase::GetCurrentContext();
-        if (!context) {
-            DELETE_RETURN_NULL(wrapper);
-        }
+        CHECK_NULL_RETURN(context, nullptr);
         std::string textString = GetSrcString(env, argv[0], textLen);
         if (context->IsFormRender() && NotFormSupport(textString)) {
             LOGE("Not supported src : %{public}s when form render", textString.c_str());
-            DELETE_RETURN_NULL(wrapper);
+            return nullptr;
         }
         wrapper->LoadImage(textString);
     } else {
 #ifdef PIXEL_MAP_SUPPORTED
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto pixelMap = GetPixelMap(env, argv[0]);
-            if (!pixelMap) {
-                DELETE_RETURN_NULL(wrapper);
-            }
-            wrapper->LoadImage(pixelMap);
-        }
+        auto pixelMap = GetPixelMap(env, argv[0]);
+        CHECK_NULL_RETURN(pixelMap, nullptr);
+        wrapper->LoadImage(pixelMap);
 #endif
     }
-    napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
-    napi_wrap_with_size(env, thisVar, wrapper, Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
-    wrapper->AddNativeRef();
+    napi_coerce_to_native_binding_object(
+        env, thisVar, DetachImageBitmap, AttachImageBitmap, AceType::RawPtr(wrapper), nullptr);
+    napi_wrap_with_size(env, thisVar, AceType::RawPtr(wrapper), Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
+    wrapper->IncRefCount();
     return thisVar;
 }
 
@@ -336,15 +334,18 @@ void JSRenderImage::LoadImage(const RefPtr<PixelMap>& pixmap)
 
 void JSRenderImage::LoadImage(const ImageSourceInfo& sourceInfo)
 {
-    auto dataReadyCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo) {
+    auto dataReadyCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto jsRenderImage = weak.Upgrade();
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageDataReady();
     };
-    auto loadSuccessCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo) {
+    auto loadSuccessCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        auto jsRenderImage = weak.Upgrade();
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadSuccess();
     };
-    auto loadFailCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+        auto jsRenderImage = weak.Upgrade();
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadFail(errorMsg);
     };
@@ -381,5 +382,28 @@ void JSRenderImage::SetHeight(double height)
 void JSRenderImage::SetCloseCallback(std::function<void()>&& callback)
 {
     closeCallbacks_.emplace_back(std::move(callback));
+}
+
+bool JSRenderImage::CreateJSRenderImage(napi_env env, RefPtr<PixelMap> pixelMap, napi_value& renderImage)
+{
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return false;
+    }
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
+    if (status != napi_ok) {
+        return false;
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    CHECK_NULL_RETURN(pixelMap, false);
+    auto pixelmapSharedPtr = pixelMap->GetPixelMapSharedPtr();
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
+    status = napi_new_instance(env, constructor, 1, &napiValue, &renderImage);
+#else
+    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
+#endif
+    return status == napi_ok;
 }
 } // namespace OHOS::Ace::Framework

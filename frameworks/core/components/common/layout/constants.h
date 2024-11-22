@@ -370,6 +370,14 @@ enum class AIImageQuality {
     HIGH,
 };
 
+enum class ImageRotateOrientation {
+    AUTO = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3,
+    LEFT = 4,
+};
+
 enum class ImageRenderMode {
     ORIGINAL = 0,
     TEMPLATE,
@@ -464,14 +472,19 @@ enum class KeyDirection {
 };
 
 enum class PixelRoundPolicy {
+    ALL_FORCE_ROUND = 0,
     FORCE_CEIL_START = 1,
     FORCE_FLOOR_START = 1 << 1,
-    FORCE_CEIL_TOP = 1 << 2,
-    FORCE_FLOOR_TOP = 1 << 3,
-    FORCE_CEIL_END = 1 << 4,
-    FORCE_FLOOR_END = 1 << 5,
-    FORCE_CEIL_BOTTOM = 1 << 6,
-    FORCE_FLOOR_BOTTOM = 1 << 7,
+    NO_FORCE_ROUND_START = 1 << 2,
+    FORCE_CEIL_TOP = 1 << 3,
+    FORCE_FLOOR_TOP = 1 << 4,
+    NO_FORCE_ROUND_TOP = 1 << 5,
+    FORCE_CEIL_END = 1 << 6,
+    FORCE_FLOOR_END = 1 << 7,
+    NO_FORCE_ROUND_END = 1 << 8,
+    FORCE_CEIL_BOTTOM = 1 << 9,
+    FORCE_FLOOR_BOTTOM = 1 << 10,
+    NO_FORCE_ROUND_BOTTOM = 1 << 11,
 };
 
 enum class PixelRoundCalcPolicy {
@@ -850,7 +863,10 @@ enum class RenderFit : int32_t {
 
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
-    RESIZE,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
+    NONE = 4,
 };
 
 enum class SwipeActionState : uint32_t {

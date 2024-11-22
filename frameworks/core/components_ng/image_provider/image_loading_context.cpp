@@ -15,6 +15,8 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -22,6 +24,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
@@ -184,6 +187,7 @@ void ImageLoadingContext::OnDataLoading()
         }
         return;
     }
+    src_.SetImageDfxConfig(GetImageDfxConfig());
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
 }
 
@@ -228,8 +232,7 @@ void ImageLoadingContext::DownloadImage()
 
 void ImageLoadingContext::PerformDownload()
 {
-    ACE_SCOPED_TRACE("PerformDownload [%d]-[%lld], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("PerformDownload %s", imageDfxConfig_.ToStringWithSrc().c_str());
     DownloadCallback downloadCallback;
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](
                                            const std::string&& imageData, bool async, int32_t instanceId) {
@@ -281,13 +284,7 @@ void ImageLoadingContext::CacheDownloadedImage()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE,
-        "Download image successfully, nodeId = %{public}d, accessId = %{public}lld, srcInfo = %{private}s, ImageData "
-        "length=%{public}zu",
-        imageDfxConfig_.nodeId_, static_cast<long long>(imageDfxConfig_.accessibilityId_), GetSrc().ToString().c_str(),
-        imageData.size());
-    ACE_SCOPED_TRACE("DownloadImageSuccess [%d]-[%lld], [%zu], src: [%s]", imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_), imageData.size(), src_.GetSrc().c_str());
+    ACE_SCOPED_TRACE("DownloadImageSuccess %s, [%zu]", imageDfxConfig_.ToStringWithSrc().c_str(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
@@ -351,7 +348,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->SetImageDfxConfig(imageDfxConfig_);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()
@@ -396,11 +393,9 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, %{public}s",
+        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE,
-        "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
-        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.nodeId_,
-        static_cast<long long>(imageDfxConfig_.accessibilityId_));
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }
@@ -510,7 +505,18 @@ void ImageLoadingContext::MakeCanvasImage(
 
 SizeF ImageLoadingContext::GetImageSize() const
 {
-    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1.0, -1.0);
+    CHECK_NULL_RETURN(imageObj_, SizeF(-1.0, -1.0));
+    auto imageSize = imageObj_->GetImageSize();
+    auto orientation = imageObj_->GetOrientation();
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+        return {imageSize.Height(), imageSize.Width()};
+    }
+    return imageSize;
+}
+
+SizeF ImageLoadingContext::GetOriginImageSize() const
+{
+    return imageObj_ ? imageObj_->GetImageSize() : SizeF(-1, -1);
 }
 
 ImageFit ImageLoadingContext::GetImageFit() const

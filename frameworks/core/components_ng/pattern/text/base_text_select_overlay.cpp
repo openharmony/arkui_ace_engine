@@ -16,10 +16,14 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
+constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
@@ -51,7 +55,7 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData)
 {
     SetShowPaste(hasClipboardData);
-    SetMenuIsShow(request.menuIsShow && !GetSelectArea().IsEmpty());
+    SetMenuIsShow(request.menuIsShow);
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {
@@ -258,7 +262,11 @@ RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const
     auto scrollablePattern = AceType::DynamicCast<NestableScrollContainer>(parentNode->GetPattern());
     auto geometryNode = parentNode->GetGeometryNode();
     if (scrollablePattern && geometryNode) {
-        auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+        RectF parentViewPort;
+        if (!GetFrameNodeContentRect(parentNode, parentViewPort)) {
+            return RectF(0, 0, 0, 0);
+        }
+        parentViewPort += parentNode->GetTransformRelativeOffset();
         if (parentViewPort.IsIntersectWith(visibleRect)) {
             intersectRect = parentViewPort.IntersectRectT(visibleRect);
         } else {
@@ -305,7 +313,7 @@ void BaseTextSelectOverlay::SetSelectionHoldCallback()
     overlayManager->SetHoldSelectionCallback(GetOwnerId(), selectionInfo);
 }
 
-RectF BaseTextSelectOverlay::GetVisibleContentRect()
+RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 {
     RectF visibleContentRect;
     auto pattern = GetPattern<Pattern>();
@@ -318,7 +326,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect()
     CHECK_NULL_RETURN(geometryNode, visibleContentRect);
     auto paintOffset = host->GetTransformRelativeOffset();
     visibleContentRect = RectF(geometryNode->GetContentOffset() + paintOffset, geometryNode->GetContentSize());
-    if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED) {
+    if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED && !isGlobal) {
         return visibleContentRect;
     }
     return GetVisibleRect(pattern->GetHost(), visibleContentRect);
@@ -521,7 +529,7 @@ RectF BaseTextSelectOverlay::GetPaintRectWithTransform()
 
 OffsetF BaseTextSelectOverlay::GetPaintRectOffsetWithTransform()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto globalFrameRect = GetPaintRectWithTransform();
     return globalFrameRect.GetOffset() - pipeline->GetRootRect().GetOffset();
@@ -608,25 +616,7 @@ OffsetF BaseTextSelectOverlay::GetPaintOffsetWithoutTransform()
 
 void BaseTextSelectOverlay::UpdateTransformFlag()
 {
-    auto pattern = GetPattern<Pattern>();
-    CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto hasTransform = false;
-    while (host) {
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            break;
-        }
-        if (!hasTransform) {
-            auto noTransformRect = renderContext->GetPaintRectWithoutTransform();
-            auto transformRect = renderContext->GetPaintRectWithTransform();
-            hasTransform = noTransformRect != transformRect;
-        }
-        host = host->GetAncestorNodeOfFrame(true);
-    }
-    hasTransform_ = hasTransform;
+    hasTransform_ = HasUnsupportedTransform(true);
 }
 
 std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
@@ -666,7 +656,7 @@ float BaseTextSelectOverlay::GetHandleDiameter()
 
 void BaseTextSelectOverlay::SwitchToOverlayMode()
 {
-    if (HasUnsupportedTransform()) {
+    if (HasUnsupportedTransform() || IsHandleInParentSafeAreaPadding()) {
         return;
     }
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -714,6 +704,9 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    if (reason == CloseReason::CLOSE_REASON_BY_RECREATE) {
+        return;
+    }
     originalMenuIsShow_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
@@ -805,7 +798,8 @@ bool BaseTextSelectOverlay::CheckHandleCanPaintInHost(const RectF& firstRect, co
 
 void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect)
 {
-    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform()) {
+    if (CheckHandleCanPaintInHost(firstLocalPaintRect, secondLocalPaintRect) || HasUnsupportedTransform() ||
+        IsHandleInParentSafeAreaPadding(firstLocalPaintRect, secondLocalPaintRect)) {
         SetHandleLevelMode(HandleLevelMode::EMBED);
     } else {
         SetHandleLevelMode(HandleLevelMode::OVERLAY);
@@ -823,13 +817,13 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     if (IsAncestorNodeGeometryChange(flag)) {
         isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
     }
-    auto isScrollEnd = IsAncestorNodeEndScroll(flag);
+    auto isScrollEnd = IsAncestorNodeEndScroll(flag) || ((flag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG);
     isSwitchToEmbed = isSwitchToEmbed && (!isScrollEnd || HasUnsupportedTransform());
     UpdateMenuWhileAncestorNodeChanged(
-        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd, flag);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterRenderTask([weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
+    auto switchTask = [weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         if (isScrollEnd) {
@@ -839,15 +833,31 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         if (isSwitchToEmbed) {
             overlay->SwitchToEmbedMode();
         }
-    });
+    };
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        switchTask();
+    } else {
+        pipeline->AddAfterRenderTask(switchTask);
+    }
+    if ((flag & FRAME_NODE_CONTENT_CLIP_CHANGE) == FRAME_NODE_CONTENT_CLIP_CHANGE) {
+        if (IsOverlayMode() && IsHandleInParentSafeAreaPadding()) {
+            SwitchToEmbedMode();
+        }
+        UpdateViewPort();
+    }
 }
 
-void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu)
+void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
+    bool shouldHideMenu, bool shouldShowMenu, FrameNodeChangeInfoFlag extraFlag)
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     if (shouldHideMenu) {
         manager->HideOptionMenu(true);
+        return;
+    }
+    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
+        manager->ShowOptionMenu();
         return;
     }
     if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {
@@ -915,13 +925,12 @@ bool BaseTextSelectOverlay::IsClickAtHandle(const GestureEvent& info)
         PointF(localOffset.GetX(), localOffset.GetY()), PointF(globalOffset.GetX(), globalOffset.GetY()));
 }
 
-bool BaseTextSelectOverlay::HasUnsupportedTransform()
+bool BaseTextSelectOverlay::HasUnsupportedTransform(bool checkScale)
 {
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto parent = pattern->GetHost();
     CHECK_NULL_RETURN(parent, false);
-    const int32_t zTranslateIndex = 2;
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
@@ -933,30 +942,53 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
-            !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
+            !(NearZero(rotateVector->x) && NearZero(rotateVector->y) && NearZero(rotateVector->z))) {
             return true;
         }
-        auto transformMatrix = renderContext->GetTransformMatrix();
-        if (transformMatrix) {
-            DecomposedTransform transform;
-            TransformUtil::DecomposeTransform(transform, transformMatrix.value());
-            Quaternion identity(0.0f, 0.0f, 0.0f, 1.0f);
-            if (transform.quaternion != identity || !NearZero(transform.translate[zTranslateIndex])) {
-                return true;
-            }
+        if (CheckUnsupportedTransformMatrix(renderContext, checkScale)) {
+            return true;
         }
         auto translate = renderContext->GetTransformTranslate();
         if (translate && !NearZero(translate->z.Value())) {
             return true;
+        }
+        if (checkScale) {
+            auto scale = renderContext->GetTransformScale();
+            if (scale && (!NearEqual(scale->x, 1.0f) || !NearEqual(scale->y, 1.0f))) {
+                return true;
+            }
         }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     return false;
 }
 
+bool BaseTextSelectOverlay::CheckUnsupportedTransformMatrix(const RefPtr<RenderContext> context, bool checkScale)
+{
+    auto transformMatrix = context->GetTransformMatrix();
+    if (!transformMatrix) {
+        return false;
+    }
+    DecomposedTransform transform;
+    TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+    Quaternion identity(0.0f, 0.0f, 0.0f, 1.0f);
+    const int32_t zTranslateIndex = 2;
+    if (transform.quaternion != identity || !NearZero(transform.translate[zTranslateIndex])) {
+        return true;
+    }
+    if (checkScale) {
+        for (const auto& scalValue : transform.scale) {
+            if (!NearEqual(scalValue, 1.0f)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
 {
-    if (mode == HandleLevelMode::OVERLAY && HasUnsupportedTransform()) {
+    if (mode == HandleLevelMode::OVERLAY && (HasUnsupportedTransform() || IsHandleInParentSafeAreaPadding())) {
         return false;
     }
     return true;
@@ -1147,6 +1179,9 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
 bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
 {
     CHECK_NULL_RETURN(node, false);
+    if (GetScrollableClipContentRect(node, contentRect)) {
+        return true;
+    }
     auto geometryNode = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto renderContext = node->GetRenderContext();
@@ -1157,5 +1192,200 @@ bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& nod
         contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
     }
     return true;
+}
+
+void BaseTextSelectOverlay::MarkOverlayDirty()
+{
+    if (SelectOverlayIsOn()) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        auto overlayNode = host->GetOverlayNode();
+        CHECK_NULL_VOID(overlayNode);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    if (keyboardInset.Length() <= 0) {
+        return;
+    }
+    if (GreatOrEqual(selectArea.Top(), keyboardInset.start)) {
+        selectArea.SetHeight(0.0f);
+    }
+}
+
+void BaseTextSelectOverlay::OnHandleMarkInfoChange(
+    const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+        info->handlerColor = GetHandleColor();
+        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void BaseTextSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+}
+
+std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(
+    const RefPtr<FrameNode>& node)
+{
+    auto props = DynamicCast<ScrollablePaintProperty>(node->GetPaintProperty<PaintProperty>());
+    CHECK_NULL_RETURN(props, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
+    auto clip = props->GetContentClip();
+    CHECK_NULL_RETURN(clip, std::make_pair(ContentClipMode::DEFAULT, std::nullopt));
+    auto mode = clip->first;
+    if (mode == ContentClipMode::DEFAULT) {
+        if (node->GetTag() == V2::GRID_ETS_TAG || node->GetTag() == V2::SCROLL_ETS_TAG) {
+            mode = ContentClipMode::BOUNDARY;
+        } else if (node->GetTag() == V2::LIST_ETS_TAG || node->GetTag() == V2::WATERFLOW_ETS_TAG) {
+            mode = ContentClipMode::CONTENT_ONLY;
+        }
+    }
+    return std::make_pair(mode, clip);
+}
+
+bool BaseTextSelectOverlay::GetScrollableClipContentRect(const RefPtr<FrameNode>& node, RectF& rect)
+{
+    auto clipInfo = GetScrollableClipInfo(node);
+    auto geo = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geo, false);
+    switch (clipInfo.first) {
+        case ContentClipMode::SAFE_AREA:
+        case ContentClipMode::CONTENT_ONLY: {
+            rect = geo->GetPaddingRect();
+            rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
+            return true;
+        }
+        case ContentClipMode::BOUNDARY: {
+            rect = geo->GetFrameRect();
+            rect.SetOffset({ 0.0f, 0.0f });
+            return true;
+        }
+        case ContentClipMode::CUSTOM: {
+            auto contentClip = clipInfo.second;
+            CHECK_NULL_RETURN(contentClip, false);
+            auto shapeRect = contentClip->second;
+            CHECK_NULL_RETURN(shapeRect, false);
+            auto clipOffset = shapeRect->GetOffset();
+            rect = RectF(clipOffset.GetX().ConvertToPx(), clipOffset.GetY().ConvertToPx(),
+                shapeRect->GetWidth().ConvertToPx(), shapeRect->GetHeight().ConvertToPx());
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
+bool BaseTextSelectOverlay::CheckHandleIsInSafeAreaPadding(const RefPtr<FrameNode>& node, const RectF& handle)
+{
+    auto clipInfo = GetScrollableClipInfo(node);
+    if (clipInfo.first != ContentClipMode::SAFE_AREA) {
+        return false;
+    }
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+    if (!safeAreaPadding.HasValue()) {
+        return false;
+    }
+    auto geo = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geo, false);
+    auto paddingRect = geo->GetPaddingRect();
+    if (safeAreaPadding.left && LessNotEqual(handle.Left(), paddingRect.Left())) {
+        return true;
+    }
+    if (safeAreaPadding.top && LessNotEqual(handle.Top(), paddingRect.Top())) {
+        return true;
+    }
+    if (safeAreaPadding.right && GreatNotEqual(handle.Right(), paddingRect.Right())) {
+        return true;
+    }
+    if (safeAreaPadding.bottom && GreatNotEqual(handle.Bottom(), paddingRect.Bottom())) {
+        return true;
+    }
+    return false;
+}
+
+bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding(const RectF& firstRect, const RectF& secondRect)
+{
+    auto firstHandlePaint = firstRect;
+    auto secondHandlePaint = secondRect;
+    auto parent = GetOwner();
+    while (parent) {
+        if (GetOwner() != parent) {
+            if (CheckHandleIsInSafeAreaPadding(parent, secondHandlePaint)) {
+                return true;
+            }
+            if (!IsSingleHandle() && CheckHandleIsInSafeAreaPadding(parent, firstHandlePaint)) {
+                return true;
+            }
+        }
+        auto context = parent->GetRenderContext();
+        CHECK_NULL_RETURN(context, false);
+        firstHandlePaint += context->GetPaintRectWithTransform().GetOffset();
+        secondHandlePaint += context->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return false;
+}
+
+bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding()
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return IsHandleInParentSafeAreaPadding(
+        overlayInfo->firstHandle.localPaintRect, overlayInfo->secondHandle.localPaintRect);
+}
+
+void BaseTextSelectOverlay::AddAvoidKeyboardCallback(bool isCustomKeyboard)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManagerNg);
+    textFieldManagerNg->AddAvoidKeyboardCallback(host->GetId(), isCustomKeyboard, [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        if (!overlay->SelectOverlayIsOn()) {
+            return;
+        }
+        auto host = overlay->GetOwner();
+        CHECK_NULL_VOID(host);
+        auto flag = host->GetChangeInfoFlag();
+        host->ClearChangeInfoFlag();
+        host->AddFrameNodeChangeInfoFlag(AVOID_KEYBOARD_END_FALG);
+        host->ProcessFrameNodeChangeFlag();
+        host->ClearChangeInfoFlag();
+        host->AddFrameNodeChangeInfoFlag(flag);
+    });
+}
+
+void BaseTextSelectOverlay::RemoveAvoidKeyboardCallback()
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManagerNg);
+    textFieldManagerNg->RemoveAvoidKeyboardCallback(host->GetId());
 }
 } // namespace OHOS::Ace::NG

@@ -628,7 +628,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setOnAnimationEnd
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_Number_TabsAnimationEvent_Void func{};

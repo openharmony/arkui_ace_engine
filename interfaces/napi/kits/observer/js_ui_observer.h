@@ -57,6 +57,13 @@ private:
     napi_value AddToRouterPageState(napi_env env);
     napi_value CreateNavDestinationState(napi_env env);
     bool isNavigationHandleFuncSetted_ = false;
+    bool isScrollEventChangeFuncSetted_ = false;
+    bool isDensityChangeSetted_ = false;
+    bool isDrawCommandSendChangeSetted_ = false;
+    bool isLayoutDoneChangeSetted_ = false;
+    bool isWillClickFuncSetted_ = false;
+    bool isDidClickFuncSetted_ = false;
+    bool isTabContentStateUpdateFuncSetted_ = false;
     bool isRouterPageHandleFuncSetted_ = false;
     bool isDestinationSwitchHandleFuncSetted_ = false;
     std::map<std::string, Func> registerProcessMap_;

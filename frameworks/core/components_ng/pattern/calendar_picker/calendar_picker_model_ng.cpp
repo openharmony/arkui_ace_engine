@@ -245,7 +245,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
         V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
     auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, pickerNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = pickerNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, pickerNode);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, pickerNode);

@@ -960,7 +960,7 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     richEditorPattern->isTextChange_ = true;
     richEditorPattern->moveDirection_ = MoveDirection::FORWARD;
     richEditorPattern->moveLength_ = 1;
-    richEditorPattern->MoveCaretOnLayoutSwap(true);
+    richEditorPattern->MoveCaretOnLayoutSwap();
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 1);
     EXPECT_EQ(richEditorPattern->moveLength_, 0);
     EXPECT_FALSE(richEditorPattern->isTextChange_);

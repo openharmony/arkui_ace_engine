@@ -35,6 +35,8 @@ public:
 
     void SetPrintOffset(const OffsetF& paintOffset);
 
+    void SetCursorColor(uint32_t cursorColor);
+
     void SetSelectedColor(uint32_t selectedColor);
 
     void SetSelectedRects(const std::vector<RectF>& selectedRects);
@@ -64,6 +66,7 @@ private:
     bool IsSelectedRectsChanged(const std::vector<RectF>& selectedRects);
 
     RefPtr<PropertyOffsetF> paintOffset_;
+    RefPtr<PropertyInt> cursorColor_;
     RefPtr<PropertyInt> selectedColor_;
     RefPtr<PropertyBool> changeSelectedRects_;
     RefPtr<PropertyBool> isClip_;;

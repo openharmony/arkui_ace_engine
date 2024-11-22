@@ -91,6 +91,8 @@ public:
     {
         frameRateRange_[type] = rateRange;
     }
+    TextDirection GetTextDirection(const std::string& content, TextDirection direction);
+    void OnFontScaleConfigurationUpdate() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -116,8 +118,16 @@ private:
     float GetTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
+    void CheckTextDirectionChange(TextDirection direction);
+    TextDirection GetCurrentTextDirection();
+    void UpdateTextDirection(
+        const RefPtr<MarqueeLayoutProperty>& layoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
+    void ProcessVisibleAreaCallback();
+    void PauseAnimation();
+    void ResumeAnimation();
+
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
     std::shared_ptr<AnimationUtils::Animation> animation_;
@@ -125,6 +135,7 @@ private:
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;

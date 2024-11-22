@@ -99,11 +99,6 @@ void RefreshModelNG::SetFriction(int32_t friction)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction);
 }
 
-void RefreshModelNG::SetProgressColor(const Color& progressColor)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
-}
-
 void RefreshModelNG::SetLoadingText(const std::string& loadingText)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);

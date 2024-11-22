@@ -142,12 +142,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + a.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_A, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 
     /**
      * @tc.steps: step3. call SetKeyboardShortcut with ctrl + shift + a.
@@ -269,12 +269,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + c.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_C, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
 
@@ -372,12 +372,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest011, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + v.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_V, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
 
@@ -475,12 +475,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest015, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + z.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_Z, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
 
@@ -578,12 +578,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest019, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + y.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_Y, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
 
@@ -681,12 +681,12 @@ HWTEST_F(ShortCutsLittleTestNg, ShortCutsLittleTest023, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SetKeyboardShortcut with ctrl + x.
-     * @tc.expected: add fail
+     * @tc.expected: add success
      */
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_LITTLE_X, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 }
 

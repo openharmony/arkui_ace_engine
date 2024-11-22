@@ -523,7 +523,7 @@ HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    navigationPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitDividerPanEvent(gestureHub);
     auto panEvent = navigationPattern->panEvent_;
     EXPECT_NE(panEvent, nullptr);
 }
@@ -1110,7 +1110,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
 
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    navigationPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitDividerPanEvent(gestureHub);
 }
 
 /**
@@ -1214,47 +1214,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern024, TestSize.Level1)
     EXPECT_FALSE(canCoordScrollUp);
     auto canCoordScrollUp2 = navBarpattern_->CanCoordScrollUp(DEFAULT_SIZE_LENGTH_NEGATIVE);
     EXPECT_FALSE(canCoordScrollUp2);
-}
-
-/**
- * @tc.name: NavBarPattern025
- * @tc.desc: Test SetNavBarMask function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern025, TestSize.Level1)
-{
-    TestParameters testParameters;
-    InitializationParameters(testParameters);
-    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
-    testParameters.theme->navBarUnfocusColor_ = Color::RED;
-    navBarpattern_->SetNavBarMask(false);
-    auto renderContext = navBarNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto maskProperty = renderContext->GetProgressMaskValue();
-    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
-    EXPECT_FALSE(isTransparent);
-}
-
-/**
- * @tc.name: NavBarPattern026
- * @tc.desc: Test SetNavBarMask function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern026, TestSize.Level1)
-{
-    TestParameters testParameters;
-    InitializationParameters(testParameters);
-    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
-    navBarpattern_->SetNavBarMask(true);
-    auto renderContext = navBarNode_->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto maskProperty = renderContext->GetProgressMaskValue();
-    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
-    EXPECT_TRUE(isTransparent);
 }
 
 /**

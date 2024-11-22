@@ -115,8 +115,11 @@ private:
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     void UpdateSymbolSource();
+    void UpdateSymbolColor();
     void InitSymbolEffectOptions();
     bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();
@@ -130,6 +133,7 @@ private:
     std::optional<ImageSourceInfo> hideIcon_;
     RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
+    Color symbolColor_;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
@@ -193,9 +197,22 @@ public:
 
     void Refresh() override;
 
+    float GetIconSize()
+    {
+        return static_cast<float>(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()));
+    }
+
+    bool CheckUpdateCleanNode();
+
 private:
     bool IsShowClean();
+    bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
+    void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
+    void SetCancelSymbolIconSize();
+    CalcDimension GetSymbolDefaultSize();
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
     void LoadingImageProperty();

@@ -505,7 +505,6 @@ void RichEditorModelNG::SetSelectionMenuOptions(
 
 void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
 {
-    CHECK_NULL_VOID(!isStyledStringMode_);
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);

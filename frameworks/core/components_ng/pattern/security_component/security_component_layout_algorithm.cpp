@@ -50,7 +50,9 @@ void SecurityComponentLayoutAlgorithm::UpdateChildPosition(LayoutWrapper* layout
     CHECK_NULL_VOID(childWrapper);
     auto childNode = childWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    childNode->GetGeometryNode()->SetMarginFrameOffset(
+    auto geometryNode = childNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(
         OffsetF(std::round(offset.GetX()), std::round(offset.GetY())));
 }
 
@@ -92,7 +94,9 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
     double borderWidth = property->GetBackgroundBorderWidth().value_or(Dimension(0.0)).ConvertToPx();
@@ -410,19 +414,39 @@ RefPtr<FrameNode> SecurityComponentLayoutAlgorithm::GetSecCompChildNode(RefPtr<F
 void SecurityComponentLayoutAlgorithm::UpdateTextRectPoint()
 {
     if (isVertical_) {
-        double contextWidth = std::max(text_.width_, icon_.width_);
-        textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
-        textRightBottomPoint_ = SizeF(left_.width_ + contextWidth, top_.height_ + icon_.height_ + middle_.height_ +
-            text_.height_);
+        if (icon_.width_ > text_.width_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + text_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + text_.width_,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        }
     } else {
-        double contextHeight = std::max(text_.height_, icon_.height_);
-        textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
-        textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
-        textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + contextHeight);
-        textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_ +
-            contextHeight);
+        if (icon_.height_ > text_.height_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + text_.height_);
+        }
     }
 }
 
@@ -725,9 +749,10 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
-    isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value() ==
-        SecurityComponentLayoutDirection::VERTICAL);
-    isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value() == BUTTON_TYPE_NULL);
+    isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
+        SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
+    isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(
+        static_cast<int32_t>(ButtonType::CAPSULE)) == BUTTON_TYPE_NULL);
     idealWidth_ = constraint_->selfIdealSize.Width().value_or(0.0);
     idealHeight_ = constraint_->selfIdealSize.Height().value_or(0.0);
     minWidth_ = constraint_->minSize.Width();
@@ -756,7 +781,9 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     icon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
     securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
         layoutWrapper));
 }
@@ -766,7 +793,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     auto frameNode = layoutWrapper->GetHostNode();
     // default return LTR
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
-    std::string text = "";
+    std::u16string text = u"";
     // get button string
     for (const auto& child : frameNode->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
@@ -785,8 +812,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     if (text.empty()) {
         return TextDirection::LTR;
     }
-    auto wString = StringUtils::ToWstring(text);
-    for (const auto& charInStr : wString) {
+    for (const auto& charInStr : text) {
         auto direction = u_charDirection(charInStr);
         if (direction == UCharDirection::U_LEFT_TO_RIGHT) {
             return TextDirection::LTR;

@@ -26,6 +26,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/geometry/dimension.h"
+#include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #undef private

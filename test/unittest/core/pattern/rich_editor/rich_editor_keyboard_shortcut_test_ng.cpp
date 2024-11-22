@@ -853,9 +853,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectPosition001, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->caretPosition_ = richEditorPattern->textSelector_.GetTextEnd();
-    auto ret = richEditorPattern->HandleSelectPosition(true);
+    auto ret = richEditorPattern->HandleKbVerticalSelection(true);
     EXPECT_EQ(ret, 0);
-    ret = richEditorPattern->HandleSelectPosition(false);
+    ret = richEditorPattern->HandleKbVerticalSelection(false);
     EXPECT_EQ(ret, 0);
 }
 
@@ -935,7 +935,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
     scrollBar->isPressed_ = true;
     MouseInfo info;
     richEditorPattern->HandleMouseEvent(info);
-    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
+    EXPECT_TRUE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**

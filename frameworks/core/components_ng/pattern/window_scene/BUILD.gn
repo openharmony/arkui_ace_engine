@@ -17,8 +17,7 @@ import(
 if (is_ohos_standard_system) {
   config("window_scene_config") {
     visibility = [ ":*" ]
-
-    defines = []
+    defines = [ "SUPPORT_GRAPHICS" ]
     cflags = []
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]

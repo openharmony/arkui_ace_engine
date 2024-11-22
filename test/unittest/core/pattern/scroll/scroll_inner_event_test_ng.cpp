@@ -204,7 +204,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick001, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(1);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step5. Release in activeBar
@@ -246,8 +246,8 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick002, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, BELOW_ACTIVE_BAR_OFFSET);
     MockAnimationManager::GetInstance().SetTicks(TICK);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step2. Press above activeBar, trigger HandleClickEvent
@@ -257,8 +257,8 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick002, TestSize.Level1)
     MouseOnScrollBar(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -279,7 +279,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick003, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, OUT_SCROLLBAR_OFFSET);
     MockAnimationManager::GetInstance().SetTicks(1);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -301,7 +301,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress001, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, IN_ACTIVE_BAR_OFFSET);
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollBar_->HandleLongPress(true);
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -327,11 +327,11 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, belowActiveBarPoint);
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollBar_->HandleLongPress(true);
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT * 2));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 2));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT * 2));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 2));
 
     /**
      * @tc.steps: step2. Press above activeBar, longPress in scrollBar
@@ -341,11 +341,11 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
     MouseOnScrollBar(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     scrollBar_->HandleLongPress(true);
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT * 1));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 1));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -504,7 +504,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar001, TestSize.Level1)
     float dragDelta = 10;
     DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, dragDelta);
     float expectOffset = -dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
+    EXPECT_TRUE(Position(expectOffset));
 
     /**
      * @tc.steps: step2. Drag end with velocity
@@ -533,7 +533,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar002, TestSize.Level1)
     float dragDelta = 10;
     DragScrollBarAction(Offset(2, 80), dragDelta);
     float expectOffset = -dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
+    EXPECT_TRUE(Position(expectOffset));
 
     /**
      * @tc.steps: step2. Drag end with velocity
@@ -562,7 +562,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar003, TestSize.Level1)
     float dragDelta = 24;
     DragScrollBarAction(Offset(1, 398), dragDelta);
     float expectOffset = -dragDelta / HORIZONTAL_RATIO;
-    EXPECT_EQ(GetChildX(frameNode_, 0), expectOffset);
+    EXPECT_TRUE(Position(expectOffset));
 
     /**
      * @tc.steps: step2. Drag end with velocity
@@ -593,7 +593,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar004, TestSize.Level1)
     float dragDelta = -24;
     DragScrollBarAction(Offset(239, 398), dragDelta);
     float expectOffset = -HORIZONTAL_SCROLLABLE_DISTANCE - dragDelta / HORIZONTAL_RATIO;
-    EXPECT_EQ(GetChildX(frameNode_, 0), expectOffset);
+    EXPECT_TRUE(Position(expectOffset));
 
     /**
      * @tc.steps: step2. Drag end with velocity
@@ -620,51 +620,51 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar005, TestSize.Level1)
     CreateScrollDone();
 
     /**
-     * @tc.steps: step1. Drag down less than half of intervalSize
+     * @tc.steps: step1. Drag up less than half of intervalSize
      * @tc.expected: Scroll back
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float dragDelta = 10;
     DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, dragDelta);
     float expectOffset = -dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
-    EXPECT_TRUE(VerifyTickPosition(expectOffset / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(expectOffset));
+    EXPECT_TRUE(TickPosition(expectOffset / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
-     * @tc.steps: step2. Drag down greater than half of intervalSize
+     * @tc.steps: step2. Drag up greater than half of intervalSize
      * @tc.expected: Scroll to intervalSize
      */
     dragDelta = 30;
     DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, dragDelta);
     expectOffset = -dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
-    EXPECT_TRUE(VerifyTickPosition((-intervalSize + expectOffset) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-intervalSize));
+    EXPECT_TRUE(Position(expectOffset));
+    EXPECT_TRUE(TickPosition((-intervalSize + expectOffset) / TICK));
+    EXPECT_TRUE(TickPosition(-intervalSize));
 
     /**
-     * @tc.steps: step3. Drag up with velocity less than half of intervalSize
+     * @tc.steps: step3. Drag down with velocity less than half of intervalSize
      * @tc.expected: Scroll back
      */
     dragDelta = -10;
     float velocity = 5;
     DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, dragDelta, velocity);
     expectOffset = -intervalSize - dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
-    EXPECT_TRUE(VerifyTickPosition((-intervalSize + expectOffset) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-intervalSize));
+    EXPECT_TRUE(Position(expectOffset));
+    EXPECT_TRUE(TickPosition((-intervalSize + expectOffset) / TICK));
+    EXPECT_TRUE(TickPosition(-intervalSize));
 
     /**
-     * @tc.steps: step4. Drag up greater than half of intervalSize
+     * @tc.steps: step4. Drag down greater than half of intervalSize
      * @tc.expected: Scroll to intervalSize
      */
     dragDelta = -30;
     velocity = 10;
     DragScrollBarAction(IN_ACTIVE_BAR_OFFSET, dragDelta, velocity);
     expectOffset = -intervalSize - dragDelta / VERTICAL_RATIO;
-    EXPECT_EQ(GetChildY(frameNode_, 0), expectOffset);
-    EXPECT_TRUE(VerifyTickPosition(expectOffset / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(expectOffset));
+    EXPECT_TRUE(TickPosition(expectOffset / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -674,7 +674,6 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar005, TestSize.Level1)
  */
 HWTEST_F(ScrollInnerEventTestNg, RegisterEventByClick001, TestSize.Level1)
 {
-    MockContainer::Current()->useNewPipeline_ = true; // for init panRecognizerNG_
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
     model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1.f)); // will be default
@@ -708,8 +707,27 @@ HWTEST_F(ScrollInnerEventTestNg, RegisterEventByClick001, TestSize.Level1)
     scrollable_->panRecognizerNG_->SetNodeId(0);
     CollectTouchTarget(OUT_SCROLLBAR_POINT);
     EXPECT_EQ(scrollable_->panRecognizerNG_->nodeId_, nodeId);
+}
 
-    // reset useNewPipeline_
-    MockContainer::Current()->useNewPipeline_ = false;
+/**
+ * @tc.name: HandleDragEndScrollBar001
+ * @tc.desc: Test handleDragEnd in Horizontal and RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. Drag end with velocity
+     * @tc.expected: Continue scroll after end
+     */
+    DragScrollBarAction(Offset(239, 398), 0.f, -1000.f);
+    EXPECT_LE(GetChildX(frameNode_, 0), 60.f);
 }
 } // namespace OHOS::Ace::NG

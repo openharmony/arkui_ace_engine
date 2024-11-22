@@ -24,32 +24,41 @@
 namespace OHOS::Ace {
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticePreview>(jsLattice->GetLattice());
-#endif
 }
 
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticePreview>(*lattice);
-#endif
 }
 
 void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     return static_cast<void*>(&lattice_);
-#endif
+}
+
+std::string DrawingLatticePreview::DumpToString()
+{
+    if (lattice_) {
+        std::string drawingConfigStr;
+        drawingConfigStr.append("fXCount = " + std::to_string(lattice_->fXCount));
+        drawingConfigStr.append("fXDivs = [");
+        for (int32_t idx = 0; idx < lattice_->fXCount; ++idx) {
+            drawingConfigStr.append(std::to_string(lattice_->fXDivs[idx]) + " ");
+        }
+        drawingConfigStr.append("] ");
+        drawingConfigStr.append("fYCount = " + std::to_string(lattice_->fYCount));
+        drawingConfigStr.append("fYDivs = [");
+        for (int32_t idx = 0; idx < lattice_->fYCount; ++idx) {
+            drawingConfigStr.append(std::to_string(lattice_->fYDivs[idx]) + " ");
+        }
+        drawingConfigStr.append("] ");
+        return drawingConfigStr;
+    }
+    return "Lattice is null";
 }
 } // namespace OHOS::Ace

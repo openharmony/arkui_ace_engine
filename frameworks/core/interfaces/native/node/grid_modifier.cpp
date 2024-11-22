@@ -444,6 +444,27 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return GridModelNG::GetCachedCount(frameNode);
 }
 
+void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetShowCached(frameNode, show);
+}
+
+void ResetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetShowCached(frameNode, false);
+}
+
+ArkUI_Bool GetShowCached(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetShowCached(frameNode);
+}
+
 void SetGridFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -467,14 +488,14 @@ const ArkUIGridModifier* GetGridModifier()
     static const ArkUIGridModifier modifier = { SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate,
         ResetGridRowsTemplate, SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
         SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
-        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
-        SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,
-        ResetGridMinCount, SetGridCellLength, ResetGridCellLength, SetGridLayoutDirection, ResetGridLayoutDirection,
-        SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
-        ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
-        GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
-        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit, SetGridAlignItems,
-        ResetGridAlignItems, SetGridFadingEdge, ResetGridFadingEdge };
+        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetShowCached, ResetShowCached,
+        GetShowCached, SetGridEditMode, ResetGridEditMode, SetGridMultiSelectable, ResetGridMultiSelectable,
+        SetGridMaxCount, ResetGridMaxCount, SetGridMinCount, ResetGridMinCount, SetGridCellLength, ResetGridCellLength,
+        SetGridLayoutDirection, ResetGridLayoutDirection, SetGridSupportAnimation, ResetGridSupportAnimation,
+        SetEdgeEffect, ResetEdgeEffect, SetNestedScroll, ResetNestedScroll, SetEnableScroll, ResetEnableScroll,
+        SetFriction, ResetFriction, GetColumnsTemplate, GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter,
+        ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount, GetCachedCount, SetFlingSpeedLimit,
+        ResetFlingSpeedLimit, SetGridAlignItems, ResetGridAlignItems, SetGridFadingEdge, ResetGridFadingEdge };
     return &modifier;
 }
 

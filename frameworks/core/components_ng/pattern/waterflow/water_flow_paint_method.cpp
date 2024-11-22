@@ -38,11 +38,16 @@ CanvasDrawFunction WaterFlowPaintMethod::GetForegroundDrawFunction(PaintWrapper*
 void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(contentModifier_);
+    auto renderContext = paintWrapper->GetRenderContext();
+    UpdateFadingGradient(renderContext);
+    if (TryContentClip(paintWrapper)) {
+        contentModifier_->SetClip(false);
+        return;
+    }
+
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    auto renderContext = paintWrapper->GetRenderContext();
-    UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     contentModifier_->SetClipOffset(paddingOffset);
     contentModifier_->SetClipSize(frameSize);

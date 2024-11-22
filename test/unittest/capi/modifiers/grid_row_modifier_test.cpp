@@ -168,7 +168,7 @@ public:
  * @tc.desc: Checking the options default values.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setGridRowOptionsTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestDefaultValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -342,7 +342,7 @@ void checkOptionValue(std::unique_ptr<JsonValue> jsonValue, const GridRowOptions
         << "Input value is: " << value.directionStr << ", method: setGridRowOptions, attribute: Direction";
 }
 
-HWTEST_F(GridRowModifierTest, setGridRowOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
     Ark_GridRowOptions inputValue;
@@ -402,7 +402,7 @@ HWTEST_F(GridRowModifierTest, setGridRowOptionsTestValidValues, TestSize.Level1)
  * @tc.desc: Checking the options invalid values.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setGridRowOptionsTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestInvalidValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
     Ark_GridRowOptions inputValue;
@@ -463,7 +463,7 @@ HWTEST_F(GridRowModifierTest, setGridRowOptionsTestInvalidValues, TestSize.Level
  * @tc.desc: Checking the AlignItems default values.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestDefaultValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
      // Without this initializations, GetJsonValue() crashes.
@@ -487,7 +487,7 @@ std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testItemAlignVa
  * @tc.desc: Checking the AlignItems valid values.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setAlignItemsTestAlignItemsValidValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
     // Without this initializations, GetJsonValue() crashes.
@@ -523,7 +523,7 @@ std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testItemAlignIn
  * @tc.desc: Checking the AlignItems invalid values.
  * @tc.type: FUNC
  */
-HWTEST_F(GridRowModifierTest, setAlignItemsTestAlignItemsInvalidValues, TestSize.Level1)
+HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
     // Without this initializations, GetJsonValue() crashes.

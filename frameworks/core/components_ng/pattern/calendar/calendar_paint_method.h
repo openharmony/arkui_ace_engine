@@ -44,6 +44,8 @@ private:
     void DrawWeekAndDates(RSCanvas& canvas, Offset offset);
     void DrawWeek(RSCanvas& canvas, const Offset& offset) const;
     void DrawDates(RSCanvas& canvas, const Offset& offset);
+    bool IsTextHeightSmaller();
+    bool CalTextHeight(const Offset& dayOffset, const CalendarDay& day);
     void SetCalendarTheme(const RefPtr<CalendarPaintProperty>& paintProperty);
     void DrawCalendar(RSCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day);
     void DrawTodayArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;

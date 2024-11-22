@@ -191,6 +191,7 @@ DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(PropertyString, NormalProperty, std::string);
 DECLARE_PROP_TYPED_CLASS(PropertyColor, NormalProperty, Color);
 DECLARE_PROP_TYPED_CLASS(PropertyRectF, NormalProperty, RectF);
+DECLARE_PROP_TYPED_CLASS(PropertyVectorFloat, NormalProperty, LinearVector<float>);
 DECLARE_PROP_TYPED_CLASS(PropertyCanvasImageModifierWrapper, NormalProperty, CanvasImageModifierWrapper);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyUint8, AnimatableProperty, uint8_t);

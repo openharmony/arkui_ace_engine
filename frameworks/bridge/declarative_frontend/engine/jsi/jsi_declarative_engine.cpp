@@ -302,7 +302,6 @@ inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const sha
  */
 std::string BuildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
 {
-    LOGE("It is necessary to build ohmUrl for forward compatibility");
     std::string tempUrl = OHMURL_START_TAG + bundleName + "/" + moduleName;
     std::string ohmUrl = tempUrl + "/ets/" + pagePath;
     auto pos = pagePath.rfind("../");
@@ -340,15 +339,13 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
         if (jsOhmUrl->IsString(vm)) {
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
-            if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
-                ohmUrl = OHMURL_START_TAG + ohmUrl;
-                ohmUrlValid = true;
-            }
+            ohmUrlValid = true;
         } else {
             LOGE("add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
+        LOGI("build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
@@ -404,7 +401,7 @@ thread_local bool isDynamicModulePreloaded_ = false;
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative instance destroyed");
 
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
@@ -1166,7 +1163,7 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative engine destroyed");
 }
 
 void JsiDeclarativeEngine::Destroy()
@@ -1501,6 +1498,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
+        LocalScope scope(obj_.GetEcmaVM());
         Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
@@ -1702,7 +1700,8 @@ bool JsiDeclarativeEngine::LoadPageSource(
 
 bool JsiDeclarativeEngine::LoadPageSource(
     const std::shared_ptr<std::vector<uint8_t>>& content,
-    const std::function<void(const std::string&, int32_t)>& errorCallback)
+    const std::function<void(const std::string&, int32_t)>& errorCallback,
+    const std::string& contentName)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("LoadJs by buffer");
@@ -1711,7 +1710,7 @@ bool JsiDeclarativeEngine::LoadPageSource(
     CHECK_NULL_RETURN(container, false);
     auto runtime = engineInstance_->GetJsRuntime();
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (!arkRuntime->EvaluateJsCode(content->data(), content->size())) {
+    if (!arkRuntime->EvaluateJsCode(content->data(), content->size(), contentName)) {
         return false;
     }
     return true;
@@ -2197,6 +2196,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+            napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
         auto objContext = JsiObject(objXComp);
@@ -2282,6 +2282,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
     if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
         return;
     }
 
@@ -2523,6 +2524,20 @@ std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
     return "";
 }
 
+std::optional<std::string> JsiDeclarativeEngine::GetRouteNameByUrl(
+    const std::string& url, const std::string& bundleName, const std::string& moduleName)
+{
+    auto iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
+        [&bundleName, &moduleName, &url](const auto& item) {
+            return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
+                    item.second.pagePath == url;
+        });
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->first;
+    }
+    return std::nullopt;
+}
+
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
 {
 #ifdef USE_ARK_ENGINE
@@ -2722,6 +2737,31 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
 #endif
 }
 
+void JsiDeclarativeEngine::JsSetAceDebugMode()
+{
+#if defined(PREVIEW)
+    return;
+#else
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(runtime_);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_VOID(engine);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_VOID(vm);
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> setAceDebugMode = globalObject->GetProperty("setAceDebugMode");
+    if (!setAceDebugMode->IsFunction()) {
+        return;
+    }
+    const auto func = JSRef<JSFunc>::Cast(setAceDebugMode);
+    ContainerScope scope(instanceId_);
+    func->Call(globalObject);
+#endif
+}
+
 // ArkTsCard start
 #ifdef FORM_SUPPORTED
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
@@ -2819,7 +2859,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::HintGC(vm, JSNApi::MemoryReduceDegree::MIDDLE, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif

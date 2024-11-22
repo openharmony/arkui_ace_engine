@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/text/html_utils.h"
 

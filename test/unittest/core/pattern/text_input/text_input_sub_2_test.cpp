@@ -14,6 +14,7 @@
  */
 
 #include "text_input_base.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -381,4 +382,180 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString007, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.URL");
 }
+
+/**
+ * @tc.name: DoProcessAutoFill001
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, DoProcessAutoFill001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize enableautofill textInput.
+     * As if model.SetType ACE_USER_NAME, isPopup is true, MockContainer::RequestAutoFill return false.
+     */
+    TextFieldModelNG model;
+    model.CreateTextInput("", "");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(element);
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    auto parentFrameNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>())
+    );
+    frameNode->MountToParent(parentFrameNode);
+    ViewStackProcessor::GetInstance()->Push(parentFrameNode);
+    
+    frameNode->SetActive();
+    FlushLayoutTask(frameNode, true);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto contextPtr = pattern->GetHost()->GetContextRefPtr();
+    contextPtr->textFieldManager_ = textFieldManager;
+
+    /**
+     * @tc.steps: step2. Call DoProcessAutoFill, case Popup
+     */
+    pattern->needToRequestKeyboardInner_ = true;
+    pattern->DoProcessAutoFill();
+    EXPECT_EQ(pattern->needToRequestKeyboardInner_, true);
+}
+
+/**
+ * @tc.name: DoProcessAutoFill002
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize enableautofill textInput.
+     * As if model.SetType ACE_NEW_PASSWORD, isPopup is true, MockContainer::RequestAutoFill return false.
+     */
+    TextFieldModelNG model;
+    model.CreateTextInput("", "");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::NEW_PASSWORD);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(element);
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    auto parentFrameNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>())
+    );
+    frameNode->MountToParent(parentFrameNode);
+    ViewStackProcessor::GetInstance()->Push(parentFrameNode);
+    
+    frameNode->SetActive();
+    FlushLayoutTask(frameNode, true);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    auto contextPtr = pattern->GetHost()->GetContextRefPtr();
+    contextPtr->textFieldManager_ = textFieldManager;
+
+    /**
+     * @tc.steps: step2. Call DoProcessAutoFill, case notPopup,ProcessAutoFill,notImeShow
+     */
+    pattern->needToRequestKeyboardInner_ = true;
+    pattern->DoProcessAutoFill();
+    EXPECT_EQ(pattern->needToRequestKeyboardInner_, true);
+}
+
+/**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput("placeholder", "text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    auto parentFrameNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    ASSERT_NE(parentFrameNode, nullptr);
+    frameNode->SetParent(parentFrameNode);
+
+    auto autoFillContainerNode = frameNode->GetFirstAutoFillContainerNode();
+    ASSERT_NE(autoFillContainerNode, nullptr);
+    auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
+    ASSERT_NE(stateHolder, nullptr);
+    stateHolder->SetAutoFillPasswordTriggered(true);
+    stateHolder->SetAutoFillNewPasswordTriggered(true);
+
+    auto currentId = frameNode->GetId();
+    auto parrent_currentId = parentFrameNode->GetId();
+
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    auto containerNodeIter = textFieldManager->textFieldInfoMap_.find(currentId);
+    EXPECT_TRUE(containerNodeIter == textFieldManager->textFieldInfoMap_.end());
+    
+    pattern->OnAttachToMainTree();
+    auto containerNodeIter_2 = textFieldManager->textFieldInfoMap_.find(parrent_currentId);
+    EXPECT_FALSE(containerNodeIter_2 == textFieldManager->textFieldInfoMap_.end());
+}
+
+/**
+ * @tc.name: OnCut001
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput("placeholder", "text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
+/**
+ * @tc.name: OnCut002
+ * @tc.desc: Test DoProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
+{
+    TextFieldModelNG model;
+    model.CreateTextInput("placeholder", "text");
+    model.SetEnableAutoFill(true);
+    model.SetType(TextInputType::USER_NAME);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pattern->OnAttachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
+
+    pattern->OnDetachContext(pipeline.GetRawPtr());
+    ASSERT_EQ(pipeline->GetInstanceId(), 0);
+}
+
 } // namespace OHOS::Ace::NG

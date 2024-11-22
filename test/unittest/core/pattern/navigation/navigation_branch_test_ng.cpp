@@ -350,7 +350,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationModel.SetHideTitleBar(false);
+    navigationModel.SetHideTitleBar(false, false);
     EXPECT_EQ(navBarLayoutProperty->GetHideTitleBar().value_or(false), false);
 }
 
@@ -1786,5 +1786,153 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
     toolBarItems.push_back(newBar1);
     int32_t indexs = 0;
     EXPECT_EQ(NavigationTitleUtil::CreatePopupDialogNode(frameNode, toolBarItems, indexs), nullptr);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg001
+ * @tc.desc: Test OnInspectorIdUpdate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    std::string id = "aa";
+    navigationGroupNode->OnInspectorIdUpdate(id);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg002
+ * @tc.desc: Test AddDestinationNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    RefPtr<UINode> parent = nullptr;
+    navigationGroupNode->AddDestinationNode(parent);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg003
+ * @tc.desc: Test AddDestinationNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto destination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    RefPtr<UINode> parent = destination;
+    navigationGroupNode->AddDestinationNode(parent);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg004
+ * @tc.desc: Test InitDialogTransition function and node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg004, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    RefPtr<NavDestinationGroupNode> node = nullptr;
+    bool isTransitionIn = false;
+    navigationGroupNode->InitDialogTransition(node, isTransitionIn);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg005
+ * @tc.desc: Test InitDialogTransition function and node is not nullptr contentNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg005, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    // navDestination node
+    int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto frameNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(frameNode_, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode_->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetName("pageOne");
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    pathInfo->name_ = "pageOne";
+    context->SetNavPathInfo(pathInfo);
+    RefPtr<NavDestinationGroupNode> node = frameNode_;
+    bool isTransitionIn = false;
+    navigationGroupNode->InitDialogTransition(node, isTransitionIn);
+}
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg006
+ * @tc.desc: Test InitDialogTransition function and node is not nullptr contentNode is not nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg006, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    // navDestination node
+    int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto frameNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(frameNode_, nullptr);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode_->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetName("pageOne");
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    pathInfo->name_ = "pageOne";
+    context->SetNavPathInfo(pathInfo);
+    RefPtr<NavDestinationGroupNode> node = frameNode_;
+    node->SetContentNode(frameNode);
+    bool isTransitionIn = false;
+    navigationGroupNode->InitDialogTransition(node, isTransitionIn);
 }
 } // namespace OHOS::Ace::NG

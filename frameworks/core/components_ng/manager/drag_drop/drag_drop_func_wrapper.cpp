@@ -38,6 +38,8 @@ constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
+constexpr size_t SHORT_KEY_LENGTH = 8;
+constexpr size_t PLAINTEXT_LENGTH = 4;
 }
 
 static bool CheckInternalDragging(const RefPtr<Container>& container)
@@ -116,13 +118,12 @@ bool ConfirmCurPointerEventInfo(
     };
     int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
-        dragAction->sourceType, sourceTool, std::move(stopDragCallback));
+        dragAction->sourceType, sourceTool, dragAction->displayId, std::move(stopDragCallback));
     if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
         dragAction->pointer = MOUSE_POINTER_ID;
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         dragAction->pointer = PEN_POINTER_ID;
     }
-    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -131,9 +132,6 @@ void EnvelopedDragData(
 {
     auto container = AceEngine::Get().GetContainer(dragAction->instanceId);
     CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    dragAction->displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
 
     std::vector<ShadowInfoCore> shadowInfos;
     GetShadowInfoArray(dragAction, shadowInfos);
@@ -171,8 +169,7 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
-        true, false, summary };
+        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -223,6 +220,7 @@ int32_t CheckStartAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> 
 
 int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
 {
+    CHECK_NULL_RETURN(dragAction, -1);
     auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto manager = pipelineContext->GetDragDropManager();
@@ -266,7 +264,6 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     if (dragAction->dragState == DragAdapterState::SENDING) {
         dragAction->dragState = DragAdapterState::SUCCESS;
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-        auto pipelineContext = container->GetPipelineContext();
         pipelineContext->OnDragEvent(
             { dragAction->x, dragAction->y }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
         NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
@@ -424,7 +421,7 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
@@ -449,7 +446,7 @@ float DragDropFuncWrapper::RadiusToSigma(float radius)
 std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     const std::optional<BlurStyleOption>& blurStyleOp)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -490,4 +487,61 @@ void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInf
     manager->SetExtraInfo(extraInfo);
 }
 
+std::string DragDropFuncWrapper::GetSummaryString(const std::map<std::string, int64_t>& summary)
+{
+    std::string summarys;
+    for (const auto& [udkey, recordSize] : summary) {
+        std::string str = udkey + "-" + std::to_string(recordSize) + ";";
+        summarys += str;
+    }
+
+    return summarys;
+}
+
+std::string DragDropFuncWrapper::GetAnonyString(const std::string &fullString)
+{
+    if (fullString.empty() || fullString.length() == 0) {
+        return "";
+    }
+    std::string middleStr = "******";
+    std::string anonyStr;
+    size_t strLen = fullString.length();
+    if (strLen <= SHORT_KEY_LENGTH) {
+        anonyStr += fullString[0];
+        anonyStr.append(middleStr);
+        anonyStr += fullString[strLen - 1];
+    } else {
+        anonyStr.append(fullString, 0, PLAINTEXT_LENGTH).append(middleStr)
+            .append(fullString, strLen - PLAINTEXT_LENGTH, PLAINTEXT_LENGTH);
+    }
+    return anonyStr;
+}
+
+// returns a node's offset relative to window plus half of self rect size(w, h)
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// ancestor will NOT check boundary of window scene
+OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary)
+{
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    context->GetPointTransformRotate(pointNode);
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    while (parent) {
+        if (checkWindowBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        pointNode.SetX(offset.GetX() + pointNode.GetX());
+        pointNode.SetY(offset.GetY() + pointNode.GetY());
+        renderContext->GetPointTransformRotate(pointNode);
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return OffsetF(pointNode.GetX(), pointNode.GetY());
+}
 } // namespace OHOS::Ace

@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
@@ -60,6 +61,7 @@
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -211,441 +213,6 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
     auto container = AceType::DynamicCast<TitleBarNode>(oldBarContainer);
     CHECK_NULL_VOID(container);
     container->MarkModifyDone();
-}
-
-void CreateToolBarDividerNode(const RefPtr<NavBarNode>& navBarNode)
-{
-    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    navBarNode->AddChild(dividerNode);
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_VOID(dividerLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    dividerLayoutProperty->UpdateStrokeWidth(theme->GetToolBarDividerWidth());
-    dividerLayoutProperty->UpdateVertical(false);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
-    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
-    navBarNode->SetToolBarDividerNode(dividerNode);
-}
-
-RefPtr<FrameNode> CreateToolbarItemsContainerNode(const RefPtr<FrameNode>& toolBarNode)
-{
-    int32_t containerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto containerNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOOL_BAR_ETS_TAG, containerNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    CHECK_NULL_RETURN(containerNode, nullptr);
-    auto containerRowProperty = containerNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(containerRowProperty, nullptr);
-    containerRowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_EVENLY);
-    toolBarNode->AddChild(containerNode);
-    return containerNode;
-}
-
-RefPtr<FrameNode> CreateToolbarItemTextNode(const std::string& text)
-{
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
-    textLayoutProperty->UpdateContent(text);
-    textLayoutProperty->UpdateFontSize(theme->GetToolBarItemFontSize());
-    textLayoutProperty->UpdateTextColor(theme->GetToolBarItemFontColor());
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    textLayoutProperty->UpdateAdaptMinFontSize(theme->GetToolBarItemMinFontSize());
-    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetToolBarItemFontSize());
-    textLayoutProperty->UpdateMaxLines(theme->GetToolbarItemTextMaxLines());
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-
-    textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), std::nullopt));
-    return textNode;
-}
-
-void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
-{
-    CHECK_NULL_VOID(symbolProperty);
-    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
-    symbolEffectOptions.SetIsTxtActive(isActive);
-    symbolEffectOptions.SetIsTxtActiveSource(0);
-    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-}
-
-RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
-    if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
-        auto iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        CHECK_NULL_RETURN(iconNode, nullptr);
-        auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(symbolProperty, nullptr);
-        symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
-        barItem.iconSymbol.value()(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
-        symbolProperty->UpdateFontSize(theme->GetToolbarIconSize());
-        UpdateSymbolEffect(symbolProperty, false);
-        iconNode->MarkModifyDone();
-        return iconNode;
-    }
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(barItem.icon.value());
-    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-
-    info.SetFillColor(theme->GetToolbarIconColor());
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-
-    auto iconSize = theme->GetToolbarIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-
-    iconNode->MarkModifyDone();
-    return iconNode;
-}
-
-bool CheckNavigationGroupEnableStatus()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_RETURN(navigationGroupNode, false);
-    auto eventHub = navigationGroupNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    return eventHub->IsEnabled();
-}
-
-void RegisterToolbarHotZoneEvent(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode)
-{
-    auto gestureEventHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    auto clickCallback = [weakNode = WeakPtr<BarItemNode>(barItemNode)](GestureEvent& info) {
-        if (info.GetSourceDevice() == SourceType::KEYBOARD) {
-            return;
-        }
-        auto barItemNode = weakNode.Upgrade();
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto pattern = barItemNode->GetPattern<BarItemPattern>();
-        CHECK_NULL_VOID(pattern);
-        eventHub->FireItemAction();
-        pattern->UpdateBarItemActiveStatusResource();
-    };
-    gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
-}
-
-void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
-    CHECK_NULL_VOID(barItemPattern);
-    if (barItem.status == NG::NavToolbarItemStatus::ACTIVE &&
-        ((barItem.activeIcon.has_value() && !barItem.activeIcon.value().empty()) ||
-            (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr)) &&
-        ((barItem.icon.has_value() && !barItem.icon.value().empty()) ||
-            (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr))) {
-        if (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr) {
-            barItemPattern->SetInitialIconSymbol(barItem.iconSymbol.value());
-        } else if (barItem.icon.has_value()) {
-            ImageSourceInfo initialIconInfo(barItem.icon.value());
-            initialIconInfo.SetFillColor(theme->GetToolbarIconColor());
-            barItemPattern->SetInitialIconImageSourceInfo(initialIconInfo);
-        }
-
-        if (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr) {
-            barItemPattern->SetActiveIconSymbol(barItem.activeIconSymbol.value());
-        } else if (barItem.activeIcon.has_value()) {
-            ImageSourceInfo activeIconInfo(barItem.activeIcon.value());
-            activeIconInfo.SetFillColor(theme->GetToolbarActiveIconColor());
-            barItemPattern->SetActiveIconImageSourceInfo(activeIconInfo);
-        }
-        barItemPattern->SetToolbarItemStatus(barItem.status);
-        barItemPattern->SetCurrentIconStatus(NG::ToolbarIconStatus::INITIAL);
-        barItemPattern->UpdateBarItemActiveStatusResource();
-    }
-}
-
-void UpdateToolbarItemNodeWithConfiguration(
-    const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, const RefPtr<FrameNode>& buttonNode)
-{
-    barItemNode->SetBarItemUsedInToolbarConfiguration(true);
-    if (barItem.text.has_value() && !barItem.text.value().empty()) {
-        auto textNode = CreateToolbarItemTextNode(barItem.text.value());
-        barItemNode->SetTextNode(textNode);
-        barItemNode->AddChild(textNode);
-    }
-    if ((barItem.icon.has_value() && !barItem.icon.value().empty())
-        || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)) {
-        auto iconNode = CreateToolbarItemIconNode(barItem);
-        barItemNode->SetIconNode(iconNode);
-        barItemNode->AddChild(iconNode);
-    }
-    if (barItem.action) {
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetItemAction(barItem.action);
-        RegisterToolbarHotZoneEvent(buttonNode, barItemNode);
-    }
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    bool navigationEnableStatus = CheckNavigationGroupEnableStatus();
-    if (barItem.status == NG::NavToolbarItemStatus::DISABLED || !navigationEnableStatus) {
-        auto renderContext = barItemNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
-
-        auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
-        CHECK_NULL_VOID(itemEventHub);
-        itemEventHub->SetEnabled(false);
-
-        auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_VOID(buttonEventHub);
-        buttonEventHub->SetEnabled(false);
-    }
-
-    UpdateBarItemPattern(barItemNode, barItem);
-    barItemNode->MarkModifyDone();
-}
-
-void AddSafeIntervalBetweenToolbarItem(
-    MarginProperty& margin, uint32_t count, size_t toolbarItemSize, bool needMoreButton)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    if (count == ONE_TOOLBAR_ITEM && toolbarItemSize != ONE_TOOLBAR_ITEM) {
-        margin.right = CalcLength(theme->GetToolbarItemMargin());
-    } else if (!needMoreButton && (count == toolbarItemSize) && (toolbarItemSize != ONE_TOOLBAR_ITEM)) {
-        margin.left = CalcLength(theme->GetToolbarItemMargin());
-    } else if (toolbarItemSize == ONE_TOOLBAR_ITEM) {
-        margin.left = CalcLength(theme->GetToolbarItemSpecialMargin());
-        margin.right = CalcLength(theme->GetToolbarItemSpecialMargin());
-    } else {
-        margin.left = CalcLength(theme->GetToolbarItemMargin());
-        margin.right = CalcLength(theme->GetToolbarItemMargin());
-    }
-}
-
-RefPtr<FrameNode> CreateToolbarItemInContainer(
-    const NG::BarItem& toolBarItem, size_t toolbarItemSize, uint32_t count, bool needMoreButton)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
-    CHECK_NULL_RETURN(toolBarItemNode, nullptr);
-    auto toolBarItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(toolBarItemLayoutProperty, nullptr);
-    toolBarItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
-    toolBarItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    toolBarItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
-    auto renderContext = toolBarItemNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    MarginProperty margin;
-    AddSafeIntervalBetweenToolbarItem(margin, count, toolbarItemSize, needMoreButton);
-    toolBarItemLayoutProperty->UpdateMargin(margin);
-
-    PaddingProperty padding;
-    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
-    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
-    padding.top = CalcLength(theme->GetToolbarItemTopPadding());
-    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
-    toolBarItemLayoutProperty->UpdatePadding(padding);
-
-    int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
-    UpdateToolbarItemNodeWithConfiguration(barItemNode, toolBarItem, toolBarItemNode);
-    auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
-    barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    barItemNode->MountToParent(toolBarItemNode);
-    toolBarItemNode->MarkModifyDone();
-
-    return toolBarItemNode;
-}
-
-void BuildSymbolToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto hub = navigationGroupNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto renderContext = barItemNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (!hub->IsEnabled()) {
-        renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
-    }
-
-    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(symbolNode);
-    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(symbolProperty);
-    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetMoreSymbolId()));
-    symbolProperty->UpdateFontSize(theme->GetToolbarIconSize());
-    symbolProperty->UpdateSymbolColorList({ theme->GetToolbarIconColor() });
-    symbolNode->MarkModifyDone();
-    barItemNode->SetIconNode(symbolNode);
-    barItemNode->SetIsMoreItemNode(true);
-    barItemNode->AddChild(symbolNode);
-}
-
-void BuildImageToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-
-    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto hub = navigationGroupNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto info = ImageSourceInfo("");
-    info.SetResourceId(theme->GetMoreResourceId());
-    if (!hub->IsEnabled()) {
-        auto renderContext = barItemNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateOpacity(theme->GetToolbarItemDisabledAlpha());
-    } else {
-        info.SetFillColor(theme->GetToolbarIconColor());
-    }
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    auto iconSize = theme->GetToolbarIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-    imageNode->MarkModifyDone();
-    barItemNode->SetIconNode(imageNode);
-    barItemNode->AddChild(imageNode);
-}
-
-void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode)
-{
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        BuildSymbolToolbarMoreItemNode(barItemNode);
-    } else {
-        BuildImageToolbarMoreItemNode(barItemNode);
-    }
-    auto textNode = CreateToolbarItemTextNode(Localization::GetInstance()->GetEntryLetters("common.more"));
-    CHECK_NULL_VOID(textNode);
-    barItemNode->SetTextNode(textNode);
-    barItemNode->SetBarItemUsedInToolbarConfiguration(true);
-    barItemNode->AddChild(textNode);
-    barItemNode->MarkModifyDone();
-}
-
-RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNode)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-    buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-    auto toolBarItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
-    CHECK_NULL_RETURN(toolBarItemNode, nullptr);
-    auto menuItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-    menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
-    menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-    menuItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
-
-    auto renderContext = toolBarItemNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    MarginProperty menuButtonMargin;
-    menuButtonMargin.left = CalcLength(theme->GetToolbarItemMargin());
-    menuItemLayoutProperty->UpdateMargin(menuButtonMargin);
-
-    PaddingProperty padding;
-    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
-    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
-    padding.top = CalcLength(theme->GetToolbarItemTopPadding());
-    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
-    menuItemLayoutProperty->UpdatePadding(padding);
-
-    barItemNode->MountToParent(toolBarItemNode);
-    barItemNode->MarkModifyDone();
-    toolBarItemNode->MarkModifyDone();
-
-    return toolBarItemNode;
-}
-
-void BuildToolbarMoreMenuNodeAction(
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode, const RefPtr<FrameNode>& buttonNode)
-{
-    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-
-    auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_VOID(context);
-
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-
-        auto menu = weakMenu.Upgrade();
-        CHECK_NULL_VOID(menu);
-
-        auto barItemNode = weakBarItemNode.Upgrade();
-        CHECK_NULL_VOID(barItemNode);
-
-        auto imageNode = barItemNode->GetChildAtIndex(0);
-        CHECK_NULL_VOID(imageNode);
-
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_VOID(imageFrameNode);
-        auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
-        auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
-
-        auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-        CHECK_NULL_VOID(menuNode);
-        auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuLayoutProperty->UpdateTargetSize(imageSize);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->SetIsSelectMenu(true);
-
-        bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (isRightToLeft) {
-            imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
-        } else {
-            imgOffset.SetX(imgOffset.GetX());
-        }
-        imgOffset.SetY(imgOffset.GetY() - imageSize.Height());
-        overlayManager->ShowMenu(id, imgOffset, menu);
-    };
-    eventHub->SetItemAction(clickCallback);
-    RegisterToolbarHotZoneEvent(buttonNode, barItemNode);
 }
 
 void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
@@ -1050,6 +617,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     buttonPattern->SetSkipColorConfigurationUpdate();
     buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1086,7 +654,8 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     auto eventHub = backButtonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         CreateSymbolBackIcon(backButtonNode, navigationGroupNode);
     } else {
         CreateImageBackIcon(backButtonNode, navigationGroupNode);
@@ -1106,7 +675,7 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     ParseCommonTitle(true, false, subtitle, "", true);
 }
 
-void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
+void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1116,6 +685,7 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+    navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
 
 void NavigationModelNG::SetHideNavBar(bool hideNavBar)
@@ -1150,7 +720,6 @@ void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::F
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
-    titleBarNode->MarkModifyDone();
 }
 
 void NavigationModelNG::SetHideBackButton(bool hideBackButton)
@@ -1169,7 +738,7 @@ void NavigationModelNG::SetHideBackButton(bool hideBackButton)
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
-void NavigationModelNG::SetHideToolBar(bool hideToolBar)
+void NavigationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1179,34 +748,16 @@ void NavigationModelNG::SetHideToolBar(bool hideToolBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutPropertyPtr<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navBarLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
 {
-    auto customToolBar = AceType::DynamicCast<NG::UINode>(customNode);
-    CHECK_NULL_VOID(customToolBar);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
-        if (customToolBar->GetId() == navBarNode->GetToolBarNode()->GetId()) {
-            navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);
-            navBarNode->UpdatePrevToolBarIsCustom(true);
-            return;
-        }
-    }
-    navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->Clean();
-    customToolBar->MountToParent(toolBarNode);
-    navBarNode->UpdatePrevToolBarIsCustom(true);
-    toolBarNode->SetHasValidContent(true);
-    auto property = toolBarNode->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    property->UpdateVisibility(VisibleType::VISIBLE);
+    NavigationToolbarUtil::SetCustomToolBar(navBarNode, customNode);
 }
 
 bool NavigationModelNG::NeedSetItems()
@@ -1259,99 +810,15 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    std::string navigationId = navigationGroupNode->GetInspectorId().value_or("");
-    if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
-        navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-    } else {
-        auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-        auto containerNode = toolbarNode->GetToolbarContainerNode();
-        if (toolbarNode && containerNode) {
-            navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-            auto preToolbarNode = navBarNode->GetPreToolBarNode();
-            preToolbarNode->RemoveChild(containerNode);
-            navBarNode->RemoveChild(navBarNode->GetToolBarDividerNode());
-        } else {
-            navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::ADD);
-        }
+    bool enabled = false;
+    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
     }
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->SetIsUseNewToolbar(true);
-    auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(rowProperty);
-    rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !SystemProperties::GetNavigationBlurEnabled()) {
-        CreateToolBarDividerNode(navBarNode);
-    }
-
-    auto containerNode = CreateToolbarItemsContainerNode(toolBarNode);
-    CHECK_NULL_VOID(containerNode);
-    toolBarNode->SetToolbarContainerNode(containerNode);
-    bool needMoreButton = toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR ? true : false;
-    uint32_t count = 0;
-    std::vector<OptionParam> params;
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    OptionParam param;
-    for (const auto& toolBarItem : toolBarItems) {
-        ++count;
-        if (needMoreButton && (count > MAXIMUM_TOOLBAR_ITEMS_IN_BAR - 1)) {
-            param = { toolBarItem.text.value_or(""), toolBarItem.icon.value_or(""), toolBarItem.action,
-                toolBarItem.iconSymbol.value_or(nullptr) };
-            param.SetSymbolUserDefinedIdealFontSize(theme->GetToolbarIconSize());
-            params.push_back(param);
-        } else {
-            auto toolBarItemNode =
-                CreateToolbarItemInContainer(toolBarItem, toolBarItems.size(), count, needMoreButton);
-            CHECK_NULL_VOID(toolBarItemNode);
-
-            // set navigation toolBar menuItem InspectorId
-            std::string toolBarItemId = toolBarItemNode->GetTag() + std::to_string(count);
-            NavigationTitleUtil::SetInnerChildId(toolBarItemNode, NG::NAV_FIELD,
-                containerNode->GetTag(), toolBarItemId, navigationId);
-
-            containerNode->AddChild(toolBarItemNode);
-        }
-    }
-
-    bool hasValidContent = !containerNode->GetChildren().empty();
-    toolBarNode->SetHasValidContent(hasValidContent);
-    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
-
-    if (needMoreButton) {
-        int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-            V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
-        auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
-        CHECK_NULL_VOID(barItemLayoutProperty);
-        barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        BuildToolbarMoreItemNode(barItemNode);
-        MenuParam menuParam;
-        menuParam.isShowInSubWindow = false;
-        auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
-        auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
-        CHECK_NULL_VOID(toolBarItemNode);
-        BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);
-
-        // set navigation toolBar "more" button InspectorId
-        NavigationTitleUtil::SetInnerChildId(toolBarItemNode, NG::NAV_FIELD,
-            containerNode->GetTag(), "More", navigationId);
-
-        containerNode->AddChild(toolBarItemNode);
-        navBarNode->SetToolbarMenuNode(barMenuNode);
-    }
-    navBarNode->SetToolBarNode(toolBarNode);
-    navBarNode->SetPreToolBarNode(toolBarNode);
-    navBarNode->UpdatePrevToolBarIsCustom(false);
-    navBarNode->SetIsUseToolbarConfiguration(true);
-
-    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
-    CHECK_NULL_VOID(navBarPattern);
-    navBarPattern->SetToolBarMenuItems(toolBarItems);
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navigationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::NAV_FIELD;
+    NavigationToolbarUtil::SetToolbarConfiguration(navBarNode, std::move(toolBarItems), enabled, fieldProperty);
 }
 
 void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
@@ -1591,7 +1058,7 @@ void NavigationModelNG::SetMenuCount(int32_t menuCount)
     return;
 }
 
-void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1601,6 +1068,7 @@ void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navBarLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
@@ -1695,7 +1163,6 @@ void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
-    titleBarNode->MarkModifyDone();
 }
 
 void NavigationModelNG::SetHideNavBarInner(
@@ -1728,7 +1195,7 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
 }
 
-void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1738,6 +1205,7 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+    navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
 
 void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)
@@ -1922,10 +1390,36 @@ void NavigationModelNG::SetRecoverable(FrameNode* frameNode, const std::optional
 
 void NavigationModelNG::SetRecoverable(bool recoverable)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetRecoverable(recoverable);
+}
+
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
+void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
+{
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    navigationGroupNode->SetRecoverable(recoverable);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
 }
 
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
@@ -1969,15 +1463,7 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
-    CHECK_NULL_VOID(navBarPattern);
-    navBarPattern->SetToolBarStyle(opt.brOptions.barStyle);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
-    CHECK_NULL_VOID(toolBarPattern);
-    toolBarPattern->SetToolbarOptions(std::move(opt));
+    NavigationToolbarUtil::SetToolbarOptions(navBarNode, std::move(opt));
 }
 
 void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
@@ -2155,6 +1641,9 @@ void NavigationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitle
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();

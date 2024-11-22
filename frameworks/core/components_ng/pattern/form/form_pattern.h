@@ -206,6 +206,12 @@ private:
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
+    void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
+    void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void SetExternalRenderOpacity(double opacity);
+    bool ShouldDoSkeletonAnimation();
+    void DoSkeletonAnimation();
+    void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
@@ -215,7 +221,14 @@ private:
     bool CheckFormBundleForbidden(const std::string &bundleName);
     void DelayResetManuallyClickFlag();
     void RemoveDelayResetManuallyClickFlagTask();
+
+    void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
+    void InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceId);
+    void InitAddUnTrustAndEnableFormCallback(int32_t instanceId);
+    void InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceId);
+    void InitOtherCallback(int32_t instanceId);
     // used by ArkTS Card, for RSSurfaceNode from FRS,
+    void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;
@@ -243,6 +256,8 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
+    bool isTransparencyEnable_ = false;
+    bool isSkeletonAnimEnable_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;

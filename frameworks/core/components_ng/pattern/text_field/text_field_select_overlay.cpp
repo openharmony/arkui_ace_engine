@@ -39,7 +39,6 @@ namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -61,6 +60,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
     SetEnableHandleLevel(true);
+    CheckEnableContainerModal();
     return true;
 }
 
@@ -104,9 +104,13 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     auto selectOverlayInfo = manager->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo);
     if (!selectOverlayInfo->isUsingMouse) {
-        pattern->StopTwinkling();
+        if (manager->IsHiddenHandle()) {
+            pattern->StartTwinkling();
+        } else {
+            pattern->StopTwinkling();
+        }
     }
-    manager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    manager->MarkInfoChange(DIRTY_SELECT_TEXT | DIRTY_SELECT_AREA);
     latestReqeust_.reset();
 }
 
@@ -119,10 +123,14 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
         if (info && info->isSingleHandle) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SingleHandle OnCloseOverlay");
             pattern->OnBackPressed();
         }
+    } else if (CloseReason::CLOSE_REASON_HOLD_BY_OTHER == reason) {
+        OnResetTextSelection();
     }
     pattern->StopContentScroll();
+    RemoveAvoidKeyboardCallback();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
@@ -315,6 +323,11 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
             overlayInfo.isSingleLine = true;
         }
     }
+    if (!textFieldPattern->IsTextArea()) {
+        overlayInfo.checkHandleReverse = [](const RectF& first, const RectF& second) {
+            return GreatNotEqual(first.Left(), second.Left());
+        };
+    }
 }
 
 RectF TextFieldSelectOverlay::GetSelectArea()
@@ -333,12 +346,13 @@ RectF TextFieldSelectOverlay::GetSelectArea()
         auto textRect = pattern->GetTextRect();
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto globalContentRect = GetVisibleContentRect();
+    auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 
@@ -386,12 +400,11 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
     auto contentRect = pattern->GetContentRect();
     auto paddingLeft = pattern->GetPaddingLeft();
     auto textRect = pattern->GetTextRect();
-    auto lineHeight = pattern->PreferredLineHeight();
     Offset offset;
     if (LessNotEqual(localOffset.GetY(), contentRect.GetY())) {
-        offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY() - lineHeight);
+        offset = Offset(localOffset.GetX() - paddingLeft, contentRect.GetY() - textRect.GetY());
     } else if (GreatOrEqual(localOffset.GetY(), contentRect.GetY() + contentRect.Height())) {
-        offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY() + lineHeight);
+        offset = Offset(localOffset.GetX() - paddingLeft, contentRect.GetY() + contentRect.Height() - textRect.GetY());
     } else {
         offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY());
     }
@@ -409,16 +422,14 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
         if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {
             index = selectController->GetEndIndex();
         }
-        auto len = pattern->GetGraphemeClusterLength(wideText, index, true);
-        return std::max(index - len, 0);
+        return index;
     }
     if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
         auto index = selectController->GetEndIndex();
         if ((isFirst && !IsHandleReverse()) || (!isFirst && IsHandleReverse())) {
             index = selectController->GetStartIndex();
         }
-        auto len = pattern->GetGraphemeClusterLength(wideText, index);
-        return std::min(index + len, pattern->GetContentWideTextLength());
+        return index;
     }
     Offset offset(localOffset.GetX() - pattern->GetTextRect().GetX(), 0.0f);
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
@@ -506,10 +517,16 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
             pattern->StartTwinkling();
             selectController->MoveCaretToContentRect(pattern->GetCaretIndex());
         } else {
+            if (isFirst) {
+                selectController->MoveFirstHandleToContentRect(selectController->GetFirstHandleIndex(), false);
+            } else {
+                selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
+            }
             overlayManager->MarkInfoChange(DIRTY_DOUBLE_HANDLE | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT);
         }
     } else {
         pattern->StopTwinkling();
+        selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
@@ -532,7 +549,7 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
 
 void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeGeometryChange(flag)) {
+    if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
@@ -613,26 +630,13 @@ void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, 
     }
 }
 
-void TextFieldSelectOverlay::OnHandleMarkInfoChange(
-    std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
 {
-    auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(manager);
-    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
-        auto textFieldPattern = GetPattern<TextFieldPattern>();
-        CHECK_NULL_VOID(textFieldPattern);
-        auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        info->handlerColor = paintProperty->GetCursorColor();
-        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
-void TextFieldSelectOverlay::UpdateHandleColor()
-{
-    auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, std::nullopt);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    return paintProperty->GetCursorColor();
 }
 
 void TextFieldSelectOverlay::UpdateAllHandlesOffset()

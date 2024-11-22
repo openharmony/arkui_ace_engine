@@ -52,21 +52,18 @@ std::mutex SpanModel::mutex_;
 
 SpanModel* SpanModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SpanModelNG());
+    static NG::SpanModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SpanModelNG());
-            } else {
-                instance_.reset(new Framework::SpanModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SpanModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SpanModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -82,6 +79,14 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 
 void JSSpan::SetFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto infoZero = info[0];
+    if (infoZero->IsUndefined() || infoZero->IsNull()) {
+        SpanModel::GetInstance()->ResetFont();
+        return;
+    }
     Font font;
     JSText::GetFontInfo(info, font);
     SpanModel::GetInstance()->SetFont(font);
@@ -94,15 +99,9 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        fontSize = theme->GetTextStyle().GetFontSize();
-        SpanModel::GetInstance()->SetFontSize(fontSize);
+        SpanModel::GetInstance()->ResetFontSize();
         return;
     }
-
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
@@ -114,12 +113,14 @@ void JSSpan::SetFontWeight(const std::string& value)
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextStyle().GetTextColor();
+    auto infoZero = info[0];
+    if (infoZero->IsUndefined() || infoZero->IsNull()) {
+        SpanModel::GetInstance()->ResetTextColor();
+        return;
+    }
+    if (!ParseJsColor(infoZero, textColor)) {
+        SpanModel::GetInstance()->ResetTextColor();
+        return;
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -129,6 +130,8 @@ void JSSpan::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
         SpanModel::GetInstance()->SetItalicFontStyle(style);
+    } else {
+        SpanModel::GetInstance()->ResetItalicFontStyle();
     }
 }
 
@@ -139,6 +142,7 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        SpanModel::GetInstance()->ResetFontFamily();
         return;
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);

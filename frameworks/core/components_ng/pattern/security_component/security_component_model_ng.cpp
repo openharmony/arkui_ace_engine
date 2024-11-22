@@ -38,7 +38,7 @@ const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
 };
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<SecurityComponentTheme>();
 }
@@ -157,6 +157,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
         if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, nullptr);
             textNode->SetInternal();
             std::string textStr = "";
             GetTextResource(style.text, textStr);
@@ -169,7 +170,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
     return frameNode;
@@ -202,8 +203,6 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     textLayoutProperty->UpdateFontSize(secCompTheme->GetFontSize());
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
-    textLayoutProperty->UpdateFontFamily(defaultFontFamily);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 
     if (isButtonVisible) {
@@ -308,6 +307,15 @@ bool SecurityComponentModelNG::IsArkuiComponent()
         return prop->GetIsArkuiComponent().value();
     }
     return false;
+}
+
+void SecurityComponentModelNG::NotifyFontColorSet()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    prop->UpdateIsFontColorSet(true);
 }
 
 bool SecurityComponentModelNG::IsArkuiComponent(FrameNode* frameNode)
@@ -424,6 +432,7 @@ void SecurityComponentModelNG::SetFontFamily(FrameNode* frameNode,
 void SecurityComponentModelNG::SetFontColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, value);
+    NotifyFontColorSet();
 }
 
 void SecurityComponentModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& value)

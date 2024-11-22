@@ -27,7 +27,7 @@ const char FILE_TYPE_BIN[] = ".abc";
 
 CardFrontendDeclarative::~CardFrontendDeclarative()
 {
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "CardDeclarative Destroyed");
 }
 
 bool CardFrontendDeclarative::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)

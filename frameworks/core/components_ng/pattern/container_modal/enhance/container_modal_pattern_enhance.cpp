@@ -15,29 +15,45 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/device_config.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
-constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
-constexpr int32_t CLOSE_BUTTON_INDEX = 2;
-constexpr int32_t TITLE_POPUP_DURATION = 400;
 
-constexpr float LIGHT_ON_INTENSITY = 1.8f;
+const int32_t MENU_TASK_DELAY_TIME = 1000;
+constexpr int32_t TITLE_POPUP_DURATION = 400;
+const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
+const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
+const int32_t MAX_BUTTON_CLICK_TO_MAXIMIZE = 1;
+const int32_t MAX_BUTTON_CLICK_TO_RECOVER = 2;
+const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
+const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
+const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
+const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
+
+constexpr float LIGHT_ON_INTENSITY_DARK = 2.5f;
+constexpr float LIGHT_ON_INTENSITY_LIGHT = 2.5f;
 constexpr float LIGHT_OFF_INTENSITY = 0.0f;
-constexpr float LIGHT_POSITION_Z = 40.0f;
+constexpr float LIGHT_POSITION_Z = 70.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
+constexpr int32_t LIGHT_OFF_DELAY_TIME = 2000;
+constexpr int32_t LIGHT_OFF_UPDATE_INTERVAL = 500000000;
 
-const Dimension MENU_ITEM_RADIUS = 12.0_vp;
+const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
 const Dimension MENU_PADDING = 4.0_vp;
@@ -45,9 +61,105 @@ const Dimension MENU_GUTTER = 2.0_vp;
 const Dimension MENU_SAFETY_X = 8.0_vp;
 const Dimension MENU_SAFETY_Y = 96.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
-const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
-const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
-const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
+const Color MENU_ITEM_COLOR = Color(0xffffff);
+
+RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
+{
+    auto node = weak.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    const auto& windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+
+    bool isMoving = windowManager->GetWindowStartMoveFlag();
+    if (isMoving) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "window is moving, button click event is not supported");
+        return nullptr;
+    }
+    return windowManager;
+}
+
+void BondingMenuItemEvent(WeakPtr<ContainerModalPatternEnhance>& weakPtn, RefPtr<FrameNode>& item, bool isLeftSplit)
+{
+    WeakPtr<FrameNode> weakItem = item;
+    auto hoverFunc = [weakItem](bool isHover) {
+        auto item = weakItem.Upgrade();
+        CHECK_NULL_VOID(item);
+        ContainerModalPatternEnhance::OnMenuItemHoverEvent(item, isHover);
+    };
+    auto clickFunc = [weakItem](MouseInfo& info) -> void {
+        auto item = weakItem.Upgrade();
+        CHECK_NULL_VOID(item);
+        ContainerModalPatternEnhance::OnMenuItemClickEvent(item, info);
+    };
+
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverFunc));
+    auto clickEvent = AceType::MakeRefPtr<InputEvent>(std::move(clickFunc));
+
+    auto inputHub = item->GetOrCreateInputEventHub();
+    inputHub->AddOnHoverEvent(hoverEvent);
+    inputHub->AddOnMouseEvent(clickEvent);
+
+    auto gestureHub = item->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto splitClickFunc = [weakPtn, isLeftSplit](GestureEvent& info) {
+        auto pattern = weakPtn.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnMenuItemClickGesture(isLeftSplit);
+    };
+    auto clickGesture = AceType::MakeRefPtr<ClickEvent>(std::move(splitClickFunc));
+    gestureHub->AddClickEvent(clickGesture);
+}
+
+RefPtr<FrameNode> BuildMenuItem(WeakPtr<ContainerModalPatternEnhance>&& weakPattern, bool isLeftSplit)
+{
+    auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    using StrPair = std::tuple<std::string, std::string, InternalResource::ResourceId>;
+    const StrPair strs[] = {
+        { "window.leftSide", "EnhanceMenuScreenLeftRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L },
+        { "window.rightSide", "EnhanceMenuScreenRightRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N }};
+    const auto& sideSrc = isLeftSplit ? strs[0] : strs[1];
+    containerTitleRow->UpdateInspectorId(std::get<1>(sideSrc));
+
+    // setRadius 8vp
+    auto render = containerTitleRow->GetRenderContext();
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.SetRadius(MENU_ITEM_RADIUS);
+    render->UpdateBorderRadius(borderRadiusProperty);
+
+    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_V),
+        CalcLength(MENU_ITEM_PADDING_V));
+    layoutProperty->UpdatePadding(padding);
+
+    auto icon = ContainerModalViewEnhance::BuildMenuItemIcon(std::get<2>(sideSrc));
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto titleLabel =
+        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), textPattern);
+    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters(std::get<0>(sideSrc)));
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
+    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    MarginProperty margin;
+    margin.left = CalcLength(MENU_ITEM_TEXT_PADDING);
+    margin.right = CalcLength(MENU_ITEM_TEXT_PADDING);
+    textLayoutProperty->UpdateMargin(margin);
+
+    // add icon and label
+    containerTitleRow->AddChild(icon);
+    containerTitleRow->AddChild(titleLabel);
+    BondingMenuItemEvent(weakPattern, containerTitleRow, isLeftSplit);
+    return containerTitleRow;
+}
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -74,6 +186,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
     isShow = isShow && hasDeco;
+    isTitleShow_ = isShow;
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -99,18 +212,11 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     stackLayoutProperty->UpdateLayoutWeight(1.0f);
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
-    BorderRadiusProperty stageBorderRadius;
-    auto contentBorderRadius = (isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp;
-    stageBorderRadius.SetRadius(contentBorderRadius);
-    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
     customTitleLayoutProperty->UpdateVisibility(
         (isShow && customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
-
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow, (isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
@@ -126,11 +232,21 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     controlButtonsLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-    SetControlButtonVisibleBeforeAnim(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    controlButtonVisibleBeforeAnim_ = (isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
-    AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(gestureRow);
+
+    // add tap event and pan event
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    pattern->SetTapGestureEvent(customTitleRow);
+    pattern->SetTapGestureEvent(gestureRow);
+    AddPanEvent(customTitleRow);
+    AddPanEvent(gestureRow);
+    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
+    customTitleRowEventHub->OnModifyDone();
+    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
+    gestureRowEventHub->OnModifyDone();
+
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -148,7 +264,7 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
 void ContainerModalPatternEnhance::OnWindowFocused()
 {
     ContainerModalPattern::OnWindowFocused();
-    ContainerModalPattern::SetIsHoveredMenu(false);
+    isHoveredMenu_ = false;
     UpdateLightIntensity();
 }
 
@@ -156,18 +272,20 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
 {
     if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
-        SetIsFocus(false);
-        ContainerModalPattern::SetIsHoveredMenu(true);
+        isFocus_ = false;
+        isHoveredMenu_ = true;
+        UpdateLightIntensity();
         return;
     }
     ContainerModalPattern::OnWindowUnfocused();
-    ContainerModalPattern::SetIsHoveredMenu(false);
+    isHoveredMenu_ = false;
     UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 {
     if (!GetIsFocus()) {
+        isHoveredMenu_ = false;
         ContainerModalPattern::OnWindowUnfocused();
     }
 }
@@ -182,32 +300,10 @@ void ContainerModalPatternEnhance::ChangeCustomTitle(bool isFocus)
 
 void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
 {
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-
-    // update maximize button
-    auto maximizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    InternalResource::ResourceId maxId =
-        (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN ||
-            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)
-            ? InternalResource::ResourceId::IC_WINDOW_RESTORES
-            : InternalResource::ResourceId::IC_WINDOW_MAX;
-    ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
-
-    // update minimize button
-    auto minimizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(minimizeButton, InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
-
-    // update close button
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
-    ChangeTitleButtonIcon(closeButton, InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
+    isFocus ? controlButtonsNode->FireOnWindowFocusedCallback() : controlButtonsNode->FireOnWindowUnfocusedCallback();
+    SetMaximizeIconIsRecover();
 }
 
 void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
@@ -237,41 +333,15 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
             : customFloatingTitleNode->FireOnWindowUnfocusedCallback();
 }
 
-void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
-    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn)
+void ContainerModalPatternEnhance::SetContainerButtonHide(
+    bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
-    ContainerModalPattern::ChangeTitleButtonIcon(buttonNode, icon, isFocus, isCloseBtn);
-}
-
-Color ContainerModalPatternEnhance::GetContainerColor(bool isFocus)
-{
-    return ContainerModalPattern::GetContainerColor(isFocus);
-}
-
-void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize,
-    bool hideClose)
-{
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetCustomButtonNode();
     CHECK_NULL_VOID(controlButtonsNode);
-    ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
-
-    auto maximizeBtn =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    CHECK_NULL_VOID(maximizeBtn);
-    maximizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
-    maximizeBtn->MarkDirtyNode();
-
-    auto minimizeBtn =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    CHECK_NULL_VOID(minimizeBtn);
-    minimizeBtn->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
-    minimizeBtn->MarkDirtyNode();
-
-    auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
-        CHECK_NULL_VOID(closeBtn);
-        closeBtn->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
-        closeBtn->MarkDirtyNode();
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_HIDE_SPLIT, hideSplit);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -304,17 +374,19 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             floatingContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height - rect.GetY()), 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        SetControlButtonVisibleBeforeAnim(controlButtonsLayoutProperty->GetVisibilityValue());
+        controlButtonVisibleBeforeAnim_ = controlButtonsLayoutProperty->GetVisibilityValue();
         controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
-            buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height -
-                (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx())/2 - rect.GetY()), 0.0f });
+            buttonsContext->OnTransformTranslateUpdate({ 0.0f,
+                static_cast<float>(
+                    height - (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx()) / 2 - rect.GetY()),
+                0.0f });
         });
     }
 
     if (!isShow && CanHideFloatingTitle()) {
-        auto beforeVisible = GetControlButtonVisibleBeforeAnim();
+        auto beforeVisible = controlButtonVisibleBeforeAnim_;
         AnimationUtils::Animate(
             option,
             [floatingContext, buttonsContext, titlePopupDistance, beforeVisible]() {
@@ -323,24 +395,26 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
             [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
-                auto containerModal = weak.Upgrade();
-                CHECK_NULL_VOID(containerModal);
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
-                controlButtonsLayoutProperty->UpdateVisibility(containerModal->GetControlButtonVisibleBeforeAnim());
+                controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
             });
     }
 }
 
 void ContainerModalPatternEnhance::AddPointLight()
 {
-    auto controlButtonsNode = GetControlButtonRow();
+    auto controlButtonsNode = GetButtonRowByInspectorId();
     CHECK_NULL_VOID(controlButtonsNode);
 
-    auto maximizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-    auto minimizeButton =
-        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    auto maximizeButton = GetMaximizeButton();
+    auto minimizeButton = GetMinimizeButton();
+    auto closeButton = GetCloseButton();
+
+    CHECK_NULL_VOID(maximizeButton);
+    CHECK_NULL_VOID(minimizeButton);
+    CHECK_NULL_VOID(closeButton);
 
     SetPointLight(controlButtonsNode, maximizeButton, minimizeButton, closeButton);
 }
@@ -349,40 +423,81 @@ void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTit
     RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn)
 {
     auto inputHub = containerTitleRow->GetOrCreateInputEventHub();
-    RefPtr<RenderContext> maximizeBtnRenderContext_ = maximizeBtn->GetRenderContext();
-    RefPtr<RenderContext> minimizeBtnRenderContext_ = minimizeBtn->GetRenderContext();
+    RefPtr<RenderContext> maximizeBtnRenderContext = maximizeBtn->GetRenderContext();
+    RefPtr<RenderContext> minimizeBtnRenderContext = minimizeBtn->GetRenderContext();
     closeBtnRenderContext_ = closeBtn->GetRenderContext();
 
-    maximizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    minimizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    CHECK_NULL_VOID(maximizeBtnRenderContext);
+    CHECK_NULL_VOID(minimizeBtnRenderContext);
+    CHECK_NULL_VOID(closeBtnRenderContext_);
+    maximizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    minimizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
 
-    auto mouseTask = [this, weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](MouseInfo& info) {
+    auto mouseTask = [weakPattern = WeakClaim(this), weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](
+                         MouseInfo& info) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto closeBtn = weakCloseBtn.Upgrade();
         CHECK_NULL_VOID(closeBtn);
         auto closeBntFrameRect = closeBtn->GetGeometryNode()->GetFrameRect();
         TranslateOptions closeTranslate = TranslateOptions(info.GetLocalLocation().GetX() - closeBntFrameRect.Left(),
             info.GetLocalLocation().GetY() - closeBntFrameRect.Top(), LIGHT_POSITION_Z);
         auto closeBtnContext = closeBtn->GetRenderContext();
+        CHECK_NULL_VOID(closeBtnContext);
         closeBtnContext->UpdateLightPosition(closeTranslate);
+        if (!pattern->isLightOn_) {
+            pattern->UpdateLightIntensity();
+        }
+        if (pattern->isLightOn_) {
+            auto timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+            pattern->UpdateLightOffDelay(timeStamp);
+        }
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
 
-    auto hoverEventFucRow = [this](bool hover) {
-        isTitleRowHovered_ = hover;
-        UpdateLightColor();
-        UpdateLightIntensity();
+    auto hoverEventFucRow = [weakPattern = WeakClaim(this)](bool hover) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isTitleRowHovered_ = hover;
+        pattern->UpdateLightColor();
+        pattern->UpdateLightIntensity();
     };
     inputHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFucRow)));
 }
 
+void ContainerModalPatternEnhance::UpdateLightOffDelay(double timeStamp)
+{
+    if (timeStamp - lightOffDelayUpdateTime_ < LIGHT_OFF_UPDATE_INTERVAL) {
+        return;
+    }
+    lightOffDelayUpdateTime_ = timeStamp;
+    auto&& callback = [weakPattern = WeakClaim(this)]() {
+        AnimationOption option;
+        option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
+        option.SetCurve(Curves::SMOOTH);
+        AnimationUtils::Animate(option, [weakPattern]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->isLightOn_ = false;
+        });
+    };
+    auto pipeline = GetHost()->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    lightOffCallback_.Reset(callback);
+    pipeline->GetTaskExecutor()->PostDelayedTask(
+        lightOffCallback_, TaskExecutor::TaskType::UI, LIGHT_OFF_DELAY_TIME, "ArkUIContainerModalLightOff");
+}
+
 void ContainerModalPatternEnhance::UpdateLightColor()
 {
+    CHECK_NULL_VOID(closeBtnRenderContext_);
     auto colorMode = SystemProperties::GetColorMode();
-    bool isDarkMode = colorMode == ColorMode::LIGHT;
-    if (isDarkMode) {
-        closeBtnRenderContext_->UpdateLightColor(Color(0xa0000000));
+    if (colorMode == ColorMode::LIGHT) {
+        closeBtnRenderContext_->UpdateLightColor(Color::BLACK);
     } else {
         closeBtnRenderContext_->UpdateLightColor(Color::WHITE);
     }
@@ -390,17 +505,21 @@ void ContainerModalPatternEnhance::UpdateLightColor()
 
 void ContainerModalPatternEnhance::UpdateLightIntensity()
 {
-    if (!closeBtnRenderContext_) {
-        return;
-    }
     AnimationOption option;
     option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
     option.SetCurve(Curves::SMOOTH);
-    AnimationUtils::Animate(option, [this]() {
-        if (GetIsFocus() && isTitleRowHovered_) {
-            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
+    AnimationUtils::Animate(option, [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
+        if (pattern->GetIsFocus() && pattern->isTitleRowHovered_) {
+            auto colorMode = SystemProperties::GetColorMode();
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(
+                colorMode == ColorMode::LIGHT ? LIGHT_ON_INTENSITY_LIGHT : LIGHT_ON_INTENSITY_DARK);
+            pattern->isLightOn_ = true;
         } else {
-            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+            pattern->isLightOn_ = false;
         }
     });
 }
@@ -408,21 +527,13 @@ void ContainerModalPatternEnhance::UpdateLightIntensity()
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
     MeasureContext textCtx;
-    textCtx.textContent = Localization::GetInstance()->GetEntryLetters("window.leftSide");
+    textCtx.textContent = Localization::GetInstance()->GetEntryLetters("window.rightSide");
     textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
     auto textSize = MeasureUtil::MeasureTextSize(textCtx);
     textWidth_ = textSize.Width();
 
     if (!menuList_) {
-        auto menuList = FrameNode::CreateFrameNode(
-            V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-        auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
-        CHECK_NULL_RETURN(listLayoutProperty, nullptr);
-        listLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-        listLayoutProperty->UpdateLaneGutter(MENU_GUTTER);
-        menuList->AddChild(BuildLeftSplitMenuItem());
-        menuList->AddChild(BuildRightSplitMenuItem());
-        menuList_ = menuList;
+        BuildMenuList();
     }
     auto menuLayoutProperty = menuList_->GetLayoutProperty<ListLayoutProperty>();
     menuLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(GetMenuWidth()), std::nullopt));
@@ -431,99 +542,17 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr
     return menuList_;
 }
 
-RefPtr<FrameNode> ContainerModalPatternEnhance::BuildLeftSplitMenuItem()
+void ContainerModalPatternEnhance::BuildMenuList()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto leftSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
-        auto windowManager = weak.Upgrade();
-        if (!windowManager) {
-            TAG_LOGE(AceLogTag::ACE_APPBAR, "create leftsplit callback func failed,windowMannager is null!");
-            return;
-        }
-        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_LEFT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
-        windowManager->FireWindowSplitCallBack();
-    };
-    auto leftSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(leftSplitClickFunc));
-    auto screenLeftRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.leftSide"),
-        InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, leftSplitEvent, false);
-    screenLeftRow->UpdateInspectorId("EnhanceMenuScreenLeftRow");
-    return screenLeftRow;
-}
-
-RefPtr<FrameNode> ContainerModalPatternEnhance::BuildRightSplitMenuItem()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-    auto rightSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
-        auto windowManager = weak.Upgrade();
-        if (!windowManager) {
-            TAG_LOGE(AceLogTag::ACE_APPBAR, "create rightSpiltBtn callback func failed, windowManager is null!");
-            return;
-        }
-        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_RIGHT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
-        windowManager->FireWindowSplitCallBack(false);
-    };
-    auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
-    auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
-        InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
-    screenRightRow->UpdateInspectorId("EnhanceMenuScreenRightRow");
-    return screenRightRow;
-}
-
-RefPtr<FrameNode> ContainerModalPatternEnhance::BuildMenuItem(
-    std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
-
-    auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    // setRadius 8vp
-    auto render = containerTitleRow->GetRenderContext();
-    BorderRadiusProperty borderRadiusProperty;
-    borderRadiusProperty.SetRadius(MENU_ITEM_RADIUS);
-    render->UpdateBorderRadius(borderRadiusProperty);
-
-    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
-    layoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_V),
-        CalcLength(MENU_ITEM_PADDING_V));
-    layoutProperty->UpdatePadding(padding);
-
-    auto leftIcon = ContainerModalViewEnhance::BuildMenuItemIcon(resourceId);
-
-    auto textPattern = AceType::MakeRefPtr<TextPattern>();
-    auto titleLabel = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), textPattern);
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(title);
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
-    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    MarginProperty margin;
-    margin.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-    margin.right = CalcLength(MENU_ITEM_TEXT_PADDING);
-    textLayoutProperty->UpdateMargin(margin);
-
-    // add icon and label
-    containerTitleRow->AddChild(leftIcon);
-    containerTitleRow->AddChild(titleLabel);
-    auto hub = containerTitleRow->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(hub, nullptr);
-    hub->AddClickEvent(event);
-    ContainerModalViewEnhance::BondingMenuItemEvent(containerTitleRow);
-    return containerTitleRow;
+    auto menuList = FrameNode::CreateFrameNode(
+        V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    listLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    listLayoutProperty->UpdateLaneGutter(MENU_GUTTER);
+    menuList->AddChild(BuildMenuItem(WeakClaim(this), true));
+    menuList->AddChild(BuildMenuItem(WeakClaim(this), false));
+    menuList_ = menuList;
 }
 
 Dimension ContainerModalPatternEnhance::GetMenuWidth()
@@ -531,11 +560,6 @@ Dimension ContainerModalPatternEnhance::GetMenuWidth()
     auto noneTextWidth = TITLE_ICON_SIZE + MENU_ITEM_PADDING_H * 2 + MENU_ITEM_TEXT_PADDING;
     auto menuWidth = Dimension(textWidth_ + noneTextWidth.ConvertToPx());
     return menuWidth;
-}
-
-OffsetF ContainerModalPatternEnhance::GetMenuOffset()
-{
-    return menuOffset_;
 }
 
 void ContainerModalPatternEnhance::CalculateMenuOffset(const RefPtr<FrameNode>& targetNode)
@@ -560,14 +584,387 @@ void ContainerModalPatternEnhance::CalculateMenuOffset(const RefPtr<FrameNode>& 
     }
     if (offsetX > screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen right");
-        offsetX = screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx();
+        offsetX = nodeOffset.GetX() + windowOffset.GetX() + buttonSize;
     }
     if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
         offsetY = offsetY - menuHeight - titleHeight;
     }
     menuOffset_ = { offsetX, offsetY };
-    TAG_LOGI(AceLogTag::ACE_APPBAR,
-        "ContainerModal ShowMaxMenu called menuOffset_ = %{public}s", menuOffset_.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModal ShowMaxMenu called menuOffset_ = %{public}s",
+        menuOffset_.ToString().c_str());
+}
+
+void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
+    CHECK_NULL_VOID(tapGesture);
+    WeakPtr<FrameNode> weakNode = frameNode_;
+    tapGesture->SetOnActionId([weakNode](GestureEvent& info) mutable {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click.");
+        auto containerNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(containerNode);
+        auto windowManager = GetNotMovingWindowManager(weakNode);
+        CHECK_NULL_VOID(windowManager);
+        auto windowMode = windowManager->GetWindowMode();
+        auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
+            windowManager->WindowRecover();
+        } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
+            windowManager->WindowMaximize(true);
+        }
+        containerNode->OnWindowFocused();
+    });
+    eventHub->AddGesture(tapGesture);
+}
+
+void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearGesture();
+    eventHub->OnModifyDone();
+}
+
+void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    ResetHoverTimer();
+    if (!windowManager) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
+    auto mode = windowManager->GetWindowMode();
+    auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
+        windowManager->WindowRecover();
+    } else {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
+        windowManager->WindowMaximize(true);
+    }
+    GetHost()->OnWindowFocused();
+}
+
+void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button click event triggerd");
+    windowManager->WindowMinimize();
+}
+
+void ContainerModalPatternEnhance::OnCloseButtonClick(GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button click event triggerd");
+    windowManager->WindowClose();
+}
+
+RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    if (!enableSplit_) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "the app window is not support spilt menu");
+        return nullptr;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+    // menu list
+    auto menuList = GetOrCreateMenuList(targetNode);
+    CHECK_NULL_RETURN(menuList, nullptr);
+    auto subWindowManger = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subWindowManger, nullptr);
+    if ((!subWindowManger->GetSubwindow(Container::CurrentId()) ||
+            !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+        ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
+        MenuParam menuParam {};
+        menuParam.type = MenuType::CONTEXT_MENU;
+        SubwindowManager::GetInstance()->ShowMenuNG(menuList, menuParam, targetNode, menuOffset_);
+    }
+    ResetHoverTimer();
+    return menuList;
+}
+
+void ContainerModalPatternEnhance::OnMaxBtnInputEvent(MouseInfo& info)
+{
+    isForbidMenuEvent_ = (info.GetButton() == MouseButton::LEFT_BUTTON || info.GetScreenLocation().IsZero());
+}
+
+void ContainerModalPatternEnhance::OnMaxBtnHoverEvent(bool hover, WeakPtr<FrameNode>& weakBtn)
+{
+    if (!hover) {
+        ResetHoverTimer();
+        return;
+    }
+    if (isMenuPending_ || isForbidMenuEvent_ || !GetIsFocus()) { // whether can show menu
+        return;
+    }
+    auto&& callback = [weakPattern = WeakClaim(this), weakBtn]() {
+        auto maximizeBtn = weakBtn.Upgrade();
+        CHECK_NULL_VOID(maximizeBtn);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ShowMaxMenu(maximizeBtn);
+    };
+    auto pipeline = GetHost()->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    contextTimer_.Reset(callback);
+    pipeline->GetTaskExecutor()->PostDelayedTask(
+        contextTimer_, TaskExecutor::TaskType::UI, MENU_TASK_DELAY_TIME, "ArkUIContainerModalShowMaxMenu");
+    isMenuPending_ = true;
+}
+
+void ContainerModalPatternEnhance::OnMenuItemHoverEvent(RefPtr<FrameNode> item, bool isHover)
+{
+    auto theme = item->GetContextRefPtr()->GetTheme<ListItemTheme>();
+    auto renderContext = item->GetRenderContext();
+    if (isHover && theme) {
+        renderContext->UpdateBackgroundColor(theme->GetItemHoverColor());
+    } else {
+        renderContext->UpdateBackgroundColor(MENU_ITEM_COLOR);
+    }
+}
+
+void ContainerModalPatternEnhance::OnMenuItemClickEvent(RefPtr<FrameNode> item, MouseInfo& info)
+{
+    auto theme = item->GetContextRefPtr()->GetTheme<ListItemTheme>();
+    if (MouseAction::PRESS == info.GetAction() && theme) {
+        auto renderContext = item->GetRenderContext();
+        renderContext->UpdateBackgroundColor(theme->GetClickColor());
+    }
+}
+
+void ContainerModalPatternEnhance::OnMenuItemClickGesture(bool isSplistLeft)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    const auto& windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    int32_t splitSide = isSplistLeft ? MAX_MENU_ITEM_LEFT_SPLIT : MAX_MENU_ITEM_RIGHT_SPLIT;
+    EventReport::ReportClickTitleMaximizeMenu(splitSide, MAX_MENU_DEFAULT_NOT_CHANGE);
+    windowManager->FireWindowSplitCallBack(isSplistLeft);
+}
+
+void ContainerModalPatternEnhance::ResetHoverTimer()
+{
+    contextTimer_.Reset(nullptr);
+    isMenuPending_ = false;
+}
+
+bool ContainerModalPatternEnhance::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty,
+    const DirtySwapConfig& config)
+{
+    CallButtonsRectChange();
+
+    auto considerFloatingWindow = true;
+    CallSetContainerWindow(considerFloatingWindow);
+    
+    return false;
+}
+
+void ContainerModalPatternEnhance::EnablePanEventOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set pan event", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        AddPanEvent(node);
+    } else {
+        RemovePanEvent(node);
+    }
+}
+
+
+void ContainerModalPatternEnhance::EnableTapGestureOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set tap gesture", rowName.c_str());
+        return;
+    }
+    
+    if (isEnable) {
+        SetTapGestureEvent(node);
+    } else {
+        ClearTapGestureEvent(node);
+    }
+}
+
+void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
+
+    auto floatingTitleRow = GetFloatingTitleRow();
+    auto customTitleRow = GetCustomTitleRow();
+    auto gestureRow = GetGestureRow();
+    EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
+    EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
+    EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
+    EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
+    EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+}
+
+bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
+{
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_RETURN(floatingTitleRow, false);
+    auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(floatingTitleRowProp, false);
+    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetCustomTitleVisible()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_RETURN(customTitleRow, false);
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(customTitleRowProp, false);
+    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetControlButtonVisible()
+{
+    auto controlButtonRow = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonRow, false);
+    auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonRowProp, false);
+    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+void ContainerModalPatternEnhance::Init()
+{
+    InitContainerColor();
+    InitContainerEvent();
+    InitTitle();
+    InitLayoutProperty();
+    SetColorConfigurationUpdate();
+}
+
+void ContainerModalPatternEnhance::SetColorConfigurationUpdate()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate");
+    auto customButtonNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customButtonNode);
+    auto isDark = SystemProperties::GetColorMode() == ColorMode::DARK;
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate isDark = %{public}d", isDark);
+    customButtonNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION, isDark);
+}
+
+void ContainerModalPatternEnhance::OnColorConfigurationUpdate()
+{
+    WindowFocus(isFocus_);
+    SetColorConfigurationUpdate();
+}
+
+void ContainerModalPatternEnhance::InitButtonsLayoutProperty() {}
+
+void ContainerModalPatternEnhance::OnMaxButtonClick()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    if (!windowManager) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd");
+    auto mode = windowManager->GetWindowMode();
+    auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
+        windowManager->WindowRecover();
+    } else {
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
+        windowManager->WindowMaximize(true);
+    }
+    GetHost()->OnWindowFocused();
+}
+
+void ContainerModalPatternEnhance::OnMinButtonClick()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button click event triggerd");
+    windowManager->WindowMinimize();
+}
+
+void ContainerModalPatternEnhance::OnCloseButtonClick()
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "close button click event triggerd");
+    windowManager->WindowClose();
+}
+
+void ContainerModalPatternEnhance::SetCloseButtonStatus(bool isEnabled)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetCloseButtonStatus isEnabled: %{public}d", isEnabled);
+    auto customNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customNode);
+    customNode->FireCustomCallback(EVENT_NAME_CLOSE_STATUS, isEnabled);
+}
+
+void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
+{
+    auto customNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(customNode);
+
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto windowManager = pipeline->GetWindowManager();
+    MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
+    } else {
+        customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);
+    }
+}
+
+CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
+{
+    auto buttonRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(buttonRow, CalcLength(Dimension(0, DimensionUnit::VP)));
+    auto width = buttonRow->GetGeometryNode()->GetFrameRect().Width();
+    return CalcLength(Dimension(width, DimensionUnit::VP));
+}
+
+bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    auto controlButtonsRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
+    buttons = buttonRect;
+    if (buttons.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttons are hidden");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

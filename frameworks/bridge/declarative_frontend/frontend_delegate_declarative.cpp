@@ -126,7 +126,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("DelegateDeclarative destroyed");
 }
 
 int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
@@ -1771,8 +1771,10 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::RemoveCustomDialog()
+void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
 {
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
     NG::ViewAbstract::DismissDialog();
 }
 
@@ -1869,13 +1871,19 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
     std::function<void(int32_t)> &&callback)
 {
-    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
-        overlayManager->CloseCustomDialog(node, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
-    return;
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+            overlayManager->CloseCustomDialog(node, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarative::UpdateCustomDialog(
@@ -1892,14 +1900,20 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogProperties, node, callback]
-        (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        LOGI("begin to update custom dialog.");
-        overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
-    return;
+
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [dialogProperties, node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+            overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -2023,6 +2037,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

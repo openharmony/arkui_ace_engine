@@ -117,6 +117,7 @@ void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
 
 void FormRendererDelegateImpl::SetActionEventHandler(std::function<void(const std::string&)>&& listener)
 {
+    HILOG_INFO("EventHandle - SetActionEventHandler");
     actionEventHandler_ = std::move(listener);
 }
 

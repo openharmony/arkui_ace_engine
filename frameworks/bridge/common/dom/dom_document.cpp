@@ -85,7 +85,7 @@
 #include "frameworks/bridge/common/dom/dom_tab_bar.h"
 #include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
-#if defined(PLAYER_FRAMEWORK_EXISTS)
+#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_video.h"
 #endif
 #if !defined(PREVIEW)
@@ -124,7 +124,6 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
 DOMDocument::~DOMDocument()
 {
     CHECK_RUN_ON(UI);
-    LOG_DESTROY();
 }
 
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
@@ -230,7 +229,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
-#if defined(PLAYER_FRAMEWORK_EXISTS)
+#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
 #endif
 #ifdef WEB_SUPPORTED

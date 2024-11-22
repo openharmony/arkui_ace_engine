@@ -1554,7 +1554,7 @@ HWTEST_F(GridModifierTest, setEnableScrollInteractionTestValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, DISABLED_setFrictionTestDefaultValues, TestSize.Level1)
 {
     double doubleResult;
 

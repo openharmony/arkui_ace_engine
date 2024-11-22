@@ -29,11 +29,10 @@
 #include "base/resource/shared_image_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
-#ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing_forward.h"
-#endif
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace {
 
 class ImageLoader : public virtual AceType {
@@ -52,20 +51,20 @@ public:
     {
         return nullptr;
     }
+
     RefPtr<NG::ImageData> GetImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr);
+
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
+
 #ifndef USE_ROSEN_DRAWING
     static sk_sp<SkData> LoadDataFromCachedFile(const std::string& uri);
 #else
     static std::shared_ptr<RSData> LoadDataFromCachedFile(const std::string& uri);
 #endif
-#ifndef USE_ROSEN_DRAWING
-    static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
-#else
+
     static std::shared_ptr<RSData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
-#endif
     static void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& data);
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
 

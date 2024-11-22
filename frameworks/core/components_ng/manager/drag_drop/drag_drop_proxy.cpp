@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 
 void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -31,7 +31,7 @@ void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
 void DragDropProxy::OnDragStart(
     const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -48,7 +48,7 @@ void DragDropProxy::OnDragStart(
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -61,7 +61,7 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
 
 void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -78,7 +78,7 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
 
 void DragDropProxy::onDragCancel()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -88,7 +88,7 @@ void DragDropProxy::onDragCancel()
 
 void DragDropProxy::OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -100,7 +100,7 @@ void DragDropProxy::OnItemDragStart(const GestureEvent& info, const RefPtr<Frame
 
 void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -112,7 +112,7 @@ void DragDropProxy::OnItemDragMove(const GestureEvent& info, int32_t draggedInde
 
 void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex, DragType dragType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -124,7 +124,7 @@ void DragDropProxy::OnItemDragEnd(const GestureEvent& info, int32_t draggedIndex
 
 void DragDropProxy::onItemDragCancel()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -135,7 +135,7 @@ void DragDropProxy::onItemDragCancel()
 
 void DragDropProxy::DestroyDragWindow()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);

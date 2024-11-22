@@ -83,7 +83,7 @@ public:
     void PushName(const std::string& name, const JSRef<JSVal>& param);
     void RemoveName(const std::string& name) override;
     void RemoveIndex(int32_t index) override;
-    void RemoveInvalidPage(const JSRef<JSObject>& info);
+    void RemoveInvalidPage(int32_t index);
     void Clear() override;
     int32_t GetReplaceValue() const override;
     void UpdateReplaceValue(int32_t isReplace) const override;
@@ -94,15 +94,13 @@ public:
     std::vector<int32_t> GetAllPathIndex() override;
     void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
     void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
-    RefPtr<NG::UINode> CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& node) override;
+    bool CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
         const WeakPtr<NG::UINode>& node) override;
     void SetJSExecutionContext(const JSExecutionContext& context);
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
     void OnDetachFromParent() override;
-    int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
-    void ClearPreBuildNodeList() override;
     std::vector<std::string> DumpStackInfo() const override;
     void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
@@ -121,6 +119,8 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -136,24 +136,18 @@ private:
     bool GetIsEntryByIndex(int32_t index);
     JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
-    int32_t GetSize() const;
+    int32_t GetSize() const override;
     void SetJSParentStack(JSRef<JSVal> parent);
     std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
     void ParseJsObject(
         std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const;
     static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
-    static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-        std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node,
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetFlagByIndex(int32_t index) const;
-    bool CallByPushDestination(int32_t index);
-    void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
-    bool GetNodeFromPreBuildList(int32_t index, const std::string& name,
-        const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
     bool GetNeedUpdatePathInfo(int32_t index);
@@ -161,8 +155,11 @@ private:
 
     JSRef<JSArray> GetPathArray();
     JSRef<JSObject> GetPathInfo(int32_t index);
+
+    std::string ErrorToMessage(int32_t errorCode);
+
+    bool RemoveDestinationIfNeeded(const JSRef<JSObject>& param, int32_t errorCode, int32_t index);
 private:
-    std::vector<NavPathInfoUINode> preBuildNodeList_;
     JSRef<JSObject> thisObj_;
 };
 } // namespace OHOS::Ace::Framework

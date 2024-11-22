@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
@@ -30,13 +31,16 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_MONTHS_COUNT = 3;
 constexpr int32_t CURRENT_MONTH_INDEX = 1;
+constexpr int32_t DAYS_OF_WEEK = 7;
 constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
+constexpr float WEEK_SPACE = 20.0f;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 constexpr size_t CANCEL_BUTTON_FONT_COLOR_INDEX = 0;
@@ -71,19 +75,30 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(calendarLayoutProperty, nullptr);
     calendarLayoutProperty->UpdateLayoutDirection(textDirection);
 
+    auto weekFrameNode = CreateWeekNode(calendarNode);
+    CHECK_NULL_RETURN(weekFrameNode, nullptr);
+
     auto titleNode = CreateTitleNode(calendarNode);
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
-
     titleLayoutProperty->UpdateLayoutDirection(textDirection);
+
+    auto scrollFrameNode = CreateScrollNode();
+    CHECK_NULL_RETURN(weekFrameNode, nullptr);
+
+    calendarNode->MountToParent(scrollFrameNode);
     titleNode->MountToParent(contentColumn);
-    calendarNode->MountToParent(contentColumn);
+    weekFrameNode->MountToParent(contentColumn);
+    scrollFrameNode->MountToParent(contentColumn);
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogLayoutProperty = dialogNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dialogLayoutProperty, nullptr);
+    auto calendarTextDirection = calendarLayoutProperty->GetNonAutoLayoutDirection();
+    auto dialogTextDirection = dialogLayoutProperty->GetNonAutoLayoutDirection();
+    SetWeekTextDirection(dialogTextDirection, calendarTextDirection, weekFrameNode);
     dialogLayoutProperty->UpdateLayoutDirection(textDirection);
     CreateChildNode(contentColumn, dialogNode, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
@@ -99,12 +114,39 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     return dialogNode;
 }
 
+void CalendarDialogView::SetWeekTextDirection(const TextDirection& dialogDirection,
+    const TextDirection& calendarDirection, const RefPtr<FrameNode>& weekNode)
+{
+    std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
+    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
+        auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textWeekNode);
+        int32_t weekId = 0;
+        if (calendarDirection == TextDirection::RTL
+            && dialogDirection != TextDirection::RTL) {
+            weekId = (DAYS_OF_WEEK - 1) - (column % DAYS_OF_WEEK);
+        } else {
+            weekId = column % DAYS_OF_WEEK;
+        }
+        if (weekId < 0) {
+            continue;
+        }
+        std::string weekContent { weekNumbers[weekId] };
+        auto textLayoutProperty = textWeekNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(weekContent);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        textWeekNode->MountToParent(weekNode);
+    }
+}
+
 void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
     const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties)
 {
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = dialogNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     RefPtr<DialogTheme> dialogTheme = pipelineContext->GetTheme<DialogTheme>();
@@ -125,6 +167,12 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            auto colorMode = SystemProperties::GetColorMode();
+            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
+        }
     }
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
@@ -216,7 +264,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -246,7 +294,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent("");
+    textLayoutProperty->UpdateContent(u"");
     MarginProperty textMargin;
     textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
     textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
@@ -273,10 +321,33 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     return titleRow;
 }
 
+RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& calendarNode)
+{
+    auto weekFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(weekFrameNode, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto weekLayoutProperty = weekFrameNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(weekLayoutProperty, nullptr);
+    auto swiperNode = calendarNode->GetChildren().front();
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
+    CHECK_NULL_RETURN(monthFrameNode, nullptr);
+    auto calendarPaintProperty = monthFrameNode->GetPaintProperty<CalendarPaintProperty>();
+    CHECK_NULL_RETURN(calendarPaintProperty, nullptr);
+    MarginProperty margin;
+    margin.top = CalcLength(theme->GetDistanceBetweenTitleAndDate().ConvertToPx() + WEEK_SPACE);
+    weekLayoutProperty->UpdateMargin(margin);
+    return weekFrameNode;
+}
+
 RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -328,21 +399,23 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     return buttonNode;
 }
 
-void CalendarDialogView::SetCalendarIdealSize(
-    const RefPtr<CalendarTheme>& theme, const RefPtr<LayoutProperty>& calendarLayoutProperty)
+void CalendarDialogView::SetCalendarIdealSize(const RefPtr<CalendarTheme>& theme,
+    const RefPtr<LayoutProperty>& calendarLayoutProperty, const Dimension& weekHeight)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
-        calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            std::nullopt, CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+        calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+            CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT - weekHeight)));
     } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
         calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-            CalcLength(theme->GetCalendarLargerContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+            CalcLength(theme->GetCalendarLargerContainerHeight()
+            + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT - weekHeight)));
     } else {
         calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-            CalcLength(theme->GetCalendarLargeContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)));
+            CalcLength(theme->GetCalendarLargeContainerHeight()
+            + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT - weekHeight)));
     }
 }
 
@@ -353,8 +426,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     auto calendarNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
     CHECK_NULL_RETURN(calendarNode, nullptr);
-
-    InitCalendarProperty(calendarNode);
 
     auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (settingData.entryNode.Upgrade() != nullptr) {
@@ -400,6 +471,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
+    InitCalendarProperty(calendarNode);
     swiperNode->MarkModifyDone();
     return calendarNode;
 }
@@ -414,11 +486,39 @@ void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarN
     CHECK_NULL_VOID(theme);
     MarginProperty margin = {
         .left = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
-        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT),
-        .top = CalcLength(theme->GetDistanceBetweenTitleAndDate()),
+        .right = CalcLength(theme->GetDistanceBetweenContainterAndDate() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT)
     };
     calendarLayoutProperty->UpdateMargin(margin);
-    SetCalendarIdealSize(theme, calendarLayoutProperty);
+    auto swiperNode = calendarNode->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto calendarMonthNode = swiperNode->GetChildAtIndex(CURRENT_MONTH_INDEX);
+    CHECK_NULL_VOID(calendarMonthNode);
+    auto calendarMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
+    CHECK_NULL_VOID(calendarMonthFrameNode);
+    auto calendarPaintProperty = calendarMonthFrameNode->GetPaintProperty<CalendarPaintProperty>();
+    auto gregorianDayHeight = calendarPaintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                    ? theme->GetCalendarTheme().gregorianCalendarHeight
+                    : calendarPaintProperty->GetGregorianCalendarHeightValue({});
+    auto monthPattern = calendarMonthFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(monthPattern);
+    if (monthPattern->IsLargeSize(theme)) {
+        gregorianDayHeight = monthPattern->GetDaySize(theme);
+    }
+    SetCalendarIdealSize(theme, calendarLayoutProperty, gregorianDayHeight);
+}
+
+RefPtr<FrameNode> CalendarDialogView::CreateScrollNode()
+{
+    auto scrollNode = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto props = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateScrollEnabled(true);
+    props->UpdateAxis(Axis::VERTICAL);
+    props->UpdateAlignment(Alignment::TOP_CENTER);
+    scrollNode->MarkModifyDone();
+    return scrollNode;
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
@@ -457,7 +557,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
 
     auto monthLayoutProperty = monthFrameNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = monthFrameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -506,7 +606,7 @@ void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode
 
 RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -522,7 +622,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
@@ -574,7 +674,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -587,7 +687,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     } else {
         width = CalcLength(pickerTheme->GetButtonWidth());
     }
-    
+
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
         (!(GetPreviousOrientation() == SystemProperties::GetDeviceOrientation())
@@ -709,7 +809,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
 
 RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     RefPtr<CalendarTheme> theme = pipeline->GetTheme<CalendarTheme>();
@@ -756,7 +856,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = contentRow->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     UpdateOptionLayoutProps(contentRow, pipelineContext);
 
@@ -818,7 +918,7 @@ void CalendarDialogView::UpdateOptionLayoutProps(
 
 void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& settingData)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -974,10 +1074,26 @@ void CalendarDialogView::UpdateDefaultFocusByButtonInfo(const RefPtr<FrameNode>&
 }
 
 void CalendarDialogView::UpdateIdealSize(const RefPtr<CalendarTheme>& calendarTheme,
-    const RefPtr<LinearLayoutProperty>& layoutProps, const RefPtr<LayoutProperty>& calendarLayoutProperty)
+    const RefPtr<LinearLayoutProperty>& layoutProps, const RefPtr<LayoutProperty>& calendarLayoutProperty,
+    const RefPtr<FrameNode>& calendarNode)
 {
     SetTitleIdealSize(calendarTheme, layoutProps);
-    SetCalendarIdealSize(calendarTheme, calendarLayoutProperty);
+    auto swiperNode = calendarNode->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto calendarMonthNode = swiperNode->GetChildAtIndex(CURRENT_MONTH_INDEX);
+    CHECK_NULL_VOID(calendarMonthNode);
+    auto calendarMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
+    CHECK_NULL_VOID(calendarMonthFrameNode);
+    auto calendarPaintProperty = calendarMonthFrameNode->GetPaintProperty<CalendarPaintProperty>();
+    auto gregorianDayHeight = calendarPaintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                    ? calendarTheme->GetCalendarTheme().gregorianCalendarHeight
+                    : calendarPaintProperty->GetGregorianCalendarHeightValue({});
+    auto monthPattern = calendarMonthFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(monthPattern);
+    if (monthPattern->IsLargeSize(calendarTheme)) {
+        gregorianDayHeight = monthPattern->GetDaySize(calendarTheme);
+    }
+    SetCalendarIdealSize(calendarTheme, calendarLayoutProperty, gregorianDayHeight);
 }
 
 void CalendarDialogView::UpdatePaintProperties(
@@ -1035,7 +1151,7 @@ void CalendarDialogView::UpdatePaintProperties(
 void CalendarDialogView::UpdateButtons(
     const RefPtr<FrameNode>& buttonNode, size_t buttonIndex, std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = buttonNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);

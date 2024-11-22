@@ -22,7 +22,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
-constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 const std::string TEST_INSERT_LINE_SPACE = " ";
 } // namespace
 
@@ -282,33 +281,10 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnRedoAction001, TestSize.Level2)
 
 /**
  * @tc.name: CalcDeleteValueObj001
- * @tc.desc: test CalcDeleteValueObj delete unicode
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto spans = richEditorPattern->GetSpanItemChildren();
-    ASSERT_FALSE(spans.empty());
-    auto spanItem = spans.back();
-    ASSERT_NE(spanItem, nullptr);
-    spanItem->unicode = 1;
-
-    RichEditorDeleteValue info;
-    int32_t currentPosition = INIT_VALUE_1.size() - 2;
-    int32_t length = 2;
-    richEditorPattern->CalcDeleteValueObj(currentPosition, length, info);
-    EXPECT_EQ(info.GetLength(), SYMBOL_SPAN_LENGTH);
-}
-
-/**
- * @tc.name: CalcDeleteValueObj001
  * @tc.desc: test CalcDeleteValueObj delete builder span
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj002, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj001, TestSize.Level1)
 {
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -655,5 +631,89 @@ HWTEST_F(RichEditorPatternTestThreeNg, InitScrollablePattern001, TestSize.Level1
     layoutProperty->UpdatePadding(padding);
     richEditorPattern->InitScrollablePattern();
     EXPECT_TRUE(IsEqual(richEditorPattern->richTextRect_.GetOffset(), OffsetF(10.0f, 10.0f)));
+}
+
+/**
+ * @tc.name: GetRectsForRange001
+ * @tc.desc: test GetRectsForRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    int32_t start = 0;
+    int32_t end = 10;
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetRectsForRange002
+ * @tc.desc: test GetRectsForRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    int32_t start = -5;
+    int32_t end = 10;
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetRectsForRange003
+ * @tc.desc: test GetRectsForRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    int32_t start = 0;
+    int32_t end = -5;
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetRectsForRange004
+ * @tc.desc: test GetRectsForRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange004, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    int32_t start = 10;
+    int32_t end = 0;
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
 }
 } // namespace OHOS::Ace::NG

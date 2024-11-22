@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "component_test\test_config.h"
+#include "component_test/test_config.h"
 
 #include <functional>
 #include <string>

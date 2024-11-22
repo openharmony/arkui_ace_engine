@@ -19,7 +19,7 @@ namespace OHOS::Ace {
 Frontend::~Frontend()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("Frontend destroyed");
 }
 
 bool Frontend::MaybeRelease()

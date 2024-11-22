@@ -47,7 +47,7 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateButtonChild(
-        int32_t id, const std::string& symbol, const RefPtr<CounterTheme>& counterTheme);
+        int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme);
     static RefPtr<FrameNode> CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme);
 };
 

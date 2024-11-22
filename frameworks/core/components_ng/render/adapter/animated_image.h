@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,20 +49,6 @@ public:
         AIImageQuality imageQuality = AIImageQuality::NONE;
     };
 
-    std::string GetResolutionQuality(AIImageQuality imageQuality)
-    {
-        switch (imageQuality) {
-            case AIImageQuality::NONE:
-                return "LOW";
-            case AIImageQuality::NORMAL:
-                return "MEDIUM";
-            case AIImageQuality::HIGH:
-                return "HIGH";
-            default:
-                return "LOW";
-        }
-    }
-
 #ifndef USE_ROSEN_DRAWING
     static RefPtr<CanvasImage> Create(
         const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
@@ -86,7 +72,7 @@ public:
         return cacheKey_;
     }
 
-    Animator::Status GetAnimatorStatus() const;
+    bool GetIsAnimating() const;
 
 protected:
     // ensure frames decode serially
@@ -101,15 +87,27 @@ private:
     void DecodeFrame(uint32_t idx);
     bool GetCachedFrame(uint32_t idx);
 
+    // git animation control
+    static int GenerateIteration(const std::unique_ptr<SkCodec>& codec);
+    static std::vector<int> GenerateDuration(const std::unique_ptr<SkCodec>& codec);
+    void PostPlayTask(uint32_t idx, int iteration);
+
     virtual void DecodeImpl(uint32_t idx) = 0;
-    virtual RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key) = 0;
+    virtual RefPtr<CanvasImage> GetCachedFrameImpl(const std::string& key)
+    {
+        return nullptr;
+    }
     virtual void UseCachedFrame(RefPtr<CanvasImage>&& image) = 0;
     virtual void CacheFrame(const std::string& key) = 0;
 
-    std::atomic_int32_t queueSize_ = 0;
-    RefPtr<Animator> animator_;
-    std::function<void()> redraw_;
+    CancelableCallback<void()> currentTask_;
     const std::string cacheKey_;
+    std::vector<int> duration_;
+    std::atomic_int32_t queueSize_ = 0;
+    std::function<void()> redraw_;
+    int iteration_ = 0;
+    uint32_t currentIdx_ = 0;
+    bool animationState_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedImage);
 };

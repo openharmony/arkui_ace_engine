@@ -34,7 +34,6 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -65,6 +64,8 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
+constexpr Dimension CUSTOM_CONTROL_BUTTON_LEFT = 8.0_vp;
+constexpr Dimension CUSTOM_CONTROL_BUTTON_TOP = 16.0_vp;
 } // namespace
 
 class SideBarLayoutTestNg : public testing::Test {
@@ -1335,17 +1336,13 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg031, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
-    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
-    ASSERT_NE(sideBarTheme, nullptr);
-    auto themeMarginTop = sideBarTheme->GetControlButtonMarginTopSmall();
-    auto themeMarginLeft = sideBarTheme->GetControlButtonMarginLeftSmall();
-    layoutProperty->UpdateControlButtonLeft(themeMarginLeft);
-    layoutProperty->UpdateControlButtonTop(themeMarginTop);
+    layoutProperty->UpdateControlButtonLeft(CUSTOM_CONTROL_BUTTON_LEFT);
+    layoutProperty->UpdateControlButtonTop(CUSTOM_CONTROL_BUTTON_TOP);
     layoutAlgorithm->LayoutControlButton(&layoutWrapper, buttonLayoutWrapper);
-    ASSERT_TRUE(
-        NearEqual(layoutProperty->GetControlButtonLeft().value_or(themeMarginLeft).Value(), themeMarginLeft.Value()));
-    ASSERT_TRUE(
-        NearEqual(layoutProperty->GetControlButtonTop().value_or(themeMarginTop).Value(), themeMarginTop.Value()));
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonLeft().value_or(CUSTOM_CONTROL_BUTTON_LEFT).Value(),
+        CUSTOM_CONTROL_BUTTON_LEFT.Value()));
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonTop().value_or(CUSTOM_CONTROL_BUTTON_TOP).Value(),
+        CUSTOM_CONTROL_BUTTON_TOP.Value()));
     
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }

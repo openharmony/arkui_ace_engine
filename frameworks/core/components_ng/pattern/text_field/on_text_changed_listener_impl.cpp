@@ -84,6 +84,9 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
+        if (!status) {
+            client->NotifyKeyboardHeight(0);
+        }
     };
     PostTaskToUI(task, "ArkUITextFieldSetKeyboardStatus");
 }
@@ -318,7 +321,6 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
                 client->NotifyKeyboardClosedByUser();
             }
             client->NotifyKeyboardClosed();
-            client->NotifyKeyboardHeight(0);
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
@@ -462,5 +464,16 @@ int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &
     };
     PostSyncTaskToUI(task, "ArkUICheckPreviewTextParams");
     return ret;
+}
+
+void OnTextChangedListenerImpl::OnDetach()
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnDetach");
+    ContainerScope scope(patternInstanceId_);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetIsImeAttached(false);
 }
 } // namespace OHOS::Ace::NG

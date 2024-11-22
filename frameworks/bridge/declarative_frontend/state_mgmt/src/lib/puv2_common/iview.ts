@@ -33,14 +33,14 @@ interface IView {
     addChild(c: IView): boolean;
     getChildById(elmtId: number) : IView | undefined;
     removeChild(child: IView): boolean;
-    findViewPUInHierarchy(id: number): ViewPU | undefined;
+    findViewInHierarchy(id: number): ViewPU | ViewV2 | undefined;
 
     purgeDeleteElmtId(rmElmtId: number): boolean;
     initialRenderView(): void;
     forceCompleteRerender(deep: boolean): void;
     forceRerenderNode(elmtId: number): void;
     
-    uiNodeNeedUpdateV3(elmtId: number) : void;
+    uiNodeNeedUpdateV2(elmtId: number) : void;
     
     // FIXME replace updateStateVarsOfChildByElmtId by new solution
     updateStateVarsOfChildByElmtId(elmtId, params: Object): void;

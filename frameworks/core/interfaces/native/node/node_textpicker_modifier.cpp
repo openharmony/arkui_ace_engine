@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,9 +95,9 @@ void SetTextPickerSelectedIndex(ArkUINodeHandle node, ArkUI_Uint32* values, ArkU
 
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, values, size);
-        return;
+    } else {
+        NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
     }
-    NodeModifier::SetSelectedIndexMulti(frameNode, values, size);
 }
 
 void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
@@ -108,9 +108,9 @@ void ResetTextPickerSelectedIndex(ArkUINodeHandle node)
     selectedValues.emplace_back(0);
     if (TextPickerModelNG::IsSingle(frameNode)) {
         NodeModifier::SetSelectedIndexSingle(frameNode, selectedValues.data(), selectedValues.size());
-        return;
+    } else {
+        NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
     }
-    NodeModifier::SetSelectedIndexMulti(frameNode, selectedValues.data(), selectedValues.size());
 }
 
 void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style)
@@ -123,7 +123,7 @@ void SetTextPickerTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Char
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-
+ 
     NG::PickerTextStyle textStyle;
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
@@ -573,9 +573,9 @@ void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, cons
     TextPickerModelNG::GetSingleRange(frameNode, rangeResult);
     if (selectedValues[0] >= rangeResult.size()) {
         TextPickerModelNG::SetSelected(frameNode, 0);
-        return;
+    } else {
+        TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
     }
-    TextPickerModelNG::SetSelected(frameNode, selectedValues[0]);
 }
 
 void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
@@ -583,15 +583,15 @@ void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
 {
     if (!TextPickerModelNG::IsCascade(frameNode)) {
         NodeModifier::SetSelectedInternal(count, options, selectedValues);
-        return;
-    }
-    TextPickerModelNG::SetHasSelectAttr(frameNode, true);
-    NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
-    uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
-    if (selectedValues.size() < maxCount) {
-        auto differ = maxCount - selectedValues.size();
-        for (uint32_t i = 0; i < differ; i++) {
-            selectedValues.emplace_back(0);
+    } else {
+        TextPickerModelNG::SetHasSelectAttr(frameNode, true);
+        NodeModifier::ProcessCascadeSelected(options, 0, selectedValues);
+        uint32_t maxCount = TextPickerModelNG::GetMaxCount(frameNode);
+        if (selectedValues.size() < maxCount) {
+            auto differ = maxCount - selectedValues.size();
+            for (uint32_t i = 0; i < differ; i++) {
+                selectedValues.emplace_back(0);
+            }
         }
     }
 }
@@ -607,17 +607,17 @@ void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptio
         for (uint32_t i = 1; i < count; i++) {
             selectedValues.emplace_back(0);
         }
-        return;
-    }
-    for (uint32_t i = 0; i < count; i++) {
-        selectedValues.emplace_back(0);
+    } else {
+        for (uint32_t i = 0; i < count; i++) {
+            selectedValues.emplace_back(0);
+        }
     }
 }
 
 void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
-    for (uint32_t i = 0; i < count; ++i) {
+    for (uint32_t i = 0; i < count; i++) {
         uint32_t val = selectedValues.size() > 0 ? selectedValues.size() - 1 : 0;
         if (i > val) {
             selectedValues.emplace_back(0);
@@ -686,6 +686,24 @@ void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChangeEvent));
+}
+
+void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScrollStopEvent = [node, extraParam](
+                             const std::vector<std::string>& value, const std::vector<double>& indexVector) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_PICKER_SCROLL_STOP;
+        for (size_t i = 0; i < indexVector.size() && i < MAX_SIZE; i++) {
+            event.componentAsyncEvent.data[i].i32 = static_cast<int32_t>(indexVector[i]);
+        }
+        SendArkUIAsyncEvent(&event);
+    };
+    TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStopEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

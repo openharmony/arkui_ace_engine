@@ -260,10 +260,6 @@ public:
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 
-    void UpdateOffsetXToAvoidSideBar();
-    void ResetSideBarControlButtonInfo();
-    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
-
     bool IsFontSizeSettedByDeveloper() const
     {
         return isFontSizeSettedByDeveloper_;
@@ -277,18 +273,6 @@ public:
     {
         shouldResetSubTitleProperty_ = reset;
     }
-
-    RectF GetControlButtonInfo() const
-    {
-        return controlButtonRect_;
-    }
-
-    bool IsNecessaryToAvoidSideBar() const
-    {
-        return needToAvoidSideBar_;
-    }
-
-    void InitSideBarButtonUpdateCallbackIfNeeded();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -309,12 +293,37 @@ public:
         return currentFoldCreaseRegion_;
     }
 
-    void OnAttachToMainTree() override
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
+    void InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode);
+
+    RefPtr<FrameNode> GetBackButtonDialogNode() const
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        InitFoldCreaseRegion();
+        return dialogNode_;
     }
+
+    void UpdateOffsetXToAvoidSideBar();
+    void ResetSideBarControlButtonInfo();
+    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
+
+    RectF GetControlButtonInfo() const
+    {
+        return controlButtonRect_;
+    }
+
+    bool IsNecessaryToAvoidSideBar() const
+    {
+        return needToAvoidSideBar_;
+    }
+
+    void InitSideBarButtonUpdateCallbackIfNeeded();
+    
+    void SetBackButtonDialogNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
+
+    void InitMenuDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -368,15 +377,29 @@ private:
     void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
         NavigationTitleMode titleMode, bool hasSubTitle, bool parentIsNavDest);
+    void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+        NavigationTitleMode titleMode, bool parentIsNavDest);
     void ApplyTitleModifierIfNeeded(const RefPtr<TitleBarNode>& hostNode);
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
+    void HandleLongPress(const RefPtr<FrameNode>& backButtonNode);
+    void HandleLongPressActionEnd();
+    void OnFontScaleConfigurationUpdate() override;
+
     RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
     void UpdateTitlePositionInfo();
     float GetNavLeftPadding(float parentWidth);
+
+    void InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void InitMenuLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPress(
+        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPressActionEnd();
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -434,6 +457,13 @@ private:
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
+
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<FrameNode> dialogNode_;
+
     float moveRatioX_ = 0.0f;
     float minTitleOffsetX_ = 0.0f;
     float maxTitleOffsetX_ = 0.0f;
@@ -445,8 +475,6 @@ private:
     bool needToAvoidSideBar_ = false;
     RectF controlButtonRect_;
     bool isScrolling_ = false;
-    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
-    std::vector<Rect> currentFoldCreaseRegion_;
 };
 
 } // namespace OHOS::Ace::NG

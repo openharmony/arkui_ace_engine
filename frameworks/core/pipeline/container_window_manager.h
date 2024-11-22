@@ -32,6 +32,7 @@ using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
 using WindowGetStartMoveFlagCallback = std::function<uint32_t(void)>;
+using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -135,6 +136,16 @@ public:
         setSystemBarStyleCallback_ = std::move(callback);
     }
 
+    void SetGetFreeMultiWindowModeEnabledStateCallback(GetFreeMultiWindowModeEnabledStateCallback&& callback)
+    {
+        getFreeMultiWindowModeEnabledStateCallback_ = std::move(callback);
+    }
+
+    void SetPerformBackCallback(WindowCallback&& callback)
+    {
+        windowPerformBackCallback_ = callback;
+    }
+
     void WindowMinimize() const
     {
         if (windowMinimizeCallback_) {
@@ -183,6 +194,11 @@ public:
         if (windowStartMoveCallback_) {
             windowStartMoveCallback_();
         }
+    }
+
+    void WindowPerformBack()
+    {
+        windowPerformBackCallback_();
     }
 
     bool GetWindowStartMoveFlag() const
@@ -249,6 +265,14 @@ public:
         }
     }
 
+    bool GetFreeMultiWindowModeEnabledState() const
+    {
+        if (getFreeMultiWindowModeEnabledStateCallback_) {
+            return getFreeMultiWindowModeEnabledStateCallback_();
+        }
+        return false;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -259,6 +283,7 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowCallback windowPerformBackCallback_;
     WindowGetStartMoveFlagCallback WindowGetStartMoveFlagCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;
@@ -268,6 +293,7 @@ private:
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
+    GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
 };
 
 } // namespace OHOS::Ace

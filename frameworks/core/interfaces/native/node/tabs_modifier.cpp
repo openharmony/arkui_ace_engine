@@ -92,11 +92,44 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
 }
-void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 blurStyle)
+void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, static_cast<BlurStyle>(blurStyle));
+    ArkUI_Int32 blurStyle = styleOption->blurStyle;
+    ArkUI_Int32 colorMode = styleOption->colorMode;
+    ArkUI_Int32 adaptiveColor = styleOption->adaptiveColor;
+    ArkUI_Int32 policy = styleOption->policy;
+    ArkUI_Int32 blurType = styleOption->blurType;
+    BlurStyleOption bgBlurStyle;
+    if (blurStyle >= 0) {
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            bgBlurStyle.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+    bool isHasOptions = !((styleOption->colorMode < 0) && (styleOption->adaptiveColor < 0) &&
+        (styleOption->scale < 0) && (styleOption->blurValuesSize == 0));
+    if (isHasOptions) {
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            bgBlurStyle.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        bgBlurStyle.scale = std::clamp(styleOption->scale, 0.0f, 1.0f);
+        BlurOption blurOption;
+        blurOption.grayscale.assign(styleOption->blurValues, styleOption->blurValues + styleOption->blurValuesSize);
+        bgBlurStyle.blurOption = blurOption;
+    }
+    bgBlurStyle.policy = static_cast<BlurStyleActivePolicy>(policy);
+    bgBlurStyle.blurType = static_cast<BlurType>(blurType);
+    bgBlurStyle.isValidColor = styleOption->isValidColor;
+    Color inactiveColor(styleOption->inactiveColor);
+    bgBlurStyle.inactiveColor = inactiveColor;
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 void SetBarOverlap(ArkUINodeHandle node, ArkUI_Bool barOverlap)
 {
@@ -208,7 +241,8 @@ void ResetBarBackgroundBlurStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, BlurStyle::NO_MATERIAL);
+    BlurStyleOption bgBlurStyle;
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 void ResetBarOverlap(ArkUINodeHandle node)
 {
@@ -337,6 +371,51 @@ void ResetAnimateMode(ArkUINodeHandle node)
     TabsModelNG::SetAnimateMode(frameNode, TabAnimateMode::CONTENT_FIRST);
 }
 
+void SetBarBackgroundEffect(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension radius;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        radius = CalcDimension(effectOption->radius, DimensionUnit::VP);
+    } else {
+        radius = CalcDimension(effectOption->radius, DimensionUnit::PX);
+    }
+    Color color(effectOption->color);
+    BlurOption blurOption;
+    blurOption.grayscale.assign(effectOption->blurValues, effectOption->blurValues + effectOption->blurValuesSize);
+
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = effectOption->saturation;
+    option.brightness = effectOption->brightness;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(effectOption->adaptiveColor);
+    option.blurOption = blurOption;
+    option.blurType = static_cast<BlurType>(effectOption->blurType);
+    option.policy = static_cast<BlurStyleActivePolicy>(effectOption->policy);
+    Color inactiveColor(effectOption->inactiveColor);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = effectOption->isValidColor;
+    TabsModelNG::SetBarBackgroundEffect(frameNode, option);
+}
+
+void ResetBarBackgroundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension radius;
+    radius.SetValue(0.0f);
+    double saturation = 1.0f;
+    double brightness = 1.0f;
+    Color color = Color::TRANSPARENT;
+    color.SetValue(Color::TRANSPARENT.GetValue());
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    BlurOption blurOption;
+    EffectOption effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
+    TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -381,6 +460,8 @@ const ArkUITabsModifier* GetTabsModifier()
         ResetTabHeightAuto,
         SetAnimateMode,
         ResetAnimateMode,
+        SetBarBackgroundEffect,
+        ResetBarBackgroundEffect,
     };
 
     return &modifier;
@@ -421,12 +502,16 @@ const CJUITabsModifier* GetCJUITabsModifier()
         ResetAnimationDuration,
         SetTabClip,
         ResetTabClip,
+        SetTabEdgeEffect,
+        ResetTabEdgeEffect,
         SetTabWidthAuto,
         ResetTabWidthAuto,
         SetTabHeightAuto,
         ResetTabHeightAuto,
         SetAnimateMode,
         ResetAnimateMode,
+        SetBarBackgroundEffect,
+        ResetBarBackgroundEffect,
     };
 
     return &modifier;

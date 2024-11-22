@@ -12,14 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/utils/utf_helper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
-
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     const std::string& message, ImageSourceInfo& imageSourceInfo)
+{
+    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), imageSourceInfo);
+}
+
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::u16string& message, ImageSourceInfo& imageSourceInfo)
 {
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -67,13 +73,21 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     return CreateCustomDialog(columnNode);
 }
 
-RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::string& message,
-    const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList, FontWeight fontWeight)
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::string& message, const RefPtr<FrameNode>& iconNode)
+{
+    return ShowLongPressDialog(UtfUtils::Str8ToStr16(message), iconNode);
+}
+
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::u16string& message, const RefPtr<FrameNode>& iconNode)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
+    auto srcLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(srcLayoutProperty, nullptr);
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -81,10 +95,14 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::strin
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolProperty, nullptr);
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
-    symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
+    symbolProperty->UpdateSymbolSourceInfo(srcLayoutProperty->GetSymbolSourceInfoValue());
+    auto symbolColorList = srcLayoutProperty->GetSymbolColorListValue({});
     symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
                             : symbolProperty->UpdateSymbolColorList(symbolColorList);
+    auto fontWeight = srcLayoutProperty->GetFontWeightValue(FontWeight::NORMAL);
     symbolProperty->UpdateFontWeight(fontWeight);
+    auto renderStrategy = srcLayoutProperty->GetSymbolRenderingStrategyValue(0);
+    symbolProperty->UpdateSymbolRenderingStrategy(renderStrategy);
     MarginProperty symbolMargin;
     Dimension dialogHeight;
     if (message.empty()) {
@@ -148,7 +166,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     return overlayManager->ShowDialogWithNode(dialogProperties, columnNode, isRightToLeft);
 }
 
-void AgingAdapationDialogUtil::CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::string& message)
+void AgingAdapationDialogUtil::CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::u16string& message)
 {
     CHECK_NULL_VOID(columnNode);
     auto context = PipelineBase::GetCurrentContext();

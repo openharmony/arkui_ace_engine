@@ -28,6 +28,7 @@ public:
     static int32_t SilentInstall(const std::string& moduleName, const std::function<void()>& callback,
         const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack);
     static bool IsHspExist(const std::string& moduleName, const std::string& pathName);
+    static void InitRouteMap();
 
 private:
     static OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> GetBundleManager();

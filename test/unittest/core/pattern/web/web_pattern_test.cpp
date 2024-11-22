@@ -327,7 +327,7 @@ HWTEST_F(WebPatternTest, GetTouchHandleOverlayTypeTest004, TestSize.Level1)
     EXPECT_FALSE(result);
 
     int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     result = g_webPattern->RunQuickMenu(params, callback);
     EXPECT_FALSE(result);
     g_webPattern->selectOverlayProxy_->Close();
@@ -415,7 +415,7 @@ HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
     g_webPattern->UpdateTouchHandleForOverlay();
 
     int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     g_webPattern->UpdateTouchHandleForOverlay();
     g_webPattern->insertHandle_.reset();
     g_webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();

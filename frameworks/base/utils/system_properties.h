@@ -365,6 +365,8 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetCacheNavigationNodeEnable();
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -470,6 +472,8 @@ public:
     {
         return astcEnabled_;
     }
+
+    static bool GetWindowRectResizeEnabled();
 
     static int32_t GetAstcMaxError()
     {
@@ -581,6 +585,11 @@ public:
         return brightUpPercent_;
     }
 
+    static float GetPageCount()
+    {
+        return pageCount_;
+    }
+
     static bool IsOpIncEnable();
 
     static float GetDragStartDampingRatio();
@@ -591,6 +600,16 @@ public:
 
     static std::string GetWebDebugRenderMode();
 
+    static std::string GetDebugInspectorId();
+
+    static double GetSrollableVelocityScale();
+
+    static double GetSrollableFriction();
+
+    static bool IsNeedResampleTouchPoints();
+
+    static bool IsNeedSymbol();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -598,6 +617,7 @@ private:
     static std::atomic<bool> layoutTraceEnable_;
     static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
@@ -655,11 +675,13 @@ private:
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
+    static float pageCount_;
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
     static float fontScale_;
     static float fontWeightScale_;
+    static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
 };
 

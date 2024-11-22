@@ -203,8 +203,11 @@ public:
     {
         mediaPlayer_.Reset();
         renderSurface_.Reset();
+        RemoveMediaPlayerSurfaceNode();
         renderContextForMediaPlayer_.Reset();
     }
+
+    void RemoveMediaPlayerSurfaceNode();
 
     void OnFullScreenChange(bool isFullScreen);
 
@@ -248,9 +251,18 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    bool GetIsSeeking() const
+    {
+        return isSeeking_;
+    }
+
     void SetIsPrepared(bool isPrepared)
     {
         isPrepared_ = isPrepared;
+    }
+    bool GetIsPrepared() const
+    {
+        return isPrepared_;
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -288,6 +300,21 @@ private:
 
     // Set properties for media player.
     void PrepareMediaPlayer();
+    void SetStartImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetPausetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetStopImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetSeekToImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetRequestFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetExitFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetResetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+
     void SetMethodCall();
 
     bool SetSourceForMediaPlayer();
@@ -307,7 +334,7 @@ private:
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
+    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
 

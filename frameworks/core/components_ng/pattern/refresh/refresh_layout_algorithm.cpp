@@ -97,6 +97,7 @@ void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
     }
 }
+
 // Called to perform layout render node and child.
 void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
@@ -110,7 +111,6 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::TOP_CENTER;
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RefreshPattern>();
@@ -125,37 +125,10 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto paddingOffsetChild = paddingOffset;
-        auto alignChild = align;
-        if (!HasCustomBuilderIndex()) {
-            if (index == layoutWrapper->GetTotalChildCount() - 1) {
-                alignChild = Alignment::TOP_CENTER;
-            }
-        } else {
+        if (HasCustomBuilderIndex()) {
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                auto builderChild = layoutWrapper->GetOrCreateChildByIndex(customBuilderIndex_.value_or(0));
-                CHECK_NULL_VOID(builderChild);
-                auto geometryNode = builderChild->GetGeometryNode();
-                CHECK_NULL_VOID(geometryNode);
-                auto builderHeight = geometryNode->GetMarginFrameSize().Height();
-                alignChild = Alignment::TOP_CENTER;
-                if (index == customBuilderIndex_.value_or(0)) {
-                    auto builderOffset =
-                        NearEqual(builderHeight, builderBaseHeight_) ? 0.0f : (builderBaseHeight_ - builderHeight);
-                    paddingOffsetChild += OffsetF(0.0f, builderOffset);
-                } else {
-                    auto scrollOffset =
-                        NearEqual(builderHeight, builderBaseHeight_) ? builderHeight : builderBaseHeight_;
-                    paddingOffsetChild += OffsetF(0.0f, scrollOffset);
-                }
-                auto translate =
-                    Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
-                    paddingOffsetChild;
-                child->GetGeometryNode()->SetMarginFrameOffset(translate);
-                index++;
-                continue;
-            }
-            if (index == customBuilderIndex_.value_or(0)) {
-                alignChild = Alignment::TOP_CENTER;
+                UpdateChildPosition(layoutWrapper, index, paddingOffsetChild);
+            } else if (index == customBuilderIndex_.value_or(0)) {
                 paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);
                 auto geometryNode = child->GetGeometryNode();
                 CHECK_NULL_VOID(geometryNode);
@@ -171,11 +144,29 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 }
             }
         }
-        auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
-                         paddingOffsetChild;
+        auto translate =
+            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), Alignment::TOP_CENTER) +
+            paddingOffsetChild;
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         index++;
     }
 }
 
+void RefreshLayoutAlgorithm::UpdateChildPosition(
+    LayoutWrapper* layoutWrapper, int32_t index, OffsetF& paddingOffsetChild)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto builderChild = layoutWrapper->GetOrCreateChildByIndex(customBuilderIndex_.value_or(0));
+    CHECK_NULL_VOID(builderChild);
+    auto geometryNode = builderChild->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto builderHeight = geometryNode->GetMarginFrameSize().Height();
+    if (index == customBuilderIndex_.value_or(0)) {
+        auto builderOffset = NearEqual(builderHeight, builderBaseHeight_) ? 0.0f : (builderBaseHeight_ - builderHeight);
+        paddingOffsetChild += OffsetF(0.0f, builderOffset);
+    } else {
+        auto scrollOffset = NearEqual(builderHeight, builderBaseHeight_) ? builderHeight : builderBaseHeight_;
+        paddingOffsetChild += OffsetF(0.0f, scrollOffset);
+    }
+}
 } // namespace OHOS::Ace::NG

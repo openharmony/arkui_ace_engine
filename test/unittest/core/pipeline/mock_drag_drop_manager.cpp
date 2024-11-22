@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,6 @@ namespace {
 int64_t g_proxyId = 0;
 } // namespace
 
-RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
-    const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
-{
-    return nullptr;
-}
-
-RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
-    const RefPtr<UINode>& customNode, const GestureEvent& info)
-{
-    currentId_ = ++g_proxyId;
-    return MakeRefPtr<DragDropProxy>(currentId_);
-}
-
 RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 {
     return nullptr;
@@ -44,8 +31,6 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
 {
     return nullptr;
 }
-
-void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY)
 {

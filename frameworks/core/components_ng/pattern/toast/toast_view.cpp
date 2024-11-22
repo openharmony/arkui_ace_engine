@@ -97,7 +97,6 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateContent(message);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
     textLayoutProperty->UpdateTextColor(textColor.value_or(defaultColor));
     textLayoutProperty->UpdateFontWeight(fontWeight);
@@ -127,6 +126,8 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
     toastContext->UpdateBorderRadius(borderRadius);
     if (toastTheme->GetToastDoubleBorderEnable()) {
         toastContext->UpdateOuterBorderRadius(borderRadius);
+        auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+        CHECK_NULL_VOID(toastProperty);
 
         BorderWidthProperty innerWidthProp;
         innerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastInnerBorderWidth()));
@@ -134,6 +135,7 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(toastTheme->GetToastInnerBorderColor());
         toastContext->UpdateBorderColor(innerColorProp);
+        toastProperty->UpdateBorderWidth(innerWidthProp);
 
         BorderWidthProperty outerWidthProp;
         outerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastOuterBorderWidth()));
@@ -157,7 +159,16 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
+    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD));
+    if (toastInfo.isTypeStyleShadow) {
+        auto colorMode = SystemProperties::GetColorMode();
+        auto shadowStyle = shadow.GetStyle();
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+    }
+    toastContext->UpdateBackShadow(shadow);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;

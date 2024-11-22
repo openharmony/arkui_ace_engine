@@ -25,7 +25,7 @@ class SvgGradient : public SvgNode {
     DECLARE_ACE_TYPE(SvgGradient, SvgNode);
 
 public:
-    explicit SvgGradient(GradientType gradientType);
+    explicit SvgGradient(OHOS::Ace::GradientType gradientType);
     ~SvgGradient() override = default;
 
     static RefPtr<SvgNode> CreateLinearGradient();
@@ -34,7 +34,7 @@ public:
 
     void OnAppendChild(const RefPtr<SvgNode>& child) override;
 
-    const Gradient& GetGradient() const;
+    const OHOS::Ace::Gradient& GetGradient() const;
 
 private:
     static void SetGradientTransform(const std::string& val, SvgGradientAttribute& attr);

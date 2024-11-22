@@ -50,12 +50,12 @@ template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
-    auto taskExecutor = TaskRunnerAdapterFactory::Create(true, "");
+    auto taskExecutor = TaskRunnerAdapterFactory::Create(false, "");
     if (!taskExecutor) {
         delete typePtr;
         return;
     }
-    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor");
+    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor", PriorityType::IDLE);
 }
 
 template<typename T>

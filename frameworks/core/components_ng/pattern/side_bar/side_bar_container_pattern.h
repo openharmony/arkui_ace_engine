@@ -145,15 +145,6 @@ public:
         typeUpdateWidth_ = typeUpdateWidth;
     }
     void GetControlImageSize(Dimension& width, Dimension& height);
-    void OnWindowFocused() override
-    {
-        WindowFocus(true);
-    }
-
-    void OnWindowUnfocused() override
-    {
-        WindowFocus(false);
-    }
 
     bool GetShowSideBar() const
     {
@@ -181,13 +172,16 @@ public:
         isControlButtonSizeCustomed_ = isControlButtonSizeCustomed;
     }
 
+    void SetImageInfo(ImageSourceInfo imageInfo)
+    {
+        imageInfo_ = imageInfo;
+    }
+
 private:
-    void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-    void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
     void DoAnimation();
     void CreateAnimation();
@@ -225,13 +219,12 @@ private:
     void UpdateDividerShadow() const;
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
-    void SetSideBarMask(bool isWindowFocus) const;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode);
     void SetAccessibilityEvent();
     void UpdateControlButtonInfo();
     void UpdateControlButtonImageSize();
-    void UpdateControlButtonImage(std::optional<ImageSourceInfo>& info);
+    void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -258,7 +251,6 @@ private:
     bool isRightToLeft_ = false;
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
-    bool isWindowFocus_ = true;
     bool userSetShowSideBar_ = true;
 
     Dimension realSideBarWidth_ = -1.0_vp;

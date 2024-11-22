@@ -50,23 +50,20 @@ declare_args() {
   # Set atomicservice basic engine so path
   ace_engine_feature_asbng_path = ""
 
-  # Disable in OH Core
-  ace_engine_standard_fonts_enable = true
-
   # Sanitize debug
   ace_sanitize_debug = false
 
   # Enable when build for text engine adapter
   enable_graphic_text_gine = true
 
-  # Don't use currentIdSafely in some function
-  use_origin_scope = false
-
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
 
   # Enable navigation split mode support
   ace_engine_feature_enable_nav_split_mode = false
+
+  # Enable aps framework support
+  ace_engine_feature_enable_aps = false
 }
 
 enable_dump_drawcmd = false
@@ -266,6 +263,13 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = false
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.graphic_graphic_2d_ext)) {
+  if (ace_engine_feature_enable_aps) {
+    ace_common_defines += [ "APS_ENABLE" ]
+  }
+}
+
 if (ace_engine_feature_asbng_path == "") {
   ace_engine_feature_asbng_path_enable = false
 } else {
@@ -303,11 +307,6 @@ foreach(item, ace_platforms) {
       (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
     current_platform = item
   }
-}
-
-if ((defined(use_origin_scope) && use_origin_scope) ||
-    (defined(force_scope) && force_scope)) {
-  ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
 
 if (ace_engine_feature_enable_split_mode) {

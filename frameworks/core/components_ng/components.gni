@@ -115,6 +115,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
           "//third_party/bounds_checking_function/include",
+          "//foundation/graphic/graphic_surface/interfaces/inner_api/surface",
         ]
         deps += [
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",

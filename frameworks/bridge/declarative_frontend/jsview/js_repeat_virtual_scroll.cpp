@@ -168,7 +168,7 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     };
 
     auto onSetActiveRange = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onSetActiveRange")](
-                            uint32_t from, uint32_t to) -> void {
+                            int32_t from, int32_t to) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto params = ConvertToJSValues(from, to);
         func->Call(JSRef<JSObject>(), params.size(), params.data());

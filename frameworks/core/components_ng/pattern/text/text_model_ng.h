@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
+    void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override;
     void SetFont(const Font& value) override;
@@ -35,6 +36,8 @@ public:
     void SetTextColor(const Color& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
+    void SetTextCaretColor(const Color& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
@@ -63,7 +66,7 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
-    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
@@ -85,8 +88,8 @@ public:
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
-    static void InitText(FrameNode* frameNode, std::string& value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
+    static void InitText(FrameNode* frameNode, std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);
@@ -128,6 +131,7 @@ public:
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
+    static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
@@ -136,7 +140,7 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
-    static std::string GetContent(FrameNode* frameNode);
+    static std::u16string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
@@ -162,6 +166,8 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static void ResetCaretColor(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);

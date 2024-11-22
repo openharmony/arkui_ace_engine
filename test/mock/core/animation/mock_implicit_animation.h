@@ -71,7 +71,7 @@ public:
     void End();
 
     /**
-     * @brief jump to the end of the animation and update the value
+     * @brief jump to the end of the animation and update the value. Requires one more frame to finish.
      */
     void JumpToEnd();
 

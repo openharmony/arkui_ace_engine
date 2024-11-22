@@ -40,10 +40,6 @@ public:
     virtual void SetEnableAnimation(bool IsEnableAnimation) = 0;
     virtual void SetAutoHalfFold(bool IsAutoHalfFold) = 0;
     virtual void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) = 0;
-
-private:
-    static std::unique_ptr<FolderStackModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_MODEL_H

@@ -101,6 +101,7 @@ bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
+float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
@@ -329,5 +330,30 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
 bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
+}
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return UNDEFINED_PARAM;
+}
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    return 0.0;
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    return 0.0;
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
 }
 } // namespace OHOS::Ace

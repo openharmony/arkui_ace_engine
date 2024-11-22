@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_UTILS_H
 
 #include <cstdint>
+
 #include "core/common/container.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ImageUtils {
 public:
     static void PostToUI(std::function<void()>&& task, const std::string& name,
         const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::VIP);
+
+    static void PostDelayedTaskToUI(std::function<void()>&& task, uint32_t delayTime, const std::string& name,
+        const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::VIP);
+
     static void PostToBg(std::function<void()>&& task, const std::string& name,
         const int32_t containerId = Container::CurrentId(), PriorityType priorityType = PriorityType::IMMEDIATE);
 
@@ -37,6 +41,8 @@ private:
     // helper function to post task to [TaskType] thread
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName,
         PriorityType priorityType = PriorityType::LOW);
+    static void PostDelayedTask(std::function<void()>&& task, TaskExecutor::TaskType taskType, uint32_t delayTime,
+        const char* taskTypeName, PriorityType priorityType = PriorityType::LOW);
 };
 } // namespace OHOS::Ace::NG
 

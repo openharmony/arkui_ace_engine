@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color DEFAULT_TEXT_COLOR = Color(0xe5000000);
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
+constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -88,9 +89,19 @@ public:
             theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
+            theme->textStyle_.SetFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");
+            auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+            theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
+            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
+            theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
+            theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
+            theme->cameraSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.camera");
+            theme->scanSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.line_viewfinder");
+            theme->imageSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.picture");
+            theme->chevronRightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
         }
     };
 
@@ -203,6 +214,46 @@ public:
     {
         return aiWriteIsSupport_;
     }
+
+    const Color& GetUrlDisabledColor() const
+    {
+        return urlDisabledColor_;
+    }
+
+    const Color& GetUrlDefaultColor() const
+    {
+        return urlDefaultColor_;
+    }
+
+    const Color& GetUrlHoverColor() const
+    {
+        return urlHoverColor_;
+    }
+
+    const Color& GetUrlPressColor() const
+    {
+        return urlPressColor_;
+    }
+
+    uint32_t GetCameraSymbolId() const
+    {
+        return cameraSymbolId_;
+    }
+
+    uint32_t GetScanSymbolId() const
+    {
+        return scanSymbolId_;
+    }
+
+    uint32_t GetImageSymbolId() const
+    {
+        return imageSymbolId_;
+    }
+
+    uint32_t GetChevronRightSymbolId() const
+    {
+        return chevronRightSymbolId_;
+    }
 protected:
     RichEditorTheme() = default;
 
@@ -213,8 +264,8 @@ private:
     Dimension scrollbarMinHeight_ = 4.0_vp;
     Edge padding_;
 
-    // UX::insert cursor offset up by 32vp
-    Dimension insertCursorOffset_ = 32.0_vp;
+    // UX::insert cursor offset up by 24vp
+    Dimension insertCursorOffset_ = 24.0_vp;
     TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
@@ -231,6 +282,14 @@ private:
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
     std::string aiWriteIsSupport_;
+    Color urlDisabledColor_ = Color(0x99000000);
+    Color urlDefaultColor_ = Color(0x99000000);
+    Color urlHoverColor_ = Color(0x99000000);
+    Color urlPressColor_ = Color(0x99000000);
+    uint32_t cameraSymbolId_;
+    uint32_t scanSymbolId_;
+    uint32_t imageSymbolId_;
+    uint32_t chevronRightSymbolId_;
 };
 } // namespace OHOS::Ace::NG
 

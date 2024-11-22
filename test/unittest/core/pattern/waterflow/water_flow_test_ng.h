@@ -47,6 +47,7 @@ protected:
 
     WaterFlowModelNG CreateWaterFlow();
     void CreateItemsInRepeat(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateItemsInLazyForEach(int32_t itemNumber, std::function<float(int32_t)>&& getHeight);
     void CreateWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
     WaterFlowItemModelNG CreateWaterFlowItem(float mainSize);
     void CreateFocusableWaterFlowItems(int32_t itemNumber = TOTAL_LINE_NUMBER);
@@ -60,6 +61,7 @@ protected:
     void AddItemsAtSlot(int32_t itemNumber, float height, int32_t slotIdx);
     AssertionResult IsEqualTotalOffset(float expectOffset);
     void HandleDrag(float offset);
+    RectF GetLazyChildRect(int32_t itemIndex);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<WaterFlowPattern> pattern_;

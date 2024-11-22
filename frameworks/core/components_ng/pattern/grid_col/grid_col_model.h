@@ -33,11 +33,6 @@ public:
     virtual void SetSpan(const V2::GridContainerSize& span) = 0;
     virtual void SetOffset(const V2::GridContainerSize& offset) = 0;
     virtual void SetOrder(const V2::GridContainerSize& order) = 0;
-
-private:
-    static std::unique_ptr<GridColModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif

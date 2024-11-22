@@ -81,7 +81,7 @@ bool HspSilentInstall::IsHspExist(const std::string &moduleName, const std::stri
 {
     auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
-    auto container = OHOS::Ace::Container::Current();
+    auto container = OHOS::Ace::Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto navigationRoute = container->GetNavigationRoute();
     CHECK_NULL_RETURN(navigationRoute, false);
@@ -104,5 +104,14 @@ bool HspSilentInstall::IsHspExist(const std::string &moduleName, const std::stri
         return true;
     }
     return false;
+}
+
+void HspSilentInstall::InitRouteMap()
+{
+    auto container = OHOS::Ace::Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto navigationRoute = container->GetNavigationRoute();
+    CHECK_NULL_VOID(navigationRoute);
+    navigationRoute->InitRouteMap();
 }
 } // namespace OHOS::NavPushPathHelper

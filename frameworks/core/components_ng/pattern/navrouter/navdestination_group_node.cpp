@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -30,12 +32,15 @@ constexpr int32_t OPACITY_TITLE_DURATION = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
+constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
+constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
     if (contentNode_) {
         contentNode_->Clean();
     }
+    ReleaseTextNodeList();
 }
 
 RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -48,6 +53,31 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     navDestinationNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(navDestinationNode);
     return navDestinationNode;
+}
+
+bool NavDestinationGroupNode::IsNeedContentTransition()
+{
+    if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return true;
+    }
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) != NavigationSystemTransitionType::NONE;
+}
+
+bool NavDestinationGroupNode::TransitionContentInValid()
+{
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) == NavigationSystemTransitionType::NONE
+        && mode_ == NavDestinationMode::STANDARD;
+}
+
+bool NavDestinationGroupNode::IsNeedTitleTransition()
+{
+    if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return true;
+    }
+    if (mode_ == NavDestinationMode::STANDARD) {
+        return (systemTransitionType_ & NavigationSystemTransitionType::TITLE) != NavigationSystemTransitionType::NONE;
+    }
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) != NavigationSystemTransitionType::NONE;
 }
 
 void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
@@ -86,6 +116,7 @@ void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
         ProcessShallowBuilder();
     }
     FrameNode::OnAttachToMainTree(recursive);
+    SetFreeze(false, true);
 }
 
 void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)
@@ -123,6 +154,15 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
     return customNode_.Upgrade();
 }
 
+int32_t NavDestinationGroupNode::GetNavigationNodeId() const
+{
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, DEFAULT_NODE_SLOT);
+    auto navigationNode = pattern->GetNavigationNode();
+    CHECK_NULL_RETURN(navigationNode, DEFAULT_NODE_SLOT);
+    return navigationNode->GetId();
+}
+
 void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
 {
     mode_ = mode;
@@ -157,20 +197,24 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
         SetIsOnAnimation(true);
         SetTransitionType(PageTransitionType::ENTER_PUSH);
         auto frameSize = GetGeometryNode()->GetFrameSize();
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            GetRenderContext()->ClipWithRRect(
-                RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-        } else {
-            GetRenderContext()->ClipWithRRect(
-                RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-                RadiusF(EdgeF(0.0f, 0.0f)));
+        if (needContentAnimation) {
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                GetRenderContext()->ClipWithRRect(
+                    RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            } else {
+                GetRenderContext()->ClipWithRRect(
+                    RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
+            }
+            GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
         }
-        GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-        if (titleBarNode) {
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
         }
         return;
@@ -178,11 +222,13 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
     SetTransitionType(PageTransitionType::EXIT_PUSH);
     SetIsOnAnimation(true);
     GetRenderContext()->RemoveClipWithRRect();
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (needContentAnimation) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     if (NeedRemoveInPush()) {
         GetEventHub<EventHub>()->SetEnabledInternal(false);
     }
-    if (titleBarNode) {
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -192,43 +238,59 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     auto frameSize = GetGeometryNode()->GetFrameSize();
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
-        GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         }
         return;
     }
-    GetRenderContext()->UpdateTranslateInXY(
-        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        GetRenderContext()->UpdateTranslateInXY(
+            { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY(
             { frameSize.Width() * TITLE_OFFSET_PERCENT  * isRTL, 0.0f });
     }
 }
 
-void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, const int32_t animationId)
 {
+    if (animationId != animationId_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return;
+    }
+    SetIsOnAnimation(false);
     if (transitionIn) {
         if (GetTransitionType() != PageTransitionType::ENTER_PUSH) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
             return;
         }
         GetRenderContext()->RemoveClipWithRRect();
-        SetIsOnAnimation(false);
         return;
     }
-    SetIsOnAnimation(false);
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (IsNeedContentTransition()) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
+    CHECK_NULL_VOID(navigation);
+    bool isInvisible = IsNodeInvisible(navigation);
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH && isInvisible) {
         GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
         SetJSViewActive(false);
     }
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    if (titleBarNode) {
+    if (titleBarNode && IsNeedTitleTransition()) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -238,11 +300,15 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     auto frameSize = GetGeometryNode()->GetFrameSize();
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (isTransitionIn) {
         SetTransitionType(PageTransitionType::ENTER_POP);
         GetRenderContext()->RemoveClipWithRRect();
-        GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY(
                 { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
         }
@@ -251,10 +317,12 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     SetIsOnAnimation(true);
     SetTransitionType(PageTransitionType::EXIT_POP);
     GetEventHub<EventHub>()->SetEnabledInternal(false);
-    GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+            RadiusF(EdgeF(0.0f, 0.0f)));
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -262,31 +330,44 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
 void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
-        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         }
         return;
     }
     auto frameSize = GetGeometryNode()->GetFrameSize();
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-    } else {
-        GetRenderContext()->ClipWithRRect(
-            RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-            RadiusF(EdgeF(0.0f, 0.0f)));
-    }
     float isRTL = GetLanguageDirection();
-    GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+        } else {
+            GetRenderContext()->ClipWithRRect(
+                RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
+        }
+        GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
     }
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback()
+bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
 {
+    if (animationId_ != animationId) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "animation id is invalid, curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return false;
+    }
+    SetIsOnAnimation(false);
     if (GetTransitionType() != PageTransitionType::EXIT_POP) {
         // has another transition, just return
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
@@ -303,12 +384,13 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback()
     if (!IsCacheNode() && GetContentNode()) {
         GetContentNode()->Clean();
     }
-    SetIsOnAnimation(false);
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (IsNeedContentTransition()) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     auto preTitleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    if (preTitleNode) {
+    if (preTitleNode && IsNeedTitleTransition()) {
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         preTitleNode->GetRenderContext()->SetOpacity(1.0);
         auto titleBarNode = AceType::DynamicCast<TitleBarNode>(preTitleNode);
@@ -323,6 +405,10 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback()
 
 void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 {
+    if (systemTransitionType_ == NavigationSystemTransitionType::NONE
+        || systemTransitionType_ == NavigationSystemTransitionType::TITLE) {
+        return;
+    }
     auto contentNode = AceType::DynamicCast<FrameNode>(GetContentNode());
     CHECK_NULL_VOID(contentNode);
     auto context = contentNode->GetRenderContext();
@@ -337,6 +423,9 @@ void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacityAnimation(bool isTransitionIn)
 {
+    if (!IsNeedTitleTransition()) {
+        return nullptr;
+    }
     CHECK_NULL_RETURN(GetTitleBarNode(), nullptr);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
     CHECK_NULL_RETURN(titleNode, nullptr);
@@ -368,6 +457,9 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
 {
+    if (!IsNeedTitleTransition()) {
+        return nullptr;
+    }
     auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
@@ -397,50 +489,74 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
     });
 }
 
-void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(bool isPopPage)
+void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
+    bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
 {
     if (isPopPage) {
-        CollectTextNodeAsRenderGroup();
+        CollectTextNodeAsRenderGroup(isPopPage);
     } else {
+        CHECK_NULL_VOID(proxy);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this)] () {
+        pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this),
+            weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] () {
             auto navDestination = weakNavDestiniation.Upgrade();
             CHECK_NULL_VOID(navDestination);
-            navDestination->CollectTextNodeAsRenderGroup();
+            auto proxy = weakProxy.Upgrade();
+            if (proxy && proxy->GetIsFinished()) {
+                return;
+            }
+            navDestination->CollectTextNodeAsRenderGroup(false);
         });
+        pipeline->RequestFrame();
     }
 }
 
-void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup(bool isPopPage)
 {
     ReleaseTextNodeList();
-    std::queue<RefPtr<UINode>> auxiliaryQueue;
-    auxiliaryQueue.push(contentNode_);
-    while (!auxiliaryQueue.empty()) {
-        auto currentNode = auxiliaryQueue.front();
-        auxiliaryQueue.pop();
-        if (!currentNode) {
-            continue;
-        }
+    std::queue<RefPtr<UINode>> childrenLoopQueue;
+    childrenLoopQueue.push(contentNode_);
+
+    // only the first 50 text nodes will be marked, avoid too much time for traversal
+    // and off-screen drawing at first few frames
+    int32_t remainTextNodeNeedRenderGroup = MAX_RENDER_GROUP_TEXT_NODE_COUNT;
+    while (!childrenLoopQueue.empty() && remainTextNodeNeedRenderGroup > 0) {
+        auto currentNode = childrenLoopQueue.front();
+        childrenLoopQueue.pop();
+        CHECK_NULL_CONTINUE(currentNode);
         for (auto& child : currentNode->GetChildren()) {
-            if (!child) {
-                continue;
+            if (remainTextNodeNeedRenderGroup <= 0) {
+                break;
             }
-            auxiliaryQueue.push(child);
+            CHECK_NULL_CONTINUE(child);
+            childrenLoopQueue.push(child);
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            if (!frameNode || frameNode->GetTag() != V2::TEXT_ETS_TAG) {
+            if (!frameNode || (frameNode->GetTag() != V2::TEXT_ETS_TAG)) {
                 continue;
             }
             auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-            if (!layoutProperty) {
+            if (!layoutProperty ||
+                (layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
                 continue;
             }
-            if ((layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) &&
-                frameNode->GetRenderContext()) {
-                frameNode->GetRenderContext()->UpdateRenderGroup(true);
-                textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            auto& renderContext = frameNode->GetRenderContext();
+            if (!renderContext || renderContext->GetRenderGroupValue(false)) {
+                continue;
             }
+            renderContext->SetMarkNodeGroup(isPopPage ||
+                (renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT));
+            textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            --remainTextNodeNeedRenderGroup;
+            auto pattern = AceType::DynamicCast<TextPattern>(frameNode->GetPattern());
+            CHECK_NULL_CONTINUE(pattern);
+            pattern->RegisterAfterLayoutCallback([weakRenderContext = WeakPtr<RenderContext>(renderContext)]() {
+                auto renderContext = weakRenderContext.Upgrade();
+                if (renderContext && !(renderContext->GetRenderGroupValue(false))) {
+                    renderContext->SetMarkNodeGroup(
+                        renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT);
+                }
+            });
         }
     }
 }
@@ -449,10 +565,59 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
 {
     for (auto& child : textNodeList_) {
         auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
-        if (textNode && textNode->GetRenderContext()) {
-            textNode->GetRenderContext()->UpdateRenderGroup(false);
+        if (!textNode) {
+            continue;
+        }
+        auto pattern = AceType::DynamicCast<TextPattern>(textNode->GetPattern());
+        if (pattern) {
+            pattern->UnRegisterAfterLayoutCallback();
+        }
+        auto renderContext = textNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetMarkNodeGroup(renderContext->GetRenderGroupValue(false));
         }
     }
     textNodeList_.clear();
+}
+
+void NavDestinationGroupNode::CleanContent()
+{
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto shallowBuilder = pattern->GetShallowBuilder();
+    if (shallowBuilder) {
+        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+    }
+    if (GetContentNode()) {
+        GetContentNode()->Clean(false, true);
+    }
+}
+
+bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
+{
+    auto navigaiton = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigaiton, false);
+    int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
+    bool isInvisible = index_ < lastStandardIndex;
+    return isInvisible;
+}
+
+std::string NavDestinationGroupNode::ToDumpString()
+{
+    std::string dumpString;
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    dumpString.append("| [");
+    dumpString.append(std::to_string(index_));
+    dumpString.append("]{ ID: ");
+    dumpString.append(std::to_string(navDestinationPattern->GetNavDestinationId()));
+    dumpString.append(", Name: \"");
+    dumpString.append(navDestinationPattern->GetName());
+    dumpString.append("\", Mode: \"");
+    dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
+    dumpString.append("\", IsOnShow: \"");
+    dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\" }");
+    return dumpString;
 }
 } // namespace OHOS::Ace::NG

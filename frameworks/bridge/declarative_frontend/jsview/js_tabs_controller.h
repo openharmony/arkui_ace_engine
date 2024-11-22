@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -38,19 +38,32 @@ public:
 
     void PreloadItems(const JSCallbackInfo& args);
 
+    void SetTabBarTranslate(const JSCallbackInfo& args);
+
+    void SetTabBarOpacity(const JSCallbackInfo& args);
+
     const RefPtr<TabController>& GetController() const
     {
         return controller_;
     }
 
-    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
+    void SetTabsController(const RefPtr<NG::TabsControllerNG>& tabsController)
     {
-        swiperController_ = swiperController;
+        auto oldTabsController = tabsControllerWeak_.Upgrade();
+        if (oldTabsController) {
+            // old controller bind another tabs.
+            oldTabsController->StartShowTabBar();
+            oldTabsController->SetOnChangeImpl(nullptr);
+        }
+        if (tabsController) {
+            tabsController->SetOnChangeImpl(onChangeImpl_);
+        }
+        tabsControllerWeak_ = tabsController;
     }
 
-    const RefPtr<SwiperController>& GetSwiperController() const
+    const WeakPtr<NG::TabsControllerNG>& GetTabsController() const
     {
-        return swiperController_;
+        return tabsControllerWeak_;
     }
 
     void SetInstanceId(int32_t id)
@@ -58,10 +71,20 @@ public:
         instanceId_ = id;
     }
 
+    void SetOnChangeImpl(const OnChangeFunc& onChangeImpl)
+    {
+        onChangeImpl_ = onChangeImpl;
+        auto tabsController = tabsControllerWeak_.Upgrade();
+        if (tabsController) {
+            tabsController->SetOnChangeImpl(onChangeImpl);
+        }
+    }
+
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<TabController> controller_;
-    RefPtr<SwiperController> swiperController_; // used by ng structure
+    WeakPtr<NG::TabsControllerNG> tabsControllerWeak_; // used by ng structure
+    OnChangeFunc onChangeImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTabsController);
 };

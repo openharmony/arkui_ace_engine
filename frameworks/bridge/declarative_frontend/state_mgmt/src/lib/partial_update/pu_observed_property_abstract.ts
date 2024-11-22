@@ -275,7 +275,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // notify owning ViewPU and peers of a variable assignment
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
-  protected notifyPropertyHasChangedPU() {
+  protected notifyPropertyHasChangedPU() : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
@@ -357,9 +357,15 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value) &&
-      !ObserveV2.IsMakeObserved(value)) || typeof value === 'number' || typeof value === 'string' ||
-      typeof value === 'boolean' || value === undefined || value === null);
+    let res = ((typeof value === 'object' && typeof value !== 'function' &&
+      !ObserveV2.IsObservedObjectV2(value) &&
+      !ObserveV2.IsMakeObserved(value)) ||
+      typeof value === 'number' ||
+      typeof value === 'string' ||
+      typeof value === 'boolean' ||
+      value === undefined ||
+      value === null);
+
     if (!res) {
       errorReport.varValueCheckFailed({
         customComponent: this.debugInfoOwningView(),
@@ -386,7 +392,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           customComponent: this.debugInfoOwningView(),
           variableDeco: this.debugInfoDecorator(),
           variableName: this.info(),
-          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract, excluding function and V2 @Observed/@Trace object`,
           value: value
         });
     }
@@ -470,8 +476,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       // not access recording 
       return;
     }
-    if (elmtId === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
+    if (elmtId === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V1 state to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }

@@ -97,6 +97,8 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     CalculateItemStartIndex();
     auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
+    layoutAlgorithm->SetCachedItemsPosition(cachedItemPosition_);
+    layoutAlgorithm->SetCachedIndex(forwardCachedIndex_, backwardCachedIndex_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     if (childrenSize_ && ListChildrenSizeExist()) {
         if (!posMap_) {
@@ -116,7 +118,15 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
         spaceWidth_, laneGutter_, itemTotalCount_ };
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
+    return MakeRefPtr<ListItemGroupPaintMethod>(
+        divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
+}
+
+void ListItemGroupPattern::SyncItemsToCachedItemPosition()
+{
+    itemPosition_.insert(cachedItemPosition_.begin(), cachedItemPosition_.end());
+    cachedItemPosition_.swap(itemPosition_);
+    itemPosition_.clear();
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -133,12 +143,16 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (cacheParam) {
         forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
         backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
+        adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
         layoutAlgorithm->SetCacheParam(std::nullopt);
-        return false;
+    }
+    if (lanes_ != layoutAlgorithm->GetLanes()) {
+        lanes_ = layoutAlgorithm->GetLanes();
+        ClearCachedItemPosition();
     }
     itemPosition_ = layoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = layoutAlgorithm->GetCachedItemPosition();
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
-    lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
     layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
     mainSize_ = layoutAlgorithm->GetMainSize();
@@ -150,6 +164,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
     startHeaderPos_ = layoutAlgorithm->GetStartHeaderPos();
     endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
+    adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
+    adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();
@@ -180,7 +196,7 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 {
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
         float averageHeight = 0.0f;
-        float estimateHeight = GetEstimateHeight(averageHeight, headerMainSize, footerMainSize);
+        float estimateHeight = GetEstimateHeight(averageHeight, headerMainSize, footerMainSize, spaceWidth_);
         if (layoutedItemInfo_.value().endIndex >= itemTotalCount_ - 1) {
             return height + estimateHeight - targetPos.second;
         } else {
@@ -191,7 +207,7 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 }
 
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
-    float headerMainSize, float footerMainSize) const
+    float headerMainSize, float footerMainSize, float spaceWidth) const
 {
     auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
@@ -223,7 +239,7 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
         totalItem -= 1;
         totalHeight += footerMainSize;
     }
-    return totalHeight + averageHeight * totalItem + paddingAndMargin;
+    return totalHeight + averageHeight * totalItem + paddingAndMargin - spaceWidth;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()
@@ -270,7 +286,7 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
     auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = pattern->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([weakPattern, change, flag]() {
             auto pattern = weakPattern.Upgrade();
@@ -367,6 +383,13 @@ void ListItemGroupPattern::ClearItemPosition()
     itemPosition_.clear();
 }
 
+void ListItemGroupPattern::ClearCachedItemPosition()
+{
+    cachedItemPosition_.clear();
+    forwardCachedIndex_ = -1;
+    backwardCachedIndex_ = INT_MAX;
+}
+
 void ListItemGroupPattern::CalculateItemStartIndex()
 {
     int32_t headerIndex = -1;
@@ -393,52 +416,218 @@ void ListItemGroupPattern::CalculateItemStartIndex()
     itemStartIndex_ = itemStartIndex;
 }
 
-void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCount)
+void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (forward) {
-        host->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount);
+        host->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount, show);
     } else {
         int32_t index = itemTotalCount_ + itemStartIndex_;
-        host->SetActiveChildRange(index, index, cacheCount, 0);
+        host->SetActiveChildRange(index, index, cacheCount, 0, show);
+    }
+    if (show && headerIndex_ >= 0) {
+        host->GetOrCreateChildByIndex(headerIndex_);
+    }
+    if (show && footerIndex_ >= 0) {
+        host->GetOrCreateChildByIndex(footerIndex_);
+    }
+    if (show) {
+        host->RebuildRenderContextTree();
     }
 }
 
-int32_t ListItemGroupPattern::UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView)
+void ListItemGroupPattern::UpdateActiveChildRange(bool show)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!itemPosition_.empty()) {
+        auto start = itemStartIndex_ + itemPosition_.begin()->first;
+        auto end = itemStartIndex_ + itemPosition_.rbegin()->first;
+        host->SetActiveChildRange(start, end);
+    } else if (headerIndex_ >= 0 || footerIndex_ >= 0) {
+        host->SetActiveChildRange(-1, itemStartIndex_ - 1);
+    } else {
+        host->RemoveAllChildInRenderTree();
+    }
+    if (headerIndex_ >= 0) {
+        host->GetOrCreateChildByIndex(headerIndex_);
+    }
+    if (footerIndex_ >= 0) {
+        host->GetOrCreateChildByIndex(footerIndex_);
+    }
+    if (show) {
+        host->RebuildRenderContextTree();
+    }
+}
+
+int32_t ListItemGroupPattern::UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount)
 {
     int32_t endIndex = (outOfView || itemPosition_.empty()) ? -1 : itemPosition_.rbegin()->first;
-    int32_t limit = std::min(endIndex + cacheCount * lanes_, itemTotalCount_ - 1);
-    int32_t forwardCachedIndex = std::clamp(forwardCachedIndex_, endIndex, limit);
-    if (outOfView && forwardCachedIndex < forwardCachedIndex_) {
-        UpdateActiveChildRange(true, forwardCachedIndex + 1);
+    int32_t endLimit = std::min(endIndex + cacheCount * lanes_, itemTotalCount_ - 1);
+    int32_t forwardCachedIndex = std::clamp(forwardCachedIndex_, endIndex, endLimit);
+    auto iter = cachedItemPosition_.begin();
+    while (iter != cachedItemPosition_.end()) {
+        if (iter->first >= endIndex + 1 && iter->first <= endLimit) {
+            iter++;
+            continue;
+        }
+        iter = cachedItemPosition_.erase(iter);
     }
-    forwardCachedIndex_ = forwardCachedIndex;
-    return forwardCachedIndex_;
+    if (cachedItemPosition_.find(forwardCachedIndex) == cachedItemPosition_.end() ||
+        cachedItemPosition_.find(endIndex + 1) == cachedItemPosition_.end()) {
+        forwardCachedIndex = endIndex;
+        cachedItemPosition_.clear();
+    }
+    if (outOfView && forwardCachedIndex < forwardCachedIndex_) {
+        UpdateActiveChildRange(true, forwardCachedIndex + 1, show);
+    }
+    return forwardCachedIndex;
 }
 
-int32_t ListItemGroupPattern::UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView)
+int32_t ListItemGroupPattern::UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount)
 {
     int32_t startIndex = (outOfView || itemPosition_.empty()) ? itemTotalCount_ : itemPosition_.begin()->first;
-    int32_t limit = std::max(startIndex - cacheCount * lanes_, 0);
-    int32_t backwardCachedIndex = std::clamp(backwardCachedIndex_, limit, startIndex);
-    if (outOfView && backwardCachedIndex > backwardCachedIndex_) {
-        UpdateActiveChildRange(false, itemTotalCount_ - backwardCachedIndex);
+    int32_t startLimit = std::max(startIndex - cacheCount * lanes_, 0);
+    if (startLimit % lanes_ != 0) {
+        startLimit += (lanes_ - startLimit % lanes_);
     }
-    backwardCachedIndex_ = backwardCachedIndex;
-    return backwardCachedIndex_;
+    int32_t backwardCachedIndex = std::clamp(backwardCachedIndex_, startLimit, startIndex);
+    auto iter = cachedItemPosition_.begin();
+    while (iter != cachedItemPosition_.end()) {
+        if (iter->first >= startLimit && iter->first <= startIndex - 1) {
+            iter++;
+            continue;
+        }
+        iter = cachedItemPosition_.erase(iter);
+    }
+    if (cachedItemPosition_.find(backwardCachedIndex) == cachedItemPosition_.end() ||
+        cachedItemPosition_.find(startIndex - 1) == cachedItemPosition_.end()) {
+        backwardCachedIndex = startIndex;
+        cachedItemPosition_.clear();
+    }
+    if (outOfView && backwardCachedIndex > backwardCachedIndex_) {
+        UpdateActiveChildRange(false, itemTotalCount_ - backwardCachedIndex, show);
+    }
+    return backwardCachedIndex;
 }
 
-void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline,
-    int32_t cached, ListMainSizeValues listSizeValues)
+std::pair<int32_t, int32_t> ListItemGroupPattern::UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache)
 {
-    ACE_SCOPED_TRACE("Group LayoutCache:%d,%d", forward, cached);
+    int32_t forwardRes = -1;
+    int32_t backwardRes = INT_MAX;
+    int32_t startIndex = itemPosition_.begin()->first;
+    int32_t startLimit = std::max(startIndex - backwardCache * lanes_, 0);
+    if (startLimit % lanes_ != 0) {
+        startLimit += (lanes_ - startLimit % lanes_);
+    }
+    int32_t backwardCachedIndex = std::clamp(backwardCachedIndex_, startLimit, startIndex);
+    int32_t endIndex = itemPosition_.rbegin()->first;
+    int32_t endLimit = std::min(endIndex + forwardCache * lanes_, itemTotalCount_ - 1);
+    int32_t forwardCachedIndex = std::clamp(forwardCachedIndex_, endIndex, endLimit);
+    auto iter = cachedItemPosition_.begin();
+    while (iter != cachedItemPosition_.end()) {
+        if ((iter->first >= startLimit && iter->first <= startIndex - 1) ||
+            (iter->first >= endIndex + 1 && iter->first <= endLimit)) {
+            iter++;
+            continue;
+        }
+        iter = cachedItemPosition_.erase(iter);
+    }
+    if (cachedItemPosition_.find(backwardCachedIndex) == cachedItemPosition_.end() ||
+        cachedItemPosition_.find(startIndex - 1) == cachedItemPosition_.end()) {
+        backwardRes = startIndex;
+    } else {
+        backwardRes = backwardCachedIndex;
+    }
+    if (cachedItemPosition_.find(forwardCachedIndex) == cachedItemPosition_.end() ||
+        cachedItemPosition_.find(endIndex + 1) == cachedItemPosition_.end()) {
+        forwardRes = endIndex;
+    } else {
+        forwardRes = forwardCachedIndex;
+    }
+    return { forwardRes, backwardRes };
+}
+
+CachedIndexInfo ListItemGroupPattern::UpdateCachedIndex(
+    bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache)
+{
+    CachedIndexInfo res;
+    auto host = GetHost();
+    if (!host) {
+        forwardCachedIndex_ = -1;
+        backwardCachedIndex_ = INT_MAX;
+        return res;
+    }
+    auto listNode = GetListFrameNode();
+    bool show = listNode && listNode->GetLayoutProperty<ListLayoutProperty>() ?
+        listNode->GetLayoutProperty<ListLayoutProperty>()->GetShowCachedItemsValue(false) : false;
+    if (itemTotalCount_ == -1 || host->CheckNeedForceMeasureAndLayout()) {
+        CalculateItemStartIndex();
+        itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_;
+    }
+    if (outOfView) {
+        ClearItemPosition();
+    }
+    if (reCache || reCache_) {
+        ClearCachedItemPosition();
+        UpdateActiveChildRange(show);
+        reCache_ = false;
+    }
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
+    if (forwardCache > -1 && backwardCache > -1 && !itemPosition_.empty()) {
+        auto cached = UpdateCachedIndexOmni(forwardCache, backwardCache);
+        forwardCachedIndex_ = cached.first;
+        backwardCachedIndex_ = cached.second;
+        int32_t startIndex = itemPosition_.begin()->first;
+        int32_t endIndex = itemPosition_.rbegin()->first;
+        res.forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes - 1) / lanes;
+        res.forwardCacheMax = (itemTotalCount_ - 1 - endIndex + lanes - 1) / lanes;
+        res.backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes - 1) / lanes;
+        res.backwardCacheMax = (startIndex + lanes - 1) / lanes;
+    } else if (forwardCache > -1) {
+        forwardCachedIndex_ = UpdateCachedIndexForward(outOfView, show, forwardCache);
+        backwardCachedIndex_ = INT_MAX;
+        int32_t endIndex = (outOfView || itemPosition_.empty()) ? -1 : itemPosition_.rbegin()->first;
+        res.forwardCachedCount = (forwardCachedIndex_ - endIndex + lanes - 1) / lanes;
+        res.forwardCacheMax = (itemTotalCount_ - 1 - endIndex + lanes - 1) / lanes;
+    } else if (backwardCache > -1) {
+        forwardCachedIndex_ = -1;
+        backwardCachedIndex_ = UpdateCachedIndexBackward(outOfView, show, backwardCache);
+        int32_t startIndex = (outOfView || itemPosition_.empty()) ? itemTotalCount_ : itemPosition_.begin()->first;
+        res.backwardCachedCount = (startIndex - backwardCachedIndex_ + lanes - 1) / lanes;
+        res.backwardCacheMax = (startIndex + lanes - 1) / lanes;
+    }
+    return res;
+}
+
+bool ListItemGroupPattern::NeedCacheForward(const LayoutWrapper* listWrapper) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto listProperty = AceType::DynamicCast<ListLayoutProperty>(listWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(listProperty, true);
+    auto listPadding = listProperty->CreatePaddingAndBorder().Offset();
+    auto offset = host->GetGeometryNode()->GetMarginFrameOffset();
+    if (GreatNotEqual(GetMainAxisOffset(offset, axis_) + headerMainSize_, GetMainAxisOffset(listPadding, axis_))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int64_t deadline,
+    int32_t forwardCached, int32_t backwardCached, ListMainSizeValues listSizeValues)
+{
     auto listNode = GetListFrameNode();
     CHECK_NULL_VOID(listNode);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) - cached;
-    if (cacheCount < 1) {
+    auto cacheCountForward = listLayoutProperty->GetCachedCountWithDefault() - forwardCached;
+    auto cacheCountBackward = listLayoutProperty->GetCachedCountWithDefault() - backwardCached;
+    if (cacheCountForward < 1 && cacheCountBackward < 1) {
         return;
     }
     auto host = GetHost();
@@ -448,8 +637,11 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
     ListItemGroupCacheParam param = {
-        .forward = forward,
-        .cacheCount = cacheCount,
+        .forward = listSizeValues.forward,
+        .backward = listSizeValues.backward,
+        .show = listLayoutProperty->GetShowCachedItemsValue(false),
+        .cacheCountForward = cacheCountForward,
+        .cacheCountBackward = cacheCountBackward,
         .forwardCachedIndex = forwardCachedIndex_,
         .backwardCachedIndex = backwardCachedIndex_,
         .deadline = deadline,
@@ -457,10 +649,15 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, bool
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,
-        listSizeValues.prevContentMainSize, forward);
+        listSizeValues.prevContentMainSize, listSizeValues.forward);
     host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
     FrameNode::ProcessOffscreenNode(host);
+    if ((!NearZero(adjustRefPos_) || !NearZero(adjustTotalSize_)) && !(childrenSize_ && ListChildrenSizeExist())) {
+        listPattern->UpdateChildPosInfo(indexInList_, adjustRefPos_, adjustTotalSize_);
+        adjustRefPos_ = 0.0f;
+        adjustTotalSize_ = 0.0f;
+    }
 }
 
 void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
@@ -473,22 +670,58 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
     }
 }
 
+float ListItemGroupPattern::GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const
+{
+    float offset = 0;
+    CHECK_NULL_RETURN(listNode, offset);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    return GetMainAxisOffset(padding.Offset(), axis_);
+}
+
+bool ListItemGroupPattern::FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    OffsetF selfOffset = geometryNode->GetPaddingOffset();
+    float mainPos = GetMainAxisOffset(selfOffset, axis_) + headerMainSize_;
+    float listPadding = GetListPaddingOffset(listNode);
+    return GreatNotEqual(mainPos, listPadding);
+}
+
+bool ListItemGroupPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex)
+{
+    if (count == 0 || (count > 0 && index > startIndex) ||
+        (count < 0 && index >= startIndex)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> listNode = GetListFrameNode();
+    CHECK_NULL_RETURN(listNode, false);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    if (!listPattern->GetMaintainVisibleContentPosition()) {
+        return false;
+    }
+
+    if (startIndex == 0 && index == 0 && count > 0 && FirstItemFullVisible(listNode)) {
+        return false;
+    }
+    listPattern->MarkNeedReEstimateOffset();
+    return true;
+}
+
 void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (itemPosition_.empty()) {
         return;
     }
-    auto startIndex = itemPosition_.begin()->first;
-    if (count == 0 || (count > 0 && index > startIndex) ||
-        (count < 0 && index >= startIndex)) {
-        return;
-    }
-
-    RefPtr<FrameNode> listNode = GetListFrameNode();
-    CHECK_NULL_VOID(listNode);
-    auto listPattern = listNode->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(listPattern);
-    if (!listPattern->GetMaintainVisibleContentPosition()) {
+    index -= itemStartIndex_;
+    int32_t startIndex = itemPosition_.begin()->first;
+    if (!CheckDataChangeOutOfStart(index, count, startIndex)) {
         return;
     }
 
@@ -517,7 +750,6 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
             }
         }
     }
-    listPattern->MarkNeedReEstimateOffset();
 }
 
 void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

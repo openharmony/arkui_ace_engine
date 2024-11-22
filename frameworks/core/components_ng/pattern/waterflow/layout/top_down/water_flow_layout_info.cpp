@@ -257,13 +257,24 @@ void WaterFlowLayoutInfo::Reset()
     segmentCache_.clear();
 }
 
+void WaterFlowLayoutInfo::ResetFooter()
+{
+    footerIndex_ = -1;
+}
+
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
     TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
+    int32_t itemCount = 0;
+    for (const auto& item : items_[0]) {
+        itemCount += static_cast<int32_t>(item.second.size());
+    }
+    if (resetFrom >= itemCount) {
+        return;
+    }
     maxHeight_ = 0.0f;
-    jumpIndex_ = EMPTY_JUMP_INDEX;
-    startIndex_ = resetFrom;
     ClearCacheAfterIndex(resetFrom - 1);
+    startIndex_ = std::max(resetFrom - 1, 0);
 }
 
 int32_t WaterFlowLayoutInfo::GetCrossCount() const
@@ -329,20 +340,22 @@ bool WaterFlowLayoutInfo::ReachStart(float prevOffset, bool firstLayout) const
     return scrollUpToReachTop || scrollDownToReachTop;
 }
 
-bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
+bool WaterFlowLayoutInfo::ReachEnd(float prevOffset, bool firstLayout) const
 {
     if (!offsetEnd_) {
         return false;
     }
     float minOffset = lastMainSize_ - maxHeight_;
-    auto scrollDownToReachEnd = GreatNotEqual(prevOffset, minOffset) && LessOrEqual(currentOffset_, minOffset);
+    auto scrollDownToReachEnd =
+        (GreatNotEqual(prevOffset, minOffset) || firstLayout) && LessOrEqual(currentOffset_, minOffset);
     auto scrollUpToReachEnd = LessNotEqual(prevOffset, minOffset) && GreatOrEqual(currentOffset_, minOffset);
     return scrollDownToReachEnd || scrollUpToReachEnd;
 }
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
-    if (NearZero(currentOffset_) && !endPosArray_.empty() && NearZero(endPosArray_[0].first)) {
+    if (NearZero(currentOffset_ + TopMargin()) && !endPosArray_.empty() &&
+        NearZero(endPosArray_[0].first - TopMargin())) {
         return endPosArray_[0].second;
     }
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,

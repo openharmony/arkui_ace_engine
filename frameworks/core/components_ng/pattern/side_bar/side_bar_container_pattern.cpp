@@ -52,7 +52,6 @@ constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE = 2;
 constexpr float RATIO_NEGATIVE = -1.0f;
 constexpr float RATIO_ZERO = 0.0f;
-constexpr float DEFAULT_SIDE_BAR_MASK_OPACITY = 0.6f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -64,8 +63,8 @@ constexpr static int32_t SIDE_BAR_INDEX = 2;
 constexpr static int32_t CONTENT_INDEX = 3;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_SIZE = 40.0_vp;    // version 13
-constexpr Dimension DEFAULT_CONTROL_BUTTON_FOCUS_LINE_SIZE = 2.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH_SMALL = 24.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL = 24.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
@@ -102,7 +101,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
@@ -596,24 +595,11 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     auto buttonRadius = sideBarTheme->GetControlButtonRadius();
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
+    buttonLayoutProperty->UpdateCreateWithLabel(false);
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(DEFAULT_CONTROL_BUTTON_SIZE), CalcLength(DEFAULT_CONTROL_BUTTON_SIZE)));
-        buttonRadius = sideBarTheme->GetControlButtonBackboardRadius();
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_RETURN(buttonPattern, nullptr);
-        buttonPattern->SetBlendColor(sideBarTheme->GetControlButtonBackboardColorPress(),
-            sideBarTheme->GetControlButtonBackboardColorHover());
-        buttonPattern->SetFocusBorderColor(sideBarTheme->GetControlButtonBackboardStrokeColor());
-        buttonPattern->SetFocusBorderWidth(DEFAULT_CONTROL_BUTTON_FOCUS_LINE_SIZE);
-        auto backBoardColor = sideBarTheme->GetControlButtonBackboardColor();
-        buttonRenderContext->UpdateBackgroundColor(backBoardColor);
-    }
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusDependence(FocusDependence::SELF);
@@ -641,13 +627,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     if (!info.has_value()) {
         info = std::make_optional<ImageSourceInfo>();
         info->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-        Color controlButtonColor;
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            controlButtonColor = sideBarTheme->GetControlButtonIconColor();
-            UpdateControlButtonImage(info);
-        } else {
-            controlButtonColor = sideBarTheme->GetControlImageColor();
-        }
+        Color controlButtonColor = sideBarTheme->GetControlImageColor();
         info->SetFillColor(controlButtonColor);
     }
     imageInfo_ = info.value();
@@ -661,6 +641,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     GetControlImageSize(imageWidth, imageHeight);
     CalcSize imageCalcSize((CalcLength(imageWidth)), CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+    InitImageErrorCallback(sideBarTheme, imgNode);
     return imgNode;
 }
 
@@ -921,9 +902,6 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     if (!imgSourceInfo.has_value()) {
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
         imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-            UpdateControlButtonImage(imgSourceInfo);
-        }
         imgSourceInfo->SetFillColor(controlButtonColor);
     }
     imageInfo_ = imgSourceInfo.value();
@@ -1263,41 +1241,6 @@ Dimension SideBarContainerPattern::ConvertPxToPercent(float value) const
     return result;
 }
 
-void SideBarContainerPattern::WindowFocus(bool isFocus)
-{
-    isWindowFocus_ = isFocus;
-    SetSideBarMask(isFocus);
-}
-
-void SideBarContainerPattern::OnColorConfigurationUpdate()
-{
-    SetSideBarMask(isWindowFocus_);
-}
-
-void SideBarContainerPattern::SetSideBarMask(bool isWindowFocus) const
-{
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto sideBarTheme = context->GetTheme<SideBarTheme>();
-    CHECK_NULL_VOID(sideBarTheme);
-    auto sideBarNode = GetSideBarNodeOrFirstChild();
-    CHECK_NULL_VOID(sideBarNode);
-
-    Color maskColor = sideBarTheme->GetSideBarUnfocusColor().BlendOpacity(DEFAULT_SIDE_BAR_MASK_OPACITY);
-    auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
-    maskProperty->SetColor((!isWindowFocus && sideBarNode->IsVisible()) ? maskColor : Color::TRANSPARENT);
-
-    auto sideBarRenderContext = sideBarNode->GetRenderContext();
-    CHECK_NULL_VOID(sideBarRenderContext);
-    sideBarRenderContext->UpdateProgressMask(maskProperty);
-
-    auto buttonNode = GetControlButtonNode();
-    CHECK_NULL_VOID(buttonNode);
-    auto buttonRenderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(buttonRenderContext);
-    buttonRenderContext->UpdateProgressMask(maskProperty);
-}
-
 void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& buttonNode)
 {
     if (longPressEvent_) {
@@ -1405,26 +1348,13 @@ void SideBarContainerPattern::SetAccessibilityEvent()
     controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
 }
 
-void SideBarContainerPattern::UpdateControlButtonInfo()
-{
-    if (updateCallBack_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        updateCallBack_(host);
-    }
-}
-
 void SideBarContainerPattern::UpdateControlButtonImageSize()
 {
     auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
     auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
-        CHECK_NULL_VOID(sideBarTheme);
-        controlButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
-        controlButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
+        controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH_SMALL;
+        controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL;
     }
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1439,18 +1369,42 @@ void SideBarContainerPattern::UpdateControlButtonImageSize()
     }
 }
 
-void SideBarContainerPattern::UpdateControlButtonImage(std::optional<ImageSourceInfo>& info)
+void SideBarContainerPattern::UpdateControlButtonInfo()
 {
-    CHECK_NULL_VOID(info.has_value());
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;
-    if (sideBarStatus_ == SideBarStatus::HIDDEN) {
-        info->SetResourceId(isStartPos ?
-            InternalResource::ResourceId::SIDE_BAR_OPEN : InternalResource::ResourceId::SIDE_BAR_CLOSE);
-    } else {
-        info->SetResourceId(isStartPos ?
-            InternalResource::ResourceId::SIDE_BAR_CLOSE : InternalResource::ResourceId::SIDE_BAR_OPEN);
+    if (updateCallBack_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        updateCallBack_(host);
     }
+}
+
+void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,
+    const RefPtr<FrameNode>& imgNode)
+{
+    auto eventHub = imgNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto errorCallback = [weakPattern = WeakClaim(this), weakNode = WeakClaim(RawPtr(imgNode)),
+        weakTheme = WeakClaim(RawPtr(sideBarTheme))] (const LoadImageFailEvent& info) {
+        auto imgNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(imgNode);
+        auto imageLayoutProperty = imgNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+        if (!imageSourceInfo.has_value()) {
+            return;
+        }
+        auto infoValue = imageSourceInfo.value();
+        infoValue.SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        auto sideBarTheme = weakTheme.Upgrade();
+        CHECK_NULL_VOID(sideBarTheme);
+        auto controlButtonColor = sideBarTheme->GetControlImageColor();
+        infoValue.SetFillColor(controlButtonColor);
+        imageLayoutProperty->UpdateImageSourceInfo(infoValue);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetImageInfo(infoValue);
+        imgNode->MarkModifyDone();
+    };
+    eventHub->SetOnError(errorCallback);
 }
 } // namespace OHOS::Ace::NG

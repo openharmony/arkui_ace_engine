@@ -23,6 +23,8 @@ TextOverlayModifier::TextOverlayModifier()
 {
     paintOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     AttachProperty(paintOffset_);
+    cursorColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    AttachProperty(cursorColor_);
     selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     selectedUrlColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     AttachProperty(selectedColor_);
@@ -99,6 +101,12 @@ void TextOverlayModifier::SetPrintOffset(const OffsetF& paintOffset)
 {
     CHECK_NULL_VOID(paintOffset_);
     paintOffset_->Set(paintOffset);
+}
+
+void TextOverlayModifier::SetCursorColor(uint32_t cursorColor)
+{
+    CHECK_NULL_VOID(cursorColor_);
+    cursorColor_->Set(static_cast<int32_t>(cursorColor));
 }
 
 void TextOverlayModifier::SetSelectedColor(uint32_t selectedColor)

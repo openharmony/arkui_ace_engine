@@ -278,7 +278,7 @@ void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
     routerPageHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
+void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
 }
@@ -293,7 +293,7 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
     layoutDoneHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleNavDestinationSwitchFunc(const NavDestinationSwitchHandleFunc& func)
+void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
 {
     navDestinationSwitchHandleFunc_ = func;
 }

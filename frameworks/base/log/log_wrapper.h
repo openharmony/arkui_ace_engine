@@ -76,7 +76,6 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define TAG_LOGE(tag, fmt, ...) PRINT_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
-#define LOG_DESTROY() LOGI("destroyed")
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)
@@ -115,97 +114,101 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 
 namespace OHOS::Ace {
 enum AceLogTag : uint8_t {
-    ACE_DEFAULT_DOMAIN = 0,   // C03900
-    ACE_ALPHABET_INDEXER,     // C03901
-    ACE_COUNTER,              // C03902
-    ACE_SUB_WINDOW,           // C03903
-    ACE_FORM,                 // C03904
-    ACE_DRAG,                 // C03905
-    ACE_VIDEO,                // C03906
-    ACE_COMPONENT_SNAPSHOT,   // C03907
-    ACE_CANVAS,               // C03908
-    ACE_REFRESH,              // C03909
-    ACE_SCROLL,               // C0390A
-    ACE_SCROLLABLE,           // C0390B
-    ACE_FONT,                 // C0390C
-    ACE_OVERLAY,              // C0390D
-    ACE_DIALOG_TIMEPICKER,    // C0390E
-    ACE_DIALOG,               // C0390F
-    ACE_PANEL,                // C03910
-    ACE_MENU,                 // C03911
-    ACE_TEXTINPUT,            // C03912
-    ACE_TEXT,                 // C03913
-    ACE_TEXT_FIELD,           // C03914
-    ACE_SWIPER,               // C03915
-    ACE_TABS,                 // C03916
-    ACE_BLANK,                // C03917
-    ACE_GRIDROW,              // C03918
-    ACE_INPUTTRACKING,        // C03919
-    ACE_RICH_TEXT,            // C0391A
-    ACE_WEB,                  // C0391B
-    ACE_FOCUS,                // C0391C
-    ACE_MOUSE,                // C0391D
-    ACE_GESTURE,              // C0391E
-    ACE_IMAGE,                // C0391F
-    ACE_RATING,               // C03920
-    ACE_LIST,                 // C03921
-    ACE_NAVIGATION,           // C03922
-    ACE_WATERFLOW,            // C03923
-    ACE_ACCESSIBILITY,        // C03924
-    ACE_ROUTER,               // C03925
-    ACE_THEME,                // C03926
-    ACE_BORDER_IMAGE,         // C03927
-    ACE_GRID,                 // C03928
-    ACE_PLUGIN_COMPONENT,     // C03929
-    ACE_UIEXTENSIONCOMPONENT, // C0392A
-    ACE_IF,                   // C0392B
-    ACE_FOREACH,              // C0392C
-    ACE_LAZY_FOREACH,         // C0392D
-    ACE_GAUGE,                // C0392E
-    ACE_HYPERLINK,            // C0392F
-    ACE_ANIMATION,            // C03930
-    ACE_XCOMPONENT,           // C03931
-    ACE_AUTO_FILL,            // C03932
-    ACE_KEYBOARD,             // C03933
-    ACE_UIEVENT,              // C03934
-    ACE_UI_SERVICE,           // C03935 ace_engine/adapter/ohos/services/uiservice/src/ui_service_hilog.h
-    ACE_DISPLAY_SYNC,         // C03936
-    ACE_RESOURCE,             // C03937
-    ACE_SIDEBAR,              // C03938
-    ACE_GEOMETRY_TRANSITION,  // C03939
-    ACE_DOWNLOAD_MANAGER,     // C0393A
-    ACE_WINDOW_SCENE,         // C0393B
-    ACE_NODE_CONTAINER,       // C0393C
-    ACE_NATIVE_NODE,          // C0393D
-    ACE_ISOLATED_COMPONENT,   // C0393E
-    ACE_MARQUEE,              // C0393F
-    ACE_OBSERVER,             // C03940
-    ACE_EMBEDDED_COMPONENT,   // C03941
-    ACE_TEXT_CLOCK,           // C03942
-    ACE_FOLDER_STACK,         // C03943
-    ACE_SELECT_COMPONENT,     // C03944
-    ACE_STATE_STYLE,          // C03945
-    ACE_SEARCH,               // C03946
-    ACE_STATE_MGMT,           // C03947
-    ACE_REPEAT,               // C03948
-    ACE_SHEET,                // C03949
-    ACE_CANVAS_COMPONENT,     // C0394A
-    ACE_SCROLL_BAR,           // C0394B
-    ACE_MOVING_PHOTO,         // C0394C
-    ACE_ARK_COMPONENT,        // C0394D
-    ACE_WINDOW,               // C0394E
-    ACE_SECURITYUIEXTENSION,  // C0394F
-    ACE_WINDOW_PIPELINE,      // C03950
-    ACE_INPUTKEYFLOW,         // C03951
-    ACE_APPBAR,               // C03952
-    ACE_SELECT_OVERLAY,       // C03953
-    ACE_CLIPBOARD,            // C03954
-    ACE_VISUAL_EFFECT,        // C03955
-    ACE_SECURITY_COMPONENT,   // C03956
-    ACE_LAYOUT_INSPECTOR,     // C03957
-    ACE_MEDIA_QUERY,          // C03958
-    ACE_LAYOUT,               // C03959
-    ACE_STYLUS,               // C03960
+    ACE_DEFAULT_DOMAIN = 0,        // C03900
+    ACE_ALPHABET_INDEXER = 1,      // C03901
+    ACE_COUNTER = 2,               // C03902
+    ACE_SUB_WINDOW = 3,            // C03903
+    ACE_FORM = 4,                  // C03904
+    ACE_DRAG = 5,                  // C03905
+    ACE_VIDEO = 6,                 // C03906
+    ACE_COMPONENT_SNAPSHOT = 7,    // C03907
+    ACE_CANVAS = 8,                // C03908
+    ACE_REFRESH = 9,               // C03909
+    ACE_SCROLL = 10,               // C0390A
+    ACE_SCROLLABLE = 11,           // C0390B
+    ACE_FONT = 12,                 // C0390C
+    ACE_OVERLAY = 13,              // C0390D
+    ACE_DIALOG_TIMEPICKER = 14,    // C0390E
+    ACE_DIALOG = 15,               // C0390F
+    ACE_PANEL = 16,                // C03910
+    ACE_MENU = 17,                 // C03911
+    ACE_TEXTINPUT = 18,            // C03912
+    ACE_TEXT = 19,                 // C03913
+    ACE_TEXT_FIELD = 20,           // C03914
+    ACE_SWIPER = 21,               // C03915
+    ACE_TABS = 22,                 // C03916
+    ACE_BLANK = 23,                // C03917
+    ACE_GRIDROW = 24,              // C03918
+    ACE_INPUTTRACKING = 25,        // C03919
+    ACE_RICH_TEXT = 26,            // C0391A
+    ACE_WEB = 27,                  // C0391B
+    ACE_FOCUS = 28,                // C0391C
+    ACE_MOUSE = 29,                // C0391D
+    ACE_GESTURE = 30,              // C0391E
+    ACE_IMAGE = 31,                // C0391F
+    ACE_RATING = 32,               // C03920
+    ACE_LIST = 33,                 // C03921
+    ACE_NAVIGATION = 34,           // C03922
+    ACE_WATERFLOW = 35,            // C03923
+    ACE_ACCESSIBILITY = 36,        // C03924
+    ACE_ROUTER = 37,               // C03925
+    ACE_THEME = 38,                // C03926
+    ACE_BORDER_IMAGE = 39,         // C03927
+    ACE_GRID = 40,                 // C03928
+    ACE_PLUGIN_COMPONENT = 41,     // C03929
+    ACE_UIEXTENSIONCOMPONENT = 42, // C0392A
+    ACE_IF = 43,                   // C0392B
+    ACE_FOREACH = 44,              // C0392C
+    ACE_LAZY_FOREACH = 45,         // C0392D
+    ACE_GAUGE = 46,                // C0392E
+    ACE_HYPERLINK = 47,            // C0392F
+    ACE_ANIMATION = 48,            // C03930
+    ACE_XCOMPONENT = 49,           // C03931
+    ACE_AUTO_FILL = 50,            // C03932
+    ACE_KEYBOARD = 51,             // C03933
+    ACE_UIEVENT = 52,              // C03934
+    ACE_UI_SERVICE = 53,           // C03935 ace_engine/adapter/ohos/services/uiservice/src/ui_service_hilog.h
+    ACE_DISPLAY_SYNC = 54,         // C03936
+    ACE_RESOURCE = 55,             // C03937
+    ACE_SIDEBAR = 56,              // C03938
+    ACE_GEOMETRY_TRANSITION = 57,  // C03939
+    ACE_DOWNLOAD_MANAGER = 58,     // C0393A
+    ACE_WINDOW_SCENE = 59,         // C0393B
+    ACE_NODE_CONTAINER = 60,       // C0393C
+    ACE_NATIVE_NODE = 61,          // C0393D
+    ACE_ISOLATED_COMPONENT = 62,   // C0393E
+    ACE_MARQUEE = 63,              // C0393F
+    ACE_OBSERVER = 64,             // C03940
+    ACE_EMBEDDED_COMPONENT = 65,   // C03941
+    ACE_TEXT_CLOCK = 66,           // C03942
+    ACE_FOLDER_STACK = 67,         // C03943
+    ACE_SELECT_COMPONENT = 68,     // C03944
+    ACE_STATE_STYLE = 69,          // C03945
+    ACE_SEARCH = 70,               // C03946
+    ACE_STATE_MGMT = 71,           // C03947
+    ACE_REPEAT = 72,               // C03948
+    ACE_SHEET = 73,                // C03949
+    ACE_CANVAS_COMPONENT = 74,     // C0394A
+    ACE_SCROLL_BAR = 75,           // C0394B
+    ACE_MOVING_PHOTO = 76,         // C0394C
+    ACE_ARK_COMPONENT = 77,        // C0394D
+    ACE_WINDOW = 78,               // C0394E
+    ACE_SECURITYUIEXTENSION = 79,  // C0394F
+    ACE_WINDOW_PIPELINE = 80,      // C03950
+    ACE_INPUTKEYFLOW = 81,         // C03951
+    ACE_APPBAR = 82,               // C03952
+    ACE_SELECT_OVERLAY = 83,       // C03953
+    ACE_CLIPBOARD = 84,            // C03954
+    ACE_VISUAL_EFFECT = 85,        // C03955
+    ACE_SECURITY_COMPONENT = 86,   // C03956
+    ACE_MEDIA_QUERY = 87,          // C03957
+    ACE_LAYOUT_INSPECTOR = 88,     // C03958
+    ACE_LAYOUT = 89,               // C03959
+    ACE_STYLUS = 90,               // C0395A
+    ACE_INDICATOR = 91,            // C0395B
+    ACE_BADGE = 92,                // C0395C
+    ACE_QRCODE = 93,               // C0395D
+    ACE_PROGRESS = 94,             // C0395E
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

@@ -54,6 +54,7 @@ public:
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
+    SizeF GetOriginImageSize() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
@@ -99,7 +100,7 @@ public:
     void OnDataReady();
 
     // Needed to restore the relevant containerId from the originating thread
-    int32_t GetContainerId()
+    int32_t GetContainerId() const
     {
         return containerId_;
     }

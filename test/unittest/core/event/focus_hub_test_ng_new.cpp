@@ -137,8 +137,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     eventHub1->AttachHost(frameNode1);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetOrCreateFocusHub();
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
@@ -147,7 +147,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->CalculatePosition();
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_FALSE(focusHub->CalculatePosition());
-    focusHub1->focusType_ = FocusType::NODE;
+    focusHub->focusStyleType_ = FocusStyleType::NONE;
+    focusHub->isFocusActiveWhenFocused_ = true;
     EXPECT_FALSE(focusHub->PaintAllFocusState());
     EXPECT_FALSE(focusHub->CalculatePosition());
 }
@@ -1048,7 +1049,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0078, TestSize.Level1)
 /**
  * @tc.name: FocusHubTestNg079
  * @tc.desc: Test the function TryRequestFocus.
- * @tc.type: FUNC
+ * @tc.type: FUNC obsolete
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
 {
@@ -1066,7 +1067,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(res);
 }
 
 /**
@@ -1389,12 +1390,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     focusHub1->parentFocusable_ = true;
     focusHub1->focusType_ = FocusType::NODE;
     focusHub1->focusCallbackEvents_->tabIndex_ = 1;
+    focusHub1->currentFocus_ = true;
     KeyEvent keyEvent;
     TabIndexNodeList tabIndexNodes;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->isTabJustTriggerOnKeyEvent_ = false;
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    context->isFocusingByTab_ = false;
     EXPECT_TRUE(focusHub->HandleFocusByTabIndex(keyEvent));
 }
 

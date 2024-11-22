@@ -344,7 +344,8 @@ HWTEST_F(CalendarDialogViewTestNg, SetCalendarIdealSize001, TestSize.Level1)
     auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     ASSERT_NE(layoutProps, nullptr);
     CalendarDialogView::CreateDividerNode();
-    CalendarDialogView::SetCalendarIdealSize(theme, layoutProps);
+    Dimension weekHeight = Dimension(0.0f);
+    CalendarDialogView::SetCalendarIdealSize(theme, layoutProps, weekHeight);
     CalendarSettingData settingData;
     auto monthFrameNode = FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });

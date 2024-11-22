@@ -28,8 +28,6 @@ const INDEX_TWO: number = 2;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
-const SINGLE_LINE_HEIGHT: number = 56;
-const DOUBLE_LINE_HEIGHT: number = 72;
 // 资源数值
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 // 左边尺寸常量
@@ -121,7 +119,7 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
 
 @Extend(Text)
 function primaryTitleStyles(fontStyle: FontStyle) {
-  .fontSize(`${getResourceValue('sys.float.Subtitle_L')}fp`)
+  .fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`)
   .fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'))
   .fontWeight(fontStyle?.fontWeight)
   .maxLines(fontStyle?.maxLines)
@@ -181,12 +179,20 @@ RESOURCE_CACHE_MAP.set('sys.float.outline_extra_larger', { resourceId: 125830951
 RESOURCE_CACHE_MAP.set('sys.float.corner_radius_level4', { resourceId: 125830909, defaultValue: 8 });
 // Subtitle_S: 125830969, 14
 RESOURCE_CACHE_MAP.set('sys.float.Subtitle_S', { resourceId: 125830969, defaultValue: 14 });
-// Subtitle_L: 125830967, 18
-RESOURCE_CACHE_MAP.set('sys.float.Subtitle_L', { resourceId: 125830967, defaultValue: 18 });
+// subheader_title_font_size: 125834265, 18
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_size', { resourceId: 125834265, defaultValue: 18 });
 // Body_L: 125830970, 16
 RESOURCE_CACHE_MAP.set('sys.float.Body_L', { resourceId: 125830970, defaultValue: 16 });
 // interactive_disable: 125831067, 0.4
 RESOURCE_CACHE_MAP.set('sys.float.interactive_disable', { resourceId: 125831067, defaultValue: 0.4 });
+// subheader_single_title_height: 125834252 56
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_title_height', { resourceId: 125834252, defaultValue: 56 });
+// subheader_single_subtitle_height: 125834253 56
+RESOURCE_CACHE_MAP.set('sys.float.subheader_single_subtitle_height', { resourceId: 125834253, defaultValue: 56 });
+// subheader_double_height: 125834254 72
+RESOURCE_CACHE_MAP.set('sys.float.subheader_double_height', { resourceId: 125834254, defaultValue: 72 });
+// subheader_title_font_weight: 125834255 700
+RESOURCE_CACHE_MAP.set('sys.float.subheader_title_font_weight', { resourceId: 125834255, defaultValue: 700 });
 
 @Component
 export struct SubHeader {
@@ -521,11 +527,13 @@ export struct SubHeader {
 
   private getMinHeight(): Length {
     if (this.secondaryTitle && this.icon) {
-      return SINGLE_LINE_HEIGHT;
+      return getResourceValue('sys.float.subheader_single_subtitle_height');
     } else if (this.secondaryTitle && this.primaryTitle) {
-      return DOUBLE_LINE_HEIGHT;
+      return getResourceValue('sys.float.subheader_double_height');
+    } else if (this.primaryTitle || this.select) {
+      return getResourceValue('sys.float.subheader_single_title_height');
     }
-    return SINGLE_LINE_HEIGHT;
+    return getResourceValue('sys.float.subheader_single_subtitle_height');
   }
 
   private getTextArrowPaddingLeft(): LengthMetrics {
@@ -552,6 +560,11 @@ export struct SubHeader {
       padding = {
         start: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
         end: LengthMetrics.vp(getResourceValue('sys.float.padding_level6')),
+      }
+    } else if (this.select) {
+      padding = {
+        top: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
+        bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level2')),
       }
     }
     return padding;
@@ -639,13 +652,12 @@ export struct SubHeader {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: FontWeight.Bold,
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
-        .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -653,12 +665,12 @@ export struct SubHeader {
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
-        .width('100%')
         .margin({
           top: getResourceValue('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
     }
+    .width('100%')
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
   }
@@ -672,7 +684,6 @@ export struct SubHeader {
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontSecondaryColor,
       })
-      .width('100%')
       .attributeModifier(this.secondaryTitleModifier)
       .commonListPadding()
   }
@@ -703,12 +714,11 @@ export struct SubHeader {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: FontWeight.Bold,
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight'),
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontPrimaryColor,
       })
-      .width('100%')
       .attributeModifier(this.primaryTitleModifier)
       .commonContentPadding()
   }

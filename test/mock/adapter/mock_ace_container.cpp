@@ -16,6 +16,9 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Platform {
+namespace {
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
+}
 sptr<IRemoteObject> AceContainer::GetToken()
 {
     return token_;
@@ -37,6 +40,16 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return nullptr;
 }
 
+uint32_t AceContainer::GetParentWindowType() const
+{
+    return DEFAULT_WINDOW_TYPE;
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    return DEFAULT_WINDOW_TYPE;
+}
+
 Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
 {
     return {};
@@ -47,5 +60,8 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return nullptr;
 }
 
+void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent) {}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
+
 } // namespace OHOS::Ace::Platform

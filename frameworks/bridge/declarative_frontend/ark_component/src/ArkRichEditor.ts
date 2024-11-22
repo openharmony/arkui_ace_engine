@@ -377,7 +377,7 @@ class RichEditorBarStateModifier extends ModifierWithKey<BarState> {
     super(value);
   }
   static identity: Symbol = Symbol('richEditorBarState');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().richEditor.resetBarState(node);
     } else {
@@ -502,6 +502,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   editMenuOptions(value: EditMenuOptions): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
+    return this;
+  }
+  barState(value: BarState): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
     return this;
   }
 }

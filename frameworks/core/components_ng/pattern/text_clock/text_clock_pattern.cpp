@@ -41,7 +41,7 @@ constexpr int32_t MAX_LENGTH_OF_MILLIS = 3;
 constexpr int32_t SIZE_OF_AM_PM_STRING = 2;
 constexpr int32_t SIZE_OF_TIME_TEXT = 30;
 constexpr int32_t BOUNDARY_OF_AM_PM = 12;
-constexpr int32_t LOG_INTERVAL_TIME = 60 * 1000;
+constexpr int32_t LOG_INTERVAL_TIME = 59 * 1000;
 constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
@@ -141,6 +141,7 @@ void TextClockPattern::UpdateTextLayoutProperty(
 
 void TextClockPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textNode = GetTextNode();
@@ -212,7 +213,7 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto areaCallback = [weak = WeakClaim(this)](bool visible, double ratio) {
@@ -264,6 +265,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
         textContext->UpdateClipEdge(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         prevTime_ = currentTime;
         FireChangeEvent();
     }

@@ -237,6 +237,11 @@ public:
         }
     }
 
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
     {
@@ -498,7 +503,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
@@ -527,7 +533,12 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetPixelRound(uint8_t value) override
+    void SetLayoutWeight(const LayoutWeightPair& value) override
+    {
+        ViewAbstract::SetLayoutWeight(value);
+    }
+
+    void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);
     }
@@ -883,9 +894,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -924,9 +935,10 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {
-        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
@@ -934,19 +946,19 @@ public:
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     }
 
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
-    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -1149,6 +1161,11 @@ public:
         ViewAbstract::SetFocusable(focusable);
     }
 
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
+    }
+
     void SetFocusNode(bool focus) override {}
 
     void SetTabIndex(int32_t index) override
@@ -1285,6 +1302,9 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
+    void SetAccessibilitySelected(bool selected, bool resetValue) override;
+    void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1418,9 +1438,9 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
-        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
     }
 
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override
@@ -1452,6 +1472,9 @@ public:
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
+    static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
+    static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
+    static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
@@ -1469,6 +1492,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
@@ -1505,9 +1529,14 @@ private:
         ViewAbstract::SetPositionLocalizedEdges(needLocalized);
     }
 
-    void SetLocalizedMarkAnchor(bool needLocalized) override
+    void SetMarkAnchorStart(Dimension& markAnchorStart) override
     {
-        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+        ViewAbstract::SetMarkAnchorStart(markAnchorStart);
+    }
+
+    void ResetMarkAnchorStart() override
+    {
+        ViewAbstract::ResetMarkAnchorStart();
     }
 
     void SetOffsetLocalizedEdges(bool needLocalized) override

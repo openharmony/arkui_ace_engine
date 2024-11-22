@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 
-#include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -24,7 +24,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto optionNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(optionNode);
-    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(optionPattern);
     const auto& selectTheme = optionPattern->GetSelectTheme();
     CHECK_NULL_VOID(selectTheme);
@@ -93,8 +93,13 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        float horInterval = 0.0f;
+        if (layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+            horInterval = optionSize.Width() - childSize.Width();
+        }
         child->GetGeometryNode()->SetMarginFrameOffset(
-            OffsetF(0.0, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+            OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
         child->Layout();
         return;
     }
@@ -154,7 +159,7 @@ void OptionLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
 {
     auto optionNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(optionNode);
-    auto optionPattern = optionNode->GetPattern<OptionPattern>();
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(optionPattern);
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);

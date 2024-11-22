@@ -602,6 +602,17 @@ class ImageOnFinishModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
+class ImageRotateOrientationModifier extends ModifierWithKey<ImageRotateOrientation> {
+  static identity: Symbol = Symbol('imageOrientation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOrientation(node);
+    } else {
+      getUINativeModule().image.setOrientation(node);
+    }
+  }
+}
+
 class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
   constructor(value: PointLightStyle) {
     super(value);
@@ -807,6 +818,11 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   dynamicRangeMode(value: DynamicRangeMode): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  orientation(value: ImageRotateOrientaion): this {
+    modifierWithKey(
+    this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
     return this;
   }
   enhancedImageQuality(value: ResolutionQuality): this {

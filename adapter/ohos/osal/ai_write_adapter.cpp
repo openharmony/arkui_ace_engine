@@ -20,40 +20,16 @@
 #include "int_wrapper.h"
 #include "want.h"
 #include "want_params.h"
-#include "bundlemgr/bundle_mgr_interface.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
-#ifdef OS_ACCOUNT_EXISTS
-#include "os_account_manager.h"
-#endif
 
 namespace OHOS::Ace {
-namespace {
-#ifndef OS_ACCOUNT_EXISTS
-constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif                                       // OS_ACCOUNT_EXISTS
-
-ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
-{
-    userIds.clear();
-#ifdef OS_ACCOUNT_EXISTS
-    return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
-#else  // OS_ACCOUNT_EXISTS
-    TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "os account part doesn't exist, use default id.");
-    userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
-    return ERR_OK;
-#endif // OS_ACCOUNT_EXISTS
-}
 const std::pair<std::string, std::string> UI_ENTENSION_TYPE = {"ability.want.params.uiExtensionType", "sys/commonUI"};
 const std::wstring BOUNDARY_SYMBOLS = L",.?，。？！";
-const std::string SELECT_BUFFER = "selectBuffer";
-const std::string SENTENCE_BUFFER = "sentenceBuffer";
 const std::string API_VERSION = "apiVersion";
 const std::string RESULT_BUFFER = "resultBuffer";
 const std::string SHEET_DISMISS = "sheetDismiss";
@@ -67,78 +43,8 @@ const std::string REQUEST_LONG_CONTENT = "requestLongContent";
 const std::string LONG_SENTENCE_BUFFER = "longSentenceBuffer";
 const std::string LONG_SELECT_START = "longSelectStart";
 const std::string LONG_SELECT_END = "longSelectEnd";
-constexpr int32_t LONG_CONTENT_BOUNDARY = 1000;
-} // namespace
-
-bool AIWriteAdapter::GetAISupportFromMetadata(const std::string& bundleName, const std::string& abilityName)
-{
-    if (bundleName.empty() || abilityName.empty()) {
-        return false;
-    }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
-        "BundleName: %{public}s, abilityName: %{public}s", bundleName.c_str(), abilityName.c_str());
-
-    std::vector<int32_t> userIds;
-    ErrCode errCode = GetActiveAccountIds(userIds);
-    if (errCode != ERR_OK) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Query Active OsAccountIds failed!");
-        return false;
-    }
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetBundleMgrProxy, systemAbilityManager is null");
-        return false;
-    }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetBundleMgrProxy, remoteObject is null");
-        return false;
-    }
-    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    AppExecFwk::BundleInfo bundleInfo;
-    int32_t bundleInfoFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA);
-    errCode = bundleMgrProxy->GetBundleInfoV9(bundleName, bundleInfoFlag, bundleInfo, userIds[0]);
-    if (errCode != ERR_OK) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Get bundleName failed! errCode = %{public}d", errCode);
-        return false;
-    }
-    return GetAISupportFromBundleInfo(bundleInfo, abilityName);
-}
-
-bool AIWriteAdapter::GetAISupportFromBundleInfo(
-    const AppExecFwk::BundleInfo& bundleInfo, const std::string& abilityName)
-{
-    AppExecFwk::HapModuleInfo hapModuleInfo;
-    for (const auto& item: bundleInfo.hapModuleInfos) {
-        if (item.mainElementName == abilityName) {
-            hapModuleInfo = item;
-            break;
-        }
-    }
-    std::vector<AppExecFwk::Metadata> metadataList;
-    for (const auto& extensionInfo: hapModuleInfo.extensionInfos) {
-        if (extensionInfo.name == abilityName) {
-            metadataList = extensionInfo.metadata;
-            break;
-        }
-    }
-    bool isAISupport = false;
-    for (const auto& metadata: metadataList) {
-        if (metadata.name == IS_AI_SUPPORT_METADATA) {
-            if (metadata.value == "true") {
-                isAISupport = true;
-            }
-            break;
-        }
-    }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Read metadata from hap, isAISupport: %{public}d", isAISupport);
-    return isAISupport;
-}
+const std::string KEY_PACKAGE_NAME = "keyPackageApp";
+const std::string START_COMPONONT_TYPE = "startComponentType";
 
 bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
 {
@@ -201,17 +107,8 @@ void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
     want.SetParam(SELECT_CONTENT_LENGTH, info.selectLength);
     want.SetParam(FIRST_HANDLE_RECT, info.firstHandle);
     want.SetParam(SECOND_HANDLE_RECT, info.secondHandle);
-    if (info.selectLength > LONG_CONTENT_BOUNDARY) {
-        return;
-    }
-    std::vector<int> selectBufferVec(info.selectBuffer.size());
-    std::transform(info.selectBuffer.begin(), info.selectBuffer.end(), selectBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    std::vector<int> sentenceBufferVec(info.sentenceBuffer.size());
-    std::transform(info.sentenceBuffer.begin(), info.sentenceBuffer.end(), sentenceBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    want.SetParam(SELECT_BUFFER, selectBufferVec);
-    want.SetParam(SENTENCE_BUFFER, sentenceBufferVec);
+    want.SetParam(KEY_PACKAGE_NAME, AceApplicationInfo::GetInstance().GetPackageName());
+    want.SetParam(START_COMPONONT_TYPE, info.componentType);
 }
 
 void AIWriteAdapter::BindModalUIExtensionCallback(

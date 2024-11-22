@@ -38,6 +38,8 @@ public:
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(SetRenderFit, void(RenderFit));
+    MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD(void, UpdateBackgroundEffect, (const std::optional<EffectOption>&), (override));
 
     void SetVisible(bool visible) override
@@ -55,17 +57,12 @@ public:
         blendColor_ = color;
     }
 
-    std::vector<double> GetTrans() override
-    {
-        return transInfo_;
-    }
-
     void UpdatePaintRect(const RectF& rect) override
     {
         paintRect_ = rect;
     }
 
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -130,13 +127,24 @@ public:
         opacityMultiplier_ = opacity;
     }
 
+    bool HasDisappearTransition() const
+    {
+        return hasDisappearTransition_;
+    }
+
+    void SetTransitionOutCallback(std::function<void()>&& callback)
+    {
+        transitionOutCallback_ = std::move(callback);
+    }
+
     bool isVisible_ = true;
+    bool hasDisappearTransition_ = false;
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
-    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
+    std::function<void()> transitionOutCallback_;
     BlurOption backdropBlurOption;
 };
 } // namespace OHOS::Ace::NG

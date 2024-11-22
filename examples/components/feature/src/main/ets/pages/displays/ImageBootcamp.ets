@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Drawer } from '../../components/Drawer';
+import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, useEnabled, SliderBlock, IconBlock } from 'common';
 
 @Component
@@ -110,6 +110,7 @@ export struct ImageboxGroupBootcamp {
         })
       }.width('100%')
     }
+    .height('52%')
   }
 }
 

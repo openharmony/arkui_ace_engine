@@ -34,6 +34,7 @@ napi_value StopPlayback(napi_env env, napi_callback_info info);
 napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info);
 napi_value JsAutoPlay(napi_env env, napi_callback_info info);
 napi_value JsRepeatPlay(napi_env env, napi_callback_info info);
+napi_value JsEnableAnalyzer(napi_env env, napi_callback_info info);
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info);
 } // namespace OHOS::Ace
 #endif // COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_NAPI_H

@@ -111,6 +111,18 @@ public:
         label_ = label;
     }
 
+    void OnAttachToMainTree() override
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->UpdateIsDetached(false);
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->UpdateIsDetached(true);
+    }
+
 private:
     void OnModifyDone() override;
 

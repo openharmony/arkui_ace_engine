@@ -44,16 +44,21 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto frameSize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto& padding = geometryNode->GetPadding();
-    float size = paintWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     if (padding) {
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
     UpdateFadingGradient(renderContext);
-    bool hasPadding = padding && padding->HasValue();
-    bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
-    listContentModifier_->SetClipOffset(paddingOffset);
-    listContentModifier_->SetClipSize(frameSize);
-    listContentModifier_->SetClip(clip);
+
+    if (TryContentClip(paintWrapper)) {
+        listContentModifier_->SetClip(false);
+    } else {
+        const bool hasPadding = padding && padding->HasValue();
+        bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
+        listContentModifier_->SetClipOffset(paddingOffset);
+        listContentModifier_->SetClipSize(frameSize);
+        listContentModifier_->SetClip(clip);
+    }
+
     float contentSize = vertical_ ? frameSize.Width() : frameSize.Height();
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
@@ -65,21 +70,23 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
+        .mainSize = vertical_ ? frameSize.Width() : frameSize.Height(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
+        .mainPadding = paddingOffset.GetMainOffset(axis),
+        .crossPadding = paddingOffset.GetCrossOffset(axis),
         .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
         .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
         .space = space_,
-        .mainPadding = paddingOffset.GetMainOffset(axis),
-        .crossPadding = paddingOffset.GetCrossOffset(axis),
-        .isVertical = vertical_,
+        .laneGutter = laneGutter_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
         .color = divider_.color,
-        .laneGutter = laneGutter_,
-        .mainSize = size
+        .isVertical = vertical_
     };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    if (NearZero(checkMargin)) return;
+    if (NearZero(checkMargin)) {
+        return;
+    }
     if (LessNotEqual(checkMargin, 0.0f)) {
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
@@ -100,8 +107,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;
-        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ?
-            false : itemPosition_[nextId].isPressed;
+        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ? false : itemPosition_[nextId].isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             dividerMap[child.second.id] = HandleDividerList(child.first, lastIsItemGroup, laneIdx, dividerInfo);
         }
@@ -132,60 +138,52 @@ ListDivider ListPaintMethod::HandleDividerList(
     int32_t index, bool lastIsGroup, int32_t laneIdx, const DividerInfo& dividerInfo)
 {
     ListDivider divider;
-    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
-    float laneLen =
-        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-    float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
+    bool laneIdxValid = dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup;
+    float avgCrossSize = (dividerInfo.crossSize + dividerInfo.laneGutter) / dividerInfo.lanes - dividerInfo.laneGutter;
+    float dividerLen = laneIdxValid ? avgCrossSize : dividerInfo.crossSize;
+    dividerLen = dividerLen - dividerInfo.startMargin - dividerInfo.endMargin;
+    float mainPos = dividerInfo.mainPadding + itemPosition_.at(index).startPos -
+        (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_) {
-        if (dividerInfo.isVertical) {
-            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
-        } else {
-            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
-        }
-    }
-    if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
-        crossPos +=
-            laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-        divider.length = laneLen;
+    if (isRTL_ && dividerInfo.isVertical) {
+        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize - itemPosition_.at(index).startPos +
+            (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
+    } else if (isRTL_ && !dividerInfo.isVertical) {
+        crossPos = dividerInfo.crossPadding + dividerInfo.crossSize - dividerInfo.startMargin - dividerLen;
+        crossPos -= (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     } else {
-        divider.length = crossLen;
+        crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     }
-    OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-    divider.offset = offset;
+    divider.length = dividerLen;
+    divider.offset = dividerInfo.isVertical ?
+        OffsetF(mainPos, crossPos + adjustOffset_) : OffsetF(crossPos, mainPos + adjustOffset_);
     return divider;
 }
 
 ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx, const DividerInfo& dividerInfo)
 {
     ListDivider divider;
-    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
-    float laneLen =
-        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-    float mainPos = itemPosition_.at(index).endPos + divOffset + dividerInfo.mainPadding;
+    bool laneIdxValid = dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup;
+    float avgCrossSize = (dividerInfo.crossSize + dividerInfo.laneGutter) / dividerInfo.lanes - dividerInfo.laneGutter;
+    float dividerLen = laneIdxValid ? avgCrossSize : dividerInfo.crossSize;
+    dividerLen = dividerLen - dividerInfo.startMargin - dividerInfo.endMargin;
+    float mainPos = dividerInfo.mainPadding + itemPosition_.at(index).endPos +
+        (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_) {
-        if (dividerInfo.isVertical) {
-            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
-        } else {
-            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
-        }
-    }
-    if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
-        crossPos +=
-            laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-        divider.length = laneLen;
+    if (isRTL_ && dividerInfo.isVertical) {
+        mainPos = dividerInfo.mainPadding + dividerInfo.mainSize - itemPosition_.at(index).endPos -
+            (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+        crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
+    } else if (isRTL_ && !dividerInfo.isVertical) {
+        crossPos = dividerInfo.crossPadding + dividerInfo.crossSize - dividerInfo.startMargin - dividerLen;
+        crossPos -= (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     } else {
-        divider.length = crossLen;
+        crossPos += (int)laneIdxValid * laneIdx * (avgCrossSize + dividerInfo.laneGutter);
     }
-    OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-    divider.offset = offset;
+    divider.length = dividerLen;
+    divider.offset = dividerInfo.isVertical ?
+        OffsetF(mainPos, crossPos + adjustOffset_) : OffsetF(crossPos, mainPos + adjustOffset_);
     return divider;
 }
 

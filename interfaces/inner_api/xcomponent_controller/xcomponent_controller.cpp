@@ -27,6 +27,9 @@ const char* NODEPTR_OF_UINODE = "nodePtr_";
 std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromNapiValue(
     napi_env env, napi_value napiValue)
 {
+    if (env == nullptr) {
+        return nullptr;
+    }
     const auto* vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
     auto localRef = NapiValueToLocalValue(napiValue);
     if (localRef->IsNull()) {
@@ -43,6 +46,9 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
 XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
     napi_env env, napi_value node, SurfaceCallbackMode mode)
 {
+    if (env == nullptr) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
     const auto* vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
     auto nodeRef = NapiValueToLocalValue(node);
     if (nodeRef.IsEmpty() || !nodeRef->IsObject(vm)) {

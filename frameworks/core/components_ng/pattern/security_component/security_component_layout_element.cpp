@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
@@ -38,7 +39,7 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     }
     isExist_ = true;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
@@ -109,7 +110,9 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
 
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
     minFontSize_ = theme->GetMinFontSize();
     if (property->GetFontSize().has_value()) {
@@ -123,7 +126,9 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     SizeT<float> maxSize { textConstraint.maxSize.Width(), Infinity<float>() };
     textConstraint.maxSize = maxSize;
     textWrap_->Measure(std::optional<LayoutConstraintF>(textConstraint));
-    auto textSizeF = textWrap->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = textWrap->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textSizeF = geometryNode->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
 }
@@ -177,7 +182,7 @@ void TextLayoutElement::ChooseExactFontSize(RefPtr<TextLayoutProperty>& property
     Dimension step = ADAPT_UNIT;
     Dimension fontSize = (property->GetFontSize().has_value()) ? property->GetFontSize().value() : defaultFontSize_;
     while (fontSize > minFontSize_) {
-        auto tempSize = GetMeasureTextSize(property->GetContent().value_or(""),
+        auto tempSize = GetMeasureTextSize(UtfUtils::Str16ToStr8(property->GetContent().value_or(u"")),
             fontSize,
             property->GetFontWeight().value_or(FontWeight::NORMAL), 0.0);
         if (!tempSize.has_value()) {
@@ -212,7 +217,9 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     }
 
     textWrap_->Measure(textConstraint);
-    auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = textWrap_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textSizeF = geometryNode->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
 }
@@ -231,8 +238,8 @@ bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize
     if (!textProp->GetContent().has_value()) {
         return false;
     }
-    currentTextSize = GetMeasureTextSize(textProp->GetContent().value(), textProp->GetFontSize().value(),
-        textProp->GetFontWeight().value_or(FontWeight::NORMAL), width_);
+    currentTextSize = GetMeasureTextSize(UtfUtils::Str16ToStr8(textProp->GetContent().value()),
+        textProp->GetFontSize().value(), textProp->GetFontWeight().value_or(FontWeight::NORMAL), width_);
     if (!currentTextSize.has_value()) {
         return false;
     }
@@ -256,8 +263,8 @@ bool TextLayoutElement::TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, boo
         }
         tempWidth -= stepPx;
         currentRectWidth -= stepPx;
-        auto tempSize = GetMeasureTextSize(textProp->GetContent().value(), textProp->GetFontSize().value(),
-            textProp->GetFontWeight().value_or(FontWeight::NORMAL), tempWidth);
+        auto tempSize = GetMeasureTextSize(UtfUtils::Str16ToStr8(textProp->GetContent().value()),
+            textProp->GetFontSize().value(), textProp->GetFontWeight().value_or(FontWeight::NORMAL), tempWidth);
         if (!tempSize.has_value()) {
             return false;
         }
@@ -298,7 +305,7 @@ void TextLayoutElement::MeasureMinTextSize()
 {
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    minTextSize_ = GetMeasureTextSize(textProp->GetContent().value_or(""),
+    minTextSize_ = GetMeasureTextSize(UtfUtils::Str16ToStr8(textProp->GetContent().value_or(u"")),
         minFontSize_,
         textProp->GetFontWeight().value_or(FontWeight::NORMAL), 0.0);
 }

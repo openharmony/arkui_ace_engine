@@ -184,6 +184,91 @@ RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
     return AceType::MakeRefPtr<PasteDataImpl>();
 }
 
+void ClipboardImpl::AddMultiTypeRecord(
+    const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    CHECK_NULL_VOID(taskExecutor_);
+    auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
+    CHECK_NULL_VOID(peData);
+    auto multiTypeRecordImpl = AceType::DynamicCast<MultiTypeRecordImpl>(multiTypeRecord);
+    CHECK_NULL_VOID(multiTypeRecordImpl);
+
+    std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap;
+    if (!multiTypeRecordImpl->GetPlainText().empty()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_TEXT_PLAIN] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetPlainText());
+    }
+    if (!multiTypeRecordImpl->GetUri().empty()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_TEXT_URI] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetUri());
+    }
+    if (multiTypeRecordImpl->GetPixelMap()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_PIXELMAP] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetPixelMap());
+    }
+    if (!multiTypeRecordImpl->GetSpanStringBuffer().empty()) {
+        multiTypeDataMap[SPAN_STRING_TAG] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetSpanStringBuffer());
+    }
+
+    auto entry =
+        std::make_shared<std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>>>(multiTypeDataMap);
+    peData->GetPasteDataData()->AddRecord(
+        MiscServices::PasteDataRecord::NewMultiTypeRecord(entry, GetMimeType(multiTypeDataMap)));
+#endif
+}
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+const std::string ClipboardImpl::GetMimeType(
+    std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap)
+{
+    std::string mimeType;
+    if (multiTypeDataMap.find(SPAN_STRING_TAG) != multiTypeDataMap.end()) {
+        mimeType = SPAN_STRING_TAG;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_PIXELMAP) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_PIXELMAP;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_TEXT_URI) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_TEXT_URI;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_TEXT_PLAIN) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_TEXT_PLAIN;
+    }
+    return mimeType;
+}
+#endif
+
+void MultiTypeRecordImpl::SetPlainText(const std::string plainText)
+{
+    plainText_ = plainText;
+}
+void MultiTypeRecordImpl::SetUri(const std::string uri)
+{
+    uri_ = uri;
+}
+void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
+{
+    pixelMap_ = pixelMap;
+}
+const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
+{
+    return pixelMap_;
+}
+const std::string MultiTypeRecordImpl::GetPlainText()
+{
+    return plainText_;
+}
+const std::string MultiTypeRecordImpl::GetUri()
+{
+    return uri_;
+}
+std::vector<uint8_t>& MultiTypeRecordImpl::GetSpanStringBuffer()
+{
+    return spanStringBuffer_;
+}
+
 void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
@@ -346,10 +431,9 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 return;
             }
             std::string resText;
+            bool hasPlainRecord = false;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                if (clip->ProcessPasteDataRecord(pasteDataRecord, resText)) {
-                    break;
-                }
+                clip->ProcessPasteDataRecord(pasteDataRecord, resText, hasPlainRecord);
             }
             if (resText.empty()) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
@@ -366,20 +450,35 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
         TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
-bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
-    std::string& resText)
+void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+    std::string& resText, bool& hasPlainRecord)
 {
     if (pasteDataRecord == nullptr) {
-        return false;
+        return;
     }
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
+    if (pasteDataRecord->GetPlainText() != nullptr) {
+        auto textData = pasteDataRecord->GetPlainText();
+        if (!hasPlainRecord) {
+            resText = "";
+        }
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "textData:%{private}s, length:%{public}zu", textData->c_str(),
+            textData->length());
+        resText.append(*textData);
+        hasPlainRecord = true;
+    }
+    if (hasPlainRecord) {
+        return;
+    }
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "htmlText:%{private}s, length=%{public}zu", htmlText->c_str(),
+            htmlText->length());
         HtmlToSpan toSpan;
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
             resText = spanStr->GetString();
-            return true;
+            return;
         }
     }
     if (pasteDataRecord->GetCustomData() != nullptr) {
@@ -388,15 +487,10 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
             auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
             if (spanStr) {
                 resText = spanStr->GetString();
-                return true;
+                return;
             }
         }
     }
-    if (pasteDataRecord->GetPlainText() != nullptr) {
-        auto textData = pasteDataRecord->GetPlainText();
-        resText.append(*textData);
-    }
-    return false;
 }
 
 void ClipboardImpl::GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
@@ -483,7 +577,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
 }
 
 void ClipboardImpl::GetSpanStringData(
-    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (!taskExecutor_ || !callback) {
@@ -495,7 +589,7 @@ void ClipboardImpl::GetSpanStringData(
 }
 
 void ClipboardImpl::GetSpanStringDataHelper(
-    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
     auto task = [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
         auto clip = weak.Upgrade();
@@ -507,16 +601,17 @@ void ClipboardImpl::GetSpanStringDataHelper(
         OHOS::MiscServices::PasteData pasteData;
         auto getDataRes = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
         CHECK_NULL_VOID(getDataRes);
-        std::vector<uint8_t> arr;
+        std::vector<std::vector<uint8_t>> arrays;
         std::string text;
-        clip->ProcessSpanStringData(arr, pasteData, text);
+        bool isMultiTypeRecord = false;
+        clip->ProcessSpanStringData(arrays, pasteData, text, isMultiTypeRecord);
         auto textData = pasteData.GetPrimaryText();
         if (textData && text.empty()) {
             text.append(*textData);
         }
         auto result = text;
         taskExecutor->PostTask(
-            [callback, arr, result]() mutable { callback(arr, result); },
+            [callback, arrays, result, isMultiTypeRecord]() mutable { callback(arrays, result, isMultiTypeRecord); },
             TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
     };
     if (syncMode) {
@@ -526,27 +621,39 @@ void ClipboardImpl::GetSpanStringDataHelper(
     }
 }
 
-void ClipboardImpl::ProcessSpanStringData(
-    std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text)
+void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
+    const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
             continue;
         }
-        if (pasteDataRecord->GetCustomData() != nullptr) {
-            auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
-            if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
-                arr = itemData[SPAN_STRING_TAG];
-                return;
-            }
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+        std::vector<std::string> types = { SPAN_STRING_TAG, OHOS::MiscServices::MIMETYPE_TEXT_URI,
+            OHOS::MiscServices::MIMETYPE_PIXELMAP, OHOS::MiscServices::MIMETYPE_TEXT_PLAIN,
+            OHOS::MiscServices::MIMETYPE_TEXT_HTML };
+        auto validTypes = pasteDataRecord->GetValidMimeTypes(types);
+        if (validTypes.size() > 1) {
+            isMultiTypeRecord = true;
         }
-        if (pasteDataRecord->GetHtmlText() != nullptr) {
+#endif
+        auto hasSpanString = false;
+        auto entryPtr = pasteDataRecord->GetEntryByMimeType(SPAN_STRING_TAG);
+        if (entryPtr) {
+            // entryValue InstanceOf OHOS::MiscServices::EntryValue.
+            auto entryValue = entryPtr->GetValue();
+            auto spanStringBuffer = std::get_if<std::vector<uint8_t>>(&entryValue);
+            arrays.emplace_back(*spanStringBuffer);
+            hasSpanString = true;
+        }
+        if (pasteDataRecord->GetHtmlText() != nullptr && !hasSpanString) {
             auto htmlText = pasteDataRecord->GetHtmlText();
             HtmlToSpan toSpan;
             auto spanStr = toSpan.ToSpanString(*htmlText);
             if (spanStr) {
+                std::vector<uint8_t> arr;
                 spanStr->EncodeTlv(arr);
-                return;
+                arrays.emplace_back(arr);
             }
         }
         if (pasteDataRecord->GetPlainText() != nullptr) {

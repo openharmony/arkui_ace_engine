@@ -57,7 +57,9 @@ void ListEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo& dragDropInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -108,7 +110,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TAG_LOGE(AceLogTag::ACE_DRAG, "listItem drag start failed, custom component screenshot is empty.");
             return;
         }
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         DragDropInfo dragDropInfo;
         dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
@@ -161,7 +163,7 @@ int32_t ListEventHub::GetListItemIndexByPosition(float x, float y, bool strict)
     CHECK_NULL_RETURN(listNode, 0);
 
     if (strict) {
-        auto itemFrameNode = listNode->FindChildByPosition(x, y);
+        auto itemFrameNode = listNode->FindChildByPositionWithoutChildTransform(x, y);
         CHECK_NULL_RETURN(itemFrameNode, -1);
         RefPtr<ListItemPattern> itemPattern = itemFrameNode->GetPattern<ListItemPattern>();
         CHECK_NULL_RETURN(itemPattern, -1);

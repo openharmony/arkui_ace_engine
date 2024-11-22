@@ -416,8 +416,7 @@ PickerTextStyle DatePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        DataPickerRowLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        DataPickerRowLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         DataPickerRowLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -460,8 +459,7 @@ PickerTextStyle DatePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        DataPickerRowLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        DataPickerRowLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         DataPickerRowLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -680,7 +678,6 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     properties.maskRect = pickerDialog.maskRect;
-    properties.onLanguageChange = [](DialogProperties&) {};
 
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
@@ -840,15 +837,16 @@ const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
-
-    float fontScaleValue = pipeline->GetFontScale();
-    if (fontScaleValue == 0) {
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
         return fontSizeValue;
     }
-
-    if (GreatOrEqualCustomPrecision(fontScaleValue, PICKER_MAXFONTSCALE)) {
-        if (fontSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(fontSizeValue / fontScaleValue);
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (fontScale != 0.0f) {
+            return Dimension(fontSizeValue / fontScale);
         }
     }
     return fontSizeValue;

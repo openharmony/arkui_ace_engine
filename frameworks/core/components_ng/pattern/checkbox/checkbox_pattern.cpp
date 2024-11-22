@@ -801,6 +801,19 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
     return (makeFunc_.value())(checkBoxConfiguration);
 }
 
+void CheckBoxPattern::UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp)
+{
+    if (checkboxSettingData_.selectedColor.has_value()) {
+        paintProp->UpdateCheckBoxSelectedColor(checkboxSettingData_.selectedColor.value());
+    }
+    if (checkboxSettingData_.unselectedColor.has_value()) {
+        paintProp->UpdateCheckBoxUnSelectedColor(checkboxSettingData_.unselectedColor.value());
+    }
+    if (checkboxSettingData_.strokeColor.has_value()) {
+        paintProp->UpdateCheckBoxCheckMarkColor(checkboxSettingData_.strokeColor.value());
+    }
+}
+
 void CheckBoxPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
@@ -814,6 +827,7 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
     checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
     checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
     checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
+    UpdatePaintPropertyBySettingData(checkBoxPaintProperty);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

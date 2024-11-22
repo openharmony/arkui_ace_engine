@@ -170,6 +170,7 @@ void MenuViewTestNg::InitMenuTestNg()
     menuItemPattern_->SetSubBuilder(buildFun);
     menuItemPattern_->SetIsSubMenuShowed(false);
     auto pattern2 = subMenuParent_->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern2, nullptr);
     pattern2->SetSubBuilder(buildFun);
     pattern2->SetIsSubMenuShowed(false);
     auto menuPattern = menuFrameNode_->GetPattern<MenuPattern>();

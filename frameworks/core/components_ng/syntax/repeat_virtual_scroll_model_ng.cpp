@@ -27,7 +27,7 @@ void RepeatVirtualScrollModelNG::Create(
     const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
-    const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange)
+    const std::function<void(int32_t from, int32_t to)>& onSetActiveRange)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScrollModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();

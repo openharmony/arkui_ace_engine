@@ -56,6 +56,8 @@ template("ace_osal_ohos_source_set") {
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
+      "data_url_analyzer_loader.cpp",
+      "data_url_analyzer_mgr.cpp",
       "display_info_utils.cpp",
       "download_manager_ohos.cpp",
       "event_report.cpp",
@@ -71,14 +73,17 @@ template("ace_osal_ohos_source_set") {
       "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
+      "stylus_detector_callback.cpp",
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
       "thp_extra_manager_impl.cpp",
+      "thread_priority.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
+      "window_utils.cpp",
     ]
 
     external_deps += [
@@ -190,14 +195,10 @@ template("ace_osal_ohos_source_set") {
     }
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-      "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     ]
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
-    }
-    if (os_account_exists) {
-      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
 }

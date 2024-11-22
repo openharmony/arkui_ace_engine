@@ -694,6 +694,30 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return maxFontScale;
     }
+
+    bindTabsToScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    bindTabsToNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -792,16 +816,44 @@ class FocusController {
         this.ohos_focusController = globalThis.requireNapi('arkui.focusController');
     }
     clearFocus() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.clearFocus();
         __JSScopeUtil__.restoreInstanceId();
     }
 
     requestFocus(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
         return result;
+    }
+
+    activate(isActive, autoInactive) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return false;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result = this.ohos_focusController.activate(isActive, autoInactive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        } else {
+            let result = this.ohos_focusController.activate(isActive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        }
+    }
+
+    setAutoFocusTransfer(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setAutoFocusTransfer(value);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

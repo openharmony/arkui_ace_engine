@@ -128,6 +128,27 @@ void SystemWindowScene::OnAttachToFrameNode()
     if (session_->NeedCheckContextTransparent()) {
         PostCheckContextTransparentTask();
     }
+    SetWindowScenePosition();
+}
+
+void SystemWindowScene::SetWindowScenePosition()
+{
+    // set window scene position (x, y) and scale data, jsAccessibilityManager will use it
+    CHECK_NULL_VOID(session_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
+        int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        auto windowRect = session->GetSessionGlobalRect();
+        left = windowRect.posX_;
+        top = windowRect.posY_;
+        scaleX = session->GetScaleX();
+        scaleY = session->GetScaleY();
+    });
 }
 
 void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -142,6 +163,7 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
+    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
 }
 
 void SystemWindowScene::OnAttachToMainTree()
@@ -201,11 +223,13 @@ void SystemWindowScene::RegisterEventCallback()
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
-
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
-        bool isPreImeEvent) -> bool {
+    auto keyEventCallback = [weakThis = WeakClaim(this), instanceId = instanceId_](
+        std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) -> bool {
+        CHECK_NULL_RETURN(keyEvent, false);
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_RETURN(self, false);
         ContainerScope Scope(instanceId);
-        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
+        return WindowSceneHelper::InjectKeyEvent(keyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }

@@ -83,7 +83,7 @@ void FfiOHOSAceFrameworkDatePickerCreate(FfiTime startDate, FfiTime endDate, Ffi
     ConvertToNoramlDate(parseStartDate);
     ConvertToNoramlDate(parseEndDate);
     ConvertToNoramlDate(parseSelectedDate);
-    
+
     auto startDays = parseStartDate.ToDays();
     auto endDays = parseEndDate.ToDays();
     auto selectedDays = parseSelectedDate.ToDays();
@@ -107,6 +107,51 @@ void FfiOHOSAceFrameworkDatePickerCreate(FfiTime startDate, FfiTime endDate, Ffi
     FfiOHOSAceFrameworkDatePickerSetDefaultAttributes();
 }
 
+// create with changeEvent
+void FfiOHOSAceFrameworkDatePickerCreateWithChangeEvent(
+    FfiTime startDate, FfiTime endDate, FfiTime selectedDate, void (*callback)(FfiTime selectedDate))
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    auto parseSelectedDate = ParseDate(selectedDate);
+
+    ConvertToNoramlDate(parseStartDate);
+    ConvertToNoramlDate(parseEndDate);
+    ConvertToNoramlDate(parseSelectedDate);
+
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    auto selectedDays = parseSelectedDate.ToDays();
+    if (startDays > endDays) {
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
+        startDays = parseStartDate.ToDays();
+        endDays = parseEndDate.ToDays();
+    }
+    if (selectedDays > endDays) {
+        parseSelectedDate = parseEndDate;
+    }
+    if (selectedDays < startDays) {
+        parseSelectedDate = parseStartDate;
+    }
+
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
+    DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
+    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+
+    auto changeEvent = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        const auto infoResult = DatePickerChangeEventToFfi(*eventInfo);
+        lambda(FfiTime { infoResult.year, infoResult.month, infoResult.day });
+    };
+    DatePickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
+
+    FfiOHOSAceFrameworkDatePickerSetDefaultAttributes();
+}
+
 void FfiOHOSAceFrameworkDatePickerSetLunar(bool isLunar)
 {
     DatePickerModel::GetInstance()->SetShowLunar(isLunar);
@@ -117,8 +162,7 @@ void FfiOHOSAceFrameworkDatePickerUseMilitaryTime(bool isUseMilitaryTime)
     DatePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
 }
 
-void FfiOHOSAceFrameworkDatePickerSetOnChange(
-    void (*callback)(int32_t year, int32_t month, int32_t day))
+void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int64_t month, int64_t day))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
         auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
@@ -135,7 +179,7 @@ void FfiOHOSAceFrameworkDatePickerSetOnChange(
 }
 
 void FfiOHOSAceFrameworkDatePickerSetOnDateChange(
-    void (*callback)(int32_t year, int32_t month, int32_t day))
+    void (*callback)(int64_t year, int64_t month, int64_t day))
 {
     auto onDateChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
         auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);

@@ -156,21 +156,6 @@ HWTEST_F(RefreshLayoutTestNg, AddCustomBuilderNode003, TestSize.Level1)
 }
 
 /**
- * @tc.name: progressColor001
- * @tc.desc: Test progressColor
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshLayoutTestNg, progressColor001, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
-    RefreshModelNG model = CreateRefresh();
-    model.SetProgressColor(Color::RED);
-    CreateDone();
-    auto progressPaintProperty = pattern_->progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    EXPECT_EQ(progressPaintProperty->GetColor().value(), Color::RED);
-}
-
-/**
  * @tc.name: AttrRefreshing001
  * @tc.desc: Test attr refreshing in low version
  * @tc.type: FUNC
@@ -268,10 +253,10 @@ HWTEST_F(RefreshLayoutTestNg, GetTargetOffset001, TestSize.Level1)
     CreateDone();
     pattern_->HandleDragStart();
     EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), 0.f);
-    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() / RATIO);
-    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE / RATIO);
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
     pattern_->HandleDragEnd(0.f);
-    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE);
 }
 
 /**
@@ -323,7 +308,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshOffset01, TestSize.Level1)
      */
     model.SetRefreshOffset(AceType::RawPtr(frameNode_), Dimension(0));
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_DISTANCE);
+    EXPECT_EQ(pattern_->refreshOffset_.ConvertToPx(), TRIGGER_REFRESH_DISTANCE);
 
     /**
      * @tc.steps: step2. Illegal arg and has LoadingText
@@ -332,7 +317,7 @@ HWTEST_F(RefreshLayoutTestNg, AttrRefreshOffset01, TestSize.Level1)
     model.SetRefreshOffset(AceType::RawPtr(frameNode_), Dimension(0));
     layoutProperty_->UpdateLoadingText("LoadingText");
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->refreshOffset_, TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
+    EXPECT_EQ(pattern_->refreshOffset_.ConvertToPx(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
 }
 
 /**
@@ -356,6 +341,26 @@ HWTEST_F(RefreshLayoutTestNg, SetPullDownRatio001, TestSize.Level1)
 
     model.SetPullDownRatio(AceType::RawPtr(frameNode_), 0.5f);
     EXPECT_EQ(pattern_->CalculatePullDownRatio(), 0.5f);
+}
+
+/**
+ * @tc.name: Layout001
+ * @tc.desc: Test layout in VERSION_TWELVE
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, Layout001, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateRefresh();
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTag(), "Refresh");
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 32, 32)));
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+
+    auto loadingProgress = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(loadingProgress->GetTag(), "LoadingProgress");
+    EXPECT_TRUE(IsEqual(loadingProgress->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 32, 32)));
+    EXPECT_EQ(loadingProgress->GetTotalChildCount(), 0);
 }
 
 /**
@@ -390,9 +395,10 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     RefreshModelNG model = CreateRefresh();
+    ViewAbstract::SetHeight(CalcLength(400));
     model.SetLoadingText("loadingText");
     CreateDone();
-    EXPECT_EQ(pattern_->GetTriggerRefreshDisTance(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
+    EXPECT_EQ(pattern_->GetTriggerRefreshDisTance().ConvertToPx(), TRIGGER_REFRESH_WITH_TEXT_DISTANCE);
 
     /**
      * @tc.steps: step2. Test refresh action
@@ -401,10 +407,10 @@ HWTEST_F(RefreshLayoutTestNg, LoadingText002, TestSize.Level1)
     pattern_->HandleDragStart();
     auto loadingTextRenderContext = pattern_->loadingTextNode_->GetRenderContext();
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 0);
-    pattern_->HandleDragUpdate(TRIGGER_LOADING_DISTANCE.ConvertToPx() / pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate(TRIGGER_LOADING_DISTANCE / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 0);
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_WITH_TEXT_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx() /
-                               pattern_->CalculatePullDownRatio());
+    pattern_->HandleDragUpdate(
+        (TRIGGER_REFRESH_WITH_TEXT_DISTANCE - TRIGGER_LOADING_DISTANCE) / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
     pattern_->HandleDragEnd(0.f);
     EXPECT_EQ(loadingTextRenderContext->GetOpacityValue(), 1);
