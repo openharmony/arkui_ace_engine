@@ -41,9 +41,10 @@ void DragDropProxy::OnDragStart(
         info.GetScreenLocation().GetY());
     auto pointerEvent = PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
+    pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->OnDragStart(point, frameNode);
-    manager->OnDragMove(pointerEvent, extraInfo);
     manager->SetExtraInfo(extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
