@@ -126,4 +126,8 @@ void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
     JSViewSetProperty(&V2::ListItemComponent::MarkIsDragStart, true);
 }
 
+void ListItemModelImpl::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node) {};
+
 } // namespace OHOS::Ace::Framework

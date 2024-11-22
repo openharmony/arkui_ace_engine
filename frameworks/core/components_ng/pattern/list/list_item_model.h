@@ -54,6 +54,10 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) = 0;
+    virtual void SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
+        NG::FrameNode* node) = 0;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;
