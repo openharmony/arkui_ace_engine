@@ -714,11 +714,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (isMenuShow) {
             auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(imageGestureEventHub);
-            if (CheckInSceneBoardWindow() && !IsPixelMapNeedScale()) {
-                imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
-            } else if (!IsPixelMapNeedScale()) {
-                scale = previewScale * windowScale;
-                imageGestureEventHub->SetMenuPreviewScale(scale);
+            if (!IsPixelMapNeedScale()) {
+                if (CheckInSceneBoardWindow()) {
+                    imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
+                } else {
+                    //if not in sceneboard,use default drag scale
+                    scale = previewScale * windowScale;
+                    imageGestureEventHub->SetMenuPreviewScale(scale);
+                }
             } else {
                 imageGestureEventHub->SetMenuPreviewScale(scale);
             }
