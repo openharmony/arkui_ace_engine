@@ -453,6 +453,7 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
         LOGW("cannot find theme of blurStyle, create blurStyle failed");
         return std::nullopt;
     }
+    CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
     ThemeColorMode colorMode = blurStyleOp->colorMode;
     if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
         colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;

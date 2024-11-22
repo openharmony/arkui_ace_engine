@@ -1087,7 +1087,7 @@ void GestureEventHub::SetDragForbiddenForcely(bool isDragForbiddenForWholeSubTre
     isDragForbiddenForWholeSubTree_ = isDragForbiddenForWholeSubTree;
 }
 
-bool GestureEventHub::IsDragForbidden()
+bool GestureEventHub::IsDragForbidden() const
 {
     return isDragForbiddenForWholeSubTree_;
 }
