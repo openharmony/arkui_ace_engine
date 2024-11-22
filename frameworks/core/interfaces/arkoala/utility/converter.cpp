@@ -175,7 +175,7 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     const auto end = PickerDate(2100, 12, 31);
     const int64_t SEC_TO_MILLISEC = 1000;
     auto date = src;
-    std::printf("\nreverse : 4 src  %d-%d-%d", src->GetYear(), src->GetMonth(), src->GetDay());
+    std::printf("\nreverse : 4 src  %d-%d-%d", src.GetYear(), src.GetMonth(), src.GetDay());
 
     if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
         date = start;
@@ -190,7 +190,6 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
     std::printf("reverse : 2 tm  %d-%d-%d", tm.tm_year, tm.tm_mon, tm.tm_mday);
-    time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
     std::printf("reverse : 3 time %ld", time);
     auto local = std::localtime(&time);
     std::printf("reverse : 4 timestamp %ld", (time * SEC_TO_MILLISEC));
