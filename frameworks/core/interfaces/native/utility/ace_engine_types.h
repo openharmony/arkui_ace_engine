@@ -85,6 +85,11 @@ enum class MessageLevel {
     LOG = 5
 };
 
+struct Header {
+    std::string headerKey;
+    std::string headerValue;
+};
+
 using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
 using PickerValueType = std::variant<std::string, std::vector<std::string>>;
 

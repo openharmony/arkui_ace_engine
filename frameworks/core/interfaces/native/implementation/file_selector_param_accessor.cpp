@@ -34,7 +34,7 @@ static void DestroyPeer(FileSelectorParamPeer *peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void GetTitleImpl(FileSelectorParamPeer* peer)
 {

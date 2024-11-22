@@ -39,7 +39,7 @@ XComponentControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void GetXComponentSurfaceIdImpl(XComponentControllerPeer* peer)
 {

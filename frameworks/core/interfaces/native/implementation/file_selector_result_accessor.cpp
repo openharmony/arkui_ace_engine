@@ -32,7 +32,7 @@ static void DestroyPeer(FileSelectorResultPeer *peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void HandleFileListImpl(FileSelectorResultPeer* peer,
                         const Array_String* fileList)
