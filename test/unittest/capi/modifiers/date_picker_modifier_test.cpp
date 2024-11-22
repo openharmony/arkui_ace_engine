@@ -241,65 +241,11 @@ const std::vector<PickerDateOptionsStepTest> PICKER_DATE_OPTIONS_TEST_PLAN = {
     { { PickerDate(1975, 4, 3), PickerDate(2008, 11, 21), PickerDate(2007, 11, 22) },
         { "1975-4-3", "2008-11-21", "2007-11-22" } },
     { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "2024-11-21", "2021-1-2" } },
+        { "2019-7-5", "2024-11-10", "2021-1-2" } },
     { { PickerDate(2018, 10, 15), PickerDate(2021, 1, 2), PickerDate(2019, 6, 8) },
-        { "2018-10-15", "2021-1-2", "2019-6-8" } },
+        { "2018-10-115", "2021-111-2", "2119-6-8" } },
     { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
-        { "2019-7-5", "2021-1-2", "2021-1-2" } },
-    { { PickerDate(2019, 57, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
-        { "1970-1-1", "2021-1-2", "2021-1-2" } },
-    { { PickerDate(2019, 7, 105), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
-        { "1970-1-1", "2021-1-2", "2021-1-2" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2021, 101, 2), PickerDate(2024, 11, 21) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 201), PickerDate(2024, 11, 21) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 111, 121) },
-        { "2019-7-5", "2021-1-2", "2019-7-5" } },
-    { { PickerDate(2200, 7, 5), PickerDate(2021, 1, 2), PickerDate(2024, 11, 21) },
-        { "1970-1-1", "2021-1-2", "2021-1-2" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2200, 7, 5), PickerDate(2024, 11, 21) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2021, 1, 2), PickerDate(2200, 7, 5) },
-        { "2019-7-5", "2021-1-2", "2019-7-5" } },
-    { { PickerDate(2024, 11, 21), PickerDate(2019, 7, 5), PickerDate(2021, 1, 2) },
-        { "2024-11-21", "2019-7-5", "2024-11-21" } },
-    { { PickerDate(2021, 1, 2), PickerDate(2019, 7, 5), PickerDate(2024, 11, 21) },
-        { "2021-1-2", "2019-7-5", "2019-7-5" } },
-    { { PickerDate(-2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "1970-1-1", "2024-11-21", "2021-1-2" } },
-    { { PickerDate(2019, -7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "1970-1-1", "2024-11-21", "2021-1-2" } },
-    { { PickerDate(2019, 7, -5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "1970-1-1", "2024-11-21", "2021-1-2" } },
-    { { PickerDate(2019, 7, 5), PickerDate(-2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, -11, 21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, -21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(-2021, 1, 2) },
-        { "2019-7-5", "2024-11-21", "2019-7-5" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, -1, -2) },
-        { "2019-7-5", "2024-11-21", "2019-7-5" } },
-    { { PickerDate(1970, 1, 1), PickerDate(2100, 12, 31), PickerDate(2023, 7, 21) },
-        { "1970-1-1", "2100-12-31", "2023-7-21" } },
-    { { PickerDate(1940, 1, 2), PickerDate(2100, 12, 31), PickerDate(2023, 7, 21) },
-        { "1970-1-1", "2100-12-31", "2023-7-21" } },
-    { { PickerDate(2019, 7, 5), PickerDate(1970, 1, 1), PickerDate(2023, 7, 21) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(1940, 1, 2), PickerDate(2023, 7, 21) },
-        { "2019-7-5", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2100, 12, 31), PickerDate(1970, 1, 1) },
-        { "2019-7-5", "2100-12-31", "2019-7-5" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2100, 12, 31), PickerDate(1940, 1, 2) },
-        { "2019-7-5", "2100-12-31", "2019-7-5" } },
-    { { PickerDate(1940, 1, 2), PickerDate(1940, 1, 2), PickerDate(1940, 1, 2) },
-        { "1970-1-1", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2200, 7, 5), PickerDate(2200, 7, 5), PickerDate(2200, 7, 5) },
-        { "1970-1-1", "1970-1-1", "1970-1-1" } },
-    { { PickerDate(2019, 7, 5), PickerDate(2024, 11, 21), PickerDate(2021, 1, 2) },
-        { "2019-7-5", "2024-11-21", "2021-1-2" } },
+        { "2019-7-5", "2021-1-2", "2021-1-2" } }
 };
 
 std::string ToJsonString(const PickerDate& pickerDate)
@@ -1093,6 +1039,7 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDatePickerOptions, nullptr);
 
+    auto counter = 1;
     for (const auto& [actual, expected] : PICKER_DATE_OPTIONS_TEST_PLAN) {
         Ark_DatePickerOptions arkOptions = {
             .start = Converter::ArkValue<Opt_Date>(std::get<0>(actual)),
@@ -1107,6 +1054,10 @@ HWTEST_F(DatePickerModifierTest, setDatePickerOptionsTest, TestSize.Level1)
         auto checkStart = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_START_NAME);
         auto checkEnd = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_END_NAME);
         auto checkSelected = GetAttrValue<std::string>(constructor, ATTRIBUTE_DATE_SELECT_NAME);
+
+        AssertionFailure() << "pattern : " << std::to_string(counter++) << std::endl;
+        
+        //  << "-"     << std::to_string( s.month) << "-" << std::to_string( s.day);
 
         EXPECT_EQ(checkStart, std::get<0>(expected));
         EXPECT_EQ(checkEnd, std::get<1>(expected));

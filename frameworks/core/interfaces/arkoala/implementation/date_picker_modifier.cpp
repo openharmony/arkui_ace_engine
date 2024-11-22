@@ -106,14 +106,7 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     if (opt->selected.has_value()) {
         DatePickerModelNG::SetSelectedDate(frameNode, *opt->selected);
     }
-    auto s = DatePickerModelNG::getStartDate(frameNode);
-    auto s2 = DatePickerModelNG::getEndDate(frameNode);
-    auto s3 = DatePickerModelNG::getSelectedDate(frameNode);
-
-    std::printf("pattern:  %d-%d-%d ", s.year, s.month, s.day);
-    std::printf("%d-%d-%d ", s2.year, s2.month, s2.day);
-    std::printf("%d-%d-%d \n", s3.year, s3.month, s3.day);
-}
+  }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
 void LunarImpl(Ark_NativePointer node,
