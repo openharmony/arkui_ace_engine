@@ -108,6 +108,7 @@ private:
     bool isForbidMenuEvent_ = false;
     bool enableSplit_ = true;
     CancelableCallback<void()> contextTimer_;
+    bool enableContainerModalGesture_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
