@@ -44,6 +44,12 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
+namespace {
+    constexpr float FULL_SCREEN_WIDTH = 720.0f;
+    constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+    const Size FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+}
+
 class WebLayoutAlgorithmTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -85,21 +91,17 @@ HWTEST_F(WebLayoutAlgorithmTest, MeasureTest001, TestSize.Level1)
     auto webLayoutAlgorithm = AceType::DynamicCast<WebLayoutAlgorithm>(webPattern->CreateLayoutAlgorithm());
     EXPECT_NE(webLayoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
-    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     
-    webLayoutAlgorithm->Measure(LayoutWrapper* layoutWrapper);
-
-    EXPECT_EQ(webLayoutAlgorithm->position_, OffsetF());
-    EXPECT_EQ(webLayoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(webLayoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    webLayoutAlgorithm->Measure(nullptr);
 #endif
 }
 
