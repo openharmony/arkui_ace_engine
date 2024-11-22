@@ -75,6 +75,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto maxWidth = GetListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty) -
                         layoutProperty->CreatePaddingAndBorder().Width();
         contentIdealSize.SetCrossSize(maxWidth, axis_);
+        listLayoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
     UpdateListItemConstraint(contentIdealSize, childLayoutConstraint_);
     referencePos_ = UpdateReferencePos(layoutProperty, forwardLayout_, referencePos_);
