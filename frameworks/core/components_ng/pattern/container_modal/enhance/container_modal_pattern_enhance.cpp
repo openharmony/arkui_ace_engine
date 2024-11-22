@@ -833,6 +833,31 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
     return true;
 }
 
+bool ContainerModalPatternEnhance::GetContainerModalComponentRect(RectF& containerModal, RectF& buttons)
+{
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    if (customTitleSettedShow_) {
+        return false;
+    }
+    auto controlButtonsRow = GetButtonRowByInspectorId();
+    CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto buttonRect = controlButtonsRow->GetGeometryNode()->GetFrameRect();
+    buttons = buttonRect;
+    if (buttons.Width() == 0) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttons are hidden");
+        return false;
+    }
+    return true;
+}
+
 void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
 {
     std::string text = "";
