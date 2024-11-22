@@ -662,6 +662,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         auto previewNode = CreatePreviewImageFrameNode(isImage);
         if (!previewNode) {
             TAG_LOGI(AceLogTag::ACE_WEB, "CreatePreviewImageFrameNode failed");
+            previewImageNodeId_.reset();
             delegate_->OnContextMenuHide("");
             return;
         }
