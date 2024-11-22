@@ -16,7 +16,10 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textfield_ffi.h"
 
 #include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "securec.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -25,21 +28,129 @@ using namespace OHOS::Ace::Framework;
 namespace {
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = {
-    TextInputAction::UNSPECIFIED, TextInputAction::NONE, TextInputAction::GO,  TextInputAction::SEARCH,
-    TextInputAction::SEND, TextInputAction::NEXT, TextInputAction::DONE, TextInputAction::PREVIOUS,
-    TextInputAction::NEW_LINE
-};
+const std::vector<TextInputAction> TEXT_INPUT_ACTIONS = { TextInputAction::UNSPECIFIED, TextInputAction::NONE,
+    TextInputAction::GO, TextInputAction::SEARCH, TextInputAction::SEND, TextInputAction::NEXT, TextInputAction::DONE,
+    TextInputAction::PREVIOUS, TextInputAction::NEW_LINE };
 const std::vector<TextInputType> TEXT_INPUT_TYPES = { TextInputType::TEXT, TextInputType::NUMBER,
-    TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD };
+    TextInputType::EMAIL_ADDRESS, TextInputType::VISIBLE_PASSWORD, TextInputType::PHONE, TextInputType::USER_NAME,
+    TextInputType::NEW_PASSWORD, TextInputType::NUMBER_PASSWORD, TextInputType::NUMBER_DECIMAL, TextInputType::URL };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
-
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::function<void(std::string)> FormatCharFunction(void (*callback)(const char* value))
 {
     const std::function<void(std::string)> result = [lambda = CJLambda::Create(callback)](
                                                         const std::string& value) -> void { lambda(value.c_str()); };
     return result;
 }
+
+struct MenuActions {
+    std::function<void(const std::string&)> copy = [](const std::string&) {};
+    std::function<void(const std::string&)> selectAll = [](const std::string&) {};
+    std::function<void(const std::string&)> cut = [](const std::string&) {};
+    std::function<void(const std::string&)> paste = [](const std::string&) {};
+    std::function<void(const std::string&)> aiWrite = [](const std::string&) {};
+};
+
+void HandleDefaultActions(const std::string& id,
+    const std::function<void(const std::string&)>& action,
+    MenuActions& actions)
+{
+    if (id == "OH_DEFAULT_COPY") {
+        actions.copy = action;
+    } else if (id == "OH_DEFAULT_SELECT_ALL") {
+        actions.selectAll = action;
+    } else if (id == "OH_DEFAULT_CUT") {
+        actions.cut = action;
+    } else if (id == "OH_DEFAULT_PASTE") {
+        actions.paste = action;
+    } else if (id == "OH_DEFAULT_AI_WRITE") {
+        actions.aiWrite = action;
+    }
+}
+
+FfiTextFieldMenuItem ConvertToFfiMenuItem(const NG::MenuItemParam& menuItem)
+{
+    FfiTextFieldMenuItem result;
+    result.content = menuItem.menuOptionsParam.content.has_value() ?
+        const_cast<char*>(menuItem.menuOptionsParam.content.value().c_str()) : nullptr;
+    result.icon = menuItem.menuOptionsParam.icon.has_value() ?
+        const_cast<char*>(menuItem.menuOptionsParam.icon.value().c_str()) : nullptr;
+    result.id = const_cast<char*>(menuItem.menuOptionsParam.id.c_str());
+    return result;
+}
+
+NG::MenuOptionsParam ConvertToMenuOptionsParam(const FfiTextFieldMenuItem& menuItem, const MenuActions& actions)
+{
+    NG::MenuOptionsParam result;
+    result.content = menuItem.content ? std::make_optional<std::string>(menuItem.content) : std::nullopt;
+    result.icon = menuItem.icon ? std::make_optional<std::string>(menuItem.icon) : std::nullopt;
+    result.id = menuItem.id;
+
+    if (result.id == "OH_DEFAULT_COPY") {
+        result.action = actions.copy;
+    } else if (result.id == "OH_DEFAULT_SELECT_ALL") {
+        result.action = actions.selectAll;
+    } else if (result.id == "OH_DEFAULT_CUT") {
+        result.action = actions.cut;
+    } else if (result.id == "OH_DEFAULT_PASTE") {
+        result.action = actions.paste;
+    } else if (result.id == "OH_DEFAULT_AI_WRITE") {
+        result.action = actions.aiWrite;
+    } else {
+        result.action = [](const std::string& arg) {};
+    }
+    return result;
+}
+
+std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> TextFieldCreatMenu(
+    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem))
+{
+    return [ffiOnAction = CJLambda::Create(callbackOnCreateMenu)](
+        const std::vector<NG::MenuItemParam>& menuItem) -> std::vector<NG::MenuOptionsParam> {
+        MenuActions actions;
+        std::vector<FfiTextFieldMenuItem> arr;
+        arr.resize(menuItem.size());
+        for (size_t i = 0; i < menuItem.size(); ++i) {
+            arr[i] = ConvertToFfiMenuItem(menuItem[i]);
+            HandleDefaultActions(menuItem[i].menuOptionsParam.id,
+                menuItem[i].menuOptionsParam.action,
+                actions);
+        }
+        VectorTextFieldMenuItemHandle vectorHandle = &arr;
+        auto newHandle = ffiOnAction(vectorHandle);
+        auto newTextFieldMenuItem = *reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(newHandle);
+
+        std::vector<NG::MenuOptionsParam> result;
+        result.resize(newTextFieldMenuItem.size());
+        for (size_t i = 0; i < newTextFieldMenuItem.size(); ++i) {
+            result[i] = ConvertToMenuOptionsParam(newTextFieldMenuItem[i], actions);
+        }
+        return result;
+    };
+}
+
+std::function<bool(const NG::MenuItemParam& menuItemParam)> TextFieldMenuClick(
+    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
+{
+    std::function<bool(const NG::MenuItemParam& menuItemParam)> result =
+        [ffiOnAction = CJLambda::Create(callbackOnMenuItemClick)](const NG::MenuItemParam& menuItemParam) -> bool {
+        auto menuItem =
+            FfiTextFieldMenuItem { menuItemParam.menuOptionsParam.content.has_value()
+                                  ? const_cast<char*>(menuItemParam.menuOptionsParam.content.value().c_str())
+                                  : nullptr,
+                menuItemParam.menuOptionsParam.icon.has_value()
+                    ? const_cast<char*>(menuItemParam.menuOptionsParam.icon.value().c_str())
+                    : nullptr,
+                const_cast<char*>(menuItemParam.menuOptionsParam.id.c_str()) };
+        return ffiOnAction(menuItem, menuItemParam.start, menuItemParam.end);
+    };
+    return result;
+}
+
+constexpr int32_t MINI_VAILD_VALUE = 1;
+constexpr int32_t MAX_VAILD_VALUE = 100;
+constexpr int32_t ILLEGAL_VALUE = 0;
+constexpr int32_t DEFAULTMAXLINES = 3;
 
 } // namespace
 
@@ -254,11 +365,357 @@ void FfiOHOSAceFrameworkTextFieldSetInputFilter(const char* value, void (*callba
     TextFieldModel::GetInstance()->SetInputFilter(value, FormatCharFunction(callback));
 }
 
+void FfiOHOSAceFrameworkTextFieldSetFontFeature(const char* value)
+{
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetLineHeight(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size.SetValue(0.0);
+    }
+
+    TextFieldModel::GetInstance()->SetLineHeight(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetLineSpacing(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size.SetValue(0.0);
+    }
+
+    TextFieldModel::GetInstance()->SetLineSpacing(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetLetterSpacing(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size.SetValue(0.0);
+    }
+
+    TextFieldModel::GetInstance()->SetLetterSpacing(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetDecoration(int32_t value, uint32_t color, int32_t style)
+{
+    TextFieldModel::GetInstance()->SetTextDecoration(static_cast<TextDecoration>(value));
+    TextFieldModel::GetInstance()->SetTextDecorationColor(Color(color));
+    TextFieldModel::GetInstance()->SetTextDecorationStyle(static_cast<TextDecorationStyle>(style));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetLineBreakStrategy(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(LineBreakStrategy::BALANCED)) {
+        value = 0;
+    }
+    TextFieldModel::GetInstance()->SetLineBreakStrategy(static_cast<LineBreakStrategy>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetWordBreak(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(WordBreak::BREAK_WORD)) {
+        value = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    }
+    TextFieldModel::GetInstance()->SetWordBreak(static_cast<WordBreak>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
+        value = 0;
+    }
+    TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(static_cast<TextHeightAdaptivePolicy>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetMaxFontSize(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size.SetValue(0.0);
+    }
+
+    TextFieldModel::GetInstance()->SetAdaptMaxFontSize(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetMinFontSize(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size = Dimension();
+    }
+
+    TextFieldModel::GetInstance()->SetAdaptMinFontSize(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetSelectedBackgroundColor(uint32_t value)
+{
+    TextFieldModel::GetInstance()->SetSelectedBackgroundColor(Color(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetCaretStyle(double value, int32_t unit, uint32_t color)
+{
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = Dimension(value, (DimensionUnit)unit);
+
+    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+    TextFieldModel::GetInstance()->SetCaretColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetTextIndent(double value, int32_t unit)
+{
+    Dimension size(value, static_cast<DimensionUnit>(unit));
+    if (size.IsNegative()) {
+        size.SetValue(0.0);
+    }
+
+    TextFieldModel::GetInstance()->SetTextIndent(size);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetTextOverflow(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        value = 0;
+    }
+    TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[value]);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetEnablePreviewText(bool value)
+{
+    TextFieldModel::GetInstance()->SetEnablePreviewText(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetStyle(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(InputStyle::INLINE)) {
+        value = static_cast<int32_t>(InputStyle::DEFAULT);
+    }
+    TextFieldModel::GetInstance()->SetInputStyle(static_cast<InputStyle>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetBarState(int32_t value)
+{
+    TextFieldModel::GetInstance()->SetBarState(static_cast<DisplayMode>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetSelectionMenuHidden(bool value)
+{
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetShowCounter(bool value, int32_t threshold, bool showBorder)
+{
+    TextFieldModel::GetInstance()->SetShowCounterBorder(showBorder);
+    if (threshold >= MINI_VAILD_VALUE && threshold <= MAX_VAILD_VALUE) {
+        TextFieldModel::GetInstance()->SetShowCounter(value);
+        TextFieldModel::GetInstance()->SetCounterType(threshold);
+    } else {
+        TextFieldModel::GetInstance()->SetShowCounter(false);
+        TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
+    }
+}
+
+void FfiOHOSAceFrameworkTextFieldSetMaxLines(int32_t value)
+{
+    if (value <= 0) {
+        value = DEFAULTMAXLINES;
+    }
+    TextFieldModel::GetInstance()->SetMaxViewLines(static_cast<uint32_t>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetEnableKeyboardOnFocus(bool value)
+{
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetContentType(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(NG::TextContentType::END)) {
+        value = static_cast<int32_t>(NG::TextContentType::UNSPECIFIED);
+    }
+    TextFieldModel::GetInstance()->SetContentType(static_cast<NG::TextContentType>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetEnableAutoFill(bool value)
+{
+    TextFieldModel::GetInstance()->SetEnableAutoFill(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetTextAreaType(int32_t value)
+{
+    if (value < 0 || value > static_cast<int32_t>(TextInputType::END)) {
+        value = static_cast<int32_t>(TextInputType::UNSPECIFIED);
+    }
+    TextFieldModel::GetInstance()->SetType(static_cast<TextInputType>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetCopyOption(int32_t value)
+{
+    TextFieldModel::GetInstance()->SetCopyOption(static_cast<CopyOptions>(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetCustomKeyboard(void (*callback)(), bool options)
+{
+    auto builderFunc = CJLambda::Create(callback);
+    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnSecurityStateChange(void (*callback)(bool value))
+{
+    TextFieldModel::GetInstance()->SetOnSecurityStateChange(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkTextFieldShowUnit(void (*callback)())
+{
+    auto unitFunc = CJLambda::Create(callback);
+    TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetPasswordRules(const char* rules)
+{
+    if (rules == nullptr) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetPasswordRules(rules);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetShowError(const char* errorText)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    bool isVisible = false;
+    std::string error;
+
+    if (errorText != nullptr) {
+        error = errorText;
+        isVisible = true;
+    }
+
+    TextFieldModel::GetInstance()->SetShowError(error, isVisible);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetShowPasswordIcon(bool isShow)
+{
+    TextFieldModel::GetInstance()->SetShowPasswordIcon(isShow);
+}
+
+void FfiOHOSAceFrameworkTextFieldShowPasswordText(bool show)
+{
+    TextFieldModel::GetInstance()->SetShowPasswordText(show);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetPasswordIcon(const char* onIconSrc, const char* offIconSrc)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    PasswordIcon passwordIcon;
+    if (onIconSrc != nullptr) {
+        passwordIcon.showResult = onIconSrc;
+    }
+
+    if (offIconSrc != nullptr) {
+        passwordIcon.hideResult = offIconSrc;
+    }
+
+    TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetCaretPosition(int32_t position)
+{
+    int32_t caretPosition = 0;
+
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        caretPosition = (position < 0) ? 0 : position;
+    } else {
+        if (position < 0) {
+            return;
+        }
+        caretPosition = position;
+    }
+
+    TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetSelectAllValue(bool value)
+{
+    TextFieldModel::GetInstance()->SetSelectAllValue(value);
+}
+
+void FfiOHOSAceFrameworkTextFieldSetShowUnderline(bool show)
+{
+    TextFieldModel::GetInstance()->SetShowUnderline(show);
+}
+
+void FfiOHOSAceFrameworkTextFieldNormalUnderlineColor(uint32_t color)
+{
+    TextFieldModel::GetInstance()->SetNormalUnderlineColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkTextFieldUserUnderlineColor(uint32_t typing, uint32_t normal, uint32_t error, uint32_t disable)
+{
+    UserUnderlineColor userColor = UserUnderlineColor();
+    userColor.typing = Color(typing);
+    userColor.normal = Color(normal);
+    userColor.error = Color(error);
+    userColor.disable = Color(disable);
+    TextFieldModel::GetInstance()->SetUserUnderlineColor(userColor);
+}
+
+void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_t unit, uint32_t color, const char* src)
+{
+    // set style
+    if (style < 0) {
+        TextFieldModel::GetInstance()->SetCleanNodeStyle(CleanNodeStyle::INPUT);
+    } else {
+        TextFieldModel::GetInstance()->SetCleanNodeStyle(static_cast<CleanNodeStyle>(style));
+    }
+    TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
+    // set normal
+    if (src == nullptr) {
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+        } else {
+            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        }
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+        return;
+    }
+    // set size
+    CalcDimension iconSize(size, static_cast<DimensionUnit>(unit));
+    if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        iconSize = theme->GetIconSize();
+    }
+    TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    // set color
+    Color iconColor(color);
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        auto theme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
+    // set src
+    std::string iconSrc(src);
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, std::string(), std::string());
+}
+
 void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key,
-                       NG::TextFieldCommonEvent& event) {
+    auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
         func(key);
     };
@@ -268,9 +725,7 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
     auto onChange = [func = FormatCharFunction(callback)](
-        const std::string& val, PreviewText& previewText) {
-        func(val);
-    };
+                        const std::string& val, PreviewText& previewText) { func(val); };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
@@ -287,14 +742,152 @@ void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [func = FormatCharFunction(callback)](
-        const std::string& val, NG::TextCommonEvent& info) {
-        func(val);
-    };
+                       const std::string& val, NG::TextCommonEvent& info) { func(val); };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
 void FfiOHOSAceFrameworkTextFieldOnEditChanged(void (*callback)(bool value))
 {
     TextFieldModel::GetInstance()->SetOnEditChanged(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkTextFieldOnContentScroll(void (*callback)(float totalOffsetX, float totalOffsetY))
+{
+    auto onScroll = [lambda = CJLambda::Create(callback)](
+                        float totalOffsetX, float totalOffsetY) -> void { lambda(totalOffsetX, totalOffsetY); };
+    TextFieldModel::GetInstance()->SetOnContentScroll(onScroll);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnTextSelectionChange(void (*callback)(int32_t selectionStart, int32_t selectionEnd))
+{
+    auto onTextSelectionChange = [lambda = CJLambda::Create(callback)](int32_t selectionStart,
+                                     int32_t selectionEnd) -> void { lambda(selectionStart, selectionEnd); };
+    TextFieldModel::GetInstance()->SetOnTextSelectionChange(onTextSelectionChange);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnDidDelete(
+    void (*callback)(double deleteOffset, int32_t direction, const char* deleteValue))
+{
+    auto onDidDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> void {
+        double deleteOffset = Info.deleteOffset;
+        int32_t direction = static_cast<int32_t>(Info.direction);
+        const char* deleteValue = Info.deleteValue.c_str();
+        lambda(deleteOffset, direction, deleteValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidDeleteEvent(onDidDelete);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnWillDelete(
+    bool (*callback)(double deleteOffset, int32_t direction, const char* deleteValue))
+{
+    auto onWillDelete = [lambda = CJLambda::Create(callback)](const DeleteValueInfo& Info) -> bool {
+        double deleteOffset = Info.deleteOffset;
+        int32_t direction = static_cast<int32_t>(Info.direction);
+        const char* deleteValue = Info.deleteValue.c_str();
+        return lambda(deleteOffset, direction, deleteValue);
+    };
+    TextFieldModel::GetInstance()->SetOnWillDeleteEvent(onWillDelete);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnDidInsert(void (*callback)(double insertOffset, const char* insertValue))
+{
+    auto onDidInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> void {
+        double insertOffset = Info.insertOffset;
+        const char* insertValue = Info.insertValue.c_str();
+        lambda(insertOffset, insertValue);
+    };
+    TextFieldModel::GetInstance()->SetOnDidInsertValueEvent(onDidInsert);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnWillInsert(bool (*callback)(double insertOffset, const char* insertValue))
+{
+    auto onWillInsert = [lambda = CJLambda::Create(callback)](const InsertValueInfo& Info) -> bool {
+        double insertOffset = Info.insertOffset;
+        const char* insertValue = Info.insertValue.c_str();
+        return lambda(insertOffset, insertValue);
+    };
+    TextFieldModel::GetInstance()->SetOnWillInsertValueEvent(onWillInsert);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
+    void (*callback)(const char* value, int32_t offset, const char* text))
+{
+    auto onChange = [func = CJLambda::Create(callback)](const std::string& val, PreviewText& previewText) {
+        func(val.c_str(), previewText.offset, previewText.value.c_str());
+    };
+    TextFieldModel::GetInstance()->SetOnChange(onChange);
+}
+
+void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
+{
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto task = [func = CJLambda::Create(callback), node = targetNode](
+                int32_t key, NG::TextFieldCommonEvent& event) {
+        PipelineContext::SetCallBackNode(node);
+        auto submitEvent = std::make_unique<CJSubmitEvent>();
+        std::string text = event.GetText();
+        size_t len = text.length() + 1;
+        submitEvent->text = (char*)malloc(len);
+        submitEvent->keepEditable = event.IsKeepEditable();
+        if (submitEvent->text) {
+            const char* src = text.c_str();
+            errno_t ret = strncpy_s(submitEvent->text, len, src, len - 1);
+            if (ret != EOK) {
+                free(submitEvent->text);
+                return;
+            }
+            event.SetKeepEditable(func(key, *submitEvent));
+            free(submitEvent->text);
+        } else {
+            event.SetKeepEditable(func(key, *submitEvent));
+        }
+    };
+    TextFieldModel::GetInstance()->SetOnSubmit(task);
+}
+
+void FfiOHOSAceFrameworkTextFieldEditMenuOptions(
+    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem),
+    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
+{
+    auto onCreateMenu = [func = TextFieldCreatMenu(callbackOnCreateMenu)](
+                            const std::vector<NG::MenuItemParam>& val) -> std::vector<NG::MenuOptionsParam> {
+        return func(val);
+    };
+    auto onMenuItemClick = [func = TextFieldMenuClick(callbackOnMenuItemClick)](
+                               const NG::MenuItemParam& val) -> bool { return func(val); };
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenu), std::move(onMenuItemClick));
+}
+
+VectorTextFieldMenuItemHandle FfiCJCreateVectorFfiTextFieldMenuItem(int64_t size)
+{
+    LOGI("Create FfiTextFieldMenuItem Vector");
+    return new std::vector<FfiTextFieldMenuItem>(size);
+}
+
+void FfiCJVectorFfiTextFieldMenuItemDelete(VectorTextFieldMenuItemHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    delete actualVec;
+}
+
+void FfiCJVectorFfiTextFieldMenuItemSetElement(VectorTextFieldMenuItemHandle vec,
+    int64_t index, FfiTextFieldMenuItem textFieldMenuItem)
+{
+    LOGI("FfiTextFieldMenuItem Vector Set Element");
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    (*actualVec)[index] = textFieldMenuItem;
+    LOGI("FfiTextFieldMenuItem Vector Set Element Success");
+}
+
+FfiTextFieldMenuItem FfiCJVectorFfiTextFieldMenuItemGetElement(VectorTextFieldMenuItemHandle vec, int64_t index)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    return (*actualVec)[index];
+}
+
+int64_t FfiCJVectorFfiTextFieldMenuItemGetSize(VectorTextFieldMenuItemHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
+    return (*actualVec).size();
 }
 }
