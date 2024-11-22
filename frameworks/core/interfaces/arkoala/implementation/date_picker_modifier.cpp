@@ -24,6 +24,7 @@
 #include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 const std::string YEAR = "year";
 const std::string MONTH = "month";
@@ -33,9 +34,9 @@ const auto DATE_MIN = PickerDate(1970, 1, 1);
 const auto DATE_MAX = PickerDate(2100, 12, 31);
 
 struct DatePickerOptions {
-    std::optional<PickerDate> start;
-    std::optional<PickerDate> end;
-    std::optional<PickerDate> selected;
+    PickerDate start;
+    PickerDate end;
+    PickerDate selected;
 };
 
 bool IsDateValid(uint32_t year, uint32_t month, uint32_t day)
@@ -72,9 +73,20 @@ namespace Converter {
 template<>
 void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptions& src)
 {
-    dst->start = Converter::OptConvert<PickerDate>(src.start);
-    dst->end = Converter::OptConvert<PickerDate>(src.end);
-    dst->selected = Converter::OptConvert<PickerDate>(src.selected);
+    DatePickerOptions options;
+    auto opt = Converter::OptConvert<PickerDate>(src.start);
+    if (opt) {
+        options.start = *opt;
+    }
+    opt = Converter::OptConvert<PickerDate>(src.end);
+    if (opt) {
+        options.end = *opt;
+    }
+    opt = Converter::OptConvert<PickerDate>(src.selected);
+    if (opt) {
+        options.selected = *opt;
+    }
+    dst = options;
 }
 
 } // namespace  OHOS::Ace:NG:Converter
@@ -88,15 +100,10 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto opt = Converter::OptConvert<DatePickerOptions>(*options);
-    if (opt->start.has_value()) {
-        DatePickerModelNG::SetStartDate(frameNode, *(opt->start));
-    }
-    if (opt->end.has_value()) {
-        DatePickerModelNG::SetEndDate(frameNode, *(opt->end));
-    }
-    if (opt->selected.has_value()) {
-        DatePickerModelNG::SetSelectedDate(frameNode, *(opt->selected));
-    }
+    CHECK_NULL_VOID(opt);
+    DatePickerModelNG::SetStartDate(frameNode, opt->start);
+    DatePickerModelNG::SetEndDate(frameNode, opt->end);
+    DatePickerModelNG::SetSelectedDate(frameNode, opt->selected);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {
