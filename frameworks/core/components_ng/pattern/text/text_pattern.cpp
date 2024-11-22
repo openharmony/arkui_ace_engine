@@ -2292,7 +2292,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            RichEditorDragInfo info;
+            DragInfo info;
             info.firstHandle = pattern->textSelector_.firstHandle;
             info.secondHandle = pattern->textSelector_.secondHandle;
             pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);

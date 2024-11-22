@@ -28,7 +28,7 @@ class ACE_EXPORT RichEditorDragPaintMethod : public TextDragPaintMethod {
 public:
     RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
         const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod,
-        const RichEditorDragInfo& info);
+        const DragInfo& info);
 
     ~RichEditorDragPaintMethod() override = default;
 
@@ -37,7 +37,7 @@ public:
 
 private:
     RefPtr<RichEditorDragContentModifier> contentModifier_;
-    RichEditorDragInfo info_;
+    DragInfo info_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPaintMethod);
 };
 } // namespace OHOS::Ace::NG
