@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
+    static const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 public:
     void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
@@ -98,11 +99,11 @@ public:
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
-    static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetTextOverflow(FrameNode* frameNode, const std::optional<TextOverflow>& value);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);

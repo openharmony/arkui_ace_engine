@@ -31,6 +31,20 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
     { COLORS_RES_0_ID, COLORS_RES_0_STR, Color(0xA1FAC0DE) },
+    { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_2_ID, DIMENSIONS_RES_NON_NEG_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_3_ID, DIMENSIONS_RES_NON_NEG_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_4_ID, DIMENSIONS_RES_NON_NEG_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_5_ID, DIMENSIONS_RES_NON_NEG_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_6_ID, DIMENSIONS_RES_NON_NEG_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_7_ID, DIMENSIONS_RES_NON_NEG_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_8_ID, DIMENSIONS_RES_NON_NEG_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_9_ID, DIMENSIONS_RES_NON_NEG_9_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_10_ID, DIMENSIONS_RES_NON_NEG_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_11_ID, DIMENSIONS_RES_NON_NEG_11_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_12_ID, DIMENSIONS_RES_NON_NEG_12_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_13_ID, DIMENSIONS_RES_NON_NEG_13_STR, -0.2_pct },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR, 123._vp },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR, 0._vp },
     { DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR, 1.23_vp },
@@ -216,6 +230,19 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColor
     { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, NodeModifier::ResourceType::COLOR), "#A1FAC0DE" },
 };
 
+// Fixture 'TextAlignType' for type 'Ark_TextAlign'
+std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureTextAlignTypeValidValues = {
+    { "ARK_TEXT_ALIGN_CENTER", Converter::ArkValue<Ark_TextAlign>(ARK_TEXT_ALIGN_CENTER), "TextAlign.Center" },
+    { "ARK_TEXT_ALIGN_START", Converter::ArkValue<Ark_TextAlign>(ARK_TEXT_ALIGN_START), "TextAlign.Start" },
+    { "ARK_TEXT_ALIGN_END", Converter::ArkValue<Ark_TextAlign>(ARK_TEXT_ALIGN_END), "TextAlign.End" },
+    { "ARK_TEXT_ALIGN_JUSTIFY", Converter::ArkValue<Ark_TextAlign>(ARK_TEXT_ALIGN_JUSTIFY), "TextAlign.Justify" },
+};
+
+std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureTextAlignTypeInvalidValues = {
+    { "static_cast<Ark_TextAlign>(-1)", Converter::ArkValue<Ark_TextAlign>(static_cast<Ark_TextAlign>(-1)) },
+    { "static_cast<Ark_TextAlign>(INT_MAX)", Converter::ArkValue<Ark_TextAlign>(static_cast<Ark_TextAlign>(INT_MAX)) },
+};
+
 // Fixture 'TextInputContentType' for type 'Ark_ContentType'
 std::vector<std::tuple<std::string, Ark_ContentType, std::string>> testFixtureTextInputContentTypeValidValues = {
     { "ARK_CONTENT_TYPE_USER_NAME", Converter::ArkValue<Ark_ContentType>(ARK_CONTENT_TYPE_USER_NAME),
@@ -382,6 +409,22 @@ std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValu
     { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
 };
 
+// Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'
+std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues = {
+    { "ARK_FONT_WEIGHT_LIGHTER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER), "400" },
+    { "ARK_FONT_WEIGHT_NORMAL", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL), "400" },
+    { "ARK_FONT_WEIGHT_REGULAR", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "400" },
+    { "ARK_FONT_WEIGHT_MEDIUM", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM), "400" },
+    { "ARK_FONT_WEIGHT_BOLD", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "400" },
+    { "ARK_FONT_WEIGHT_BOLDER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER), "400" },
+};
+
+std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeightEnumInvalidValues = {
+    { "static_cast<Ark_FontWeight>(-1)", Converter::ArkValue<Ark_FontWeight>(static_cast<Ark_FontWeight>(-1)) },
+    { "static_cast<Ark_FontWeight>(INT_MAX)",
+        Converter::ArkValue<Ark_FontWeight>(static_cast<Ark_FontWeight>(INT_MAX)) },
+};
+
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues = {
     { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
@@ -504,6 +547,31 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensi
     { "-3.45", Converter::ArkValue<Ark_Number>(-3.45), "-3.45vp" },
 };
 
+// Fixture 'DimensionsStrNonNeg' for type 'Ark_String'
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegValidValues = {
+    { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
+    { "\"0vp\"", Converter::ArkValue<Ark_String>("0vp"), "0.00vp" },
+    { "\"1.23vp\"", Converter::ArkValue<Ark_String>("1.23vp"), "1.23vp" },
+    { "\"123fp\"", Converter::ArkValue<Ark_String>("123fp"), "123.00fp" },
+    { "\"0fp\"", Converter::ArkValue<Ark_String>("0fp"), "0.00fp" },
+    { "\"1.23fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
+    { "\"123px\"", Converter::ArkValue<Ark_String>("123px"), "123.00px" },
+    { "\"0px\"", Converter::ArkValue<Ark_String>("0px"), "0.00px" },
+    { "\"1.23px\"", Converter::ArkValue<Ark_String>("1.23px"), "1.23px" },
+    { "\"123lpx\"", Converter::ArkValue<Ark_String>("123lpx"), "123.00lpx" },
+    { "\"0lpx\"", Converter::ArkValue<Ark_String>("0lpx"), "0.00lpx" },
+    { "\"1.23lpx\"", Converter::ArkValue<Ark_String>("1.23lpx"), "1.23lpx" },
+    { "\"20%\"", Converter::ArkValue<Ark_String>("20%"), "20.00%" },
+};
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegInvalidValues = {
+    { "\"-123vp\"", Converter::ArkValue<Ark_String>("-123vp") },
+    { "\"-123vp\"", Converter::ArkValue<Ark_String>("-123vp") },
+    { "\"-123px\"", Converter::ArkValue<Ark_String>("-123px") },
+    { "\"-123lpx\"", Converter::ArkValue<Ark_String>("-123lpx") },
+    { "\"-20%\"", Converter::ArkValue<Ark_String>("-20%") },
+};
+
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues = {
     { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
@@ -527,6 +595,69 @@ std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegN
     { "\"-123lpx\"", Converter::ArkValue<Ark_String>("-123lpx") },
     { "\"20%\"", Converter::ArkValue<Ark_String>("20%") },
     { "\"-20%\"", Converter::ArkValue<Ark_String>("-20%") },
+};
+
+// Fixture 'DimensionsResNonNeg' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegValidValues = {
+    { "ResId:DIMENSIONS_RES_NON_NEG_0_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_0_ID, NodeModifier::ResourceType::FLOAT), "123.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_0_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_0_STR, NodeModifier::ResourceType::FLOAT), "123.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_1_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_1_ID, NodeModifier::ResourceType::FLOAT), "0.00vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_1_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_1_STR, NodeModifier::ResourceType::FLOAT), "0.00vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_2_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_2_ID, NodeModifier::ResourceType::FLOAT), "1.23vp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_2_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_2_STR, NodeModifier::ResourceType::FLOAT), "1.23vp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_3_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_3_ID, NodeModifier::ResourceType::FLOAT), "123.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_3_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_3_STR, NodeModifier::ResourceType::FLOAT), "123.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_4_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_4_ID, NodeModifier::ResourceType::FLOAT), "0.00fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_4_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_4_STR, NodeModifier::ResourceType::FLOAT), "0.00fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_5_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_5_ID, NodeModifier::ResourceType::FLOAT), "1.23fp" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_5_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_5_STR, NodeModifier::ResourceType::FLOAT), "1.23fp" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_6_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_6_ID, NodeModifier::ResourceType::FLOAT), "123.00px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_6_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_6_STR, NodeModifier::ResourceType::FLOAT), "123.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_7_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_7_ID, NodeModifier::ResourceType::FLOAT), "0.00px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_7_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_7_STR, NodeModifier::ResourceType::FLOAT), "0.00px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_8_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_8_ID, NodeModifier::ResourceType::FLOAT), "1.23px" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_8_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_8_STR, NodeModifier::ResourceType::FLOAT), "1.23px" },
+    { "ResId:DIMENSIONS_RES_NON_NEG_9_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_9_ID, NodeModifier::ResourceType::FLOAT), "20.00%" },
+    { "ResName:DIMENSIONS_RES_NON_NEG_9_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_9_STR, NodeModifier::ResourceType::FLOAT), "20.00%" },
+};
+
+std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegInvalidValues = {
+    { "ResId:DIMENSIONS_RES_NON_NEG_10_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_10_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_10_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_10_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_11_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_11_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_11_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_11_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_12_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_12_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_12_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_12_STR, NodeModifier::ResourceType::FLOAT) },
+    { "ResId:DIMENSIONS_RES_NON_NEG_13_ID",
+        CreateResource(DIMENSIONS_RES_NON_NEG_13_ID, NodeModifier::ResourceType::FLOAT) },
+    { "ResName:DIMENSIONS_RES_NON_NEG_13_STR",
+        CreateResource(DIMENSIONS_RES_NON_NEG_13_STR, NodeModifier::ResourceType::FLOAT) },
 };
 
 // Fixture 'DimensionsResNonNegNonPct' for type 'Ark_Resource'

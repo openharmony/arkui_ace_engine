@@ -37,6 +37,20 @@ enum ResID {
     FONT_FAMILY_RESOURCE_1_ID,
     FONT_FAMILY_RESOURCE_2_ID,
     COLORS_RES_0_ID,
+    DIMENSIONS_RES_NON_NEG_0_ID,
+    DIMENSIONS_RES_NON_NEG_1_ID,
+    DIMENSIONS_RES_NON_NEG_2_ID,
+    DIMENSIONS_RES_NON_NEG_3_ID,
+    DIMENSIONS_RES_NON_NEG_4_ID,
+    DIMENSIONS_RES_NON_NEG_5_ID,
+    DIMENSIONS_RES_NON_NEG_6_ID,
+    DIMENSIONS_RES_NON_NEG_7_ID,
+    DIMENSIONS_RES_NON_NEG_8_ID,
+    DIMENSIONS_RES_NON_NEG_9_ID,
+    DIMENSIONS_RES_NON_NEG_10_ID,
+    DIMENSIONS_RES_NON_NEG_11_ID,
+    DIMENSIONS_RES_NON_NEG_12_ID,
+    DIMENSIONS_RES_NON_NEG_13_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID,
@@ -97,6 +111,20 @@ inline constexpr auto FONT_FAMILY_RESOURCE_0_STR = "FONT_FAMILY_RESOURCE_0_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_1_STR = "FONT_FAMILY_RESOURCE_1_STR";
 inline constexpr auto FONT_FAMILY_RESOURCE_2_STR = "FONT_FAMILY_RESOURCE_2_STR";
 inline constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_0_STR = "DIMENSIONS_RES_NON_NEG_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_1_STR = "DIMENSIONS_RES_NON_NEG_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_2_STR = "DIMENSIONS_RES_NON_NEG_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_3_STR = "DIMENSIONS_RES_NON_NEG_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_4_STR = "DIMENSIONS_RES_NON_NEG_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_5_STR = "DIMENSIONS_RES_NON_NEG_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_6_STR = "DIMENSIONS_RES_NON_NEG_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_7_STR = "DIMENSIONS_RES_NON_NEG_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_8_STR = "DIMENSIONS_RES_NON_NEG_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_9_STR = "DIMENSIONS_RES_NON_NEG_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_10_STR = "DIMENSIONS_RES_NON_NEG_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_11_STR = "DIMENSIONS_RES_NON_NEG_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_12_STR = "DIMENSIONS_RES_NON_NEG_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_13_STR = "DIMENSIONS_RES_NON_NEG_13_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR";
@@ -190,6 +218,10 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 // Fixture 'ColorsRes' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues;
 
+// Fixture 'TextAlignType' for type 'Ark_TextAlign'
+extern std::vector<std::tuple<std::string, Ark_TextAlign, std::string>> testFixtureTextAlignTypeValidValues;
+extern std::vector<std::tuple<std::string, Ark_TextAlign>> testFixtureTextAlignTypeInvalidValues;
+
 // Fixture 'TextInputContentType' for type 'Ark_ContentType'
 extern std::vector<std::tuple<std::string, Ark_ContentType, std::string>> testFixtureTextInputContentTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ContentType>> testFixtureTextInputContentTypeInvalidValues;
@@ -222,6 +254,10 @@ extern std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgres
 extern std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues;
 
+// Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'
+extern std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues;
+extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeightEnumInvalidValues;
+
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
@@ -248,9 +284,17 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStr
 // Fixture 'DimensionsNumAny' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumAnyValidValues;
 
+// Fixture 'DimensionsStrNonNeg' for type 'Ark_String'
+extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegInvalidValues;
+
 // Fixture 'DimensionsStrNonNegNonPct' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureDimensionsStrNonNegNonPctInvalidValues;
+
+// Fixture 'DimensionsResNonNeg' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegInvalidValues;
 
 // Fixture 'DimensionsResNonNegNonPct' for type 'Ark_Resource'
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegNonPctValidValues;

@@ -211,11 +211,8 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::F
 
 void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, frameNode);
-    }
+    auto variableFontWeight = value.value_or(DEFAULT_VARIABLE_FONT_WEIGHT);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, variableFontWeight, frameNode);
 }
 
 void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
@@ -283,9 +280,13 @@ void TextModelNG::SetTextAlign(Ace::TextAlign value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
 }
 
-void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
+void TextModelNG::SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, frameNode);
+    }
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -317,9 +318,13 @@ void TextModelNG::SetLineHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
 }
 
-void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, frameNode);
+    }
 }
 
 void TextModelNG::SetLineSpacing(const Dimension& value)

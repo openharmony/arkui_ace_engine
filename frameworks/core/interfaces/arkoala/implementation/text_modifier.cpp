@@ -270,9 +270,7 @@ void TextAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto textAlign = Converter::OptConvert<TextAlign>(value);
-    if (textAlign) {
-        TextModelNG::SetTextAlign(frameNode, textAlign.value());
-    }
+    TextModelNG::SetTextAlign(frameNode, textAlign);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String_Resource* value)
@@ -281,9 +279,8 @@ void LineHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto lineHeight = Converter::OptConvert<Dimension>(*value);
-    if (lineHeight) {
-        TextModelNG::SetLineHeight(frameNode, lineHeight.value());
-    }
+    Validator::ValidateNonNegative(lineHeight);
+    TextModelNG::SetLineHeight(frameNode, lineHeight);
 }
 void TextOverflowImpl(Ark_NativePointer node,
                       const Ark_TextOverflowOptions* value)

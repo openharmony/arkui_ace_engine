@@ -1384,7 +1384,7 @@ HWTEST_F(TextModifierTest, setFontStyleTestFontStyleInvalidValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontWeight0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1398,7 +1398,7 @@ HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestFontWeightValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontWeight0TestFontWeightValidValues, TestSize.Level1)
 {
     Ark_Union_Number_FontWeight_String initValueFontWeight;
 
@@ -1421,10 +1421,10 @@ HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestFontWeightValidValues, Tes
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
     }
 }
@@ -1434,7 +1434,7 @@ HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestFontWeightValidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontWeight0TestFontWeightInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_FontWeight_String initValueFontWeight;
 
@@ -1455,193 +1455,17 @@ HWTEST_F(TextModifierTest, DISABLED_setFontWeight0TestFontWeightInvalidValues, T
             "Input value is: " << input << ", method: setFontWeight0, attribute: fontWeight";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
+    }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setFontWeight1TestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight1TestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultFontWeight =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    std::unique_ptr<JsonValue> resultOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_DEFAULT_VALUE) <<
-        "Default value for attribute 'fontWeight.weight'";
-
-    resultStr =
-        GetAttrValue<std::string>(resultOptions, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE) <<
-        "Default value for attribute 'fontWeight.options.enableVariableFontWeight'";
-}
-
-/*
- * @tc.name: setFontWeight1TestFontWeightWeightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight1TestFontWeightWeightValidValues, TestSize.Level1)
-{
-    Ark_Union_Number_FontWeight_String initValueWeight;
-    Opt_FontSettingOptions initValueOptions;
-
-    // Initial setup
-    initValueWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueOptions).enableVariableFontWeight =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueWeight, &initValueOptions](const std::string& input,
-                          const std::string& expectedStr, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueWeight = initValueWeight;
-        Opt_FontSettingOptions inputValueOptions = initValueOptions;
-
-        inputValueWeight = value;
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultFontWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setFontWeight1, attribute: fontWeight.weight";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setFontWeight1TestFontWeightWeightInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight1TestFontWeightWeightInvalidValues, TestSize.Level1)
-{
-    Ark_Union_Number_FontWeight_String initValueWeight;
-    Opt_FontSettingOptions initValueOptions;
-
-    // Initial setup
-    initValueWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueOptions).enableVariableFontWeight =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueWeight, &initValueOptions](
-                          const std::string& input, const Ark_Union_Number_FontWeight_String& value) {
-        Ark_Union_Number_FontWeight_String inputValueWeight = initValueWeight;
-        Opt_FontSettingOptions inputValueOptions = initValueOptions;
-
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        inputValueWeight = value;
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultFontWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_I_WEIGHT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setFontWeight1, attribute: fontWeight.weight";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(
-    TextModifierTest, DISABLED_setFontWeight1TestFontWeightOptionsEnableVariableFontWeightValidValues, TestSize.Level1)
-{
-    Ark_Union_Number_FontWeight_String initValueWeight;
-    Opt_FontSettingOptions initValueOptions;
-
-    // Initial setup
-    initValueWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueOptions).enableVariableFontWeight =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueWeight, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
-        Ark_Union_Number_FontWeight_String inputValueWeight = initValueWeight;
-        Opt_FontSettingOptions inputValueOptions = initValueOptions;
-
-        WriteTo(inputValueOptions).enableVariableFontWeight = value;
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultFontWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_NAME);
-        auto resultStr = GetAttrValue<std::string>(
-            resultOptions, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input
-            << ", method: setFontWeight1, attribute: fontWeight.options.enableVariableFontWeight";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
-    }
-}
-
-/*
- * @tc.name: setFontWeight1TestFontWeightOptionsEnableVariableFontWeightInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setFontWeight1TestFontWeightOptionsEnableVariableFontWeightInvalidValues,
-    TestSize.Level1)
-{
-    Ark_Union_Number_FontWeight_String initValueWeight;
-    Opt_FontSettingOptions initValueOptions;
-
-    // Initial setup
-    initValueWeight = ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValueOptions).enableVariableFontWeight =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueWeight, &initValueOptions](const std::string& input, const Opt_Boolean& value) {
-        Ark_Union_Number_FontWeight_String inputValueWeight = initValueWeight;
-        Opt_FontSettingOptions inputValueOptions = initValueOptions;
-
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        WriteTo(inputValueOptions).enableVariableFontWeight = value;
-        modifier_->setFontWeight1(node_, &inputValueWeight, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultFontWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultFontWeight, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_NAME);
-        auto resultStr = GetAttrValue<std::string>(
-            resultOptions, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_I_OPTIONS_I_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE) <<
-            "Input value is: " << input
-            << ", method: setFontWeight1, attribute: fontWeight.options.enableVariableFontWeight";
-    };
-
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -1673,7 +1497,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineSpacingTestValidValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextAlignTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1687,12 +1511,12 @@ HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestTextAlignValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextAlignTestTextAlignValidValues, TestSize.Level1)
 {
     Ark_TextAlign initValueTextAlign;
 
     // Initial setup
-    initValueTextAlign = std::get<1>(Fixtures::testFixtureEnumTextAlignValidValues[0]);
+    initValueTextAlign = std::get<1>(Fixtures::testFixtureTextAlignTypeValidValues[0]);
 
     auto checkValue = [this, &initValueTextAlign](
                           const std::string& input, const std::string& expectedStr, const Ark_TextAlign& value) {
@@ -1706,7 +1530,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestTextAlignValidValues, TestSi
             "Input value is: " << input << ", method: setTextAlign, attribute: textAlign";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextAlignValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextAlignTypeValidValues) {
         checkValue(input, expected, value);
     }
 }
@@ -1716,12 +1540,12 @@ HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestTextAlignValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestTextAlignInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextAlignTestTextAlignInvalidValues, TestSize.Level1)
 {
     Ark_TextAlign initValueTextAlign;
 
     // Initial setup
-    initValueTextAlign = std::get<1>(Fixtures::testFixtureEnumTextAlignValidValues[0]);
+    initValueTextAlign = std::get<1>(Fixtures::testFixtureTextAlignTypeValidValues[0]);
 
     auto checkValue = [this, &initValueTextAlign](const std::string& input, const Ark_TextAlign& value) {
         Ark_TextAlign inputValueTextAlign = initValueTextAlign;
@@ -1735,7 +1559,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextAlignTestTextAlignInvalidValues, Test
             "Input value is: " << input << ", method: setTextAlign, attribute: textAlign";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumTextAlignInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureTextAlignTypeInvalidValues) {
         checkValue(input, value);
     }
 }
@@ -1759,13 +1583,13 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueLineHeight;
 
     // Initial setup
     initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](const std::string& input, const std::string& expectedStr,
                           const Ark_Union_Number_String_Resource& value) {
@@ -1779,13 +1603,15 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, Test
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -1799,7 +1625,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, Te
 
     // Initial setup
     initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
@@ -1814,7 +1640,15 @@ HWTEST_F(TextModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, Te
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
 }
@@ -1990,12 +1824,12 @@ HWTEST_F(TextModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
 {
     Ark_Number initValueMaxLines;
 
     // Initial setup
-    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueMaxLines](
                           const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
@@ -2009,8 +1843,37 @@ HWTEST_F(TextModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
         checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setMaxLinesTestMaxLinesInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, TestSize.Level1)
+{
+    Ark_Number initValueMaxLines;
+
+    // Initial setup
+    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+
+    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
+        Ark_Number inputValueMaxLines = initValueMaxLines;
+
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        inputValueMaxLines = value;
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
+        checkValue(input, value);
     }
 }
 
@@ -2222,6 +2085,130 @@ HWTEST_F(TextModifierTest, setDecorationTestDecorationStyleValidValues, TestSize
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextDecorationStyleValidValues) {
         checkValue(input, expected, ArkValue<Opt_TextDecorationStyle>(value));
     }
+}
+
+/*
+ * @tc.name: setDecorationTestDecorationStyleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setDecorationTestDecorationStyleInvalidValues, TestSize.Level1)
+{
+    Ark_DecorationStyleInterface initValueDecoration;
+
+    // Initial setup
+    initValueDecoration.type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
+    initValueDecoration.color =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueDecoration.style =
+        ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
+
+    auto checkValue = [this, &initValueDecoration](const std::string& input, const Opt_TextDecorationStyle& value) {
+        Ark_DecorationStyleInterface inputValueDecoration = initValueDecoration;
+
+        modifier_->setDecoration(node_, &inputValueDecoration);
+        inputValueDecoration.style = value;
+        modifier_->setDecoration(node_, &inputValueDecoration);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_STYLE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setDecoration, attribute: decoration.style";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumTextDecorationStyleInvalidValues) {
+        checkValue(input, ArkValue<Opt_TextDecorationStyle>(value));
+    }
+}
+
+/*
+ * @tc.name: setLetterSpacingTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) << "Default value for attribute 'letterSpacing'";
+}
+
+/*
+ * @tc.name: setLetterSpacingTestLetterSpacingValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestLetterSpacingValidValues, TestSize.Level1)
+{
+    Ark_Union_Number_String initValueLetterSpacing;
+
+    // Initial setup
+    initValueLetterSpacing =
+        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_String& value) {
+        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+
+        inputValueLetterSpacing = value;
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setLetterSpacingTestLetterSpacingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestLetterSpacingInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_String initValueLetterSpacing;
+
+    // Initial setup
+    initValueLetterSpacing =
+        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const Ark_Union_Number_String& value) {
+        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        inputValueLetterSpacing = value;
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_String, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setTextCaseTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextCaseTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_CASE_DEFAULT_VALUE) << "Default value for attribute 'textCase'";
 }
 
 } // namespace OHOS::Ace::NG
