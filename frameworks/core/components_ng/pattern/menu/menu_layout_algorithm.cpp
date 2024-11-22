@@ -2039,6 +2039,10 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     CHECK_NULL_RETURN(layoutWrapper, OffsetF());
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(menuNode, OffsetF());
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    if (menuLayoutProperty && menuLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        return menuNode->GetPaintRectOffset(true);
+    }
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
