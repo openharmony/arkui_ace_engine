@@ -26,6 +26,8 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+#include "core/interfaces/arkoala/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG::Converter {
 template<>
 inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
@@ -143,8 +145,16 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
+    auto call = [arkCallback = CallbackHelper(*value)](ScrollEdge edgeIn) {
+        auto edge = Converter::ArkValue<Ark_Edge>(edgeIn);
+        // need a data check
+        Ark_Edge badEdge = static_cast<Ark_Edge>(-1);
+        if (badEdge == edge) {
+            edge = Ark_Edge::ARK_EDGE_TOP;
+        }
+        arkCallback.Invoke(edge);
+    };
+    ScrollModelNG::SetOnScrollEdge(frameNode, call);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const VoidCallback* value)

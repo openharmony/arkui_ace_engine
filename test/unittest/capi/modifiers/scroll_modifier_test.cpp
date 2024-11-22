@@ -1225,4 +1225,92 @@ HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::Tes
     ASSERT_FALSE(enable.value());
 }
 
+/**
+ * @tc.name: OnScrollEdge_SetCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct resultData {
+        Ark_Int32 resourceId;
+        Ark_Edge side;
+    };
+    static std::optional<resultData> result;
+
+    auto callback = [](
+        const Ark_Int32 resourceId, Ark_Edge side) {
+            result = {resourceId, side};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<OnScrollEdgeCallback>(callback, id);
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+
+    modifier_->setOnScrollEdge(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
+    eventHub->GetScrollEdgeEvent()(ScrollEdge::BOTTOM);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(Ark_Edge::ARK_EDGE_BOTTOM, result.value().side);
+    EXPECT_EQ(id, result.value().resourceId);
+}
+
+/**
+ * @tc.name: OnScrollEdge_SetNullCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    modifier_->setOnScrollEdge(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+}
+
+/**
+ * @tc.name: OnScrollEdge_SetNullCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnScrollEdge_PassBadValuesToCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct resultData {
+        Ark_Int32 resourceId;
+        Ark_Edge side;
+    };
+    static std::optional<resultData> result;
+
+    auto callback = [](
+        const Ark_Int32 resourceId, Ark_Edge side) {
+            result = {resourceId, side};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<OnScrollEdgeCallback>(callback, id);
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+
+    modifier_->setOnScrollEdge(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
+    eventHub->GetScrollEdgeEvent()(static_cast<ScrollEdge>(INT_MIN));
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(Ark_Edge::ARK_EDGE_TOP, result.value().side);
+    EXPECT_EQ(id, result.value().resourceId);
+}
+
+
 } // namespace OHOS::Ace::NG
