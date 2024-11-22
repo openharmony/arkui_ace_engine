@@ -42,6 +42,7 @@ public:
     ~SpanString() override;
     const std::string& GetString() const;
     std::wstring GetWideString();
+    std::u16string GetU16string();
     int32_t GetLength() const;
     void SetString(const std::string& text);
     void SetGroupId(const RefPtr<SpanBase>& span);

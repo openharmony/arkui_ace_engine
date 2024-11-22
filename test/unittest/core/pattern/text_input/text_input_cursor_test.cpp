@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 
+#include "base/utils/string_utils.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -46,7 +47,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition001, TestSize.Level1)
     /**
      * @tc.steps: Changed new text and remeasure and layout
      */
-    pattern_->InsertValue("new");
+    pattern_->InsertValue(u"new");
     FlushLayoutTask(frameNode_);
 
     /**
@@ -164,7 +165,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition006, TestSize.Level1)
 
     auto controller = pattern_->GetTextSelectController();
     controller->UpdateCaretIndex(2);
-    pattern_->InsertValue("new");
+    pattern_->InsertValue(u"new");
     FlushLayoutTask(frameNode_);
 
     /**
@@ -337,7 +338,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     GetFocus();
-    pattern_->InsertValue("abc");
+    pattern_->InsertValue(u"abc");
     FlushLayoutTask(frameNode_);
 
     /**
@@ -351,7 +352,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition004, TestSize.Le
      */
     auto textFiledController = pattern_->GetTextFieldController();
     textFiledController->CaretPosition(0);
-    pattern_->InsertValue("abcde");
+    pattern_->InsertValue(u"abcde");
     FlushLayoutTask(frameNode_);
 
     /**
@@ -451,7 +452,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition007, TestSize.Le
         ACTION_COPY,
         ACTION_PASTE,
     };
-    auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto callback = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) { model.SetOnCut(callback); });
     pattern_->HandleSetSelection(start, end, false);
     pattern_->HandleExtendAction(action[1]);
@@ -487,10 +488,10 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
         ACTION_COPY,
         ACTION_PASTE,
     };
-    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPasteWithEvent = [expectStr](const std::string& str, NG::TextCommonEvent& event) {
-        EXPECT_EQ(expectStr, str); };
+    auto onCopy = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
+    auto onPaste = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
+    auto onPasteWithEvent = [expectStr](const std::u16string& str, NG::TextCommonEvent& event) {
+        EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnCopy(onCopy);
         model.SetOnPaste(onPaste);
@@ -785,7 +786,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineBeginTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. Insert text and move line begin
      */
-    pattern_->InsertValue("hello world");
+    pattern_->InsertValue(u"hello world");
     FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLineBegin();
 
@@ -831,7 +832,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveToParagraphBeginTest001, TestSize.Level1
     /**
      * @tc.steps: step2. Insert text
      */
-    pattern_->InsertValue("hello world");
+    pattern_->InsertValue(u"hello world");
     FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveToParagraphBegin();
 
@@ -862,7 +863,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveHomeTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. Insert text
      */
-    pattern_->InsertValue("hello world");
+    pattern_->InsertValue(u"hello world");
     FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveHome();
 
@@ -1353,7 +1354,7 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview001, TestSize.Level1)
      * @tc.steps: call InitEditingValueText value is ""
      * @tc.expected: check GetIsPreviewText return false
      */
-    pattern_->InitEditingValueText("");
+    pattern_->InitEditingValueText(u"");
     EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
@@ -1428,7 +1429,7 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
      * @tc.expected: check GetIsPreviewText return false
      */
     SourceAndValueInfo info;
-    info.insertValue = HELLO_TEXT;
+    info.insertValue = HELLO_TEXT_U16;
     pattern_->InsertValue(info.insertValue, info.isIME);
     EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_TEXT);
     FlushLayoutTask(frameNode_);

@@ -33,11 +33,11 @@ HWTEST_F(TextFieldPatternTestFive, UpdateInputFilterErrorText001, TestSize.Level
     CreateTextField();
     auto textFieldEventHub = frameNode_->GetEventHub<TextFieldEventHub>();
 
-    textFieldEventHub->SetOnInputFilterError([](std::string errorText) { ASSERT_TRUE(errorText.empty()); });
-    pattern_->UpdateInputFilterErrorText("");
+    textFieldEventHub->SetOnInputFilterError([](std::u16string errorText) { ASSERT_TRUE(errorText.empty()); });
+    pattern_->UpdateInputFilterErrorText(u"");
 
-    textFieldEventHub->SetOnInputFilterError([](std::string errorText) { ASSERT_FALSE(errorText.empty()); });
-    pattern_->UpdateInputFilterErrorText("hasErrorText");
+    textFieldEventHub->SetOnInputFilterError([](std::u16string errorText) { ASSERT_FALSE(errorText.empty()); });
+    pattern_->UpdateInputFilterErrorText(u"hasErrorText");
 }
 
 /**
@@ -173,7 +173,7 @@ HWTEST_F(TextFieldPatternTestFive, SetShowError001, TestSize.Level0)
     pattern_->SetShowError();
     ASSERT_EQ(pattern_->underlineWidth_, Dimension(1.0_px));
 
-    layoutProperty->UpdateErrorText("This is Error Text");
+    layoutProperty->UpdateErrorText(u"This is Error Text");
     layoutProperty->UpdateShowErrorText(true);
     layoutProperty->UpdateShowUnderline(true);
     pattern_->SetShowError();
@@ -246,11 +246,11 @@ HWTEST_F(TextFieldPatternTestFive, AdjustTextRectByCleanNode001, TestSize.Level0
     layoutProperty->UpdateCleanNodeStyle(CleanNodeStyle::INPUT);
     pattern_->AdjustTextRectByCleanNode(rect);
     ASSERT_EQ(rect.Left(), 1);
-    pattern_->contentController_->content_ = "hhh";
+    pattern_->contentController_->content_ = u"hhh";
     pattern_->AdjustTextRectByCleanNode(rect);
     ASSERT_EQ(rect.Left(), 2);
     layoutProperty->UpdateCleanNodeStyle(CleanNodeStyle::INVISIBLE);
-    pattern_->contentController_->content_ = "hhh";
+    pattern_->contentController_->content_ = u"hhh";
     pattern_->AdjustTextRectByCleanNode(rect);
     ASSERT_EQ(rect.Left(), 2);
 }
@@ -265,13 +265,13 @@ HWTEST_F(TextFieldPatternTestFive, InsertOrDeleteSpace001, TestSize.Level0)
     CreateTextField();
     ASSERT_EQ(pattern_->InsertOrDeleteSpace(-1), false);
 
-    pattern_->contentController_->content_ = "123 456 abc def";
+    pattern_->contentController_->content_ = u"123 456 abc def";
     ASSERT_EQ(pattern_->InsertOrDeleteSpace(3), true);
 
-    pattern_->contentController_->content_ = "123 456 abc def";
+    pattern_->contentController_->content_ = u"123 456 abc def";
     ASSERT_EQ(pattern_->InsertOrDeleteSpace(4), true);
 
-    pattern_->contentController_->content_ = "123 456 abc def";
+    pattern_->contentController_->content_ = u"123 456 abc def";
     ASSERT_EQ(pattern_->InsertOrDeleteSpace(5), true);
 
     ASSERT_EQ(pattern_->InsertOrDeleteSpace(999), false);

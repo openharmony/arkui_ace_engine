@@ -31,7 +31,7 @@ void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 }
 
 int32_t TextBase::GetGraphemeClusterLength(
-    const std::wstring& text, int32_t extend, bool checkPrev)
+    const std::u16string& text, int32_t extend, bool checkPrev)
 {
     char16_t aroundChar = 0;
     if (checkPrev) {

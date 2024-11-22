@@ -84,6 +84,7 @@ constexpr float OFFSET = 3;
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const std::string DEFAULT_TEXT_THREE_LINE = "abcdef\nghijkl\nmnopqr\n";
 const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
@@ -191,7 +192,7 @@ void TextAreaBase::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(placeHolder, text);
+    textFieldModelNG.CreateTextArea(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -1347,7 +1348,7 @@ HWTEST_F(TextFieldUXTest, FontFeature001, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1371,7 +1372,7 @@ HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1599,7 +1600,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout001, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::NORMAL);
@@ -1632,7 +1633,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout002, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
@@ -1665,7 +1666,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout003, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
@@ -1700,7 +1701,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout004, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((uint32_t)(textStyle.GetWordBreak()), invalidValue);
@@ -1735,7 +1736,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout005, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);

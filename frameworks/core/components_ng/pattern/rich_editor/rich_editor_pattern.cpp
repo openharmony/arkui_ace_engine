@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include "base/utils/utf_helper.h"
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -385,7 +386,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         start = textSelector_.GetTextStart();
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
-    auto range = TextEmojiProcessor::CalSubWstringRange(start, length, styledString_->GetWideString(), true);
+    auto range = TextEmojiProcessor::CalSubU16stringRange(start, length, styledString_->GetU16string(), true);
     start = range.startIndex;
     length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, "");
@@ -1512,8 +1513,7 @@ std::u16string RichEditorPattern::GetLeftTextOfCursor(int32_t number)
     if (IsSelected()) {
         start = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
     }
-    auto stringText = GetSelectedText(start - number, start);
-    return StringUtils::Str8ToStr16(stringText);
+    return GetSelectedText(start - number, start);
 }
 
 std::u16string RichEditorPattern::GetRightTextOfCursor(int32_t number)
@@ -1522,8 +1522,7 @@ std::u16string RichEditorPattern::GetRightTextOfCursor(int32_t number)
     if (IsSelected()) {
         end = std::max(textSelector_.GetStart(), textSelector_.GetEnd());
     }
-    auto stringText = GetSelectedText(end, end + number);
-    return StringUtils::Str8ToStr16(stringText);
+    return GetSelectedText(end, end + number);
 }
 
 int32_t RichEditorPattern::GetTextIndexAtCursor()
@@ -2842,7 +2841,8 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, cons
     auto textOffset = globalOffset - offset;
     int32_t currentPosition = paragraphs_.GetIndex(textOffset);
     currentPosition = std::min(currentPosition, GetTextContentLength());
-    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
+    int32_t nextPosition = currentPosition + GetGraphemeClusterLength(UtfUtils::Str8ToStr16(GetTextForDisplay()),
+        currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
     AdjustPlaceholderSelection(currentPosition, nextPosition, textOffset);
     auto textSelectInfo = GetSpansInfo(currentPosition, nextPosition, GetSpansMethod::ONSELECT);
@@ -5381,7 +5381,7 @@ std::pair<bool, bool> RichEditorPattern::IsEmojiOnCaretPosition(int32_t& emojiLe
     auto content = ss.str();
     std::u16string u16 = StringUtils::Str8ToStr16(content);
     auto caretPos = std::clamp(caretPosition_, 0, static_cast<int32_t>(u16.length()));
-    emojiLength = TextEmojiProcessor::Delete(caretPos, length, content, isBackward);
+    emojiLength = TextEmojiProcessor::Delete(caretPos, length, u16, isBackward);
     if (emojiLength > 0) {
         if (isBackward) {
             isEmojiOnCaretBackward = true;
@@ -8681,7 +8681,7 @@ bool RichEditorPattern::NeedAiAnalysis(
         return false;
     }
 
-    if (!InputAIChecker::NeedAIAnalysis(content, targeType, lastClickTimeStamp_ - lastAiPosTimeStamp_)) {
+    if (!InputAIChecker::NeedAIAnalysis(content.empty(), targeType, lastClickTimeStamp_ - lastAiPosTimeStamp_)) {
         return false;
     }
 

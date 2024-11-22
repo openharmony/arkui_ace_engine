@@ -227,8 +227,8 @@ HWTEST_F(TextFieldPatternTestFour, UpdateInputFilterErrorText001, TestSize.Level
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->UpdateInputFilterErrorText("");
-    pattern->UpdateInputFilterErrorText("Error123456");
+    pattern->UpdateInputFilterErrorText(u"");
+    pattern->UpdateInputFilterErrorText(u"Error123456");
 }
 
 /**
@@ -299,11 +299,11 @@ HWTEST_F(TextFieldPatternTestFour, WordLength001, TestSize.Level0)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    std::vector<std::string> strVec = { "0", "1", "2" };
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
     auto paragraphData = CreateParagraphData { true, textStyle.GetFontSize().ConvertToPx() };
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, paragraphData);
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", true, paragraphData);
     DirtySwapConfig config;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         textFieldNode, AceType::MakeRefPtr<GeometryNode>(), textFieldNode->GetLayoutProperty());
@@ -314,17 +314,17 @@ HWTEST_F(TextFieldPatternTestFour, WordLength001, TestSize.Level0)
     ASSERT_NE(textDragNode0, nullptr);
     pattern_->dragNode_ = textDragNode0;
     EXPECT_EQ(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config), true);
-    pattern_->contentController_->content_ = " T e s t ";
+    pattern_->contentController_->content_ = u" T e s t ";
     pattern_->GetWordLength(0, 2);
     pattern_->GetWordLength(1, 2);
     pattern_->GetWordLength(0, 1);
     pattern_->GetWordLength(1, 1);
-    pattern_->contentController_->content_ = "       ";
+    pattern_->contentController_->content_ = u"       ";
     pattern_->GetWordLength(0, 2);
     pattern_->GetWordLength(1, 2);
     pattern_->GetWordLength(0, 1);
     pattern_->GetWordLength(1, 1);
-    pattern_->contentController_->content_ = "T\ne\ns\nt\n";
+    pattern_->contentController_->content_ = u"T\ne\ns\nt\n";
     pattern_->GetLineBeginPosition(0, true);
     pattern_->GetLineBeginPosition(0, false);
     pattern_->GetLineBeginPosition(1, true);
@@ -333,7 +333,7 @@ HWTEST_F(TextFieldPatternTestFour, WordLength001, TestSize.Level0)
     pattern_->GetLineEndPosition(0, false);
     pattern_->GetLineEndPosition(1, true);
     pattern_->GetLineEndPosition(1, false);
-    pattern_->contentController_->content_ = "\n\n\n\n\n";
+    pattern_->contentController_->content_ = u"\n\n\n\n\n";
     pattern_->GetLineBeginPosition(0, true);
     pattern_->GetLineBeginPosition(0, false);
     pattern_->GetLineBeginPosition(1, true);
@@ -366,7 +366,7 @@ HWTEST_F(TextFieldPatternTestFour, CursorMove001, TestSize.Level0)
     pattern->CursorMoveToParagraphBegin();
     pattern->CursorMoveLineEnd();
     pattern->CursorMoveToParagraphEnd();
-    pattern->contentController_->content_  = " T e s t ";
+    pattern->contentController_->content_  = u" T e s t ";
     pattern->selectController_->caretInfo_.index = -1;
     pattern->CursorMoveLeftWord();
     pattern->CursorMoveLineBegin();

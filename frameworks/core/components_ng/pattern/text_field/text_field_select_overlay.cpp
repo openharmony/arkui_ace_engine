@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -362,7 +363,7 @@ std::string TextFieldSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(pattern, "");
     auto start = pattern->GetTextSelectController()->GetStartIndex();
     auto end = pattern->GetTextSelectController()->GetEndIndex();
-    return pattern->GetTextContentController()->GetSelectedValue(start, end);
+    return UtfUtils::Str16ToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
 }
 
 void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -416,7 +417,7 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
     auto pattern = GetPattern<TextFieldPattern>();
     auto contentRect = pattern->GetContentRect();
     auto selectController = pattern->GetTextSelectController();
-    auto wideText = pattern->GetWideText();
+    auto wideText = pattern->GetTextUtf16Value();
     if (LessNotEqual(localOffset.GetX(), contentRect.GetX())) {
         auto index = selectController->GetStartIndex();
         if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {

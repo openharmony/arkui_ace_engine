@@ -55,7 +55,7 @@ public:
 
     RefPtr<Paragraph> GetParagraph() const override;
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
     const RectF& GetTextRect() const
@@ -78,7 +78,7 @@ public:
         return inlineMeasureItem_;
     }
 
-    static TextDirection GetTextDirection(const std::string& content, TextDirection direction = TextDirection::AUTO);
+    static TextDirection GetTextDirection(const std::u16string& content, TextDirection direction = TextDirection::AUTO);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -98,25 +98,25 @@ public:
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
-    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+    void CreateParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
         int32_t nakedCharPosition, CreateParagraphData paragraphData);
-    void CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
-        const std::string& content, bool needObscureText, CreateParagraphData paragraphData);
-    void CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+    void CreateParagraph(const TextStyle& textStyle, const std::vector<std::u16string>& contents,
+        const std::u16string& content, bool needObscureText, CreateParagraphData paragraphData);
+    void CreateInlineParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
         int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
 
     void ConstructTextStyles(
-        const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder);
+        const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder);
     LayoutConstraintF CalculateContentMaxSizeWithCalculateConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, const float fontSize) const;
+        const TextStyle& textStyle, const std::u16string& content, const float fontSize) const;
     void GetInlineMeasureItem(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float& inlineIdealHeight);
     float ConstraintWithMinWidth(
@@ -135,11 +135,11 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IsNeedAdaptFontSize(const TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint);
-    bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::u16string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-    bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+    bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::u16string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+    virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
     LayoutConstraintF CalculateFrameSizeConstraint(
@@ -152,7 +152,7 @@ protected:
 
     RectF textRect_;
     OffsetF parentGlobalOffset_;
-    std::string textContent_;
+    std::u16string textContent_;
     bool showPlaceHolder_ = false;
     float preferredHeight_ = 0.0f;
     TextDirection direction_ = TextDirection::AUTO;

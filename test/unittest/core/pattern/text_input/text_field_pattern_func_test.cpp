@@ -17,6 +17,7 @@
 
 #include "adapter/preview/entrance/editing/text_input_connection_impl.h"
 #include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -37,7 +38,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc001, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::string content;
+    std::u16string content;
     pattern->InitEditingValueText(content);
 }
 
@@ -49,12 +50,12 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc002, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::string content = "openharmony";
+    std::u16string content = u"openharmony";
     ASSERT_NE(pattern->contentController_, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->deleteBackwardOperations_.push(1);
     pattern->InitEditingValueText(content);
-    EXPECT_NE(pattern->contentController_->content_, content);
+    EXPECT_NE(StringUtils::Str16ToStr8(pattern->contentController_->content_), StringUtils::Str16ToStr8(content));
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc003, TestSize.Level1)
@@ -65,7 +66,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc003, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::string content = "openharmony";
+    std::u16string content = u"openharmony";
     ASSERT_NE(pattern->contentController_, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->deleteBackwardOperations_.push(1);
@@ -81,7 +82,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc004, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::string content;
+    std::u16string content;
     bool state = pattern->InitValueText(content);
     EXPECT_TRUE(state);
 }
@@ -94,7 +95,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc005, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    std::string content = "openharmony";
+    std::u16string content = u"openharmony";
     pattern->hasPreviewText_ = true;
     pattern->deleteBackwardOperations_.push(1);
     bool state = pattern->InitValueText(content);
@@ -111,7 +112,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc006, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->contentController_, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
-    std::string content;
+    std::u16string content;
     pattern->hasPreviewText_ = true;
     pattern->deleteBackwardOperations_.push(1);
     bool state = pattern->InitValueText(content);
@@ -840,7 +841,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc049, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    std::string insertValue;
+    std::u16string insertValue;
     int32_t offset = 0.0;
     auto state = pattern->BeforeIMEInsertValue(insertValue, offset);
     EXPECT_TRUE(state);
@@ -859,7 +860,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc050, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ state = true; };
     pattern->GetHost()->GetEventHub<TextFieldEventHub>()->SetOnDidInsertValueEvent(callback);
-    std::string insertValue;
+    std::u16string insertValue;
     pattern->AfterIMEInsertValue(insertValue);
     EXPECT_TRUE(state);
 }
@@ -946,7 +947,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc054, TestSize.Level1)
     ASSERT_NE(pattern->selectController_, nullptr);
 
     pattern->hasPreviewText_ = true;
-    std::string insertValue;
+    std::u16string insertValue;
     EXPECT_TRUE(pattern->FinishTextPreviewByPreview(insertValue));
 }
 
@@ -962,7 +963,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc055, TestSize.Level1)
     ASSERT_NE(pattern->selectController_, nullptr);
 
     pattern->hasPreviewText_ = false;
-    std::string insertValue;
+    std::u16string insertValue;
     EXPECT_FALSE(pattern->FinishTextPreviewByPreview(insertValue));
 }
 
@@ -978,7 +979,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc056, TestSize.Level1)
     ASSERT_NE(pattern->selectController_, nullptr);
 
     pattern->hasPreviewText_ = false;
-    std::string insertValue;
+    std::u16string insertValue;
     EXPECT_FALSE(pattern->FinishTextPreviewByPreview(insertValue));
 }
 
@@ -992,7 +993,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc057, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     
-    std::string insertValue = "1";
+    std::u16string insertValue = u"1";
     pattern->obscureTickCountDown_ = 10;
     pattern->UpdateObscure(insertValue, false);
 }
@@ -1009,7 +1010,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc058, TestSize.Level1)
     
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = false;
-    pattern->InsertValue("", true);
+    pattern->InsertValue(u"", true);
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc059, TestSize.Level1)
@@ -1025,7 +1026,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc059, TestSize.Level1)
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = false;
-    pattern->InsertValue("", true);
+    pattern->InsertValue(u"", true);
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc060, TestSize.Level1)
@@ -1042,7 +1043,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc060, TestSize.Level1)
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
     pattern->focusIndex_ = FocuseIndex::CANCEL;
-    pattern->InsertValue("", true);
+    pattern->InsertValue(u"", true);
     EXPECT_FALSE(pattern->HandleSpaceEvent());
 }
 
@@ -1065,7 +1066,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc061, TestSize.Level1)
 
     pattern->focusIndex_ = FocuseIndex::TEXT;
     pattern->hasPreviewText_ = true;
-    pattern->InsertValue("", true);
+    pattern->InsertValue(u"", true);
     EXPECT_FALSE(pattern->inputOperations_.empty());
 }
 
@@ -1088,7 +1089,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc062, TestSize.Level1)
 
     pattern->focusIndex_ = FocuseIndex::TEXT;
     pattern->hasPreviewText_ = false;
-    pattern->InsertValue("", true);
+    pattern->InsertValue(u"", true);
     EXPECT_FALSE(pattern->insertValueOperations_.empty());
 }
 
@@ -1134,7 +1135,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc064, TestSize.Level1)
     layoutProperty->propTextInputType_ = TextInputType::TEXT;
     pattern->contentController_->Reset();
     pattern->blurReason_ = BlurReason::FOCUS_SWITCH;
-    pattern->contentController_->SetTextValue("openharmony");
+    pattern->contentController_->SetTextValue(u"openharmony");
     pattern->ProcessFocusStyle();
     EXPECT_TRUE(pattern->inlineSelectAllFlag_);
 }
@@ -1160,7 +1161,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc065, TestSize.Level1)
     layoutProperty->propTextInputType_ = TextInputType::TEXT;
     pattern->contentController_->Reset();
     pattern->blurReason_ = BlurReason::WINDOW_BLUR;
-    pattern->contentController_->SetTextValue("openharmony");
+    pattern->contentController_->SetTextValue(u"openharmony");
     pattern->ProcessFocusStyle();
     EXPECT_FALSE(pattern->inlineSelectAllFlag_);
 }
@@ -1199,7 +1200,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc067, TestSize.Level1)
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    pattern->contentController_->SetTextValue("openharmony");
+    pattern->contentController_->SetTextValue(u"openharmony");
     layoutProperty->propSelectAllValue_ = true;
     pattern->HandleFocusEvent();
     EXPECT_TRUE(pattern->needSelectAll_);
@@ -1215,7 +1216,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc068, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->contentController_->SetTextValue("");
+    pattern->contentController_->SetTextValue(u"");
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1234,7 +1235,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc069, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->contentController_->SetTextValue("");
+    pattern->contentController_->SetTextValue(u"");
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);

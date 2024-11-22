@@ -14,6 +14,7 @@
  */
 
 #include "text_input_base.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -344,7 +345,7 @@ HWTEST_F(TextInputUpdateTestNg, GetErrorTextString001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
 
     pattern_->SearchRequestKeyboard();
-    EXPECT_EQ(pattern_->GetErrorTextString(), "");
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern_->GetErrorTextString()), "");
 }
 
 /**
@@ -936,7 +937,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
 
     auto onWillChange = [&offset, &value](const InsertValueInfo& info) {
         offset = info.insertOffset;
-        value = info.insertValue;
+        value = StringUtils::Str16ToStr8(info.insertValue);
         return true;
     };
     eventHub_->SetOnWillInsertValueEvent(std::move(onWillChange));
@@ -945,7 +946,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
     std::string didValue = "";
     auto onDidChange = [&didOffset, &didValue](const InsertValueInfo& info) {
         didOffset = info.insertOffset;
-        didValue = info.insertValue;
+        didValue = StringUtils::Str16ToStr8(info.insertValue);
     };
     eventHub_->SetOnDidInsertValueEvent(std::move(onDidChange));
 
@@ -954,7 +955,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
      * @tc.expected: return value is valid
      */
     SourceAndValueInfo info;
-    info.insertValue = "2";
+    info.insertValue = u"2";
     info.isIME = true;
     pattern_->InsertValueOperation(info);
     EXPECT_EQ(offset, 0);
@@ -981,7 +982,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest002, TestSize.Level1)
 
     auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
         offset = info.deleteOffset;
-        value = info.deleteValue;
+        value = StringUtils::Str16ToStr8(info.deleteValue);
         direction = info.direction;
         return true;
     };
@@ -992,7 +993,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest002, TestSize.Level1)
     std::string didValue = "";
     auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
         didOffset = info.deleteOffset;
-        didValue = info.deleteValue;
+        didValue = StringUtils::Str16ToStr8(info.deleteValue);
         didDirection = info.direction;
     };
     eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
@@ -1028,7 +1029,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
 
     auto onWillChange = [&offset, &value](const InsertValueInfo& info) {
         offset = info.insertOffset;
-        value = info.insertValue;
+        value = StringUtils::Str16ToStr8(info.insertValue);
         return false;
     };
     eventHub_->SetOnWillInsertValueEvent(std::move(onWillChange));
@@ -1037,7 +1038,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
     std::string didValue = "";
     auto onDidChange = [&didOffset, &didValue](const InsertValueInfo& info) {
         didOffset = info.insertOffset;
-        didValue = info.insertValue;
+        didValue = StringUtils::Str16ToStr8(info.insertValue);
     };
     eventHub_->SetOnDidInsertValueEvent(std::move(onDidChange));
 
@@ -1046,7 +1047,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
      * @tc.expected: return value is valid
      */
     SourceAndValueInfo info;
-    info.insertValue = "2";
+    info.insertValue = u"2";
     info.isIME = true;
     pattern_->InsertValueOperation(info);
     EXPECT_EQ(offset, 0);
@@ -1073,7 +1074,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest004, TestSize.Level1)
 
     auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
         offset = info.deleteOffset;
-        value = info.deleteValue;
+        value = StringUtils::Str16ToStr8(info.deleteValue);
         direction = info.direction;
         return false;
     };
@@ -1084,7 +1085,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest004, TestSize.Level1)
     std::string didValue = "";
     auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
         didOffset = info.deleteOffset;
-        didValue = info.deleteValue;
+        didValue = StringUtils::Str16ToStr8(info.deleteValue);
         didDirection = info.direction;
     };
     eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
@@ -1121,7 +1122,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest005, TestSize.Level1)
 
     auto onWillChange = [&offset, &value, &direction](const DeleteValueInfo& info) {
         offset = info.deleteOffset;
-        value = info.deleteValue;
+        value = StringUtils::Str16ToStr8(info.deleteValue);
         direction = info.direction;
         return true;
     };
@@ -1132,7 +1133,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest005, TestSize.Level1)
     std::string didValue = "";
     auto onDidChange = [&didOffset, &didValue, &didDirection](const DeleteValueInfo& info) {
         didOffset = info.deleteOffset;
-        didValue = info.deleteValue;
+        didValue = StringUtils::Str16ToStr8(info.deleteValue);
         didDirection = info.direction;
     };
     eventHub_->SetOnDidDeleteEvent(std::move(onDidChange));
