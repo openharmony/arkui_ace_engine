@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -153,9 +155,10 @@ void OnReachStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WaterFlowModelNG::SetOnReachStart(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnReachStartImpl -> Method is not implemented. Event!");
+    auto onReachStart = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
 void OnReachEndImpl(Ark_NativePointer node,
                     const Callback_Void* value)
@@ -163,9 +166,10 @@ void OnReachEndImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WaterFlowModelNG::SetOnReachEnd(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnReachEndImpl -> Method is not implemented. Event!");
+    auto onReachEnd = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    WaterFlowModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
@@ -175,7 +179,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnScrollFrameBeginImpl -> Method is not implemented. Event!");
+    LOGE("ARKOALA WaterFlow.OnScrollFrameBeginImpl -> Method is not implemented. Event with return value!");
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        const Callback_Number_Number_Void* value)
@@ -183,9 +187,11 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WaterFlowModelNG::SetOnScrollIndex(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnScrollIndexImpl -> Method is not implemented. Event!");
+    auto onScrollIndex = [arkCallback = CallbackHelper(*value)](const int32_t first, const int32_t last) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(first), Converter::ArkValue<Ark_Number>(last));
+    };
+    
+    WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
