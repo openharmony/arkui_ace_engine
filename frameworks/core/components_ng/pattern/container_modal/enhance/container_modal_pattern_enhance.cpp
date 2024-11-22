@@ -43,15 +43,6 @@ const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 
-constexpr float LIGHT_ON_INTENSITY_DARK = 2.5f;
-constexpr float LIGHT_ON_INTENSITY_LIGHT = 2.5f;
-constexpr float LIGHT_OFF_INTENSITY = 0.0f;
-constexpr float LIGHT_POSITION_Z = 70.0f;
-constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
-constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
-constexpr int32_t LIGHT_OFF_DELAY_TIME = 2000;
-constexpr int32_t LIGHT_OFF_UPDATE_INTERVAL = 500000000;
-
 const Dimension MENU_ITEM_RADIUS = 4.0_vp;
 const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
 const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
@@ -226,7 +217,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
-    AddPointLight();
     auto controlButtonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
@@ -264,7 +254,6 @@ void ContainerModalPatternEnhance::OnWindowFocused()
 {
     ContainerModalPattern::OnWindowFocused();
     isHoveredMenu_ = false;
-    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowUnfocused()
@@ -273,12 +262,10 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
         isFocus_ = false;
         isHoveredMenu_ = true;
-        UpdateLightIntensity();
         return;
     }
     ContainerModalPattern::OnWindowUnfocused();
     isHoveredMenu_ = false;
-    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
@@ -400,127 +387,6 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 controlButtonsLayoutProperty->UpdateVisibility(pattern->controlButtonVisibleBeforeAnim_);
             });
     }
-}
-
-void ContainerModalPatternEnhance::AddPointLight()
-{
-    auto controlButtonsNode = GetButtonRowByInspectorId();
-    CHECK_NULL_VOID(controlButtonsNode);
-
-    auto maximizeButton = GetMaximizeButton();
-    auto minimizeButton = GetMinimizeButton();
-    auto closeButton = GetCloseButton();
-
-    CHECK_NULL_VOID(maximizeButton);
-    CHECK_NULL_VOID(minimizeButton);
-    CHECK_NULL_VOID(closeButton);
-
-    SetPointLight(controlButtonsNode, maximizeButton, minimizeButton, closeButton);
-}
-
-void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
-    RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn)
-{
-    auto inputHub = containerTitleRow->GetOrCreateInputEventHub();
-    RefPtr<RenderContext> maximizeBtnRenderContext = maximizeBtn->GetRenderContext();
-    RefPtr<RenderContext> minimizeBtnRenderContext = minimizeBtn->GetRenderContext();
-    closeBtnRenderContext_ = closeBtn->GetRenderContext();
-
-    CHECK_NULL_VOID(maximizeBtnRenderContext);
-    CHECK_NULL_VOID(minimizeBtnRenderContext);
-    CHECK_NULL_VOID(closeBtnRenderContext_);
-    maximizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    minimizeBtnRenderContext->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-
-    auto mouseTask = [weakPattern = WeakClaim(this), weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](
-                         MouseInfo& info) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto closeBtn = weakCloseBtn.Upgrade();
-        CHECK_NULL_VOID(closeBtn);
-        auto closeBntFrameRect = closeBtn->GetGeometryNode()->GetFrameRect();
-        TranslateOptions closeTranslate = TranslateOptions(info.GetLocalLocation().GetX() - closeBntFrameRect.Left(),
-            info.GetLocalLocation().GetY() - closeBntFrameRect.Top(), LIGHT_POSITION_Z);
-        auto closeBtnContext = closeBtn->GetRenderContext();
-        CHECK_NULL_VOID(closeBtnContext);
-        closeBtnContext->UpdateLightPosition(closeTranslate);
-        if (!pattern->isLightOn_) {
-            pattern->UpdateLightIntensity();
-        }
-        if (pattern->isLightOn_) {
-            auto timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
-            pattern->UpdateLightOffDelay(timeStamp);
-        }
-    };
-    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnMouseEvent(mouseEvent);
-
-    auto hoverEventFucRow = [weakPattern = WeakClaim(this)](bool hover) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isTitleRowHovered_ = hover;
-        pattern->UpdateLightColor();
-        pattern->UpdateLightIntensity();
-    };
-    inputHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFucRow)));
-}
-
-void ContainerModalPatternEnhance::UpdateLightOffDelay(double timeStamp)
-{
-    if (timeStamp - lightOffDelayUpdateTime_ < LIGHT_OFF_UPDATE_INTERVAL) {
-        return;
-    }
-    lightOffDelayUpdateTime_ = timeStamp;
-    auto&& callback = [weakPattern = WeakClaim(this)]() {
-        AnimationOption option;
-        option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
-        option.SetCurve(Curves::SMOOTH);
-        AnimationUtils::Animate(option, [weakPattern]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
-            pattern->isLightOn_ = false;
-        });
-    };
-    auto pipeline = GetHost()->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    lightOffCallback_.Reset(callback);
-    pipeline->GetTaskExecutor()->PostDelayedTask(
-        lightOffCallback_, TaskExecutor::TaskType::UI, LIGHT_OFF_DELAY_TIME, "ArkUIContainerModalLightOff");
-}
-
-void ContainerModalPatternEnhance::UpdateLightColor()
-{
-    CHECK_NULL_VOID(closeBtnRenderContext_);
-    auto colorMode = SystemProperties::GetColorMode();
-    if (colorMode == ColorMode::LIGHT) {
-        closeBtnRenderContext_->UpdateLightColor(Color::BLACK);
-    } else {
-        closeBtnRenderContext_->UpdateLightColor(Color::WHITE);
-    }
-}
-
-void ContainerModalPatternEnhance::UpdateLightIntensity()
-{
-    AnimationOption option;
-    option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
-    option.SetCurve(Curves::SMOOTH);
-    AnimationUtils::Animate(option, [weakPattern = WeakClaim(this)]() {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(pattern->closeBtnRenderContext_);
-        if (pattern->GetIsFocus() && pattern->isTitleRowHovered_) {
-            auto colorMode = SystemProperties::GetColorMode();
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(
-                colorMode == ColorMode::LIGHT ? LIGHT_ON_INTENSITY_LIGHT : LIGHT_ON_INTENSITY_DARK);
-            pattern->isLightOn_ = true;
-        } else {
-            pattern->closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
-            pattern->isLightOn_ = false;
-        }
-    });
 }
 
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
