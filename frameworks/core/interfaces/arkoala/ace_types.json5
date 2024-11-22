@@ -949,6 +949,10 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "name": "baselineOffset",
+                    "default": "0.00px",
                 }
             ]
         },
