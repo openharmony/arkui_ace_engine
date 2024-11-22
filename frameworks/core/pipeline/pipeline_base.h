@@ -964,7 +964,7 @@ public:
 
     void OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode);
 
-    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double, bool)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
         static std::atomic<int32_t> pseudoId(-1); // -1 will not be conflict with real node ids.
@@ -979,11 +979,11 @@ public:
     {
         virtualKeyBoardCallback_.erase(nodeId);
     }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const
     {
         bool isConsume = false;
         for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
-            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard, isCustomKeyboard)) {
                 isConsume = true;
             }
         }
