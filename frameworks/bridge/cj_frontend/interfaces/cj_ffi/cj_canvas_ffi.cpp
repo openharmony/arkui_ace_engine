@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_canvas_ffi.h"
-
+#include <cstdint>
 
 #include "cj_lambda.h"
 
-#include "bridge/cj_frontend/cppview/canvas_renderer.h"
+#include "bridge/cj_frontend/cppview/canvas_image_data.h"
+#include "bridge/cj_frontend/cppview/canvas_pattern.h"
+#include "bridge/cj_frontend/cppview/rendering_context.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_canvas_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 
 using namespace OHOS;
@@ -28,6 +31,7 @@ using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
 namespace {
+constexpr int32_t PIXEL_SIZE = 4;
 enum class CanvasImageType { COORDINATES_ONLY = 0, COORDINATES_AND_SIZE, COORDINATES_AND_SIZE_WITH_SOURCE };
 const std::vector<LineCapStyle> LINE_CAP_STYLE_LIST = { LineCapStyle::BUTT, LineCapStyle::ROUND, LineCapStyle::SQUARE };
 const std::vector<LineJoinStyle> LINE_JOIN_STYLE_LIST = { LineJoinStyle::MITER, LineJoinStyle::ROUND,
@@ -47,10 +51,6 @@ const std::vector<CanvasImageType> CANVAS_IMAGE_TYPE_LIST = { CanvasImageType::C
 
 Rect GetRectParam(double x, double y, double width, double height)
 {
-    x = PipelineBase::Vp2PxWithCurrentDensity(x);
-    y = PipelineBase::Vp2PxWithCurrentDensity(y);
-    width = PipelineBase::Vp2PxWithCurrentDensity(width);
-    height = PipelineBase::Vp2PxWithCurrentDensity(height);
     Rect rect = Rect(x, y, width, height);
     return rect;
 }
@@ -58,31 +58,31 @@ Rect GetRectParam(double x, double y, double width, double height)
 BezierCurveParam GetBezierCurveParam(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
 {
     BezierCurveParam param;
-    param.cp1x = PipelineBase::Vp2PxWithCurrentDensity(cp1x);
-    param.cp1y = PipelineBase::Vp2PxWithCurrentDensity(cp1y);
-    param.cp2x = PipelineBase::Vp2PxWithCurrentDensity(cp2x);
-    param.cp2y = PipelineBase::Vp2PxWithCurrentDensity(cp2y);
-    param.x = PipelineBase::Vp2PxWithCurrentDensity(x);
-    param.y = PipelineBase::Vp2PxWithCurrentDensity(y);
+    param.cp1x = cp1x;
+    param.cp1y = cp1y;
+    param.cp2x = cp2x;
+    param.cp2y = cp2y;
+    param.x = x;
+    param.y = y;
     return param;
 }
 
 QuadraticCurveParam GetQuadraticCurveParam(double cpx, double cpy, double x, double y)
 {
     QuadraticCurveParam param;
-    param.cpx = PipelineBase::Vp2PxWithCurrentDensity(cpx);
-    param.cpy = PipelineBase::Vp2PxWithCurrentDensity(cpy);
-    param.x = PipelineBase::Vp2PxWithCurrentDensity(x);
-    param.y = PipelineBase::Vp2PxWithCurrentDensity(y);
+    param.cpx = cpx;
+    param.cpy = cpy;
+    param.x = x;
+    param.y = y;
     return param;
 }
 
 ArcParam GetArcParam(double x, double y, double radius, double startAngle, double endAngle, bool anticlockwise)
 {
     ArcParam param;
-    param.x = PipelineBase::Vp2PxWithCurrentDensity(x);
-    param.y = PipelineBase::Vp2PxWithCurrentDensity(y);
-    param.radius = PipelineBase::Vp2PxWithCurrentDensity(radius);
+    param.x = x;
+    param.y = y;
+    param.radius = radius;
     param.startAngle = startAngle;
     param.endAngle = endAngle;
     param.anticlockwise = anticlockwise;
@@ -92,11 +92,11 @@ ArcParam GetArcParam(double x, double y, double radius, double startAngle, doubl
 ArcToParam GetArcToParam(double x1, double y1, double x2, double y2, double radius)
 {
     ArcToParam param;
-    param.x1 = PipelineBase::Vp2PxWithCurrentDensity(x1);
-    param.y1 = PipelineBase::Vp2PxWithCurrentDensity(y1);
-    param.x2 = PipelineBase::Vp2PxWithCurrentDensity(x2);
-    param.y2 = PipelineBase::Vp2PxWithCurrentDensity(y2);
-    param.radius = PipelineBase::Vp2PxWithCurrentDensity(radius);
+    param.x1 = x1;
+    param.y1 = y1;
+    param.x2 = x2;
+    param.y2 = y2;
+    param.radius = radius;
     return param;
 }
 
@@ -104,10 +104,10 @@ EllipseParam GetEllipseParam(double x, double y, double radiusX, double radiusY,
     double endAngle, bool anticlockwise)
 {
     EllipseParam param;
-    param.x = PipelineBase::Vp2PxWithCurrentDensity(x);
-    param.y = PipelineBase::Vp2PxWithCurrentDensity(y);
-    param.radiusX = PipelineBase::Vp2PxWithCurrentDensity(radiusX);
-    param.radiusY = PipelineBase::Vp2PxWithCurrentDensity(radiusY);
+    param.x = x;
+    param.y = y;
+    param.radiusX = radiusX;
+    param.radiusY = radiusY;
     param.rotation = rotation;
     param.startAngle = startAngle;
     param.endAngle = endAngle;
@@ -123,8 +123,32 @@ TransformParam GetTransformParam(
     param.scaleY = scaleY;
     param.skewX = skewX;
     param.skewY = skewY;
-    param.translateX = PipelineBase::Vp2PxWithCurrentDensity(translateX);
-    param.translateY = PipelineBase::Vp2PxWithCurrentDensity(translateY);
+    param.translateX = translateX;
+    param.translateY = translateY;
+    return param;
+}
+
+TransformParam ConvertToTransformParam(const TransformParams p)
+{
+    TransformParam param;
+    param.scaleX = p.scaleX;
+    param.scaleY = p.scaleY;
+    param.skewX = p.skewX;
+    param.skewY = p.skewY;
+    param.translateX = p.translateX;
+    param.translateY = p.translateY;
+    return param;
+}
+
+TransformParams ConvertToTransformParams(const TransformParam p)
+{
+    TransformParams param;
+    param.scaleX = p.scaleX;
+    param.scaleY = p.scaleY;
+    param.skewX = p.skewX;
+    param.skewY = p.skewY;
+    param.translateX = p.translateX;
+    param.translateY = p.translateY;
     return param;
 }
 } // namespace
@@ -161,6 +185,16 @@ int64_t FfiOHOSAceFrameworkRenderingContextCtor(bool antialias)
     return context->GetID();
 }
 
+int64_t FfiOHOSAceFrameworkRenderingContextCtorWithUnit(bool antialias, int32_t unit)
+{
+    auto context = FFIData::Create<NativeCanvasRenderer>(antialias);
+    context->SetUnit(static_cast<CanvasUnit>(unit));
+    if (context == nullptr) {
+        return FFI_ERROR_CODE;
+    }
+    return context->GetID();
+}
+
 void FfiOHOSAceFrameworkRenderingContextSetFillStyle(int64_t contextId, uint32_t colorValue)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -188,7 +222,6 @@ void FfiOHOSAceFrameworkRenderingContextSetLineWidth(int64_t contextId, double l
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        lineWidth = PipelineBase::Vp2PxWithCurrentDensity(lineWidth);
         context->SetLineWidth(lineWidth);
     } else {
         LOGE("canvas lineWidth error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -216,6 +249,19 @@ void FfiOHOSAceFrameworkRenderingContextSetStrokeStyleByGradient(int64_t context
         return;
     }
     context->SetStrokeStyle(nativeCanvasGradient);
+}
+
+void FfiOHOSAceFrameworkRenderingContextSetStrokeStyleByPattern(int64_t contextId, int64_t patterntId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return;
+    }
+    auto nativeCanvasPattern = FFIData::GetData<NativeCanvasPattern>(patterntId);
+    if (nativeCanvasPattern == nullptr) {
+        return;
+    }
+    context->SetStrokeStyle(nativeCanvasPattern);
 }
 
 void FfiOHOSAceFrameworkRenderingContextSetLineCap(int64_t contextId, int32_t lineCap)
@@ -248,7 +294,6 @@ void FfiOHOSAceFrameworkRenderingContextSetMiterLimit(int64_t contextId, double 
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        limit = PipelineBase::Vp2PxWithCurrentDensity(limit);
         context->SetMiterLimit(limit);
     } else {
         LOGE("canvas miterLimit error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -320,7 +365,6 @@ void FfiOHOSAceFrameworkRenderingContextSetLineDashOffset(int64_t contextId, dou
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        lineDashOffset = PipelineBase::Vp2PxWithCurrentDensity(lineDashOffset);
         context->SetLineDashOffset(lineDashOffset);
     } else {
         LOGE("canvas lineDashOffset error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -365,7 +409,6 @@ void FfiOHOSAceFrameworkRenderingContextSetShadowOffsetX(int64_t contextId, doub
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        offsetX = PipelineBase::Vp2PxWithCurrentDensity(offsetX);
         context->SetShadowOffsetX(offsetX);
     } else {
         LOGE("canvas shadowOffsetX error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -376,7 +419,6 @@ void FfiOHOSAceFrameworkRenderingContextSetShadowOffsetY(int64_t contextId, doub
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        offsetY = PipelineBase::Vp2PxWithCurrentDensity(offsetY);
         context->SetShadowOffsetY(offsetY);
     } else {
         LOGE("canvas shadowOffsetY error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -440,8 +482,6 @@ void FfiOHOSAceFrameworkRenderingContextFillText(int64_t contextId, double x, do
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         context->FillText(x, y, text);
     } else {
         LOGE("canvas fillText error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -452,8 +492,6 @@ void FfiOHOSAceFrameworkRenderingContextStrokeText(int64_t contextId, double x, 
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         context->StrokeText(x, y, text);
     } else {
         LOGE("canvas strokeText error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -511,8 +549,6 @@ void FfiOHOSAceFrameworkRenderingContextMoveTo(int64_t contextId, double x, doub
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         context->MoveTo(x, y);
     } else {
         LOGE("canvas moveTo error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -523,8 +559,6 @@ void FfiOHOSAceFrameworkRenderingContextLineTo(int64_t contextId, double x, doub
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         context->LineTo(x, y);
     } else {
         LOGE("canvas lineTo error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -621,6 +655,32 @@ void FfiOHOSAceFrameworkRenderingContextFill(int64_t contextId)
     }
 }
 
+void FfiOHOSAceFrameworkRenderingContextFillWithStr(int64_t contextId, const char* ruleStr)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->Fill(ruleStr);
+    } else {
+        LOGE("canvas fill error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextFillWithPath(int64_t contextId, int64_t pathId, const char* ruleStr)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("canvas fill error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return;
+    }
+
+    auto path2d = FFIData::GetData<NativeCanvasPath>(pathId);
+    if (path2d == nullptr) {
+        LOGE("canvas fill error, Cannot get NativeCanvasPath by id: %{public}" PRId64, pathId);
+        return;
+    }
+    context->Fill(path2d, ruleStr);
+}
+
 void FfiOHOSAceFrameworkRenderingContextClip(int64_t contextId)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -629,6 +689,32 @@ void FfiOHOSAceFrameworkRenderingContextClip(int64_t contextId)
     } else {
         LOGE("canvas clip error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
     }
+}
+
+void FfiOHOSAceFrameworkRenderingContextClipWithStr(int64_t contextId, const char* ruleStr)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->Clip(ruleStr);
+    } else {
+        LOGE("canvas clip error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextClipWithPath(int64_t contextId, int64_t pathId, const char* ruleStr)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("canvas clip error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return;
+    }
+
+    auto path2d = FFIData::GetData<NativeCanvasPath>(pathId);
+    if (path2d == nullptr) {
+        LOGE("canvas clip error, Cannot get NativeCanvasPath by id: %{public}" PRId64, pathId);
+        return;
+    }
+    context->Clip(path2d, ruleStr);
 }
 
 void FfiOHOSAceFrameworkRenderingContextRotate(int64_t contextId, double angle)
@@ -675,12 +761,50 @@ void FfiOHOSAceFrameworkRenderingContextSetTransform(
     }
 }
 
+void FfiOHOSAceFrameworkRenderingContextSetTransformByMatrix(int64_t contextId, int64_t matrixId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        auto matrix2d = FFIData::GetData<NativeMatrix2d>(matrixId);
+        if (matrix2d != nullptr) {
+            context->SetTransformByMatrix(matrix2d);
+        } else {
+            LOGE("canvas setTransform error, Cannot get NativeMatrix2d by id: %{public}" PRId64, matrixId);
+        }
+    } else {
+        LOGE("canvas setTransform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextCreateCanvasPattern(
+    int64_t contextId, ImageBitMapParams imageBitMap, const char* repSrc)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        auto renderImage = FFIData::GetData<CJRenderImage>(imageBitMap.imageBitMapId);
+        if (renderImage == nullptr) {
+            LOGE("canvas createCanvasPattern error, Cannot get CJRenderImage by id: %{public}" PRId64,
+                imageBitMap.imageBitMapId);
+            return 0;
+        }
+        std::unique_ptr<RenderImage> image;
+        image->unit = renderImage->GetUnit();
+        image->width_ = renderImage->GetWidth();
+        image->height_ = renderImage->GetHeight();
+        image->src = renderImage->GetSrc();
+        image->imageData = renderImage->GetImageData();
+        image->pixMapID = imageBitMap.pixelMapId;
+        return context->CreatePattern(std::move(image), repSrc);
+    } else {
+        LOGE("canvas setTransform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+    return 0;
+}
+
 void FfiOHOSAceFrameworkRenderingContextTranslate(int64_t contextId, double x, double y)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         context->Translate(x, y);
     } else {
         LOGE("canvas translate error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -712,10 +836,6 @@ int64_t FfiOHOSAceFrameworkRenderingContextCreateLinearGradient(
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x0 = PipelineBase::Vp2PxWithCurrentDensity(x0);
-        y0 = PipelineBase::Vp2PxWithCurrentDensity(y0);
-        x1 = PipelineBase::Vp2PxWithCurrentDensity(x1);
-        y1 = PipelineBase::Vp2PxWithCurrentDensity(y1);
         return context->CreateLinearGradient(x0, y0, x1, y1);
     } else {
         LOGE("canvas createLinearGradient error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -728,12 +848,6 @@ int64_t FfiOHOSAceFrameworkRenderingContextCreateRadialGradient(
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context != nullptr) {
-        x0 = PipelineBase::Vp2PxWithCurrentDensity(x0);
-        y0 = PipelineBase::Vp2PxWithCurrentDensity(y0);
-        r0 = PipelineBase::Vp2PxWithCurrentDensity(r0);
-        x1 = PipelineBase::Vp2PxWithCurrentDensity(x1);
-        y1 = PipelineBase::Vp2PxWithCurrentDensity(y1);
-        r1 = PipelineBase::Vp2PxWithCurrentDensity(r1);
         return context->CreateRadialGradient(x0, y0, r0, x1, y1, r1);
     } else {
         LOGE("canvas createRadialGradient error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
@@ -799,7 +913,6 @@ void FfiOHOSAceFrameworkRenderingContextDrawImageWithPixelMap(
         .dy = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dy),
         .dWidth = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dWidth),
         .dHeight = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dHeight) };
-    context->DrawImage(pixMapOhos, image);
 }
 
 int64_t FfiOHOSAceFrameworkRenderingContextGetPixelMap(
@@ -811,10 +924,6 @@ int64_t FfiOHOSAceFrameworkRenderingContextGetPixelMap(
         return 0;
     }
 
-    left = PipelineBase::Vp2PxWithCurrentDensity(left);
-    top = PipelineBase::Vp2PxWithCurrentDensity(top);
-    width = PipelineBase::Vp2PxWithCurrentDensity(width);
-    height = PipelineBase::Vp2PxWithCurrentDensity(height);
     return context->GetPixelMap(left, top, width, height);
 }
 
@@ -828,6 +937,18 @@ void FfiOHOSAceFrameworkCanvasGradientAddColorStop(int64_t contextId, double off
     }
 }
 
+double FfiOHOSAceFrameworkRenderingContextGetHight(int64_t contextId)
+{
+    auto context = FFIData::GetData<CJRenderingContext>(contextId);
+    return context->GetHeight();
+}
+
+double FfiOHOSAceFrameworkRenderingContextGetWidth(int64_t contextId)
+{
+    auto context = FFIData::GetData<CJRenderingContext>(contextId);
+    return context->GetWidth();
+}
+
 // Canvas Path2d
 int64_t FfiOHOSAceFrameworkCanvasPathCtor()
 {
@@ -838,6 +959,20 @@ int64_t FfiOHOSAceFrameworkCanvasPathCtor()
 int64_t FfiOHOSAceFrameworkCanvasPathCtorWithPath(const char* path)
 {
     auto path2d = FFIData::Create<NativeCanvasPath>(path);
+    return path2d->GetID();
+}
+
+int64_t FfiOHOSAceFrameworkCanvasPathCtorWithUnit(int32_t unit)
+{
+    auto path2d = FFIData::Create<NativeCanvasPath>();
+    path2d->SetUnit(static_cast<CanvasUnit>(unit));
+    return path2d->GetID();
+}
+
+int64_t FfiOHOSAceFrameworkCanvasPathCtorWithPathAndUnit(const char* path, int32_t unit)
+{
+    auto path2d = FFIData::Create<NativeCanvasPath>(path);
+    path2d->SetUnit(static_cast<CanvasUnit>(unit));
     return path2d->GetID();
 }
 
@@ -854,13 +989,29 @@ void FfiOHOSAceFrameworkCanvasPathAddPath(int64_t selfId, int64_t pathId)
     path2d->AddPath(addPath);
 }
 
+void FfiOHOSAceFrameworkCanvasPathAddPathWithMatrix(int64_t selfId, int64_t pathId, int64_t matrixId)
+{
+    auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
+    if (path2d == nullptr) {
+        return;
+    }
+    auto addPath = FFIData::GetData<NativeCanvasPath>(pathId);
+    if (addPath == nullptr) {
+        return;
+    }
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(matrixId);
+    if (matrix2d == nullptr) {
+        return;
+    }
+    path2d->AddPathWithMatrix(addPath, matrix2d);
+}
+
 void FfiOHOSAceFrameworkCanvasPathSetTransform(int64_t selfId, TransformParams params)
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double translateX = PipelineBase::Vp2PxWithCurrentDensity(params.translateX);
-        double translateY = PipelineBase::Vp2PxWithCurrentDensity(params.translateY);
-        path2d->SetTransform(params.scaleX, params.skewX, params.skewY, params.scaleY, translateX, translateY);
+        path2d->SetTransform(
+            params.scaleX, params.skewX, params.skewY, params.scaleY, params.translateX, params.translateY);
     } else {
         LOGE("canvas path2D setTransform error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -870,8 +1021,6 @@ void FfiOHOSAceFrameworkCanvasPathMoveTo(int64_t selfId, double x, double y)
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d->MoveTo(x, y);
     } else {
         LOGE("canvas path2D moveTo error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
@@ -882,8 +1031,6 @@ void FfiOHOSAceFrameworkCanvasPathLineTo(int64_t selfId, double x, double y)
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        x = PipelineBase::Vp2PxWithCurrentDensity(x);
-        y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d->LineTo(x, y);
     } else {
         LOGE("canvas path2D lineTo error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
@@ -894,10 +1041,7 @@ void FfiOHOSAceFrameworkCanvasPathArc(int64_t selfId, ArcParams params, bool ant
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double x = PipelineBase::Vp2PxWithCurrentDensity(params.x);
-        double y = PipelineBase::Vp2PxWithCurrentDensity(params.y);
-        double radius = PipelineBase::Vp2PxWithCurrentDensity(params.radius);
-        path2d->Arc(x, y, radius, params.startAngle, params.endAngle, anticlockwise);
+        path2d->Arc(params.x, params.y, params.radius, params.startAngle, params.endAngle, anticlockwise);
     } else {
         LOGE("canvas path2D arc error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -907,12 +1051,7 @@ void FfiOHOSAceFrameworkCanvasPathArcTo(int64_t selfId, ArcToParams params)
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double x1 = PipelineBase::Vp2PxWithCurrentDensity(params.x1);
-        double y1 = PipelineBase::Vp2PxWithCurrentDensity(params.y1);
-        double x2 = PipelineBase::Vp2PxWithCurrentDensity(params.x2);
-        double y2 = PipelineBase::Vp2PxWithCurrentDensity(params.y2);
-        double radius = PipelineBase::Vp2PxWithCurrentDensity(params.radius);
-        path2d->ArcTo(x1, y1, x2, y2, radius);
+        path2d->ArcTo(params.x1, params.y1, params.x2, params.y2, params.radius);
     } else {
         LOGE("canvas path2D arcTo error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -922,11 +1061,7 @@ void FfiOHOSAceFrameworkCanvasPathQuadraticCurveTo(int64_t selfId, QuadraticCurv
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double cpx = PipelineBase::Vp2PxWithCurrentDensity(params.cpx);
-        double cpy = PipelineBase::Vp2PxWithCurrentDensity(params.cpy);
-        double x = PipelineBase::Vp2PxWithCurrentDensity(params.x);
-        double y = PipelineBase::Vp2PxWithCurrentDensity(params.y);
-        path2d->QuadraticCurveTo(cpx, cpy, x, y);
+        path2d->QuadraticCurveTo(params.cpx, params.cpy, params.x, params.y);
     } else {
         LOGE("canvas path2D quadraticCurveTo error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -936,13 +1071,7 @@ void FfiOHOSAceFrameworkCanvasPathBezierCurveTo(int64_t selfId, BezierCurveToPar
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double cp1x = PipelineBase::Vp2PxWithCurrentDensity(params.cp1x);
-        double cp1y = PipelineBase::Vp2PxWithCurrentDensity(params.cp1y);
-        double cp2x = PipelineBase::Vp2PxWithCurrentDensity(params.cp2x);
-        double cp2y = PipelineBase::Vp2PxWithCurrentDensity(params.cp2y);
-        double x = PipelineBase::Vp2PxWithCurrentDensity(params.x);
-        double y = PipelineBase::Vp2PxWithCurrentDensity(params.y);
-        path2d->BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+        path2d->BezierCurveTo(params.cp1x, params.cp1y, params.cp2x, params.cp2y, params.x, params.y);
     } else {
         LOGE("canvas path2D bezierCurveTo error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -952,11 +1081,8 @@ void FfiOHOSAceFrameworkCanvasPathEllipse(int64_t selfId, EllipseParams params, 
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double x = PipelineBase::Vp2PxWithCurrentDensity(params.x);
-        double y = PipelineBase::Vp2PxWithCurrentDensity(params.y);
-        double radiusX = PipelineBase::Vp2PxWithCurrentDensity(params.radiusX);
-        double radiusY = PipelineBase::Vp2PxWithCurrentDensity(params.radiusY);
-        path2d->Ellipse(x, y, radiusX, radiusY, params.rotation, params.startAngle, params.endAngle, anticlockwise);
+        path2d->Ellipse(params.x, params.y, params.radiusX, params.radiusY, params.rotation, params.startAngle,
+            params.endAngle, anticlockwise);
     } else {
         LOGE("canvas path2D ellipse error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -966,11 +1092,7 @@ void FfiOHOSAceFrameworkCanvasPathRect(int64_t selfId, RectParams params)
 {
     auto path2d = FFIData::GetData<NativeCanvasPath>(selfId);
     if (path2d != nullptr) {
-        double x = PipelineBase::Vp2PxWithCurrentDensity(params.x);
-        double y = PipelineBase::Vp2PxWithCurrentDensity(params.y);
-        double width = PipelineBase::Vp2PxWithCurrentDensity(params.width);
-        double height = PipelineBase::Vp2PxWithCurrentDensity(params.height);
-        path2d->Rect(x, y, width, height);
+        path2d->Rect(params.x, params.y, params.width, params.height);
     } else {
         LOGE("canvas path2D rect error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
@@ -984,5 +1106,210 @@ void FfiOHOSAceFrameworkCanvasPathClosePath(int64_t selfId)
     } else {
         LOGE("canvas path2D closePath error, Cannot get NativeCanvasPath by id: %{public}" PRId64, selfId);
     }
+}
+
+// Canvas Matrix2d
+int64_t FfiOHOSAceFrameworkCanvasMatrixCtor(int32_t unit)
+{
+    auto matrix2d = FFIData::Create<NativeMatrix2d>(unit);
+    return matrix2d->GetID();
+}
+
+TransformParams FfiOHOSAceFrameworkCanvasMatrixIdentity(int64_t selfId, TransformParams transParams)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+        matrix2d->Identity();
+        params = matrix2d->GetTransform();
+    } else {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    return ConvertToTransformParams(params);
+}
+
+TransformParams FfiOHOSAceFrameworkCanvasMatrixInvert(int64_t selfId, TransformParams transParams)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+        matrix2d->Invert();
+        params = matrix2d->GetTransform();
+    } else {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    return ConvertToTransformParams(params);
+}
+
+TransformParams FfiOHOSAceFrameworkCanvasMatrixRotate(
+    int64_t selfId, TransformParams transParams, double degree, double rx, double ry)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+        matrix2d->Rotate(degree, rx, ry);
+        params = matrix2d->GetTransform();
+    } else {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    return ConvertToTransformParams(params);
+}
+
+TransformParams FfiOHOSAceFrameworkCanvasMatrixTranslate(
+    int64_t selfId, TransformParams transParams, double tx, double ty)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+        matrix2d->Translate(tx, ty);
+        params = matrix2d->GetTransform();
+    } else {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    return ConvertToTransformParams(params);
+}
+
+TransformParams FfiOHOSAceFrameworkCanvasMatrixScale(int64_t selfId, TransformParams transParams, double sx, double sy)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+        matrix2d->Scale(sx, sy);
+        params = matrix2d->GetTransform();
+    } else {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    return ConvertToTransformParams(params);
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixUpdate(int64_t selfId, TransformParams transParams)
+{
+    TransformParam params = ConvertToTransformParam(transParams);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d != nullptr) {
+        matrix2d->SetTransform(params);
+    } else {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+}
+
+// Canvas ImageData
+ImageDataParams FfiOHOSAceFrameworkCanvasImageDataCtor(
+    double width, double heigth, VectorUInt8Prt dataHandle, int32_t unit)
+{
+    auto imageData = FFIData::Create<NativeImageData>();
+
+    int32_t finalWidth = 0;
+    int32_t finalHeight = 0;
+    ImageDataParams res;
+    imageData->SetUnit(static_cast<CanvasUnit>(unit));
+    if (!imageData->GetImageDataSize(width, heigth, finalWidth, finalHeight)) {
+        res.id = -1;
+        return res;
+    }
+    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    imageData->width_ = finalWidth;
+    imageData->height_ = finalHeight;
+
+    const auto& colorArray = *reinterpret_cast<std::vector<uint8_t>*>(dataHandle);
+    imageData->data = colorArray;
+    res.id = imageData->GetID();
+    res.width = imageData->width_;
+    res.height = imageData->height_;
+    res.result = result;
+    return res;
+}
+
+ImageDataParams FfiOHOSAceFrameworkCanvasImageDataCtorWithNoData(double width, double heigth, int32_t unit)
+{
+    auto imageData = FFIData::Create<NativeImageData>();
+    int32_t finalWidth = 0;
+    int32_t finalHeight = 0;
+    ImageDataParams res;
+    imageData->SetUnit(static_cast<CanvasUnit>(unit));
+    if (!imageData->GetImageDataSize(width, heigth, finalWidth, finalHeight)) {
+        res.id = 0;
+        return res;
+    }
+    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    imageData->width_ = finalWidth;
+    imageData->height_ = finalHeight;
+
+    std::vector<uint8_t> bufferArray;
+    for (int32_t i = 0; i < result; i++) {
+        bufferArray.emplace_back(0);
+    }
+    imageData->data = bufferArray;
+    res.id = imageData->GetID();
+    res.width = imageData->width_;
+    res.height = imageData->height_;
+    res.result = result;
+    return res;
+}
+
+// Canvas Pattern
+int64_t FfiOHOSAceFrameworkCanvasPatternCtor()
+{
+    auto pattern = FFIData::Create<NativeCanvasPattern>();
+    pattern->IncRefCount();
+    return pattern->GetID();
+}
+
+void FfiOHOSAceFrameworkCanvasPatternSetTransform(int64_t selfId, int64_t matrixId)
+{
+    auto pattern = FFIData::GetData<NativeCanvasPattern>(selfId);
+    if (pattern != nullptr) {
+        auto matrix2d = FFIData::GetData<NativeMatrix2d>(matrixId);
+        if (matrix2d != nullptr) {
+            TransformParam param = matrix2d->GetTransform();
+            pattern->SetTransform(param);
+        } else {
+            LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix by id: %{public}" PRId64, matrixId);
+        }
+    } else {
+        LOGE("canvas pattern invert error, Cannot get NativeCanvasPattern by id: %{public}" PRId64, selfId);
+    }
+}
+// ImageBitmap
+ImageBitMapParams FfiOHOSAceFrameworkImageBitMapCtor(ImageBitMapParams params, const char* src)
+{
+    ImageBitMapParams ret = params;
+    // ImageBitMap init by src
+    if (params.hasSrc) {
+        auto renderImage = FFIData::Create<CJRenderImage>(src);
+        renderImage->SetUnit(static_cast<CanvasUnit>(params.unit));
+        ret.height = renderImage->GetHeight();
+        ret.width = renderImage->GetWidth();
+        ret.imageBitMapId = renderImage->GetID();
+        return ret;
+    }
+
+    // ImageBitMap init by PixelMap
+    auto instance = FFIData::GetData<OHOS::Media::PixelMapImpl>(params.pixelMapId);
+    if (instance == nullptr) {
+        LOGE("canvas drawImage error, Cannot get PixelMapProxy by id: %{public}" PRId64, params.pixelMapId);
+        return ret;
+    }
+    auto pixMap = instance->GetRealPixelMap();
+    if (pixMap == nullptr) {
+        LOGE("canvas drawImage error, Cannot get pixMap in PixelMapProxy");
+        return ret;
+    }
+    auto pixMapOhos = PixelMap::CreatePixelMap(&pixMap);
+    if (pixMapOhos == nullptr) {
+        LOGE("canvas drawImage error, Cannot create PixelMapOhos by pixMap");
+        return ret;
+    }
+    auto renderImage = FFIData::Create<CJRenderImage>(pixMapOhos);
+    renderImage->SetUnit(static_cast<CanvasUnit>(params.unit));
+    ret.height = renderImage->GetHeight();
+    ret.width = renderImage->GetWidth();
+    ret.imageBitMapId = renderImage->GetID();
+    return ret;
 }
 }

@@ -210,6 +210,9 @@
       OHOS::Ace::FocusNode::*;
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
+      OHOS::Ace::NG::Matrix2D::*;
+      OHOS::Ace::NG::CanvasPattern::*;
+      OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::ComponentGroupElement::*;
       OHOS::Ace::ComposedComponent::*;
@@ -313,6 +316,7 @@
       vtable?for?OHOS::Ace::NG::PanGesture;
       vtable?for?OHOS::Ace::NG::GestureGroup;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
+      vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -336,6 +340,7 @@
       VTT?for?OHOS::Ace::NG::PanGesture;
       VTT?for?OHOS::Ace::NG::GestureGroup;
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
+      VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
