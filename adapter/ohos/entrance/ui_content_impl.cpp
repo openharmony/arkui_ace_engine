@@ -380,10 +380,6 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     CHECK_NULL_VOID(safeAreaManager);
     uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-    if (avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == avoidAreas.end()) {
-        safeAreaManager->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
-            NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
-    }
     ParseAvoidAreasUpdate(context, avoidAreas, config);
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
 }
