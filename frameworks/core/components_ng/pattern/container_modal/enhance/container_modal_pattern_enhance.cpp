@@ -150,6 +150,14 @@ RefPtr<FrameNode> BuildMenuItem(WeakPtr<ContainerModalPatternEnhance>&& weakPatt
     BondingMenuItemEvent(weakPattern, containerTitleRow, isLeftSplit);
     return containerTitleRow;
 }
+
+void EventHubOnModifyDone(RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->OnModifyDone();
+}
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -226,16 +234,16 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(gestureRow);
 
     // add tap event and pan event
-    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
-    pattern->SetTapGestureEvent(customTitleRow);
-    pattern->SetTapGestureEvent(gestureRow);
-    AddPanEvent(customTitleRow);
-    AddPanEvent(gestureRow);
-    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
-    customTitleRowEventHub->OnModifyDone();
-    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
-    gestureRowEventHub->OnModifyDone();
-
+    if (enableContainerModalGesture_) {
+        auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+        pattern->SetTapGestureEvent(customTitleRow);
+        pattern->SetTapGestureEvent(gestureRow);
+        AddPanEvent(customTitleRow);
+        AddPanEvent(gestureRow);
+        EventHubOnModifyDone(customTitleRow);
+        EventHubOnModifyDone(gestureRow);
+    }
+    
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -677,6 +685,8 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
 
+    enableContainerModalGesture_ = isEnable;
+
     auto floatingTitleRow = GetFloatingTitleRow();
     auto customTitleRow = GetCustomTitleRow();
     auto gestureRow = GetGestureRow();
@@ -685,6 +695,9 @@ void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
     EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
     EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
     EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+    EventHubOnModifyDone(floatingTitleRow);
+    EventHubOnModifyDone(customTitleRow);
+    EventHubOnModifyDone(gestureRow);
 }
 
 bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
