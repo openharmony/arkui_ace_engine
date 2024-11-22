@@ -15,7 +15,8 @@
 
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { IconBlock, RadioBlock, useEnabled } from 'common';
+import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+import { LengthMetrics } from '@kit.ArkUI';
 
 @Component
 export struct MenuBootcamp {
@@ -45,6 +46,48 @@ export struct MenuBootcamp {
   @State selectIcon3: ResourceStr = $r('sys.media.ohos_ic_public_ok');
   @State enableSelectIcon4: boolean = false;
   @State selectIcon4: ResourceStr = $r('sys.media.ohos_ic_public_ok');
+  @State enableMenuFontSize: boolean = false;
+  @State menuFontSize: number = 16;
+  @State enableMenuFontWeight: boolean = false;
+  @State menuFontWeight: FontWeight = FontWeight.Medium;
+  @State enableMenuFontStyle: boolean = false;
+  @State menuFontStyle: FontStyle = FontStyle.Normal;
+  @State enableMenuFontColor: boolean = false;
+  @State menuFontColor: ResourceStr = '#E5000000';
+  @State enableMenuRadius: boolean = false;
+  @State menuRadius: number = 0;
+  @State enableMenuWidth: boolean = false;
+  @State menuWidth: number = 100;
+  @State enableMenuHeight: boolean = false;
+  @State menuHeight: number = 250;
+  @State enableMenuItemDividerStrokeWidth: boolean = false;
+  @State menuItemDividerStrokeWidth: number = 1;
+  @State enableMenuItemDividerColor: boolean = false;
+  @State menuItemDividerColor: ResourceStr = '#E5000000';
+  @State enableMenuItemDividerStartMargin: boolean = false;
+  @State menuItemDividerStartMargin: number = 16;
+  @State enableMenuItemDividerEndMargin: boolean = false;
+  @State menuItemDividerEndMargin: number = 16;
+  @State enableMenuItemGroupDividerStrokeWidth: boolean = false;
+  @State menuItemGroupDividerStrokeWidth: number = 1;
+  @State enableMenuItemGroupDividerColor: boolean = false;
+  @State menuItemGroupDividerColor: ResourceStr = '#E5000000';
+  @State enableMenuItemGroupDividerStartMargin: boolean = false;
+  @State menuItemGroupDividerStartMargin: number = 16;
+  @State enableMenuItemGroupDividerEndMargin: boolean = false;
+  @State menuItemGroupDividerEndMargin: number = 16;
+  @State enableSubMenuExpandingMode: boolean = false;
+  @State subMenuExpandingMode: SubMenuExpandingMode = SubMenuExpandingMode.SIDE_EXPAND;
+  @State enableMenuBackgroundColor: boolean = false;
+  @State menuBackgroundColor: ResourceStr = '#E5000000';
+  @State enableMenuOpacity: boolean = false;
+  @State menuOpacity: number = 1;
+  @State enableMenuVisibility: boolean = true;
+  @State menuVisibility: Visibility = Visibility.Visible;
+  @State enableMenuPadding: boolean = false;
+  @State menuPadding: number = 0;
+  @State enableMenuMargin: boolean = false;
+  @State menuMargin: number = 0;
 
   build() {
     NavDestination() {
@@ -116,6 +159,37 @@ export struct MenuBootcamp {
         .selectIcon(useEnabled(this.enableSelectIcon4, this.selectIcon4))
         .direction(useEnabled(this.enableDirection, this.comDirection))
     }
+    .font({
+      size: useEnabled(this.enableMenuFontSize, this.menuFontSize),
+      family: 'HarmonyOS Sans',
+      weight: useEnabled(this.enableMenuFontWeight, this.menuFontWeight),
+      style: useEnabled(this.enableMenuFontStyle, this.menuFontStyle)
+    })
+    .fontColor(useEnabled(this.enableMenuFontColor, this.menuFontColor))
+    .radius(useEnabled(this.enableMenuRadius, this.menuRadius))
+    .width(useEnabled(this.enableMenuWidth, this.menuWidth))
+    .height(useEnabled(this.enableMenuHeight, this.menuHeight))
+    .menuItemDivider({
+      strokeWidth: useEnabled(this.enableMenuItemDividerStrokeWidth, LengthMetrics.vp(this.menuItemDividerStrokeWidth)),
+      color: useEnabled(this.enableMenuItemDividerColor, this.menuItemDividerColor),
+      startMargin: useEnabled(this.enableMenuItemDividerStartMargin, LengthMetrics.vp(this.menuItemDividerStartMargin)),
+      endMargin: useEnabled(this.enableMenuItemDividerEndMargin, LengthMetrics.vp(this.menuItemDividerEndMargin))
+    })
+    .menuItemGroupDivider({
+      strokeWidth: useEnabled(this.enableMenuItemGroupDividerStrokeWidth,
+        LengthMetrics.vp(this.menuItemGroupDividerStrokeWidth)),
+      color: useEnabled(this.enableMenuItemGroupDividerColor, this.menuItemGroupDividerColor),
+      startMargin: useEnabled(this.enableMenuItemGroupDividerStartMargin,
+        LengthMetrics.vp(this.menuItemGroupDividerStartMargin)),
+      endMargin: useEnabled(this.enableMenuItemGroupDividerEndMargin,
+        LengthMetrics.vp(this.menuItemGroupDividerEndMargin))
+    })
+    .subMenuExpandingMode(useEnabled(this.enableSubMenuExpandingMode, this.subMenuExpandingMode))
+    .backgroundColor(useEnabled(this.enableMenuBackgroundColor, this.menuBackgroundColor))
+    .opacity(useEnabled(this.enableMenuOpacity, this.menuOpacity))
+    .visibility(useEnabled(this.enableMenuVisibility, this.menuVisibility))
+    .padding(useEnabled(this.enableMenuPadding, this.menuPadding))
+    .margin(useEnabled(this.enableMenuMargin, this.menuMargin))
   }
 
   @Builder
@@ -130,14 +204,147 @@ export struct MenuBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        SliderBlock({
+          title: 'font.size',
+          isEnabled: $enableMenuFontSize,
+          value: $menuFontSize,
+          min: 16,
+          max: 24
+        })
+
         RadioBlock({
-          title: '菜单组件布局方式',
-          isEnabled: this.enableDirection,
-          value: this.comDirection,
+          title: 'font.weight',
+          isEnabled: $enableMenuFontWeight,
+          value: $menuFontWeight,
           dataSource: [
-            { label: '跟随系统默认布局', value: Direction.Auto },
-            { label: '从右到左', value: Direction.Rtl },
-            { label: '从左到右', value: Direction.Ltr }
+            { label: 'Lighter', value: FontWeight.Lighter },
+            { label: 'Normal', value: FontWeight.Normal },
+            { label: 'Regular', value: FontWeight.Regular },
+            { label: 'Medium', value: FontWeight.Medium },
+            { label: 'Bold', value: FontWeight.Bold },
+            { label: 'Bolder', value: FontWeight.Bolder }
+          ]
+        })
+
+        RadioBlock({
+          title: 'font.style',
+          isEnabled: $enableMenuFontStyle,
+          value: $menuFontStyle,
+          dataSource: [
+            { label: 'Normal', value: FontWeight.Lighter },
+            { label: 'Italic', value: FontWeight.Normal }
+          ]
+        })
+
+        ColorBlock({
+          title: 'fontColor',
+          isEnabled: $enableMenuFontColor,
+          color: $menuFontColor,
+        })
+
+        SliderBlock({
+          title: 'radius',
+          isEnabled: $enableMenuRadius,
+          value: $menuRadius,
+          min: 0,
+          max: 16
+        })
+
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableMenuWidth,
+          value: $menuWidth,
+          min: 100,
+          max: 150
+        })
+
+        SliderBlock({
+          title: 'height',
+          isEnabled: $enableMenuHeight,
+          value: $menuHeight,
+          min: 250,
+          max: 450
+        })
+
+        ColorBlock({
+          title: 'menuItemDivider.color',
+          isEnabled: $enableMenuItemDividerColor,
+          color: $menuItemDividerColor,
+        })
+
+        SliderBlock({
+          title: 'menuItemDivider.strokeWidth',
+          isEnabled: $enableMenuItemDividerStrokeWidth,
+          value: $menuItemDividerStrokeWidth,
+          min: 1,
+          max: 5
+        })
+
+        SliderBlock({
+          title: 'menuItemDivider.startMargin',
+          isEnabled: $enableMenuItemDividerStartMargin,
+          value: $menuItemDividerStartMargin,
+          min: 16,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'menuItemDivider.endMargin',
+          isEnabled: $enableMenuItemDividerEndMargin,
+          value: $menuItemDividerEndMargin,
+          min: 16,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'menuItemGroupDivider.strokeWidth',
+          isEnabled: $enableMenuItemGroupDividerStrokeWidth,
+          value: $menuItemGroupDividerStrokeWidth,
+          min: 1,
+          max: 5
+        })
+
+        ColorBlock({
+          title: 'menuItemGroupDivider.color',
+          isEnabled: $enableMenuItemGroupDividerColor,
+          color: $menuItemGroupDividerColor,
+        })
+
+        SliderBlock({
+          title: 'menuItemGroupDivider.startMargin',
+          isEnabled: $enableMenuItemGroupDividerStartMargin,
+          value: $menuItemGroupDividerStartMargin,
+          min: 16,
+          max: 32
+        })
+
+        SliderBlock({
+          title: 'menuItemGroupDivider.endMargin',
+          isEnabled: $enableMenuItemGroupDividerEndMargin,
+          value: $menuItemGroupDividerEndMargin,
+          min: 16,
+          max: 32
+        })
+
+        RadioBlock({
+          title: 'SubMenuExpandingMode',
+          isEnabled: $enableSubMenuExpandingMode,
+          value: $subMenuExpandingMode,
+          dataSource: [
+            { label: 'SIDE_EXPAND', value: SubMenuExpandingMode.SIDE_EXPAND },
+            { label: 'EMBEDDED_EXPAND', value: SubMenuExpandingMode.EMBEDDED_EXPAND },
+            { label: 'STACK_EXPAND', value: SubMenuExpandingMode.STACK_EXPAND }
+          ]
+        })
+
+        RadioBlock({
+          title: 'direction',
+          isEnabled: $enableDirection,
+          value: $comDirection,
+          dataSource: [
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Rtl', value: Direction.Rtl },
+            { label: 'Ltr', value: Direction.Ltr }
           ]
         })
 
@@ -231,6 +438,47 @@ export struct MenuBootcamp {
             { label: '显示', value: true },
             { label: '隐藏', value: false }
           ]
+        })
+
+        ColorBlock({
+          title: 'BackgroundColor',
+          isEnabled: $enableMenuBackgroundColor,
+          color: $menuBackgroundColor,
+        })
+
+        SliderBlock({
+          title: 'Opacity',
+          isEnabled: $enableMenuOpacity,
+          value: $menuOpacity,
+          step: 0.1,
+          min: 0,
+          max: 1
+        })
+
+        RadioBlock({
+          title: 'Visibility',
+          isEnabled: $enableMenuVisibility,
+          value: $menuVisibility,
+          dataSource: [
+            { label: 'Visible', value: Visibility.Visible },
+            { label: 'Hidden', value: Visibility.Hidden }
+          ]
+        })
+
+        SliderBlock({
+          title: 'Padding',
+          isEnabled: $enableMenuPadding,
+          value: $menuPadding,
+          min: 0,
+          max: 16
+        })
+
+        SliderBlock({
+          title: 'Margin',
+          isEnabled: $enableMenuMargin,
+          value: $menuMargin,
+          min: 0,
+          max: 16
         })
       }.width('100%')
     }.height('50%')
