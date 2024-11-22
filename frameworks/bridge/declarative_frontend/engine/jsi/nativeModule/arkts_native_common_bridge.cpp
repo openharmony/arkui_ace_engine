@@ -2977,7 +2977,24 @@ ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInf
 
     std::vector<ArkUI_Float32> dashOptions;
     ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 17); // Border DashGap args start index from 17
+    Local<JSValueRef> startDashGap = runtimeCallInfo->GetCallArgRef(36); // Border DashGap args start index from 36
+    Local<JSValueRef> endDashGap = runtimeCallInfo->GetCallArgRef(37); // Border DashGap args end index from 37
+    std::optional<CalcDimension> startDashGapDim;
+    std::optional<CalcDimension> endDashGapDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashGap, startDashGapDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashGap, endDashGapDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashGapDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashGapDim, dashOptions);
+
     ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 21); // Border DashWidth args start index from 21
+    Local<JSValueRef> startDashWidth = runtimeCallInfo->GetCallArgRef(38); // Border DashWidth args start index from 38
+    Local<JSValueRef> endDashWidth = runtimeCallInfo->GetCallArgRef(39); // Border DashWidth args end index from 39
+    std::optional<CalcDimension> startDashWidthDim;
+    std::optional<CalcDimension> endDashWidthDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashWidth, startDashWidthDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashWidth, endDashWidthDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashWidthDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashWidthDim, dashOptions);
 
     GetArkUINodeModifiers()->getCommonModifier()->setBorderDashParams(nativeNode, dashOptions.data(),
         dashOptions.size());
