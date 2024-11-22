@@ -27,6 +27,9 @@ extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEn
 extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureEnumBarStateValidValues;
 extern std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_BreakpointsReference, std::string>>
+    testFixtureEnumBreakpointsReferenceValidValues;
+extern std::vector<std::tuple<std::string, Ark_BreakpointsReference>> testFixtureEnumBreakpointsReferenceInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonRole, std::string>> testFixtureEnumButtonRoleValidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonRole>> testFixtureEnumButtonRoleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ButtonStyleMode, std::string>> testFixtureEnumButtonStyleModeValidValues;
@@ -62,6 +65,9 @@ extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureEnumFontW
 extern std::vector<std::tuple<std::string, Ark_GradientDirection, std::string>>
     testFixtureEnumGradientDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_GradientDirection>> testFixtureEnumGradientDirectionInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_GridRowDirection, std::string>>
+    testFixtureEnumGridRowDirectionValidValues;
+extern std::vector<std::tuple<std::string, Ark_GridRowDirection>> testFixtureEnumGridRowDirectionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_IlluminatedType, std::string>> testFixtureEnumIlluminatedTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_IlluminatedType>> testFixtureEnumIlluminatedTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureEnumImageContentValidValues;
@@ -77,6 +83,8 @@ extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFi
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;
+extern std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>>
     testFixtureEnumLineBreakStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureEnumLineBreakStrategyInvalidValues;

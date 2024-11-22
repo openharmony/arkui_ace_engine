@@ -137,7 +137,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsValueValidValues, Te
     initValueOptions.type = ArkValue<Opt_ProgressType>(std::get<1>(Fixtures::testFixtureProgressTypeValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_ProgressOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -147,12 +147,12 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsValueValidValues, Te
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.value";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.value";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatPositiveValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -173,7 +173,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTotalValidValues, Te
     initValueOptions.type = ArkValue<Opt_ProgressType>(std::get<1>(Fixtures::testFixtureProgressTypeValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
         Ark_ProgressOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -183,12 +183,12 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTotalValidValues, Te
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TOTAL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatPositiveValidValues) {
-        checkValue(input, ArkValue<Opt_Number>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -218,8 +218,8 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTotalInvalidValues, 
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TOTAL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TOTAL_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TOTAL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
     };
 
     // Check empty optional
@@ -243,7 +243,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressOptionsTestOptionsStyleValidV
     initValueOptions.type = ArkValue<Opt_ProgressType>(std::get<1>(Fixtures::testFixtureProgressTypeValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ProgressStyle& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ProgressStyle& value) {
         Ark_ProgressOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -253,12 +253,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressOptionsTestOptionsStyleValidV
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.style";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumProgressStyleValidValues) {
-        checkValue(input, ArkValue<Opt_ProgressStyle>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ProgressStyle>(value));
     }
 }
 
@@ -288,8 +288,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressOptionsTestOptionsStyleInvali
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.style";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumProgressStyleInvalidValues) {
@@ -314,7 +314,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeValidValues, Tes
     initValueOptions.type = ArkValue<Opt_ProgressType>(std::get<1>(Fixtures::testFixtureProgressTypeValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](
-                          const std::string& input, const Opt_ProgressType& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ProgressType& value) {
         Ark_ProgressOptions inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -324,12 +324,12 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeValidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureProgressTypeValidValues) {
-        checkValue(input, ArkValue<Opt_ProgressType>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ProgressType>(value));
     }
 }
 
@@ -359,8 +359,8 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeInvalidValues, T
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
+        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureProgressTypeInvalidValues) {
@@ -397,7 +397,7 @@ HWTEST_F(ProgressModifierTest, setValueTestValueValidValues, TestSize.Level1)
     initValueValue = std::get<1>(Fixtures::testFixtureNumberFloatPositiveValidValues[0]);
 
     auto checkValue = [this, &initValueValue](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueValue = initValueValue;
 
         inputValueValue = value;
@@ -408,7 +408,7 @@ HWTEST_F(ProgressModifierTest, setValueTestValueValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatPositiveValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -424,20 +424,20 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Leve
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_ANGLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_ANGLE_DEFAULT_VALUE)
-        << "Default value for attribute 'color.LinearGradient.angle'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_ANGLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'color.LinearGradient.angle'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_DIRECTION_DEFAULT_VALUE)
-        << "Default value for attribute 'color.LinearGradient.direction'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_DIRECTION_DEFAULT_VALUE) <<
+        "Default value for attribute 'color.LinearGradient.direction'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_COLORS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_COLORS_DEFAULT_VALUE)
-        << "Default value for attribute 'color.LinearGradient.colors'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_COLORS_DEFAULT_VALUE) <<
+        "Default value for attribute 'color.LinearGradient.colors'";
 
     resultStr = GetAttrValue<std::string>(resultColor, ATTRIBUTE_COLOR_I_REPEATING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE)
-        << "Default value for attribute 'color.LinearGradient.repeating'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE) <<
+        "Default value for attribute 'color.LinearGradient.repeating'";
 }
 
 /*
@@ -466,7 +466,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         ArkUnion<Ark_VP, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0])));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -475,12 +475,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -509,8 +509,8 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleLinearStyleOptionsStrokeWidthInv
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -545,8 +545,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeRadius";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeRadius";
     };
 
     // Check invalid union
@@ -576,7 +576,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
         ArkValue<Opt_ProgressStatus>(std::get<1>(Fixtures::testFixtureEnumProgressStatusValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -585,12 +585,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -621,8 +621,8 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleRingStyleOptionsStrokeWidthInval
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -650,7 +650,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowV
         ArkValue<Opt_ProgressStatus>(std::get<1>(Fixtures::testFixtureEnumProgressStatusValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -659,12 +659,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowV
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHADOW_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -695,8 +695,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowI
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHADOW_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHADOW_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHADOW_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
     };
 
     // Check empty optional
@@ -721,7 +721,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusV
         ArkValue<Opt_ProgressStatus>(std::get<1>(Fixtures::testFixtureEnumProgressStatusValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_ProgressStatus& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ProgressStatus& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -730,12 +730,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusV
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STATUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumProgressStatusValidValues) {
-        checkValue(input, ArkValue<Opt_ProgressStatus>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_ProgressStatus>(value));
     }
 }
 
@@ -766,8 +766,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusI
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STATUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STATUS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STATUS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumProgressStatusInvalidValues) {
@@ -806,7 +806,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -815,21 +815,21 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -873,8 +873,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -920,7 +920,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -929,12 +929,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -978,8 +978,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1020,7 +1020,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsCont
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_String& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1029,12 +1029,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsCont
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_CONTENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.content";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.content";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkValue<Opt_String>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_String>(value));
     }
 }
 
@@ -1078,8 +1078,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsCont
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_CONTENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_CONTENT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.content";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_CONTENT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.content";
     };
 
     // Check empty optional
@@ -1117,7 +1117,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1127,12 +1127,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -1177,8 +1177,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1218,8 +1218,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_FontWeight_Number_String& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_FontWeight_Number_String& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1229,18 +1229,18 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
     }
 }
 
@@ -1286,8 +1286,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
@@ -1329,8 +1329,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
     WriteToUnion<Ark_CapsuleStyleOptions>(initValueStyle).showDefaultPercentage =
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_String_Resource& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1340,12 +1340,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
@@ -1391,8 +1391,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
     };
 
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
@@ -1433,7 +1433,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_FontStyle& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1443,12 +1443,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, ArkValue<Opt_FontStyle>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -1493,8 +1493,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {
@@ -1533,7 +1533,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1542,21 +1542,21 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -1600,8 +1600,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1648,7 +1648,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1657,13 +1657,13 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
             << ", method: setStyle, attribute: style.CapsuleStyleOptions.showDefaultPercentage";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -1708,8 +1708,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE) <<
+            "Input value is: " << input
             << ", method: setStyle, attribute: style.CapsuleStyleOptions.showDefaultPercentage";
     };
 
@@ -1735,7 +1735,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1744,12 +1744,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -1780,8 +1780,8 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsStrokeWidthI
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1809,7 +1809,7 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountVa
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1818,12 +1818,12 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountVa
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_COUNT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
-        checkValue(input, ArkValue<Opt_Number>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -1854,8 +1854,8 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountIn
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_COUNT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_COUNT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
@@ -1883,7 +1883,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsSca
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -1892,12 +1892,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsSca
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -1928,8 +1928,8 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleWidthIn
         auto jsonValue = GetJsonValue(node_);
         auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_WIDTH_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1966,20 +1966,20 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValue
     initValuePrivacySensitive =
         ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValuePrivacySensitive](const std::string& input,
-                          const Ark_Union_Boolean_Undefined& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValuePrivacySensitive](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Boolean_Undefined& value) {
         Ark_Union_Boolean_Undefined inputValuePrivacySensitive = initValuePrivacySensitive;
 
         inputValuePrivacySensitive = value;
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(value));
     }
 }
 
@@ -2005,8 +2005,8 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidVal
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
+        EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
     checkValue("undefined", ArkUnion<Ark_Union_Boolean_Undefined, Ark_Undefined>(Ark_Undefined()));

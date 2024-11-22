@@ -33,20 +33,20 @@ HWTEST_F(WebModifierTest, DISABLED_setWebOptionsTestDefaultValues, TestSize.Leve
     EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_SRC_DEFAULT_VALUE) << "Default value for attribute 'value.src'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_CONTROLLER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_CONTROLLER_DEFAULT_VALUE)
-        << "Default value for attribute 'value.controller'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_CONTROLLER_DEFAULT_VALUE) <<
+        "Default value for attribute 'value.controller'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_RENDER_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_RENDER_MODE_DEFAULT_VALUE)
-        << "Default value for attribute 'value.renderMode'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_RENDER_MODE_DEFAULT_VALUE) <<
+        "Default value for attribute 'value.renderMode'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_INCOGNITO_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_INCOGNITO_MODE_DEFAULT_VALUE)
-        << "Default value for attribute 'value.incognitoMode'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_INCOGNITO_MODE_DEFAULT_VALUE) <<
+        "Default value for attribute 'value.incognitoMode'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_DEFAULT_VALUE)
-        << "Default value for attribute 'value.sharedRenderProcessToken'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_DEFAULT_VALUE) <<
+        "Default value for attribute 'value.sharedRenderProcessToken'";
 }
 
 /*
@@ -70,8 +70,8 @@ HWTEST_F(WebModifierTest, setJavaScriptAccessTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptAccess'";
 }
 
 /*
@@ -87,19 +87,19 @@ HWTEST_F(WebModifierTest, setJavaScriptAccessTestJavaScriptAccessValidValues, Te
     initValueJavaScriptAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueJavaScriptAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueJavaScriptAccess = initValueJavaScriptAccess;
 
         inputValueJavaScriptAccess = value;
         modifier_->setJavaScriptAccess(node_, inputValueJavaScriptAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setJavaScriptAccess, attribute: javaScriptAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setJavaScriptAccess, attribute: javaScriptAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -130,19 +130,19 @@ HWTEST_F(WebModifierTest, setFileAccessTestFileAccessValidValues, TestSize.Level
     initValueFileAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueFileAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueFileAccess = initValueFileAccess;
 
         inputValueFileAccess = value;
         modifier_->setFileAccess(node_, inputValueFileAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setFileAccess, attribute: fileAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFileAccess, attribute: fileAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -157,8 +157,8 @@ HWTEST_F(WebModifierTest, setOnlineImageAccessTestDefaultValues, TestSize.Level1
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ONLINE_IMAGE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ONLINE_IMAGE_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'onlineImageAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ONLINE_IMAGE_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'onlineImageAccess'";
 }
 
 /*
@@ -174,19 +174,19 @@ HWTEST_F(WebModifierTest, setOnlineImageAccessTestOnlineImageAccessValidValues, 
     initValueOnlineImageAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueOnlineImageAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueOnlineImageAccess = initValueOnlineImageAccess;
 
         inputValueOnlineImageAccess = value;
         modifier_->setOnlineImageAccess(node_, inputValueOnlineImageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ONLINE_IMAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setOnlineImageAccess, attribute: onlineImageAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setOnlineImageAccess, attribute: onlineImageAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -201,8 +201,8 @@ HWTEST_F(WebModifierTest, setDomStorageAccessTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DOM_STORAGE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DOM_STORAGE_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'domStorageAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DOM_STORAGE_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'domStorageAccess'";
 }
 
 /*
@@ -218,19 +218,19 @@ HWTEST_F(WebModifierTest, setDomStorageAccessTestDomStorageAccessValidValues, Te
     initValueDomStorageAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueDomStorageAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueDomStorageAccess = initValueDomStorageAccess;
 
         inputValueDomStorageAccess = value;
         modifier_->setDomStorageAccess(node_, inputValueDomStorageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DOM_STORAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDomStorageAccess, attribute: domStorageAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDomStorageAccess, attribute: domStorageAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -261,19 +261,19 @@ HWTEST_F(WebModifierTest, setImageAccessTestImageAccessValidValues, TestSize.Lev
     initValueImageAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueImageAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueImageAccess = initValueImageAccess;
 
         inputValueImageAccess = value;
         modifier_->setImageAccess(node_, inputValueImageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IMAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setImageAccess, attribute: imageAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setImageAccess, attribute: imageAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -304,19 +304,19 @@ HWTEST_F(WebModifierTest, setMixedModeTestMixedModeValidValues, TestSize.Level1)
     initValueMixedMode = std::get<1>(Fixtures::testFixtureEnumMixedModeValidValues[0]);
 
     auto checkValue = [this, &initValueMixedMode](
-                          const std::string& input, const Ark_MixedMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_MixedMode& value) {
         Ark_MixedMode inputValueMixedMode = initValueMixedMode;
 
         inputValueMixedMode = value;
         modifier_->setMixedMode(node_, inputValueMixedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIXED_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumMixedModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -340,8 +340,8 @@ HWTEST_F(WebModifierTest, setMixedModeTestMixedModeInvalidValues, TestSize.Level
         modifier_->setMixedMode(node_, inputValueMixedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIXED_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumMixedModeInvalidValues) {
@@ -376,19 +376,19 @@ HWTEST_F(WebModifierTest, setZoomAccessTestZoomAccessValidValues, TestSize.Level
     initValueZoomAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueZoomAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueZoomAccess = initValueZoomAccess;
 
         inputValueZoomAccess = value;
         modifier_->setZoomAccess(node_, inputValueZoomAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ZOOM_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setZoomAccess, attribute: zoomAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setZoomAccess, attribute: zoomAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -403,8 +403,8 @@ HWTEST_F(WebModifierTest, setGeolocationAccessTestDefaultValues, TestSize.Level1
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GEOLOCATION_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_GEOLOCATION_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'geolocationAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_GEOLOCATION_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'geolocationAccess'";
 }
 
 /*
@@ -420,19 +420,19 @@ HWTEST_F(WebModifierTest, setGeolocationAccessTestGeolocationAccessValidValues, 
     initValueGeolocationAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueGeolocationAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueGeolocationAccess = initValueGeolocationAccess;
 
         inputValueGeolocationAccess = value;
         modifier_->setGeolocationAccess(node_, inputValueGeolocationAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GEOLOCATION_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setGeolocationAccess, attribute: geolocationAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setGeolocationAccess, attribute: geolocationAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -449,24 +449,24 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptProxyTestDefaultValues, TestSize
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptProxy.name'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptProxy.name'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptProxy.methodList'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptProxy.methodList'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptProxy.controller'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptProxy.controller'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptProxy.asyncMethodList'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptProxy.asyncMethodList'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptProxy.permission'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptProxy.permission'";
 }
 
 /*
@@ -506,19 +506,19 @@ HWTEST_F(WebModifierTest, DISABLED_setPasswordTestPasswordValidValues, TestSize.
     initValuePassword = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValuePassword](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValuePassword = initValuePassword;
 
         inputValuePassword = value;
         modifier_->setPassword(node_, inputValuePassword);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setPassword, attribute: password";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPassword, attribute: password";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -549,19 +549,19 @@ HWTEST_F(WebModifierTest, setCacheModeTestCacheModeValidValues, TestSize.Level1)
     initValueCacheMode = std::get<1>(Fixtures::testFixtureEnumCacheModeValidValues[0]);
 
     auto checkValue = [this, &initValueCacheMode](
-                          const std::string& input, const Ark_CacheMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_CacheMode& value) {
         Ark_CacheMode inputValueCacheMode = initValueCacheMode;
 
         inputValueCacheMode = value;
         modifier_->setCacheMode(node_, inputValueCacheMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHE_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCacheModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -585,8 +585,8 @@ HWTEST_F(WebModifierTest, setCacheModeTestCacheModeInvalidValues, TestSize.Level
         modifier_->setCacheMode(node_, inputValueCacheMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHE_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCacheModeInvalidValues) {
@@ -621,19 +621,19 @@ HWTEST_F(WebModifierTest, setDarkModeTestDarkModeValidValues, TestSize.Level1)
     initValueDarkMode = std::get<1>(Fixtures::testFixtureEnumWebDarkModeValidValues[0]);
 
     auto checkValue = [this, &initValueDarkMode](
-                          const std::string& input, const Ark_WebDarkMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_WebDarkMode& value) {
         Ark_WebDarkMode inputValueDarkMode = initValueDarkMode;
 
         inputValueDarkMode = value;
         modifier_->setDarkMode(node_, inputValueDarkMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DARK_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumWebDarkModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -657,8 +657,8 @@ HWTEST_F(WebModifierTest, setDarkModeTestDarkModeInvalidValues, TestSize.Level1)
         modifier_->setDarkMode(node_, inputValueDarkMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DARK_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DARK_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_DARK_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumWebDarkModeInvalidValues) {
@@ -693,19 +693,19 @@ HWTEST_F(WebModifierTest, setForceDarkAccessTestForceDarkAccessValidValues, Test
     initValueForceDarkAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueForceDarkAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueForceDarkAccess = initValueForceDarkAccess;
 
         inputValueForceDarkAccess = value;
         modifier_->setForceDarkAccess(node_, inputValueForceDarkAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DARK_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setForceDarkAccess, attribute: forceDarkAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setForceDarkAccess, attribute: forceDarkAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -722,12 +722,12 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE)
-        << "Default value for attribute 'mediaOptions.resumeInterval'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE) <<
+        "Default value for attribute 'mediaOptions.resumeInterval'";
 
     resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE)
-        << "Default value for attribute 'mediaOptions.audioExclusive'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE) <<
+        "Default value for attribute 'mediaOptions.audioExclusive'";
 }
 
 /*
@@ -746,7 +746,7 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsResumeIntervalValidValu
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueMediaOptions](
-                          const std::string& input, const Opt_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
         Ark_WebMediaOptions inputValueMediaOptions = initValueMediaOptions;
 
         inputValueMediaOptions.resumeInterval = value;
@@ -754,12 +754,12 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsResumeIntervalValidValu
         auto jsonValue = GetJsonValue(node_);
         auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, ArkValue<Opt_Number>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
     }
 }
 
@@ -787,8 +787,8 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsResumeIntervalInvalidVa
         auto jsonValue = GetJsonValue(node_);
         auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
+        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
     };
 
     // Check empty optional
@@ -811,7 +811,7 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveValidValu
         ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
     auto checkValue = [this, &initValueMediaOptions](
-                          const std::string& input, const Opt_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
         Ark_WebMediaOptions inputValueMediaOptions = initValueMediaOptions;
 
         inputValueMediaOptions.audioExclusive = value;
@@ -819,12 +819,12 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveValidValu
         auto jsonValue = GetJsonValue(node_);
         auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, ArkValue<Opt_Boolean>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -852,8 +852,8 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveInvalidVa
         auto jsonValue = GetJsonValue(node_);
         auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
+        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
     };
 
     // Check empty optional
@@ -887,19 +887,19 @@ HWTEST_F(WebModifierTest, DISABLED_setTableDataTestTableDataValidValues, TestSiz
     initValueTableData = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueTableData](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueTableData = initValueTableData;
 
         inputValueTableData = value;
         modifier_->setTableData(node_, inputValueTableData);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TABLE_DATA_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTableData, attribute: tableData";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTableData, attribute: tableData";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -914,8 +914,8 @@ HWTEST_F(WebModifierTest, DISABLED_setWideViewModeAccessTestDefaultValues, TestS
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'wideViewModeAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'wideViewModeAccess'";
 }
 
 /*
@@ -931,19 +931,19 @@ HWTEST_F(WebModifierTest, DISABLED_setWideViewModeAccessTestWideViewModeAccessVa
     initValueWideViewModeAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueWideViewModeAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueWideViewModeAccess = initValueWideViewModeAccess;
 
         inputValueWideViewModeAccess = value;
         modifier_->setWideViewModeAccess(node_, inputValueWideViewModeAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWideViewModeAccess, attribute: wideViewModeAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWideViewModeAccess, attribute: wideViewModeAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -958,8 +958,8 @@ HWTEST_F(WebModifierTest, setOverviewModeAccessTestDefaultValues, TestSize.Level
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVERVIEW_MODE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OVERVIEW_MODE_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'overviewModeAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_OVERVIEW_MODE_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'overviewModeAccess'";
 }
 
 /*
@@ -975,19 +975,19 @@ HWTEST_F(WebModifierTest, setOverviewModeAccessTestOverviewModeAccessValidValues
     initValueOverviewModeAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueOverviewModeAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueOverviewModeAccess = initValueOverviewModeAccess;
 
         inputValueOverviewModeAccess = value;
         modifier_->setOverviewModeAccess(node_, inputValueOverviewModeAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVERVIEW_MODE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setOverviewModeAccess, attribute: overviewModeAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setOverviewModeAccess, attribute: overviewModeAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1018,19 +1018,19 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeValidValues, TestSi
     initValueOverScrollMode = std::get<1>(Fixtures::testFixtureEnumOverScrollModeValidValues[0]);
 
     auto checkValue = [this, &initValueOverScrollMode](
-                          const std::string& input, const Ark_OverScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_OverScrollMode& value) {
         Ark_OverScrollMode inputValueOverScrollMode = initValueOverScrollMode;
 
         inputValueOverScrollMode = value;
         modifier_->setOverScrollMode(node_, inputValueOverScrollMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVER_SCROLL_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumOverScrollModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1054,8 +1054,8 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeInvalidValues, Test
         modifier_->setOverScrollMode(node_, inputValueOverScrollMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVER_SCROLL_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumOverScrollModeInvalidValues) {
@@ -1090,19 +1090,19 @@ HWTEST_F(WebModifierTest, setTextZoomAtioTestTextZoomAtioValidValues, TestSize.L
     initValueTextZoomAtio = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueTextZoomAtio](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueTextZoomAtio = initValueTextZoomAtio;
 
         inputValueTextZoomAtio = value;
         modifier_->setTextZoomAtio(node_, &inputValueTextZoomAtio);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_ATIO_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextZoomAtio, attribute: textZoomAtio";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextZoomAtio, attribute: textZoomAtio";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1133,19 +1133,19 @@ HWTEST_F(WebModifierTest, setTextZoomRatioTestTextZoomRatioValidValues, TestSize
     initValueTextZoomRatio = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueTextZoomRatio](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueTextZoomRatio = initValueTextZoomRatio;
 
         inputValueTextZoomRatio = value;
         modifier_->setTextZoomRatio(node_, &inputValueTextZoomRatio);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_RATIO_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextZoomRatio, attribute: textZoomRatio";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextZoomRatio, attribute: textZoomRatio";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1176,19 +1176,19 @@ HWTEST_F(WebModifierTest, setDatabaseAccessTestDatabaseAccessValidValues, TestSi
     initValueDatabaseAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueDatabaseAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueDatabaseAccess = initValueDatabaseAccess;
 
         inputValueDatabaseAccess = value;
         modifier_->setDatabaseAccess(node_, inputValueDatabaseAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATABASE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDatabaseAccess, attribute: databaseAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDatabaseAccess, attribute: databaseAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1219,19 +1219,19 @@ HWTEST_F(WebModifierTest, setInitialScaleTestInitialScaleValidValues, TestSize.L
     initValueInitialScale = std::get<1>(Fixtures::testFixtureNumberFloatAnythingValidValues[0]);
 
     auto checkValue = [this, &initValueInitialScale](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueInitialScale = initValueInitialScale;
 
         inputValueInitialScale = value;
         modifier_->setInitialScale(node_, &inputValueInitialScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INITIAL_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setInitialScale, attribute: initialScale";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setInitialScale, attribute: initialScale";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1262,19 +1262,19 @@ HWTEST_F(WebModifierTest, setUserAgentTestUserAgentValidValues, TestSize.Level1)
     initValueUserAgent = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueUserAgent](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueUserAgent = initValueUserAgent;
 
         inputValueUserAgent = value;
         modifier_->setUserAgent(node_, &inputValueUserAgent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_USER_AGENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setUserAgent, attribute: userAgent";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setUserAgent, attribute: userAgent";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1305,19 +1305,19 @@ HWTEST_F(WebModifierTest, setMetaViewportTestMetaViewportValidValues, TestSize.L
     initValueMetaViewport = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueMetaViewport](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueMetaViewport = initValueMetaViewport;
 
         inputValueMetaViewport = value;
         modifier_->setMetaViewport(node_, inputValueMetaViewport);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_META_VIEWPORT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMetaViewport, attribute: metaViewport";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMetaViewport, attribute: metaViewport";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1332,8 +1332,8 @@ HWTEST_F(WebModifierTest, setMediaPlayGestureAccessTestDefaultValues, TestSize.L
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'mediaPlayGestureAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'mediaPlayGestureAccess'";
 }
 
 /*
@@ -1349,19 +1349,19 @@ HWTEST_F(WebModifierTest, setMediaPlayGestureAccessTestMediaPlayGestureAccessVal
     initValueMediaPlayGestureAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueMediaPlayGestureAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueMediaPlayGestureAccess = initValueMediaPlayGestureAccess;
 
         inputValueMediaPlayGestureAccess = value;
         modifier_->setMediaPlayGestureAccess(node_, inputValueMediaPlayGestureAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMediaPlayGestureAccess, attribute: mediaPlayGestureAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMediaPlayGestureAccess, attribute: mediaPlayGestureAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1376,8 +1376,8 @@ HWTEST_F(WebModifierTest, setMultiWindowAccessTestDefaultValues, TestSize.Level1
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MULTI_WINDOW_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MULTI_WINDOW_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'multiWindowAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_MULTI_WINDOW_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'multiWindowAccess'";
 }
 
 /*
@@ -1393,19 +1393,19 @@ HWTEST_F(WebModifierTest, setMultiWindowAccessTestMultiWindowAccessValidValues, 
     initValueMultiWindowAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueMultiWindowAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueMultiWindowAccess = initValueMultiWindowAccess;
 
         inputValueMultiWindowAccess = value;
         modifier_->setMultiWindowAccess(node_, inputValueMultiWindowAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MULTI_WINDOW_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMultiWindowAccess, attribute: multiWindowAccess";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMultiWindowAccess, attribute: multiWindowAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1436,19 +1436,19 @@ HWTEST_F(WebModifierTest, setWebStandardFontTestWebStandardFontValidValues, Test
     initValueWebStandardFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebStandardFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebStandardFont = initValueWebStandardFont;
 
         inputValueWebStandardFont = value;
         modifier_->setWebStandardFont(node_, &inputValueWebStandardFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_STANDARD_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebStandardFont, attribute: webStandardFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebStandardFont, attribute: webStandardFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1479,19 +1479,19 @@ HWTEST_F(WebModifierTest, setWebSerifFontTestWebSerifFontValidValues, TestSize.L
     initValueWebSerifFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebSerifFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebSerifFont = initValueWebSerifFont;
 
         inputValueWebSerifFont = value;
         modifier_->setWebSerifFont(node_, &inputValueWebSerifFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SERIF_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebSerifFont, attribute: webSerifFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebSerifFont, attribute: webSerifFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1506,8 +1506,8 @@ HWTEST_F(WebModifierTest, setWebSansSerifFontTestDefaultValues, TestSize.Level1)
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SANS_SERIF_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_SANS_SERIF_FONT_DEFAULT_VALUE)
-        << "Default value for attribute 'webSansSerifFont'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_SANS_SERIF_FONT_DEFAULT_VALUE) <<
+        "Default value for attribute 'webSansSerifFont'";
 }
 
 /*
@@ -1523,19 +1523,19 @@ HWTEST_F(WebModifierTest, setWebSansSerifFontTestWebSansSerifFontValidValues, Te
     initValueWebSansSerifFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebSansSerifFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebSansSerifFont = initValueWebSansSerifFont;
 
         inputValueWebSansSerifFont = value;
         modifier_->setWebSansSerifFont(node_, &inputValueWebSansSerifFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SANS_SERIF_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebSansSerifFont, attribute: webSansSerifFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebSansSerifFont, attribute: webSansSerifFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1566,19 +1566,19 @@ HWTEST_F(WebModifierTest, setWebFixedFontTestWebFixedFontValidValues, TestSize.L
     initValueWebFixedFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebFixedFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebFixedFont = initValueWebFixedFont;
 
         inputValueWebFixedFont = value;
         modifier_->setWebFixedFont(node_, &inputValueWebFixedFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FIXED_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebFixedFont, attribute: webFixedFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebFixedFont, attribute: webFixedFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1609,19 +1609,19 @@ HWTEST_F(WebModifierTest, setWebFantasyFontTestWebFantasyFontValidValues, TestSi
     initValueWebFantasyFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebFantasyFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebFantasyFont = initValueWebFantasyFont;
 
         inputValueWebFantasyFont = value;
         modifier_->setWebFantasyFont(node_, &inputValueWebFantasyFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FANTASY_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebFantasyFont, attribute: webFantasyFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebFantasyFont, attribute: webFantasyFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1652,19 +1652,19 @@ HWTEST_F(WebModifierTest, setWebCursiveFontTestWebCursiveFontValidValues, TestSi
     initValueWebCursiveFont = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueWebCursiveFont](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueWebCursiveFont = initValueWebCursiveFont;
 
         inputValueWebCursiveFont = value;
         modifier_->setWebCursiveFont(node_, &inputValueWebCursiveFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_CURSIVE_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setWebCursiveFont, attribute: webCursiveFont";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setWebCursiveFont, attribute: webCursiveFont";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1679,8 +1679,8 @@ HWTEST_F(WebModifierTest, setDefaultFixedFontSizeTestDefaultValues, TestSize.Lev
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'defaultFixedFontSize'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'defaultFixedFontSize'";
 }
 
 /*
@@ -1696,19 +1696,19 @@ HWTEST_F(WebModifierTest, setDefaultFixedFontSizeTestDefaultFixedFontSizeValidVa
     initValueDefaultFixedFontSize = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueDefaultFixedFontSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueDefaultFixedFontSize = initValueDefaultFixedFontSize;
 
         inputValueDefaultFixedFontSize = value;
         modifier_->setDefaultFixedFontSize(node_, &inputValueDefaultFixedFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDefaultFixedFontSize, attribute: defaultFixedFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDefaultFixedFontSize, attribute: defaultFixedFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1739,19 +1739,19 @@ HWTEST_F(WebModifierTest, setDefaultFontSizeTestDefaultFontSizeValidValues, Test
     initValueDefaultFontSize = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueDefaultFontSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueDefaultFontSize = initValueDefaultFontSize;
 
         inputValueDefaultFontSize = value;
         modifier_->setDefaultFontSize(node_, &inputValueDefaultFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setDefaultFontSize, attribute: defaultFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDefaultFontSize, attribute: defaultFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1782,19 +1782,19 @@ HWTEST_F(WebModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Lev
     initValueMinFontSize = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueMinFontSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueMinFontSize = initValueMinFontSize;
 
         inputValueMinFontSize = value;
         modifier_->setMinFontSize(node_, &inputValueMinFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1809,8 +1809,8 @@ HWTEST_F(WebModifierTest, setMinLogicalFontSizeTestDefaultValues, TestSize.Level
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'minLogicalFontSize'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'minLogicalFontSize'";
 }
 
 /*
@@ -1826,19 +1826,19 @@ HWTEST_F(WebModifierTest, setMinLogicalFontSizeTestMinLogicalFontSizeValidValues
     initValueMinLogicalFontSize = std::get<1>(Fixtures::testFixtureNumberIntFloorValidValues[0]);
 
     auto checkValue = [this, &initValueMinLogicalFontSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
         Ark_Number inputValueMinLogicalFontSize = initValueMinLogicalFontSize;
 
         inputValueMinLogicalFontSize = value;
         modifier_->setMinLogicalFontSize(node_, &inputValueMinLogicalFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setMinLogicalFontSize, attribute: minLogicalFontSize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinLogicalFontSize, attribute: minLogicalFontSize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberIntFloorValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1853,8 +1853,8 @@ HWTEST_F(WebModifierTest, setDefaultTextEncodingFormatTestDefaultValues, TestSiz
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_DEFAULT_VALUE)
-        << "Default value for attribute 'defaultTextEncodingFormat'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_DEFAULT_VALUE) <<
+        "Default value for attribute 'defaultTextEncodingFormat'";
 }
 
 /*
@@ -1871,20 +1871,20 @@ HWTEST_F(
     initValueDefaultTextEncodingFormat = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueDefaultTextEncodingFormat](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueDefaultTextEncodingFormat = initValueDefaultTextEncodingFormat;
 
         inputValueDefaultTextEncodingFormat = value;
         modifier_->setDefaultTextEncodingFormat(node_, &inputValueDefaultTextEncodingFormat);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
             << ", method: setDefaultTextEncodingFormat, attribute: defaultTextEncodingFormat";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1899,8 +1899,8 @@ HWTEST_F(WebModifierTest, setForceDisplayScrollBarTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_DEFAULT_VALUE)
-        << "Default value for attribute 'forceDisplayScrollBar'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_DEFAULT_VALUE) <<
+        "Default value for attribute 'forceDisplayScrollBar'";
 }
 
 /*
@@ -1916,19 +1916,19 @@ HWTEST_F(WebModifierTest, setForceDisplayScrollBarTestForceDisplayScrollBarValid
     initValueForceDisplayScrollBar = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueForceDisplayScrollBar](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueForceDisplayScrollBar = initValueForceDisplayScrollBar;
 
         inputValueForceDisplayScrollBar = value;
         modifier_->setForceDisplayScrollBar(node_, inputValueForceDisplayScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setForceDisplayScrollBar, attribute: forceDisplayScrollBar";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setForceDisplayScrollBar, attribute: forceDisplayScrollBar";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1959,19 +1959,19 @@ HWTEST_F(WebModifierTest, setBlockNetworkTestBlockNetworkValidValues, TestSize.L
     initValueBlockNetwork = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueBlockNetwork](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueBlockNetwork = initValueBlockNetwork;
 
         inputValueBlockNetwork = value;
         modifier_->setBlockNetwork(node_, inputValueBlockNetwork);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_NETWORK_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setBlockNetwork, attribute: blockNetwork";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBlockNetwork, attribute: blockNetwork";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1986,8 +1986,8 @@ HWTEST_F(WebModifierTest, setHorizontalScrollBarAccessTestDefaultValues, TestSiz
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'horizontalScrollBarAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'horizontalScrollBarAccess'";
 }
 
 /*
@@ -2003,20 +2003,20 @@ HWTEST_F(WebModifierTest, setHorizontalScrollBarAccessTestHorizontalScrollBarAcc
     initValueHorizontalScrollBarAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueHorizontalScrollBarAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueHorizontalScrollBarAccess = initValueHorizontalScrollBarAccess;
 
         inputValueHorizontalScrollBarAccess = value;
         modifier_->setHorizontalScrollBarAccess(node_, inputValueHorizontalScrollBarAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
             << ", method: setHorizontalScrollBarAccess, attribute: horizontalScrollBarAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -2031,8 +2031,8 @@ HWTEST_F(WebModifierTest, setVerticalScrollBarAccessTestDefaultValues, TestSize.
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE)
-        << "Default value for attribute 'verticalScrollBarAccess'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE) <<
+        "Default value for attribute 'verticalScrollBarAccess'";
 }
 
 /*
@@ -2048,19 +2048,19 @@ HWTEST_F(WebModifierTest, setVerticalScrollBarAccessTestVerticalScrollBarAccessV
     initValueVerticalScrollBarAccess = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueVerticalScrollBarAccess](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueVerticalScrollBarAccess = initValueVerticalScrollBarAccess;
 
         inputValueVerticalScrollBarAccess = value;
         modifier_->setVerticalScrollBarAccess(node_, inputValueVerticalScrollBarAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
-                                          << ", method: setVerticalScrollBarAccess, attribute: verticalScrollBarAccess";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setVerticalScrollBarAccess, attribute: verticalScrollBarAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -2091,19 +2091,19 @@ HWTEST_F(WebModifierTest, setPinchSmoothTestPinchSmoothValidValues, TestSize.Lev
     initValuePinchSmooth = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValuePinchSmooth](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValuePinchSmooth = initValuePinchSmooth;
 
         inputValuePinchSmooth = value;
         modifier_->setPinchSmooth(node_, inputValuePinchSmooth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setPinchSmooth, attribute: pinchSmooth";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPinchSmooth, attribute: pinchSmooth";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -2118,8 +2118,8 @@ HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE)
-        << "Default value for attribute 'allowWindowOpenMethod'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE) <<
+        "Default value for attribute 'allowWindowOpenMethod'";
 }
 
 /*
@@ -2135,19 +2135,19 @@ HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestAllowWindowOpenMethodValid
     initValueAllowWindowOpenMethod = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueAllowWindowOpenMethod](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueAllowWindowOpenMethod = initValueAllowWindowOpenMethod;
 
         inputValueAllowWindowOpenMethod = value;
         modifier_->setAllowWindowOpenMethod(node_, inputValueAllowWindowOpenMethod);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setAllowWindowOpenMethod, attribute: allowWindowOpenMethod";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setAllowWindowOpenMethod, attribute: allowWindowOpenMethod";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 

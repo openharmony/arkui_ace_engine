@@ -28,8 +28,8 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentStartTestDefaultValues
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptOnDocumentStart'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptOnDocumentStart'";
 }
 
 /*
@@ -53,8 +53,8 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentEndTestDefaultValues, 
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE)
-        << "Default value for attribute 'javaScriptOnDocumentEnd'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE) <<
+        "Default value for attribute 'javaScriptOnDocumentEnd'";
 }
 
 /*
@@ -94,19 +94,19 @@ HWTEST_F(WebModifierTest, setLayoutModeTestLayoutModeValidValues, TestSize.Level
     initValueLayoutMode = std::get<1>(Fixtures::testFixtureEnumWebLayoutModeValidValues[0]);
 
     auto checkValue = [this, &initValueLayoutMode](
-                          const std::string& input, const Ark_WebLayoutMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_WebLayoutMode& value) {
         Ark_WebLayoutMode inputValueLayoutMode = initValueLayoutMode;
 
         inputValueLayoutMode = value;
         modifier_->setLayoutMode(node_, inputValueLayoutMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumWebLayoutModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -130,8 +130,8 @@ HWTEST_F(WebModifierTest, setLayoutModeTestLayoutModeInvalidValues, TestSize.Lev
         modifier_->setLayoutMode(node_, inputValueLayoutMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumWebLayoutModeInvalidValues) {
@@ -152,36 +152,37 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollForward'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptions.scrollForward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollBackward'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptions.scrollBackward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollUp'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollUp'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollDown'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollDown'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollRight'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollRight'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE)
-        << "Default value for attribute 'nestedScroll..scrollLeft'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE) <<
+        "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollLeft'";
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollForwardValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardValidValues,
+    TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
@@ -190,17 +191,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardV
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollRight =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollLeft =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Ark_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollForward = value;
@@ -208,21 +201,23 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardV
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollForward";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollForward";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollForwardInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardInvalidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardInvalidValues,
+    TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
@@ -231,14 +226,6 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardI
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollRight =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollLeft =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](const std::string& input, const Ark_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
@@ -249,8 +236,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardI
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollForward";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollForward";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -259,11 +247,12 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollForwardI
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollBackwardValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackwardValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardValidValues,
+    TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
@@ -272,17 +261,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackward
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollRight =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollLeft =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Ark_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollBackward = value;
@@ -290,21 +271,23 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackward
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollBackward";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollBackward";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollBackwardInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackwardInvalidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardInvalidValues,
+    TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
@@ -313,14 +296,6 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackward
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
         std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollRight =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
-    WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollLeft =
-        ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](const std::string& input, const Ark_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
@@ -331,8 +306,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackward
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollBackward";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollBackward";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -341,19 +317,15 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollScrollBackward
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollUpValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollUpValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollUpValidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -364,7 +336,7 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpValidValues, Te
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Opt_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollUp = value;
@@ -372,29 +344,26 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpValidValues, Te
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollUp";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollUp";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, ArkValue<Opt_NestedScrollMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_NestedScrollMode>(value));
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollUpInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollUpInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpInvalidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollUpInvalidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -413,8 +382,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpInvalidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollUp";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollUp";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -423,19 +393,15 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollUpInvalidValues, 
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollDownValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollDownValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollDownValidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -446,7 +412,7 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownValidValues, 
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Opt_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollDown = value;
@@ -454,29 +420,26 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollDown";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollDown";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, ArkValue<Opt_NestedScrollMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_NestedScrollMode>(value));
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollDownInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollDownInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownInvalidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollDownInvalidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -495,8 +458,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollDown";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollDown";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -505,19 +469,15 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollDownInvalidValues
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollRightValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollRightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollRightValidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -528,7 +488,7 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightValidValues,
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Opt_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollRight = value;
@@ -536,29 +496,27 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightValidValues,
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollRight";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollRight";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, ArkValue<Opt_NestedScrollMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_NestedScrollMode>(value));
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollRightInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollRightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightInvalidValues, TestSize.Level1)
+HWTEST_F(
+    WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollRightInvalidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -577,8 +535,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightInvalidValue
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollRight";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollRight";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -587,19 +546,15 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollRightInvalidValue
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollLeftValidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollLeftValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollLeftValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollLeftValidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -610,7 +565,7 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollLeftValidValues, 
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
 
     auto checkValue = [this, &initValueNestedScroll](
-                          const std::string& input, const Opt_NestedScrollMode& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_NestedScrollMode& value) {
         Ark_Union_NestedScrollOptions_NestedScrollOptionsExt inputValueNestedScroll = initValueNestedScroll;
 
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollLeft = value;
@@ -618,29 +573,26 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollLeftValidValues, 
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollLeft";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollLeft";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumNestedScrollModeValidValues) {
-        checkValue(input, ArkValue<Opt_NestedScrollMode>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_NestedScrollMode>(value));
     }
 }
 
 /*
- * @tc.name: setNestedScrollTestNestedScrollScrollLeftInvalidValues
+ * @tc.name: setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollLeftInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollLeftInvalidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtScrollLeftInvalidValues, TestSize.Level1)
 {
     Ark_Union_NestedScrollOptions_NestedScrollOptionsExt initValueNestedScroll;
 
     // Initial setup
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollForward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
-    WriteToUnion<Ark_NestedScrollOptions>(initValueNestedScroll).scrollBackward =
-        std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]);
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollUp =
         ArkValue<Opt_NestedScrollMode>(std::get<1>(Fixtures::testFixtureEnumNestedScrollModeValidValues[0]));
     WriteToUnion<Ark_NestedScrollOptionsExt>(initValueNestedScroll).scrollDown =
@@ -659,8 +611,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollScrollLeftInvalidValues
         auto jsonValue = GetJsonValue(node_);
         auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll..scrollLeft";
+        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollLeft";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumNestedScrollModeInvalidValues) {
@@ -679,8 +632,8 @@ HWTEST_F(WebModifierTest, setEnableNativeEmbedModeTestDefaultValues, TestSize.Le
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_DEFAULT_VALUE)
-        << "Default value for attribute 'enableNativeEmbedMode'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableNativeEmbedMode'";
 }
 
 /*
@@ -696,114 +649,19 @@ HWTEST_F(WebModifierTest, setEnableNativeEmbedModeTestEnableNativeEmbedModeValid
     initValueEnableNativeEmbedMode = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableNativeEmbedMode](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableNativeEmbedMode = initValueEnableNativeEmbedMode;
 
         inputValueEnableNativeEmbedMode = value;
         modifier_->setEnableNativeEmbedMode(node_, inputValueEnableNativeEmbedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableNativeEmbedMode, attribute: enableNativeEmbedMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableNativeEmbedMode, attribute: enableNativeEmbedMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setRegisterNativeEmbedRuleTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultRegisterNativeEmbedRule =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
-    std::string resultStr;
-
-    resultStr =
-        GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_DEFAULT_VALUE)
-        << "Default value for attribute 'registerNativeEmbedRule.tag'";
-
-    resultStr =
-        GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_DEFAULT_VALUE)
-        << "Default value for attribute 'registerNativeEmbedRule.type'";
-}
-
-/*
- * @tc.name: setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTagValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTagValidValues, TestSize.Level1)
-{
-    Ark_String initValueTag;
-    Ark_String initValueType;
-
-    // Initial setup
-    initValueTag = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-    initValueType = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-
-    auto checkValue = [this, &initValueTag, &initValueType](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        Ark_String inputValueTag = initValueTag;
-        Ark_String inputValueType = initValueType;
-
-        inputValueTag = value;
-        modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultRegisterNativeEmbedRule =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setRegisterNativeEmbedRule, attribute: registerNativeEmbedRule.tag";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTypeValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTypeValidValues, TestSize.Level1)
-{
-    Ark_String initValueTag;
-    Ark_String initValueType;
-
-    // Initial setup
-    initValueTag = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-    initValueType = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-
-    auto checkValue = [this, &initValueTag, &initValueType](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
-        Ark_String inputValueTag = initValueTag;
-        Ark_String inputValueType = initValueType;
-
-        inputValueType = value;
-        modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultRegisterNativeEmbedRule =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
-            << ", method: setRegisterNativeEmbedRule, attribute: registerNativeEmbedRule.type";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -834,19 +692,19 @@ HWTEST_F(WebModifierTest, setCopyOptionsTestCopyOptionsValidValues, TestSize.Lev
     initValueCopyOptions = std::get<1>(Fixtures::testFixtureEnumCopyOptionsValidValues[0]);
 
     auto checkValue = [this, &initValueCopyOptions](
-                          const std::string& input, const Ark_CopyOptions& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_CopyOptions& value) {
         Ark_CopyOptions inputValueCopyOptions = initValueCopyOptions;
 
         inputValueCopyOptions = value;
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCopyOptionsValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -870,8 +728,8 @@ HWTEST_F(WebModifierTest, setCopyOptionsTestCopyOptionsInvalidValues, TestSize.L
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCopyOptionsInvalidValues) {
@@ -906,19 +764,19 @@ HWTEST_F(WebModifierTest, setTextAutosizingTestTextAutosizingValidValues, TestSi
     initValueTextAutosizing = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueTextAutosizing](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueTextAutosizing = initValueTextAutosizing;
 
         inputValueTextAutosizing = value;
         modifier_->setTextAutosizing(node_, inputValueTextAutosizing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_AUTOSIZING_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setTextAutosizing, attribute: textAutosizing";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextAutosizing, attribute: textAutosizing";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -936,13 +794,13 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestDefaultValues, TestSize.
 
     resultStr =
         GetAttrValue<std::string>(resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_DEFAULT_VALUE)
-        << "Default value for attribute 'enableNativeMediaPlayer.enable'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableNativeMediaPlayer.enable'";
 
     resultStr = GetAttrValue<std::string>(
         resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_DEFAULT_VALUE)
-        << "Default value for attribute 'enableNativeMediaPlayer.shouldOverlay'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableNativeMediaPlayer.shouldOverlay'";
 }
 
 /*
@@ -959,7 +817,7 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestEnableNativeMediaPlayerE
     initValueEnableNativeMediaPlayer.shouldOverlay = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableNativeMediaPlayer](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_NativeMediaPlayerConfig inputValueEnableNativeMediaPlayer = initValueEnableNativeMediaPlayer;
 
         inputValueEnableNativeMediaPlayer.enable = value;
@@ -969,13 +827,13 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestEnableNativeMediaPlayerE
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
             << ", method: setEnableNativeMediaPlayer, attribute: enableNativeMediaPlayer.enable";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -994,7 +852,7 @@ HWTEST_F(
     initValueEnableNativeMediaPlayer.shouldOverlay = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableNativeMediaPlayer](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_NativeMediaPlayerConfig inputValueEnableNativeMediaPlayer = initValueEnableNativeMediaPlayer;
 
         inputValueEnableNativeMediaPlayer.shouldOverlay = value;
@@ -1004,13 +862,13 @@ HWTEST_F(
             GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
             << ", method: setEnableNativeMediaPlayer, attribute: enableNativeMediaPlayer.shouldOverlay";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1025,8 +883,8 @@ HWTEST_F(WebModifierTest, setEnableSmoothDragResizeTestDefaultValues, TestSize.L
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_DEFAULT_VALUE)
-        << "Default value for attribute 'enableSmoothDragResize'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableSmoothDragResize'";
 }
 
 /*
@@ -1042,19 +900,19 @@ HWTEST_F(WebModifierTest, setEnableSmoothDragResizeTestEnableSmoothDragResizeVal
     initValueEnableSmoothDragResize = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableSmoothDragResize](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableSmoothDragResize = initValueEnableSmoothDragResize;
 
         inputValueEnableSmoothDragResize = value;
         modifier_->setEnableSmoothDragResize(node_, inputValueEnableSmoothDragResize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SMOOTH_DRAG_RESIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableSmoothDragResize, attribute: enableSmoothDragResize";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableSmoothDragResize, attribute: enableSmoothDragResize";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1069,8 +927,8 @@ HWTEST_F(WebModifierTest, DISABLED_setSelectionMenuOptionsTestDefaultValues, Tes
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTION_MENU_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_MENU_OPTIONS_DEFAULT_VALUE)
-        << "Default value for attribute 'selectionMenuOptions'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_MENU_OPTIONS_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectionMenuOptions'";
 }
 
 /*
@@ -1094,8 +952,8 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestDefaultValues, TestSize.Level1
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE)
-        << "Default value for attribute 'keyboardAvoidMode'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE) <<
+        "Default value for attribute 'keyboardAvoidMode'";
 }
 
 /*
@@ -1110,20 +968,20 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestKeyboardAvoidModeValidValues, 
     // Initial setup
     initValueKeyboardAvoidMode = std::get<1>(Fixtures::testFixtureEnumWebKeyboardAvoidModeValidValues[0]);
 
-    auto checkValue = [this, &initValueKeyboardAvoidMode](const std::string& input,
-                          const Ark_WebKeyboardAvoidMode& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueKeyboardAvoidMode](const std::string& input, const std::string& expectedStr,
+                          const Ark_WebKeyboardAvoidMode& value) {
         Ark_WebKeyboardAvoidMode inputValueKeyboardAvoidMode = initValueKeyboardAvoidMode;
 
         inputValueKeyboardAvoidMode = value;
         modifier_->setKeyboardAvoidMode(node_, inputValueKeyboardAvoidMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumWebKeyboardAvoidModeValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -1148,8 +1006,8 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestKeyboardAvoidModeInvalidValues
         modifier_->setKeyboardAvoidMode(node_, inputValueKeyboardAvoidMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
+        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumWebKeyboardAvoidModeInvalidValues) {
@@ -1168,8 +1026,8 @@ HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Lev
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)
-        << "Default value for attribute 'enableHapticFeedback'";
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
 }
 
 /*
@@ -1185,19 +1043,114 @@ HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidVa
     initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableHapticFeedback](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
 
         inputValueEnableHapticFeedback = value;
         modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRegisterNativeEmbedRuleTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultRegisterNativeEmbedRule =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+    std::string resultStr;
+
+    resultStr =
+        GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_DEFAULT_VALUE) <<
+        "Default value for attribute 'registerNativeEmbedRule.tag'";
+
+    resultStr =
+        GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_DEFAULT_VALUE) <<
+        "Default value for attribute 'registerNativeEmbedRule.type'";
+}
+
+/*
+ * @tc.name: setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTagValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTagValidValues, TestSize.Level1)
+{
+    Ark_String initValueTag;
+    Ark_String initValueType;
+
+    // Initial setup
+    initValueTag = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    initValueType = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValueTag, &initValueType](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValueTag = initValueTag;
+        Ark_String inputValueType = initValueType;
+
+        inputValueTag = value;
+        modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRegisterNativeEmbedRule =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setRegisterNativeEmbedRule, attribute: registerNativeEmbedRule.tag";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTypeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleTypeValidValues, TestSize.Level1)
+{
+    Ark_String initValueTag;
+    Ark_String initValueType;
+
+    // Initial setup
+    initValueTag = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    initValueType = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValueTag, &initValueType](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValueTag = initValueTag;
+        Ark_String inputValueType = initValueType;
+
+        inputValueType = value;
+        modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultRegisterNativeEmbedRule =
+            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+        auto resultStr =
+            GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setRegisterNativeEmbedRule, attribute: registerNativeEmbedRule.type";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, value);
     }
 }
 } // namespace OHOS::Ace::NG

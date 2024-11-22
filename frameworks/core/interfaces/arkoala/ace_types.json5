@@ -730,7 +730,7 @@
                 ["\"yy\"", "yy"],
                 ["\"MM\"", "MM"],
                 ["\"M\"", "M"],
-                ["\"dd\"", "dd"], 
+                ["\"dd\"", "dd"],
                 ["\"d\"", "d"],
                 ["\"EEEE\"", "EEEE"],
                 ["\"E, EE, EEE\"", "E, EE, EEE"],
@@ -789,9 +789,8 @@
             ]
         },
         {
-            "name": "ShadowRaduisNumber",
+            "name": "ShadowRadiusNumber",
             "type": "Ark_Number",
-            "resType": "FLOAT",
             "validValues": [
                 ["123", "123.000000"],
                 ["0", "0.000000"],
@@ -800,7 +799,7 @@
             "invalidValues": ["-1"],
         },
         {
-            "name": "ShadowRaduisRes",
+            "name": "ShadowRadiusRes",
             "type": "Ark_Resource",
             "resType": "FLOAT",
             "validValues": [
@@ -815,7 +814,6 @@
         {
             "name": "ShadowOffsetNumber",
             "type": "Ark_Number",
-            "resType": "FLOAT",
             "validValues": [
                 ["123", "123.000000"],
                 ["0", "0.000000"],
@@ -919,6 +917,10 @@
     "components": [
         {
             "name": "BaseSpan",
+            "disable": [
+                "setBaselineOffsetTestDefaultValues", // new attribute
+                "setBaselineOffsetTestValidValues", // new attribute
+            ],
             "attributes": [
                 {
                     "name": "textBackgroundStyle",
@@ -1147,7 +1149,7 @@
                 },
                 {
                     "name": "lineSpacing",
-                    "default": "0.00px"
+                    "default": "0.00vp"
                 },
                 {
                     "name": "lineHeight",
@@ -1250,6 +1252,7 @@
                 "setMaxLinesTestDefaultValues",
                 "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
+                "setLineSpacingTestValidValues",
                 "setLineHeightTestLineHeightValidValues",
                 "setLineHeightTestLineHeightInvalidValues",
                 "setFontFeatureTestDefaultValues",
@@ -1570,13 +1573,12 @@
                 }
             ],
             "remove": [
-                "setUnderlineColorTestUnderlineColorNormalValidValues",
-                "setUnderlineColorTestUnderlineColorErrorValidValues",
-                "setUnderlineColorTestUnderlineColorTypingValidValues",
-                "setUnderlineColorTestUnderlineColorDisableValidValues",
-                "setCaretPositionTestCaretPositionValidValues"
             ],
             "disable": [
+                "setCaretPositionTestCaretPositionValidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
                 "setTextInputOptionsTestDefaultValues",
                 "setTextInputOptionsTestValidValues",
                 "setTypeTestTypeValidValues",
@@ -2567,18 +2569,18 @@
                 "setFontTestFontFamilyValidValues", // Incorrect resource processing
                 "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
                 "setTextShadowTestDefaultValues",
-                "setTextShadowTestTextShadowRadiusValidValues",
-                "setTextShadowTestTextShadowRadiusInvalidValues",
-                "setTextShadowTestTextShadowTypeValidValues",
-                "setTextShadowTestTextShadowTypeInvalidValues",
-                "setTextShadowTestTextShadowColorValidValues",
-                "setTextShadowTestTextShadowColorInvalidValues",
-                "setTextShadowTestTextShadowOffsetXValidValues",
-                "setTextShadowTestTextShadowOffsetXInvalidValues",
-                "setTextShadowTestTextShadowOffsetYValidValues",
-                "setTextShadowTestTextShadowOffsetYInvalidValues",
-                "setTextShadowTestTextShadowFillValidValues",
-                "setTextShadowTestTextShadowFillInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsTypeValidValues",
+                "setTextShadowTestTextShadowShadowOptionsTypeInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorValidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillValidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
             ],
             "attributes": [
                 {
@@ -2849,23 +2851,26 @@
                 "setTextOptionsTestDefaultValues",
                 "setTextOptionsTestValidValues",
                 "setTextShadowTestDefaultValues",
-                "setTextShadowTestTextShadowColorInvalidValues",
-                "setTextShadowTestTextShadowColorValidValues",
-                "setTextShadowTestTextShadowFillInvalidValues",
-                "setTextShadowTestTextShadowFillValidValues",
-                "setTextShadowTestTextShadowOffsetXInvalidValues",
-                "setTextShadowTestTextShadowOffsetXValidValues",
-                "setTextShadowTestTextShadowOffsetYInvalidValues",
-                "setTextShadowTestTextShadowOffsetYValidValues",
-                "setTextShadowTestTextShadowRadiusInvalidValues",
-                "setTextShadowTestTextShadowRadiusValidValues",
-                "setTextShadowTestTextShadowTypeInvalidValues",
-                "setTextShadowTestTextShadowTypeValidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorValidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillValidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsTypeValidValues",
+                "setTextShadowTestTextShadowShadowOptionsTypeInvalidValues",
 
                 // Generated tests do not match json structure
                 "setTextOverflowTestDefaultValues",
                 "setTextOverflowTestTextOverflowOverflowInvalidValues",
                 "setTextOverflowTestTextOverflowOverflowValidValues",
+
+                "setLineSpacingTestDefaultValues", // new attribute
+                "setLineSpacingTestValidValues", // new attribute
             ]
         },
         {
@@ -2879,16 +2884,16 @@
                 "setFontFamilyTestDefaultValues",
                 "setFontFamilyTestFontFamilyInvalidValues",
                 "setTextShadowTestDefaultValues",
-                "setTextShadowTestTextShadowRadiusValidValues",
-                "setTextShadowTestTextShadowRadiusInvalidValues",
-                "setTextShadowTestTextShadowTypeValidValues",
-                "setTextShadowTestTextShadowColorValidValues",
-                "setTextShadowTestTextShadowColorInvalidValues",
-                "setTextShadowTestTextShadowOffsetXValidValues",
-                "setTextShadowTestTextShadowOffsetXInvalidValues",
-                "setTextShadowTestTextShadowOffsetYValidValues",
-                "setTextShadowTestTextShadowOffsetYInvalidValues",
-                "setTextShadowTestTextShadowFillValidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
+                "setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsTypeValidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorValidValues",
+                "setTextShadowTestTextShadowShadowOptionsColorInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYValidValues",
+                "setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setDateTimeOptionsTestDefaultValues"
             ],
             "attributes": [
@@ -2901,7 +2906,7 @@
                     "default": "0.000000"
                 },
                 {
-                    "name": "format", 
+                    "name": "format",
                     "default": "aa hh:mm:ss",
                     "fixtures": ["TimeFormat"]
                 },
@@ -2991,10 +2996,10 @@
                 // Test Skipped (incorrect test behaviour)
                 "setDefaultTextEncodingFormatTestDefaultTextEncodingFormatValidValues",
                 "setNestedScrollTestDefaultValues",
-                "setNestedScrollTestNestedScrollScrollForwardValidValues",
-                "setNestedScrollTestNestedScrollScrollForwardInvalidValues",
-                "setNestedScrollTestNestedScrollScrollBackwardValidValues",
-                "setNestedScrollTestNestedScrollScrollBackwardInvalidValues",
+                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardValidValues",
+                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollForwardInvalidValues",
+                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardValidValues",
+                "setNestedScrollTestNestedScrollNestedScrollOptionsScrollBackwardInvalidValues",
             ],
             "attributes": [
                 {
@@ -3374,9 +3379,9 @@
                 "setTextTimerOptionsTestValidValues",
                 "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
                 "setTextShadowTestDefaultValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowTypeValidValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowTypeInvalidValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowColorValidValues" // Shadow coloring strategy attribute is missed in json
+                "setTextShadowTestTextShadowShadowOptionsTypeValidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowShadowOptionsTypeInvalidValues", // Shadow type has incorrect value in json
+                "setTextShadowTestTextShadowShadowOptionsColorValidValues" // Shadow coloring strategy attribute is missed in json
             ],
             "attributes": [
                 {
@@ -3425,7 +3430,7 @@
                         {
                             "name": "radius",
                             "default": "0.000000",
-                            "fixtures": ["ShadowRaduisNumber", "ShadowRaduisRes"]
+                            "fixtures": ["ShadowRadiusNumber", "ShadowRadiusRes"]
                         },
                         {
                             "name": "type",

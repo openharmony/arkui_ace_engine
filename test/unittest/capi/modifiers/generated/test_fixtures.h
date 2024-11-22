@@ -72,12 +72,12 @@ enum ResID {
     FRICTION_RESOURCE_5_ID,
     FRICTION_RESOURCE_6_ID,
     FRICTION_RESOURCE_7_ID,
-    SHADOW_RADUIS_RES_0_ID,
-    SHADOW_RADUIS_RES_1_ID,
-    SHADOW_RADUIS_RES_2_ID,
-    SHADOW_RADUIS_RES_3_ID,
-    SHADOW_RADUIS_RES_4_ID,
-    SHADOW_RADUIS_RES_5_ID,
+    SHADOW_RADIUS_RES_0_ID,
+    SHADOW_RADIUS_RES_1_ID,
+    SHADOW_RADIUS_RES_2_ID,
+    SHADOW_RADIUS_RES_3_ID,
+    SHADOW_RADIUS_RES_4_ID,
+    SHADOW_RADIUS_RES_5_ID,
     SHADOW_OFFSET_RES_0_ID,
     SHADOW_OFFSET_RES_1_ID,
     SHADOW_OFFSET_RES_2_ID,
@@ -132,12 +132,12 @@ inline constexpr auto FRICTION_RESOURCE_4_STR = "FRICTION_RESOURCE_4_STR";
 inline constexpr auto FRICTION_RESOURCE_5_STR = "FRICTION_RESOURCE_5_STR";
 inline constexpr auto FRICTION_RESOURCE_6_STR = "FRICTION_RESOURCE_6_STR";
 inline constexpr auto FRICTION_RESOURCE_7_STR = "FRICTION_RESOURCE_7_STR";
-inline constexpr auto SHADOW_RADUIS_RES_0_STR = "SHADOW_RADUIS_RES_0_STR";
-inline constexpr auto SHADOW_RADUIS_RES_1_STR = "SHADOW_RADUIS_RES_1_STR";
-inline constexpr auto SHADOW_RADUIS_RES_2_STR = "SHADOW_RADUIS_RES_2_STR";
-inline constexpr auto SHADOW_RADUIS_RES_3_STR = "SHADOW_RADUIS_RES_3_STR";
-inline constexpr auto SHADOW_RADUIS_RES_4_STR = "SHADOW_RADUIS_RES_4_STR";
-inline constexpr auto SHADOW_RADUIS_RES_5_STR = "SHADOW_RADUIS_RES_5_STR";
+inline constexpr auto SHADOW_RADIUS_RES_0_STR = "SHADOW_RADIUS_RES_0_STR";
+inline constexpr auto SHADOW_RADIUS_RES_1_STR = "SHADOW_RADIUS_RES_1_STR";
+inline constexpr auto SHADOW_RADIUS_RES_2_STR = "SHADOW_RADIUS_RES_2_STR";
+inline constexpr auto SHADOW_RADIUS_RES_3_STR = "SHADOW_RADIUS_RES_3_STR";
+inline constexpr auto SHADOW_RADIUS_RES_4_STR = "SHADOW_RADIUS_RES_4_STR";
+inline constexpr auto SHADOW_RADIUS_RES_5_STR = "SHADOW_RADIUS_RES_5_STR";
 inline constexpr auto SHADOW_OFFSET_RES_0_STR = "SHADOW_OFFSET_RES_0_STR";
 inline constexpr auto SHADOW_OFFSET_RES_1_STR = "SHADOW_OFFSET_RES_1_STR";
 inline constexpr auto SHADOW_OFFSET_RES_2_STR = "SHADOW_OFFSET_RES_2_STR";
@@ -342,13 +342,13 @@ extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureIn
 // Fixture 'TextInputCaretPosition' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextInputCaretPositionValidValues;
 
-// Fixture 'ShadowRaduisNumber' for type 'Ark_Number'
-extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureShadowRaduisNumberValidValues;
-extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureShadowRaduisNumberInvalidValues;
+// Fixture 'ShadowRadiusNumber' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureShadowRadiusNumberValidValues;
+extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureShadowRadiusNumberInvalidValues;
 
-// Fixture 'ShadowRaduisRes' for type 'Ark_Resource'
-extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureShadowRaduisResValidValues;
-extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureShadowRaduisResInvalidValues;
+// Fixture 'ShadowRadiusRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureShadowRadiusResValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureShadowRadiusResInvalidValues;
 
 // Fixture 'ShadowOffsetNumber' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureShadowOffsetNumberValidValues;

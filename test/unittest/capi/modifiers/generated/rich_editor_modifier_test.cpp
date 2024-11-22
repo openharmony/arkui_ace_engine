@@ -55,18 +55,6 @@ const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_NAME = "color";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_NAME = "style";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME = "value";
-const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME = "size";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_NAME = "weight";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_NAME = "family";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_NAME = "style";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_NAME = "fontColor";
-const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_CARET_COLOR_NAME = "caretColor";
 const auto ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME = "selectedBackgroundColor";
@@ -79,6 +67,18 @@ const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_BAR_STATE_NAME = "barState";
 const auto ATTRIBUTE_BAR_STATE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME = "value";
+const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME = "size";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_NAME = "weight";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_NAME = "family";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_NAME = "style";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_NAME = "fontColor";
+const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
 
 class RichEditorModifierTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
@@ -174,19 +174,19 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestCopyOptionsValidValu
     initValueCopyOptions = std::get<1>(Fixtures::testFixtureEnumCopyOptionsValidValues[0]);
 
     auto checkValue = [this, &initValueCopyOptions](
-                          const std::string& input, const Ark_CopyOptions& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_CopyOptions& value) {
         Ark_CopyOptions inputValueCopyOptions = initValueCopyOptions;
 
         inputValueCopyOptions = value;
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCopyOptionsValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -210,8 +210,8 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestCopyOptionsInvalidVa
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCopyOptionsInvalidValues) {
@@ -247,7 +247,7 @@ HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTestEnableDataDetectorVali
     initValueEnableDataDetector = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnableDataDetector](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnableDataDetector = initValueEnableDataDetector;
 
         inputValueEnableDataDetector = value;
@@ -259,7 +259,7 @@ HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTestEnableDataDetectorVali
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -291,7 +291,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTestEnablePreviewT
     initValueEnablePreviewText = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
 
     auto checkValue = [this, &initValueEnablePreviewText](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
         Ark_Boolean inputValueEnablePreviewText = initValueEnablePreviewText;
 
         inputValueEnablePreviewText = value;
@@ -303,7 +303,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTestEnablePreviewT
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -350,6 +350,418 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setDataDetectorConfigTestDefaultValues
 HWTEST_F(RichEditorModifierTest, DISABLED_setDataDetectorConfigTestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+}
+
+/*
+ * @tc.name: setCaretColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setCaretColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) << "Default value for attribute 'caretColor'";
+}
+
+/*
+ * @tc.name: setCaretColorTestCaretColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setCaretColorTestCaretColorValidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueCaretColor;
+
+    // Initial setup
+    initValueCaretColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueCaretColor](
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
+
+        inputValueCaretColor = value;
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setCaretColorTestCaretColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setCaretColorTestCaretColorInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueCaretColor;
+
+    // Initial setup
+    initValueCaretColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueCaretColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
+
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        inputValueCaretColor = value;
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedBackgroundColor'";
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueSelectedBackgroundColor;
+
+    // Initial setup
+    initValueSelectedBackgroundColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueSelectedBackgroundColor](
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
+
+        inputValueSelectedBackgroundColor = value;
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues,
+    TestSize.Level1)
+{
+    Ark_ResourceColor initValueSelectedBackgroundColor;
+
+    // Initial setup
+    initValueSelectedBackgroundColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueSelectedBackgroundColor](
+                          const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
+
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        inputValueSelectedBackgroundColor = value;
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setEnterKeyTypeTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE) << "Default value for attribute 'enterKeyType'";
+}
+
+/*
+ * @tc.name: setEnterKeyTypeTestEnterKeyTypeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestEnterKeyTypeValidValues, TestSize.Level1)
+{
+    Ark_EnterKeyType initValueEnterKeyType;
+
+    // Initial setup
+    initValueEnterKeyType = std::get<1>(Fixtures::testFixtureEnumEnterKeyTypeValidValues[0]);
+
+    auto checkValue = [this, &initValueEnterKeyType](
+                          const std::string& input, const std::string& expectedStr, const Ark_EnterKeyType& value) {
+        Ark_EnterKeyType inputValueEnterKeyType = initValueEnterKeyType;
+
+        inputValueEnterKeyType = value;
+        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnterKeyType, attribute: enterKeyType";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumEnterKeyTypeValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnterKeyTypeTestEnterKeyTypeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestEnterKeyTypeInvalidValues, TestSize.Level1)
+{
+    Ark_EnterKeyType initValueEnterKeyType;
+
+    // Initial setup
+    initValueEnterKeyType = std::get<1>(Fixtures::testFixtureEnumEnterKeyTypeValidValues[0]);
+
+    auto checkValue = [this, &initValueEnterKeyType](const std::string& input, const Ark_EnterKeyType& value) {
+        Ark_EnterKeyType inputValueEnterKeyType = initValueEnterKeyType;
+
+        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
+        inputValueEnterKeyType = value;
+        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnterKeyType, attribute: enterKeyType";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumEnterKeyTypeInvalidValues) {
+        checkValue(input, value);
+    }
+}
+
+/*
+ * @tc.name: setEnableKeyboardOnFocusTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableKeyboardOnFocus'";
+}
+
+/*
+ * @tc.name: setEnableKeyboardOnFocusTestEnableKeyboardOnFocusValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFocusValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableKeyboardOnFocus;
+
+    // Initial setup
+    initValueEnableKeyboardOnFocus = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableKeyboardOnFocus](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableKeyboardOnFocus = initValueEnableKeyboardOnFocus;
+
+        inputValueEnableKeyboardOnFocus = value;
+        modifier_->setEnableKeyboardOnFocus(node_, inputValueEnableKeyboardOnFocus);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableKeyboardOnFocus, attribute: enableKeyboardOnFocus";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setBarStateTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) << "Default value for attribute 'barState'";
+}
+
+/*
+ * @tc.name: setBarStateTestBarStateValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateValidValues, TestSize.Level1)
+{
+    Ark_BarState initValueBarState;
+
+    // Initial setup
+    initValueBarState = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
+
+    auto checkValue = [this, &initValueBarState](
+                          const std::string& input, const std::string& expectedStr, const Ark_BarState& value) {
+        Ark_BarState inputValueBarState = initValueBarState;
+
+        inputValueBarState = value;
+        modifier_->setBarState(node_, inputValueBarState);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBarState, attribute: barState";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumBarStateValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setBarStateTestBarStateInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateInvalidValues, TestSize.Level1)
+{
+    Ark_BarState initValueBarState;
+
+    // Initial setup
+    initValueBarState = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
+
+    auto checkValue = [this, &initValueBarState](const std::string& input, const Ark_BarState& value) {
+        Ark_BarState inputValueBarState = initValueBarState;
+
+        modifier_->setBarState(node_, inputValueBarState);
+        inputValueBarState = value;
+        modifier_->setBarState(node_, inputValueBarState);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBarState, attribute: barState";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumBarStateInvalidValues) {
+        checkValue(input, value);
+    }
 }
 
 /*
@@ -417,7 +829,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueVali
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
-                          const std::string& input, const Ark_ResourceStr& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceStr& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -431,10 +843,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueVali
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceStr, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceStr, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_Resource>(value));
     }
 }
 
@@ -503,7 +915,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -521,7 +933,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
-        checkValue(input, ArkValue<Opt_Length>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
     }
 }
 
@@ -596,8 +1008,8 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(initValueStyle).fontColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input,
-                          const Opt_Union_FontWeight_Number_String& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_FontWeight_Number_String& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -615,13 +1027,13 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
     }
 }
 
@@ -699,8 +1111,8 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     WriteTo(initValueStyle).fontColor =
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input,
-                          const Opt_Union_String_Resource& value, const std::string& expectedStr) {
+    auto checkValue = [this, &initValueValue, &initValueStyle](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_String_Resource& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -718,7 +1130,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
@@ -796,7 +1208,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
-                          const std::string& input, const Opt_FontStyle& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -814,7 +1226,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
-        checkValue(input, ArkValue<Opt_FontStyle>(value), expected);
+        checkValue(input, expected, ArkValue<Opt_FontStyle>(value));
     }
 }
 
@@ -888,7 +1300,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueValue, &initValueStyle](
-                          const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
         Ark_ResourceStr inputValueValue = initValueValue;
         Opt_PlaceholderStyle inputValueStyle = initValueStyle;
 
@@ -904,16 +1316,16 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -967,417 +1379,5 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_ResourceColor>());
-}
-
-/*
- * @tc.name: setCaretColorTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setCaretColorTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) << "Default value for attribute 'caretColor'";
-}
-
-/*
- * @tc.name: setCaretColorTestCaretColorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setCaretColorTestCaretColorValidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueCaretColor;
-
-    // Initial setup
-    initValueCaretColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueCaretColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
-
-        inputValueCaretColor = value;
-        modifier_->setCaretColor(node_, &inputValueCaretColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
-    }
-}
-
-/*
- * @tc.name: setCaretColorTestCaretColorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setCaretColorTestCaretColorInvalidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueCaretColor;
-
-    // Initial setup
-    initValueCaretColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueCaretColor](const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
-
-        modifier_->setCaretColor(node_, &inputValueCaretColor);
-        inputValueCaretColor = value;
-        modifier_->setCaretColor(node_, &inputValueCaretColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setSelectedBackgroundColorTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
-        "Default value for attribute 'selectedBackgroundColor'";
-}
-
-/*
- * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
-{
-    Ark_ResourceColor initValueSelectedBackgroundColor;
-
-    // Initial setup
-    initValueSelectedBackgroundColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueSelectedBackgroundColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
-        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
-
-        inputValueSelectedBackgroundColor = value;
-        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
-            ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
-    }
-}
-
-/*
- * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues,
-    TestSize.Level1)
-{
-    Ark_ResourceColor initValueSelectedBackgroundColor;
-
-    // Initial setup
-    initValueSelectedBackgroundColor =
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueSelectedBackgroundColor](
-                          const std::string& input, const Ark_ResourceColor& value) {
-        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
-
-        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
-        inputValueSelectedBackgroundColor = value;
-        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input <<
-            ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setEnterKeyTypeTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE) << "Default value for attribute 'enterKeyType'";
-}
-
-/*
- * @tc.name: setEnterKeyTypeTestEnterKeyTypeValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestEnterKeyTypeValidValues, TestSize.Level1)
-{
-    Ark_EnterKeyType initValueEnterKeyType;
-
-    // Initial setup
-    initValueEnterKeyType = std::get<1>(Fixtures::testFixtureEnumEnterKeyTypeValidValues[0]);
-
-    auto checkValue = [this, &initValueEnterKeyType](
-                          const std::string& input, const Ark_EnterKeyType& value, const std::string& expectedStr) {
-        Ark_EnterKeyType inputValueEnterKeyType = initValueEnterKeyType;
-
-        inputValueEnterKeyType = value;
-        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnterKeyType, attribute: enterKeyType";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumEnterKeyTypeValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setEnterKeyTypeTestEnterKeyTypeInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTestEnterKeyTypeInvalidValues, TestSize.Level1)
-{
-    Ark_EnterKeyType initValueEnterKeyType;
-
-    // Initial setup
-    initValueEnterKeyType = std::get<1>(Fixtures::testFixtureEnumEnterKeyTypeValidValues[0]);
-
-    auto checkValue = [this, &initValueEnterKeyType](const std::string& input, const Ark_EnterKeyType& value) {
-        Ark_EnterKeyType inputValueEnterKeyType = initValueEnterKeyType;
-
-        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
-        inputValueEnterKeyType = value;
-        modifier_->setEnterKeyType(node_, inputValueEnterKeyType);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setEnterKeyType, attribute: enterKeyType";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureEnumEnterKeyTypeInvalidValues) {
-        checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setEnableKeyboardOnFocusTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE) <<
-        "Default value for attribute 'enableKeyboardOnFocus'";
-}
-
-/*
- * @tc.name: setEnableKeyboardOnFocusTestEnableKeyboardOnFocusValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFocusValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueEnableKeyboardOnFocus;
-
-    // Initial setup
-    initValueEnableKeyboardOnFocus = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueEnableKeyboardOnFocus](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueEnableKeyboardOnFocus = initValueEnableKeyboardOnFocus;
-
-        inputValueEnableKeyboardOnFocus = value;
-        modifier_->setEnableKeyboardOnFocus(node_, inputValueEnableKeyboardOnFocus);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnableKeyboardOnFocus, attribute: enableKeyboardOnFocus";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setEnableHapticFeedbackTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
-        "Default value for attribute 'enableHapticFeedback'";
-}
-
-/*
- * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueEnableHapticFeedback;
-
-    // Initial setup
-    initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueEnableHapticFeedback](
-                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
-        Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
-
-        inputValueEnableHapticFeedback = value;
-        modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setBarStateTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) << "Default value for attribute 'barState'";
-}
-
-/*
- * @tc.name: setBarStateTestBarStateValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateValidValues, TestSize.Level1)
-{
-    Ark_BarState initValueBarState;
-
-    // Initial setup
-    initValueBarState = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
-
-    auto checkValue = [this, &initValueBarState](
-                          const std::string& input, const Ark_BarState& value, const std::string& expectedStr) {
-        Ark_BarState inputValueBarState = initValueBarState;
-
-        inputValueBarState = value;
-        modifier_->setBarState(node_, inputValueBarState);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setBarState, attribute: barState";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumBarStateValidValues) {
-        checkValue(input, value, expected);
-    }
-}
-
-/*
- * @tc.name: setBarStateTestBarStateInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateInvalidValues, TestSize.Level1)
-{
-    Ark_BarState initValueBarState;
-
-    // Initial setup
-    initValueBarState = std::get<1>(Fixtures::testFixtureEnumBarStateValidValues[0]);
-
-    auto checkValue = [this, &initValueBarState](const std::string& input, const Ark_BarState& value) {
-        Ark_BarState inputValueBarState = initValueBarState;
-
-        modifier_->setBarState(node_, inputValueBarState);
-        inputValueBarState = value;
-        modifier_->setBarState(node_, inputValueBarState);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setBarState, attribute: barState";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureEnumBarStateInvalidValues) {
-        checkValue(input, value);
-    }
 }
 } // namespace OHOS::Ace::NG

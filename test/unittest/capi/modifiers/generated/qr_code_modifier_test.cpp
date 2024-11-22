@@ -82,7 +82,7 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueValidValues, TestSize.Leve
     initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
 
     auto checkValue = [this, &initValueValue](
-                          const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
         Ark_String inputValueValue = initValueValue;
 
         // Re-create node for 'options' attribute
@@ -92,12 +92,12 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueValidValues, TestSize.Leve
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setQRCodeOptions, attribute: value";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setQRCodeOptions, attribute: value";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, value, expected);
+        checkValue(input, expected, value);
     }
 }
 
@@ -128,7 +128,7 @@ HWTEST_F(QRCodeModifierTest, setColorTestColorValidValues, TestSize.Level1)
     initValueColor = ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueColor = initValueColor;
 
         inputValueColor = value;
@@ -139,16 +139,16 @@ HWTEST_F(QRCodeModifierTest, setColorTestColorValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -172,8 +172,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.L
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -214,28 +214,28 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorValid
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBackgroundColor](
-                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
         Ark_ResourceColor inputValueBackgroundColor = initValueBackgroundColor;
 
         inputValueBackgroundColor = value;
         modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -260,8 +260,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorInval
         modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
+        EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -301,23 +301,23 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityValidVa
     initValueContentOpacity =
         ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureOpacityValidValues[0]));
 
-    auto checkValue = [this, &initValueContentOpacity](const std::string& input, const Ark_Union_Number_Resource& value,
-                          const std::string& expectedStr) {
+    auto checkValue = [this, &initValueContentOpacity](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueContentOpacity = initValueContentOpacity;
 
         inputValueContentOpacity = value;
         modifier_->setContentOpacity(node_, &inputValueContentOpacity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_OPACITY_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureOpacityValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureOpacityResourceValidValues) {
-        checkValue(input, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value), expected);
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Resource>(value));
     }
 }
 
@@ -343,8 +343,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityInvalid
         modifier_->setContentOpacity(node_, &inputValueContentOpacity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_OPACITY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE)
-            << "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
+        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
     };
 
     // Check invalid union
