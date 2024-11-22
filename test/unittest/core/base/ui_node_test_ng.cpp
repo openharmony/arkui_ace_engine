@@ -81,8 +81,8 @@ public:
         return hitTestResult_;
     }
 
-    HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override
+    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
+        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override
     {
         return hitTestResult_;
     }
@@ -2363,6 +2363,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg070, TestSize.Level1)
     testNode1->AddChild(testNode4, 1, false);
     PointT<float> globalPoint;
     PointT<float> parentLocalPoint;
+    PointT<float> parentRevertPoint;
+    TouchRestrict touchRestrict;
     MouseTestResult onMouseResult;
     MouseTestResult onHoverResult;
     RefPtr<FrameNode> hoverNode;
@@ -2370,7 +2372,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg070, TestSize.Level1)
         testNode1->UINode::MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
     EXPECT_EQ(ret == HitTestResult::BUBBLING, true);
     AxisTestResult onAxisResult;
-    HitTestResult ret2 = testNode1->UINode::AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+    HitTestResult ret2 =
+        testNode1->UINode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_EQ(ret2 == HitTestResult::OUT_OF_REGION, true);
 }
 

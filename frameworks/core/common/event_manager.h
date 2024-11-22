@@ -293,6 +293,8 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,

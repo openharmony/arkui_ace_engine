@@ -369,6 +369,51 @@ void EventManager::TouchTest(
     LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
 }
 
+TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent)
+{
+    TouchType type = TouchType::UNKNOWN;
+    if (axisEvent.action == AxisAction::BEGIN) {
+        type = TouchType::DOWN;
+    } else if (axisEvent.action == AxisAction::END) {
+        type = TouchType::UP;
+    } else if (axisEvent.action == AxisAction::UPDATE) {
+        type = TouchType::MOVE;
+    } else if (axisEvent.action == AxisAction::CANCEL) {
+        type = TouchType::CANCEL;
+    } else {
+        type = TouchType::UNKNOWN;
+    }
+    TouchPoint point { .id = axisEvent.id,
+        .x = axisEvent.x,
+        .y = axisEvent.y,
+        .screenX = axisEvent.screenX,
+        .screenY = axisEvent.screenY,
+        .downTime = axisEvent.time,
+        .size = 0.0,
+        .isPressed = (type == TouchType::DOWN),
+        .originalId = axisEvent.id };
+    TouchEvent event;
+    event.SetId(axisEvent.id)
+        .SetX(axisEvent.x)
+        .SetY(axisEvent.y)
+        .SetScreenX(axisEvent.screenX)
+        .SetScreenY(axisEvent.screenY)
+        .SetType(type)
+        .SetTime(axisEvent.time)
+        .SetSize(0.0)
+        .SetDeviceId(axisEvent.deviceId)
+        .SetTargetDisplayId(axisEvent.targetDisplayId)
+        .SetSourceType(axisEvent.sourceType)
+        .SetSourceTool(axisEvent.sourceTool)
+        .SetPointerEvent(axisEvent.pointerEvent)
+        .SetTouchEventId(axisEvent.touchEventId)
+        .SetOriginalId(axisEvent.originalId)
+        .SetIsInjected(axisEvent.isInjected);
+    event.pointers.emplace_back(std::move(point));
+    event.pressedKeyCodes_ = axisEvent.pressedCodes;
+    return event;
+}
+
 bool EventManager::HasDifferentDirectionGesture()
 {
     uint8_t verticalFlag = 0;
@@ -1478,7 +1523,12 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 {
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
-    frameNode->AxisTest(point, point, axisTestResults_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::AXIS;
+    touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
+    frameNode->AxisTest(point, point, point, touchRestrict, axisTestResults_);
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
