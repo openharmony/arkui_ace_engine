@@ -256,6 +256,10 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
+        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
+    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -269,7 +273,6 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }
@@ -2306,6 +2309,19 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
+        auto context = GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
+            [self = WeakClaim(this)](double density) {
+            auto renderContext = self.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            auto borderRadius = renderContext->GetBorderRadius();
+            if (borderRadius.has_value()) {
+                renderContext->SetBorderRadius(borderRadius.value());
+            }
+        });
+    }
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
