@@ -635,9 +635,23 @@ void RosenRenderSurface::SetIsUniRender(bool isUniRender)
         return;
     }
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (buffersToDraw_.empty()) {
+        auto lastSurfaceNode = buffersToRelease_.empty() ? nullptr : buffersToRelease_.back();
+        if (lastSurfaceNode) {
+            buffersToRelease_.pop_back();
+            buffersToDraw_.emplace_back(lastSurfaceNode);
+        }
+    }
     ReleaseAllBuffers(buffersToRelease_, consumerSurface_);
     ReleaseAllButLastBuffer(buffersToDraw_, consumerSurface_);
+    // buffersToDraw_ has 1 buffer at most, so .back() equals .front()
+    auto lastSurfaceNode = buffersToDraw_.empty() ? nullptr : buffersToDraw_.back();
+    if (lastSurfaceNode) {
+        lastSurfaceNode->sendTimes_ = 0;
+    }
+    sendCount_.store(-1);
     isUniRender_.store(isUniRender);
+    PostRenderOnlyTaskToUI();
 }
 
 #ifdef OHOS_PLATFORM
@@ -697,7 +711,8 @@ void RosenRenderSurface::OnWindowStateChange(bool isShow)
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         if (buffersToDraw_.empty()) {
             ReleaseAllButLastBuffer(buffersToRelease_, consumerSurface_);
-            sendCount_.store(buffersToRelease_.empty() ? -1 : buffersToRelease_.front()->sendTimes_ - 1);
+            sendCount_.store(
+                buffersToRelease_.empty() ? -1 : static_cast<int32_t>(buffersToRelease_.front()->sendTimes_ - 1));
         } else {
             ReleaseAllBuffers(buffersToRelease_, consumerSurface_);
             ReleaseAllButLastBuffer(buffersToDraw_, consumerSurface_);
