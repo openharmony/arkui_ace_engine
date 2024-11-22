@@ -715,6 +715,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(imageGestureEventHub);
             if (!IsPixelMapNeedScale()) {
+                imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
                 if (CheckInSceneBoardWindow()) {
                     imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
                 } else {
