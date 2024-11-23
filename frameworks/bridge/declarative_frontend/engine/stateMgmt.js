@@ -4047,7 +4047,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             parent.addChild(this); // FIXME
         }
         this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
-        
+        this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -7064,7 +7064,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
+                    if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
                         child.aboutToReuseInternal();
                     }
                 }
@@ -7092,7 +7092,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
+                    if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
                         child.aboutToRecycleInternal();
                     }
                 }

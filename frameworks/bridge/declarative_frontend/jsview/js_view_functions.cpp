@@ -279,6 +279,11 @@ void ViewFunctions::InitViewFunctions(
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
 
+        JSRef<JSVal> jsAboutToReuseFunc = jsObject->GetProperty("aboutToReuseInternal");
+        if (jsAboutToReuseFunc->IsFunction()) {
+            jsAboutToReuseFunc_ = JSRef<JSFunc>::Cast(jsAboutToReuseFunc);
+        }
+
         JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActiveInternal");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
@@ -457,6 +462,29 @@ void ViewFunctions::ExecuteDidBuild()
 void ViewFunctions::ExecuteAboutToRecycle()
 {
     ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
+}
+
+void ViewFunctions::ExecuteAboutToReuse(void* params)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsAboutToReuseFunc_.IsEmpty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("ExecuteAboutToReuse");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    if (!jsObject->IsUndefined()) {
+        std::string functionName("ExecuteAboutToReuse");
+        AceScopedPerformanceCheck scoped(functionName);
+        auto reuseParams = JsiCallbackInfo(reinterpret_cast<panda::JsiRuntimeCallInfo*>(params));
+        JsiRef<JsiValue> params[1] = { reuseParams[0] };
+        if (reuseParams.Length() > 0) {
+            jsAboutToReuseFunc_.Lock()->Call(jsObject, 1, params);
+        } else {
+            jsAboutToReuseFunc_.Lock()->Call(jsObject);
+        }
+    } else {
+        LOGE("jsObject is undefined. Internal error while trying to exec ExecuteAboutToReuse");
+    }
 }
 
 bool ViewFunctions::HasLayout() const

@@ -254,6 +254,12 @@ public:
         return executeFireOnAppear_;
     }
 
+    // used By BuilderNode
+    void SetOnRecycleFunc(std::function<void()>&& func);
+    void FireOnRecycleFunc();
+    void SetOnReuseFunc(std::function<void(void*)>&& func);
+    void FireOnReuseFunc(void* params);
+        
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
@@ -275,6 +281,8 @@ private:
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     std::function<std::string()> onDumpInspectorFunc_;
     std::function<void*()> getThisFunc_;
+    std::function<void()> onRecycleFunc_;
+    std::function<void(void*)> onReuseFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
     RecycleNodeInfo recycleInfo_;
