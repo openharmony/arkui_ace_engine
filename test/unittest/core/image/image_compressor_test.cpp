@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/image/test/unittest/image_compressor_test.h"
-
 #include "gtest/gtest.h"
+#define private public
+#define protected public
+#include "include/core/SkImage.h"
+
+#include "core/image/image_cache.h"
+#include "core/image/image_compressor.h"
+#include "core/image/image_loader.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+const std::string FILE_JPG = "file:///data/test/resource/imageprovider/images/unbroken.jpg";
 
 class ImageCompressorTest : public testing::Test {
 public:
@@ -80,7 +86,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor002, TestSize.Level1)
     /**
      * @tc.steps: step1. cache images one by one.
      */
-    std::string &path = const_cast<std::string &>(instance->shader_path_);
+    std::string& path = const_cast<std::string&>(instance->shader_path_);
     path = "";
     instance->Init();
     auto image = LoadImage();
@@ -92,7 +98,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor002, TestSize.Level1)
         int32_t height = static_cast<int32_t>(pixmap.height());
         auto compressData = instance->GpuCompress(key, pixmap, width, height);
         ASSERT_TRUE(compressData == nullptr);
-        instance->WriteToFile(key, compressData, {width, height});
+        instance->WriteToFile(key, compressData, { width, height });
     }
     path = "/system/bin/astc.bin";
 }
@@ -115,7 +121,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor003, TestSize.Level1)
         int32_t height = static_cast<int32_t>(pixmap.height());
         auto compressData = instance->GpuCompress(key, pixmap, width, height);
         ASSERT_TRUE(compressData != nullptr);
-        instance->WriteToFile(key, compressData, {width, height});
+        instance->WriteToFile(key, compressData, { width, height });
     }
 }
 
@@ -138,7 +144,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor004, TestSize.Level1)
         int32_t height = static_cast<int32_t>(pixmap.height());
         auto compressData = instance->GpuCompress(key, pixmap, width, height);
         ASSERT_TRUE(compressData == nullptr);
-        instance->WriteToFile(key, compressData, {width, height});
+        instance->WriteToFile(key, compressData, { width, height });
     }
 }
 
@@ -160,7 +166,7 @@ HWTEST_F(ImageCompressorTest, ImageCompressor005, TestSize.Level1)
         int32_t height = static_cast<int32_t>(pixmap.height());
         auto compressData = instance->GpuCompress(key, pixmap, width, height);
         ASSERT_TRUE(compressData != nullptr);
-        instance->WriteToFile(key, compressData, {width, height});
+        instance->WriteToFile(key, compressData, { width, height });
         auto task = instance->ScheduleReleaseTask();
         task();
         ASSERT_TRUE(instance->context_ == nullptr);
