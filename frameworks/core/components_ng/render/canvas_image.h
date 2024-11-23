@@ -25,9 +25,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
@@ -51,6 +51,7 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
+    float smoothEdge_ = 0.0f;
     ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool flipHorizontally_ = false;

@@ -137,6 +137,11 @@ public:
         imageQuality_ = imageQuality;
     }
 
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetOrientation(ImageRotateOrientation orientation)
     {
         isOrientationChange_ = (userOrientation_ != orientation);
@@ -150,11 +155,6 @@ public:
 
     void UpdateOrientation();
 
-    AIImageQuality GetImageQuality()
-    {
-        return imageQuality_;
-    }
-
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -163,34 +163,6 @@ public:
     void SetImageInterpolation(ImageInterpolation value)
     {
         interpolation_ = value;
-    }
-
-    std::string GetImageInterpolation()
-    {
-        switch (interpolation_) {
-            case ImageInterpolation::LOW:
-                return "LOW";
-            case ImageInterpolation::MEDIUM:
-                return "MEDIUM";
-            case ImageInterpolation::HIGH:
-                return "HIGH";
-            default:
-                return "NONE";
-        }
-    }
-
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
-    {
-        switch (dynamicMode) {
-            case DynamicRangeMode::HIGH:
-                return "HIGH";
-            case DynamicRangeMode::CONSTRAINT:
-                return "CONSTRAINT";
-            case DynamicRangeMode::STANDARD:
-                return "STANDARD";
-            default:
-                return "STANDARD";
-        }
     }
 
     std::string GetImageFitStr(ImageFit value);

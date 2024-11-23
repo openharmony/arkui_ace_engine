@@ -22,6 +22,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
@@ -281,25 +282,20 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
 
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    if (!rosenImageData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "rosenImageData null, [%{private}s]-%{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
-        return nullptr;
-    }
-    rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
+    CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto codec = rosenImageData->Parse();
     if (!codec.imageSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{private}s, frameCount is %{public}d, nodeId = %{public}s.",
+            "%{public}s, "
+            "frameCount is %{public}d",
             src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
-            codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
+            codec.frameCount);
         return nullptr;
     }
     RefPtr<ImageObject> imageObject;
     if (codec.frameCount > 1) {
         auto imageObject = MakeRefPtr<AnimatedImageObject>(src, codec.imageSize, data);
-        imageObject->SetOrientation(codec.orientation);
         imageObject->SetFrameCount(codec.frameCount);
         return imageObject;
     }

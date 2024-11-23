@@ -44,7 +44,6 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
-constexpr int32_t BORDER_RADIUS_ARRAY_SIZE = 4;
 constexpr int32_t DEGREE_NINETY = 90;
 constexpr int32_t DEGREE_HUNDRED_EIGHTY = 180;
 

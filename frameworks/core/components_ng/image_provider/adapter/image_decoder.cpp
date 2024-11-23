@@ -83,11 +83,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto height = static_cast<int32_t>(std::lround(desiredSize_.Height()));
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     auto src = obj_->GetSourceInfo();
+    auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
     // Determine whether to decode the width and height of each other based on the orientation
     SwapDecodeSize(width, height);
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], hdr: [%d], quality: [%d]",
-        src.c_str(), sourceSize.first, sourceSize.second, width, height, static_cast<int32_t>(isHdrDecoderNeed),
-        static_cast<int32_t>(imageQuality));
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", srcStr.c_str(),
+        sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
 
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
 

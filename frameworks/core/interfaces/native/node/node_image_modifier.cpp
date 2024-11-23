@@ -885,22 +885,22 @@ void ResetImageRotateOrientation(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
-        ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
-        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
-        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
-        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
-        ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit,
-        SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
-        SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, SetImageBorderWithValues, ResetImageBorder,
-        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable, ResetResizable,
-        SetDynamicRangeMode, ResetDynamicRangeMode, SetImageRotateOrientation, ResetImageRotateOrientation,
-        SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
-        GetDrawingColorFilter, ResetImageContent, ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
-        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption,
+        SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad,
+        ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize,
+        ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
+        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
+        SetImageBorderWithValues, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
+        ResetEdgeAntialiasing, SetResizable, ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode,
+        SetImageRotateOrientation, ResetImageRotateOrientation, SetEnhancedImageQuality, ResetEnhancedImageQuality,
+        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve,
+        ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent,
+        ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
+        ResetImageOnFinish };
     return &modifier;
 }
 
