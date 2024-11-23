@@ -110,6 +110,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -130,6 +131,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -150,6 +152,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -500,6 +503,10 @@ void ImagePattern::UpdateOrientation()
 {
     auto imageObj = loadingCtx_->GetImageObject();
     CHECK_NULL_VOID(imageObj);
+    if (imageObj->GetFrameCount() > 1) {
+        imageObj->SetOrientation(ImageRotateOrientation::UP);
+        return;
+    }
     imageObj->SetUserOrientation(userOrientation_);
     auto selfOrientation_ = imageObj->GetOrientation();
     if (userOrientation_ == ImageRotateOrientation::UP) {
