@@ -391,6 +391,8 @@ public:
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
 
+    virtual void OnPropertyChangeMeasure() {}
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 

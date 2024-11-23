@@ -105,6 +105,7 @@ protected:
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
     bool isMarquee_ = false;
+    bool needReCreateParagraph_ = true;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
