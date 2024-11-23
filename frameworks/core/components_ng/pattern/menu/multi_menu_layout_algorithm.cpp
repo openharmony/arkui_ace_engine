@@ -21,6 +21,30 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
+bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(frameNode && columnInfo, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (Positive(pipeline->GetRootWidth())) {
+        return false;
+    }
+
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_RETURN(currentId >= MIN_SUBCONTAINER_ID, false);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subwindowManager, false);
+    auto parentContainerId = subwindowManager->GetParentContainerId(currentId);
+    auto subwindow = subwindowManager->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto width = subwindow->GetRect().Width();
+    CHECK_NULL_RETURN(Positive(width), false);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, false);
+    parent->BuildColumnWidth(width);
+    return true;
+}
+
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -64,7 +88,9 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
         CHECK_NULL_VOID(columnInfo);
         CHECK_NULL_VOID(columnInfo->GetParent());
-        columnInfo->GetParent()->BuildColumnWidth();
+        if (!UpdateColumnWidth(node, columnInfo)) {
+            columnInfo->GetParent()->BuildColumnWidth();
+        }
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
 
