@@ -105,6 +105,11 @@ struct DragPointerEvent final : public PointerEvent {
     {
         return displayY;
     }
+
+    void UpdatePressedKeyCodes(std::vector<KeyCode> pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_POINTER_EVENT_H
