@@ -970,7 +970,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
