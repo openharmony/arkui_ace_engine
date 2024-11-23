@@ -19,13 +19,13 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -184,12 +184,13 @@ void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge, con
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, FadingEdgeLength, fadingEdgeLength, frameNode);
 }
 
-void ScrollableModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollableModelNG::SetEdgeEffect(
+    FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

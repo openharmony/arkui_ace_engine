@@ -138,7 +138,8 @@ class ScrollEdgeEffectModifier extends ModifierWithKey<ArkScrollEdgeEffect> {
     if (reset) {
       getUINativeModule().scroll.resetEdgeEffect(node);
     } else {
-      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, this.value.options?.alwaysEnabled,
+        this.value.options?.effectEdge);
     }
   }
 

@@ -65,7 +65,7 @@ void ListModelImpl::SetScrollBar(DisplayMode scrollBar)
     JSViewSetProperty(&V2::ListComponent::SetScrollBar, scrollBar);
 }
 
-void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     JSViewSetProperty(&V2::ListComponent::SetEdgeEffect, edgeEffect);
 }

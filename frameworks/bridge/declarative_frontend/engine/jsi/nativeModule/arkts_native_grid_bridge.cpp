@@ -565,10 +565,13 @@ ArkUINativeModuleValue GridBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_effect = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    Local<JSValueRef> arg_edgeEffectOptions = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    Local<JSValueRef> alwaysEnabledArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    Local<JSValueRef> effectEdgeArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of effectEdge value
 
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
+    bool alwaysEnabled = false;
+    int32_t effectEdge = static_cast<int32_t>(EffectEdge::ALL);
     if (!arg_effect->IsUndefined() && !arg_effect->IsNull()) {
         effect = arg_effect->Int32Value(vm);
     }
@@ -577,13 +580,17 @@ ArkUINativeModuleValue GridBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCa
         effect != static_cast<int32_t>(EdgeEffect::FADE)) {
         effect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-
-    if (arg_edgeEffectOptions->IsNull() || arg_edgeEffectOptions->IsUndefined()) {
-        GetArkUINodeModifiers()->getGridModifier()->setEdgeEffect(nativeNode, effect, false);
-    } else {
-        GetArkUINodeModifiers()->getGridModifier()->setEdgeEffect(
-            nativeNode, effect, arg_edgeEffectOptions->ToBoolean(vm)->Value());
+    if (!alwaysEnabledArg->IsUndefined() && !alwaysEnabledArg->IsNull()) {
+        alwaysEnabled = alwaysEnabledArg->ToBoolean(vm)->Value();
     }
+    if (!effectEdgeArg->IsUndefined() && !effectEdgeArg->IsNull()) {
+        effectEdge = effectEdgeArg->Int32Value(vm);
+    }
+    if (effectEdge < static_cast<int32_t>(EffectEdge::START) || effectEdge > static_cast<int32_t>(EffectEdge::END)) {
+        effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+    }
+
+    GetArkUINodeModifiers()->getGridModifier()->setEdgeEffect(nativeNode, effect, alwaysEnabled, effectEdge);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue GridBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)

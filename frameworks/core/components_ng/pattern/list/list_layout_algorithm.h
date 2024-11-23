@@ -125,6 +125,16 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetCanOverScrollStart(bool canOverScroll)
+    {
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll)
+    {
+        canOverScrollEnd_ = canOverScroll;
+    }
+
     void SetIsSpringEffect(bool isSpringEffect)
     {
         isSpringEffect_ = isSpringEffect;
@@ -560,6 +570,8 @@ private:
     float prevContentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
     bool canOverScroll_ = false;
     bool isSpringEffect_ = false;
     bool forwardFeature_ = false;

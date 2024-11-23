@@ -373,7 +373,8 @@ class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
     if (reset) {
       getUINativeModule().grid.resetEdgeEffect(node);
     } else {
-      getUINativeModule().grid.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().grid.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled,
+        this.value.options?.effectEdge);
     }
   }
 

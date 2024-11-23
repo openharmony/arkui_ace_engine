@@ -347,10 +347,13 @@ ArkUINativeModuleValue WaterFlowBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> argEdgeEffect = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> argEdgeEffectOptions = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> alwaysEnabledArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> effectEdgeArg = runtimeCallInfo->GetCallArgRef(NUM_3);
 
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
+    bool alwaysEnabled = false;
+    int32_t effectEdge = static_cast<int32_t>(EffectEdge::ALL);
     if (!argEdgeEffect->IsUndefined() && !argEdgeEffect->IsNull()) {
         effect = argEdgeEffect->Int32Value(vm);
     }
@@ -359,13 +362,16 @@ ArkUINativeModuleValue WaterFlowBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runt
         effect != static_cast<int32_t>(EdgeEffect::FADE)) {
         effect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-
-    if (argEdgeEffectOptions->IsNull() || argEdgeEffectOptions->IsUndefined()) {
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setEdgeEffect(nativeNode, effect, false);
-    } else {
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setEdgeEffect(
-            nativeNode, effect, argEdgeEffectOptions->ToBoolean(vm)->Value());
+    if (!alwaysEnabledArg->IsUndefined() && !alwaysEnabledArg->IsNull()) {
+        alwaysEnabled = alwaysEnabledArg->ToBoolean(vm)->Value();
     }
+    if (!effectEdgeArg->IsUndefined() && !effectEdgeArg->IsNull()) {
+        effectEdge = effectEdgeArg->Int32Value(vm);
+    }
+    if (effectEdge < static_cast<int32_t>(EffectEdge::START) || effectEdge > static_cast<int32_t>(EffectEdge::END)) {
+        effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+    }
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setEdgeEffect(nativeNode, effect, alwaysEnabled, effectEdge);
     return panda::JSValueRef::Undefined(vm);
 }
 

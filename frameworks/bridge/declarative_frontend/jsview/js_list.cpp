@@ -164,14 +164,16 @@ void JSList::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 void JSList::SetEdgeEffect(const JSCallbackInfo& info)
 {
     auto edgeEffect = EdgeEffect::SPRING;
+    auto effectEdge = EffectEdge::ALL;
     if (info.Length() > 0) {
         edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::SPRING);
     }
     auto alwaysEnabled = false;
     if (info.Length() > 1) {
         alwaysEnabled = JSScrollable::ParseAlwaysEnable(info[1], false);
+        effectEdge = JSScrollable::ParseEffectEdge(info[1]);
     }
-    ListModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ListModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
 void JSList::SetEditMode(bool editMode)

@@ -338,17 +338,6 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-    bool CanOverScroll(int32_t source) override
-    {
-        auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_) &&
-            (IsAtBottom() || IsAtTop()));
-        if (canOverScroll != lastCanOverScroll_) {
-            lastCanOverScroll_ = canOverScroll;
-            AddScrollableFrameInfo(source);
-        }
-        return canOverScroll;
-    }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
