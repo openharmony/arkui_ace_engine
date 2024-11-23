@@ -20,6 +20,9 @@ import I18n from '@ohos.i18n';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
+const DEFAULT_MAX_FONT_SCALE: number = 1
+const MAX_MAX_FONT_SCALE: number = 2
+const MIN_MAX_FONT_SCALE: number = 1
 
 interface SegmentButtonThemeInterface {
   FONT_COLOR: ResourceColor,
@@ -484,6 +487,7 @@ struct MultiSelectItemArray {
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
   @Link focusIndex: number
+  @Prop @Require maxFontScale: number | Resource
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
@@ -561,6 +565,7 @@ struct SegmentButtonItem {
           .fontSize(this.property.fontSize)
           .minFontSize(9)
           .maxFontSize(this.property.fontSize)
+          .maxFontScale(this.maxFontScale)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
@@ -617,6 +622,7 @@ struct SegmentButtonItemArrayComponent {
   @Link pressArray: boolean[]
   @Link hoverArray: boolean[]
   @Link hoverColorArray: HoverColorProperty[]
+  @Prop @Require maxFontScale: number | Resource
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
@@ -815,7 +821,8 @@ struct SegmentButtonItemArrayComponent {
                 itemOptions: item,
                 options: this.options,
                 property: this.buttonItemProperty[index],
-                groupId: this.groupId
+                groupId: this.groupId,
+                maxFontScale: this.maxFontScale
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -952,6 +959,7 @@ export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
+  @Prop maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
   @Provide componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
@@ -1174,6 +1182,7 @@ export struct SegmentButton {
           optionsArray: this.options.buttons,
           options: this.options,
           selectedIndexes: $selectedIndexes,
+          maxFontScale: this.getMaxFontSize()
         })
       }
     }
@@ -1372,6 +1381,25 @@ export struct SegmentButton {
     )
   }
 
+  getMaxFontSize(): number {
+    if (typeof this.maxFontScale === void 0) {
+      return DEFAULT_MAX_FONT_SCALE;
+    }
+    if (typeof this.maxFontScale === 'number') {
+      return Math.max(Math.min(this.maxFontScale, MAX_MAX_FONT_SCALE), MIN_MAX_FONT_SCALE);
+    }
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      return DEFAULT_MAX_FONT_SCALE;
+    }
+    try {
+      return resourceManager.getNumber(this.maxFontScale.id);
+    } catch (error) {
+      console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
+      return DEFAULT_MAX_FONT_SCALE;
+    }
+  }
+  
   getSelectedChangeCurve(): ICurve | null {
     if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
       return null
