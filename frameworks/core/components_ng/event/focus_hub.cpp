@@ -831,13 +831,9 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         return false;
     }
 
-    auto node = GetFrameNode();
-    CHECK_NULL_RETURN(node, false);
-    auto* pipeline = node->GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
     auto info = KeyEventInfo(keyEvent);
-    if (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) ||
-        pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT)) {
+    if (keyEvent.HasKey(KeyCode::KEY_META_LEFT) ||
+        keyEvent.HasKey(KeyCode::KEY_META_RIGHT)) {
         info.SetMetaKey(1);
     }
     if (keyEvent.isPreIme) {
