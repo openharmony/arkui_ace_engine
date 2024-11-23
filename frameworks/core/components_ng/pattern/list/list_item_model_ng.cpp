@@ -257,4 +257,28 @@ void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& sel
     eventHub->SetOnSelect(std::move(selectCallback));
 }
 
+void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node)
+{
+    if (!node) {
+        node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pattern = node->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (isStartArea) {
+        pattern->SetStartNode(builderComponent);
+        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
+            std::move(onStateChange), isStartArea);
+        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
+    } else {
+        pattern->SetEndNode(builderComponent);
+        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
+            std::move(onStateChange), isStartArea);
+        ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
+    }
+}
 } // namespace OHOS::Ace::NG

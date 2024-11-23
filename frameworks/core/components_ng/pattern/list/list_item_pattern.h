@@ -287,6 +287,7 @@ private:
     bool hasEndDeleteArea_ = false;
     bool inStartDeleteArea_ = false;
     bool inEndDeleteArea_ = false;
+    bool curOffsetSwipeChanged_ = false;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;

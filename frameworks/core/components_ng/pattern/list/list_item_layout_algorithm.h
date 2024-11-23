@@ -34,6 +34,8 @@ public:
 
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper) const;
 
+    void SetSwipeActionNode(LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset);
+
     void SetAxis(Axis axis)
     {
         axis_ = axis;
@@ -64,6 +66,11 @@ public:
         return endNodeSize_;
     }
 
+    float GetCurOffset() const
+    {
+        return curOffset_;
+    }
+
     void SetIndexInList(int32_t index)
     {
         indexInList_ = index;
@@ -89,6 +96,16 @@ public:
         hasStartDeleteArea_ = hasStartDeleteArea;
     }
 
+    void SetCurOffsetSwipeChanged(bool curOffsetSwipeChanged)
+    {
+        curOffsetSwipeChanged_ = curOffsetSwipeChanged;
+    }
+
+    bool GetCurOffsetSwipeChanged() const
+    {
+        return curOffsetSwipeChanged_;
+    }
+
     void SetHasEndDeleteArea(bool hasEndDeleteArea)
     {
         hasEndDeleteArea_ = hasEndDeleteArea;
@@ -110,7 +127,7 @@ private:
     float endNodeSize_ = 0.0f;
     bool hasStartDeleteArea_ = false;
     bool hasEndDeleteArea_ = false;
-
+    bool curOffsetSwipeChanged_ = false;
     Axis axis_ = Axis::VERTICAL;
 };
 } // namespace OHOS::Ace::NG
