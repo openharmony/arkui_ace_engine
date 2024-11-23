@@ -467,11 +467,11 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(pattern);
     if (!IsAllowedDrag(eventHub)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "FrameNode is not allow drag, tag is %{public}s, id is %{private}s,"
+            "FrameNode is not allow drag, tag is %{public}s"
             "draggable is %{public}d, drag start event is %{public}d,"
             "default support drag is %{public}d, user set is %{public}d.",
-            frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), frameNode->IsDraggable(),
-            eventHub->HasOnDragStart(), pattern->DefaultSupportDrag(), frameNode->IsUserSet());
+            frameNode->GetTag().c_str(), frameNode->IsDraggable(), eventHub->HasOnDragStart(),
+            pattern->DefaultSupportDrag(), frameNode->IsUserSet());
         HandleNotallowDrag(info);
         return;
     }
@@ -777,13 +777,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
-        "Start drag, frameNode is %{public}s, id is %{private}s, pixelMap width %{public}d height %{public}d, "
+        "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s.",
-        frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), width, height, scale,
-        DragDropFuncWrapper::GetAnonyString(udKey).c_str(), recordsSize,
-        static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(), info.GetTargetDisplayId(), windowId,
-        summarys.c_str());
+        frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
+        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(), info.GetTargetDisplayId(),
+        windowId, summarys.c_str());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
@@ -1229,8 +1228,8 @@ void GestureEventHub::PrintIfImageNode(
         hasImageNode = true;
         imageNodes.push_back(frameNode);
         TAG_LOGI(AceLogTag::ACE_DRAG,
-            "customNode has ImageNode, nodeId: %{public}d, syncLoad: %{public}d, decode complete: %{public}d",
-            frameNode->GetId(), pattern->GetSyncLoad(), pattern->GetCanvasImage() != nullptr);
+            "customNode has ImageNode, syncLoad: %{public}d, decode complete: %{public}d",
+            pattern->GetSyncLoad(), pattern->GetCanvasImage() != nullptr);
     }
 
     auto children = builderNode->GetChildren();
@@ -1249,8 +1248,7 @@ void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
         auto pattern = imageNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         if (!pattern->GetCanvasImage()) {
-            TAG_LOGW(
-                AceLogTag::ACE_DRAG, "ImageNode did not complete decoding, nodeId: %{public}d", imageNode->GetId());
+            TAG_LOGW(AceLogTag::ACE_DRAG, "ImageNode did not complete decoding");
         }
     }
 }
