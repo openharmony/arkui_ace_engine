@@ -56,6 +56,9 @@ void DimensionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
+    Dimension width = Dimension(100);
+    Dimension height = Dimension(200);
+    FormModelNG::SetSize(frameNode, width, height);
     //FormComponentModelNG::SetDimension(frameNode, convValue);
 }
 void AllowUpdateImpl(Ark_NativePointer node,

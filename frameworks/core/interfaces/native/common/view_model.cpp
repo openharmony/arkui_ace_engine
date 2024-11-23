@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
+#include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
@@ -682,7 +683,10 @@ void* createFolderStackNode(ArkUI_Int32 nodeId)
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = FormModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createFormLinkNode(ArkUI_Int32 nodeId)
