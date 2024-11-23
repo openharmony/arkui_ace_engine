@@ -803,10 +803,15 @@ void BubblePaintMethod::InitEdgeSize(Edge& edge)
 
 void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
 {
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameNodeSize = geometryNode->GetFrameSize();
+    CHECK_NULL_VOID(frameNodeSize.IsPositive());
     auto path = AceType::MakeRefPtr<Path>();
     path->SetValue(clipPath_);
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipShape(path);
 }
 
