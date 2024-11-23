@@ -228,7 +228,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     auto expandableArea = layoutWrapper->GetOrCreateChildByIndex(EXPANDABLE_AREA_VIEW_INDEX);
     if (expandableArea) {
         expandableArea->Measure(childConstraint);
-        expandableHeight = expandableArea->GetGeometryNode()->GetMarginFrameSize().Height();
+        expandableHeight = std::max(expandableArea->GetGeometryNode()->GetMarginFrameSize().Height(), 0.0f);
     }
 
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);

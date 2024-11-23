@@ -394,8 +394,6 @@ void MenuPattern::UpdateSelectIndex(int32_t index)
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
-    RecordItemsAndGroups();
-
     // determine menu type based on sibling menu count
     auto count = FindSiblingMenuCount();
     if (count > 0) {
