@@ -53,6 +53,9 @@ private:
         /* With irregular items, mainLineIndex can't be determined by simple calculation. */
     }
 
+    void FillOneLineForwardWithoutUpdatingStartIndex(
+        float crossSize, float mainSize, LayoutWrapper* layoutWrapper) override
+    {}
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
