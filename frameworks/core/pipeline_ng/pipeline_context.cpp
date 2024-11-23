@@ -839,6 +839,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         LOGW("Cannot flush vsync as the pipeline context is destroyed.");
         return;
     }
+    SetVsyncTime(nanoTimestamp);
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
         static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
@@ -861,7 +862,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp);
-    SetVsyncTime(nanoTimestamp);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushDragEvents();
