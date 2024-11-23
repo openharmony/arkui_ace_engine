@@ -196,19 +196,6 @@ void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, visible, frameNode);
 }
 
-void FormModelNG::AllowUpdate(FrameNode* frameNode, bool allowUpdate)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    if (!property->HasRequestFormInfo()) {
-        return;
-    }
-    auto formInfo = property->GetRequestFormInfoValue();
-    formInfo.allowUpdate = allowUpdate;
-    property->UpdateRequestFormInfo(formInfo);
-}
-
 void FormModelNG::SetDimension(FrameNode* frameNode, int32_t dimension)
 {
     CHECK_NULL_VOID(frameNode);

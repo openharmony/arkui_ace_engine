@@ -43,6 +43,7 @@ ace_unittest("capi_all_modifiers_test") {
     "date_picker_modifier_test.cpp",
     "divider_modifier_test.cpp",
     "folder_stack_modifier_test.cpp",
+    "form_component_modifier_test.cpp",
     "form_link_modifier_test.cpp",
     "gauge_modifier_test.cpp",
     "grid_col_modifier_test.cpp",

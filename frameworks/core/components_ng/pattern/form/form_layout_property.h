@@ -47,6 +47,17 @@ public:
         ResetVisibleType();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        auto formInfo = GetRequestFormInfoValue(RequestFormInfo());
+        json->PutExtAttr("allowUpdate", formInfo.allowUpdate ? "true" : "false", filter);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(VisibleType, VisibleType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RequestFormInfo, RequestFormInfo, PROPERTY_UPDATE_MEASURE);
 };

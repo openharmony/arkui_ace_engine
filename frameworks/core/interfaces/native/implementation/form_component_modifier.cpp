@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -63,7 +64,7 @@ void AllowUpdateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //FormComponentModelNG::SetAllowUpdate(frameNode, convValue);
+    FormModelNG::AllowUpdate(frameNode, convValue);
 }
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)
