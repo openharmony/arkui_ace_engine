@@ -275,7 +275,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     spanTextStyle.SetTextBackgroundStyle(backgroundStyle);
-    if (!fontStyle->HasTextColor() && urlOnRelease) {
+    if (fontStyle && !fontStyle->HasTextColor() && urlOnRelease) {
         auto urlSpanColor = pattern->GetUrlSpanColor();
         spanTextStyle.SetTextColor(urlSpanColor);
         UpdateTextStyle(spanContent, builder, spanTextStyle, selectedStart, selectedEnd);
