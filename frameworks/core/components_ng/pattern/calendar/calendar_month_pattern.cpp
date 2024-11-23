@@ -457,6 +457,7 @@ void CalendarMonthPattern::InitializeCalendarAccessibility()
         margin_ = theme->GetDialogMargin().ConvertToPx();
         selectedTxt_ = sliderTheme->GetSelectedTxt();
         disabledDesc_ = sliderTheme->GetDisabelDesc();
+        deviceOrientation_ = SystemProperties::GetDeviceOrientation();
     }
 }
 
