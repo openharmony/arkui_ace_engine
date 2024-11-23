@@ -355,6 +355,24 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
+void GestureEventHub:: ProcessMenuPreviewScale(
+    const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale)
+{
+    auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(imageGestureEventHub);
+    if (!IsPixelMapNeedScale()) {
+        if (CheckInSceneBoardWindow()) {
+            imageGestureEventHub->SetMenuPreviewScale(defaultMenuPreviewScale);
+        } else {
+            //if not in sceneboard,use default drag scale
+            scale = defaultDragScale;
+            imageGestureEventHub->SetMenuPreviewScale(defaultDragScale);
+        }
+    } else {
+        imageGestureEventHub->SetMenuPreviewScale(scale);
+    }
+}
+
 RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
 {
     ACE_SCOPED_TRACE("drag: get scaled pixmal, %f", targetScale);
@@ -712,20 +730,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
-            auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(imageGestureEventHub);
-            if (!IsPixelMapNeedScale()) {
-                imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
-                if (CheckInSceneBoardWindow()) {
-                    imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
-                } else {
-                    //if not in sceneboard,use default drag scale
-                    scale = previewScale * windowScale;
-                    imageGestureEventHub->SetMenuPreviewScale(scale);
-                }
-            } else {
-                imageGestureEventHub->SetMenuPreviewScale(scale);
-            }
+            ProcessMenuPreviewScale(imageNode, scale,previewScale * windowScale, defaultPixelMapScale);
         }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
