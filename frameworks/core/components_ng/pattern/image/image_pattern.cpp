@@ -729,7 +729,7 @@ void ImagePattern::LoadImage(
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{public}s", imageDfxConfig_.ToStringWithSrc().c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{private}s", imageDfxConfig_.ToStringWithSrc().c_str());
     }
 
     if (onProgressCallback_) {
@@ -1702,6 +1702,8 @@ void ImagePattern::OnIconConfigurationUpdate()
 
 void ImagePattern::OnConfigurationUpdate()
 {
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnConfigurationUpdate, %{public}s-%{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), loadingCtx_ ? 1 : 0);
     CHECK_NULL_VOID(loadingCtx_);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
