@@ -52,7 +52,12 @@ void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto formPattern = frameNode->GetPattern<FormPattern>();
     CHECK_NULL_VOID(formPattern);
+
     auto isLoaded = formPattern->GetIsLoaded();
+    
+    std::printf("model: is_loaded: %d\n", isLoaded);
+
+    
     auto layoutProperty = frameNode->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (isLoaded || visible != VisibleType::VISIBLE) {
@@ -90,5 +95,16 @@ void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleN
     property->UpdateRequestFormInfo(formInfo);
 }
 
-void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
+void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (!property->HasRequestFormInfo()) {
+        return;
+    }
+    auto formInfo = property->GetRequestFormInfoValue();
+    formInfo.width = width;
+    formInfo.height = height;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo, frameNode);
+}
 } // namespace OHOS::Ace::NG

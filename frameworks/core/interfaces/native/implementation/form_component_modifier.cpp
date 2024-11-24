@@ -79,6 +79,10 @@ void SizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto dimension = Converter::Convert<LiteralDimension>(*value);
+
+    std::printf("============ modifier: size: %s, %s\n", dimension.width.ToString().c_str(), dimension.height.ToString().c_str());
+    std::printf("============ modifier: size: %.2f, %.2f\n", dimension.width.Value(), dimension.height.Value());
+    std::printf("============ modifier: size: %d, %d\n", dimension.width.Unit(), dimension.height.Unit());
     FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
 }
 void ModuleNameImpl(Ark_NativePointer node,
@@ -96,7 +100,10 @@ void DimensionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto opt = Converter::OptConvert<int32_t>(value);
+    std::printf("============ modifier: opt: %d, %d\n", opt.has_value(), *opt);
+    
     CHECK_NULL_VOID(opt);
+    std::printf("============ modifier2: opt: %d, %d\n", opt.has_value(), *opt);
     FormModelNG::SetDimension(frameNode, *opt);
 }
 void AllowUpdateImpl(Ark_NativePointer node,
@@ -113,7 +120,25 @@ void VisibilityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto opt = Converter::OptConvert<VisibleType>(value);
+    std::printf("====== modifier: visibility 1");
     CHECK_NULL_VOID(opt);
+    std::printf("====== modifier: visibility 2");
+    std::string v;
+    if(*opt == VisibleType::VISIBLE) {
+        v = "Layout.Visibile (Visibile)";
+    }
+    else if(*opt == VisibleType::INVISIBLE){
+         v = "Layout.Hidden (Invisible)";
+    }
+    else if(*opt == VisibleType::GONE) {
+        v = "Layout.None (Gone)";
+    }
+    else {
+        v = "Layout.Uknown 3..N";
+    }
+    
+    std::printf("====== modifier: visibility 3: %s\n", v.c_str());
+ 
     FormModelNG::SetVisibility(frameNode, *opt);
 }
 void OnAcquiredImpl(Ark_NativePointer node,

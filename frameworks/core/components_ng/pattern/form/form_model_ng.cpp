@@ -57,7 +57,20 @@ void FormModelNG::SetDimension(int32_t dimension)
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
 }
 
-void FormModelNG::SetSize(const Dimension& width, const Dimension& height) {}
+void FormModelNG::SetSize(const Dimension& width, const Dimension& height) {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (!property->HasRequestFormInfo()) {
+        return;
+    }
+    auto formInfo = property->GetRequestFormInfoValue();
+    formInfo.width = width;
+    formInfo.height = height;
+    property->UpdateRequestFormInfo(formInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
+}
 
 void FormModelNG::AllowUpdate(bool allowUpdate)
 {
@@ -71,6 +84,8 @@ void FormModelNG::AllowUpdate(bool allowUpdate)
     auto formInfo = property->GetRequestFormInfoValue();
     formInfo.allowUpdate = allowUpdate;
     property->UpdateRequestFormInfo(formInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
+}
 }
 
 void FormModelNG::SetVisible(VisibleType visible)
