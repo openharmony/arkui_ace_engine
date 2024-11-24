@@ -355,7 +355,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-void GestureEventHub:: ProcessMenuPreviewScale(
+void GestureEventHub::ProcessMenuPreviewScale(
     const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale)
 {
     auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
@@ -730,7 +730,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
-            ProcessMenuPreviewScale(imageNode, scale,previewScale * windowScale, defaultPixelMapScale);
+            ProcessMenuPreviewScale(imageNode, scale, previewScale * windowScale, defaultPixelMapScale);
         }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
