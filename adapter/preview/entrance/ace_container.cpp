@@ -507,7 +507,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
+UIContentErrorCode AceContainer::RunPage(
+    int32_t instanceId, const std::string& url, const std::string& params, bool isNamedRouter)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -517,14 +518,16 @@ UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& 
 
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
-        auto type = front->GetType();
-        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
-            (type == FrontendType::ETS_CARD)) {
-            return front->RunPage(url, params);
-        } else {
-            LOGE("Frontend type not supported when runpage");
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    auto type = front->GetType();
+    if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
+        (type == FrontendType::ETS_CARD)) {
+        if (isNamedRouter) {
+            return front->RunPageByNamedRouter(url, params);
         }
+        return front->RunPage(url, params);
+    } else {
+        LOGE("Frontend type not supported when runpage");
     }
     return UIContentErrorCode::NULL_POINTER;
 }
