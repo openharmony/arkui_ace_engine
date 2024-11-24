@@ -157,6 +157,8 @@
       OHOS::Ace::ScrollBarModel::*;
       OHOS::Ace::SearchModel::*;
       OHOS::Ace::SelectModel::*;
+      OHOS::Ace::Shadow::*;
+      OHOS::Ace::ShadowStyle::*;
       OHOS::Ace::ShapeModel::*;
       OHOS::Ace::SideBarContainerModel::*;
       OHOS::Ace::SliderModel::*;
