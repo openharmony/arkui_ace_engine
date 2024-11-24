@@ -91,8 +91,8 @@ HWTEST_F(WebLayoutAlgorithmTest, MeasureTest001, TestSize.Level1)
     auto webLayoutAlgorithm = AceType::DynamicCast<WebLayoutAlgorithm>(webPattern->CreateLayoutAlgorithm());
     EXPECT_NE(webLayoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, 
-                                                                frameNode->GetLayoutProperty());
+    auto layoutWrapper = 
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
