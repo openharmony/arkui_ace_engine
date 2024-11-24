@@ -261,7 +261,7 @@ std::pair<bool, bool> FocusView::HandleDefaultFocusNode(
 
 bool FocusView::RequestDefaultFocus()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
         GetFrameId());
     auto focusViewHub = GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, false);
