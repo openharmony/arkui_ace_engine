@@ -187,6 +187,7 @@ public:
     virtual bool IsToastSubWindow() = 0;
     virtual void DestroyWindow() = 0;
     virtual void ResizeDialogSubwindow() = 0;
+    virtual uint64_t GetDisplayId() = 0;
 
 private:
     int32_t subwindowId_ = 0;

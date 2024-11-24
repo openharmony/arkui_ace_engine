@@ -625,6 +625,15 @@ public:
         return false;
     }
 
+    void SetCurrentDisplayId(uint64_t displayId)
+    {
+        currentDisplayId_ = displayId;
+    }
+
+    uint64_t GetCurrentDisplayId() const
+    {
+        return currentDisplayId_;
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
@@ -659,6 +668,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
+    uint64_t currentDisplayId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

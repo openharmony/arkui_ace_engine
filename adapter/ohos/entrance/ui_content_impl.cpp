@@ -121,6 +121,7 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
+constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -2102,10 +2103,16 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     auto& DMManager = Rosen::DisplayManager::GetInstance();
+    auto window = container->GetUIWindow(instanceId_);
+    int32_t displayId = 0;
+    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
+        displayId = window->GetDisplayId();
+        listenedDisplayId_ = displayId;
+    }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
-    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_);
+    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);
     Rosen::DMRect availableArea;
-    auto defaultDisplay = DMManager.GetDefaultDisplay();
+    auto defaultDisplay = DMManager.GetDisplayById(displayId);
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
         if (ret == Rosen::DMError::DM_OK) {
@@ -2231,7 +2238,7 @@ void UIContentImpl::UnregisterDisplayManagerCallback()
         foldDisplayModeListener_ = nullptr;
     }
     if (availableAreaChangedListener_) {
-        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_);
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
         availableAreaChangedListener_ = nullptr;
     }
 }
@@ -2530,6 +2537,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (window_ && window_->GetDisplayId() != DISPLAY_ID_INVALID) {
+        container->SetCurrentDisplayId(window_->GetDisplayId());
+    }
     if (container->IsSubContainer()) {
         auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
         SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
