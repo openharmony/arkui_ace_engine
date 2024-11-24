@@ -628,12 +628,15 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
     pushPath(l7, m7, n7) {
         hilog.info(0x0000, 'MultiNavigation', 'pushPath policy = ' + n7 + ', info.name = ' + l7.name);
         let o7 = true;
-        if (m7 !== undefined && typeof m7 !== 'boolean') {
-            hilog.warn(0x0000, 'MultiNavigation', 'pushPath do not support NavigationOptions now');
-            return;
-        }
-        if (typeof m7 === 'boolean') {
-            o7 = m7;
+        if (m7 !== undefined) {
+            if (typeof m7 === 'boolean') {
+                o7 = m7;
+            }
+            else if (m7.animated !== undefined) {
+                o7 = m7.animated;
+            }
+            else {
+            }
         }
         n7 = (n7 === undefined) ? SplitPolicy.DETAIL_PAGE : n7;
         const p7 = this.subStackList.length;
@@ -730,12 +733,15 @@ let MultiNavPathStack = class MultiNavPathStack extends NavPathStack {
     }
     replacePath(p6, q6) {
         let r6 = true;
-        if (q6 !== undefined && typeof q6 !== 'boolean') {
-            hilog.warn(0x0000, 'MultiNavigation', 'replacePath do not support NavigationOptions now');
-            return;
-        }
-        if (typeof q6 === 'boolean') {
-            r6 = q6;
+        if (q6 !== undefined) {
+            if (typeof q6 === 'boolean') {
+                r6 = q6;
+            }
+            else if (q6.animated !== undefined) {
+                r6 = q6.animated;
+            }
+            else {
+            }
         }
         let s6 = this.totalStack.length;
         let t6 = this.subStackList.length;

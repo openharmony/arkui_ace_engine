@@ -468,12 +468,14 @@ export class MultiNavPathStack extends NavPathStack {
   pushPath(info: NavPathInfo, optionParam?: boolean | NavigationOptions, policy?: SplitPolicy): void {
     hilog.info(0x0000, 'MultiNavigation', 'pushPath policy = ' + policy + ', info.name = ' + info.name);
     let animated: boolean = true;
-    if (optionParam !== undefined && typeof optionParam !== 'boolean') {
-      hilog.warn(0x0000, 'MultiNavigation', 'pushPath do not support NavigationOptions now');
-      return;
-    }
-    if (typeof optionParam === 'boolean') {
-      animated = optionParam;
+    if (optionParam !== undefined) {
+      if (typeof optionParam === 'boolean') {
+        animated = optionParam;
+      } else if (optionParam.animated !== undefined) {
+        animated = optionParam.animated;
+      } else {
+
+      }
     }
     policy = (policy === undefined) ? SplitPolicy.DETAIL_PAGE : policy;
     const subStackLength = this.subStackList.length;
@@ -585,12 +587,14 @@ export class MultiNavPathStack extends NavPathStack {
   replacePath(info: NavPathInfo, options?: NavigationOptions): void;
   replacePath(info: NavPathInfo, optionParam?: boolean | NavigationOptions): void {
     let animated: boolean = true;
-    if (optionParam !== undefined && typeof optionParam !== 'boolean') {
-      hilog.warn(0x0000, 'MultiNavigation', 'replacePath do not support NavigationOptions now');
-      return;
-    }
-    if (typeof optionParam === 'boolean') {
-      animated = optionParam;
+    if (optionParam !== undefined) {
+      if (typeof optionParam === 'boolean') {
+        animated = optionParam;
+      } else if (optionParam.animated !== undefined) {
+        animated = optionParam.animated;
+      } else {
+
+      }
     }
 
     let totalSize = this.totalStack.length;
