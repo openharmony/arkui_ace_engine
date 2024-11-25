@@ -1315,7 +1315,9 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::SELF) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
-        GetFocusManager()->FocusSwitchingEnd(SwitchingEndReason::DEPENDENCE_SELF);
+        auto focusManager = GetFocusManager();
+        CHECK_NULL_VOID(focusManager);
+        focusManager->FocusSwitchingEnd(SwitchingEndReason::DEPENDENCE_SELF);
         return;
     }
 
@@ -1329,7 +1331,9 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::AUTO && !isAnyChildFocusable) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
-        GetFocusManager()->FocusSwitchingEnd(SwitchingEndReason::NO_FOCUSABLE_CHILD);
+        auto focusManager = GetFocusManager();
+        CHECK_NULL_VOID(focusManager);
+        focusManager->FocusSwitchingEnd(SwitchingEndReason::NO_FOCUSABLE_CHILD);
         return;
     }
 
