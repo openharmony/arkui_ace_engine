@@ -64,6 +64,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     SetTabBarPosition(barPosition);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
+    if (tabsLayoutProperty->GetIndex().has_value()) {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == index || index < 0) {
+            return;
+        }
+    }
     tabsLayoutProperty->UpdateIndexSetByUser(index);
 }
 
