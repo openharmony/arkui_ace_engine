@@ -257,7 +257,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key,
     child->OnRecycle();
 }
 
-bool RepeatVirtualScrollCaches::hasTTypeChanged(uint32_t index)
+bool RepeatVirtualScrollCaches::CheckTTypeChanged(uint32_t index)
 {
     std::string oldTType;
     if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
