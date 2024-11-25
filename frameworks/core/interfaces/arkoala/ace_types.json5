@@ -2267,7 +2267,6 @@
                 "setImageOptions2TestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setAltTestAltValidValues", // No fixture is defined for type Ark_CustomObject
                 "setAltTestAltInvalidValues", // No fixture is defined for type Ark_CustomObject
-                "setAutoResizeTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine

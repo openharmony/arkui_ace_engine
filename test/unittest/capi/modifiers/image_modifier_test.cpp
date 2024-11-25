@@ -132,7 +132,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
  * Disabled because the default value should be false, but the returned value is true.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setAutoResizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
