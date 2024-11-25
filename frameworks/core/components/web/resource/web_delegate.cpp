@@ -1390,6 +1390,13 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
     return result;
 }
 
+bool WebDelegate::IsCurrentFocus()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->IsCurrentFocus();
+}
+
 void WebDelegate::SearchAllAsync(const std::string& searchStr)
 {
     auto context = context_.Upgrade();
