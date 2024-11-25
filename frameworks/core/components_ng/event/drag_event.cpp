@@ -1534,8 +1534,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     } else {
         manager->MountEventToRootNode(columnNode);
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success. depth %{public}d, id %{public}d.",
-        columnNode->GetDepth(), columnNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success.");
 }
 
 void DragEventActuator::HideFilter()
