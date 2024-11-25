@@ -75,13 +75,7 @@ public:
         : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
     {}
 
-    ~ScrollablePattern()
-    {
-        UnRegister2DragDropManager();
-        if (scrollBarProxy_) {
-            scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
-        }
-    }
+    ~ScrollablePattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -154,6 +148,13 @@ public:
     {
         return scrollableEvent_;
     }
+
+    RefPtr<Scrollable> GetScrollable()
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, nullptr);
+        return scrollableEvent_->GetScrollable();
+    }
+
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
