@@ -754,7 +754,7 @@ HWTEST_F(ImageModifierTest, setObjectRepeatTestObjectRepeatInvalidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setAutoResizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
