@@ -371,7 +371,9 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navigation, false);
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
+        CHECK_NULL_RETURN(navigationLayoutProperty, false);
         auto pattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+        CHECK_NULL_RETURN(pattern, false);
         auto stack = pattern->GetNavigationStack();
         CHECK_NULL_RETURN(stack, false);
         if (navigationLayoutProperty->GetHideNavBarValue(false) && stack->GetSize() <= 1) {
