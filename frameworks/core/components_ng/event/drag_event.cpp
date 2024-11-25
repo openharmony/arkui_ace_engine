@@ -1224,7 +1224,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(columnNode);
     }
-    FlushSyncGeometryNodeTasks();
+    if (!isDragPixelMap) {
+        FlushSyncGeometryNodeTasks();
+    }
 }
 
 /* Retrieves a preview PixelMap for a given drag event action.
@@ -2068,7 +2070,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
         width = pixelMap->GetWidth();
         height = pixelMap->GetHeight();
     }
-    auto offset = GetFloatImageOffset(frameNode, pixelMap);
+    auto offset = frameNode->GetPositionToWindowWithTransform();
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     
@@ -2096,7 +2098,8 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
+    gatherNodeChildInfo = { imageNode, DragDropFuncWrapper::GetFrameNodeOffsetToScreen(frameNode),
+        width, height, width / 2.0f, height / 2.0f };
     return imageNode;
 }
 
@@ -2136,6 +2139,14 @@ void DragEventActuator::ResetNode(const RefPtr<FrameNode>& frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
+void DragEventActuator::InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+{
+    for (auto childInfo : gatherNodeChildrenInfo) {
+        auto imageNode = childInfo.imageNode.Upgrade();
+        DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, childInfo.offset);
     }
 }
 

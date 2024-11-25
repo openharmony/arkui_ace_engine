@@ -680,7 +680,7 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
             if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
                 return false;
             }
-            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenter(previewChild);
+            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(previewChild);
             offset.SetX(previewOffset.GetX());
             offset.SetY(previewOffset.GetY());
             return true;
@@ -6502,10 +6502,9 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
             for (auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
                 CHECK_NULL_VOID(imageNode);
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, child.offset);
                 auto imageContext = imageNode->GetRenderContext();
                 CHECK_NULL_VOID(imageContext);
-                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(child.offset.GetX()),
-                    Dimension(child.offset.GetY())));
                 imageContext->UpdateTransformScale({ 1.0f, 1.0f });
                 Vector5F rotate = Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
                 imageContext->UpdateTransformRotate(rotate);
