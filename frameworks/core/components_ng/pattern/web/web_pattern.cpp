@@ -2145,6 +2145,10 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
+    
+    if (renderMode_ == RenderMode::SYNC_RENDER) {
+        return true;
+    }
     return false;
 }
 
@@ -2235,7 +2239,9 @@ void WebPattern::OnAreaChangedInner()
             size.Height(), resizeOffset.GetY());
         areaChangeSize_ = size;
         drawSize_ = size;
-        drawSizeCache_ = drawSize_;
+        if (renderMode_ != RenderMode::SYNC_RENDER) {
+            drawSizeCache_ = drawSize_;
+        }
         TAG_LOGD(AceLogTag::ACE_WEB, "Safe area, drawsize_ : %{public}s", drawSize_.ToString().c_str());
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
         IsNeedResizeVisibleViewport();
@@ -3178,9 +3184,17 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     delegate_->ResizeVisibleViewport(visibleViewportSize_, isKeyboard);
 
     if (isUpdate) {
-        rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
-        frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        ACE_SCOPED_TRACE("WebPattern::UpdateWebLayoutSize rect: %s", rect.ToString().c_str());
+        if (renderMode_ == RenderMode::SYNC_RENDER) {
+            CHECK_NULL_VOID(renderSurface_);
+            renderSurface_->SetIsNeedSyncGeometryProperties(true);
+            renderSurface_->SetKeyBoardAvoidRect(rect);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+        } else {
+            rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
+            frameNode->GetRenderContext()->SyncGeometryProperties(rect);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 }
 
@@ -5653,7 +5667,7 @@ void WebPattern::SetRenderMode(RenderMode renderMode)
         return;
     }
     renderMode_ = renderMode;
-    TAG_LOGI(AceLogTag::ACE_WEB, "web renderMode is: %{public}d.", renderMode_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "renderMode is %{public}d", renderMode_);
     isRenderModeInit_ = true;
 }
 
