@@ -809,7 +809,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             }
         });
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 RefPtr<RenderContext> TextPattern::GetRenderContext()
@@ -1980,7 +1980,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
         AddUdmfData(event);
     }
     CloseOperate();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     return itemInfo;
 }
 
@@ -2100,8 +2100,9 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1
+                                       ? PROPERTY_UPDATE_MEASURE_SELF
+                                       : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
@@ -2186,10 +2187,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
             ShowSelectOverlay({ .menuIsShow = false });
         }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->OnPropertyChangeMeasure();
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
@@ -2213,9 +2211,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
             }
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -2710,8 +2706,7 @@ void TextPattern::OnModifyDone()
     selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;
-        textLayoutProperty->OnPropertyChangeMeasure();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -3902,10 +3897,7 @@ void TextPattern::SetTextDetectEnable(bool enable)
     } else {
         dataDetectorAdapter_->CancelAITask();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->OnPropertyChangeMeasure();
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 bool TextPattern::CanStartAITask()
@@ -3946,7 +3938,7 @@ void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType resp
     selectionMenuMap_[key] = selectionMenuParams;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPattern::CloseSelectionMenu()
@@ -4043,10 +4035,7 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
     if (changeSymbolEffect) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        auto layoutProperty = host->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -4173,7 +4162,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     ProcessSpanString();
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
@@ -4298,10 +4287,7 @@ void TextPattern::OnSensitiveStyleChange(bool isSensitive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isSensitive_ = isSensitive;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->OnPropertyChangeMeasure();
+    host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
 }
 
 bool TextPattern::IsSensitiveEnalbe()
