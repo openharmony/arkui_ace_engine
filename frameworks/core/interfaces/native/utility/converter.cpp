@@ -495,6 +495,25 @@ CalcDimension Convert(const Ark_Length& src)
 }
 
 template<>
+CalcDimension Convert(const Ark_String& src)
+{
+    auto str = Convert<std::string>(src);
+    if (!str.empty()) {
+        char firstChar = str[0];
+        if (firstChar < '0' || firstChar > '9') {
+            return CalcDimension(str);
+        }
+    }
+    return Dimension::FromString(str);
+}
+
+template<>
+CalcDimension Convert(const Ark_Number& src)
+{
+    return Convert<Dimension>(src);
+}
+
+template<>
 std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
 {
     return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };

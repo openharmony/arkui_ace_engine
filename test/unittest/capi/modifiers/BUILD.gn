@@ -53,6 +53,7 @@ ace_unittest("capi_all_modifiers_test") {
     "grid_modifier_test.cpp",
     "grid_row_modifier_test.cpp",
     "hyperlink_modifier_test.cpp",
+    "image_animator_modifier_test.cpp",
     "image_modifier_test.cpp",
     "line_modifier_test.cpp",
     "list_item_group_modifier_test.cpp",

@@ -21,6 +21,7 @@ generated_sources = [
   "column_split_modifier_test.cpp",
   "container_span_modifier_test.cpp",
   "grid_row_modifier_test.cpp",
+  "image_animator_modifier_test.cpp",
   "image_modifier_test.cpp",
   "image_span_modifier_test.cpp",
   "progress_modifier_test.cpp",
