@@ -2982,6 +2982,7 @@ void FocusHub::ToJsonValue(
     bool focusOnTouch = false;
     int32_t tabIndex = 0;
     std::unique_ptr<JsonValue> focusBox = nullptr;
+    bool tabStop = false;
     if (hub) {
         enabled = hub->IsEnabled();
         defaultFocus = hub->IsDefaultFocus();
@@ -2989,6 +2990,7 @@ void FocusHub::ToJsonValue(
         focusOnTouch = hub->IsFocusOnTouch().value_or(false);
         tabIndex = hub->GetTabIndex();
         focusBox = FocusBox::ToJsonValue(hub->box_);
+        tabStop = hub->IsTabStop();
     }
     json->PutExtAttr("enabled", enabled, filter);
     json->PutExtAttr("defaultFocus", defaultFocus, filter);
@@ -2996,6 +2998,7 @@ void FocusHub::ToJsonValue(
     json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
     json->PutExtAttr("tabIndex", tabIndex, filter);
     json->PutExtAttr("focusBox", focusBox, filter);
+    json->PutExtAttr("tabStop", tabStop, filter);
 }
 
 bool FocusHub::IsComponentDirectionRtl()
