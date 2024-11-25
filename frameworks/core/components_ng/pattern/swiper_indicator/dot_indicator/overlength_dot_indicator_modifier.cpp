@@ -107,6 +107,11 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     for (size_t i = 0; i < totalCount; ++i) {
+        if (i >= contentProperty.unselectedIndicatorWidth.size() ||
+            i >= contentProperty.unselectedIndicatorHeight.size()) {
+            break;
+        }
+
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         float width = contentProperty.unselectedIndicatorWidth[i];
         float height = contentProperty.unselectedIndicatorHeight[i];
@@ -201,13 +206,13 @@ void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& ma
 }
 
 std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXWithBlack(
-    int32_t index, const LinearVector<float>& itemHalfSizes)
+    size_t index, const LinearVector<float>& itemHalfSizes)
 {
     if (isHorizontalAndRTL_) {
         index = maxDisplayCount_ - 1 - index;
     }
 
-    if (static_cast<size_t>(index) >= animationEndCenterX_.size()) {
+    if (index >= animationEndCenterX_.size()) {
         return std::make_pair(0.0f, 0.0f);
     }
 
@@ -245,7 +250,8 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     newPointOpacity_->Set(0);
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetSelectedIndex_, itemHalfSizes);
+    auto longPointEndCenterX =
+        CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetSelectedIndex_), itemHalfSizes);
     blackPointsAnimEnd_ = false;
     AnimationUtils::StartAnimation(blackPointOption, [&]() {
         vectorBlackPointCenterX_->Set(animationEndCenterX_);
@@ -360,7 +366,7 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
         targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ + 1 : currentSelectedIndex_ - 1;
     }
 
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetIndex, itemHalfSizes);
+    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetIndex), itemHalfSizes);
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
         overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +
