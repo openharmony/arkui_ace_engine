@@ -200,10 +200,11 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
             ResourceManager::GetInstance().UpdateColorMode(localMode);
         }
         themes_.emplace(type, theme);
-    } else {
-        auto theme = builderIter->second(themeConstants_);
-        themes_.emplace(type, theme);
+        return theme;
     }
+    
+    auto theme = builderIter->second(themeConstants_);
+    themes_.emplace(type, theme);
     return theme;
 }
 
