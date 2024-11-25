@@ -5713,81 +5713,6 @@ void ResetFocusScopePriority(ArkUINodeHandle node)
     ViewAbstract::SetFocusScopePriority(frameNode, scopeId, priority);
 }
 
-PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_CEIL_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_CEIL_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_FLOOR_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_FLOOR_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
-{
-    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
-        ret = ConvertCeilPixelRoundPolicy(index);
-    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
-        ret = ConvertFloorPixelRoundPolicy(index);
-    }
-    return static_cast<uint8_t>(ret);
-}
-
-void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    uint8_t value = 0;
-    for (ArkUI_Int32 index = 0; index < length; index++) {
-        value |= ConvertPixelRoundPolicy(values[index], index);
-    }
-    ViewAbstract::SetPixelRound(frameNode, value);
-}
-
-void ResetPixelRound(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
-}
-
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5948,6 +5873,99 @@ ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     g_strValue = accessibilityProperty->GetAccessibilityRole();
     return g_strValue.c_str();
+}
+
+PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_CEIL_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_CEIL_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_FLOOR_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_FLOOR_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+PixelRoundPolicy ConvertNoPixelRoundPolicy(ArkUI_Int32 index)
+{
+    switch (index) {
+        case 0:
+            return PixelRoundPolicy::NO_FORCE_ROUND_START;
+        case 1:
+            return PixelRoundPolicy::NO_FORCE_ROUND_TOP;
+        case 2: // 2:index of end
+            return PixelRoundPolicy::NO_FORCE_ROUND_END;
+        case 3: // 3:index of bottom
+            return PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
+        default:
+            return PixelRoundPolicy::ALL_FORCE_ROUND;
+    }
+}
+
+uint16_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
+{
+    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
+        ret = ConvertCeilPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
+        ret = ConvertFloorPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::NO_FORCE_ROUND) {
+        ret = ConvertNoPixelRoundPolicy(index);
+    }
+    return static_cast<uint16_t>(ret);
+}
+
+void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    uint16_t value = 0;
+    for (ArkUI_Int32 index = 0; index < length; index++) {
+        value |= ConvertPixelRoundPolicy(values[index], index);
+    }
+    ViewAbstract::SetPixelRound(frameNode, value);
+}
+
+void ResetPixelRound(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)

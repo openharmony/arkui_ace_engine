@@ -111,6 +111,10 @@ constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
+constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -3158,7 +3162,7 @@ void RosenRenderContext::RoundToPixelGrid()
     }
 }
 
-void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
+void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
 {
     CHECK_NULL_VOID(rsNode_);
     auto frameNode = GetHost();
@@ -3170,14 +3174,14 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
     float nodeHeight = geometryNode->GetFrameSize().Height();
     float absoluteRight = relativeLeft + nodeWidth;
     float absoluteBottom = relativeTop + nodeHeight;
-    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
     // round node
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
@@ -3263,7 +3267,7 @@ void RosenRenderContext::OnePixelRounding()
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
 }
 
-void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
+void RosenRenderContext::OnePixelRounding(uint16_t flag)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -3276,23 +3280,27 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
     float roundToPixelErrorY = 0.0f;
     float absoluteRight = relativeLeft + nodeWidth;
     float absoluteBottom = relativeTop + nodeHeight;
-    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool noRoundLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool noRoundTop = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool noRoundRight = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool noRoundBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 
-    float nodeLeftI = OnePixelValueRounding(relativeLeft, isRound, ceilLeft, floorLeft);
-    float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
+    float nodeLeftI = OnePixelValueRounding(relativeLeft, !noRoundLeft, ceilLeft, floorLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop, !noRoundTop, ceilTop, floorTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
-    float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
-    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, isRound, ceilRight, floorRight);
+    float nodeWidthI = OnePixelValueRounding(absoluteRight, !noRoundRight, ceilRight, floorRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, !noRoundRight, ceilRight, floorRight);
     roundToPixelErrorX += nodeWidthI - nodeWidth;
     if (roundToPixelErrorX > 0.5f) {
         nodeWidthI -= 1.0f;
@@ -3307,8 +3315,8 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         nodeWidthI = nodeWidthTemp;
     }
 
-    float nodeHeightI = OnePixelValueRounding(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
-    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, isRound, ceilBottom, floorBottom);
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom, !noRoundBottom, ceilBottom, floorBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, !noRoundBottom, ceilBottom, floorBottom);
     roundToPixelErrorY += nodeHeightI - nodeHeight;
     if (roundToPixelErrorY > 0.5f) {
         nodeHeightI -= 1.0f;
@@ -6268,7 +6276,7 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
-void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
+void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6276,14 +6284,13 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (!SystemProperties::GetPixelRoundEnabled()) {
+        //isRound is the switch of pixelRound of lower version
         isRound = false;
+        //flag is the switch of pixelRound of upper version
+        flag = NO_FORCE_ROUND;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (isRound && flag == 0) {
-            OnePixelRounding(); // call OnePixelRounding without param to improve performance
-        } else {
-            OnePixelRounding(isRound, flag);
-        }
+        OnePixelRounding(flag);
     } else {
         if (isRound && flag == 0) {
             RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance

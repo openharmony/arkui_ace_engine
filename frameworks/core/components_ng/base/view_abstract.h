@@ -125,7 +125,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
-    static void SetPixelRound(uint8_t value);
+    static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
@@ -749,7 +749,7 @@ public:
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
-    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
+    static void SetPixelRound(FrameNode* frameNode, uint16_t value);
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);

@@ -61,7 +61,7 @@ public:
         paintRect_ = rect;
     }
 
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
