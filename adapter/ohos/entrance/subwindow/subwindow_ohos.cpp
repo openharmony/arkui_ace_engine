@@ -188,12 +188,13 @@ bool SubwindowOhos::InitContainer()
         bool isAppSubwindow = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+            windowTag = "TOAST_SYSTEM_";
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
             isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
             auto mainWindowId = GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
-            windowTag = "TOPMOST_TOAST_";
+            windowTag = "TOAST_TOPMOST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {

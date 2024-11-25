@@ -226,7 +226,7 @@ std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS:
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
-const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOPMOST_TOAST";
+const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOAST";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
