@@ -172,6 +172,7 @@ ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
+    CHECK_NULL_RETURN(parent, nullptr);
     auto index = -1;
     if (isExpanded) {
         parent->GetAllChildrenWithBuild(false);
