@@ -647,6 +647,7 @@ public:
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
+    bool IsCurrentFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
     {
         customKeyboardBuilder_ = customKeyboardBuilder;

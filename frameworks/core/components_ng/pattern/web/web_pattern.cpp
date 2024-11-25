@@ -6947,6 +6947,18 @@ void WebPattern::RequestFocus()
     WebRequestFocus();
 }
 
+bool WebPattern::IsCurrentFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+
+    return focusHub->IsCurrentFocus();
+}
+
 void WebPattern::OnRebuildFrame()
 {
     auto host = GetHost();
