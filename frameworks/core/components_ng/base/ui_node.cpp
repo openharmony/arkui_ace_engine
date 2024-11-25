@@ -1047,6 +1047,11 @@ PipelineContext* UINode::GetContext() const
     return context;
 }
 
+PipelineContext* UINode::GetAttachedContext() const
+{
+    return context_;
+}
+
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {

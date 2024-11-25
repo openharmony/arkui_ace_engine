@@ -3859,13 +3859,22 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto instanceId = context->GetInstanceId();
-    ContainerScope scope(instanceId);
     if (value) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->RequestFocus();
     } else {
+        auto context = frameNode->GetAttachedContext();
+        if (!context) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS,
+                "Can't find Node %{public}s/%{public}d attachedContext, please check the timing of the function call.",
+                frameNode->GetTag().c_str(), frameNode->GetId());
+            return;
+        }
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->LostFocusToViewRoot();
     }
 }
