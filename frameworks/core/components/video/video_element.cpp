@@ -21,6 +21,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
 
 #include "base/i18n/localization.h"
 #include "base/image/file_uri_helper.h"
@@ -39,8 +40,6 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include <securec.h>
-
-#include "display_type.h"
 #include "surface.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -347,7 +346,7 @@ void VideoElement::PreparePlayer()
     }
     producerSurface->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
-    producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+    producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(GRAPHIC_PIXEL_FMT_RGBA_8888));
     if (mediaPlayer_->SetVideoSurface(producerSurface) != 0) {
         LOGE("Player SetVideoSurface failed");
         return;
