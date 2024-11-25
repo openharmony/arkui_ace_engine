@@ -18,7 +18,11 @@
 #include "mock_form_manager_delegate.h"
 #include "core/components/form/sub_container.h"
 
+#ifndef ARKUI_CAPI_UNITTEST
 #include "pointer_event.h"
+#else
+#include "mock_pointer_event.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 FormPattern::FormPattern() = default;

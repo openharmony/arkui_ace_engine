@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#ifndef ARKUI_CAPI_UNITTEST
 #include "pointer_event.h"
+#else
+#include "mock_pointer_event.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::MMI {
 std::shared_ptr<PointerEvent> PointerEvent::Create()

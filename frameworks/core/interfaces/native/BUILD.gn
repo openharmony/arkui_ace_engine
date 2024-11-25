@@ -237,16 +237,13 @@ foreach(item, ace_platforms) {
 }
 
 web_components_support_for_test = true
+form_component_support_for_test = true
 
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   defines = []
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/ability/form_fwk/interfaces/inner_api/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-  ]
+  include_dirs = []
 
   public_configs = [
     ":ace_core_interfaces_native_node_config",
@@ -296,6 +293,11 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   if (defined(web_components_support_for_test) &&
       web_components_support_for_test) {
     defines += [ "WEB_SUPPORTED" ]
+  }
+
+  if (defined(form_component_support_for_test) &&
+      form_component_support_for_test) {
+    defines += [ "FORM_SUPPORTED" ]
   }
 
   cflags_cc = [ "-Wno-unused-variable" ]

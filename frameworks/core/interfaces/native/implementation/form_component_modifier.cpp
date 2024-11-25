@@ -51,20 +51,24 @@ namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
               const Ark_Literal_Number_height_width* value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto dimension = Converter::Convert<LiteralDimension>(*value);
     FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
+#endif // FORM_SUPPORTED
 }
 void ModuleNameImpl(Ark_NativePointer node,
                     const Ark_String* value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto name = Converter::Convert<std::string>(*value);
     FormModelNG::SetModuleName(frameNode, name);
+#endif // FORM_SUPPORTED
 }
 void DimensionImpl(Ark_NativePointer node,
                    Ark_FormDimension value)
@@ -78,10 +82,12 @@ void DimensionImpl(Ark_NativePointer node,
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
     FormModelNG::AllowUpdate(frameNode, convValue);
+#endif // FORM_SUPPORTED
 }
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)

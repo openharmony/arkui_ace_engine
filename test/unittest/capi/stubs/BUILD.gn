@@ -18,11 +18,6 @@ ohos_source_set("capi-ut-stubs") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   defines = [ "ARKUI_CAPI_UNITTEST " ]
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/ability/form_fwk/interfaces/inner_api/include",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-  ]
   sources = [
     "capi-ut-stubs.cpp",
     "mock_form_pattern.cpp",

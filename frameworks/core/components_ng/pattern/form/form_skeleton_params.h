@@ -16,8 +16,25 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SKELETON_PARAMS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SKELETON_PARAMS_H
 
+#ifndef ARKUI_CAPI_UNITTEST
 #include "form_constants.h"
-
+#else
+namespace OHOS::AppExecFwk::Constants {
+enum class Dimension : int8_t {
+    DIMENSION_MIN = 1,
+    DIMENSION_1_2 = DIMENSION_MIN,
+    DIMENSION_2_2,
+    DIMENSION_2_4,
+    DIMENSION_4_4,
+    DIMENSION_2_1,
+    DIMENSION_1_1,
+    DIMENSION_6_4,
+    DIMENSION_2_3,
+    DIMENSION_3_3,
+    DIMENSION_MAX = DIMENSION_3_3
+};
+} // OHOS::AppExecFwk::Constants
+#endif // ARKUI_CAPI_UNITTEST
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MARGIN_DOUBLE = 2;
