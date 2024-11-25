@@ -319,6 +319,8 @@ private:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
+    void ProcessMenuPreviewScale(
+        const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale);
 
     template<typename T>
     const RefPtr<T> GetAccessibilityRecognizer();
