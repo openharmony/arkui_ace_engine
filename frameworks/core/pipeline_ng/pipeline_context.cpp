@@ -1104,11 +1104,15 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
 
 void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type)
 {
-    for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
+    std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>
+        Callbacks;
+    std::swap(Callbacks, surfaceChangedCallbackMap_);
+    for (auto&& [id, callback] : Callbacks) {
         if (callback) {
             callback(newWidth, newHeight, rootWidth_, rootHeight_, type);
         }
     }
+    std::swap(Callbacks, surfaceChangedCallbackMap_);
 }
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
