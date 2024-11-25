@@ -1315,23 +1315,12 @@ ArkUIPipelineContext GetPipelineContext(ArkUINodeHandle node)
     return reinterpret_cast<ArkUIPipelineContext>(frameNode->GetContext());
 }
 
-void SetVsyncCallback(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId)
+void SetVsyncCallback(ArkUIPipelineContext pipelineContext, ArkUIVsyncCallback callback)
 {
-    static int vsyncCount = 1;
-    auto vsync = [vmContext, callbackId]() {
-        ArkUIEventCallbackArg args[] = { {.i32 =vsyncCount++ } };
-        ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
-        CHECK_NULL_VOID(vmContext);
-        CHECK_NULL_VOID(cbs);
-        cbs->CallInt(vmContext, callbackId, 1, &args[0]);
+    auto vsync = [pipelineContext, callback]() {
+        callback(pipelineContext);
     };
-
     reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
-}
-
-void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext)
-{
-    reinterpret_cast<PipelineContext*>(pipelineContext)->RequestFrame();
 }
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
@@ -2061,7 +2050,6 @@ ArkUIExtendedNodeAPI impl_extended = {
     SetLazyItemIndexer,
     GetPipelineContext,
     SetVsyncCallback,
-    UnblockVsyncWait,
     NodeEvent::CheckEvent,
     NodeEvent::SendArkUIAsyncEvent,
     CallContinuation,
@@ -2482,7 +2470,6 @@ const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
         nullptr, // setLazyItemIndexer
         GetPipelineContext,
         SetVsyncCallback,
-        UnblockVsyncWait,
         NodeEvent::CheckEvent,
         NodeEvent::SendArkUIAsyncEvent,
         nullptr, // callContinuation

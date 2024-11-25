@@ -27,7 +27,7 @@
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
-#define GENERATED_ARKUI_EXTENDED_NODE_API_VERSION 7
+#define GENERATED_ARKUI_EXTENDED_NODE_API_VERSION 8
 #define GENERATED_ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define GENERATED_ARKUI_NODE_MODIFIERS_API_VERSION 6
 #define GENERIC_SERVICE_API_VERSION 1
@@ -20292,6 +20292,8 @@ typedef struct GenericServiceAPI {
     void (*setLogger)(const ServiceLogger* logger);
 } GenericServiceAPI;
 
+typedef void (*Ark_VsyncCallback)(Ark_PipelineContext);
+
 typedef struct GENERATED_ArkUIExtendedNodeAPI {
     Ark_Int32 version;
 
@@ -20355,17 +20357,14 @@ typedef struct GENERATED_ArkUIExtendedNodeAPI {
 
     /// Vsync support
     Ark_PipelineContext (*getPipelineContext)(Ark_NodeHandle node);
-    void (*setVsyncCallback)(Ark_VMContext  vmContext,
-                             Ark_PipelineContext pipelineContext,
-                             Ark_Int32 callbackId);
-    void (*unblockVsyncWait)(Ark_VMContext  vmContext,
-                             Ark_PipelineContext pipelineContext);
+    void (*setVsyncCallback)(Ark_PipelineContext pipelineContext,
+                             Ark_VsyncCallback callback);
 
-  void (*setChildTotalCount)(Ark_NodeHandle node,
-                             Ark_Int32 totalCount);
+    void (*setChildTotalCount)(Ark_NodeHandle node,
+                               Ark_Int32 totalCount);
 
-  /// Error reporting.
-  void (*showCrash)(Ark_CharPtr message);
+    /// Error reporting.
+    void (*showCrash)(Ark_CharPtr message);
 
 } GENERATED_ArkUIExtendedNodeAPI;
 

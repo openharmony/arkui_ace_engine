@@ -3394,8 +3394,7 @@ struct CJUIExtendedNodeAPI {
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
     /// Vsync support.
     ArkUIPipelineContext (*getPipelineContext)(ArkUINodeHandle node);
-    void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
-    void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
+    void (*setVsyncCallback)(ArkUIPipelineContext pipelineContext, ArkUIVsyncCallback callback);
     /// Events.
     /**
      * Returns != 0 if an event was received,
