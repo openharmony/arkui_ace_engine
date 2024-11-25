@@ -18,6 +18,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,11 @@ public:
     ~WebPattern() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<WebEventHub>();
+    }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
@@ -84,6 +90,11 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
     void SetWebSrc(const std::string &webSrc);
+    void SetWebData(const std::string& webData);
+    const std::optional<std::string>& GetWebData() const
+    {
+        return webData_;
+    }
     void SetIncognitoMode(bool incognitoMode);
     void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken);
     void SetNestedScrollExt(NestedScrollOptionsExt const& nestedScroll);
@@ -180,6 +191,7 @@ private:
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     RefPtr<WebController> webController_;
+    std::optional<std::string> webData_;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H
