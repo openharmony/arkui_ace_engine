@@ -61,6 +61,7 @@ public:
     void InitButtonsLayoutProperty() override;
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
+    bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
 
     void OnMaxButtonClick();
     void OnMinButtonClick();
