@@ -21,13 +21,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-int32_t testOnReadyEvent = 0;
-int32_t testAboutToIMEInput = 0;
-int32_t testOnIMEInputComplete = 0;
-int32_t testAboutToDelete = 0;
-int32_t testOnDeleteComplete = 0;
-} // namespace
 
 class RichEditorPatternTestFourNg : public RichEditorCommonTestNg {
 public:
@@ -57,11 +50,6 @@ void RichEditorPatternTestFourNg::SetUp()
 void RichEditorPatternTestFourNg::TearDown()
 {
     richEditorNode_ = nullptr;
-    testOnReadyEvent = 0;
-    testAboutToIMEInput = 0;
-    testOnIMEInputComplete = 0;
-    testAboutToDelete = 0;
-    testOnDeleteComplete = 0;
     MockParagraph::TearDown();
 }
 
@@ -917,50 +905,25 @@ HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    SelectionInfo textSelectInfo;
+    std::vector<std::tuple<SelectSpanType, std::string, RefPtr<PixelMap>>> testTuples;
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, " ", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, "", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, " ", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, "", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, " ", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, "", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, " ", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, "", nullptr);
     std::list<ResultObject> resultObjectList;
     ResultObject obj;
+    for (const auto& testcase : testTuples) {
+        obj.type = std::get<0>(testcase);
+        obj.valueString = std::get<1>(testcase);
+        obj.valuePixelMap = std::get<2>(testcase);
+        resultObjectList.emplace_back(obj);
+    }
 
-    obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = " ";
-    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = "";
-    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = " ";
-    obj.valuePixelMap = nullptr;
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = "";
-    obj.valuePixelMap = nullptr;
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = " ";
-    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = "";
-    obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = " ";
-    obj.valuePixelMap = nullptr;
-    resultObjectList.emplace_back(obj);
-
-    obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = "";
-    obj.valuePixelMap = nullptr;
-    resultObjectList.emplace_back(obj);
-
+    SelectionInfo textSelectInfo;
     textSelectInfo.SetResultObjectList(resultObjectList);
     richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
 

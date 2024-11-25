@@ -457,7 +457,7 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorEventHub003, TestSize.Level1)
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     auto func = [](bool value) {
-        g_isOnEditChangeCalled = value;
+        isOnEditChangeCalled = value;
     };
     richEditorModel.SetOnEditingChange(std::move(func));
 
@@ -470,10 +470,10 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorEventHub003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. fire OnEditingChange func
-     * @tc.expected: expect g_isOnEditChangeCalled is true
+     * @tc.expected: expect isOnEditChangeCalled is true
      */
     eventHub->FireOnEditingChange(true);
-    EXPECT_EQ(g_isOnEditChangeCalled, true);
+    EXPECT_EQ(isOnEditChangeCalled, true);
 
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -1287,7 +1287,7 @@ HWTEST_F(RichEditorBaseTestOneNg, IsSelectLineHeadAndUseLeadingMargin003, TestSi
  * @tc.desc: Test the paragraph manager function.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestOneNg, GetGetIndex001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestOneNg, GetIndex001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1336,8 +1336,7 @@ HWTEST_F(RichEditorBaseTestOneNg, GetGlyphPositionAtCoordinate001, TestSize.Leve
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
     PositionWithAffinity positionWithAffinity(2, TextAffinity::UPSTREAM);
     EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-    bool clamp = false;
-    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, 0.0), clamp);
+    int32_t paragraphsIndex = richEditorPattern->paragraphs_.GetIndex(Offset(100.0, 0.0), false);
     EXPECT_EQ(paragraphsIndex, 6);
 
     PositionWithAffinity finalResult = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(Offset(0.0, 0.0));

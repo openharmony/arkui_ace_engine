@@ -33,6 +33,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
+    void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
+        const RefPtr<MagnifierController>& controller, const OffsetF& localOffset);
 };
 
 void RichEditorBaseTestNg::SetUp()
@@ -582,24 +585,16 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level1)
     auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
     EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
 
-    // test paragraph style linebreakstrategy value of LineBreakStrategy.GREEDY
+    std::vector<LineBreakStrategy> strategies = { LineBreakStrategy::GREEDY, LineBreakStrategy::HIGH_QUALITY,
+        LineBreakStrategy::BALANCED };
     struct UpdateParagraphStyle style;
-    style.lineBreakStrategy = LineBreakStrategy::GREEDY;
-    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
-    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
-    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
-
-    // test paragraph style linebreakstrategy value of LineBreakStrategy.HIGH_QUALITY
-    style.lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY;
-    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
-    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
-    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::HIGH_QUALITY);
-
-    // test paragraph style linebreakstrategy value of LineBreakStrategy.BALANCED
-    style.lineBreakStrategy = LineBreakStrategy::BALANCED;
-    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
-    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
-    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::BALANCED);
+    for (LineBreakStrategy strategy : strategies) {
+        // test paragraph style linebreakstrategy
+        style.lineBreakStrategy = strategy;
+        richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+        info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+        EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), strategy);
+    }
 }
 
 /**
@@ -1006,7 +1001,6 @@ HWTEST_F(RichEditorBaseTestNg, OnDirtyLayoutWrapper001, TestSize.Level1)
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
     richEditorPattern->isRichEditorInit_ = true;
-
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = 2;
     ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -1143,11 +1137,11 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController009, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
-    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
-    EXPECT_EQ(index1, 0);
+    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index = richEditorController->AddPlaceholderSpan(builderNode, {});
+    EXPECT_EQ(index, 0);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
     auto builderSpanChildren = richEditorNode_->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
@@ -1158,10 +1152,8 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController009, TestSize.Level1)
 
     auto richEditorLayoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(richEditorLayoutAlgorithm));
-
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(BUILDER_SIZE);
-
     RefPtr<GeometryNode> builderGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     builderGeometryNode->Reset();
     RefPtr<LayoutWrapperNode> builderLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
@@ -1547,12 +1539,18 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
     controller->SetLocalOffset(localOffset);
     SystemProperties::SetDevicePhysicalHeight(0);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2 -
-                                          MAGNIFIER_OFFSETY.ConvertToPx());
+    EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2
+        - MAGNIFIER_OFFSETY.ConvertToPx());
 
     /**
-     * @tc.steps: step3. Test cases of removeframeNode.
+     * @tc.steps: step3. Test cases of magnifier.
      */
+    TestMagnifier(richEditorPattern, controller, localOffset);
+}
+
+void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
+    const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
+{
     richEditorPattern->HandleTouchUp();
     EXPECT_FALSE(controller->GetShowMagnifier());
 

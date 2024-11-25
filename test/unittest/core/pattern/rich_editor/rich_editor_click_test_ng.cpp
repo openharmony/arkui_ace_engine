@@ -363,17 +363,17 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent002, TestSize.Level1)
         .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
 
-    GestureEvent info;
     richEditorPattern->isMousePressed_ = true;
-    info.SetSourceDevice(SourceType::MOUSE);
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
     richEditorPattern->caretPosition_ = 0;
-    info.localLocation_ = Offset(0, 0);
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    info.localLocation_ = Offset(0, 0);
     richEditorPattern->HandleDoubleClickOrLongPress(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
@@ -528,7 +528,6 @@ HWTEST_F(RichEditorClickTestNg, RichEditorController019, TestSize.Level1)
     borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
     updateSpanStyle.borderRadius = borderRadius;
     updateSpanStyle.marginProp = marginProp;
-
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
 
     ImageSpanAttribute imageStyle;
@@ -538,7 +537,6 @@ HWTEST_F(RichEditorClickTestNg, RichEditorController019, TestSize.Level1)
     imageStyle.marginProp = marginProp;
     imageStyle.borderRadius = borderRadius;
     TextStyle style;
-
     richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
 
     /**
@@ -599,8 +597,8 @@ HWTEST_F(RichEditorClickTestNg, RichEditorController020, TestSize.Level1)
     options.bundleName = BUNDLE_NAME;
     options.moduleName = MODULE_NAME;
     options.offset = 1;
-    auto index1 = richEditorPattern->AddImageSpan(options, false, 0, true);
-    EXPECT_EQ(index1, 1);
+    auto index = richEditorPattern->AddImageSpan(options, false, 0, true);
+    EXPECT_EQ(index, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 2);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
 }
@@ -644,8 +642,8 @@ HWTEST_F(RichEditorClickTestNg, RichEditorController021, TestSize.Level1)
     /**
      * @tc.steps: step4. test AddTextSpan
      */
-    auto index1 = richEditorPattern->AddTextSpan(options, true, 5);
-    EXPECT_EQ(index1, 5);
+    auto index = richEditorPattern->AddTextSpan(options, true, 5);
+    EXPECT_EQ(index, 5);
     auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
