@@ -1102,10 +1102,6 @@ void VideoPattern::UpdateVideoProperty()
 
 void VideoPattern::OnRebuildFrame()
 {
-    if (!renderSurface_ || !renderSurface_->IsSurfaceValid()) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "MediaPlayer surface is not valid");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto video = AceType::DynamicCast<VideoNode>(host);
@@ -1738,17 +1734,6 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
-
-    if (!isFullScreen && mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
-        auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
-        CHECK_NULL_VOID(videoLayoutProperty);
-        SizeF videoSize = SizeF(
-            static_cast<float>(mediaPlayer->GetWidth()),
-            static_cast<float>(mediaPlayer->GetHeight()));
-        videoLayoutProperty->UpdateVideoSize(videoSize);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-
     if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
