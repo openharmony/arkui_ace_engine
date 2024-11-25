@@ -57,6 +57,26 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
+ScrollablePattern::~ScrollablePattern()
+{
+    UnRegister2DragDropManager();
+    if (AnimateRunning()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+        auto scrollable = GetScrollable();
+        if (scrollable) {
+            auto nodeId = scrollable->GetNodeId();
+            auto nodeTag = scrollable->GetNodeTag();
+            AceAsyncTraceEnd(nodeId,
+                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
+            AceAsyncTraceEnd(
+                nodeId, (TRAILING_ANIMATION + std::to_string(nodeId) + std::string(" ") + nodeTag).c_str());
+        }
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
+    }
+}
+
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
@@ -1346,7 +1366,9 @@ void ScrollablePattern::OnAnimateFinish()
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
-        AceAsyncTraceEnd(host->GetId(), TRAILING_ANIMATION);
+        AceAsyncTraceEnd(host->GetAccessibilityId(),
+            (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+                .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
 }
@@ -1420,6 +1442,8 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, 0.0f);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
     uint64_t currentVsync = context->GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
     if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
@@ -1432,9 +1456,8 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     }
     if (NearEqual(offset, lastPosition_, 1.0) && !animateToTraceFlag_) {
         animateToTraceFlag_ = true;
-        auto host = GetHost();
-        auto id = host ? host->GetId() : 0;
-        AceAsyncTraceBegin(id, TRAILING_ANIMATION);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceBegin(id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
     }
     auto delta = useTotalOffset_ ? GetTotalOffset() - offset : lastPosition_ - offset;
     lastVsyncTime_ = currentVsync;
@@ -2736,9 +2759,8 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
     }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-    AceAsyncTraceEnd(
-        0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
-            .c_str());
+    AceAsyncTraceEnd(host->GetAccessibilityId(),
+        (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
 }
@@ -3183,9 +3205,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             pattern->OnAnimateStop();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            AceAsyncTraceEnd(
-                host->GetId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-                                   std::string(" ") + host->GetTag()).c_str());
+            AceAsyncTraceEnd(host->GetAccessibilityId(),
+                (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") +
+                    host->GetTag()).c_str());
         });
     }
 
@@ -3214,8 +3236,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
-    AceAsyncTraceBegin(host->GetId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
-        std::string(" ") + host->GetTag()).c_str());
+    AceAsyncTraceBegin(
+        host->GetAccessibilityId(), (SCROLLER_FIX_VELOCITY_ANIMATION + std::to_string(host->GetAccessibilityId()) +
+                                        std::string(" ") + host->GetTag()).c_str());
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart();
 }
