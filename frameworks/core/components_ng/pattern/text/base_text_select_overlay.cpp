@@ -1403,4 +1403,13 @@ bool BaseTextSelectOverlay::IsHiddenHandle()
     CHECK_NULL_RETURN(overlayInfo, false);
     return overlayInfo->isSingleHandle && overlayManager->IsHiddenHandle();
 }
+
+bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return isFirst ? overlayInfo->firstHandle.isShow : overlayInfo->secondHandle.isShow;
+}
 } // namespace OHOS::Ace::NG

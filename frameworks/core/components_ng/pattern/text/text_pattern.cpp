@@ -2296,8 +2296,12 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                 }
             }
             RichEditorDragInfo info;
-            info.firstHandle = pattern->textSelector_.firstHandle;
-            info.secondHandle = pattern->textSelector_.secondHandle;
+            if (pattern->selectOverlay_->IsHandleVisible(true)) {
+                info.firstHandle = pattern->textSelector_.firstHandle;
+            }
+            if (pattern->selectOverlay_->IsHandleVisible(false)) {
+                info.secondHandle = pattern->textSelector_.secondHandle;
+            }
             pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
