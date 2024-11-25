@@ -28,7 +28,26 @@ template<typename CallbackType,
 >
 class CallbackHelper {
 public:
-    CallbackHelper(const CallbackType &callback): callback_(callback) {}
+    CallbackHelper() = default;
+
+    CallbackHelper(const CallbackType &callback): callback_(callback)
+    {
+        if (callback_.resource.hold) {
+            (*callback_.resource.hold)(callback_.resource.resourceId);
+        }
+    }
+    CallbackHelper(const CallbackHelper &other): callback_(other.callback_)
+    {
+        if (callback_.resource.hold) {
+            (*callback_.resource.hold)(callback_.resource.resourceId);
+        }
+    }
+    ~CallbackHelper()
+    {
+        if (callback_.resource.release) {
+            (*callback_.resource.release)(callback_.resource.resourceId);
+        }
+    }
 
     template<typename... Params>
     void Invoke(Params&&... args) const
@@ -38,7 +57,10 @@ public:
         }
     }
 protected:
-    const CallbackType &callback_;
+    const CallbackType callback_  = {
+        .resource = {.hold = nullptr, .release = nullptr},
+        .call = nullptr
+    };
 };
 } // namespace OHOS::Ace::NG
 
