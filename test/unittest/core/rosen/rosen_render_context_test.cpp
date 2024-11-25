@@ -156,7 +156,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest005, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame()[1], paintRect.GetY());
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame()[2], paintRect.Width());
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame()[3], paintRect.Height());
-    rosenRenderContext->DoTextureExport(1);
     rosenRenderContext->SyncGeometryFrame(paintRect);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBounds()[0], paintRect.GetX());
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBounds()[1], paintRect.GetY());
