@@ -28,7 +28,7 @@ namespace Converter {
 template<>
 LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
 {
-    return LiteralDimension { 
+    return LiteralDimension {
         .width = Converter::Convert<Dimension>(src.width),
         .height = Converter::Convert<Dimension>(src.height)
     };

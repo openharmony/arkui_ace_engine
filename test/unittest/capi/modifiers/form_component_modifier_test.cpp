@@ -48,10 +48,8 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSiz
     { "-56.78vp", Converter::ArkValue<Ark_Number>(-56.78), "-56.78vp" },
 };
 } // namespace
-
 class FormComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIFormComponentModifier,
     &GENERATED_ArkUINodeModifiers::getFormComponentModifier, GENERATED_ARKUI_FORM_COMPONENT> {
-
     void SetUp(void) override
     {
         ModifierTestBase::SetUp();
@@ -72,13 +70,12 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
     auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
     auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
     std::string resultStr;
-
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_WIDTH_DEFAULT_VALUE)
-        << "Default value for attribute 'size.width'" << " resultStr: " << resultStr.c_str();
+    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_WIDTH_DEFAULT_VALUE) <<
+        "Default value for attribute 'size.width'" << " resultStr: " << resultStr.c_str();
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_HEIGHT_DEFAULT_VALUE)
-        << "Default value for attribute 'size.height'" << " resultStr: " << resultStr.c_str();
+    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_HEIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'size.height'" << " resultStr: " << resultStr.c_str();
 }
 
 /*
@@ -97,17 +94,15 @@ HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Le
     auto checkValue = [this, &initValueSize](
                           const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
         Ark_Literal_Number_height_width inputValueSize = initValueSize;
-
         inputValueSize.width = value;
         modifier_->setSize(node_, &inputValueSize);
-
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setSize, attribute: size.width";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setSize, attribute: size.width";
     };
-
     for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
         checkValue(input, value, expected);
     }
@@ -121,23 +116,20 @@ HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Le
 HWTEST_F(FormComponentModifierTest, setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
     Ark_Literal_Number_height_width initValueSize;
-
     // Initial setup
     initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-
     auto checkValue = [this, &initValueSize](
                           const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
         Ark_Literal_Number_height_width inputValueSize = initValueSize;
-
         inputValueSize.height = value;
         modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);
-
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setSize, attribute: size.height";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setSize, attribute: size.height";
     };
 
     for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
@@ -170,21 +162,17 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestModuleNameValidValues, Test
 
     // Initial setup
     initValueModuleName = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-
     auto checkValue = [this, &initValueModuleName](
                           const std::string& input, const Ark_String& value, const std::string& expectedStr) {
         Ark_String inputValueModuleName = initValueModuleName;
-
         inputValueModuleName = value;
         modifier_->setModuleName(node_, &inputValueModuleName);
         auto jsonValue = GetJsonValue(node_);
-
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setModuleName, attribute: moduleName";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setModuleName, attribute: moduleName";
     };
-
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, value, expected);
     }
@@ -215,21 +203,17 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestAllowUpdateValidValues, Te
 
     // Initial setup
     initValueAllowUpdate = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
     auto checkValue = [this, &initValueAllowUpdate](
                           const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
         Ark_Boolean inputValueAllowUpdate = initValueAllowUpdate;
-
         inputValueAllowUpdate = value;
         modifier_->setAllowUpdate(node_, inputValueAllowUpdate);
         auto jsonValue = GetJsonValue(node_);
-
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_ALLOW_UPDATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr)
-            << "Input value is: " << input << ", method: setAllowUpdate, attribute: allowUpdate";
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setAllowUpdate, attribute: allowUpdate";
     };
-
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, value, expected);
     }
