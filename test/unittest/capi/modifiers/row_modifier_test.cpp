@@ -29,6 +29,11 @@ namespace  {
     const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "VerticalAlign.Center";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
+    const auto ATTRIBUTE_IS_REVERSE_NAME = "isReverse";
+    const auto ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE = "0";
+    const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+    const auto ATTRIBUTE_LIGHT_INTENSITY_NAME = "lightIntensity";
+    const auto ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE = "0";
 } // namespace
 
 class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier,
@@ -125,4 +130,100 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     }
 }
 
+/*
+ * @tc.name: setPointLightDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RowModifierTest, DISABLED_setPointLightDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    std::string resultStr2;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
+    EXPECT_EQ(resultStr2, ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setPointLightValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RowModifierTest, DISABLED_setPointLightValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string resultStr2;
+    Ark_PointLightStyle inputValuePointLight;
+    Ark_LightSource arkLightSource;
+    arkLightSource = {
+        .color =
+            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY)),
+        .positionX = Converter::ArkValue<Ark_Length>(1.0f),
+        .positionY = Converter::ArkValue<Ark_Length>(2.0f),
+        .positionZ = Converter::ArkValue<Ark_Length>(3.0f),
+        .intensity = Converter::ArkValue<Ark_Number>(4),
+    };
+    inputValuePointLight.lightSource = Converter::ArkValue<Opt_LightSource>(arkLightSource);
+    inputValuePointLight.bloom = Converter::ArkValue<Opt_Number>(3);
+    inputValuePointLight.illuminated = Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT);
+
+    modifier_->setPointLight(node_, &inputValuePointLight);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
+    EXPECT_EQ(resultStr2, ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setIsReverseDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(RowModifierTest, setIsReverseDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE);
+}
+#ifdef WRONG_OPT
+// Valid values for attribute 'isReverse'
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "1"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "0"},
+};
+
+/*
+ * @tc.name: setIsReverseDefaultValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setIsReverseDefaultValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Boolean inputValueSelect;
+    Ark_Boolean initValueSelect;
+
+    // Initial setup
+    initValueSelect = std::get<1>(isReverseValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueSelect = initValueSelect;
+    for (auto&& value: isReverseValidValues) {
+        inputValueSelect = std::get<1>(value);
+        modifier_->setReverse(node_, &inputValueSelect);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -1247,4 +1247,30 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
         dst = DATE_MIN;
     }
 }
+
+template<>
+LightSource Convert(const Ark_LightSource& src)
+{
+    LightSource lightSource;
+    lightSource.x = Converter::OptConvert<CalcDimension>(src.positionX);
+    lightSource.y = Converter::OptConvert<CalcDimension>(src.positionY);
+    lightSource.z = Converter::OptConvert<CalcDimension>(src.positionZ);
+    lightSource.intensity = Converter::OptConvert<float>(src.intensity);
+    Validator::ValidateIntensity(lightSource.intensity);
+    lightSource.lightColor = Converter::OptConvert<Color>(src.color);
+    return lightSource;
+}
+
+template<>
+PointLightStyle Convert(const Ark_PointLightStyle& src)
+{
+    PointLightStyle pointLightStyle;
+    pointLightStyle.lightSource = Converter::OptConvert<LightSource>(src.lightSource);
+    // this converter should be changed to support IlluminatedType
+    auto arkIlluminatedType = Converter::OptConvert<Ark_IlluminatedType>(src.illuminated);
+    pointLightStyle.illuminationType = EnumToInt(arkIlluminatedType);
+    pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
+    Validator::ValidateBloom(pointLightStyle.bloom);
+    return pointLightStyle;
+}
 } // namespace OHOS::Ace::NG::Converter

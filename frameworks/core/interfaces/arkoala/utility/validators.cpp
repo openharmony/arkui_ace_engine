@@ -23,6 +23,10 @@ namespace Validator {
 namespace {
     constexpr float DEFAULT_OPACITY = 1.0;
     constexpr float MIN_OPACITY = 0.0;
+    constexpr float INTENSITY_MIN = 0.0f;
+    constexpr float INTENSITY_MAX = 1.0f;
+    constexpr float BLOOM_MIN = 0.0f;
+    constexpr float BLOOM_MAX = 1.0f;
 } // namespace
 
 void ValidateNonNegative(std::optional<Dimension>& opt)
@@ -130,6 +134,14 @@ void ValidateNonNegative(std::optional<V2::GridContainerSize>& value)
             value.reset();
         }
     }
+}
+void ValidateBloom(std::optional<float>& opt)
+{
+    ValidateByRange(opt, BLOOM_MIN, BLOOM_MAX);
+}
+void ValidateIntensity(std::optional<float>& opt)
+{
+    ValidateByRange(opt, INTENSITY_MIN, INTENSITY_MAX);
 }
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG

@@ -373,6 +373,7 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
+    template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);
@@ -382,6 +383,7 @@ namespace Converter {
     template<> PickerValueType Convert(const Array_String& src);
     template<> PickerSelectedType Convert(const Ark_Number& src);
     template<> PickerSelectedType Convert(const Array_Number& src);
+    template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);

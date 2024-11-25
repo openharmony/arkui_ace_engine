@@ -20,6 +20,7 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/arkoala/utility/ace_engine_types.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -213,8 +214,35 @@ void PointLightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
+    auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelNG::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
 #endif
-    LOGE("Arkoala: Image.ResizableImpl - method not implemented");
 }
 void EdgeAntialiasingImpl(Ark_NativePointer node,
                           const Ark_Number* value)

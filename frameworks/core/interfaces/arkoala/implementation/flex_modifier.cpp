@@ -18,8 +18,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/ace_engine_types.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -154,13 +156,39 @@ namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA FlexAttribute_PointLightImpl -> Method is not FULLY implemented.");
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
-        (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
+    auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelNG::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
+#endif
 }
 } // FlexAttributeModifier
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
