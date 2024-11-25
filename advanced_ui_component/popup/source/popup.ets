@@ -367,12 +367,7 @@ export struct PopupComponent {
       if (px2vp(defaultDisplaySync.width) > 400) {
         textMaxWeight = 400
       } else {
-        if (defaultDisplaySync.width != 0) {
-          textMaxWeight = px2vp(defaultDisplaySync.width)
-        } else {
-          // The previewer does not support the display interface to use abnormal values
-          textMaxWeight = -1
-        }
+        textMaxWeight = px2vp(defaultDisplaySync.width) - 40 - 40
       }
       textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
       textMaxWeight -= this.theme.windows.padding.end.value
@@ -516,12 +511,7 @@ export struct PopupComponent {
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      if (defaultDisplaySync.width != 0) {
-        applyMaxWidth = px2vp(defaultDisplaySync.width)
-      } else {
-        // The previewer does not support the display interface to use abnormal values
-        applyMaxWidth = -1
-      }
+      applyMaxWidth = px2vp(defaultDisplaySync.width) - 40 - 40
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480

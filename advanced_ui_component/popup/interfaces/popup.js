@@ -679,12 +679,7 @@ export class PopupComponent extends ViewPU {
                 n28 = 400;
             }
             else {
-                if (o28.width != 0) {
-                    n28 = px2vp(o28.width);
-                } else {
-                    // The previewer does not support the display interface to use abnormal values
-                    n28 = -1;
-                }
+                n28 = px2vp(o28.width) - 40 - 40;
             }
             n28 -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
             n28 -= this.theme.windows.padding.end.value;
@@ -831,12 +826,7 @@ export class PopupComponent extends ViewPU {
             e28 = 400;
         }
         else {
-            if (h28.width != 0) {
-                e28 = px2vp(h28.width);
-            } else {
-                // The previewer does not support the display interface to use abnormal values
-                e28 = -1;
-            }
+            e28 = px2vp(h28.width) - 40 - 40;
         }
         if (px2vp(h28.height) > 480) {
             f28 = 480;
