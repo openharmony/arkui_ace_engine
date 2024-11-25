@@ -532,6 +532,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);
     template<> void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
+    template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
