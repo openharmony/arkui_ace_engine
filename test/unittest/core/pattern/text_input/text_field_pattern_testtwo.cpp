@@ -442,13 +442,18 @@ HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    pattern->textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
+    pattern->textFieldForegroundModifier_ = AceType::MakeRefPtr<TextFieldForegroundModifier>(pattern);
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateShowCounter(true);
     layoutProperty->UpdateMaxLength(1024);
     layoutProperty->UpdateShowUnderline(true);
-
+    pattern->CalcCounterBoundHeight();
+    pattern->CalculateBoundsRect();
     pattern->deleteForwardOperations_.emplace(10);
     pattern->deleteBackwardOperations_.emplace(10);
     pattern->HandleCountStyle();
@@ -470,6 +475,9 @@ HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
     layoutProperty->UpdateShowHighlightBorder(true);
     pattern->HandleCountStyle();
 
+    layoutProperty->UpdateShowCounter(true);
+    layoutProperty->UpdateShowErrorText(true);
+    pattern->CalculateBoundsRect();
     EXPECT_EQ(pattern->underlineWidth_, 2.0_px);
 }
 

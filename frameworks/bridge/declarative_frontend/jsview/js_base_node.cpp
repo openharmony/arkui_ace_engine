@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 
 #include <memory>
+#include <queue>
 #include <string>
 
 #include "canvas_napi/js_canvas.h"
@@ -81,6 +82,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     lazyBuilderFunc();
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    realNode_ = newNode;
     if (newNode) {
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
     }
@@ -355,6 +357,51 @@ void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
     }
 }
 
+void JSBaseNode::OnReuseWithBindThis(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(realNode_);
+    std::queue<RefPtr<NG::UINode>> elements;
+    elements.push(realNode_);
+    void* data = static_cast<void*>(info.GetJsiRuntimeCallInfo());
+    while (!elements.empty()) {
+        auto currentNode = elements.front();
+        elements.pop();
+        if (!currentNode) {
+            continue;
+        }
+        if (AceType::InstanceOf<NG::CustomNodeBase>(currentNode)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(currentNode);
+            customNode->FireOnReuseFunc(data);
+        } else {
+            for (const auto& child : currentNode->GetChildren()) {
+                elements.push(child);
+            }
+        }
+    }
+}
+
+void JSBaseNode::OnRecycleWithBindThis(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(realNode_);
+    std::queue<RefPtr<NG::UINode>> elements;
+    elements.push(realNode_);
+    while (!elements.empty()) {
+        auto currentNode = elements.front();
+        elements.pop();
+        if (!currentNode) {
+            continue;
+        }
+        if (AceType::InstanceOf<NG::CustomNodeBase>(currentNode)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(currentNode);
+            customNode->FireOnRecycleFunc();
+        } else {
+            for (const auto& child : currentNode->GetChildren()) {
+                elements.push(child);
+            }
+        }
+    }
+}
+
 void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
@@ -365,6 +412,8 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("disposeNode", &JSBaseNode::Dispose);
     JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
     JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
+    JSClass<JSBaseNode>::CustomMethod("onReuseWithBindObject", &JSBaseNode::OnReuseWithBindThis);
+    JSClass<JSBaseNode>::CustomMethod("onRecycleWithBindObject", &JSBaseNode::OnRecycleWithBindThis);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

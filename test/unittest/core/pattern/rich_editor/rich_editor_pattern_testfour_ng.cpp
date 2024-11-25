@@ -254,8 +254,8 @@ HWTEST_F(RichEditorPatternTestFourNg, RequestKeyboard001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReplacePreviewText001
- * @tc.desc: test ReplacePreviewText
+ * @tc.name: ReplaceText001
+ * @tc.desc: test ReplaceText
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
@@ -269,27 +269,27 @@ HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
     std::string previewTextValue;
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = -3;
     previewRange.end = -2;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 1;
     previewRange.end = 0;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 10;
     previewRange.end = 20;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 15;
     previewRange.end = 10;
-    richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    richEditorPattern->ReplaceText(previewTextValue, previewRange);
 
     previewRange.start = 1;
     previewRange.end = 2;
-    bool res = richEditorPattern->ReplacePreviewText(previewTextValue, previewRange);
+    bool res = richEditorPattern->ReplaceText(previewTextValue, previewRange);
     ASSERT_NE(res, false);
 }
 
@@ -577,6 +577,216 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString001, TestSize.Level1)
     richEditorPattern->ProcessStyledString();
 
     ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: ProcessStyledString002
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: ProcessStyledString003
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: SetSelection007
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetSelection007, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    ASSERT_NE(richEditorPattern->contentMod_, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.startOffset = 1;
+    richEditorPattern->previewTextRecord_.endOffset = 10;
+
+    int32_t start = -1;
+    int32_t end = 1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: SetSelection008
+ * @tc.desc: test SetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetSelection008, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    ASSERT_NE(richEditorPattern->contentMod_, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    std::string content = "TEST123";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.startOffset = -1;
+    richEditorPattern->previewTextRecord_.endOffset = 10;
+
+    int32_t start = -1;
+    int32_t end = -1;
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    richEditorPattern->SetSelection(start, end, options, true);
+    EXPECT_TRUE(richEditorPattern->HasFocus());
+}
+
+/**
+ * @tc.name: GetTextBoxes002
+ * @tc.desc: test GetTextBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetTextBoxes002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = "testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+
+    std::vector<RectF> res;
+    auto ret = richEditorPattern->GetTextBoxes();
+    EXPECT_EQ(ret, res);
+
+    TextLineMetrics lineMetrics;
+    richEditorPattern->GetLineCount();
+    EXPECT_EQ(richEditorPattern->GetLineHeight(), 0.0f);
+    EXPECT_EQ(richEditorPattern->GetLetterSpacing(), 0.0f);
+    auto retLineMetrics = richEditorPattern->GetLineMetrics(-1);
+    EXPECT_EQ(retLineMetrics.x, 0);
+
+    auto retLineMetricsS = richEditorPattern->GetLineMetrics(2);
+    EXPECT_EQ(retLineMetricsS.x, 0);
+
+    int32_t scroll_from_update = 1;
+    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 1, 100, 160);
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->UpdateScrollStateAfterLayout(true);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, scroll_from_update)) << "Reach Top Boundary";
+}
+
+/**
+ * @tc.name: GetCrossOverHeight004
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetCrossOverHeight004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight005
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, GetCrossOverHeight005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**

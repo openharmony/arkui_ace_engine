@@ -165,7 +165,7 @@ void SessionWrapperImpl::NotifyForeground()
 {
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
 }
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
@@ -241,6 +241,9 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
 }
 
 void SessionWrapperImpl::OnReleaseDone()
+{}
+
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
 {}
 
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const

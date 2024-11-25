@@ -38,6 +38,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -485,12 +486,16 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     CalcDimension bottom;
 
     JSRef<JSVal> startVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::START));
-    if (startVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(startVal), start)) {
+    if (startVal->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
+        ParseJsLengthMetrics(startObj, start);
         edges.start = start;
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
-    if (endVal->IsObject() && ParseJsLengthMetrics(JSRef<JSObject>::Cast(endVal), end)) {
+    if (endVal->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
+        ParseJsLengthMetrics(endObj, end);
         edges.end = end;
         useLocalizedEdges = true;
     }
@@ -2211,9 +2216,9 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
     if (jsEndValue->IsNumber()) {
         int32_t endValue = jsEndValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
         } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
         }
@@ -2222,9 +2227,9 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
     if (jsBottomValue->IsNumber()) {
         int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
         } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
         }
@@ -3785,8 +3790,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3801,8 +3804,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -5751,12 +5752,8 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
     return true;
 }
 
-bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
+bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result)
 {
-    if (jsValue->IsString()) {
-        result = jsValue->ToString();
-        return true;
-    }
     if (!jsValue->IsObject()) {
         return false;
     }
@@ -5827,6 +5824,30 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
     return true;
+}
+
+bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
+{
+    if (jsValue->IsString()) {
+        result = jsValue->ToString();
+        return true;
+    }
+    return ParseJsStringObj(jsValue, result);
+}
+
+bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& result)
+{
+    std::string u8Result;
+    if (jsValue->IsString()) {
+        result = jsValue->ToU16String();
+        return true;
+    }
+    bool ret = ParseJsStringObj(jsValue, u8Result);
+    if (ret) {
+        result = UtfUtils::Str8ToStr16(u8Result);
+        return true;
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result)
@@ -6345,6 +6366,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+        }
+        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
+        if (dragPreview->IsBoolean()) {
+            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
         }
     }
 
@@ -7300,6 +7325,15 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsTabStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetTabStop(false);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetTabStop(info[0]->ToBoolean());
+}
+
 void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject() || info.Length() != 1) {
@@ -7354,11 +7388,12 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(arg));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -8750,6 +8785,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("advancedBlendMode", &JSViewAbstract::JsAdvancedBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("tabStop", &JSViewAbstract::JsTabStop);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
@@ -10609,7 +10645,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
 
         JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
         sizeInPxObj->SetProperty<float>("height", context.height);
-        sizeInPxObj->SetProperty<float>("width", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
         contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
 
         auto engine = EngineHelper::GetCurrentEngine();

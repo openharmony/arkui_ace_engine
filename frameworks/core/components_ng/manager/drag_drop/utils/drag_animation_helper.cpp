@@ -145,7 +145,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     if (!actuator->IsNeedGather()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -262,16 +262,19 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (!dragDropManager->IsShowBadgeAnimation()) {
-        return;
-    }
     CHECK_NULL_VOID(textNode);
     auto textNodeContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textNodeContext);
+    auto windowScale = dragDropManager->GetWindowScale();
+    auto badgeScale = GreatNotEqual(windowScale, 0.0f) ? BADGE_ANIMATION_SCALE / windowScale : BADGE_ANIMATION_SCALE;
+    if (!dragDropManager->IsShowBadgeAnimation()) {
+        textNodeContext->UpdateTransformScale({ badgeScale, badgeScale });
+        return;
+    }
     textNodeContext->UpdateTransformScale({ 0.0f, 0.0f });
     RefPtr<Curve> interpolatingSpring = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 628.0f, 40.0f);
     CHECK_NULL_VOID(interpolatingSpring);
@@ -281,8 +284,8 @@ void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
     textOption.SetDelay(BADGE_ANIMATION_DELAY);
     AnimationUtils::Animate(
         textOption,
-        [textNodeContext]() mutable {
-            textNodeContext->UpdateTransformScale({ BADGE_ANIMATION_SCALE, BADGE_ANIMATION_SCALE });
+        [textNodeContext, badgeScale]() mutable {
+            textNodeContext->UpdateTransformScale({ badgeScale, badgeScale });
         },
         textOption.GetOnFinishEvent());
 
@@ -313,7 +316,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(menuPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -328,9 +331,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipeline, badgeLength);
+    auto offset = CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
@@ -340,7 +341,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(textNode);
     }
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipelineContext->FlushSyncGeometryNodeTasks();
 }
 
 void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(

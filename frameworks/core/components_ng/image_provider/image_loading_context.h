@@ -54,6 +54,7 @@ public:
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
+    SizeF GetOriginImageSize() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
@@ -219,6 +220,8 @@ private:
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
     ImageDfxConfig imageDfxConfig_;
+    // If the API version is greater or equal than 14, use the preload module to download the URL.
+    const bool usePreload_ = false;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

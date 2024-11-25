@@ -110,6 +110,8 @@ ohos_unittest("parse_test_ng") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:rosen_text",
@@ -122,8 +124,6 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/unittest:ace_components_render",
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (ability_runtime_graphics) {
@@ -195,6 +195,8 @@ ohos_unittest("svg_dom_test_ng") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:rosen_text",
@@ -207,8 +209,6 @@ ohos_unittest("svg_dom_test_ng") {
     "$ace_root/test/unittest:ace_components_render",
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 }
 

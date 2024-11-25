@@ -504,7 +504,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest009, TestSize.Level1)
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     ViewAbstract::SetJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(onHoverEventFunc));
     ViewAbstract::ClearJSFrameNodeOnHover(AceType::RawPtr(FRAME_NODE_REGISTER));
-    OnKeyCallbackFunc onKeyCallback;
+    OnKeyConsumeFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     DragPreviewOption dragPreviewOption;
     ViewAbstract::SetDragPreviewOptions(dragPreviewOption);
@@ -550,7 +550,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     OnHoverFunc onHoverEventFunc;
     ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
-    OnKeyCallbackFunc onKeyCallback;
+    OnKeyConsumeFunc onKeyCallback;
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
 
     auto hoverEffect = static_cast<HoverEffectType>(INDEX);

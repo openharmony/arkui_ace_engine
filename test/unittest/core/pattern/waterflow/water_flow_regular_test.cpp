@@ -15,7 +15,6 @@
 
 #include "water_flow_test_ng.h"
 
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
 #define protected public
@@ -423,6 +422,47 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CacheScroll001
+ * @tc.desc: Layout WaterFlow cache items
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 18);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 18), -20.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 8));
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 7));
+
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 16);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 23);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 7));
+    EXPECT_EQ(GetChildY(frameNode_, 18), 180.0f);
+    EXPECT_TRUE(GetItem(18)->IsOnMainTree());
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    ASSERT_TRUE(GetItem(7, true));
+    EXPECT_FALSE(GetItem(7, true)->IsOnMainTree());
+    EXPECT_EQ(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
+        PROPERTY_UPDATE_MEASURE);
+    UpdateCurrentOffset(5.0f);
+    EXPECT_FALSE(GetItem(7, true)->IsOnMainTree());
+    EXPECT_EQ(GetChildLayoutProperty<LayoutProperty>(frameNode_, 7)->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE,
+        PROPERTY_UPDATE_MEASURE);
+}
+
+/**
  * @tc.name: Remeasure001
  * @tc.desc: Test triggering measure multiple times on the same Algo object
  * @tc.type: FUNC
@@ -460,9 +500,11 @@ HWTEST_F(WaterFlowTestNg, ShowCachedItems001, TestSize.Level1)
     CreateDone();
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 12));
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive()); // footer
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 12), 800.0f);
+    // check if ::Layout is called
+    EXPECT_EQ(GetChildLayoutProperty<LayoutProperty>(frameNode_, 12)->GetPropertyChangeFlag(), 0);
 }
 
 /**

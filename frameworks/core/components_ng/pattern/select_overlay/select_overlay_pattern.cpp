@@ -597,6 +597,16 @@ void SelectOverlayPattern::UpdateSelectMenuInfo(std::function<void(SelectMenuInf
     }
 }
 
+void SelectOverlayPattern::UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const
+{
+    if (info_->ancestorViewPort != ancestorViewPort) {
+        info_->ancestorViewPort = ancestorViewPort;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden, bool noAnimation)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());

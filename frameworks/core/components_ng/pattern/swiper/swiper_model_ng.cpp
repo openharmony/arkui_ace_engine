@@ -286,15 +286,6 @@ void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameter
     pattern->SetSwiperParameters(swiperParameters);
 };
 
-void SwiperModelNG::SetBindIndicator(bool bind)
-{
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetBindIndicator(bind);
-}
-
 void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -637,14 +628,6 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
-}
-
-void SwiperModelNG::SetBindIndicator(FrameNode* frameNode, bool bind)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetBindIndicator(bind);
 }
 
 void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)

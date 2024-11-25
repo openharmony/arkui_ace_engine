@@ -30,7 +30,6 @@
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
-#include "third_party/node/src/js_native_api_types.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {

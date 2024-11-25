@@ -32,6 +32,7 @@
 #include "core/common/thread_model_impl.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event_recognizer.h"
+#include "core/event/non_pointer_event.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -67,6 +68,7 @@ public:
     void RegisterTouchEventCallback(TouchEventCallback&& callback) override;
     void RegisterDragEventCallback(DragEventCallBack&& callback) override;
     void RegisterKeyEventCallback(KeyEventCallback&& callback) override;
+    void RegisterNonPointerEventCallback(NonPointerEventCallback&& callback) override;
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override;
     void RegisterAxisEventCallback(AxisEventCallback&& callback) override;
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
@@ -86,6 +88,8 @@ public:
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, bool isInjected = false);
 
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
+
+    bool ProcessNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     bool ProcessRotationEvent(float rotationValue);
 
@@ -240,6 +244,7 @@ private:
     int32_t instanceId_ = -1;
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
+    NonPointerEventCallback nonPointerEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };

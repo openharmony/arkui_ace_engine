@@ -687,6 +687,22 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         return (void*)&(jsView->jsViewObject_);
     };
 
+    auto recycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteAboutToRecycle();
+    };
+
+    auto reuseFunc = [weak = AceType::WeakClaim(this)](void* params) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteAboutToReuse(params);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .didBuildFunc = std::move(didBuildFunc),
         .renderFunc = std::move(renderFunction),
@@ -703,6 +719,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
         .getThisFunc = std::move(getThisFunc),
+        .reuseFunc = std::move(reuseFunc),
+        .recycleFunc = std::move(recycleFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),

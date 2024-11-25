@@ -100,29 +100,29 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
      * @tc.steps: step1. Default
      * @tc.expected: text is "1/4"
      */
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "1");
-    EXPECT_EQ(lastTextLayoutProperty->GetContentValue(), "/4");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
+    EXPECT_EQ(lastTextLayoutProperty->GetContentValue(), u"/4");
 
     /**
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Change firstText
      */
     ShowNext();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "2");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"2");
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Change firstText
      */
     ShowPrevious();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "1");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Change firstText
      */
     ChangeIndex(3);
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), "4");
+    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"4");
 }
 
 /**

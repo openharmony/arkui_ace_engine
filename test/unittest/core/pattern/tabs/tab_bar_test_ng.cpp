@@ -171,6 +171,214 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarPatternSetSelectedMode002
+ * @tc.desc: test SetSelectedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetSelectedMode002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    EXPECT_EQ(tabBarPattern_->GetSelectedMode(), SelectedMode::INDICATOR);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->selectedModes_.size()), TABCONTENT_NUMBER);
+
+    tabBarPattern_->SetSelectedMode(SelectedMode::INDICATOR, 0, true);
+    EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::INDICATOR);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->selectedModes_.size()), 5);
+
+    tabBarPattern_->SetSelectedMode(SelectedMode::INDICATOR, 1, false);
+    EXPECT_EQ(tabBarPattern_->selectedModes_[1], SelectedMode::INDICATOR);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->selectedModes_.size()), 5);
+
+    tabBarPattern_->SetSelectedMode(SelectedMode::INDICATOR, 10, true);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->selectedModes_.size()), 6);
+    EXPECT_EQ(tabBarPattern_->selectedModes_[5], SelectedMode::INDICATOR);
+
+    tabBarPattern_->SetSelectedMode(SelectedMode::INDICATOR, 10, false);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->selectedModes_.size()), 7);
+    EXPECT_EQ(tabBarPattern_->selectedModes_[6], SelectedMode::INDICATOR);
+}
+
+/**
+ * @tc.name: TabBarPatternSetIndicatorStyle001
+ * @tc.desc: test SetIndicatorStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetIndicatorStyle001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->indicatorStyles_.size()), TABCONTENT_NUMBER);
+
+    IndicatorStyle indicator;
+    tabBarPattern_->SetIndicatorStyle(indicator, 0, true);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->indicatorStyles_.size()), 5);
+
+    tabBarPattern_->SetIndicatorStyle(indicator, 1, false);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_[1], indicator);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->indicatorStyles_.size()), 5);
+
+    tabBarPattern_->SetIndicatorStyle(indicator, 10, true);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->indicatorStyles_.size()), 6);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_[5], indicator);
+
+    tabBarPattern_->SetIndicatorStyle(indicator, 10, false);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->indicatorStyles_.size()), 7);
+    EXPECT_EQ(tabBarPattern_->indicatorStyles_[6], indicator);
+}
+
+/**
+ * @tc.name: TabBarPatternSetTabBarStyle001
+ * @tc.desc: test tab bar SetTabBarStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetTabBarStyle001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarStyles_.size()), TABCONTENT_NUMBER);
+
+    TabBarStyle tabBarStyle = TabBarStyle::SUBTABBATSTYLE;
+    tabBarPattern_->SetTabBarStyle(tabBarStyle, 0, true);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], tabBarStyle);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarStyles_.size()), 5);
+
+    tabBarPattern_->SetTabBarStyle(tabBarStyle, 1, false);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_[1], tabBarStyle);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarStyles_.size()), 5);
+
+    tabBarPattern_->SetTabBarStyle(tabBarStyle, 10, true);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarStyles_.size()), 6);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_[5], tabBarStyle);
+
+    tabBarPattern_->SetTabBarStyle(tabBarStyle, 10, false);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarStyles_.size()), 7);
+    EXPECT_EQ(tabBarPattern_->tabBarStyles_[6], tabBarStyle);
+}
+
+/**
+ * @tc.name: TabBarPatternSetBottomTabBarStyle001
+ * @tc.desc: test tab bar SetBottomTabBarStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetBottomTabBarStyle001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->bottomTabBarStyles_.size()), TABCONTENT_NUMBER);
+
+    BottomTabBarStyle bottomTabBarStyle;
+    tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 0, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->bottomTabBarStyles_.size()), 5);
+
+    tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 1, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->bottomTabBarStyles_.size()), 5);
+
+    tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 10, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->bottomTabBarStyles_.size()), 6);
+
+    tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 10, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->bottomTabBarStyles_.size()), 7);
+}
+
+/**
+ * @tc.name: TabBarPatternSetIconStyle001
+ * @tc.desc: test tab bar SetIconStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetIconStyle001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->iconStyles_.size()), TABCONTENT_NUMBER);
+
+    IconStyle iconStyle;
+    tabBarPattern_->SetIconStyle(iconStyle, 0, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->iconStyles_.size()), 5);
+
+    tabBarPattern_->SetIconStyle(iconStyle, 1, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->iconStyles_.size()), 5);
+
+    tabBarPattern_->SetIconStyle(iconStyle, 10, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->iconStyles_.size()), 6);
+
+    tabBarPattern_->SetIconStyle(iconStyle, 10, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->iconStyles_.size()), 7);
+}
+
+/**
+ * @tc.name: TabBarPatternSetSymbol001
+ * @tc.desc: test tab bar SetSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetSymbol001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->symbolArray_.size()), TABCONTENT_NUMBER);
+
+    TabBarSymbol symbol;
+    tabBarPattern_->SetSymbol(symbol, 0, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->symbolArray_.size()), 5);
+
+    tabBarPattern_->SetSymbol(symbol, 1, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->symbolArray_.size()), 5);
+
+    tabBarPattern_->SetSymbol(symbol, 10, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->symbolArray_.size()), 6);
+
+    tabBarPattern_->SetSymbol(symbol, 10, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->symbolArray_.size()), 7);
+}
+
+/**
+ * @tc.name: TabBarPatternAddTabBarItemId001
+ * @tc.desc: test tab bar AddTabBarItemId
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternAddTabBarItemId001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarItemIds_.size()), TABCONTENT_NUMBER);
+
+    int32_t tabBarItemId = 1;
+    tabBarPattern_->AddTabBarItemId(tabBarItemId, 0, true);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarItemIds_.size()), 5);
+    EXPECT_EQ(tabBarPattern_->tabBarItemIds_[0], tabBarItemId);
+
+    tabBarItemId = 2;
+    tabBarPattern_->AddTabBarItemId(tabBarItemId, 1, false);
+    EXPECT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarItemIds_.size()), 5);
+    EXPECT_EQ(tabBarPattern_->tabBarItemIds_[1], tabBarItemId);
+
+    tabBarItemId = 3;
+    tabBarPattern_->AddTabBarItemId(tabBarItemId, 10, true);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarItemIds_.size()), 6);
+    EXPECT_EQ(tabBarPattern_->tabBarItemIds_[5], tabBarItemId);
+
+    tabBarItemId = 4;
+    tabBarPattern_->AddTabBarItemId(tabBarItemId, 10, false);
+    ASSERT_EQ(static_cast<int32_t>(tabBarPattern_->tabBarItemIds_.size()), 7);
+    EXPECT_EQ(tabBarPattern_->tabBarItemIds_[6], tabBarItemId);
+}
+
+/**
  * @tc.name: TabBarPatternUpdateIndicator001
  * @tc.desc: test UpdateIndicator
  * @tc.type: FUNC
@@ -197,7 +405,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->tabBarType_[0] = true;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::CUSTOM_BUILDER;
     tabBarPattern_->UpdateIndicator(0);
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
@@ -205,7 +413,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-    tabBarPattern_->tabBarType_[0] = false;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::NORMAL;
     tabBarPattern_->UpdateIndicator(0);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
@@ -613,7 +821,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Le
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.

@@ -92,6 +92,7 @@ public:
         frameRateRange_[type] = rateRange;
     }
     TextDirection GetTextDirection(const std::string& content, TextDirection direction);
+    void OnFontScaleConfigurationUpdate() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -106,11 +107,13 @@ private:
 
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart);
-    void SetTextOffset(float offsetX);
+    void UpdateTextTranslateXY(float offsetX, bool cancel = false);
+    void PropertyCancelAnimationFinish();
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
-    void PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay);
+    void PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay, bool isFirst = true);
+    void StopAndResetAnimation();
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
@@ -136,10 +139,10 @@ private:
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
     TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
-    LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;
     int32_t lastWindowWidth_ = 0.0;
     float marqueeWidth_ = 0.0f;
+    std::optional<OffsetF> lastAnimationOffset_;
     std::unordered_map<MarqueeDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
 };
 } // namespace OHOS::Ace::NG

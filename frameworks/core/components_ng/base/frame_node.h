@@ -257,6 +257,11 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
+    void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
     void CleanVisibleAreaInnerCallback()
     {
         eventHub_->CleanVisibleAreaCallback(false);
@@ -682,6 +687,9 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // new function will ignore child's position and translate properties.
+    RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
@@ -786,7 +794,8 @@ public:
         int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
@@ -1110,8 +1119,8 @@ public:
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
-    void AddCustomProperty(const std::string& key, const std::string& value);
-    void RemoveCustomProperty(const std::string& key);
+    void AddCustomProperty(const std::string& key, const std::string& value) override;
+    void RemoveCustomProperty(const std::string& key) override;
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1130,7 +1139,7 @@ public:
         return exposeInnerGestureFlag_;
     }
 
-    RefPtr<UINode> GetCurrentPageRootNode();
+    RefPtr<UINode> GetCurrentPageRootNode() override;
 
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
@@ -1379,7 +1388,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 

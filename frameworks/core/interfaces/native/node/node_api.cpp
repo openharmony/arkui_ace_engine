@@ -430,6 +430,7 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnChange,
+    NodeModifier::SetTextPickerOnScrollStop,
 };
 
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -539,13 +540,13 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::ResetOnDragStart,
+    NodeModifier::ResetOnDragEnter,
+    NodeModifier::ResetOnDragDrop,
+    NodeModifier::ResetOnDragMove,
+    NodeModifier::ResetOnDragLeave,
+    NodeModifier::ResetOnDragEnd,
+    NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
 };
 

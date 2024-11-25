@@ -353,6 +353,8 @@ public:
 
     void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
+    SizeF GetChildrenExpandedSize() override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 

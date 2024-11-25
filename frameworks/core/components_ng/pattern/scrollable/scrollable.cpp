@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
@@ -89,6 +91,10 @@ void Scrollable::SetFriction(double sFriction)
 Scrollable::~Scrollable()
 {
     // If animation still runs, force stop it.
+    if (!IsStopped()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+        AceAsyncTraceEnd(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+    }
     StopFrictionAnimation();
     StopSpringAnimation();
     StopSnapAnimation();
@@ -993,6 +999,8 @@ void Scrollable::ProcessSpringMotion(double position)
         // trace stop at OnScrollStop
         if (!isFadingAway_) {
             AceAsyncTraceBegin(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        } else {
+            ACE_SCOPED_TRACE("Spring to same position");
         }
     }
     auto distance = currentPos_ - finalPosition_;
@@ -1217,7 +1225,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         }
         auto context = scroll->context_.Upgrade();
         CHECK_NULL_VOID(context);
-        uint64_t currentVsync = scroll->context_.Upgrade();
+        uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;

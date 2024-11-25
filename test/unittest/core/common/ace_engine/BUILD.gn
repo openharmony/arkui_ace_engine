@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("ace_engine_special_test") {
   module_out_path = base_test_output_path
   sources = [
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
@@ -105,8 +106,10 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "//base/startup/init/interfaces/innerkits:libbegetutil",
-    "//third_party/googletest:gmock_main",
   ]
-  external_deps = [ "cJSON:cjson" ]
+  external_deps = [
+    "cJSON:cjson",
+    "googletest:gtest_main",
+  ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

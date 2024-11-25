@@ -72,15 +72,12 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
-#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
-#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -157,6 +154,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -228,64 +226,6 @@
 
 namespace OHOS::Ace::Framework {
 
-void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
-{
-    const auto object = JSRef<JSObject>::Make(obj);
-    const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
-    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        return;
-    }
-    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
-    CHECK_NULL_VOID(uiNode);
-    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
-    CHECK_NULL_VOID(customNode);
-
-    auto id = ContainerScope::CurrentId();
-    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
-    if (setAppTitle->IsFunction()) {
-        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
-        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id, vm](const std::string& title) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(vm);
-            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppTitleCallback(callback);
-    }
-#ifdef PIXEL_MAP_SUPPORTED
-    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
-    if (setAppIcon->IsFunction()) {
-        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
-        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
-            ContainerScope scope(id);
-            JSRef<JSVal> param = ConvertPixmap(icon);
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppIconCallback(callback);
-    }
-#endif
-    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
-    if (onWindowFocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowFocusedCallback(callback);
-    }
-
-    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
-    if (onWindowUnfocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowUnfocusedCallback(callback);
-    }
-    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
-}
 
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 {
@@ -535,7 +475,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
-    { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -605,7 +544,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
-    { "Indicator", JSIndicator::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
@@ -724,7 +662,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
-    { "IndicatorController", JSIndicatorController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -816,9 +753,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind },
-    { "LinearIndicator", JSLinearIndicator::JSBind },
-    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -848,7 +783,6 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
-    JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
@@ -900,7 +834,6 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
-    JSIndicatorController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -1107,7 +1040,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
-
+    JSContainerModal::JSBind(globalObj);
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {

@@ -193,6 +193,10 @@ public:
     {
         return isPressed_;
     }
+    bool IsDriving() const
+    {
+        return isDriving_;
+    }
     void SetHover(bool hover)
     {
         isHover_ = hover;

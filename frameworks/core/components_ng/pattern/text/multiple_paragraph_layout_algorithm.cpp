@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 #include "text_layout_adapter.h"
+#include "base/utils/utf_helper.h"
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/i18n/localization.h"
@@ -33,14 +34,19 @@ namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto size = geometryNode->GetFrameSize();
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto offsetY = padding.top.value_or(0);
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = geometryNode->GetContent();
     if (content) {
         offsetY += Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align).GetY();
     }
@@ -219,6 +225,9 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -323,6 +332,16 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetBaselineOffset(textStyle.GetBaselineOffset(), textStyle, true);
     }
+    auto lineHeight = layoutProperty->GetLineHeight();
+    if (lineHeight.has_value()) {
+        if (lineHeight->Unit() == DimensionUnit::PERCENT) {
+            modifier->SetLineHeight(lineHeight.value(), textStyle, true);
+        } else {
+            modifier->SetLineHeight(lineHeight.value(), textStyle);
+        }
+    } else {
+        modifier->SetLineHeight(textStyle.GetLineHeight(), textStyle, true);
+    }
 }
 
 RefPtr<Paragraph> MultipleParagraphLayoutAlgorithm::GetSingleParagraph() const
@@ -366,7 +385,7 @@ void MultipleParagraphLayoutAlgorithm::SetAdaptFontSizeStepToTextStyle(
 }
 
 ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
+    const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
     return { .direction = GetTextDirection(content, layoutWrapper),
         .align = textStyle.GetTextAlign(),
@@ -380,26 +399,11 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         };
 }
 
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
-    const std::string& content, LayoutWrapper* layoutWrapper)
-{
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    return GetTextDirectionByContent(content);
-}
-
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::u16string& content)
 {
     bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
-    auto showingTextForWString = StringUtils::ToWstring(content);
-    for (const auto& charOfShowingText : showingTextForWString) {
+    for (const auto& charOfShowingText : content) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
             return TextDirection::LTR;
         } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
@@ -409,6 +413,11 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const 
         }
     }
     return textDirection;
+}
+
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+{
+    return GetTextDirectionByContent(UtfUtils::Str8ToStr16(content));
 }
 
 bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF& contentConstraint)

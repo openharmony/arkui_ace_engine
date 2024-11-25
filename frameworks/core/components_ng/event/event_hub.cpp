@@ -110,7 +110,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 
 void EventHub::PostEnabledTask()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -286,14 +286,16 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
 
 void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
     frameNode->InitLastArea();
+    if (onAreaChangedInnerCallbacks_.find(id) == onAreaChangedInnerCallbacks_.end()) {
+        hasInnerAreaChangeUntriggered_.emplace_back(id);
+    }
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
-    hasInnerAreaChangeUntriggered_.emplace_back(id);
 }
 
 void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
@@ -418,7 +420,7 @@ void EventHub::ClearJSFrameNodeOnDisappear()
 void EventHub::FireOnAppear()
 {
     if (onAppear_ || onJSFrameNodeAppear_) {
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
@@ -506,6 +508,11 @@ void EventHub::SetOnDetach(std::function<void()>&& onDetach)
 void EventHub::ClearOnDetach()
 {
     onDetach_ = nullptr;
+}
+
+void EventHub::ClearOnPreDrag()
+{
+    onPreDragFunc_ = nullptr;
 }
 
 void EventHub::FireOnDetach()
@@ -771,7 +778,10 @@ void EventHub::SetEnabled(bool enabled)
 {
     auto host = GetFrameNode();
     if (enabled_ != enabled && host) {
-        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        }
     }
     enabled_ = enabled;
     developerEnabled_ = enabled;

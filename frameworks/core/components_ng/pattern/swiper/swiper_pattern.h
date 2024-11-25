@@ -297,7 +297,7 @@ public:
 
     bool HasIndicatorNode() const
     {
-        return indicatorId_.has_value() || GetIndicatorNode() != nullptr;
+        return indicatorId_.has_value();
     }
 
     bool HasLeftButtonNode() const
@@ -310,12 +310,15 @@ public:
         return rightButtonId_.has_value();
     }
 
-    int32_t GetIndicatorId()
+    int32_t CreateIndicatorId()
     {
-        if (!indicatorId_.has_value()) {
-            indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
+        indicatorId_ = ElementRegister::GetInstance()->MakeUniqueId();
         return indicatorId_.value();
+    }
+
+    int32_t GetIndicatorId() const
+    {
+        return indicatorId_.has_value() ? indicatorId_.value() : -1;
     }
 
     int32_t GetLeftButtonId()
@@ -627,40 +630,6 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-    bool IsBindIndicator() const
-    {
-        return isBindIndicator_;
-    }
-
-    void SetBindIndicator(bool bind)
-    {
-        isBindIndicator_ = bind;
-    }
- 
-    void SetIndicatorNode(WeakPtr<NG::UINode>& indicatorNode)
-    {
-        if (isBindIndicator_) {
-            indicatorNode_ = indicatorNode;
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
-            auto frameIndicatorNode = GetIndicatorNode();
-            CHECK_NULL_VOID(frameIndicatorNode);
-            frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }
-
-    RefPtr<FrameNode> GetIndicatorNode() const
-    {
-        auto refUINode = indicatorNode_.Upgrade();
-        CHECK_NULL_RETURN(refUINode, nullptr);
-        auto frameNode = DynamicCast<FrameNode>(refUINode);
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        return frameNode;
-    }
-
-    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
     bool IsAutoPlay() const;
 
 private:
@@ -701,6 +670,7 @@ private:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
+    bool InsideIndicatorRegion(const TouchLocationInfo& locationInfo);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
@@ -1193,13 +1163,6 @@ private:
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
-    WeakPtr<NG::UINode> indicatorNode_;
-    bool isBindIndicator_ = false;
-    RefPtr<FrameNode> GetCommonIndicatorNode();
-    bool IsIndicator(const std::string& tag) const
-    {
-        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
-    }
 };
 } // namespace OHOS::Ace::NG
 

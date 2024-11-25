@@ -856,20 +856,17 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
     gridMatrix_.erase(it, gridMatrix_.end());
 }
 
-float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool prune) const
 {
+    if (!prune) {
+        return GetHeightInRange(startMainLineIndex_, endMainLineIndex_ + 1, mainGap) - mainGap;
+    }
+    auto it = SkipLinesAboveView(mainGap).first;
+    if (it == lineHeightMap_.end() || it->first > endMainLineIndex_) {
+        return -mainGap;
+    }
+    auto endIt = lineHeightMap_.upper_bound(endMainLineIndex_);
     float len = 0.0f;
-    auto it = lineHeightMap_.find(startMainLineIndex_);
-    if (!regular) {
-        it = SkipLinesAboveView(mainGap).first;
-    }
-    if (it == lineHeightMap_.end()) {
-        return -mainGap;
-    }
-    if (startMainLineIndex_ > endMainLineIndex_ || it->first > endMainLineIndex_) {
-        return -mainGap;
-    }
-    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;
     }
@@ -1055,11 +1052,6 @@ void GridLayoutInfo::UpdateDefaultCachedCount()
     } else {
         defCachedCount_ = std::max(newCachedCount, defCachedCount_);
     }
-}
-
-bool GridLayoutInfo::IsInViewport(int32_t index) const
-{
-    return index >= startIndex_ && index <= endIndex_;
 }
 
 int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex)

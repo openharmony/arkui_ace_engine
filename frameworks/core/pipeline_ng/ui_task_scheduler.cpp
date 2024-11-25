@@ -263,27 +263,30 @@ void UITaskScheduler::FlushTask()
     } while (multiLayoutCount_ > 0);
     // abandon unused params
     layoutWithImplicitAnimation_ = std::queue<bool>();
-    // handle case of components executing FlushUITaskWithSingleDirtyNode during FlushLayoutTask
-    if (layoutedCount_ < ENDORSE_LAYOUT_COUNT && !singleDirtyNodesToFlush_.empty()) {
-        ACE_SCOPED_TRACE("Flush after-layout singleNode task, count %zu", singleDirtyNodesToFlush_.size());
-        auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-        if (pipeline) {
-            auto singleDirtyNodes = std::move(singleDirtyNodesToFlush_);
-            for (const auto& node : singleDirtyNodes) {
-                pipeline->FlushUITaskWithSingleDirtyNode(node);
-            }
-        }
-    } else if (!singleDirtyNodesToFlush_.empty()) {
-        auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-        if (pipeline) {
-            pipeline->RequestFrame();
-        }
-        singleDirtyNodesToFlush_.clear();
-    }
+    FlushAllSingleNodeTasks();
     multiLayoutCount_ = 0;
     layoutedCount_ = 0;
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::FlushAllSingleNodeTasks()
+{
+    // handle case of components executing FlushUITaskWithSingleDirtyNode during FlushLayoutTask
+    if (singleDirtyNodesToFlush_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("Flush after-layout singleNode task, count %zu", singleDirtyNodesToFlush_.size());
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto singleDirtyNodes = std::move(singleDirtyNodesToFlush_);
+    for (const auto& node : singleDirtyNodes) {
+        // skip if already flushed by any previous tasks
+        if (!node || (!node->IsLayoutDirtyMarked() && !node->CheckNeedForceMeasureAndLayout())) {
+            continue;
+        }
+        pipeline->FlushUITaskWithSingleDirtyNode(node);
+    }
 }
 
 void UITaskScheduler::AddSingleNodeToFlush(const RefPtr<FrameNode>& dirtyNode)

@@ -86,6 +86,9 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     previewNode->AddChild(previewCustomNode);
 
     CHECK_NULL_VOID(menuParam.isShowHoverImage);
+    auto pipeline = previewNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    ScopedLayout scope(pipeline);
     previewNode->Measure(layoutProperty->GetLayoutConstraint());
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
@@ -94,8 +97,6 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = previewNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
@@ -830,6 +831,19 @@ void SetHasCustomRadius(
         menuWrapperPattern->SetHasCustomRadius(false);
     }
 }
+
+void SetMenuFocusRule(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto focusHub = menuNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto pipelineContext = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    focusHub->SetDirectionalKeyFocus(menuTheme->GetEnableDirectionalKeyFocus());
+}
 } // namespace
 
 void MenuView::CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode)
@@ -913,6 +927,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetMenuFocusRule(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
@@ -955,7 +970,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         optionNode->MountToParent(column);
         optionNode->MarkModifyDone();
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -1076,6 +1091,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetMenuFocusRule(menuNode);
 
     SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
     // put custom node in a scroll to limit its height
@@ -1083,7 +1099,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CHECK_NULL_RETURN(scroll, nullptr);
     MountScrollToMenu(customNode, scroll, type, menuNode);
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
     menuNode->MarkModifyDone();

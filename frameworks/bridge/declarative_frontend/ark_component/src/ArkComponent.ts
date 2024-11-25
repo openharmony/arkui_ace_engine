@@ -14,6 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
+/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -149,6 +150,9 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
+  if (Utils.isApiVersionEQAbove(14)) {
+    return false;
+  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&
@@ -2258,6 +2262,16 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class tabStopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    getUINativeModule().common.setTabStop(node, this.value);
+  }
+}
+
 class TouchableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -3868,6 +3882,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, undefined);
+    }
+    return this;
+  }
+
+  tabStop(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, tabStopModifier.identity, tabStopModifier, undefined);
     }
     return this;
   }

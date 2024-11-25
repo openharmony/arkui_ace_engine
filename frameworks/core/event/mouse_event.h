@@ -86,10 +86,8 @@ enum class HoverEffectType : int32_t {
     UNKNOWN,
 };
 
-struct MouseEvent final {
+struct MouseEvent final : public PointerEvent {
     int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
     float z = 0.0f;
     float deltaX = 0.0f;
     float deltaY = 0.0f;
@@ -97,13 +95,10 @@ struct MouseEvent final {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
-    float screenX = 0.0f;
-    float screenY = 0.0f;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
-    TimeStamp time;
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
@@ -145,33 +140,37 @@ struct MouseEvent final {
 
     MouseEvent CloneWith(float scale) const
     {
-        return {.id = id,
-            .x = x / scale,
-            .y = y / scale,
-            .z = z / scale,
-            .deltaX = deltaX / scale,
-            .deltaY = deltaY / scale,
-            .deltaZ = deltaZ / scale,
-            .scrollX = scrollX / scale,
-            .scrollY = scrollY / scale,
-            .scrollZ = scrollZ / scale,
-            .screenX = screenX / scale,
-            .screenY = screenY / scale,
-            .action = action,
-            .pullAction = pullAction,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
+        if (NearEqual(scale, 0.f)) {
+            return {};
+        }
+        MouseEvent mouseEvent;
+        mouseEvent.id = id;
+        mouseEvent.x = x / scale;
+        mouseEvent.y = y / scale;
+        mouseEvent.z = z / scale;
+        mouseEvent.deltaX = deltaX / scale;
+        mouseEvent.deltaY = deltaY /  scale;
+        mouseEvent.deltaZ = deltaZ / scale;
+        mouseEvent.scrollX = scrollX /  scale;
+        mouseEvent.scrollY = scrollY /  scale;
+        mouseEvent.scrollZ = scrollZ / scale;
+        mouseEvent.screenX = screenX / scale;
+        mouseEvent.screenY = screenY / scale;
+        mouseEvent.action = action;
+        mouseEvent.pullAction = pullAction;
+        mouseEvent.button = button;
+        mouseEvent.pressedButtons = pressedButtons;
+        mouseEvent.time = time;
+        mouseEvent.deviceId = deviceId;
+        mouseEvent.targetDisplayId = targetDisplayId;
+        mouseEvent.sourceType = sourceType;
+        mouseEvent.sourceTool = sourceTool;
+        mouseEvent.pointerEvent = pointerEvent;
+        mouseEvent.originalId = originalId;
+        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+        mouseEvent.isInjected = isInjected;
+        mouseEvent.isPrivacyMode = isPrivacyMode;
+        return mouseEvent;
     }
 
     MouseEvent CreateScaleEvent(float scale) const
@@ -235,31 +234,33 @@ struct MouseEvent final {
 
     MouseEvent operator-(const Offset& offset) const
     {
-        return { .x = x - offset.GetX(),
-            .y = y - offset.GetY(),
-            .z = z,
-            .deltaX = deltaX,
-            .deltaY = deltaY,
-            .deltaZ = deltaZ,
-            .scrollX = scrollX,
-            .scrollY = scrollY,
-            .scrollZ = scrollZ,
-            .screenX = screenX - offset.GetX(),
-            .screenY = screenY - offset.GetY(),
-            .action = action,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
+        MouseEvent mouseEvent;
+        mouseEvent.x = x - offset.GetX();
+        mouseEvent.x = x - offset.GetX();
+        mouseEvent.y = y - offset.GetY();
+        mouseEvent.z = z;
+        mouseEvent.deltaX = deltaX;
+        mouseEvent.deltaY = deltaY;
+        mouseEvent.deltaZ = deltaZ;
+        mouseEvent.scrollX = scrollX;
+        mouseEvent.scrollY = scrollY;
+        mouseEvent.scrollZ = scrollZ;
+        mouseEvent.screenX = screenX - offset.GetX();
+        mouseEvent.screenY = screenY - offset.GetY();
+        mouseEvent.action = action;
+        mouseEvent.button = button;
+        mouseEvent.pressedButtons = pressedButtons;
+        mouseEvent.time = time;
+        mouseEvent.deviceId = deviceId;
+        mouseEvent.targetDisplayId = targetDisplayId;
+        mouseEvent.sourceType = sourceType;
+        mouseEvent.sourceTool = sourceTool;
+        mouseEvent.pointerEvent = pointerEvent;
+        mouseEvent.originalId = originalId;
+        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+        mouseEvent.isInjected = isInjected;
+        mouseEvent.isPrivacyMode = isPrivacyMode;
+        return mouseEvent;
     }
 };
 
@@ -443,31 +444,7 @@ public:
         onMouseCallback_ = onMouseCallback;
     }
 
-    bool HandleMouseEvent(const MouseEvent& event)
-    {
-        if (!onMouseCallback_) {
-            return false;
-        }
-        MouseInfo info;
-        info.SetPointerEvent(event.pointerEvent);
-        info.SetButton(event.button);
-        info.SetAction(event.action);
-        info.SetPullAction(event.pullAction);
-        info.SetGlobalLocation(event.GetOffset());
-        Offset localLocation = Offset(
-            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
-        info.SetLocalLocation(localLocation);
-        info.SetScreenLocation(event.GetScreenOffset());
-        info.SetTimeStamp(event.time);
-        info.SetDeviceId(event.deviceId);
-        info.SetTargetDisplayId(event.targetDisplayId);
-        info.SetSourceDevice(event.sourceType);
-        info.SetSourceTool(event.sourceTool);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetPressedKeyCodes(event.pressedKeyCodes_);
-        onMouseCallback_(info);
-        return info.IsStopPropagation();
-    }
+    bool HandleMouseEvent(const MouseEvent& event);
 
     bool DispatchEvent(const TouchEvent& point) override
     {

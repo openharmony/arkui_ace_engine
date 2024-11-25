@@ -844,20 +844,6 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
-
-void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
-}
-
-void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
-}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -883,8 +869,7 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchOnWillInsert, SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete,
         ResetSearchOnWillDelete, SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText,
         ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
-        SetSearchEnableHapticFeedback, ResetSearchEnableHapticFeedback, SetSearchAutoCapitalizationMode,
-        ResetSearchAutoCapitalizationMode };
+        SetSearchEnableHapticFeedback, ResetSearchEnableHapticFeedback };
     return &modifier;
 }
 

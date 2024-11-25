@@ -930,6 +930,7 @@ void RefreshPattern::ResetAnimation()
         CHECK_NULL_VOID(offsetProperty_);
         offsetProperty_->Set(currentOffset);
     } else {
+        CHECK_NULL_VOID(lowVersionOffset_);
         lowVersionOffset_->Set(currentOffset);
     }
 }
@@ -1029,6 +1030,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
 {
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     if (isDrag) {
         option.SetCurve(AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f));
@@ -1044,6 +1046,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
 void RefreshPattern::LoadingProgressExit()
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
@@ -1080,6 +1083,7 @@ void RefreshPattern::UpdateLoadingProgress()
 void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     if (isDrag) {
         option.SetCurve(AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f));
@@ -1095,6 +1099,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
 void RefreshPattern::CustomBuilderExit()
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     option.SetCurve(DEFAULT_CURVE);

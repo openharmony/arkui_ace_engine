@@ -562,6 +562,8 @@ public:
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
+    uint32_t GetStatusBarHeight();
+
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
@@ -710,6 +712,12 @@ public:
     }
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
+    bool IsFloatingWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
 
 private:
     virtual bool MaybeRelease() override;

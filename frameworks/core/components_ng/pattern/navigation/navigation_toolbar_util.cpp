@@ -337,12 +337,15 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
 
 void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool enabled)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolToolbarMoreItemNode(barItemNode, enabled);
     } else {
         BuildImageToolbarMoreItemNode(barItemNode, enabled);
     }
-    auto textNode = CreateToolbarItemTextNode(Localization::GetInstance()->GetEntryLetters("common.more"));
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto textNode = CreateToolbarItemTextNode(theme->GetMoreMessage());
     CHECK_NULL_VOID(textNode);
     barItemNode->SetTextNode(textNode);
     barItemNode->SetBarItemUsedInToolbarConfiguration(true);
@@ -647,6 +650,13 @@ void NavigationToolbarUtil::MountToolBar(
 
     bool hideToolBar = propertyBase->GetHideToolBarValue(false);
     auto currhideToolBar = navDestinationPatternBase->GetCurrHideToolBar();
+    if (currhideToolBar.has_value() && currhideToolBar.value() != hideToolBar && hideToolBar) {
+        /**
+         * we need reset translate&opacity of toolBar when state change from show to hide.
+         * @sa NavDestinationPattern::EnableTitleBarSwipe
+         */
+        NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(nodeBase, toolBarNode, 0.0f, false);
+    }
     /**
      * 1. At the initial state, animation is not required;
      * 2. When toolbar is displayed at Title's menu position, no animation is needed for the toolbar.

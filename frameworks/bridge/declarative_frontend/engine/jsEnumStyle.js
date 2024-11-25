@@ -247,6 +247,15 @@ var ImageRenderMode;
   ImageRenderMode[ImageRenderMode["Template"] = 1] = "Template";
 })(ImageRenderMode || (ImageRenderMode = {}));
 
+var ImageRotateOrientation;
+(function (ImageRotateOrientation) {
+  ImageRotateOrientation[ImageRotateOrientation["AUTO"] = 0] = "AUTO";
+  ImageRotateOrientation[ImageRotateOrientation["UP"] = 1] = "UP";
+  ImageRotateOrientation[ImageRotateOrientation["RIGHT"] = 2] = "RIGHT";
+  ImageRotateOrientation[ImageRotateOrientation["DOWN"] = 3] = "DOWN";
+  ImageRotateOrientation[ImageRotateOrientation["LEFT"] = 4] = "LEFT";
+})(ImageRotateOrientation || (ImageRotateOrientation = {}));
+
 var ImageInterpolation;
 (function (ImageInterpolation) {
   ImageInterpolation[ImageInterpolation["None"] = 0] = "None";
@@ -983,14 +992,6 @@ var TextAreaType;
   TextAreaType[TextAreaType["URL"] = 13] = "URL";
 })(TextAreaType || (TextAreaType = {}));
 
-var AutoCapitalizationMode;
-(function (AutoCapitalizationMode) {
-  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
-  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
-  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
-  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
-})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
-
 var EnterKeyType;
 (function (EnterKeyType) {
   EnterKeyType[EnterKeyType["Go"] = 2] = "Go";
@@ -1237,6 +1238,12 @@ var OverScrollMode;
   OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
   OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
 })(OverScrollMode || (OverScrollMode = {}));
+
+var BlurOnKeyboardHideMode;
+(function (BlurOnKeyboardHideMode) {
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["SILENT"] = 0] = "SILENT";
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["BLUR"] = 1] = "BLUR";
+})(BlurOnKeyboardHideMode || (BlurOnKeyboardHideMode = {}));
 
 var RenderExitReason;
 (function (RenderExitReason) {
@@ -2042,7 +2049,7 @@ class TextMenuItemId {
   static get CUT() {
     return new TextMenuItemId('OH_DEFAULT_CUT');
   }
-  
+
   static get COPY() {
     return new TextMenuItemId('OH_DEFAULT_COPY');
   }

@@ -804,6 +804,15 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
 {
+    if (spanItemType == SpanItemType::NORMAL) {
+        // ImageSpan(resource)场景，复制图片为属性字符串为空格。ImageSpanItem::GetSameStyleSpanItem获取到的spanItemType为NORMAL
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
+        TLVUtil::WriteInt32(buff, interval.first);
+        TLVUtil::WriteInt32(buff, interval.second);
+        TLVUtil::WriteString(buff, content);
+        TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
+        return true;
+    }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
@@ -949,7 +958,16 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
     if (options.HasValue()) {
         sameSpan->SetImageSpanOptions(options);
     } else {
+        // 用与Text控件复制ImageSpan子控件，生成并保存options数据
         sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+        if (!(sameSpan->options.imagePixelMap.value())) {
+            /*
+                ImageSpan子控件，存在resource和pixelMap两种来源。
+                ImageSpan(resource)场景，复制图片为属性字符串为空格。
+                因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
+            */
+            sameSpan->spanItemType = SpanItemType::NORMAL;
+        }
     }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;

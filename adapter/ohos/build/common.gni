@@ -23,7 +23,6 @@ defines = [
 declare_args() {
   ace_engine_feature_enable_accessibility = false
   ace_engine_feature_enable_web = false
-  ace_engine_feature_enable_video = true
 }
 
 js_engines = []
@@ -46,14 +45,6 @@ if (ace_engine_feature_enable_accessibility) {
 
 if (ace_engine_feature_enable_web) {
   web_components_support = true
-}
-
-if (ace_engine_feature_enable_video) {
-  video_components_support = true
-  video_support_jsstack = true
-} else {
-  video_components_support = false
-  video_support_jsstack = false
 }
 
 use_build_in_js_engine = true
@@ -85,6 +76,8 @@ if (defined(global_parts_info.inputmethod_imf)) {
 build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
+video_components_support = true
+video_support_jsstack = true
 image_components_support = true
 preview_support = false
 if (defined(global_parts_info.distributeddatamgr_pasteboard)) {

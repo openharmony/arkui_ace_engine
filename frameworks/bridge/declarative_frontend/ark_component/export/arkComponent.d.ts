@@ -99,6 +99,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onTouch(event: (event?: TouchEvent) => void): this;
     onKeyEvent(event: (event?: KeyEvent) => void): this;
     focusable(value: boolean): this;
+    tabStop(value: boolean): this;
     onFocus(event: () => void): this;
     onBlur(event: () => void): this;
     tabIndex(index: number): this;
@@ -333,6 +334,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     fillColor(value: ResourceColor): this;
     objectFit(value: ImageFit): this;
     objectRepeat(value: ImageRepeat): this;
+    orientation(value: ImageRotateOrientation): this;
     autoResize(value: boolean): this;
     renderMode(value: ImageRenderMode): this;
     interpolation(value: ImageInterpolation): this;
@@ -909,6 +911,8 @@ declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     initialOffset(value: OffsetOptions): this;
     flingSpeedLimit(value: number): this;
+    onReachStart(event: () => void): this;
+    onReachEnd(event: () => void): this;
 }
 declare class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1772,10 +1776,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this;
     onScrollIndex(event: (start: number, end: number, center: number) => void): this;
-    onReachStart(event: () => void): this;
-    onReachEnd(event: () => void): this;
-    onScrollStart(event: () => void): this;
-    onScrollStop(event: () => void): this;
+    onScrollVisibleContentChange(callback: OnScrollVisibleContentChangeCallback): this;
     onItemDelete(event: (index: number) => boolean): this;
     onItemMove(event: (from: number, to: number) => boolean): this;
     onItemDragStart(event: (event: ItemDragInfo, itemIndex: number) => void | (() => any)): this;
@@ -1786,6 +1787,13 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollFrameBegin(event: (offset: number, state: ScrollState) => {
         offsetRemain: number;
     }): this;
+    onWillScroll(callback: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this;
+    onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this;
+    onReachStart(event: () => void): this;
+    onReachEnd(event: () => void): this;
+    onScrollStart(event: () => void): this;
+    onScrollStop(event: () => void): this;
     fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     childrenMainSize(value: ChildrenMainSize): this;
 }
@@ -1985,6 +1993,7 @@ declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWin
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
+    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
@@ -2006,11 +2015,6 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
     fontWeight(value: number | FontWeight | string): SymbolSpanAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolSpanAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolSpanAttribute;
-}
-
-declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
-    constructor(nativePtr: KNode, classType?: ModifierType);
-    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }
 
 declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {

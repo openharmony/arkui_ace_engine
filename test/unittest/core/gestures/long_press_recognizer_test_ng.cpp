@@ -73,8 +73,6 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest001, TestSize.Level1)
      * @tc.steps: case3: onLongPress, empty, !repeat
      * @tc.expected: step2. result equals.
      */
-    onLongPress = [](LongPressInfo) {};
-    longPressRecognizer.onLongPress_ = onLongPress;
     longPressRecognizer.touchPoints_.clear();
     longPressRecognizer.repeat_ = false;
     longPressRecognizer.OnAccepted();

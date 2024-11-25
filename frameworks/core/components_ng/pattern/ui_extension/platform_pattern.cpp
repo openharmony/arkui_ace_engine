@@ -196,9 +196,12 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(pointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    const auto& changedTouches = info.GetChangedTouches();
+    if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -231,7 +234,7 @@ void PlatformPattern::HandleHoverEvent(bool isHover)
     DispatchPointerEvent(lastPointerEvent_);
 }
 
-void PlatformPattern::HandleDragEvent(const PointerEvent& info)
+void PlatformPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     const auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
@@ -239,7 +242,7 @@ void PlatformPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host);
+    Platform::CalculatePointerEvent(pointerEvent, host, true);
     DispatchPointerEvent(pointerEvent);
 }
 

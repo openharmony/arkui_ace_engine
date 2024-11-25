@@ -36,6 +36,8 @@ template("ace_capability_ohos_source_set") {
       "time/time_event_proxy_ohos.cpp",
     ]
     include_dirs = []
+
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     external_deps = [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_model.h"
@@ -66,6 +67,7 @@ public:
     void SetSmoothEdge(float value) override;
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
+    void SetOrientation(ImageRotateOrientation orientation) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
@@ -87,6 +89,7 @@ public:
     static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
+    static void SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
     static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);

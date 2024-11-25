@@ -225,6 +225,14 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
     }
     return maxGridCounts;
 }
+
+RefPtr<NG::MenuTheme> GetMenuTheme(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    return pipelineContext->GetTheme<NG::MenuTheme>();
+}
 } // namespace
 
 MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
@@ -301,9 +309,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    auto menuTheme = GetMenuTheme(menuNode);
     CHECK_NULL_VOID(menuTheme);
     auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
     auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();
@@ -323,6 +329,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitializeParam(menuPattern);
+    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+        position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
+        TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
+            position_.ToString().c_str());
+    }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -335,6 +346,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     }
     dumpInfo_.defaultPlacement = PlacementUtils::ConvertPlacementToString(placement_);
     InitSpace(props, menuPattern);
+    holdEmbeddedMenuPosition_ = HoldEmbeddedMenuPosition(layoutWrapper);
+    auto previewRect = menuPattern->GetPreviewRect();
+    previewOriginOffset_ = menuPattern->GetPreviewOriginOffset();
+    previewOffset_ = previewRect.GetOffset();
+    previewSize_ = previewRect.GetSize();
 }
 
 void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern)
@@ -441,6 +457,12 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !isTargetNodeInSubwindow_) {
+        wrapperRect_ = param_.menuWindowRect;
+        wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
+        dumpInfo_.wrapperRect = wrapperRect_;
+        return;
+    }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -463,7 +485,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (canExpandCurrentWindow_ && isContainerModal) {
+        if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_);
         }
         isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
@@ -684,8 +706,10 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
-    if (!constraint) return;
-    
+    if (!constraint) {
+        return;
+    }
+
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::VERTICAL, menuLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT), true);
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
@@ -868,9 +892,41 @@ void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameN
     }
 }
 
-void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
-    RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
+void MenuLayoutAlgorithm::CheckPreviewSize(
+    const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern)
 {
+    CHECK_NULL_VOID(previewLayoutWrapper && menuPattern);
+    auto previewNode = previewLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(previewNode);
+    auto tag = previewNode->GetTag();
+    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isPreview);
+
+    auto previewGeometryNode = previewNode->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize();
+
+    if (menuPattern->GetIsFirstShow()) {
+        menuPattern->SetPreviewIdealSize(previewSize);
+        return;
+    }
+
+    if (previewSize != menuPattern->GetPreviewIdealSize()) {
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto constraint = menuWrapperPattern->GetChildLayoutConstraint();
+        CHECK_NULL_VOID(constraint.maxSize.IsPositive() && constraint.percentReference.IsPositive());
+        previewLayoutWrapper->Measure(constraint);
+        menuPattern->SetPreviewIdealSize(previewGeometryNode->GetMarginFrameSize());
+    }
+}
+
+void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
+    RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, const RefPtr<LayoutWrapper>& menuLayoutWrapper)
+{
+    CHECK_NULL_VOID(child);
     auto hostNode = child->GetHostNode();
     auto geometryNode = child->GetGeometryNode();
     if (!hostNode || !geometryNode) {
@@ -884,7 +940,14 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
         return;
     }
 
-    if (isImageNode && isShowHoverImage) {
+    CHECK_NULL_VOID(menuLayoutWrapper);
+    auto menuNode = menuLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    CheckPreviewSize(child, menuPattern);
+
+    if (isImageNode && menuPattern->GetIsShowHoverImage()) {
         return;
     }
 
@@ -919,7 +982,7 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         if (!hostNode || !geometryNode) {
             continue;
         }
-        GetPreviewNodeTotalSize(child, param_.menuWindowRect, previewLayoutWrapper, size, isShowHoverImage);
+        GetPreviewNodeTotalSize(child, param_.menuWindowRect, previewLayoutWrapper, size, menuLayoutWrapper);
         auto menuPattern = hostNode->GetPattern<MenuPattern>();
         if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
@@ -1368,6 +1431,7 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
+    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 }
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
@@ -1507,7 +1571,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE && !holdEmbeddedMenuPosition_) {
         LayoutPreviewMenu(layoutWrapper);
     }
     if (!menuPattern->IsSelectOverlayCustomMenu()) {
@@ -1520,10 +1584,19 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
         }
-        auto menuPosition = lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)
-                                ? lastPosition_.value()
-                                : MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
+        OffsetF menuPosition;
+        auto useLastPosition = lastPosition_.has_value() && holdEmbeddedMenuPosition_;
+        if (useLastPosition) {
+            menuPosition = lastPosition_.value();
+            auto lastArrowPlacement = menuPattern->GetLastArrowPlacement();
+            if (lastArrowPlacement.has_value()) {
+                arrowPlacement_ = lastArrowPlacement.value();
+            }
+        } else {
+            menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
+        }
         menuPattern->UpdateLastPosition(menuPosition);
+        menuPattern->UpdateLastArrowPlacement(arrowPlacement_);
         CalculateChildOffset(didNeedArrow);
         OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
         TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
@@ -1979,7 +2052,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-    if (lastPosition_.has_value() && CheckIsEmbeddedMode(layoutWrapper)) {
+    if (lastPosition_.has_value() && holdEmbeddedMenuPosition_) {
         auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
         if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             spaceToBottom -= param_.bottomSecurity;
@@ -2169,6 +2242,10 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     CHECK_NULL_RETURN(layoutWrapper, OffsetF());
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(menuNode, OffsetF());
+    auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
+    if (menuLayoutProperty && menuLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        return menuNode->GetPaintRectOffset(true);
+    }
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
@@ -2470,23 +2547,21 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
-    OffsetF tempPos = position;
+    auto leftOutside = LessNotEqual(x, rect.Left());
+    auto rightOutside = GreatNotEqual(x + childSize.Width(), rect.Right());
+    auto topOutside = LessNotEqual(y, rect.Top());
+    auto bottomOutside = GreatNotEqual(y + childSize.Height(), rect.Bottom());
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "CheckPositionInPlacementRect, leftOutside : %{public}d, rightOutside : %{public}d, topOutside : %{public}d, "
+        "bottomOutside : %{public}d",
+        leftOutside, rightOutside, topOutside, bottomOutside);
+    auto outside = leftOutside || rightOutside || topOutside || bottomOutside;
     if (state_ != prevState_) {
         if (prevState_ == -1) {
             prevState_ = state_;
             preOffset_ = position;
-            preOffset_.SetX(x);
-            preOffset_.SetY(y);
-            preRect_.SetOffset(rect.GetOffset());
-            preRect_.SetSize(rect.GetSize());
-            auto outside = LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
-                           LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom());
+            preRect_ = rect;
             if (!outside) {
-                preOffset_ = position;
-                preOffset_.SetX(x);
-                preOffset_.SetY(y);
-                preRect_.SetOffset(rect.GetOffset());
-                preRect_.SetSize(rect.GetSize());
                 return true;
             }
             flag_ = true;
@@ -2495,15 +2570,9 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
         }
         return CheckPlacement(childSize);
     }
-    x = tempPos.GetX();
-    y = tempPos.GetY();
-    if (LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
-        LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom())) {
+    if (outside) {
         preOffset_ = position;
-        preOffset_.SetX(x);
-        preOffset_.SetY(y);
-        preRect_.SetOffset(rect.GetOffset());
-        preRect_.SetSize(rect.GetSize());
+        preRect_ = rect;
         return false;
     }
     return true;
@@ -2513,12 +2582,19 @@ bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
 {
     auto x = preOffset_.GetX();
     auto y = preOffset_.GetY();
+    auto leftOutside = LessNotEqual(x, preRect_.Left());
+    auto rightOutside = GreatNotEqual(x + childSize.Width(), preRect_.Right());
+    auto topOutside = LessNotEqual(y, preRect_.Top());
+    auto bottomOutside = GreatNotEqual(y + childSize.Height(), preRect_.Bottom());
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "CheckPlacement, leftOutside : %{public}d, rightOutside : %{public}d, topOutside : %{public}d, "
+        "bottomOutside : %{public}d",
+        leftOutside, rightOutside, topOutside, bottomOutside);
 
     switch (prevState_) {
         case static_cast<int>(DirectionState::Bottom_Direction):
         case static_cast<int>(DirectionState::Top_Direction): {
-            if ((LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right())) &&
-                !(LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom()))) {
+            if ((leftOutside || rightOutside) && !(topOutside || bottomOutside)) {
                 placement_ = Placement::NONE;
                 return true;
             }
@@ -2526,8 +2602,7 @@ bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
         }
         case static_cast<int>(DirectionState::Right_Direction):
         case static_cast<int>(DirectionState::Left_Direction): {
-            if ((LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom())) &&
-                !(LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()))) {
+            if ((topOutside || bottomOutside) && !(leftOutside || rightOutside)) {
                 placement_ = Placement::NONE;
                 return true;
             }
@@ -2594,6 +2669,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTop(
     const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition)
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTop : %{public}s", topPosition.ToString().c_str());
     return topPosition;
 }
 
@@ -2605,6 +2681,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTopLeft(
     float marginBottom = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - marginRight, targetOffset_.GetY() - childSize.Height() - marginBottom - targetSpace_);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTopLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2616,12 +2693,14 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementTopRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
         targetOffset_.GetY() - childSize.Height() - targetSpace_ - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementTopRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
 OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottom(
     const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition)
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottom : %{public}s", bottomPosition.ToString().c_str());
     return bottomPosition;
 }
 
@@ -2633,6 +2712,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottomLeft(
     float marginTop = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - marginRight, targetOffset_.GetY() + targetSize_.Height() + targetSpace_ + marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottomLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2644,6 +2724,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementBottomRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() + targetSpace_ + marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementBottomRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2654,6 +2735,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeft(
     float marginRight = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight,
         targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeft : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2665,6 +2747,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeftTop(
     float marginBottom = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight, targetOffset_.GetY() - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeftTop : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2676,6 +2759,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementLeftBottom(
     float marginTop = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() - targetSpace_ - childSize.Width() - marginRight,
         targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementLeftBottom : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2686,6 +2770,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRight(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() / 2.0 - childSize.Height() / 2.0);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRight : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2697,6 +2782,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightTop(
     float marginLeft = 0.0f;
     childPosition = OffsetF(
         targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft, targetOffset_.GetY() - marginBottom);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRightTop : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2708,6 +2794,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     float marginLeft = 0.0f;
     childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace_ + marginLeft,
         targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+    TAG_LOGI(AceLogTag::ACE_MENU, "GetPositionWithPlacementRightBottom : %{public}s", childPosition.ToString().c_str());
     return childPosition;
 }
 
@@ -2790,7 +2877,7 @@ void MenuLayoutAlgorithm::ModifyTargetOffset()
     }
 }
 
-bool MenuLayoutAlgorithm::CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper)
+bool MenuLayoutAlgorithm::HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper)
 {
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(menuNode, false);
@@ -2806,7 +2893,8 @@ bool MenuLayoutAlgorithm::CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(innerMenuPattern, false);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, false);
-    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
+    return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED &&
+           menuWrapperPattern->GetEmbeddedSubMenuExpandTotalCount() > 0;
 }
 
 std::string MenuLayoutAlgorithm::MoveTo(double x, double y)
@@ -2974,7 +3062,14 @@ void MenuLayoutAlgorithm::NormalizeBorderRadius(float& radiusTopLeftPx, float& r
 
 std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow)
 {
-    std::string path;
+    CHECK_NULL_RETURN(layoutWrapper, "");
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(menuNode, "");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, "");
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, "");
+    auto menuPosition = renderContext->GetPositionValue(OffsetT<Dimension>());
     BorderRadiusProperty menuBorderRadius = GetMenuRadius(layoutWrapper, childMarginFrameSize_);
     float radiusTopLeftPx = menuBorderRadius.radiusTopLeft.value_or(Dimension())
         .ConvertToPxWithSize(childMarginFrameSize_.Width());
@@ -2985,7 +3080,30 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
     float radiusBottomRightPx = menuBorderRadius.radiusBottomRight.value_or(Dimension())
         .ConvertToPxWithSize(childMarginFrameSize_.Width());
     NormalizeBorderRadius(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx);
-
+    auto targetOffset = OffsetF(menuPosition.GetX().ConvertToPx(), menuPosition.GetY().ConvertToPx());
+    if (menuPattern->GetMenuType() == MenuType::SUB_MENU) {
+        const auto& geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, "");
+        targetOffset = geometryNode->GetMarginFrameOffset();
+    }
+    auto childOffset = targetOffset + childOffset_;
+    auto arrowPosition = targetOffset + arrowPosition_;
+    MenuPathParams params = {
+        radiusTopLeftPx,
+        radiusTopRightPx,
+        radiusBottomLeftPx,
+        radiusBottomRightPx,
+        childOffset,
+        childMarginFrameSize_,
+        arrowPosition,
+        arrowPlacement_,
+        didNeedArrow,
+    };
+    menuPattern->UpdateMenuPathParams(params);
+    if (!didNeedArrow) {
+        return "";
+    }
+    std::string path;
     path += MoveTo(childOffset_.GetX() + radiusTopLeftPx, childOffset_.GetY());
     path += BuildTopLinePath(arrowPosition_, radiusTopRightPx, arrowPlacement_, didNeedArrow);
     path += BuildRightLinePath(arrowPosition_, radiusBottomRightPx, arrowPlacement_, didNeedArrow);
@@ -2997,10 +3115,6 @@ std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper,
 void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
 {
     bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
-    if (didNeedArrow) {
-        clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
-    } else {
-        clipPath_ = "";
-    }
+    clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
 }
 } // namespace OHOS::Ace::NG

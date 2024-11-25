@@ -127,14 +127,6 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
-}
-
 void FindListenerImpl::OnFindResultReceived(
     const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting)
 {
@@ -517,7 +509,7 @@ bool WebClientImpl::OnFileSelectorShow(
 void WebClientImpl::OnResource(const std::string& url)
 {
     // Don't use RefPtr<WebDelegate> object here!
-    // OnResource will be called in Chrome_IOThread. When the RefPtr object is
+    // OnResource will be called in a background thread. When the RefPtr object is
     // the last reference, the destructor will be called here, which may cause
     // js-object-releasing of WebDelegate in non-main thread.
     auto task = Container::CurrentTaskExecutorSafely();
@@ -1301,5 +1293,15 @@ bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslError
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
     return jsResult;
+}
+
+void WebClientImpl::OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d",
+        accessibilityId, eventType);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
 } // namespace OHOS::Ace

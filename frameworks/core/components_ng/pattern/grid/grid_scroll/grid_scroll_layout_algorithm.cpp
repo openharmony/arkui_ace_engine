@@ -2305,7 +2305,7 @@ bool GridScrollLayoutAlgorithm::SkipLargeLineHeightLines(float mainSize)
         }
     }
     if (needSkip) {
-        auto totalViewHeight = info_.GetTotalHeightOfItemsInView(mainGap_, true);
+        auto totalViewHeight = info_.GetTotalHeightOfItemsInView(mainGap_);
         auto needSkipHeight = totalViewHeight + info_.prevOffset_ + mainGap_;
         if (GreatOrEqual(needSkipHeight, -info_.currentOffset_)) {
             return false;

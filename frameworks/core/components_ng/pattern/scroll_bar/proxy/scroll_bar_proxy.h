@@ -29,7 +29,7 @@ struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
     std::function<bool(double, int32_t source, bool)> onPositionChanged;
     std::function<bool(double, int32_t source, bool)> scrollStartCallback;
-    std::function<void()> scrollEndCallback;
+    std::function<void(bool)> scrollEndCallback;
     StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
     std::function<void(bool, bool smooth)> scrollPageCallback;

@@ -1032,7 +1032,7 @@ class ImageMenuItem extends ViewPU {
     this.observeComponentCreation((u1, v1) => {
       ViewStackProcessor.StartGetAccessRecordingFor(u1);
       Row.create();
-      Row.enabled(this.item.isEnabled);
+      Row.enabled(this.item.isEnabled ? this.item.isEnabled : false);
       Row.width(ImageMenuItem.imageHotZoneWidth);
       Row.height(ImageMenuItem.imageHotZoneWidth);
       Row.borderRadius(ImageMenuItem.buttonBorderRadius);

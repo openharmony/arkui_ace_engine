@@ -104,6 +104,11 @@ public:
         return maxListItemIndex_;
     }
 
+    int32_t GetStartIndexInItemPosition() const
+    {
+        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
+    }
+
     bool IsScrollable() const override
     {
         return isScrollable_;
@@ -345,6 +350,8 @@ public:
         return canOverScroll;
     }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
+
+    SizeF GetChildrenExpandedSize() override;
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -399,7 +406,7 @@ private:
     bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
-        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
+        const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);

@@ -84,9 +84,9 @@ void DragDropBehaviorReporter::Reset()
 
 void DragDropBehaviorReporter::Submit(DragReporterPharse pharse, int32_t containerId)
 {
-    std::string dragBehavior = pharse == DragReporterPharse::DRAG_START ? "DRAG_START" : "DRAG_STOP";
-    int32_t result = pharse == DragReporterPharse::DRAG_START
-                     ? static_cast<int32_t>(startResult_) : static_cast<int32_t>(stopResult_);
+    bool isStart = pharse == DragReporterPharse::DRAG_START;
+    std::string dragBehavior = isStart ? "DRAG_START" : "DRAG_STOP";
+    int32_t result = isStart ? static_cast<int32_t>(startResult_) : static_cast<int32_t>(stopResult_);
     std::string allowDropTypes;
     for (const auto& type: allowDropType_) {
         std::string str = type + ";";

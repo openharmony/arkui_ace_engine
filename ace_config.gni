@@ -61,6 +61,12 @@ declare_args() {
 
   # Enable navigation split mode support
   ace_engine_feature_enable_nav_split_mode = false
+
+  # Enable aps framework support
+  ace_engine_feature_enable_aps = false
+
+  # Enable wearable product support
+  ace_engine_feature_wearable = false
 }
 
 enable_dump_drawcmd = false
@@ -262,10 +268,9 @@ if (defined(global_parts_info) &&
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.graphic_graphic_2d_ext)) {
-  aps_enable = true
-  ace_common_defines += [ "APS_ENABLE" ]
-} else {
-  aps_enable = false
+  if (ace_engine_feature_enable_aps) {
+    ace_common_defines += [ "APS_ENABLE" ]
+  }
 }
 
 if (ace_engine_feature_asbng_path == "") {
@@ -313,4 +318,8 @@ if (ace_engine_feature_enable_split_mode) {
 
 if (ace_engine_feature_enable_nav_split_mode) {
   ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
+}
+
+if (ace_engine_feature_wearable) {
+  ace_common_defines += [ "ARKUI_WEARABLE" ]
 }

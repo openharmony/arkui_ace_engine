@@ -280,9 +280,10 @@ public:
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
+    static void SetTabStop(bool tabStop);
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
-    static void SetOnKeyEvent(OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnKeyEvent(OnKeyConsumeFunc &&onKeyCallback);
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
@@ -414,6 +415,7 @@ public:
     static void DisableOnDisappear(FrameNode* frameNode);
     static void DisableOnAttach(FrameNode* frameNode);
     static void DisableOnDetach(FrameNode* frameNode);
+    static void DisableOnPreDrag(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -548,6 +550,7 @@ public:
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetTabStop(FrameNode* frameNode, bool tabStop);
     static void SetFocusType(FrameNode* frameNode, FocusType type);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
@@ -640,7 +643,7 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave);
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
-    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -654,6 +657,7 @@ public:
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
 
     static bool GetFocusable(FrameNode* frameNode);
+    static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
@@ -775,8 +779,8 @@ public:
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);
-    static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
-    static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
+    static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
+    static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
 
 private:
     static void AddDragFrameNodeToManager();

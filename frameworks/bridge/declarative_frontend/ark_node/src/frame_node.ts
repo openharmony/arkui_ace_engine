@@ -101,7 +101,9 @@ class FrameNode {
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
     this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
     if (this._nodeId === -1) {
       return;
     }
@@ -126,7 +128,7 @@ class FrameNode {
     return this.nodePtr_;
   }
   getValidNodePtr(): NodePtr {
-    if (this._nativeRef) {
+    if (this.nodePtr_) {
       return this.nodePtr_;
     } else {
       throw Error('The FrameNode has been disposed!');
@@ -172,11 +174,15 @@ class FrameNode {
 
   convertToFrameNode(nodePtr: NodePtr, nodeId: number = -1): FrameNode | null {
     if (nodeId === -1) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       let frameNode = new ProxyFrameNode(this.uiContext_);
       let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
       frameNode.setNodePtr(node);
       frameNode._nodeId = nodeId;
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -349,8 +355,10 @@ class FrameNode {
   }
 
   getParent(): FrameNode | null {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
     const nodeId = result?.nodeId;
+    __JSScopeUtil__.restoreInstanceId();
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
@@ -362,36 +370,38 @@ class FrameNode {
   }
 
   getChildrenCount(isExpanded?: boolean): number {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   getPositionToParent(): Position {
-    const position = getUINativeModule().frameNode.getPositionToParent(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
   getPositionToScreen(): Position {
-    const position = getUINativeModule().frameNode.getPositionToScreen(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
   getPositionToWindow(): Position {
-    const position = getUINativeModule().frameNode.getPositionToWindow(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
   getPositionToParentWithTransform(): Position {
-    const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
   getPositionToScreenWithTransform(): Position {
-    const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
   getPositionToWindowWithTransform(): Position {
-    const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getValidNodePtr());
+    const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -406,7 +416,7 @@ class FrameNode {
   }
 
   getUserConfigBorderWidth(): EdgesT<LengthMetrics> {
-    const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.getValidNodePtr());
+    const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.getNodePtr());
     return {
       top: new LengthMetrics(borderWidth[0], borderWidth[1]),
       right: new LengthMetrics(borderWidth[2], borderWidth[3]),
@@ -416,7 +426,7 @@ class FrameNode {
   }
 
   getUserConfigPadding(): EdgesT<LengthMetrics> {
-    const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.getValidNodePtr());
+    const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.getNodePtr());
     return {
       top: new LengthMetrics(borderWidth[0], borderWidth[1]),
       right: new LengthMetrics(borderWidth[2], borderWidth[3]),
@@ -426,7 +436,7 @@ class FrameNode {
   }
 
   getUserConfigMargin(): EdgesT<LengthMetrics> {
-    const margin = getUINativeModule().frameNode.getConfigMargin(this.getValidNodePtr());
+    const margin = getUINativeModule().frameNode.getConfigMargin(this.getNodePtr());
     return {
       top: new LengthMetrics(margin[0], margin[1]),
       right: new LengthMetrics(margin[2], margin[3]),
@@ -436,7 +446,7 @@ class FrameNode {
   }
 
   getUserConfigSize(): SizeT<LengthMetrics> {
-    const size = getUINativeModule().frameNode.getConfigSize(this.getValidNodePtr());
+    const size = getUINativeModule().frameNode.getConfigSize(this.getNodePtr());
     return {
       width: new LengthMetrics(size[0], size[1]),
       height: new LengthMetrics(size[2], size[3])
@@ -472,7 +482,9 @@ class FrameNode {
   }
 
   getInspectorInfo(): Object {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
   }
@@ -509,7 +521,9 @@ class FrameNode {
   }
 
   layout(position: Position): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   setNeedsLayout(): void {

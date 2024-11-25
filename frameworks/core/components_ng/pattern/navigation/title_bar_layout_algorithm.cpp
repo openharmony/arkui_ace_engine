@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
@@ -536,11 +537,6 @@ float TitleBarLayoutAlgorithm::GetFullModeTitleOffsetY(float titleHeight, float 
     OffsetF titleOffset = OffsetF(0.0f, 0.0f);
     float offsetY = 0.0f;
     auto titleSpace = titleBarHeight - menuHeight_ - static_cast<float>(paddingTopTwolines_.ConvertToPx());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) &&
-        needToAvoidSideBar_) {
-        titleSpace = titleBarHeight - std::max(sideBarAvoidY_, menuHeight_) -
-            static_cast<float>(paddingTopTwolines_.ConvertToPx());
-    }
     auto titleRealHeight = titleHeight + subtitleHeight + navTitleSpaceVertical_;
     float dividerOffset = 2.0f;
     if (NearZero(subtitleHeight) && titleHeight < titleBarHeight - menuHeight_) {
@@ -722,49 +718,38 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
         if (!textLayoutProperty) {
             // current title mode is Navigation common title
-            OffsetF titleOffset = OffsetF(offsetX, std::max(sideBarAvoidY_, menuHeight_) + offsetY);
+            OffsetF titleOffset = OffsetF(offsetX, menuHeight_+ offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;
         }
         MeasureContext context;
-        context.textContent = textLayoutProperty->GetContentValue();
+        context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
         context.fontSize = titleFontSize_;
 #ifdef ENABLE_ROSEN_BACKEND
         minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
 #else
         minTitleHeight_ = 0.0;
 #endif
-        initialTitleOffsetY_ = std::max(sideBarAvoidY_, menuHeight_) + offsetY;
+        initialTitleOffsetY_ = menuHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);
         titlePattern->SetCurrentTitleOffsetY(initialTitleOffsetY_);
-        // offsetX can be the absolute value when changeOffsetByDirection twice
-        auto absoluteDragOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
-        // offsetX to deal with drag must be the absolute value
-        titlePattern->SetCurrentTitleOffsetX(absoluteDragOffsetX);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
 
     if (NearZero(titlePattern->GetTempTitleOffsetY())) {
-        initialTitleOffsetY_ = std::max(sideBarAvoidY_, menuHeight_) + offsetY;
+        initialTitleOffsetY_ = menuHeight_ + offsetY;
         titlePattern->SetCurrentTitleOffsetY(initialTitleOffsetY_);
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);
-        // offsetX avoid sideBarButton can be the absolute value when changeOffsetByDirection twice
-        auto absoluteDragOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
-        // offsetX to deal with drag must be the absolute value
-        titlePattern->SetCurrentTitleOffsetX(absoluteDragOffsetX);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
     auto overDragOffset = titlePattern->GetOverDragOffset();
-    auto dragOffsetY = titlePattern->GetTempTitleOffsetY() + overDragOffset / OVERDRAG_DIVIDE_NUM;
-    auto dragOffsetX = titlePattern->GetTempTitleOffsetX();
-    dragOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, dragOffsetX);
-    auto titleOffset = OffsetF(dragOffsetX, dragOffsetY);
+    auto titleOffset = OffsetF(offsetX, titlePattern->GetTempTitleOffsetY() + overDragOffset / OVERDRAG_DIVIDE_NUM);
     titlePattern->SetCurrentTitleOffsetY(titleOffset.GetY());
     geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
@@ -831,7 +816,6 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
         offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         initialSubtitleOffsetY_ = menuHeight_ + offsetY;
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
-            initialSubtitleOffsetY_ = std::max(sideBarAvoidY_, menuHeight_) + offsetY;
             if (isInitialSubtitle_) {
                 isInitialSubtitle_ = false;
                 OffsetF titleOffset = OffsetF(offsetX, initialSubtitleOffsetY_);
@@ -849,10 +833,8 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
                 return;
             }
             auto overDragOffset = titlePattern->GetOverDragOffset();
-            auto dragOffsetY = titlePattern->GetTempSubTitleOffsetY() + overDragOffset / OVERDRAG_DIVIDE_NUM;
-            auto dragOffsetX = titlePattern->GetTempSubTitleOffsetX();
-            dragOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, dragOffsetX);
-            OffsetF titleOffset = OffsetF(dragOffsetX, dragOffsetY);
+            OffsetF titleOffset = OffsetF(
+                offsetX, titlePattern->GetTempSubTitleOffsetY() + overDragOffset / OVERDRAG_DIVIDE_NUM);
             geometryNode->SetMarginFrameOffset(titleOffset);
             subtitleWrapper->Layout();
             return;
@@ -1031,12 +1013,6 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
     titleMaxWidth = WidthAfterAvoidMenubar(titleBarNode, titleMaxWidth);
-    if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR &&
-        layoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
-        // update sideBar Button relative info
-        GetSideBarButtonInfo(titleBarNode);
-        titleMaxWidth = WidthAfterAvoidSideBar(titleBarNode, titleMaxWidth);
-    }
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     titlePattern->SetCurrentTitleBarHeight(size.Height());
@@ -1093,28 +1069,5 @@ float TitleBarLayoutAlgorithm::ChangeOffsetByDirection(LayoutWrapper* layoutWrap
         offsetX = parentWidth - offsetX - childGeometryNode->GetFrameSize().Width();
     }
     return offsetX;
-}
-
-float TitleBarLayoutAlgorithm::WidthAfterAvoidSideBar(const RefPtr<TitleBarNode>& titleBarNode, float width)
-{
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, width);
-    if (needToAvoidSideBar_) {
-        return width - titlePattern->GetTempTitleOffsetX() + paddingLeft_;
-    }
-    return width;
-}
-
-void TitleBarLayoutAlgorithm::GetSideBarButtonInfo(const RefPtr<TitleBarNode>& titleBarNode)
-{
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    needToAvoidSideBar_ = titlePattern->IsNecessaryToAvoidSideBar();
-    if (!needToAvoidSideBar_) {
-        sideBarAvoidY_ = 0.0f;
-        return;
-    }
-    auto sideBarRectF = titlePattern->GetControlButtonInfo();
-    sideBarAvoidY_ = sideBarRectF.Height() + sideBarRectF.GetY();
 }
 } // namespace OHOS::Ace::NG

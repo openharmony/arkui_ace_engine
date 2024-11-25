@@ -606,6 +606,10 @@ public:
 
     static double GetSrollableFriction();
 
+    static bool IsNeedResampleTouchPoints();
+
+    static bool IsNeedSymbol();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

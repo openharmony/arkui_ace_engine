@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
+#include "bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -92,18 +93,21 @@ bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
     }
     return false;
 }
-
 } // namespace
 
 void JSNavDestination::Create()
 {
     NavDestinationModel::GetInstance()->Create();
+    NavDestinationModel::GetInstance()->SetScrollableProcessor(
+        []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
 }
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(
+            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
         return;
     }
 
@@ -122,6 +126,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
             ctx->SetNavPathInfo(navPathInfo);
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(
+                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
             return;
         } else if (info[0]->IsObject()) {
             // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB}
@@ -134,6 +140,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
             pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
             NavDestinationModel::GetInstance()->Create();
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(
+                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
             NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
             return;
         }
@@ -164,6 +172,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
         pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
         NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(
+            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
         NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
     }
 }
@@ -548,6 +558,26 @@ void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
 }
 
+void JSNavDestination::BindToScrollable(const JSCallbackInfo& info)
+{
+    auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToScrollable(info);
+    };
+    NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
+}
+
+void JSNavDestination::BindToNestedScrollable(const JSCallbackInfo& info)
+{
+    auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToNestedScrollable(info);
+    };
+    NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -579,6 +609,8 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("toolbarConfiguration", &JSNavDestination::SetToolBarConfiguration);
     JSClass<JSNavDestination>::StaticMethod("hideToolBar", &JSNavDestination::SetHideToolBar);
     JSClass<JSNavDestination>::StaticMethod("systemTransition", &JSNavDestination::SetSystemTransition);
+    JSClass<JSNavDestination>::StaticMethod("bindToScrollable", &JSNavDestination::BindToScrollable);
+    JSClass<JSNavDestination>::StaticMethod("bindToNestedScrollable", &JSNavDestination::BindToNestedScrollable);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

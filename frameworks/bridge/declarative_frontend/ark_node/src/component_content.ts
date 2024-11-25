@@ -47,6 +47,12 @@ class ComponentContent extends Content {
   public recycle(): void {
     this.builderNode_.recycle();
   }
+  public onReuseWithBindObject(param?: Object):void{
+    this.builderNode_.onReuseWithBindObject(param);
+  } 
+  public onRecycleWithBindObject():void{
+    this.builderNode_.onRecycleWithBindObject();
+  }
   public dispose(): void {
     this.detachFromParent();
     this.attachNodeRef_?.dispose();

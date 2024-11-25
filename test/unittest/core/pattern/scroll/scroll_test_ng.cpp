@@ -121,7 +121,7 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
     contentChildren_.clear();
     for (int32_t index = 0; index < childNumber; index++) {
         TextModelNG textModel;
-        textModel.Create("text");
+        textModel.Create(u"text");
         SetSize(layoutProperty_->GetAxis(), CalcLength(FILL_LENGTH), CalcLength(ITEM_MAIN_SIZE));
         contentChildren_.emplace_back(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         ViewStackProcessor::GetInstance()->Pop();

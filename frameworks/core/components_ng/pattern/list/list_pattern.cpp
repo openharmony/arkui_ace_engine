@@ -2212,7 +2212,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             if (!selectedZone.IsIntersectWith(itemGroupRect)) {
                 continue;
             }
-            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
+            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.GetOffset());
             continue;
         }
         auto itemPattern = item->GetPattern<ListItemPattern>();
@@ -2236,7 +2236,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 }
 
 void ListPattern::HandleCardModeSelectedEvent(
-    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop)
+    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset)
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
@@ -2254,7 +2254,8 @@ void ListPattern::HandleCardModeSelectedEvent(
         auto context = item->GetRenderContext();
         CHECK_NULL_VOID(context);
         auto itemRect = itemGeometry->GetFrameRect();
-        RectF itemRectInGroup(itemRect.GetX(), itemRect.GetY() + itemGroupTop, itemRect.Width(), itemRect.Height());
+        RectF itemRectInGroup(itemRect.GetX() + groupOffset.GetX(),
+            itemRect.GetY() + groupOffset.GetY(), itemRect.Width(), itemRect.Height());
         if (!selectedZone.IsIntersectWith(itemRectInGroup)) {
             itemPattern->MarkIsSelected(false);
         } else {
@@ -2714,5 +2715,26 @@ void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("isScrollEnd", isScrollEnd_);
     json->Put("IsAtTop", IsAtTop());
     json->Put("IsAtBottom", IsAtBottom());
+}
+
+SizeF ListPattern::GetChildrenExpandedSize()
+{
+    auto viewSize = GetViewSizeMinusPadding();
+    auto axis = GetAxis();
+    float estimatedHeight = 0.0f;
+    if (childrenSize_) {
+        estimatedHeight = listTotalHeight_;
+    } else if (!itemPosition_.empty()) {
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis);
+        calculate.GetEstimateHeightAndOffset(GetHost());
+        estimatedHeight = calculate.GetEstimateHeight();
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

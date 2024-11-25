@@ -921,7 +921,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest005, TestSize.Level1)
     focusHub->onPreFocusCallback_ = []() {};
     frameNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE, true);
     bool result = true;
-    focusHub->RequestFocusImmediately(false);
+    focusHub->RequestFocusImmediately();
     EXPECT_TRUE(result);
 }
 
@@ -968,35 +968,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNgtest007
- * @tc.desc: Test the function RequestFocusImmediately.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNgtest007, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->GetOrCreateFocusHub();
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    ASSERT_NE(focusHub, nullptr);
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    ASSERT_NE(context, nullptr);
-    context->isFocusingByTab_ = false;
-    focusHub->currentFocus_ = false;
-    focusHub->focusType_ = FocusType::NODE;
-    focusHub->focusable_ = true;
-    focusHub->parentFocusable_ = true;
-    eventHub->enabled_ = true;
-    focusHub->onPreFocusCallback_ = []() {};
-    frameNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE, true);
-    bool result = true;
-    focusHub->RequestFocusImmediately(true);
-    EXPECT_TRUE(result);
-}
-/**
  * @tc.name: FocusHubTestNgtest008
  * @tc.desc: Test the function OnKeyPreIme.
  * @tc.type: FUNC
@@ -1021,7 +992,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest008, TestSize.Level1)
     auto info = KeyEventInfo(keyEvent);
     focusHub->focusCallbackEvents_ = nullptr;
     focusHub->OnKeyPreIme(info, keyEvent);
-    OnKeyPreImeFunc onKeyCallback = [](KeyEventInfo& event) -> bool { return true; };
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& event) -> bool { return true; };
     focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     focusHub->OnKeyPreIme(info, keyEvent);
     EXPECT_TRUE(result);

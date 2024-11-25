@@ -537,7 +537,9 @@ void ShowContextMenuDisappearAnimation(
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto hasTransition = menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->HasPreviewTransitionEffect();
-    auto menuPosition = hasTransition ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
+    auto isPreviewNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
+    auto menuPosition =
+        (hasTransition || isPreviewNone) ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
     menuWrapperPattern->ClearAllSubMenu();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1408,9 +1410,12 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
     duration = std::max(duration, AceApplicationInfo::GetInstance().GetBarrierfreeDuration());
     continuousTask_.Reset([weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
         auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        ContainerScope scope(id);
-        overlayManager->PopToast(toastId);
+        if (overlayManager) {
+            ContainerScope scope(id);
+            overlayManager->PopToast(toastId);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "Can not get overlayManager, pop toast failed");
+        }
     });
     option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
         ContainerScope scope(id);
@@ -1740,6 +1745,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
     // There is no overlay under the root node or it is not in atomicservice
     if (iter == rootChildren.rend() && !pipeline->GetInstallationFree()) {
+        popupMap_[targetId].isCurrentOnShow = false;
         return;
     }
 
@@ -2036,13 +2042,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu insubwindow enter");
-    auto menuOffset = offset;
-    auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
-    if (currentSubwindow) {
-        auto subwindowRect = currentSubwindow->GetRect();
-        menuOffset -= subwindowRect.GetOffset();
-    }
-    if (!ShowMenuHelper(menu, targetId, menuOffset)) {
+    if (!ShowMenuHelper(menu, targetId, offset)) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
         return;
     }
@@ -3129,7 +3129,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     // There is overlay under the root node or it is in atomicservice
     if (rootNode->GetChildren().size() > ROOT_MIN_NODE || pipeline->GetInstallationFree()) {
         // stage node is at index 0, remove overlay at last
-        auto overlay = GetOverlayFrameNode();
+        auto overlay = GetLastChildNotRemoving(rootNode);
         CHECK_NULL_RETURN(overlay, false);
         auto pattern = overlay->GetPattern();
         auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, isBackPressed, isPageRouter);
@@ -3311,12 +3311,14 @@ bool OverlayManager::RemoveModalInOverlay()
     return true;
 }
 
-bool OverlayManager::RemoveAllModalInOverlay()
+bool OverlayManager::RemoveAllModalInOverlay(bool isRouterTransition)
 {
     if (modalStack_.empty()) {
         return true;
     }
-
+    if (!isRouterTransition) {
+        return true;
+    }
     auto topModalNode = modalStack_.top().Upgrade();
     bool isModalUiextensionNode = IsModalUiextensionNode(topModalNode);
     bool isProhibitedRemoveByRouter = IsProhibitedRemoveByRouter(topModalNode);
@@ -3638,7 +3640,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     }
 
     // remove the overlay node just mounted in subwindow
-    auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
+    auto overlay = GetLastChildNotRemoving(rootNode);
     CHECK_NULL_RETURN(overlay, false);
     auto pattern = overlay->GetPattern();
     auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, false, false);
@@ -5473,6 +5475,7 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
+    customKeyboard->MarkRemoving();
     PlayKeyboardTransition(customKeyboard, false);
     Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
     pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
@@ -5489,7 +5492,6 @@ void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardSafeHeight(safeHeight);
-    pattern->SetKeyboardAreaChange(keyboardAvoidance_);
     pattern->SetKeyboardOption(keyboardAvoidance_);
 }
 
@@ -6466,7 +6468,7 @@ void OverlayManager::RemoveGatherNode()
 
 void OverlayManager::RemoveGatherNodeWithAnimation()
 {
-    if (!hasGatherNode_) {
+    if (!hasGatherNode_ || DragDropGlobalController::GetInstance().IsInMoving()) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node with animation");
@@ -6977,5 +6979,17 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
     auto dragFrameNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(dragFrameNode, borderRadius);
     return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
+}
+
+RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& rootNode)
+{
+    const auto& children = rootNode->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child->IsRemoving()) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -36,16 +36,6 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
-{
-    CHECK_NULL_VOID(row);
-    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
-    row->MarkModifyDone();
-    row->MarkDirtyNode();
-}
-
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerNode = GetHost();
@@ -92,6 +82,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
@@ -464,7 +455,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
 
 void ContainerModalPattern::SetAppTitle(const std::string& title)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully, title is %{public}s", title.c_str());
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully");
     auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
@@ -643,6 +634,12 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
 
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
+    auto controlButtonsRowLayoutProperty = controlButtonsRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsRowLayoutProperty, false);
+    if (controlButtonsRowLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttonRow are hidden");
+        return false;
+    }
     auto children = controlButtonsRow->GetChildren();
     RectF firstButtonRect;
     RectF lastButtonRect;
@@ -809,13 +806,14 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
     titleRowProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(rowHeight)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     PaddingProperty padding;
-    auto sidePadding = isRtl ? &padding.left : & padding.right;
+    auto sidePadding = isRtl ? &padding.left : &padding.right;
     *sidePadding = GetControlButtonRowWidth();
     titleRowProperty->UpdatePadding(padding);
 }
@@ -971,4 +969,14 @@ void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
     pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
     windowPaintRect_ = expectRect;
 }
+void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
+{
+    CHECK_NULL_VOID(row);
+    auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
+    row->MarkModifyDone();
+    row->MarkDirtyNode();
+}
+
 } // namespace OHOS::Ace::NG

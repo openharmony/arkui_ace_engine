@@ -84,6 +84,7 @@ static const std::set<std::string> stringAttrs = {
     "dialog_icon_primary",
     "dialog_font_primary",
     "menu_has_filter",
+    "navigation_general_more",
     "calendar_picker_dialog_button_transparent",
     "calendar_picker_dialog_divider_transparent",
     "textfield_accessibility_property_clear",

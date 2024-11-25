@@ -93,7 +93,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 
 bool TouchEventActuator::ShouldResponse()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, true);
 
     auto eventManager = context->GetEventManager();

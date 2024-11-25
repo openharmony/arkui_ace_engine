@@ -27,12 +27,14 @@ template("napi_mediaquery_static") {
     deps = []
     external_deps = []
     if (platform != "" && is_arkui_x) {
-      deps += [
-        "$ace_root/frameworks/core:ace_container_scope_static",
-        "//plugins/libs/napi:napi_$platform",
-      ]
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
       external_deps += [ "napi:ace_napi" ]
+    }
+
+    if (platform != "" && (is_arkui_x || is_mingw || is_mac || is_linux)) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
+    } else {
       deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
     }
 

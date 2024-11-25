@@ -837,6 +837,18 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
     });
 }
 
+void MenuWrapperPattern::RequestPathRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuWrapperPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto flag = paintProperty->GetRenderFlagValue(0);
+    flag++;
+    paintProperty->UpdateRenderFlag(flag);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void MenuWrapperPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));

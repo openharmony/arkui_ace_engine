@@ -495,6 +495,65 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove001, TestSize.Lev
 }
 
 /**
+ * @tc.name: UpdateSelectionByTouchMove002
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+    EXPECT_EQ(touchOffset.GetX(), richEditorPattern->magnifierController_->localOffset_.GetX());
+    EXPECT_EQ(touchOffset.GetY(), richEditorPattern->magnifierController_->localOffset_.GetY());
+    EXPECT_TRUE(richEditorPattern->magnifierController_->magnifierNodeExist_);
+}
+
+/**
+ * @tc.name: UpdateSelectionByTouchMove003
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->magnifierController_ = nullptr;
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    EXPECT_TRUE(richEditorPattern->isShowMenu_);
+}
+
+/**
+ * @tc.name: UpdateSelectionByTouchMove004
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->textSelector_.Update(0, 10);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    EXPECT_TRUE(richEditorPattern->isShowMenu_);
+}
+
+/**
  * @tc.name: GetSelectedMaxWidth001
  * @tc.desc: test GetSelectedMaxWidth
  * @tc.type: FUNC
@@ -1108,5 +1167,131 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
     options.menuPolicy = MenuPolicy::SHOW;
     richEditorPattern->SetSelection(start, end, options, false);
     EXPECT_NE(richEditorPattern->HasFocus(), false);
+}
+
+/**
+ * @tc.name: ReplacePlaceholderWithRawSpans001
+ * @tc.desc: test ReplacePlaceholderWithRawSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+
+    customSpanItem->spanItemType = SpanItemType::CustomSpan;
+    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    customSpanItem->SetCustomNode(builderNode);
+    size_t index = 0;
+    size_t textIndex = 0;
+    size_t sum = 6;
+    richEditorPattern->ReplacePlaceholderWithRawSpans(customSpanItem, index, textIndex);
+    EXPECT_EQ(textIndex, sum);
+}
+
+/**
+ * @tc.name: ReplacePlaceholderWithRawSpans002
+ * @tc.desc: test ReplacePlaceholderWithRawSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    ASSERT_NE(imageSpanItem, nullptr);
+
+    imageSpanItem->spanItemType = SpanItemType::IMAGE;
+    size_t index = 0;
+    size_t textIndex = 0;
+    size_t sum = 6;
+    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
+    EXPECT_EQ(textIndex, sum);
+}
+
+/**
+ * @tc.name: ReplacePlaceholderWithRawSpans003
+ * @tc.desc: test ReplacePlaceholderWithRawSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    ASSERT_NE(imageSpanItem, nullptr);
+
+    imageSpanItem->spanItemType = SpanItemType::PLACEHOLDER;
+    size_t index = 0;
+    size_t textIndex = 0;
+    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
+    EXPECT_EQ(textIndex, 0);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper001
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_B;
+    TextStyle style;
+    style.SetFontWeight(Ace::FontWeight::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontWeight(), Ace::FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper002
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_I;
+    TextStyle style;
+    style.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontStyle(), OHOS::Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper003
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_U;
+    TextStyle style;
+    style.SetTextDecoration(TextDecoration::NONE);
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetTextDecoration(), TextDecoration::UNDERLINE);
+}
+
+/**
+ * @tc.name: HandleSelectFontStyleWrapper004
+ * @tc.desc: test HandleSelectFontStyleWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper004, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    KeyCode code = KeyCode::KEY_HEADSETHOOK;
+    TextStyle style;
+    FontWeight result1 = style.GetFontWeight();
+    TextDecoration result3 = style.GetTextDecoration();
+    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
+    EXPECT_EQ(style.GetFontWeight(), result1);
+    EXPECT_EQ(style.GetTextDecoration(), result3);
 }
 } // namespace OHOS::Ace::NG

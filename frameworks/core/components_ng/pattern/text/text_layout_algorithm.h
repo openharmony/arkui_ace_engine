@@ -59,7 +59,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
     float GetBaselineOffset() const override;
@@ -92,18 +92,18 @@ protected:
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
     bool UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, const TextStyle& textStyle,
-        const std::string& content, double maxWidth);
+        const std::u16string& content, double maxWidth);
     bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
         const TextStyle& textStyle, const std::vector<std::string>& contents, const RefPtr<Paragraph>& paragraph);
     void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans);
-    bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
+    bool AdaptMinTextSize(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool CreateParagraph(const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper,
+        double maxWidth = 0.0) override;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
@@ -112,14 +112,17 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
-    void UpdateSensitiveContent(std::string& content);
-    std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::string& content,
+    bool AdaptMaxTextSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::string& content,
+    void UpdateSensitiveContent(std::u16string& content);
+    void CheckNeedReCreateParagraph(
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern);
+    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
-    std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::string& content,
+    std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
         
 

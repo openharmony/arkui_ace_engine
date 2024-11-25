@@ -350,6 +350,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShow001, TestSize.Lev
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
     dialogEvent["changeId"] = func;
     dialogEvent["acceptId"] = func;
+    dialogEvent["scrollStopId"] = func;
 
     int32_t cancelCallbackInfo = 0;
     auto cancelFunc = [&cancelCallbackInfo](

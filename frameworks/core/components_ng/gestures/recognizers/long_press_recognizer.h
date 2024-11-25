@@ -56,11 +56,6 @@ public:
     void OnAccepted() override;
     void OnRejected() override;
 
-    void SetOnLongPress(const OnLongPress& onLongPress)
-    {
-        onLongPress_ = onLongPress;
-    }
-
     bool HasAction() const
     {
         if (onAction_ && *onAction_) {
@@ -141,7 +136,6 @@ private:
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
     int32_t thumbnailDeadline = 150;
-    OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
     std::function<void(Offset)> callback_;

@@ -228,7 +228,7 @@ RefPtr<InputEventHub> ScrollablePattern::GetInputHub()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateInputEventHub();
 }
 
@@ -1081,7 +1081,9 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 
     // outer scrollbar
     if (scrollBarProxy_) {
-        estimatedHeight_ = estimatedHeight - (GetAxis() == Axis::VERTICAL ? viewPort.Height() : viewPort.Width());
+        auto height = (GetAxis() == Axis::VERTICAL ? viewPort.Height() : viewPort.Width());
+        auto estimatedHeightItem = estimatedHeight - height;
+        estimatedHeight_ = (estimatedHeightItem < 0 ? 0 : estimatedHeightItem);
         barOffset_ = -offset;
         scrollBarProxy_->NotifyScrollBar();
     }
@@ -1092,6 +1094,15 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
             continue;
         }
         scrollBarProxy->NotifyScrollBar();
+    }
+}
+
+void ScrollablePattern::ScrollEndCallback(bool nestedScroll, float velocity)
+{
+    if (nestedScroll) {
+        OnScrollEndRecursiveInner(velocity);
+    } else {
+        OnScrollEnd();
     }
 }
 
@@ -1122,10 +1133,10 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
-    auto scrollEndCallback = [weak = WeakClaim(this)]() {
+    auto scrollEndCallback = [weak = WeakClaim(this)](bool nestedScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEnd();
+        pattern->ScrollEndCallback(nestedScroll, pattern->GetVelocity());
     };
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](float delta, float animationVelocity,
                                           float predictVelocity, float dragDistance) -> bool {
@@ -2573,10 +2584,14 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
 void ScrollablePattern::FireObserverOnTouch(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(positionController_);
+    auto touchInfo = info;
     auto observer = positionController_->GetObserver();
     if (observer.onTouchEvent) {
-        auto touchInfo = info;
         (*observer.onTouchEvent)(touchInfo);
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnTouchEvent(touchInfo);
     }
 }
 
@@ -2587,6 +2602,10 @@ void ScrollablePattern::FireObserverOnReachStart()
     if (observer.onReachStartEvent) {
         observer.onReachStartEvent();
     }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnReachEvent(false);
+    }
 }
 
 void ScrollablePattern::FireObserverOnReachEnd()
@@ -2595,6 +2614,10 @@ void ScrollablePattern::FireObserverOnReachEnd()
     auto observer = positionController_->GetObserver();
     if (observer.onReachEndEvent) {
         observer.onReachEndEvent();
+    }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnReachEvent(true);
     }
 }
 
@@ -2605,6 +2628,10 @@ void ScrollablePattern::FireObserverOnScrollStart()
     if (observer.onScrollStartEvent) {
         observer.onScrollStartEvent();
     }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnScrollStartEvent();
+    }
 }
 
 void ScrollablePattern::FireObserverOnScrollStop()
@@ -2614,6 +2641,10 @@ void ScrollablePattern::FireObserverOnScrollStop()
     if (observer.onScrollStopEvent) {
         observer.onScrollStopEvent();
     }
+    auto obsMgr = positionController_->GetObserverManager();
+    if (obsMgr) {
+        obsMgr->HandleOnScrollStopEvent();
+    }
 }
 
 void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
@@ -2621,10 +2652,16 @@ void ScrollablePattern::FireObserverOnDidScroll(float finalOffset)
     OnScrollEvent onScroll = [weak = WeakClaim(this)](Dimension dimension, ScrollState state) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern && pattern->positionController_);
+        auto source = pattern->ConvertScrollSource(pattern->scrollSource_);
+        bool isAtTop = pattern->IsAtTop();
+        bool isAtBottom = pattern->IsAtBottom();
         auto observer = pattern->positionController_->GetObserver();
         if (observer.onDidScrollEvent) {
-            observer.onDidScrollEvent(dimension, pattern->ConvertScrollSource(pattern->scrollSource_),
-                pattern->IsAtTop(), pattern->IsAtBottom());
+            observer.onDidScrollEvent(dimension, source, isAtTop, isAtBottom);
+        }
+        auto obsMgr = pattern->positionController_->GetObserverManager();
+        if (obsMgr) {
+            obsMgr->HandleOnDidScrollEvent(dimension, source, isAtTop, isAtBottom);
         }
     };
     FireOnScroll(finalOffset, onScroll);
@@ -3780,7 +3817,7 @@ float ScrollablePattern::GetNestedScrollVelocity()
         return 0.0f;
     }
     uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
-    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
     if (diff >= MAX_VSYNC_DIFF_TIME) {
         nestedScrollVelocity_ = 0.0f;
     }
@@ -3806,5 +3843,19 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     scrollBar_->SetForegroundColor(theme->GetForegroundColor());
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+}
+
+SizeF ScrollablePattern::GetViewSizeMinusPadding()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+    return viewSize;
 }
 } // namespace OHOS::Ace::NG

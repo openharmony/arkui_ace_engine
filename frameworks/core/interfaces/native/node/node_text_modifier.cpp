@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -82,12 +83,11 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 namespace {
 
 std::string g_strValue;
-
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string content(value);
+    std::u16string content = UtfUtils::Str8ToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
 }
 
@@ -95,7 +95,7 @@ const char* GetTextContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = TextModelNG::GetContent(frameNode);
+    g_strValue = UtfUtils::Str16ToStr8(TextModelNG::GetContent(frameNode));
     return g_strValue.c_str();
 }
 

@@ -154,6 +154,15 @@ RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
     return customNode_.Upgrade();
 }
 
+int32_t NavDestinationGroupNode::GetNavigationNodeId() const
+{
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, DEFAULT_NODE_SLOT);
+    auto navigationNode = pattern->GetNavigationNode();
+    CHECK_NULL_RETURN(navigationNode, DEFAULT_NODE_SLOT);
+    return navigationNode->GetId();
+}
+
 void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
 {
     mode_ = mode;

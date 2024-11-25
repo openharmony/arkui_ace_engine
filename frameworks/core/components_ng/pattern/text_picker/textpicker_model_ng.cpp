@@ -387,6 +387,15 @@ void TextPickerModelNG::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void TextPickerModelNG::SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
 void TextPickerModelNG::SetValue(const std::string& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, value);
@@ -697,8 +706,8 @@ RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
 void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
-    const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onScrollStop, TextPickerDialog& textPickerDialog,
+    TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -722,6 +731,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["changeId"] = onChange;
+    dialogEvent["scrollStopId"] = onScrollStop;
     auto func = [onCancel](const GestureEvent& /* info */) {
         if (onCancel) {
             onCancel();
@@ -1149,6 +1159,14 @@ void TextPickerModelNG::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChan
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void TextPickerModelNG::SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
 int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)

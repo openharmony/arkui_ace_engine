@@ -44,6 +44,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+// default clicked & hover color for background blend when theme is null(value from SelectTheme)
+const Color DEFAULT_CLICKED_COLOR(0x19000000);
+const Color DEFAULT_HOVER_COLOR(0x0c000000);
 constexpr double VELOCITY = 0.0f;
 constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
@@ -196,7 +199,10 @@ void MenuItemPattern::OnModifyDone()
         }
         SetAccessibilityAction();
 
-        host->GetRenderContext()->SetClipToBounds(true);
+        auto renderContext = host->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetClipToBounds(true);
+        }
         if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             InitLongPressEvent();
         }
@@ -297,7 +303,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        auto frameNode = GetSubMenu(customNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -354,7 +360,7 @@ RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
     return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
-RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 {
     CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
@@ -716,7 +722,6 @@ bool MenuItemPattern::OnClick()
         onChange(IsSelected());
         RecordChangeEvent();
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -747,7 +752,9 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         return;
     }
     // change menu item paint props on press
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         NotifyPressStatus(true);
@@ -797,15 +804,17 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
-        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+        lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
-        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        auto touchUpOffset = touches.front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
@@ -1051,7 +1060,7 @@ void MenuItemPattern::UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     CHECK_NULL_VOID(itemProperty);
     auto symbol = itemProperty->GetSelectSymbol();
     if (itemProperty->GetSelectIconSrc().value_or("").empty() &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && SystemProperties::IsNeedSymbol()) {
         // iamge -> symbol
         row->RemoveChild(selectIcon);
         selectIcon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -1136,7 +1145,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     }
     if (!selectIcon_) {
         if (!itemProperty->GetSelectIconSrc().value_or("").empty() ||
-            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !SystemProperties::IsNeedSymbol()) {
             selectIcon_ = FrameNode::CreateFrameNode(
                 V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         } else {
@@ -1212,6 +1221,9 @@ void MenuItemPattern::AddClickableArea()
         !clickableArea_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(hostAccessibilityProperty);
+        hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
@@ -1635,10 +1647,8 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
     CHECK_NULL_VOID(host);
     if (isSelected) {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     } else {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 
@@ -2008,7 +2018,7 @@ std::string MenuItemPattern::GetText()
     CHECK_NULL_RETURN(text_, std::string());
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, std::string());
-    return textProps->GetContentValue();
+    return UtfUtils::Str16ToStr8(textProps->GetContentValue());
 }
 
 std::string MenuItemPattern::InspectorGetFont()
@@ -2027,7 +2037,9 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2035,7 +2047,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     // enter press status
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
-        SetBgBlendColor(theme->GetClickedColor());
+        SetBgBlendColor(theme ? theme->GetClickedColor() : DEFAULT_CLICKED_COLOR);
         PlayBgColorAnimation(false);
 
         props->UpdatePress(true);
@@ -2045,7 +2057,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         // leave press status
         if (IsHover()) {
-            SetBgBlendColor(theme->GetHoverColor());
+            SetBgBlendColor(theme ? theme->GetHoverColor() : DEFAULT_HOVER_COLOR);
         } else {
             SetBgBlendColor(Color::TRANSPARENT);
         }

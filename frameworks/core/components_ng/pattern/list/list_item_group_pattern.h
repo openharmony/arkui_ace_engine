@@ -298,8 +298,7 @@ public:
     void ClearCachedItemPosition();
     void CalculateItemStartIndex();
     bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
-    std::pair<int32_t, int32_t> UpdateCachedIndex(bool outOfView, bool reCache,
-        int32_t forwardCache, int32_t backwardCache);
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
     int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
     int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
     std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);

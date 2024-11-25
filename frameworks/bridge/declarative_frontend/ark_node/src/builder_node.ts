@@ -62,6 +62,12 @@ class BuilderNode {
   public updateConfiguration(): void {
     this._JSBuilderNode.updateConfiguration();
   }
+  public onReuseWithBindObject(param?: Object):void{
+    this._JSBuilderNode.onReuseWithBindObject(param);
+  } 
+  public onRecycleWithBindObject():void{
+    this._JSBuilderNode.onRecycleWithBindObject();
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -73,6 +79,7 @@ class JSBuilderNode extends BaseNode {
   private _nativeRef: NativeStrongRef;
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
+  private bindedViewOfBuilderNode:ViewPU;
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
@@ -110,10 +117,19 @@ class JSBuilderNode extends BaseNode {
       } // if child
     });
   }
+  public onReuseWithBindObject(param?: Object): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    super.onReuseWithBindObject(param);
+    __JSScopeUtil__.restoreInstanceId();
+  }
+  public onRecycleWithBindObject(): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    super.onRecycleWithBindObject();
+    __JSScopeUtil__.restoreInstanceId();
+  }
   public getCardId(): number {
     return -1;
   }
-
   public addChild(child: ViewPU): boolean {
     if (this.childrenWeakrefMap_.has(child.id__())) {
       return false;
@@ -169,18 +185,25 @@ class JSBuilderNode extends BaseNode {
         },
         get: (target, property, receiver): Object => { return this.params_?.[property] }
       });
-      this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     } else {
-      this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
+    this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
     this.params_ = params;
     this.updateFuncByElmtId.clear();
+    if(this.bindedViewOfBuilderNode){
+      globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode); 
+    }
     this.buildWithNestingBuilder(builder, supportLazyBuild);
+    if(this.bindedViewOfBuilderNode){
+      globalThis.__viewPuStack__?.pop(); 
+    }
     this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
       this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -409,7 +432,6 @@ class JSBuilderNode extends BaseNode {
     //un-registers the removed child elementIDs using proxy
     UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
     this.purgeDeletedElmtIds();
-
     branchfunc();
   }
   public getNodePtr(): NodePtr {

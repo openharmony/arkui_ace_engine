@@ -466,7 +466,7 @@ void TextPickerColumnPattern::ClearCurrentTextOptions(
             CHECK_NULL_VOID(textPattern);
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
             textNode->GetRenderContext()->SetClipToFrame(true);
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -510,17 +510,42 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
         if (NotLoopOptions() && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             textLayoutProperty->UpdateContent(optionValue.text_);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
+        UpdateTextAccessibilityProperty(textNode, virtualIndex, iter, virtualIndexValidate);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
     selectedIndex_ = currentIndex;
+}
+
+void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
+    std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
+{
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!NotLoopOptions() || virtualIndexValidate) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+        return;
+    }
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (virtualIndex == -1 && isFocus) {
+        auto nextTextNode = DynamicCast<FrameNode>(*(++iter));
+        CHECK_NULL_VOID(nextTextNode);
+        nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        --iter;
+    } else if (virtualIndex == static_cast<int32_t>(GetOptionCount()) && isFocus) {
+        auto preTextNode = DynamicCast<FrameNode>(*(--iter));
+        CHECK_NULL_VOID(preTextNode);
+        preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        ++iter;
+    }
 }
 
 void TextPickerColumnPattern::FlushCurrentImageOptions()
@@ -564,6 +589,7 @@ void TextPickerColumnPattern::FlushCurrentImageOptions()
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
+        UpdateTextAccessibilityProperty(rangeNode, virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -634,12 +660,13 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         }
         if (NotLoopOptions() && !virtualIndexValidate) {
             iconLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-            textLayoutProperty->UpdateContent("");
+            textLayoutProperty->UpdateContent(u"");
         } else {
             textLayoutProperty->UpdateContent(optionValue.text_);
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
+        UpdateTextAccessibilityProperty(linearLayoutNode, virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
@@ -1052,7 +1079,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
-        InnerHandleScroll(isDownScroll_, true);
+        if (InnerHandleScroll(isDownScroll_, true)) {
+            HandleScrollStopEventCallback(true);
+        }
         return;
     }
     animationBreak_ = false;
@@ -1084,6 +1113,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
         if (overscroller_.IsOverScroll()) { // Start rebound animation. Higher priority than fling
             CreateReboundAnimation(overscroller_.GetOverScroll(), 0.0);
+            HandleScrollStopEventCallback(true);
             return;
         }
     }
@@ -1105,10 +1135,16 @@ void TextPickerColumnPattern::HandleDragEnd()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(!isDownScroll_, true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        if (NearZero(scrollDelta_)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+    if (!NearZero(scrollDelta_)) {
+        HandleScrollStopEventCallback(true);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -1490,6 +1526,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             InnerHandleScroll(dragDelta < 0, true, false);
         }
         dragDelta = additionalShift;
+        if (NearZero(dragDelta)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
     if (useRebound && !isReboundInProgress_) {
         if (overscroller_.ApplyCurrentOffset(yLast_, offsetY, dragDelta)) {
@@ -1622,6 +1661,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         pattern->SetScrollDirection(true);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
+        pattern->HandleScrollStopEventCallback(true);
         // AccessibilityEventType::SCROLL_END
     });
 
@@ -1635,6 +1675,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         pattern->SetScrollDirection(false);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
+        pattern->HandleScrollStopEventCallback(true);
         // AccessibilityEventType::SCROLL_END
     });
 }
@@ -1690,10 +1731,16 @@ void TextPickerColumnPattern::PlayResetAnimation()
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
         InnerHandleScroll(!isDownScroll_, true, false);
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        if (NearZero(scrollDelta_)) {
+            HandleScrollStopEventCallback(true);
+        }
     }
 
     SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
+    if (!NearZero(scrollDelta_)) {
+        HandleScrollStopEventCallback(true);
+    }
 }
 
 void TextPickerColumnPattern::SetCanLoop(bool isLoop)

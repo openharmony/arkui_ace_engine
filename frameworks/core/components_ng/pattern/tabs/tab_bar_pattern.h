@@ -127,6 +127,17 @@ enum class AnimationType {
     HOVERTOPRESS,
 };
 
+enum class TabBarState {
+    SHOW = 0,
+    HIDE
+};
+
+enum class TabBarParamType {
+    NORMAL = 0,
+    CUSTOM_BUILDER,
+    COMPONENT_CONTENT
+};
+
 class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
@@ -211,9 +222,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, TabBarParamType type)
     {
-        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, type));
     }
 
     bool IsContainsBuilder();
@@ -562,7 +573,7 @@ private:
     void ShowDialogWithNode(int32_t index);
     void CloseDialog();
     void InitLongPressAndDragEvent();
-    void HandleClick(const GestureEvent& info, int32_t index);
+    void HandleClick(SourceType type, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
@@ -628,7 +639,7 @@ private:
     RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
-    void PostShowTabBarDelayedTask(int32_t delay);
+    void StartShowTabBarImmediately();
     void CancelShowTabBar();
     void StartHideTabBar();
     void StopHideTabBar();
@@ -644,6 +655,7 @@ private:
     CancelableCallback<void()> showTabBarTask_;
     bool isTabBarShowing_ = false;
     bool isTabBarHiding_ = false;
+    TabBarState tabBarState_ = TabBarState::SHOW;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -664,7 +676,7 @@ private:
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    std::unordered_map<int32_t, bool> tabBarType_;
+    std::unordered_map<int32_t, TabBarParamType> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;

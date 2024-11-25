@@ -2942,6 +2942,7 @@ ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* ru
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::NativePointerRef::New(vm, nullptr));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> options;
@@ -2977,9 +2978,9 @@ void CommonBridge::ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, i
     isLocalizedBorderWidth =
         (isLocalizedBorderWidthArg->IsBoolean()) ? isLocalizedBorderWidthArg->ToBoolean(vm)->Value() : false;
     isLocalizedBorderColor =
-        (isLocalizedBorderWidthArg->IsBoolean()) ? isLocalizedBorderColorArg->ToBoolean(vm)->Value() : false;
+        (isLocalizedBorderColorArg->IsBoolean()) ? isLocalizedBorderColorArg->ToBoolean(vm)->Value() : false;
     isLocalizedBorderRadius =
-        (isLocalizedBorderWidthArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
+        (isLocalizedBorderRadiusArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
 }
 
 ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -3832,6 +3833,32 @@ ArkUINativeModuleValue CommonBridge::ResetFocusable(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetFocusable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTabStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool tabStop = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->setTabStop(nativeNode, tabStop);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->setTabStop(nativeNode, false);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTabStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->setTabStop(nativeNode, false);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -6996,7 +7023,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
     auto onKeyEvent = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                          KeyEventInfo& info) {
+                          KeyEventInfo& info) -> bool {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -7017,7 +7044,11 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return false;
     };
     NG::ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));
     return panda::JSValueRef::Undefined(vm);
@@ -7918,6 +7949,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     if (frameCallback->Get(vm, "onFrame")->IsFunction(vm)) {
         onFrameCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
                                   delayMillis](int64_t nanoTimestamp) -> void {
+            LocalScope scope(vm);
             Local<FunctionRef> onFrameFunc = frameCallbackObj->Get(vm, "onFrame");
 
             auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);
@@ -7929,6 +7961,7 @@ ArkUINativeModuleValue CommonBridge::PostFrameCallback(ArkUIRuntimeCallInfo* run
     if (frameCallback->Get(vm, "onIdle")->IsFunction(vm)) {
         onIdleCallbackFunc = [vm, frameCallbackObj = panda::CopyableGlobal(vm, frameCallback),
                                  delayMillis](int64_t nanoTimestamp) -> void {
+            LocalScope scope(vm);
             Local<FunctionRef> onIdleFunc = frameCallbackObj->Get(vm, "onIdle");
 
             auto nanoTimestampRef = NumberRef::New(vm, nanoTimestamp);

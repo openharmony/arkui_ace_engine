@@ -77,6 +77,7 @@ void PaContainer::InitializeBackend(SrcLanguage language)
 RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
     return AceType::DynamicCast<PaContainer>(container);
 }
 

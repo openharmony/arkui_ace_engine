@@ -268,6 +268,9 @@ public:
     {
         focusIndex_ = std::nullopt;
     }
+
+    SizeF GetChildrenExpandedSize() override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -330,6 +333,7 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
     void FireFocus();
+    bool IsInViewport(int32_t index) const;
 
     std::string GetIrregularIndexesString() const;
 

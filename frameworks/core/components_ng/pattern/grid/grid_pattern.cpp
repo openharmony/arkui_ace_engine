@@ -406,13 +406,13 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    bool regular = !UseIrregularLayout();
+    bool irregular = UseIrregularLayout();
     float mainGap = GetMainGap();
-    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, regular);
+    auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (!regular) {
+            if (irregular) {
                 overScroll = info_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
             } else {
                 overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -560,7 +560,18 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             triggerFocus_ = false;
             focusHub->GetNextFocusByStep(keyEvent_);
         } else {
+            if (!focusIndex_.has_value()) {
+                needTriggerFocus_ = false;
+                return;
+            }
             triggerFocus_ = true;
+            auto child = host->GetOrCreateChildByIndex(focusIndex_.value());
+            CHECK_NULL_VOID(child);
+            auto childNode = child->GetHostNode();
+            auto childFocusHub = childNode->GetFocusHub();
+            if (childFocusHub && !childFocusHub->IsCurrentFocus()) {
+                childFocusHub->RequestFocusImmediately();
+            }
             MarkDirtyNodeSelf();
         }
         return;
@@ -579,8 +590,8 @@ void GridPattern::FireFocus()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
-    CHECK_NULL_VOID(!focusIndex_.has_value());
-    if (info_.IsInViewport(focusIndex_.value())) {
+    CHECK_NULL_VOID(focusIndex_.has_value());
+    if (IsInViewport(focusIndex_.value())) {
         auto child = host->GetChildByIndex(focusIndex_.value());
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
@@ -762,6 +773,7 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
 int32_t GridPattern::GetIndexByFocusHub(const WeakPtr<FocusHub>& focusNode)
 {
     auto focusHub = focusNode.Upgrade();
+    CHECK_NULL_RETURN(focusHub, -1);
     auto node = focusHub->GetFrameNode();
     CHECK_NULL_RETURN(node, -1);
     auto property = AceType::DynamicCast<GridItemLayoutProperty>(node->GetLayoutProperty());
@@ -1405,6 +1417,20 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+bool GridPattern::IsInViewport(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, true);
+    int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
+    bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
+    if (!showCachedItems) {
+        return index >= info_.startIndex_ && index <= info_.endIndex_;
+    }
+    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
+}
+
 bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
 {
     auto pipeline = GetContext();
@@ -1415,9 +1441,9 @@ bool GridPattern::ScrollToLastFocusIndex(KeyCode keyCode)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
-    CHECK_NULL_RETURN(!focusIndex_.has_value(), false);
+    CHECK_NULL_RETURN(focusIndex_.has_value(), false);
 
-    if (!info_.IsInViewport(focusIndex_.value())) {
+    if (!IsInViewport(focusIndex_.value())) {
         StopAnimate();
         needTriggerFocus_ = true;
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
@@ -1724,20 +1750,20 @@ float GridPattern::GetEndOffset()
 {
     auto& info = info_;
     float contentHeight = info.lastMainSize_ - info.contentEndPadding_;
-    float mainGap = GetMainGap();
-    bool regular = !UseIrregularLayout();
-    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, regular);
+    const float mainGap = GetMainGap();
+    const bool irregular = UseIrregularLayout();
+    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
     if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
         // overScroll with contentHeight < viewport
-        if (!regular) {
+        if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
         float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
-    if (regular) {
+    if (!irregular) {
         return contentHeight - heightInView;
     }
     float disToBot = info_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
@@ -1776,7 +1802,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_.rbegin()->second)) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info_.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;
@@ -2309,5 +2335,39 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("AlignItems", property->GetAlignItems() ? "GridItemAlignment.STRETCH" : "GridItemAlignment.DEFAULT");
     BuildScrollAlignInfo(json);
     BuildGridLayoutInfo(json);
+}
+
+SizeF GridPattern::GetChildrenExpandedSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+
+    auto axis = GetAxis();
+    float estimatedHeight = 0.f;
+    const auto& info = info_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (UseIrregularLayout()) {
+        estimatedHeight = info.GetIrregularHeight(mainGap);
+    } else if (!layoutProperty->GetLayoutOptions().has_value()) {
+        estimatedHeight = info.GetContentHeight(mainGap);
+    } else {
+        estimatedHeight =
+            info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

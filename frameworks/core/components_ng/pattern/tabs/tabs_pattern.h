@@ -91,6 +91,8 @@ public:
 
     void AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override;
 
+    void RecoverInnerOnGestureRecognizerJudgeBegin() override;
+
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     ChangeEventPtr GetIndexChangeEvent()
@@ -163,6 +165,8 @@ private:
     void SetSwiperPaddingAndBorder();
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
+    void UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
+        const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;

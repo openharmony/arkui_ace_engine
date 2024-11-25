@@ -116,6 +116,7 @@ public:
             theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
             theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
             theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
+            theme->enableDirectionalKeyFocus_ = pattern->GetAttr<int>("menu_focus_directional_key_enable", 0);
         }
     };
 
@@ -326,6 +327,11 @@ public:
         return hasBackBlur_;
     }
 
+    bool GetEnableDirectionalKeyFocus() const
+    {
+        return enableDirectionalKeyFocus_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -371,6 +377,7 @@ private:
     bool normalLayout_ = true;
     bool normalPlacement_ = true;
     bool hasBackBlur_ = true;
+    bool enableDirectionalKeyFocus_ = false;
 };
 
 } // namespace OHOS::Ace::NG

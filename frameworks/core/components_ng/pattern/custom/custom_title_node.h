@@ -19,6 +19,23 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {
+
+const std::string EVENT_NAME_COLOR_CONFIGURATION = "arkui_color_configuration";
+const std::string EVENT_NAME_HIDE_SPLIT = "arkui_hide_split";
+const std::string EVENT_NAME_MAXIMIZE_VISIBILITY = "arkui_maximize_visibility";
+const std::string EVENT_NAME_MINIMIZE_VISIBILITY = "arkui_minimize_visibility";
+const std::string EVENT_NAME_CLOSE_VISIBILITY = "arkui_close_visibility";
+const std::string EVENT_NAME_CLOSE_STATUS = "arkui_close_status";
+const std::string EVENT_NAME_MAXIMIZE_IS_RECOVER = "arkui_maximize_is_recover";
+const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_menu_width_change";
+
+namespace {
+inline std::string BoolToString(bool value)
+{
+    return value ? "true" : "false";
+}
+} // namespace
+
 class ACE_EXPORT CustomTitleNode : public CustomNode {
     DECLARE_ACE_TYPE(CustomTitleNode, CustomNode);
 
@@ -76,11 +93,32 @@ public:
         }
     }
 
+    void SetCustomCallback(const std::function<void(const std::string& eventName, std::string param)>& callback)
+    {
+        customCallback_ = callback;
+    }
+
+    void FireCustomCallback(const std::string& eventName, std::string param)
+    {
+        if (customCallback_) {
+            customCallback_(eventName, param);
+        }
+    }
+
+    void FireCustomCallback(const std::string& eventName, bool value)
+    {
+        if (customCallback_) {
+            customCallback_(eventName, BoolToString(value));
+        }
+    }
+
 private:
     std::function<void(const std::string&)> appTitleCallback_ = nullptr;
     std::function<void(const RefPtr<PixelMap>&)> appIconCallback_ = nullptr;
     std::function<void()> onWindowFocusedCallback_ = nullptr;
     std::function<void()> onWindowUnfocusedCallback_ = nullptr;
+
+    std::function<void(const std::string&, std::string)> customCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H

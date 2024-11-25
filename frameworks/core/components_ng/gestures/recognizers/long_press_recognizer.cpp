@@ -57,17 +57,9 @@ void LongPressRecognizer::OnAccepted()
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
     refereeState_ = RefereeState::SUCCEED;
-    if (onLongPress_ && !touchPoints_.empty()) {
-        TouchEvent trackPoint = touchPoints_.begin()->second;
-        PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, trackPoint.postEventNodeId);
-        LongPressInfo info(trackPoint.id);
-        info.SetTimeStamp(time_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        onLongPress_(info);
+    if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
+        std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
+        time_ = TimeStamp(nanoseconds);
     }
 
     UpdateFingerListInfo();
@@ -90,7 +82,7 @@ void LongPressRecognizer::OnRejected()
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (!callback_) {
         return;
@@ -111,7 +103,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -170,9 +162,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -223,7 +215,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
         event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
@@ -278,7 +270,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
 
 void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this), isCatchMode]() {
@@ -313,7 +305,7 @@ void LongPressRecognizer::DoRepeat()
 
 void LongPressRecognizer::StartRepeatTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto&& callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -329,7 +321,7 @@ void LongPressRecognizer::StartRepeatTimer()
 
 double LongPressRecognizer::ConvertPxToVp(double offset) const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
 
     double vpOffset = context->ConvertPxToVp(Dimension(offset, DimensionUnit::PX));
@@ -381,7 +373,7 @@ void LongPressRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     timer_.Cancel();
     deadlineTimer_.Cancel();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
 }

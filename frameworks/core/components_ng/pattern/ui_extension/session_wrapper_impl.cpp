@@ -106,6 +106,13 @@ public:
         sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
+    void OnExtensionDetachToDisplay() override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionDetachToDisplay();
+    }
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         auto sessionWrapper = sessionWrapper_.Upgrade();
@@ -329,6 +336,11 @@ void SessionWrapperImpl::InitAllCallback()
                 pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
             },
             TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
+    };
+    sessionCallbacks->getStatusBarHeightFunc_ = [instanceId = instanceId_]() -> uint32_t {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, 0);
+        return container->GetStatusBarHeight();
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -620,12 +632,18 @@ void SessionWrapperImpl::NotifyForeground()
         session_, hostWindowId, std::move(foregroundCallback_));
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
-        session_, std::move(backgroundCallback_));
+    UIEXT_LOGI("NotifyBackground, persistentid = %{public}d, isHandleError = %{public}d.",
+        session_->GetPersistentId(), isHandleError);
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, std::move(backgroundCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::OnReleaseDone()
@@ -729,6 +747,27 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
                 isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
+}
+
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{
+    UIEXT_LOGI("OnExtensionDetachToDisplay");
+    int32_t callSessionId = GetSessionId();
+    taskExecutor_->PostTask(
+        [weak = hostPattern_, callSessionId]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "OnExtensionDetachToDisplay: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+
+            pattern->OnExtensionDetachToDisplay();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionOnExtensionDetachToDisplay");
 }
 
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)

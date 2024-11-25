@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
+#include "base/utils/utf_helper.h"
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
@@ -163,7 +164,7 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        message = theme->GetMoreMessage();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
             CHECK_NULL_VOID(symbolNode);
@@ -182,7 +183,7 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
         CHECK_NULL_VOID(textLayoutProperty);
         auto textValue = textLayoutProperty->GetContent();
         if (!textValue.value().empty()) {
-            message = textValue.value();
+            message = UtfUtils::Str16ToStr8(textValue.value());
         }
     }
     if (imageNode != nullptr) {

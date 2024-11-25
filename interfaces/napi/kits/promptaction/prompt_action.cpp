@@ -803,6 +803,10 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
     }
 
     // parse maskRect
+    DimensionRect rect;
+    rect.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    rect.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+    maskRect = rect;
     napi_typeof(env, asyncContext->maskRectApi, &valueType);
     if (valueType == napi_object) {
         napi_value xApi = nullptr;
@@ -1751,10 +1755,15 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         asyncContext = nullptr;
     };
 
+    DimensionRect rect;
+    rect.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    rect.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+
     PromptDialogAttr promptDialogAttr = {
         .title = asyncContext->titleString,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
+        .maskRect = rect,
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {

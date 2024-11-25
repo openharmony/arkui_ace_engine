@@ -134,8 +134,6 @@ public:
         return MakeRefPtr<PageEventHub>();
     }
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish);
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -177,8 +175,6 @@ public:
 
     bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr,
         const std::function<void()>& onUIExtNodeBindingCompleted = nullptr);
-
-    void StopPageTransition();
 
     void MarkRenderDone()
     {
@@ -261,6 +257,48 @@ public:
         visibilityChangeCallback_ = std::move(callback);
     }
 
+    void SetAnimationId(int32_t animationId)
+    {
+        animationId_ = animationId;
+    }
+
+    int32_t GetAnimationId() const
+    {
+        return animationId_;
+    }
+
+    void InitTransitionIn(const RefPtr<PageTransitionEffect>& effect);
+
+    void InitTransitionOut(const RefPtr<PageTransitionEffect>& effect);
+
+    void TransitionInFinish(const RefPtr<PageTransitionEffect>& effect);
+
+    void TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect);
+
+    void FinishOutPage(const int32_t animationId);
+
+    void FinishInPage(const int32_t animationId);
+
+    RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+
+    void SetPageTransitionType(PageTransitionType type)
+    {
+        type_ = type;
+    }
+
+    PageTransitionType GetPageTransitionType() const
+    {
+        return type_;
+    }
+
+    void ResetPageTransitionEffect();
+
+    void TriggerPageTransition(const std::function<void()>& onFinish);
+
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -288,6 +326,23 @@ protected:
 
     void NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName);
 
+    RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
+
+    void SlideTransitionEffect(const SlideEffect& effect, const RectF& rect, TranslateOptions& translate);
+
+    void UpdateDefaultEnterPopEffect(RefPtr<PageTransitionEffect>& effect, float statusHeight);
+
+    void UpdateEnterPushEffect(RefPtr<PageTransitionEffect>& effect, float statusHeight);
+
+    void UpdateExitPushEffect(RefPtr<PageTransitionEffect>& effect, float statusHeight);
+
+    void UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
+        RefPtr<PageTransitionEffect>& effect, AnimationOption& option);
+
+    void TriggerDefaultTransition(const std::function<void()>& onFinish);
+
+    void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 
@@ -303,6 +358,7 @@ protected:
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
     std::function<void(const std::vector<std::string>&)> dumpListener_;
 
+    int32_t animationId_ = -1;
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
@@ -316,6 +372,7 @@ protected:
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
+    PageTransitionType type_ = PageTransitionType::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

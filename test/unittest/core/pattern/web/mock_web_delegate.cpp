@@ -998,6 +998,8 @@ void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
 #endif
 }
 void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue) {}
+void WebDelegate::UpdateBlurOnKeyboardHideMode(const int isBlurOnKeyboardHideEnable) {}
+void WebDelegate::GestureBackBlur() {}
 void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue) {}
 void WebDelegate::UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay) {}
 void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing) {}
@@ -1062,7 +1064,7 @@ bool WebDelegate::ExecuteAction(
 {
     return false;
 }
-void WebDelegate::SetAccessibilityState(bool state) {}
+void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {

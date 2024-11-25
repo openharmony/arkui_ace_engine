@@ -175,6 +175,7 @@ ohos_unittest("AnimationTest") {
 
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/thread_priority.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
@@ -209,9 +210,10 @@ ohos_unittest("AnimationTest") {
     ":config_animation_test",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/googletest:gtest_main",
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps += [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
   if (!is_ohos_standard_system) {
     external_deps = [

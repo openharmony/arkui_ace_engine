@@ -68,6 +68,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     border_ = bubbleLayoutAlgorithm->GetBorder();
     dumpInfo_ = bubbleLayoutAlgorithm->GetDumpInfo();
+    arrowBuildPlacement_ = bubbleLayoutAlgorithm->GetArrowBuildPlacement();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -141,9 +142,7 @@ void BubblePattern::OnAttachToFrameNode()
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());

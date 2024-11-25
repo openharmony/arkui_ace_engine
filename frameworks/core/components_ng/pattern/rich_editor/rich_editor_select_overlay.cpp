@@ -81,6 +81,8 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
         return false;
     }
 
+    // Keep handle visible when moving
+    CHECK_NULL_RETURN(!isHandleMoving_ || IsSingleHandle(), true);
     auto visibleContentRect = GetVisibleContentRect();
     GetClipHandleViewPort(visibleContentRect);
     if (visibleContentRect.IsEmpty()) {
@@ -181,7 +183,6 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     auto preHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
-    pattern->StartVibratorByIndexChange(currentHandleIndex, preHandleIndex);
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
@@ -194,6 +195,8 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
             pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
     }
+    auto finalHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
+    pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex);
 }
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
@@ -364,7 +367,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             }
             break;
         default:
-            TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Unsupported menu option id %{public}d", id);
             break;
     }
 }
@@ -382,7 +385,7 @@ void RichEditorSelectOverlay::ToggleMenu()
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);

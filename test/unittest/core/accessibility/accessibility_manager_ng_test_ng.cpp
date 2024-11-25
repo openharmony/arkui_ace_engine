@@ -234,7 +234,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     NG::PointF hoverPoint(x, y);
     std::string summary;
     std::string detail;
-    PointerEvent pointerEvent;
+    DragPointerEvent pointerEvent;
 
     TimeStamp time;
     
@@ -261,7 +261,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     ASSERT_NE(endNode, nullptr);
     endNode->UpdateRecycleElmtId(NUMTWO);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 #include "base/i18n/localization.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
@@ -65,7 +66,7 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
     // read navdestination "more" button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.more");
+    std::string message = theme ? theme->GetMoreMessage() : "";
     SetAccessibility(menuItemNode, message);
 
     // set navdestination titleBar "more" button inspectorId
@@ -135,7 +136,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
             return nullptr;
         }
     }
-    auto titleBarNode = menuNode->GetParentFrameNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNodeBase->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, nullptr);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titleBarPattern, nullptr);
@@ -343,7 +344,9 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
             auto targetNode = weakTargetNode.Upgrade();
             CHECK_NULL_VOID(targetNode);
             auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            popupParam->SetMessage(Localization::GetInstance()->GetEntryLetters("common.more"));
+            auto theme = NavigationGetTheme();
+            CHECK_NULL_VOID(theme);
+            popupParam->SetMessage(theme->GetMoreMessage());
             popupParam->SetIsShow(isHover);
             popupParam->SetBlockEvent(false);
             ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
@@ -463,7 +466,8 @@ void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButt
 
 void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
     } else {
         BuildImageMoreItemNode(barItemNode, isButtonEnabled);
@@ -496,7 +500,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_RETURN(theme, nullptr);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        message = theme->GetMoreMessage();
         if (message.empty()) {
             message = accessibilityProperty->GetAccessibilityText();
         }
@@ -561,7 +565,7 @@ std::string NavigationTitleUtil::GetTitleString(const RefPtr<TitleBarNode>& titl
     }
     auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
+    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
 }
 
 std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode)
@@ -574,7 +578,7 @@ std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& t
     }
     auto textLayoutProperty = subtitle->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
+    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
 }
 
 float NavigationTitleUtil::ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth)
@@ -840,5 +844,37 @@ float NavigationTitleUtil::CalculateTitlebarOffset(const RefPtr<UINode>& titleBa
     
     // offsetY = The Y of the foldCrease + Adapt vertical displacement of hover state - the height of the status bar.
     return foldCrease.GetOffset().GetY() + TITLEBAR_VERTICAL_PADDING.ConvertToPx() - length;
+}
+
+void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
+    const RefPtr<FrameNode>& barNode, float translate, bool isTitle)
+{
+    CHECK_NULL_VOID(nodeBase);
+    CHECK_NULL_VOID(barNode);
+    auto renderContext = barNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto option = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    option.y = CalcDimension(translate, DimensionUnit::PX);
+    renderContext->UpdateTransformTranslate(option);
+    auto barHeight = renderContext->GetPaintRectWithoutTransform().Height();
+    float opacity = 1.0f;
+    if (!NearZero(barHeight)) {
+        opacity = 1.0f - std::clamp(std::abs(translate) / barHeight, 0.0f, 1.0f);
+    }
+    renderContext->UpdateOpacity(opacity);
+    if (isTitle) {
+        return;
+    }
+    auto divider = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarDividerNode());
+    CHECK_NULL_VOID(divider);
+    auto dividerRenderContext = divider->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateTransformTranslate(option);
+    dividerRenderContext->UpdateOpacity(opacity);
+}
+
+bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
+{
+    return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
 }
 } // namespace OHOS::Ace::NG

@@ -238,6 +238,23 @@ public:
         EventCallback_ = value;
     }
 
+    void HandleScrollStopEventCallback(bool refresh)
+    {
+        if (scrollStopEventCallback_) {
+            scrollStopEventCallback_(refresh);
+        }
+    }
+
+    const EventCallback& GetScrollStopEventCallback() const
+    {
+        return scrollStopEventCallback_;
+    }
+
+    void SetScrollStopEventCallback(EventCallback&& value)
+    {
+        scrollStopEventCallback_ = value;
+    }
+
     void SetLocalDownDistance(float value)
     {
         localDownDistance_ = value;
@@ -311,6 +328,7 @@ public:
         if (!status && NotLoopOptions() && !pressed_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
             // Start rebound animation when toss stoped
             CreateReboundAnimation(overscroller_.GetOverScroll(), 0.0);
+            HandleScrollStopEventCallback(true);
         }
     }
 
@@ -430,12 +448,15 @@ private:
     void InitTextFontFamily();
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
+    void UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
+        std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
 
     bool isTossing_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
     EventCallback EventCallback_;
+    EventCallback scrollStopEventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

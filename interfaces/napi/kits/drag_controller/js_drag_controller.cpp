@@ -97,7 +97,7 @@ struct DragControllerAsyncCtx {
     bool hasHandle = false;
     int32_t globalX = -1;
     int32_t globalY = -1;
-    uint64_t displayId = 0;
+    int32_t displayId = 0;
     int32_t sourceType = 0;
     float windowScale = 1.0f;
     float dipScale = 0.0;
@@ -859,9 +859,6 @@ void OnComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     CHECK_NULL_VOID(taskExecutor);
     auto windowScale = container->GetWindowScale();
     asyncCtx->windowScale = windowScale;
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    asyncCtx->displayId = displayInfo->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -1595,16 +1592,14 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
         HandleStopDragCallback(asyncCtx, container);
     };
     int32_t sourceTool = -1;
-    int32_t displayId = 0;
     bool getPointSuccess = container->GetCurPointerEventInfo(
         asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
-        sourceTool, displayId, std::move(stopDragCallback));
+        sourceTool, asyncCtx->displayId, std::move(stopDragCallback));
     if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
         asyncCtx->pointerId = MOUSE_POINTER_ID;
     } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         asyncCtx->pointerId = PEN_POINTER_ID;
     }
-    asyncCtx->displayId = displayId;
     return getPointSuccess;
 }
 

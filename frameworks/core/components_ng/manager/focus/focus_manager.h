@@ -38,6 +38,12 @@ enum class FocusActiveReason : int32_t {
     USE_API = 2,
 };
 
+enum class FocusViewStackState : int32_t {
+    IDLE = 0,
+    SHOW = 1,
+    CLOSE = 2,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -59,7 +65,7 @@ public:
 
     void FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep = false);
     void FocusViewHide(const RefPtr<FocusView>& focusView);
-    void FocusViewClose(const RefPtr<FocusView>& focusView);
+    void FocusViewClose(const RefPtr<FocusView>& focusView, bool isDetachFromTree = false);
 
     void FlushFocusView();
 
@@ -115,6 +121,25 @@ public:
         return isNeedTriggerScroll_.value_or(false);
     }
 
+    void SetIsAutoFocusTransfer(bool isAutoFocusTransfer)
+    {
+        isAutoFocusTransfer_ = isAutoFocusTransfer;
+    }
+
+    bool IsAutoFocusTransfer() const
+    {
+        return isAutoFocusTransfer_;
+    }
+
+    bool RearrangeViewStack();
+
+    void SetFocusViewStackState(FocusViewStackState focusViewStackState)
+    {
+        focusViewStackState_ = focusViewStackState;
+    }
+
+    bool SetFocusViewRootScope(const RefPtr<FocusView>& focusView);
+
     void PaintFocusState();
 
     bool AddFocusScope(const std::string& focusScopeId, const RefPtr<FocusHub>& scopeFocusHub);
@@ -125,6 +150,12 @@ public:
 
     void UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason);
     RefPtr<FocusHub> GetCurrentFocus();
+    void UpdateSwitchingEndReason(SwitchingEndReason reason)
+    {
+        if (isSwitchingFocus_.value_or(false)) {
+            endReason_ = reason;
+        }
+    }
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
@@ -164,6 +195,9 @@ private:
     std::optional<SwitchingStartReason> startReason_;
     std::optional<SwitchingEndReason> endReason_;
     std::optional<SwitchingUpdateReason> updateReason_;
+
+    bool isAutoFocusTransfer_ = true;
+    FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

@@ -58,6 +58,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 {
+    CHECK_NULL_VOID(!allSpans_.empty());
     auto lastSpan = allSpans_.back();
     CHECK_NULL_VOID(lastSpan);
     if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
@@ -148,7 +149,7 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper, maxSize.Width())) {
+    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
     }
     CHECK_NULL_RETURN(paragraphManager_, false);
@@ -162,7 +163,7 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
 }
 
 bool RichEditorLayoutAlgorithm::CreateParagraph(
-    const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth)
+    const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth)
 {
     CHECK_NULL_RETURN(!spans_.empty(), false);
     if (!paragraphManager_) {
@@ -260,7 +261,7 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
+    const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
     auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();

@@ -144,7 +144,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest033, TestSize.Le
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 

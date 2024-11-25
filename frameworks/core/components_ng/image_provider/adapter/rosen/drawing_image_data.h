@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_ROSEN_DRAWING_IMAGE_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_ROSEN_DRAWING_IMAGE_DATA_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+struct ImageCodec {
+    SizeF imageSize = { -1, -1 };
+    int32_t frameCount = 1;
+    ImageRotateOrientation orientation = ImageRotateOrientation::UP;
+};
+
 class DrawingImageData : public ImageData {
     DECLARE_ACE_TYPE(DrawingImageData, ImageData);
+
 public:
     DrawingImageData(const void* data, size_t length);
     explicit DrawingImageData(std::shared_ptr<RSData> rsData) : rsData_(std::move(rsData)) {}
     size_t GetSize() const override;
     const void* GetData() const override;
     std::shared_ptr<RSData> GetRSData() const;
-    std::pair<SizeF, int32_t> Parse() const;
+    ImageCodec Parse() const;
     RefPtr<SvgDomBase> MakeSvgDom(const ImageSourceInfo& src);
     std::string ToString() const override;
 

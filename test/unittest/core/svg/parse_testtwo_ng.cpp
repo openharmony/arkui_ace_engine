@@ -252,30 +252,30 @@ const std::string HUE_ROTATE = "80";
 const std::string FE_COLOR_MATRIX =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feColorMatrix in=\"SourceGraphic\" type=\"matrix\" values=\"R 0 0 0 0 0 G 0 0 0 0 0 B 0 0 0 0 0 A 0\" />"
-        "<feColorMatrix type=\"saturate\" values=\"10\"/>"
-        "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
-        "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
+    "<feColorMatrix in=\"SourceGraphic\" type=\"matrix\" values=\"R 0 0 0 0 0 G 0 0 0 0 0 B 0 0 0 0 0 A 0\" />"
+    "<feColorMatrix type=\"saturate\" values=\"10\"/>"
+    "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
+    "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
     "</filter>"
     "<g>"
-        "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
     "</g>"
     "<g filter=\"url(#colorMatrix)\">"
-        "<circle cx=\"80\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "<circle cx=\"80\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 const std::string FE_GAUSSIAN_BLUR =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feGaussianBlur stdDeviation=\"10 50\"/>"
-        "<feGaussianBlur stdDeviation=\"10\"/>"
-        "<feGaussianBlur stdDeviation=\"abc abc\"/>"
+    "<feGaussianBlur stdDeviation=\"10 50\"/>"
+    "<feGaussianBlur stdDeviation=\"10\"/>"
+    "<feGaussianBlur stdDeviation=\"abc abc\"/>"
     "</filter>"
     "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 const std::string FE_FLOOD_AND_COMPOSITE =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" >"
@@ -289,18 +289,18 @@ const std::string FE_FLOOD_AND_COMPOSITE =
 const std::string FE_BLEND =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<filter id=\"colorMatrix\">"
-        "<feBlend in=\"SourceGraphic\" in2=\"SourceAlpha\" mode=\"lighten\" />"
+    "<feBlend in=\"SourceGraphic\" in2=\"SourceAlpha\" mode=\"lighten\" />"
     "</filter>"
     "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
     "</g>"
-"</svg>";
+    "</svg>";
 
 const std::string IMAGE_HREF = "test.png";
 const std::string IMAGE_LABEL =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
     "<image id=\"image001\" x=\"150\" y=\"20\" width=\"100\" height=\"100\" href=\"test.png\" />"
-"</svg>";
+    "</svg>";
 
 constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
 constexpr float IMAGE_COMPONENT_HEIGHT = 100.0f;
@@ -695,7 +695,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
 {
-    std::function func = [&](Gradient &gradient) {
+    std::function func = [&](Gradient& gradient) {
         auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
         EXPECT_NE(svgStream, nullptr);
         ImageSourceInfo src;
@@ -779,7 +779,7 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
 
     svgNode->SetAttr("strokeWidth", "1.2");
     EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), 1.2);
-    
+
     svgNode->SetAttr("strokeWidth", "-1.2");
     EXPECT_NE(svgNode->GetBaseAttributes().strokeState.GetLineWidth().Value(), -1.2);
 
@@ -788,7 +788,7 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
 
     svgNode->SetAttr("strokeDasharray", "");
     svgNode->SetAttr("strokeDasharray", "1.1 1.2");
-    auto tesData = std::vector{1.1, 1.2};
+    auto tesData = std::vector { 1.1, 1.2 };
     EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().lineDash, tesData);
 
     svgNode->SetAttr("strokeDashoffset", "2.0");
@@ -843,8 +843,8 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest003, TestSize.Level1)
     Size size;
     auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
     auto dimension = Dimension(0.0, DimensionUnit::PERCENT);
-    
-    SvgLengthType svgLengthType = static_cast<SvgLengthType>(int(SvgLengthType::OTHER)+1);
+
+    SvgLengthType svgLengthType = static_cast<SvgLengthType>(int(SvgLengthType::OTHER) + 1);
     EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, size, svgLengthType), 0.0);
     dimension.SetUnit(DimensionUnit::AUTO);
     EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, size, svgLengthType), 0.0);
@@ -852,5 +852,24 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest003, TestSize.Level1)
     EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, 1.0), 0.0);
 
     EXPECT_EQ(svgNode->GetRootViewBox(), Rect());
+}
+
+/**
+ * @tc.name: ParseNodeTest004
+ * @tc.desc: SvgNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest004, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
+    ImageSourceInfo src;
+    Size size = { 100, 100 };
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    svgDom->SetAnimationOnFinishCallback([](){});
+    svgDom->SetColorFilter(std::nullopt);
+    Testing::MockCanvas rSCanvas;
+    CallBack(rSCanvas);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, size);
 }
 } // namespace OHOS::Ace::NG

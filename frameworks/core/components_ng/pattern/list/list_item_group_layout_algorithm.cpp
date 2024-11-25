@@ -27,10 +27,8 @@ constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 
-uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
+uint32_t GetMaxGridCounts(int32_t currentColumns)
 {
-    CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
-    auto currentColumns = columnInfo->GetParent()->GetColumns();
     auto maxGridCounts = GRID_COUNTS_8;
     switch (currentColumns) {
         case GRID_COUNTS_4:
@@ -51,6 +49,7 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 
 void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     CHECK_NULL_VOID(listLayoutProperty_);
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -71,13 +70,11 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint_ = layoutProperty->CreateChildConstraint();
     isCardStyle_ = IsCardStyleForListItemGroup(layoutWrapper);
     if (isCardStyle_) {
-        auto maxWidth = GetListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty) -
-                        layoutProperty->CreatePaddingAndBorder().Width();
-        contentIdealSize.SetCrossSize(maxWidth, axis_);
+        UpdateListItemGroupMaxWidth(contentConstraint.parentIdealSize, layoutProperty, contentIdealSize);
+        listLayoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     }
     UpdateListItemConstraint(contentIdealSize, childLayoutConstraint_);
     referencePos_ = UpdateReferencePos(layoutProperty, forwardLayout_, referencePos_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     totalMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (Negative(spaceWidth_) || GreatOrEqual(spaceWidth_, endPos_ - startPos_)) {
@@ -104,7 +101,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureCacheItem(layoutWrapper);
     } else {
         MeasureListItem(layoutWrapper, childLayoutConstraint_);
-        UpdateCachedItemPosition();
+        UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     }
     childrenSize_ ? AdjustByPosMap() : AdjustItemPosition();
 
@@ -118,12 +115,13 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
 }
 
-void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition()
+void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
 {
     if (!itemPosition_.empty()) {
         auto iter = cachedItemPosition_.begin();
         while (iter != cachedItemPosition_.end()) {
-            if (iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) {
+            if ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
+                iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount)) {
                 iter = cachedItemPosition_.erase(iter);
             } else {
                 iter++;
@@ -132,30 +130,33 @@ void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition()
     }
 }
 
-float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
-    const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty)
+void ListItemGroupLayoutAlgorithm::UpdateListItemGroupMaxWidth(
+    const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty, OptionalSizeF& contentIdealSize)
 {
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
-    columnInfo->GetParent()->BuildColumnWidth();
-    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
-    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + layoutProperty->CreatePaddingAndBorder().Width();
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::LIST_CARD);
+    CHECK_NULL_VOID(columnInfo);
+    auto columnParent = columnInfo->GetParent();
+    CHECK_NULL_VOID(columnParent);
+    columnParent->BuildColumnWidth();
+    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnParent->GetColumns())));
+    float paddingWidth = layoutProperty->CreatePaddingAndBorder().Width();
+    auto parentWidth = parentIdealSize.CrossSize(axis_).value() + paddingWidth;
     auto maxWidth = std::min(parentWidth, maxGridWidth);
-    if (LessNotEqual(maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width())) {
+    if (LessNotEqual(maxGridWidth, paddingWidth)) {
         TAG_LOGI(AceLogTag::ACE_LIST,
             "ListItemGroup reset to parentWidth since grid_col width:%{public}f, border:%{public}f",
-            maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width());
+            maxGridWidth, paddingWidth);
         maxWidth = parentWidth;
     }
-    return maxWidth;
+    contentIdealSize.SetCrossSize(maxWidth - paddingWidth, axis_);
 }
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    const auto& layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
@@ -164,6 +165,8 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(listLayoutProperty_);
     itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
     bool show = listLayoutProperty_->GetShowCachedItemsValue(false);
+    layoutProperty->UpdateListLanes(listLayoutProperty_->GetLanes(),
+        listLayoutProperty_->GetLaneMinLength(), listLayoutProperty_->GetLaneMaxLength());
     SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountWithDefault(), show);
 
     if (cacheParam_) {
@@ -253,9 +256,15 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         layoutWrapper->SetActiveChildRange(start, end, cachedCountBackward, cachedCountForward, show);
         return;
     } else if (show && !cachedItemPosition_.empty()) {
-        int32_t start = itemStartIndex_ + cachedItemPosition_.begin()->first;
-        int32_t end = itemStartIndex_ + cachedItemPosition_.rbegin()->first;
-        layoutWrapper->SetActiveChildRange(start, end);
+        int32_t start = cachedItemPosition_.begin()->first;
+        int32_t end = cachedItemPosition_.rbegin()->first;
+        int32_t count = end - start + 1;
+        if (start == 0) {
+            layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, count, show);
+        } else if (end == totalItemCount_ - 1) {
+            int32_t endLimit = end + itemStartIndex_ + 1;
+            layoutWrapper->SetActiveChildRange(endLimit, endLimit, count, 0, show);
+        }
         return;
     }
     auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
@@ -1138,12 +1147,10 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
         UpdateZIndex(footerWrapper);
         footerMainSize = footerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float footerPos = 0.0f;
-        if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) && !itemPosition_.empty()) {
+        if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
             float stickyPos = contentStartOffset_ - mainPos;
-            if (GetEndIndex() == totalItemCount_ - 1) {
-                stickyPos = std::min(stickyPos, GetEndPosition() - footerMainSize);
-            }
+            stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             footerPos = std::max(footerPos, stickyPos);
             footerPos = std::min(footerPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
         }
@@ -1186,12 +1193,10 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterLTR(LayoutWrapper* layoutWr
         UpdateZIndex(headerWrapper);
         headerMainSize = headerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float headerPos = 0.0f;
-        if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) && !itemPosition_.empty()) {
+        if (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) {
             contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
             float stickyPos = contentStartOffset_ - mainPos;
-            if (GetEndIndex() == totalItemCount_ - 1) {
-                stickyPos = std::min(stickyPos, GetEndPosition() - headerMainSize);
-            }
+            stickyPos = std::min(stickyPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
             headerPos = std::max(headerPos, stickyPos);
         }
         LayoutIndex(headerWrapper, paddingOffset, crossSize, headerPos);
@@ -1344,7 +1349,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheForward(LayoutWrapper* layoutWrap
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex + i < totalItemCount_; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex + i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }
@@ -1384,7 +1390,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheBackward(LayoutWrapper* layoutWra
         float mainLen = 0.0f;
         int32_t cnt = 0;
         for (int32_t i = 0; i < lanes && curIndex - i >= 0; i++) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, true);
+            auto wrapper =
+                layoutWrapper->GetOrCreateChildByIndex(curIndex - i + itemStartIndex_, param.show, !param.show);
             if (!wrapper || !wrapper->GetHostNode() || !wrapper->GetHostNode()->RenderCustomChild(param.deadline)) {
                 return;
             }
