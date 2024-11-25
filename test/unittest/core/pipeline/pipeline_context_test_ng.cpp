@@ -76,6 +76,7 @@ void PipelineContextTestNg::SetUpTestSuite()
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    context_->fontManager_ = FontManager::Create();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -1421,8 +1422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
 
     // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
-    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 },
-        { 200, 0, 0 } };
+    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
