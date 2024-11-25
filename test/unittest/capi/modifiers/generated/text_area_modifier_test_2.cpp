@@ -511,13 +511,61 @@ HWTEST_F(TextAreaModifierTest, setLineSpacingTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLineSpacingTestValidValues
+ * @tc.name: setLineSpacingTestLineSpacingValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setLineSpacingTestValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setLineSpacingTestLineSpacingValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_LengthMetrics initValueLineSpacing;
+
+    // Initial setup
+    initValueLineSpacing = std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]);
+
+    auto checkValue = [this, &initValueLineSpacing](
+                          const std::string& input, const std::string& expectedStr, const Ark_LengthMetrics& value) {
+        Ark_LengthMetrics inputValueLineSpacing = initValueLineSpacing;
+
+        inputValueLineSpacing = value;
+        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_SPACING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setLineSpacing, attribute: lineSpacing";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthMetricsNonNegValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setLineSpacingTestLineSpacingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setLineSpacingTestLineSpacingInvalidValues, TestSize.Level1)
+{
+    Ark_LengthMetrics initValueLineSpacing;
+
+    // Initial setup
+    initValueLineSpacing = std::get<1>(Fixtures::testFixtureLengthMetricsNonNegValidValues[0]);
+
+    auto checkValue = [this, &initValueLineSpacing](const std::string& input, const Ark_LengthMetrics& value) {
+        Ark_LengthMetrics inputValueLineSpacing = initValueLineSpacing;
+
+        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
+        inputValueLineSpacing = value;
+        modifier_->setLineSpacing(node_, &inputValueLineSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_SPACING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_SPACING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLineSpacing, attribute: lineSpacing";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthMetricsNonNegInvalidValues) {
+        checkValue(input, value);
+    }
 }
 
 /*
@@ -877,7 +925,7 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTestEnablePreviewTextValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -892,7 +940,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnableHapticFeedbackTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueEnableHapticFeedback;
 

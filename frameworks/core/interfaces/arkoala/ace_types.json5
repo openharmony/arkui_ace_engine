@@ -418,6 +418,24 @@
             ],
         },
         {
+            "name": "LengthMetricsNonNeg",
+            "type": "Ark_LengthMetrics",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["0.0_vp", "0.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["0.0_fp", "0.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["0.0_px", "0.00px"],
+                ["1.23_px", "1.23px"],
+                ["0.5_pct", "50.00%"],
+                ["0.0_pct", "0.00%"],
+            ],
+            "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
+        },
+        {
             "name": "DimensionsNumNonNeg",
             "type": "Ark_Number",
             "validValues": [
@@ -1073,6 +1091,10 @@
             "themes": ["TextFieldTheme"],
             "attributes": [
                 {
+                    "name": "enableHapticFeedback",
+                    "default": "true"
+                },
+                {
                     "name": "minFontSize",
                     "default": "0.00px",
                     "type": "DimensionNonNegNonPct",
@@ -1221,7 +1243,8 @@
                 },
                 {
                     "name": "lineSpacing",
-                    "default": "0.00vp"
+                    "default": "0.00vp",
+                    "fixtures": ["LengthMetricsNonNeg"]
                 },
                 {
                     "name": "lineHeight",
@@ -1329,8 +1352,6 @@
                 "setLineHeightTestLineHeightInvalidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
-                "setEnableHapticFeedbackTestDefaultValues",
-                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues",
                 "setTextOverflowTestTextOverflowValidValues"
             ]
         },

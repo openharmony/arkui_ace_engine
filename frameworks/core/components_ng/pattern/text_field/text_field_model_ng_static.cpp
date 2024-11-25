@@ -103,4 +103,13 @@ RefPtr<Referenced> TextFieldModelNG::GetJSTextEditableController(FrameNode* fram
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetJSTextEditableController();
 }
+
+void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
+{
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

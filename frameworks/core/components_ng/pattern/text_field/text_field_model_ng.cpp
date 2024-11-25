@@ -1843,11 +1843,6 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const std::optional<D
     }
 }
 
-void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
-}
-
 void TextFieldModelNG::SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt)
 {
     if (valueOpt) {
