@@ -29,6 +29,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
@@ -1136,18 +1137,30 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
+Shadow GetDefaultShadow(ShadowStyle style)
+{
+    Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, shadow);
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    auto colorMode = SystemProperties::GetColorMode();
+    shadow = shadowTheme->GetShadow(style, colorMode);
+    return shadow;
+}
+
 void DialogPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOff)));
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff)));
 }
 
 void DialogPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOn)));
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn)));
 }
 
 // XTS inspector
