@@ -129,6 +129,7 @@ private:
     double GetTextMaxHeight();
     double GetTextMaxWidth();
     int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
+    NG::SizeF GetSystemTopMostSubwindowSize() const;
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
