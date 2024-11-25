@@ -29,7 +29,6 @@ using namespace Converter;
 using namespace TypeHelper;
 
 namespace  {
-
 const auto ATTRIBUTE_CONSTRUCTOR_NAME = "constructor";
 const auto ATTRIBUTE_SIZE_NAME = "size";
 const auto ATTRIBUTE_SIZE_I_WIDTH_NAME = "width";
@@ -48,14 +47,6 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSiz
     { "12.34vp", Converter::ArkValue<Ark_Number>(12.34), "12.34vp" },
     { "-56.78vp", Converter::ArkValue<Ark_Number>(-56.78), "-56.78vp" },
 };
-
-
-
-// test!!!
-std::ofstream out2("test_json_output.txt");    
-
-
-
 } // namespace
 
 class FormComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIFormComponentModifier,
@@ -77,38 +68,14 @@ class FormComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIFormCom
  */
 HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
 {
-
-    // test!!!
-        std::unique_ptr<JsonValue> jsonValue2 = GetJsonValue(node_);
-        auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue2, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultSize2 = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor2, ATTRIBUTE_SIZE_NAME);
-        out2 << "\ntest_json_set_size_default.txt === \n";
-        auto resultStr2 = GetAttrValue<std::string>(resultSize2, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-        auto resultStr3 = GetAttrValue<std::string>(resultSize2, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-        out2 << "size.width: " << resultStr2.c_str() << " " << ATTRIBUTE_SIZE_I_WIDTH_DEFAULT_VALUE << " ";
-        out2 << "size.height: " << resultStr3.c_str() << " " << ATTRIBUTE_SIZE_I_HEIGHT_DEFAULT_VALUE << std::endl;
-
-        std::printf("\ntest: constructor: resultConstructor2: %s", resultConstructor2->ToString().c_str());
-        std::printf("\ntest: size: resultSize2: %s", resultSize2->ToString().c_str());
-        std::printf("\ntest: size width: resultStr2: %s", resultStr2.c_str());
-        std::printf("\ntest: size height: resultStr3: %s", resultStr3.c_str());
-        out2 << "   " << jsonValue2->ToString().c_str();
-    // test!!!
-
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
     auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
     std::string resultStr;
 
-    std::printf("\ntest: constructor: resultConstructor: %s", resultConstructor->ToString().c_str());
-    std::printf("\ntest: size: resultSize: %s", resultSize->ToString().c_str());
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-    std::printf("\ntest: size width: resultStr: %s", resultStr.c_str());
     EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_WIDTH_DEFAULT_VALUE) << "Default value for attribute 'size.width'" << " resultStr: " << resultStr.c_str();
-
-
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-    std::printf("\ntest: size height: resultStr: %s", resultStr.c_str());
     EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_I_HEIGHT_DEFAULT_VALUE) << "Default value for attribute 'size.height'" << " resultStr: " << resultStr.c_str();
 }
 
@@ -131,26 +98,13 @@ HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Le
 
         inputValueSize.width = value;
         modifier_->setSize(node_, &inputValueSize);
-    // test!!!
-        auto jsonValue2 = GetJsonValue(node_);
-        auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue2, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultSize2 = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue2, ATTRIBUTE_SIZE_NAME);
-        auto resultStr2 = GetAttrValue<std::string>(resultSize2, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-        out2 << "\nsize.width: " << input.c_str() << " read: " << resultStr2.c_str()  <<  " expected: " << expectedStr.c_str() << std::endl;
-        out2 << "   " << jsonValue2->ToString().c_str();
-    // test!!!
-        
-       
+
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setSize, attribute: size.width";
     };
-
-    // test!!!
-        out2 << "\n\ntest_json_set_size_width_valid.txt";    
-    // test!!!
 
     for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
         checkValue(input, value, expected);
@@ -178,25 +132,12 @@ HWTEST_F(FormComponentModifierTest, setSizeTestSizeHeightValidValues, TestSize.L
         modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);
 
-
-    // test!!!
-        auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultSize2 = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor2, ATTRIBUTE_SIZE_NAME);
-        auto resultStr2 = GetAttrValue<std::string>(resultSize2, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-        out2 << "\nsize.height: " << input.c_str() << " read: " << resultStr2.c_str()  <<  " expected: " << expectedStr.c_str() << std::endl;
-        out2 << "   " << jsonValue->ToString().c_str();
-    // test!!!
-
-
         auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setSize, attribute: size.height";
     };
 
-    // test!!!
-        out2 << "\n\ntest_json_set_size_height_valid.txt";    
-    // test!!!
     for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
         checkValue(input, value, expected);
     }
@@ -211,15 +152,6 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestDefaultValues, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
-    // test!!!
-    out2 << "\n\ntest_json_module_name_default.txt";
-    auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    auto resultStr2 = GetAttrValue<std::string>(resultConstructor2, ATTRIBUTE_MODULE_NAME_NAME);
-    out2 << "\nmoduleName: " << resultStr2.c_str() << " expected: " << ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE << std::endl;
-    out2 << jsonValue->ToString().c_str();
-    // test!!!
-
     auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
     resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE) << "Default value for attribute 'moduleName'";
@@ -242,28 +174,14 @@ HWTEST_F(FormComponentModifierTest, setModuleNameTestModuleNameValidValues, Test
         Ark_String inputValueModuleName = initValueModuleName;
 
         inputValueModuleName = value;
-
-        std::printf("test: %s\n", input.c_str());
         modifier_->setModuleName(node_, &inputValueModuleName);
         auto jsonValue = GetJsonValue(node_);
-
-        // test!!!
-        auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultStr2 = GetAttrValue<std::string>(resultConstructor2, ATTRIBUTE_MODULE_NAME_NAME);
-        out2 << "\nmoduleName: " << input.c_str() << " read: " << resultStr2.c_str()  <<  " expected: " << expectedStr.c_str() << std::endl;
-        out2 << jsonValue->ToString().c_str();
-        // test!!!
 
         auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setModuleName, attribute: moduleName";
     };
-
-
-    // test!!!
-        out2 << "\n\ntest_json_module_name_valid.txt";
-    // test!!!
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, value, expected);
@@ -279,17 +197,6 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestDefaultValues, TestSize.Le
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
-
-    // test!!!
-    out2 << "\n\ntest_json_allow_update_default.txt"; 
-    auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    auto resultStr2 = GetAttrValue<std::string>(resultConstructor2, ATTRIBUTE_ALLOW_UPDATE_NAME);
-    out2 << "\nallowUpdate: " << resultStr2.c_str() << " expected: " << ATTRIBUTE_ALLOW_UPDATE_DEFAULT_VALUE << std::endl;
-    out2 << jsonValue->ToString().c_str();
-    // test!!!
-
-
     auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
     resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_ALLOW_UPDATE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_UPDATE_DEFAULT_VALUE) << "Default value for attribute 'allowUpdate'";
@@ -315,27 +222,11 @@ HWTEST_F(FormComponentModifierTest, setAllowUpdateTestAllowUpdateValidValues, Te
         modifier_->setAllowUpdate(node_, inputValueAllowUpdate);
         auto jsonValue = GetJsonValue(node_);
 
-
-        // test!!!
-        auto resultConstructor2 =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultStr2 = GetAttrValue<std::string>(resultConstructor2, ATTRIBUTE_ALLOW_UPDATE_NAME);
-        out2 << "\nallowUpdate: " << input.c_str() << " read: " << resultStr2.c_str()  <<  " expected: " << expectedStr.c_str() << std::endl;
-        out2 << jsonValue->ToString().c_str();
-        // test!!!
-
-
         auto resultConstructor =  GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_ALLOW_UPDATE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setAllowUpdate, attribute: allowUpdate";
     };
-
-
-        // test!!!
-        out2 << "\n\ntest_json_allow_update_valid.txt";
-        // test!!!
-
-
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, value, expected);
