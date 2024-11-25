@@ -107,6 +107,9 @@
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::ButtonModel::*;
+      OHOS::Ace::WaterFlowModel::*;
+      OHOS::Ace::NG::WaterFlowSections::*;
+      OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
       OHOS::Ace::CheckBoxModel::*;
       OHOS::Ace::CheckBoxGroupModel::*;
