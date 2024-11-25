@@ -23,6 +23,8 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,6 +37,13 @@ namespace  {
 
 class TextClockModifierTest : public ModifierTestBase<GENERATED_ArkUITextClockModifier,
                                 &GENERATED_ArkUINodeModifiers::getTextClockModifier, GENERATED_ARKUI_TEXT_CLOCK> {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+
+        SetupTheme<TextTheme>();
+    }
 };
 
 
@@ -172,6 +181,52 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
         expectedStr = ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
+}
+
+/*
+ * @tc.name: setOnDateChange
+ * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnDateChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        float index;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onDateChange = [](Ark_Int32 nodeId, const Ark_Number index) {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<float>(index),
+        };
+    };
+
+    Callback_Number_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onDateChange
+    };
+
+    modifier_->setOnDateChange(node_, &callBackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    eventHub->FireChangeEvent("55.5");
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 55.5);
+    eventHub->FireChangeEvent("0.0");
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 0.0);
 }
 
 } // namespace OHOS::Ace::NG

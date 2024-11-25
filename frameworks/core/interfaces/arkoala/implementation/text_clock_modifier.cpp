@@ -15,11 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/arkoala/implementation/text_clock_controller_peer_impl.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
     struct TextClockOptions {
@@ -85,8 +88,10 @@ void OnDateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextClockModelNG::SetOnDateChange(frameNode, convValue);
+    auto onDateChange = [arkCallback = CallbackHelper(*value)](const std::string& data) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(std::stof(data)));
+    };
+    TextClockModelNG::SetOnDateChange(frameNode, std::move(onDateChange));
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)

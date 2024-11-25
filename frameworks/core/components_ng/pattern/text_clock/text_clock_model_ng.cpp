@@ -291,6 +291,14 @@ void TextClockModelNG::SetJSTextClockController(FrameNode* frameNode, const RefP
     pattern->SetJSTextClockController(controller);
 }
 
+void TextClockModelNG::SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextClockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDateChange(std::move(onChange));
+}
+
 RefPtr<Referenced> TextClockModelNG::GetJSTextClockController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
