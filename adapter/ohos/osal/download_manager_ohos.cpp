@@ -21,7 +21,6 @@
 namespace OHOS::Ace {
 using CreateDownloadManagerFunc = DownloadManager* (*)();
 std::unique_ptr<DownloadManager> DownloadManager::instance_ = nullptr;
-std::mutex DownloadManager::mutex_;
 constexpr char CREATE_DOWNLOAD_MANAGER_FUNC[] = "OHOS_ACE_CreateDownloadManager";
 constexpr char ACE_NET_WORK_NAME[] = "libace_network.z.so";
 
@@ -46,13 +45,10 @@ DownloadManager* CreateDownloadManager()
 DownloadManager* DownloadManager::GetInstance()
 {
     TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager GetInstance");
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            auto* manager = CreateDownloadManager();
-            instance_.reset(manager);
-        }
-    }
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        instance_.reset(CreateDownloadManager());
+    });
     return instance_.get();
 }
 } // namespace OHOS::Ace
