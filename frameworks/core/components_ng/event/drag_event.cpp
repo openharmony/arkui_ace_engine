@@ -113,10 +113,8 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
     }
 }
 
-void DragEventActuator::StartLongPressActionForWeb(bool isFloatImage)
+void DragEventActuator::StartLongPressActionForWeb()
 {
-    TAG_LOGW(AceLogTag::ACE_WEB, "StartLongPressActionForWeb isFloatImage:%{public}d", isFloatImage);
-    isFloatImage_ = isFloatImage;
     if (!isReceivedLongPress_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop not received long press action,"
             "don't start long press action for web");
@@ -779,7 +777,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->isOnBeforeLiftingAnimation_ = false;
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() ||
+            actuator->IsNotNeedShowPreviewForWeb(gestureHub->GetFrameNode())) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
             return;
         }
@@ -795,10 +794,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
                 actuator->SetEventColumn(actuator);
             }
-            return;
-        }
-        if (!actuator->isFloatImage_) {
-            actuator->isFloatImage_ = true;
             return;
         }
 

@@ -245,7 +245,7 @@ public:
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void StartDragTaskForWeb();
     void ResetDragActionForWeb();
