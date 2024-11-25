@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
+#include <numeric>
+
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap)
 {
@@ -336,6 +338,7 @@ void WaterFlowLayoutInfoSW::Reset()
     }
     idxToLane_.clear();
     idxToHeight_.clear();
+    heightSum_ = 0.0f;
     maxHeight_ = 0.0f;
     synced_ = false;
 }
@@ -418,6 +421,7 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
     maxHeight_ = 0.0f;
     idxToLane_.clear();
     idxToHeight_.clear();
+    heightSum_ = 0.0f;
     synced_ = false;
 }
 
@@ -469,6 +473,8 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>&
 {
     EraseFrom(idx, idxToLane_);
     EraseFrom(idx, idxToHeight_);
+    heightSum_ = 0.0f;
+
     if (mainGap.size() < lanes_.size()) {
         TAG_LOGW(ACE_WATERFLOW,
             "internal data structure is corrupted. mainGap size = %{public}zu, lanes size = %{public}zu",
@@ -771,11 +777,55 @@ void WaterFlowLayoutInfoSW::ClearData()
     lanes_.clear();
     idxToLane_.clear();
     idxToHeight_.clear();
+    heightSum_ = 0.0f;
     margins_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
+}
+
+void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t startIdx)
+{
+    if (heightSum_ == 0) {
+        heightSum_ = std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
+            [](float sum, const auto& pair) { return sum + pair.second; });
+    }
+    const float average = heightSum_ / static_cast<float>(idxToHeight_.size());
+
+    const int32_t section = GetSegment(startIdx);
+    const float prevOffset = totalOffset_;
+    totalOffset_ = StartPos();
+
+    for (int32_t i = 0; i <= section; ++i) {
+        totalOffset_ -= EstimateSectionHeight(i, average, startIdx - 1);
+    }
+
+    // filter unreasonable estimates
+    if (prevStart <= startIdx) {
+        totalOffset_ = std::min(totalOffset_, prevOffset - average);
+    } else {
+        totalOffset_ = std::max(totalOffset_, prevOffset + average);
+    }
+}
+
+float WaterFlowLayoutInfoSW::EstimateSectionHeight(uint32_t section, float average, int32_t bound) const
+{
+    if (segmentTails_.size() <= section || lanes_.size() <= section || mainGap_.size() <= section ||
+        margins_.size() <= section) {
+        return 0.0f;
+    }
+    bound = std::min(segmentTails_[section], bound);
+    const size_t crossCnt = lanes_[section].size();
+
+    float height = 0.0f;
+    for (int32_t i = (section == 0) ? 0 : segmentTails_[section - 1] + 1; i <= bound; ++i) {
+        height += GetCachedHeight(i).value_or(average) + mainGap_[section];
+    }
+    height /= static_cast<float>(crossCnt);
+    height += average; // to compensate half-filled last row
+    height += axis_ == Axis::VERTICAL ? margins_[section].Height() : margins_[section].Width();
+    return height;
 }
 
 std::optional<float> WaterFlowLayoutInfoSW::GetCachedHeight(int32_t idx) const

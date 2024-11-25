@@ -710,6 +710,6 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge009, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isReachEndCalled);
-    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0.0f);
+    EXPECT_LE(pattern_->layoutInfo_->Offset(), -14200.0f);
 }
 } // namespace OHOS::Ace::NG
