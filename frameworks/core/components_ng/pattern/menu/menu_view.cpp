@@ -920,6 +920,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     MenuType type, const MenuParam& menuParam)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1076,6 +1077,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 {
     auto type = menuParam.type;
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
     // create previewNode
     auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
@@ -1152,6 +1154,8 @@ RefPtr<FrameNode> MenuView::Create(
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag);
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_RETURN(wrapperNode && menuNode, nullptr);
+    SetMenuFocusRule(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
