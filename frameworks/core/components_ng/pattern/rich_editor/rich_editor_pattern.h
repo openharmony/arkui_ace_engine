@@ -964,6 +964,13 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = true;
     }
 
+    void TriggerAvoidOnCaretChangeImmediately()
+    {
+        ForceTriggerAvoidOnCaretChange(true);
+        isTriggerAvoidOnCaretAvoidMode_ = false;
+        TriggerAvoidOnCaretChange();
+    }
+
     void ResetTriggerAvoidFlagOnCaretChange()
     {
         isTriggerAvoidOnCaretAvoidMode_ = false;

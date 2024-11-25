@@ -3485,6 +3485,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
+    TriggerAvoidOnCaretChangeImmediately();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
