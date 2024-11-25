@@ -445,6 +445,7 @@ private:
     std::mutex updateDecorVisibleMutex_;
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
     std::mutex setAppWindowIconMutex_;
+    uint64_t listenedDisplayId_ = 0;
 };
 
 } // namespace OHOS::Ace

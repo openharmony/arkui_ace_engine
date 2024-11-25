@@ -160,6 +160,7 @@ public:
     void DestroyWindow() override;
 
     void ResizeDialogSubwindow() override;
+    uint64_t GetDisplayId() override;
 
 private:
     RefPtr<StackElement> GetStack();
