@@ -1200,7 +1200,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, ShowHandles001, TestSize.Level1)
 }
 
 /**
- * @tc.name: EnableImageDrag001  
+ * @tc.name: EnableImageDrag001
  * @tc.desc: Test EnableImageDrag
  * @tc.type: FUNC
  */
@@ -1698,5 +1698,51 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     Offset point(10, 10);
     thumbnailCallback(point);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: HandleClickSelection001
+ * @tc.desc: test HandleClickSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleClickSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->selectOverlay_->bindManager_.Reset();
+    OHOS::Ace::GestureEvent info;
+    EXPECT_TRUE(richEditorPattern->HandleClickSelection(info));
+}
+
+/**
+ * @tc.name: RepeatClickCaret001
+ * @tc.desc: test RepeatClickCaret
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretTwinkling_ = true;
+    Offset offset;
+    RectF lastCaretRect;
+    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, 1, lastCaretRect));
+}
+
+/**
+ * @tc.name: CloseSystemMenu001
+ * @tc.desc: test CloseSystemMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, CloseSystemMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->selectOverlay_->bindManager_.Reset();
+    richEditorPattern->CloseSystemMenu();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 } // namespace OHOS::Ace::NG
