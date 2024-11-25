@@ -18,7 +18,7 @@
 #include "gmock/gmock.h"
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/interfaces/arkoala/implementation/canvas_renderer_peer_impl.h"
+#include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -99,7 +99,7 @@ std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN 
     { Converter::ArkValue<Ark_String>(" copy"), CompositeOperation::COPY },
     { Converter::ArkValue<Ark_String>("XOR"), CompositeOperation::XOR },
     { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
-    { Converter::ArkValue<Ark_String>("unkonwn value"), static_cast<CompositeOperation>(-1) },
+    { Converter::ArkValue<Ark_String>("unknown value"), static_cast<CompositeOperation>(-1) },
 };
 
 std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {

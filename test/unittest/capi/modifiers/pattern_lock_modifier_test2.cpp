@@ -14,9 +14,9 @@
  */
 
 #include "modifier_test_base.h"
-#include "core/interfaces/arkoala/implementation/pattern_lock_controller_accessor_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 
 namespace OHOS::Ace::NG {

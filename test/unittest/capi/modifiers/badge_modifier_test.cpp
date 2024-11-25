@@ -22,7 +22,7 @@
 #include "modifiers_test_utils.h"
 
 #include "core/components/badge/badge_theme.h"
-#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/native/utility/converter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -285,13 +285,13 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.L
     }
 }
 
-static const std::vector<TestVector> INALID_0_TEST1_PLAN = {
+static const std::vector<TestVector> INVALID_0_TEST1_PLAN = {
     { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
     { ATTRIBUTE_COUNT_NAME, "-1" },
     { ATTRIBUTE_MAX_COUNT_NAME, "-100" },
 };
 
-static const std::vector<TestVector> INALID_0_TEST2_PLAN = {
+static const std::vector<TestVector> INVALID_0_TEST2_PLAN = {
     { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
     { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
     { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
@@ -341,12 +341,12 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
     std::string strResult;
-    for (const auto& [key, expected] : INALID_0_TEST1_PLAN) {
+    for (const auto& [key, expected] : INVALID_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
     }
 
-    for (const auto& [key, expected] : INALID_0_TEST2_PLAN) {
+    for (const auto& [key, expected] : INVALID_0_TEST2_PLAN) {
         strResult = badgeStyleAttrs->GetString(key);
         EXPECT_EQ(strResult, expected);
     }
@@ -427,7 +427,7 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.L
     Ark_Position position;
     position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(16.00f)));
     position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(24.00f)));
-    
+
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_BadgePosition>(
         Converter::ArkValue<Ark_BadgePosition>(BadgePosition::LEFT)
         );
@@ -455,19 +455,19 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.L
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
     }
-    
+
     for (const auto& [key, expected] : VALID_1_TEST2_PLAN) {
         strResult = badgeStyleAttrs->GetString(key);
         EXPECT_EQ(strResult, expected);
     }
 }
 
-static const std::vector<TestVector> INALID_1_TEST1_PLAN = {
+static const std::vector<TestVector> INVALID_1_TEST1_PLAN = {
     { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
     { ATTRIBUTE_VALUE_NAME, "" },
 };
 
-static const std::vector<TestVector> INALID_1_TEST2_PLAN = {
+static const std::vector<TestVector> INVALID_1_TEST2_PLAN = {
     { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
     { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
     { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
@@ -515,12 +515,12 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
     std::string strResult;
-    for (const auto& [key, expected] : INALID_1_TEST1_PLAN) {
+    for (const auto& [key, expected] : INVALID_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
     }
 
-    for (const auto& [key, expected] : INALID_1_TEST2_PLAN) {
+    for (const auto& [key, expected] : INVALID_1_TEST2_PLAN) {
         strResult = badgeStyleAttrs->GetString(key);
         EXPECT_EQ(strResult, expected);
     }

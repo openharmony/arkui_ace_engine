@@ -17,9 +17,9 @@
 
 #include "accessor_test_base.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
-#include "core/interfaces/arkoala/implementation/console_message_peer_impl.h"
+#include "core/interfaces/native/implementation/console_message_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 

@@ -17,9 +17,9 @@
 #include "swiper_modifier_test.h"
 #include "modifiers_test_utils.h"
 
-#include "core/interfaces/arkoala/implementation/tabs_controller_modifier_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 

@@ -15,8 +15,8 @@
 
 #include "gtest/gtest.h"
 
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/interfaces/arkoala/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 using namespace std::literals;
 using namespace testing;

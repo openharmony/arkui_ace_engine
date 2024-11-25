@@ -19,7 +19,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 

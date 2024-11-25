@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/arkoala/implementation/image_bitmap_peer_impl.h"
+#include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 
 #include "accessor_test_base.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"
 
@@ -92,8 +92,8 @@ public:
  */
 HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 {
-    auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     bool result = false;
     auto clouseFunc = [&result]() {
         result = true;
@@ -113,8 +113,8 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 {
-    auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     ASSERT_NE(peer_, nullptr);
     peer_->SetHeight(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);
@@ -131,8 +131,8 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
  */
 HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 {
-    auto imageResurse = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
-    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResurse));
+    auto imageResource = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->ctor(&imageResource));
     ASSERT_NE(peer_, nullptr);
     peer_->SetWidth(DEFAULT_INT_VALUE);
     ASSERT_NE(accessor_->getHeight, nullptr);

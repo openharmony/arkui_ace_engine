@@ -19,7 +19,7 @@
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/interfaces/arkoala/implementation/rich_editor_controller_structs.h"
+#include "core/interfaces/native/implementation/rich_editor_controller_structs.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const TextDecorationStruct& src);

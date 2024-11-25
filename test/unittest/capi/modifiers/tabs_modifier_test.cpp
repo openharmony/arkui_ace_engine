@@ -22,8 +22,8 @@
 
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"

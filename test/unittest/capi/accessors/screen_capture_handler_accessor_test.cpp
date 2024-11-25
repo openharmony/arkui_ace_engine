@@ -17,10 +17,10 @@
 
 #include "accessor_test_base.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/interfaces/arkoala/utility/validators.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
-#include "core/interfaces/arkoala/implementation/screen_capture_handler_peer_impl.h"
+#include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 

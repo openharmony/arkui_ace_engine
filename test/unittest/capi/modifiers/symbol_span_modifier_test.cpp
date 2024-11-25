@@ -19,7 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "generated/test_fixtures.h"
 #include "core/components/theme/theme_style.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;

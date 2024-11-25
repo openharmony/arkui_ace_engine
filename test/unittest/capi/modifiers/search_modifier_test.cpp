@@ -21,8 +21,8 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 

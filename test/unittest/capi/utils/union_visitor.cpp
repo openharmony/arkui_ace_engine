@@ -15,9 +15,9 @@
 
 #include "gtest/gtest.h"
 
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/converter_union.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;

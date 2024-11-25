@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/arkoala/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"
 

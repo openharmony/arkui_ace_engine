@@ -19,10 +19,10 @@
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/implementation/video_controller_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/video_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;

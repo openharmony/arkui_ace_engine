@@ -17,9 +17,9 @@
 
 #include "accessor_test_base.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
-#include "core/interfaces/arkoala/implementation/calendar_controller_peer.h"
+#include "core/interfaces/native/implementation/calendar_controller_peer.h"
 
 namespace OHOS::Ace::NG {
 

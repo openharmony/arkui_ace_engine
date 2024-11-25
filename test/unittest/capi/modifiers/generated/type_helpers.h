@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "core/interfaces/arkoala/utility/generated/converter_generated.h"
+#include "core/interfaces/native/utility/generated/converter_generated.h"
 
 namespace OHOS::Ace::NG::TypeHelper {
 template<typename T, typename = std::void_t<decltype(T().tag), decltype(T().value)>>

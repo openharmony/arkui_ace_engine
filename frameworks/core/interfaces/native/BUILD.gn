@@ -14,14 +14,14 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
-    "//foundation/arkui/ace_engine/frameworks/core/interfaces/arkoala/generated/interface/node_interface.gni")
+    "//foundation/arkui/ace_engine/frameworks/core/interfaces/native/generated/interface/node_interface.gni")
 
 config("ace_core_interfaces_native_node_config") {
   include_dirs = [
     "${ace_root}/interfaces/inner_api/ace",
     "${ace_root}/interfaces/native",
     "${ace_root}/interfaces/native/node",
-    "${ace_root}/frameworks/core/interfaces/arkoala/generated/interface",
+    "${ace_root}/frameworks/core/interfaces/native/generated/interface",
     "${ace_root}/frameworks/core/interfaces/arkoala",
   ]
 
@@ -48,15 +48,13 @@ template("ace_core_interfaces_native_node") {
 
     # add common source file needed by all product platform here
     sources = [
-      "../arkoala/implementation/canvas_renderer_peer_impl.cpp",
-      "../arkoala/implementation/canvas_rendering_context2d_peer_impl.cpp",
-      "../arkoala/implementation/custom_dialog_controller_peer_impl.cpp",
-      "../arkoala/implementation/drawing_rendering_context_peer_impl.cpp",
-      "../arkoala/implementation/scroller_peer_impl.cpp",
-      "../arkoala/implementation/search_controller_accessor_peer_impl.cpp",
-      "../arkoala/implementation/video_controller_peer_impl.cpp",
-      "../arkoala/utility/converter_enums.cpp",
-      "../arkoala/utility/reverse_converter_enums.cpp",
+      "implementation/canvas_renderer_peer_impl.cpp",
+      "implementation/canvas_rendering_context2d_peer_impl.cpp",
+      "implementation/custom_dialog_controller_peer_impl.cpp",
+      "implementation/drawing_rendering_context_peer_impl.cpp",
+      "implementation/scroller_peer_impl.cpp",
+      "implementation/search_controller_accessor_peer_impl.cpp",
+      "implementation/video_controller_peer_impl.cpp",
       "node/alphabet_indexer_modifier.cpp",
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
@@ -159,6 +157,8 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/view_model2.cpp",
       "node/water_flow_modifier.cpp",
+      "utility/converter_enums.cpp",
+      "utility/reverse_converter_enums.cpp",
     ]
     if (defined(config.web_components_support) &&
         config.web_components_support && !is_arkui_x) {
@@ -264,22 +264,22 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/canvas_renderer_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/canvas_rendering_context2d_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/custom_dialog_controller_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/drawing_rendering_context_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/scroller_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/implementation/video_controller_peer_impl.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/utility/converter_enums.cpp",
-    "$ace_root/frameworks/core/interfaces/arkoala/utility/reverse_converter_enums.cpp",
     "common/view_model.cpp",
     "common/view_model2.cpp",
+    "implementation/canvas_renderer_peer_impl.cpp",
+    "implementation/canvas_rendering_context2d_peer_impl.cpp",
+    "implementation/custom_dialog_controller_peer_impl.cpp",
+    "implementation/drawing_rendering_context_peer_impl.cpp",
+    "implementation/scroller_peer_impl.cpp",
+    "implementation/search_controller_accessor_peer_impl.cpp",
+    "implementation/video_controller_peer_impl.cpp",
     "node/extension_companion_node.cpp",
     "node/node_adapter_impl.cpp",
     "node/node_api.cpp",
     "node/node_list_item_modifier.cpp",
     "node/util_modifier.cpp",
+    "utility/converter_enums.cpp",
+    "utility/reverse_converter_enums.cpp",
   ]
   sources += generated_sources
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]

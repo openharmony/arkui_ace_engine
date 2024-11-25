@@ -16,7 +16,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include <gtest/gtest.h>
 #include "arkoala_api_generated.h"
 
@@ -70,7 +70,7 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestDefaultValues, TestSize.Level1)
 
     auto fullJson = GetJsonValue(node_);
     auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
-    
+
     auto flexDirection = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_DIRECTION_NAME);
     EXPECT_EQ(flexDirection, ATTRIBUTE_SET_FLEX_DIRECTION_DEFAULT_VALUE);
 
@@ -104,7 +104,7 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestNoWrapValues, TestSize.Level1)
     inputValue = Converter::ArkValue<Opt_FlexOptions>(flexOptions);
     modifier_->setFlexOptions(node_, &inputValue);
     auto fullJson = GetJsonValue(node_);
-    
+
     auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);

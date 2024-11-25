@@ -18,7 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "arkoala_api_generated.h"
 

@@ -17,9 +17,9 @@
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "drawing_rendering_context_accessor_test.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
-#include "core/interfaces/arkoala/implementation/drawing_rendering_context_peer_impl.h"
+#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "gmock/gmock.h"
 

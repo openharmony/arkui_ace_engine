@@ -17,9 +17,9 @@
 
 #include "accessor_test_base.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/interfaces/arkoala/implementation/list_scroller_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/list_scroller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "node_api.h"
 
 namespace OHOS::Ace::NG {
@@ -311,7 +311,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemRectInGroupTestValidValuesTes
     index = std::get<0>(indexValues[0]);
     arkIndex = std::get<1>(indexValues[0]);
     expectedRect = Rect();
-    
+
     for (auto&& value: indexInGroupValues) {
         indexInGroup = std::get<0>(value);
         arkIndexInGroup = std::get<1>(value);
@@ -418,7 +418,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
     x = std::get<0>(indexValues[0]);
     arkX = std::get<1>(indexValues[0]);
     expectedRect = ListItemGroupIndex();
-    
+
     for (auto&& value: indexInGroupValues) {
         y = std::get<0>(value);
         arkY = std::get<1>(value);
@@ -436,7 +436,7 @@ HWTEST_F(ListScrollerAccessorTest, DISABLED_GetItemIndexInGroupTestValidValuesTe
     y = std::get<0>(indexValues[0]);
     arkY = std::get<1>(indexValues[0]);
     expectedRect = ListItemGroupIndex();
-    
+
     for (auto&& value: indexNegativeValues) {
         x = std::get<0>(value);
         arkX = std::get<1>(value);
