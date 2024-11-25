@@ -365,7 +365,7 @@ ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
     }
-    ArkUI_Node* arkUINode = new ArkUI_Node({ 0, node, false });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
     impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
     return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
 }
