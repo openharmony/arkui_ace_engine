@@ -2033,5 +2033,54 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
     context_->FlushDirtyPropertyNodes();
     EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
 }
+
+/**
+ * @tc.name: PipelineContextTestNg102
+ * @tc.desc: Test the MouseHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    context_->mouseEvents_.clear();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    ASSERT_EQ(context_->lastMouseEvent_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     */
+    MouseEvent event;
+    event.x = 12.345f;
+    event.y = 12.345f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 1);
+        EXPECT_EQ(mouseEvents.back().x, 12.345f);
+        EXPECT_EQ(mouseEvents.back().y, 12.345f);
+    }
+    context_->mouseEvents_.clear();
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     * @param: set lastMouseEvent_ is not null
+     */
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(event);
+    context_->lastMouseEvent_->action = MouseAction::MOVE;
+    event.x = 54.321f;
+    event.y = 54.321f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    ASSERT_NE(context_->lastMouseEvent_, nullptr);
+    ASSERT_NE(static_cast<int>(context_->lastMouseEvent_->action), 5);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 0);
+    }
+    context_->mouseEvents_.clear();
+}
 } // namespace NG
 } // namespace OHOS::Ace
