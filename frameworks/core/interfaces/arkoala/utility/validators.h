@@ -38,6 +38,7 @@ void ValidateNonPercent(std::optional<CalcDimension>& opt);
 void ValidateNonEmpty(std::optional<CalcDimension>& opt);
 void ValidateNonNegative(std::optional<int>& value);
 void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
+void ValidatePositive(std::optional<int>& value);
 void ValidateNonNegative(std::optional<V2::GridContainerSize>& value);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
