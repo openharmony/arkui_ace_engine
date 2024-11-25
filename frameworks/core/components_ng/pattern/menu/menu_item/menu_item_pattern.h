@@ -233,7 +233,7 @@ protected:
     RefPtr<FrameNode> GetMenuWrapper();
 
 private:
-    friend class ServiceCollaborationMenuAceHelper;
+friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
@@ -312,6 +312,7 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
+
     RefPtr<FrameNode> embeddedMenu_ = nullptr;
     RefPtr<FrameNode> clickableArea_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;

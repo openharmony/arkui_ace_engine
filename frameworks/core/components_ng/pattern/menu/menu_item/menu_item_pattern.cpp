@@ -348,6 +348,7 @@ void MenuItemPattern::ShowSubMenu()
     auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
+
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
         static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
@@ -358,7 +359,6 @@ RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
     CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
         auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-        CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode;
     }
     uint32_t depth = 0;
@@ -367,7 +367,7 @@ RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
             if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
-                child  = child->GetChildAtIndex(0);
+                child = child->GetChildAtIndex(0);
                 ++depth;
             }
             continue;
@@ -1411,8 +1411,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
     }
-
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);

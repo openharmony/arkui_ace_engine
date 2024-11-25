@@ -243,8 +243,8 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 }
 } // namespace
 
-MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag, const std::optional<OffsetF>& lastPosition)
-    : targetNodeId_(id), targetTag_(tag)
+MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
+    const std::optional<OffsetF>& lastPosition) : targetNodeId_(id), targetTag_(tag)
 {
     if (lastPosition.has_value()) {
         lastPosition_ = lastPosition;
@@ -262,10 +262,10 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag, con
     placementFuncMap_[Placement::RIGHT_TOP] = &MenuLayoutAlgorithm::GetPositionWithPlacementRightTop;
     placementFuncMap_[Placement::RIGHT_BOTTOM] = &MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom;
 
-    setHorizontal_ = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT,
-        Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
-    setVertical_ = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM,
-        Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
+    setHorizontal_ = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
+        Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
+    setVertical_ = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT,
+        Placement::BOTTOM, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -515,14 +515,14 @@ void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, con
     if (props->GetMenuPlacement().has_value()) {
         auto targetSecurity = targetSecurity_;
         topSpace_ = std::max(0.0, targetOffset_.GetY() - targetSecurity - paddingTop_ - wrapperRect_.Top());
-        bottomSpace_ = std::max(
-            0.0, wrapperRect_.Bottom() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
+        bottomSpace_ = std::max(0.0,
+            wrapperRect_.Bottom() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
         if (NearZero(topSpace_) && NearZero(bottomSpace_)) {
             bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
         }
         leftSpace_ = std::max(0.0, wrapperRect_.Left() + targetOffset_.GetX() - paddingStart_ - targetSecurity);
-        rightSpace_ =
-            std::max(0.0, wrapperRect_.Right() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
+        rightSpace_ = std::max(
+            0.0, wrapperRect_.Right() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
         if (NearZero(leftSpace_) && NearZero(rightSpace_)) {
             leftSpace_ = position_.GetX();
             rightSpace_ = wrapperRect_.Right() - leftSpace_;
@@ -579,6 +579,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
         paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
     }
 }
+
 
 void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position)
 {
@@ -642,8 +643,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
-    if (!constraint)
-        return;
+    if (!constraint) return;
 
     auto idealSize = CreateIdealSize(
         constraint.value(), Axis::VERTICAL, menuLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT), true);
@@ -734,8 +734,9 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     childConstraint.maxSize.SetWidth(maxWidth);
 }
 
-void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
-    PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem)
+void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
+    LayoutConstraintF& childConstraint, PaddingPropertyF padding, SizeF& idealSize,
+    RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
         auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
@@ -787,8 +788,8 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper, Layou
 
 void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect)
 {
-    CHECK_NULL_VOID(
-        frameNode && (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::FLEX_ETS_TAG));
+    CHECK_NULL_VOID(frameNode &&
+        (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::FLEX_ETS_TAG));
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
