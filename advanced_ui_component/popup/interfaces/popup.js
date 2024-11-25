@@ -800,7 +800,7 @@ export class PopupComponent extends ViewPU {
         j28 -= (this.theme.windows.padding.bottom.value -
             (this.theme.button.textMargin.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(j28 + 1)) {
-            return this.textHeight;
+            return j28;
         }
         else {
             j28 = undefined;
@@ -1092,6 +1092,14 @@ export class PopupComponent extends ViewPU {
                         Column.direction(this.popupDirection);
                         Column.layoutWeight(this.getLayoutWeight());
                     }, Column);
+                    this.observeComponentCreation2((i3, j3) => {
+                        Flex.create();
+                        Flex.height(0);
+                        Flex.onAreaChange((l3, m3) => {
+                            this.titleHeight = m3.height;
+                        });
+                    }, Flex);
+                    Flex.pop();
                     this.observeComponentCreation2((w24, x24) => {
                         Row.create();
                         Row.direction(this.popupDirection);
