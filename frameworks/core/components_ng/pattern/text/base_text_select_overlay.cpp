@@ -1394,4 +1394,13 @@ void BaseTextSelectOverlay::RemoveAvoidKeyboardCallback()
     CHECK_NULL_VOID(textFieldManagerNg);
     textFieldManagerNg->RemoveAvoidKeyboardCallback(host->GetId());
 }
+
+bool BaseTextSelectOverlay::IsHiddenHandle()
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return overlayInfo->isSingleHandle && overlayManager->IsHiddenHandle();
+}
 } // namespace OHOS::Ace::NG
