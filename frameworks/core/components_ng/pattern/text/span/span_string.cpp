@@ -1050,6 +1050,23 @@ void SpanString::UpdateSpansMap()
     }
 }
 
+std::string SpanString::ToString()
+{
+    std::stringstream ss;
+    for (auto span: spans_) {
+        ss << "Get spanItem [" << span->interval.first << ":"
+            << span->interval.second << "] " << span->content << std::endl;
+    }
+    for (auto& iter : spansMap_) {
+        auto spans = spansMap_[iter.first];
+        for (auto it = spans.begin(); it != spans.end(); ++it) {
+            ss << (*it)->ToString() << std::endl;
+        }
+    }
+    std::string output = ss.str();
+    return output;
+}
+
 RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
 {
     CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);

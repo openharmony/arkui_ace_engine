@@ -86,6 +86,7 @@ public:
     void ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end);
     void ChangeStartToCorrectNum(int32_t& start);
     void ChangeEndToCorrectNum(int32_t& end);
+    std::string ToString();
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
