@@ -98,6 +98,7 @@ generated_sources = [
   "../arkoala/implementation/image_analyzer_controller_accessor.cpp",
   "../arkoala/implementation/image_animator_modifier.cpp",
   "../arkoala/implementation/image_bitmap_accessor.cpp",
+  "../arkoala/implementation/image_bitmap_peer_impl.cpp",
   "../arkoala/implementation/image_modifier.cpp",
   "../arkoala/implementation/image_span_modifier.cpp",
   "../arkoala/implementation/js_geolocation_accessor.cpp",

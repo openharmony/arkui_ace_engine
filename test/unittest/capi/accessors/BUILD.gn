@@ -31,6 +31,7 @@ ace_unittest("capi_all_accessors_test") {
     "full_screen_exit_handler_accessor_test.cpp",
     "gesture_recognizer_accessor_test.cpp",
     "image_analyzer_controller_accessor_test.cpp",
+    "image_bitmap_accessor_test.cpp",
     "js_geolocation_accessor_test.cpp",
     "js_result_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
