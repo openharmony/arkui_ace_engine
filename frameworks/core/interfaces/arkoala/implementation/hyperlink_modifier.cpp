@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -25,9 +26,12 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(address);
-    //auto convValue = Converter::OptConvert<type>(address); // for enums
-    //HyperlinkModelNG::SetSetHyperlinkOptions(frameNode, convValue);
+    CHECK_NULL_VOID(address);
+    auto convAddress = Converter::OptConvert<std::string>(*address);
+    auto convContent = Converter::OptConvert<std::string>(*content);
+    if (convAddress.has_value()) {
+        HyperlinkModelNG::SetTextStyle(frameNode, convAddress.value(), convContent);
+    }
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
@@ -37,8 +41,8 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //HyperlinkModelNG::SetColor(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Color>(*value);
+    HyperlinkModelNG::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
