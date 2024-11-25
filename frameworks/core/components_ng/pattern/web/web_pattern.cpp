@@ -4260,6 +4260,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle, beginTouchHandle, endTouchHandle);
     if (overlayType == INVALID_OVERLAY) return false;
     if (params->GetIsLongPressActived()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ShowMagnifier");
         ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
     }
@@ -4301,7 +4302,6 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "ShowMagnifier");
     if (magnifierController_) {
         OffsetF localOffset = OffsetF(centerOffsetX, centerOffsetY);
         magnifierController_->SetLocalOffset(localOffset);
