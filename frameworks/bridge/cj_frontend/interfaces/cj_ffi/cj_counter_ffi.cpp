@@ -70,6 +70,16 @@ void FfiOHOSAceFrameworkCounterSetBackgroundColor(uint32_t color)
     CounterModel::GetInstance()->SetBackgroundColor(Color(color));
 }
 
+void FfiOHOSAceFrameworkCounterEnableInc(bool enable)
+{
+    CounterModel::GetInstance()->SetEnableInc(enable);
+}
+
+void FfiOHOSAceFrameworkCounterEnableDec(bool enable)
+{
+    CounterModel::GetInstance()->SetEnableDec(enable);
+}
+
 void FfiOHOSAceFrameworkCounterSetOnInc(void (*callback)())
 {
     CounterModel::GetInstance()->SetOnInc(CJLambda::Create(callback));

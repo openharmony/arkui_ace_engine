@@ -226,6 +226,7 @@
       OHOS::Ace::NG::CustomPaintPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::CustomNodeBase::*;
+      OHOS::Ace::NG::XComponentPattern::*;
       OHOS::Ace::PipelineBase::Vp2PxWithCurrentDensity*;
       OHOS::Ace::PipelineBase::Px2VpWithCurrentDensity*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
@@ -322,6 +323,10 @@
       vtable?for?OHOS::Ace::NG::GestureGroup;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
+      vtable?for?OHOS::Ace::NG::XComponentModelNG;
+      vtable?for?OHOS::Ace::Framework::XComponentModelImpl;
+      vtable?for?OHOS::Ace::NG::XComponentControllerNG;
+      vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;

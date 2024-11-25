@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
