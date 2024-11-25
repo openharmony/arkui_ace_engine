@@ -1864,7 +1864,9 @@ void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index,
     }
     CHECK_NULL_VOID(prevNode);
     if (prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto pattern = DynamicCast<FrameNode>(prevNode)->GetPattern<MenuItemGroupPattern>();
+        auto preFrameNode = DynamicCast<FrameNode>(prevNode);
+        CHECK_NULL_VOID(preFrameNode);
+        auto pattern = preFrameNode->GetPattern<MenuItemGroupPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->OnExtItemPressed(press, false);
     }
