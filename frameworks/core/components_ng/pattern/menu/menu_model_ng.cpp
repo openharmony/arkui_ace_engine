@@ -19,7 +19,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
-
 void MenuModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -208,5 +207,4 @@ void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
     ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
-
 } // namespace OHOS::Ace::NG

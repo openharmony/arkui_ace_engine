@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float MULTIPLE_FACTOR = 2.0f;
 } // namespace
+
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
