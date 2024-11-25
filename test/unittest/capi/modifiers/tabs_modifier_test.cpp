@@ -48,9 +48,9 @@ const auto ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE = "-1";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME = "lg";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE = "-1";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME = "margin";
-const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME = "gutter";
-const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE = "0.00vp";
 const auto COLOR_BLUE = "#FF0000FF";
 const auto COLOR_GREEN = "#FF00FF00";
 const auto COLOR_RED = "#FFFF0000";
@@ -59,6 +59,7 @@ const auto RES_NAME = NamedResourceId{"RES_NAME", NodeModifier::ResourceType::CO
 const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
 const auto RES_STRING_FAKE_ID = IntResourceId{22222, NodeModifier::ResourceType::STRING};
 const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, NodeModifier::ResourceType::STRING};
+constexpr double ANIMATION_DURATION_DEFAULT = 300.0;
 
 Ark_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)
 {
@@ -189,6 +190,8 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+        auto themeStyle = SetupThemeStyle(THEME_PATTERN_TAB);
+        themeStyle->SetAttr("tab_content_animation_duration", { .value = ANIMATION_DURATION_DEFAULT });
         SetupTheme<TabTheme>();
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
         EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks(_)).Times(AnyNumber());
@@ -289,13 +292,12 @@ HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setAnimationDuration
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setAnimationDurationTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
 {
     const std::string PROP_NAME("animationDuration");
     ASSERT_NE(modifier_->setAnimationDuration, nullptr);
     auto checkVal = GetAttrValue<int>(GetJsonValue(node_), PROP_NAME);
-    const int defaultDuration = 0;
-    EXPECT_EQ(checkVal, defaultDuration);
+    EXPECT_EQ(checkVal, static_cast<int>(ANIMATION_DURATION_DEFAULT));
 
     typedef std::pair<Ark_Number, int> ArkNumberTestStep;
     const std::vector<ArkNumberTestStep> arkNumberTestPlan = {
@@ -303,10 +305,10 @@ HWTEST_F(TabsModifierTest, DISABLED_setAnimationDurationTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0), 0 },
         { Converter::ArkValue<Ark_Number>(22.5f), 22 },
         // now next step is failed, because Tabs component used incorrect default value 200
-        { Converter::ArkValue<Ark_Number>(-20), defaultDuration },
+        { Converter::ArkValue<Ark_Number>(-20), static_cast<int>(ANIMATION_DURATION_DEFAULT) },
         { Converter::ArkValue<Ark_Number>(0.0f), 0 },
         // now next step is failed, because Tabs component used incorrect default value 200
-        { Converter::ArkValue<Ark_Number>(-22.5f), defaultDuration },
+        { Converter::ArkValue<Ark_Number>(-22.5f), static_cast<int>(ANIMATION_DURATION_DEFAULT) },
         { Converter::ArkValue<Ark_Number>(20), 20 }};
 
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
