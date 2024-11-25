@@ -75,6 +75,9 @@ constexpr float SEGMENTWIDTH = 20.0f;
 constexpr float SPACEWIDTH = 5.0f;
 constexpr float ROOT_WIDTH = 1000.0f;
 constexpr float ROOT_HEIGHT = 1000.0f;
+constexpr Dimension STROKE_WIDTH = 10.0_vp;
+constexpr float DRAW_ANGLE = 355.0f;
+constexpr float PERCENT_HALF = 0.5f;
 } // namespace
 
 class DataPanelTestNg : public testing::Test {
@@ -1089,6 +1092,116 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DataPanelPaintCircleTest004
+ * @tc.desc: Test DataPanel PaintMethod PaintCircle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level1)
+{
+    /**
+     * case 1: maxValue = 100, totalValue = 110
+     *  values = { 100.0f, 10.0f } totalValue = 110
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    
+    std::vector<Gradient> valueColors;
+    // test Solid color when the valueColors >0 and valueColors <=9
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor::WHITE);
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    int length = 2;
+    for (int i = 0; i < length; i++) {
+        valueColors.push_back(gradient);
+    }
+    dataPanelModifier.SetShadowColors(valueColors, length);
+    dataPanelModifier.SetShadowVisible(true);
+    dataPanelModifier.SetEffect(true);
+    dataPanelModifier.SetStrokeWidth(STROKE_WIDTH.ConvertToPx());
+    dataPanelModifier.SetMax(100.0f);
+    std::vector<double> VALUES = { 100.0f, 10.0f };
+    dataPanelModifier.SetValues(VALUES);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    dataPanelModifier.PaintCircle(context, OFFSET);
+}
+
+/**
+ * @tc.name: DataPanelPaintCircleTest005
+ * @tc.desc: Test DataPanel PaintMethod PaintCircle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level1)
+{
+    /**
+     * case 1: value1 nearZero, value2 nearMax
+     *  values = { 0.0001f, 99.9f }
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    
+    std::vector<Gradient> valueColors;
+    // test Solid color when the valueColors >0 and valueColors <=9
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor::WHITE);
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    int length = 2;
+    for (int i = 0; i < length; i++) {
+        valueColors.push_back(gradient);
+    }
+    dataPanelModifier.SetShadowColors(valueColors, length);
+    dataPanelModifier.SetShadowVisible(true);
+    dataPanelModifier.SetEffect(true);
+    dataPanelModifier.SetStrokeWidth(STROKE_WIDTH.ConvertToPx());
+    dataPanelModifier.SetMax(100.0f);
+    std::vector<double> VALUES = { 0.0001f, 99.9f };
+    dataPanelModifier.SetValues(VALUES);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    dataPanelModifier.PaintCircle(context, OFFSET);
+}
+
+/**
  * @tc.name: DataPanelPaintLinearProgressTest001
  * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
  * @tc.type: FUNC
@@ -2067,5 +2180,49 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest006, TestSize.Level1)
     layoutConstraintWidthInfinite.percentReference = SizeF(MAX_INFINITE, MAX_HEIGHT);
     dataPanelSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraintWidthInfinite, &layoutWrapper).value();
     EXPECT_EQ(dataPanelSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
+}
+
+/**
+ * @tc.name: DataPanelGetPaintPathTest001
+ * @tc.desc: Test DataPanel PaintMethod GetPaintPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelGetPaintPathTest001, TestSize.Level1)
+{
+    DataPanelModifier dataPanelModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 50.0f, 50.0f };
+    // test Solid color when the valueColors >0 and valueColors <=9
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor::WHITE);
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor::BLACK);
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+
+    ArcData arcData;
+    Offset center = Offset(context.width * PERCENT_HALF, context.height * PERCENT_HALF);
+    arcData.center = center;
+    arcData.thickness = STROKE_WIDTH.ConvertToPx();
+    arcData.radius = WIDTH.ConvertToPx();
+    arcData.lastAngle = MAX_ZERO_VALUE;
+    arcData.drawAngle = DRAW_ANGLE;
+    arcData.totalDrawAngle = DRAW_ANGLE;
+    arcData.shadowColor = gradient;
+    arcData.progressColors = gradient;
+    RSPath path;
+    RSPath endPath;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    dataPanelModifier.GetPaintPath(arcData, path, endPath);
+    dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, true);
+    dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, false);
 }
 } // namespace OHOS::Ace::NG
