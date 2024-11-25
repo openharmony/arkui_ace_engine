@@ -62,7 +62,7 @@ class ListTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag);
+    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag, float crossSize, float mainSize);
     void SetUp() override;
     void TearDown() override;
     void GetList();
@@ -85,6 +85,8 @@ public:
     void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
     std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
+    void CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+        const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
