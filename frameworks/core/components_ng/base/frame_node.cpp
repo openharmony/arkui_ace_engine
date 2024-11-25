@@ -4223,6 +4223,10 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
+        if (SystemProperties::GetSyncDebugTraceEnabled()) {
+            ACE_LAYOUT_TRACE_BEGIN("TriggerOnSizeChangeNode:[%s][id:%d]", GetTag().c_str(), GetId());
+            ACE_LAYOUT_TRACE_END()
+        }
         TriggerOnSizeChangeCallback();
     }
 
