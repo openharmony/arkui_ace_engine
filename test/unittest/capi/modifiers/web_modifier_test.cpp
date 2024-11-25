@@ -17,7 +17,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -47,7 +46,7 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
     options.src = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>("src");
 
     Ark_NativePointer controllerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getWebControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getWebControllerAccessor()->ctor();
     auto peerImplPtr = reinterpret_cast<GeneratedModifier::WebControllerPeerImpl*>(controllerPtr);
     EXPECT_NE(peerImplPtr, nullptr);
 
@@ -71,7 +70,7 @@ HWTEST_F(WebModifierTest, setOptionsWebControllerTestValidValues, TestSize.Level
     EXPECT_EQ(peerImplPtr->GetController(), controller);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getWebControllerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getWebControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(WebControllerPeer *)>(finalizerPtr);
     EXPECT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<WebControllerPeer *>(controllerPtr));

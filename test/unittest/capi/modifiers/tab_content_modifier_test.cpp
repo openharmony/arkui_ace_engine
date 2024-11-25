@@ -17,7 +17,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "arkoala_api_generated.h"
@@ -33,8 +32,8 @@ using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
 const auto RES_ID = 11111;
-const auto RES_NAME_ID = NamedResourceId{RES_NAME, NodeModifier::ResourceType::STRING};
-const auto RES_INT_ID = IntResourceId{RES_ID, NodeModifier::ResourceType::STRING};
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, Converter::ResourceType::STRING};
+const auto RES_INT_ID = IntResourceId{RES_ID, Converter::ResourceType::STRING};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";

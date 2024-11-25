@@ -17,15 +17,13 @@
 
 #include "gtest/gtest.h"
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/node/view_model.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
+extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
 template <typename AccessorType, auto GetAccessorFunc, typename PeerType>
 class AccessorTestBaseParent : public testing::Test {
@@ -62,8 +60,7 @@ public:
 protected:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
-            GENERATED_ARKUI_FULL_API_VERSION)
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
         );
     inline static const GENERATED_ArkUIAccessors *accessors_
         = fullAPI_ ? fullAPI_->getAccessors() : nullptr;

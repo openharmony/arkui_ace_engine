@@ -22,7 +22,6 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -216,7 +215,7 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Leve
 {
     Opt_TextTimerOptions opts = {};
     Ark_NativePointer controllerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->ctor();
+        fullAPI_->getAccessors()->getTextTimerControllerAccessor()->ctor();
     auto peerImplPtr = reinterpret_cast<TextTimerControllerPeer*>(controllerPtr);
     ASSERT_NE(peerImplPtr, nullptr);
 
@@ -237,7 +236,7 @@ HWTEST_F(TextTimerModifierTest, setTextTimerOptionsTestController, TestSize.Leve
     EXPECT_EQ(peerImplPtr->GetController(), controller);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getTextTimerControllerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getTextTimerControllerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(TextTimerControllerPeer *)>(finalizerPtr);
     ASSERT_NE(finalyzer, nullptr);
     finalyzer(reinterpret_cast<TextTimerControllerPeer *>(controllerPtr));

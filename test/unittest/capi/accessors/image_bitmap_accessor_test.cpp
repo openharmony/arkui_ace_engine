@@ -15,7 +15,6 @@
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -74,8 +73,7 @@ public:
 private:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
-            GENERATED_ARKUI_FULL_API_VERSION)
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
         );
 
 public:

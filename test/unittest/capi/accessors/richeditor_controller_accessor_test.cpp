@@ -15,7 +15,6 @@
 #include "richeditor_accessor_test.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

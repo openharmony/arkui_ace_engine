@@ -21,7 +21,6 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
@@ -503,7 +502,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     double testVal = 0.317;
     std::string resName = "app.float.friction";
     AddResource(resName, testVal);
-    auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::FLOAT};
+    auto RES_NAME = NamedResourceId{resName.c_str(), Converter::ResourceType::FLOAT};
     auto friction = CreateResourceUnion<Ark_Union_Number_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
@@ -761,7 +760,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
-    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -783,7 +782,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     ASSERT_EQ(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
     finalyzer(peerImplPtr);
 }
@@ -795,7 +794,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
 {
-    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = fullAPI_->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -817,7 +816,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     ASSERT_NE(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
 
     Ark_NativePointer finalizerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+        fullAPI_->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
     finalyzer(peerImplPtr);
 }

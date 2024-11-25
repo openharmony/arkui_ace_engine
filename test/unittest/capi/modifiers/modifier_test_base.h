@@ -20,7 +20,6 @@
 
 #include "gtest/gtest.h"
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 
 #include "test/mock/base/mock_task_executor.h"
@@ -31,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 
-extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
+extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
 void DumpJsonToFile(Ark_NodeHandle node, int index = -1);
 
@@ -55,7 +54,7 @@ public:
 
     virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType realNode = NodeType)
     {
-        return basicAPI_ ? basicAPI_->createNode(realNode, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
+        return basicAPI_ ? basicAPI_->createNode(realNode, GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
     }
 
     virtual void DisposeNode(Ark_NodeHandle &node)
@@ -64,11 +63,6 @@ public:
             basicAPI_->disposeNode(node);
         }
         node = nullptr;
-    }
-
-    static const GENERATED_ArkUINodeModifiers *GetNodeModifiers()
-    {
-        return nodeModifiers_;
     }
 
     static void SetUpTestCase()
@@ -173,21 +167,21 @@ protected:
 
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_BASIC,
             GENERATED_ARKUI_BASIC_NODE_API_VERSION)
         );
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL,
             GENERATED_ARKUI_FULL_API_VERSION)
         );
-    inline static const GENERATED_ArkUINodeModifiers *nodeModifiers_
+    const GENERATED_ArkUINodeModifiers *nodeModifiers_
         = fullAPI_ ? fullAPI_->getNodeModifiers() : nullptr;
 
-    inline static const Modifier *modifier_
+    const Modifier *modifier_
         = nodeModifiers_ && GetModifierFunc ? (nodeModifiers_->*GetModifierFunc)() : nullptr;
 
-    inline static const GENERATED_ArkUICommonMethodModifier *commonModifier_
+    const GENERATED_ArkUICommonMethodModifier *commonModifier_
         = nodeModifiers_ ? (nodeModifiers_->getCommonMethodModifier)() : nullptr;
 };
 } // namespace OHOS::Ace::NG

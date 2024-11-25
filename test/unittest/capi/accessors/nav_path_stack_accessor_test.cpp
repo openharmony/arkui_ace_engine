@@ -35,7 +35,7 @@ public:
 
     virtual Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType realNode = GENERATED_Ark_NodeType())
     {
-        return basicAPI_ ? basicAPI_->createNode(realNode, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
+        return basicAPI_ ? basicAPI_->createNode(realNode, GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
     }
 
     virtual void DisposeNode(Ark_NodeHandle &node)
@@ -108,13 +108,12 @@ private:
 
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_BASIC,
             GENERATED_ARKUI_BASIC_NODE_API_VERSION)
         );
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-            GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
-            GENERATED_ARKUI_FULL_API_VERSION)
+            GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_FULL, GENERATED_ARKUI_FULL_API_VERSION)
         );
     inline static const GENERATED_ArkUINodeModifiers *nodeModifiers_
         = fullAPI_ ? fullAPI_->getNodeModifiers() : nullptr;
@@ -223,7 +222,7 @@ HWTEST_F(NavPathStackAccessorTest, bothPushPath1Pop1ParamCallbackTest, TestSize.
 
     static const std::string expectedName = "PageA";
     static const std::string expectedData = "smth custom data from developer";
-    static const ArkUI_Int32 expectedResId = 123;
+    static const Ark_Int32 expectedResId = 123;
     static bool wasInvoke = false;
     auto checkFunc = [](const Ark_Int32 resourceId, const Ark_PopInfo parameter) {
         wasInvoke = true;

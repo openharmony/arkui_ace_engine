@@ -37,7 +37,7 @@ extern "C" {
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
-#define ARKUI_NODE_MODIFIERS_API_VERSION 8
+#define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
 #define ARKUI_MAX_ANCHOR_ID_SIZE 50
 enum ArkUIAPIVariantKind {
@@ -64,7 +64,6 @@ typedef const char* ArkUI_CharPtr;
 typedef unsigned long long ArkUI_Uint64;
 
 // Several opaque struct declarations.
-#ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
 struct _ArkUIVMContext;
 struct _ArkUIPipelineContext;
 struct _ArkUIVMObject;
@@ -81,9 +80,6 @@ struct ArkUI_ListItemSwipeActionOption;
 struct ArkUI_ListItemSwipeActionItem;
 struct ArkUI_ListChildrenMainSize;
 struct ArkUI_StyledString_Descriptor;
-#else
-#error "Do not include arkoala_api_generated.h before arkoala_api.h"
-#endif
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -362,14 +358,6 @@ struct ArkUILengthType {
     ArkUI_CharPtr string;
     ArkUI_Float32 number;
     ArkUI_Int32 unit;
-};
-
-struct ArkUIResource {
-    ArkUI_Int32 id;
-    ArkUI_Int32 type;
-    ArkUI_CharPtr name;
-    ArkUI_CharPtr bundleName;
-    ArkUI_CharPtr moduleName;
 };
 
 struct ArkUIResourceLength {
@@ -2273,7 +2261,8 @@ struct ArkUIImageModifier {
     // Do we need resetSrc() ?
     void (*setImageShowSrc)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
         ArkUI_Bool isUriPureNumber);
-    void (*setImageResource)(ArkUINodeHandle node, const ArkUIResource* resource);
+    void (*setImageResource)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
+        ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, ArkUI_Bool autoResize);
@@ -2628,7 +2617,6 @@ struct ArkUISwiperControllerModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
     void (*showNext)(ArkUINodeHandle node);
     void (*showPrevious)(ArkUINodeHandle node);
-    void (*changeIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool useAnimation);
 };
 
 struct ArkUIStackModifier {
@@ -2963,11 +2951,8 @@ struct ArkUIStepperItemModifier {
 };
 
 struct ArkUITabContentModifier {
-    void (*setTabContent)(ArkUINodeHandle node, const ArkUIResource* icon, const ArkUIResource* label);
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
-    void (*setLayoutMode)(ArkUINodeHandle node, ArkUI_Int32 mode);
-    void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
 };
 
 struct ArkUITabsControllerModifier {
@@ -5178,7 +5163,6 @@ typedef enum {
 } ArkUIDirtyFlag;
 
 typedef void (*EventReceiver)(ArkUINodeEvent* event);
-typedef void (*CustomEventReceiver)(ArkUICustomNodeEvent* event);
 
 struct ArkUIBasicAPI {
     /// Tree operations.
@@ -5217,7 +5201,8 @@ struct ArkUIBasicAPI {
     // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
-    ArkUI_Float32 (*convertLengthMetricsUnit)(ArkUI_Float32 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
+
+    ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 
     ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
 };
@@ -5253,8 +5238,6 @@ struct ArkUIBasicNodeAPI {
     const ArkUIBasicAPI* (*getBasicModifier)();
 };
 
-typedef void (*ArkUIVsyncCallback)(ArkUIPipelineContext);
-
 struct ArkUIExtendedNodeAPI {
     ArkUI_Int32 version;
 
@@ -5270,7 +5253,7 @@ struct ArkUIExtendedNodeAPI {
     void (*registerCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
     void (*registerCustomSpanAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind, void* extraParam);
     ArkUI_Int32 (*unregisterCustomNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUI_Int32 kind);
-    void (*registerCustomNodeAsyncEventReceiver)(CustomEventReceiver eventReceiver);
+    void (*registerCustomNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUICustomNodeEvent* event));
 
     void (*setCustomCallback)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 callbackId);
     ArkUI_Int32 (*measureLayoutAndDraw)(ArkUIVMContext vmContext, ArkUINodeHandle node);
@@ -5298,7 +5281,8 @@ struct ArkUIExtendedNodeAPI {
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
     /// Vsync support.
     ArkUIPipelineContext (*getPipelineContext)(ArkUINodeHandle node);
-    void (*setVsyncCallback)(ArkUIPipelineContext pipelineContext, ArkUIVsyncCallback callback);
+    void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
+    void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
     /**
      * Returns != 0 if an event was received,

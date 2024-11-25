@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#include "modifiers_test_utils.h"
+
 #include <fstream>
+#include <iostream>
 
 #include "gtest/gtest.h"
-
-#include "modifiers_test_utils.h"
-#include "iostream"
 
 namespace OHOS::Ace::NG {
 
@@ -95,7 +95,7 @@ std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::s
     return std::string();
 }
 
-Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type)
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::Converter::ResourceType type)
 {
     return {
         .id = Converter::ArkValue<Ark_Number>(id),
@@ -106,7 +106,7 @@ Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceTy
     };
 }
 
-Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::ResourceType type)
+Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::Converter::ResourceType type)
 {
     static std::vector<std::unique_ptr<Ark_String>> s_strCache;
     s_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));

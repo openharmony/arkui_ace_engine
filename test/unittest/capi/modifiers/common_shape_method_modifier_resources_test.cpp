@@ -36,8 +36,8 @@ const Ark_Int32 FAKE_RES_ID(1234);
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
 const auto RES_ID = 11111;
-const auto RES_NAME_ID = NamedResourceId{RES_NAME, NodeModifier::ResourceType::FLOAT};
-const auto RES_INT_ID = IntResourceId{RES_ID, NodeModifier::ResourceType::FLOAT};
+const auto RES_NAME_ID = NamedResourceId{RES_NAME, Converter::ResourceType::FLOAT};
+const auto RES_INT_ID = IntResourceId{RES_ID, Converter::ResourceType::FLOAT};
 
 // resource values
 const auto RESOURCE_OPACITY_BY_STRING = 0.4f;

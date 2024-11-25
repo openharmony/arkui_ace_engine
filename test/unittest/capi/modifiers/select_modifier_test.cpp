@@ -15,7 +15,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
 
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -160,7 +159,7 @@ std::vector<FontTestStep> getFontFamilyTestPlan()
     const auto familyStr1 = "Family string value";
 
     // static keyword is required because a pointer to this variable is stored in testPlan
-    static auto arkResName = NamedResourceId(FONT_FAMILY_RES_NAME, NodeModifier::ResourceType::STRARRAY);
+    static auto arkResName = NamedResourceId(FONT_FAMILY_RES_NAME, Converter::ResourceType::STRARRAY);
 
     const std::vector<FontTestStep> testPlan = {
         { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
@@ -309,12 +308,12 @@ HWTEST_F(SelectModifierTest, setFontColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -359,12 +358,12 @@ HWTEST_F(SelectModifierTest, setMenuBackgroundColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setMenuBackgroundColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -409,12 +408,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionBgColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionBgColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -459,12 +458,12 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setSelectedOptionFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -509,12 +508,12 @@ HWTEST_F(SelectModifierTest, setOptionBgColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setOptionBgColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setOptionBgColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -559,12 +558,12 @@ HWTEST_F(SelectModifierTest, setOptionFontColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
     auto resNameColor = CreateResourceUnion<Ark_ResourceColor>(
-        NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR});
+        NamedResourceId{"aa.bb.cc", Converter::ResourceType::COLOR});
     modifier_->setOptionFontColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, NodeModifier::ResourceType::COLOR});
+    auto resIdColor = CreateResourceUnion<Ark_ResourceColor>(IntResourceId{1234, Converter::ResourceType::COLOR});
     modifier_->setOptionFontColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
@@ -1154,7 +1153,7 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
     const auto propName = "value";
     const auto valueStr = "Select value";
 
-    auto arkResName = NamedResourceId(VALUE_RES_NAME, NodeModifier::ResourceType::STRING);
+    auto arkResName = NamedResourceId(VALUE_RES_NAME, Converter::ResourceType::STRING);
 
     using TestStep = std::tuple<Ark_ResourceStr, std::string>;
     std::vector<TestStep> testPlan = {
@@ -1242,9 +1241,9 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
     const auto propName = "options";
     ASSERT_NE(modifier_->setSelectOptions, nullptr);
 
-    auto arkValueResourceName = NamedResourceId(OPTIONS_VALUE_RES_NAME, NodeModifier::ResourceType::STRING);
+    auto arkValueResourceName = NamedResourceId(OPTIONS_VALUE_RES_NAME, Converter::ResourceType::STRING);
 
-    auto arkIconResourceName = NamedResourceId(OPTIONS_ICON_RES_NAME, NodeModifier::ResourceType::STRING);
+    auto arkIconResourceName = NamedResourceId(OPTIONS_ICON_RES_NAME, Converter::ResourceType::STRING);
 
     const std::vector<Ark_SelectOption> selectOptions = {
         {

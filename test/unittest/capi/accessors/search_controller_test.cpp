@@ -15,7 +15,6 @@
 
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
-#include "node_api.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"

@@ -15,7 +15,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include <gtest/gtest.h>
 #include "arkoala_api_generated.h"

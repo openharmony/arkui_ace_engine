@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"

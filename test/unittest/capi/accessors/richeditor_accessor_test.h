@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_RICHEDITOR_MODIFIER_TEST_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_RICHEDITOR_MODIFIER_TEST_H
 
-#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_structs.h"

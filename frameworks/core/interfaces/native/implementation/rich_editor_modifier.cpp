@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"

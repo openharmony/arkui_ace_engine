@@ -81,20 +81,20 @@ const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 // color res
-const auto RES_COLOR_ID = IntResourceId{102001, NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_ID = IntResourceId{102001, Converter::ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
 const auto RES_COLOR_NAME_VALUE = Color(0xFF123456);
-const auto RES_COLOR_INVALID_ID = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_INVALID_ID = IntResourceId{-1, Converter::ResourceType::COLOR};
 const auto RES_COLOR_INVALID_ID_VALUE = "#FFFF0000";
 
 
 // font family res
-const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_NAME = NamedResourceId{"res_font_family_id", Converter::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_NAME_VALUE = "res_font_family_string_id";
-const auto RES_FONT_FAMILY_ID = IntResourceId{102002, NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_ID = IntResourceId{102002, Converter::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_ID_VALUE = "res_font_family_number_id";
-const auto RES_FONT_FAMILY_INVALID_ID = IntResourceId{-1, NodeModifier::ResourceType::STRARRAY};
+const auto RES_FONT_FAMILY_INVALID_ID = IntResourceId{-1, Converter::ResourceType::STRARRAY};
 const auto RES_FONT_FAMILY_INVALID_ID_VALUE = ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE;
 
 // font family

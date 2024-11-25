@@ -32,20 +32,6 @@ void ResetColor(ArkUINodeHandle node)
     BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
 }
 
-void SetBlankMin(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(minValue, (DimensionUnit)minUnit));
-}
-
-void ResetBlankMin(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(0.0, DimensionUnit::VP));
-}
-
 void SetBlankHeight(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -58,6 +44,20 @@ void ResetBlankHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
+
+void SetBlankMin(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlankModelNG::SetBlankMin(frameNode, CalcDimension(minValue, (DimensionUnit)minUnit));
+}
+
+void ResetBlankMin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlankModelNG::SetBlankMin(frameNode, CalcDimension(0.0, DimensionUnit::VP));
 }
 
 namespace NodeModifier {

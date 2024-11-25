@@ -25,7 +25,6 @@ void SetImageOnComplete(ArkUINodeHandle node, void* extraParam);
 void SetImageOnError(ArkUINodeHandle node, void* extraParam);
 void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam);
 void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam);
-std::optional<std::string> ImageResourceToString(ArkUINodeHandle node, const ArkUIResource* resource);
 
 void ResetImageOnComplete(ArkUINodeHandle node);
 void ResetImageOnError(ArkUINodeHandle node);

@@ -16,7 +16,6 @@
 #include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
 
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "core/components/text_clock/text_clock_controller.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

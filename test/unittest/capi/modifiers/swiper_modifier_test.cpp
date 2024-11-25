@@ -79,8 +79,8 @@ static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
 static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
 static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
-const auto RES_NAME = NamedResourceId("aa.bb.cc", NodeModifier::ResourceType::COLOR);
-const auto RES_ID = IntResourceId(1234, NodeModifier::ResourceType::COLOR);
+const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
+const auto RES_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
@@ -1679,13 +1679,8 @@ HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
     const int32_t CONTEXT_ID = 123;
     const int32_t EXPECTED_INDEX_VALUE = 2342;
 
-    static const auto *fullAPI = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
-        GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
-            GENERATED_ARKUI_FULL_API_VERSION)
-    );
-    ASSERT_NE(fullAPI, nullptr);
-    ASSERT_NE(fullAPI->getAccessors(), nullptr);
-    static const auto *accessor = fullAPI->getAccessors()->getSwiperContentTransitionProxyAccessor();
+    ASSERT_NE(fullAPI_->getAccessors(), nullptr);
+    static const auto *accessor = fullAPI_->getAccessors()->getSwiperContentTransitionProxyAccessor();
     ASSERT_NE(accessor, nullptr);
     ASSERT_NE(accessor->getFinalizer, nullptr);
     ASSERT_NE(accessor->getIndex, nullptr);

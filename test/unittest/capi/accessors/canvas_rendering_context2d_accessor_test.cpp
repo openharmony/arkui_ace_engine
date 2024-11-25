@@ -15,7 +15,6 @@
 
 #include "test/mock/core/pattern/mock_canvas_pattern.h"
 #include "accessor_test_base.h"
-#include "node_api.h"
 #include "canvas_rendering_context2d_accessor_test.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 

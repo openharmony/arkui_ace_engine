@@ -479,12 +479,12 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestDefaultValues, TestSi
 
 // Fixture 'StringRes' for type 'Ark_Resource'
 std::vector<std::tuple<std::string, Ark_Resource, std::string>> testSymbolGlyphOptionsResValidValues = {
-    { "ResId:STRING_RES_0_ID", CreateResource(INT_RES_0_STR, NodeModifier::ResourceType::INTEGER), "1" },
-    { "ResName:STRING_RES_0_STR", CreateResource(INT_RES_1_STR, NodeModifier::ResourceType::INTEGER), "12" },
-    { "ResId:STRING_RES_1_ID", CreateResource(INT_RES_2_STR, NodeModifier::ResourceType::INTEGER), "123" },
-    { "ResName:STRING_RES_1_STR", CreateResource(INT_RES_3_STR, NodeModifier::ResourceType::INTEGER), "1234" },
-    { "ResId:STRING_RES_2_ID", CreateResource(INT_RES_4_STR, NodeModifier::ResourceType::INTEGER), "12345" },
-    { "ResName:STRING_RES_2_STR", CreateResource(INT_RES_5_STR, NodeModifier::ResourceType::INTEGER), "123456" },
+    { "ResId:STRING_RES_0_ID", CreateResource(INT_RES_0_STR, Converter::ResourceType::INTEGER), "1" },
+    { "ResName:STRING_RES_0_STR", CreateResource(INT_RES_1_STR, Converter::ResourceType::INTEGER), "12" },
+    { "ResId:STRING_RES_1_ID", CreateResource(INT_RES_2_STR, Converter::ResourceType::INTEGER), "123" },
+    { "ResName:STRING_RES_1_STR", CreateResource(INT_RES_3_STR, Converter::ResourceType::INTEGER), "1234" },
+    { "ResId:STRING_RES_2_ID", CreateResource(INT_RES_4_STR, Converter::ResourceType::INTEGER), "12345" },
+    { "ResName:STRING_RES_2_STR", CreateResource(INT_RES_5_STR, Converter::ResourceType::INTEGER), "123456" },
 };
 
 /*

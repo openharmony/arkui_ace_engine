@@ -3318,7 +3318,7 @@ struct CJUIBasicAPI {
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
 
-    ArkUI_Float32 (*convertLengthMetricsUnit)(ArkUI_Float32 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
+    ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 
     ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
 };
@@ -3394,7 +3394,8 @@ struct CJUIExtendedNodeAPI {
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
     /// Vsync support.
     ArkUIPipelineContext (*getPipelineContext)(ArkUINodeHandle node);
-    void (*setVsyncCallback)(ArkUIPipelineContext pipelineContext, ArkUIVsyncCallback callback);
+    void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
+    void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
     /**
      * Returns != 0 if an event was received,

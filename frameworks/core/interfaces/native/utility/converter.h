@@ -52,7 +52,6 @@
 #include "core/image/image_source_info.h"
 
 #include "ace_engine_types.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 
@@ -115,6 +114,8 @@ namespace Converter {
         return result;
     }
 
+    RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundleName, Ark_CharPtr moduleName);
+
     class ResourceConverter {
         public:
             ResourceConverter() = delete;
@@ -139,7 +140,7 @@ namespace Converter {
 
         private:
             RefPtr<ThemeConstants> themeConstants_;
-            NodeModifier::ResourceType type_;
+            ResourceType type_;
             std::string bundleName_;
             std::string moduleName_;
             int32_t id_;

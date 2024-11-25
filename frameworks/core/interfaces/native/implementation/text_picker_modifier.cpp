@@ -478,7 +478,9 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, pickerStyle);
 }
@@ -489,7 +491,9 @@ void TextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TextPickerModelNG::SetNormalTextStyle(frameNode, theme, pickerStyle);
 }
@@ -500,7 +504,9 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
@@ -577,7 +583,9 @@ void DividerImpl(Ark_NativePointer node,
     auto dividerParams = Converter::OptConvert<ItemDivider>(*value);
 
     ItemDivider divider;
-    auto theme = GetTheme<PickerTheme>();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
     if (theme) {
         divider.strokeWidth = theme->GetDividerThickness();
         divider.color = theme->GetDividerColor();

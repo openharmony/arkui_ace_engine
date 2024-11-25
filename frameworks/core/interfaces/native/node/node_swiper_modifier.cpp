@@ -435,7 +435,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
-    SwiperModelNG::SetNextMargin(frameNode, value, std::nullopt);
+    SwiperModelNG::SetNextMargin(frameNode, value);
 }
 
 void SetSwiperPrevMargin(
@@ -452,7 +452,7 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension value(0.0, DimensionUnit::VP);
-    SwiperModelNG::SetPreviousMargin(frameNode, value, std::nullopt);
+    SwiperModelNG::SetPreviousMargin(frameNode, value);
 }
 
 void SetSwiperDisplayCount(ArkUINodeHandle node, ArkUI_CharPtr displayCountChar, ArkUI_CharPtr displayCountType)

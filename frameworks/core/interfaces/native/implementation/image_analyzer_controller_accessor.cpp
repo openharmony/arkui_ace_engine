@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "image_analyzer_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"

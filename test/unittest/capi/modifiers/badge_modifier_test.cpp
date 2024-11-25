@@ -59,7 +59,7 @@ const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "";
 
 // resource names and id
-const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", Converter::ResourceType::COLOR};
 const auto COLOR_BY_STRING = Color(0xFF123456);
 
 template<typename T>

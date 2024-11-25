@@ -635,6 +635,7 @@ template("ace_core_source_set") {
 
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+    deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
