@@ -14,17 +14,9 @@
  */
 
 #include "core/components_ng/pattern/form/form_model_ng.h"
-
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
-
-// #include "base/geometry/dimension.h"
-// #include "base/utils/utils.h"
-
 #include "core/components_ng/base/view_abstract.h"
-// #include "core/components_ng/base/view_stack_processor.h"
-// #include "core/components_v2/inspector/inspector_constants.h"
-// #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
@@ -52,12 +44,7 @@ void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto formPattern = frameNode->GetPattern<FormPattern>();
     CHECK_NULL_VOID(formPattern);
-
     auto isLoaded = formPattern->GetIsLoaded();
-    
-    std::printf("model: is_loaded: %d\n", isLoaded);
-
-    
     auto layoutProperty = frameNode->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (isLoaded || visible != VisibleType::VISIBLE) {
@@ -65,7 +52,6 @@ void FormModelNG::SetVisibility(FrameNode* frameNode, VisibleType visible)
     } else {
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     }
-
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, visible, frameNode);
 }
 

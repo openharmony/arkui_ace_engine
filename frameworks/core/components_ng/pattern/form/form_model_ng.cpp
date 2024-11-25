@@ -86,7 +86,6 @@ void FormModelNG::AllowUpdate(bool allowUpdate)
     property->UpdateRequestFormInfo(formInfo);
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
 }
-}
 
 void FormModelNG::SetVisible(VisibleType visible)
 {

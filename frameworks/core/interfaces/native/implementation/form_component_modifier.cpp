@@ -54,17 +54,15 @@ void SizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     auto dimension = Converter::Convert<LiteralDimension>(*value);
     FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
 }
 void ModuleNameImpl(Ark_NativePointer node,
                     const Ark_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     auto name = Converter::Convert<std::string>(*value);
     FormModelNG::SetModuleName(frameNode, name);
 }
@@ -80,9 +78,8 @@ void DimensionImpl(Ark_NativePointer node,
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
     auto convValue = Converter::Convert<bool>(value);
     FormModelNG::AllowUpdate(frameNode, convValue);
 }
