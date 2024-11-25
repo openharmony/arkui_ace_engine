@@ -20,6 +20,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_accessibility_test_ng.cpp",
     "rich_editor_base_test_ng.cpp",
     "rich_editor_base_testone_ng.cpp",
+    "rich_editor_base_testtwo_ng.cpp",
     "rich_editor_change_callback_test_ng.cpp",
     "rich_editor_click_test_ng.cpp",
     "rich_editor_click_testone_ng.cpp",
