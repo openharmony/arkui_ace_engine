@@ -33,30 +33,6 @@ LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
         .height = Converter::Convert<Dimension>(src.height)
     };
 }
-template<>
-void AssignCast(std::optional<int32_t>& dst, const Ark_FormDimension& src)
-{
-    switch (src) {
-        case ARK_FORM_DIMENSION_DIMENSION_1_2: dst = 1; break;
-        case ARK_FORM_DIMENSION_DIMENSION_2_2: dst = 2; break;
-        case ARK_FORM_DIMENSION_DIMENSION_2_4: dst = 3; break;
-        case ARK_FORM_DIMENSION_DIMENSION_4_4: dst = 4; break;
-        case ARK_FORM_DIMENSION_DIMENSION_2_1: dst = 5; break;
-        case ARK_FORM_DIMENSION_DIMENSION_1_1: dst = 6; break;
-        case ARK_FORM_DIMENSION_DIMENSION_6_4: dst = 7; break;
-        default: LOGE("Unexpected enum value in Ark_FormDimension: %{public}d", src);
-    }
-}
-template<>
-void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
-{
-    switch (src) {
-        case ARK_VISIBILITY_VISIBLE: dst = VisibleType::VISIBLE; break;
-        case ARK_VISIBILITY_HIDDEN: dst = VisibleType::INVISIBLE; break;
-        case ARK_VISIBILITY_NONE: dst = VisibleType::GONE; break;
-        default: LOGE("Unexpected enum value in Ark_Visibility: %{public}d", src);
-    }
-}
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -78,11 +54,8 @@ void SizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto dimension = Converter::Convert<LiteralDimension>(*value);
 
-    std::printf("============ modifier: size: %s, %s\n", dimension.width.ToString().c_str(), dimension.height.ToString().c_str());
-    std::printf("============ modifier: size: %.2f, %.2f\n", dimension.width.Value(), dimension.height.Value());
-    std::printf("============ modifier: size: %d, %d\n", dimension.width.Unit(), dimension.height.Unit());
+    auto dimension = Converter::Convert<LiteralDimension>(*value);
     FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
 }
 void ModuleNameImpl(Ark_NativePointer node,
@@ -91,6 +64,7 @@ void ModuleNameImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+
     auto name = Converter::Convert<std::string>(*value);
     FormModelNG::SetModuleName(frameNode, name);
 }
@@ -99,18 +73,16 @@ void DimensionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<int32_t>(value);
-    std::printf("============ modifier: opt: %d, %d\n", opt.has_value(), *opt);
-    
-    CHECK_NULL_VOID(opt);
-    std::printf("============ modifier2: opt: %d, %d\n", opt.has_value(), *opt);
-    FormModelNG::SetDimension(frameNode, *opt);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //FormComponentModelNG::SetDimension(frameNode, convValue);
 }
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+
     auto convValue = Converter::Convert<bool>(value);
     FormModelNG::AllowUpdate(frameNode, convValue);
 }
@@ -119,27 +91,9 @@ void VisibilityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<VisibleType>(value);
-    std::printf("====== modifier: visibility 1");
-    CHECK_NULL_VOID(opt);
-    std::printf("====== modifier: visibility 2");
-    std::string v;
-    if(*opt == VisibleType::VISIBLE) {
-        v = "Layout.Visibile (Visibile)";
-    }
-    else if(*opt == VisibleType::INVISIBLE){
-         v = "Layout.Hidden (Invisible)";
-    }
-    else if(*opt == VisibleType::GONE) {
-        v = "Layout.None (Gone)";
-    }
-    else {
-        v = "Layout.Uknown 3..N";
-    }
-    
-    std::printf("====== modifier: visibility 3: %s\n", v.c_str());
- 
-    FormModelNG::SetVisibility(frameNode, *opt);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //FormComponentModelNG::SetVisibility(frameNode, convValue);
 }
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
