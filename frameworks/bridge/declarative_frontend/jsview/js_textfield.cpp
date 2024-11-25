@@ -1806,11 +1806,11 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
-        auto tmpInfo = info[0];
-        int32_t overflow = 0;
         if (info.Length() < 1) {
             break;
         }
+        auto tmpInfo = info[0];
+        int32_t overflow = 0;
         if (tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsNumber()) {
             overflow = DEFAULT_OVERFLOW;
         } else if (tmpInfo->IsNumber()) {
