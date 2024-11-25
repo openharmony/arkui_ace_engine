@@ -3956,7 +3956,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
             weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), fullUpdate]() {
             auto pipeline = weak.Upgrade();
             CHECK_NULL_VOID(pipeline);
-            if (configurationChange.IsNeedUpdate()) {
+            if (configurationChange.IsNeedUpdate() || configurationChange.iconUpdate) {
                 auto rootNode = pipeline->GetRootElement();
                 rootNode->UpdateConfigurationUpdate(configurationChange);
                 auto overlay = weakOverlayManager.Upgrade();
@@ -3964,7 +3964,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
                     overlay->ReloadBuilderNodeConfig();
                 }
             }
-            if (fullUpdate) {
+            if (fullUpdate && configurationChange.IsNeedUpdate()) {
                 CHECK_NULL_VOID(pipeline->stageManager_);
                 pipeline->SetIsReloading(true);
                 pipeline->stageManager_->ReloadStage();
