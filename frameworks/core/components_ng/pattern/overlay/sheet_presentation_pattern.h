@@ -332,6 +332,8 @@ public:
         ProcessColumnRect(height_);
     }
 
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
+
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
         DeviceType deviceType = SystemProperties::GetDeviceType();
