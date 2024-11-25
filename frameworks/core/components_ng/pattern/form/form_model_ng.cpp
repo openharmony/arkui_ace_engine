@@ -192,5 +192,4 @@ void FormModelNG::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
-
 } // namespace OHOS::Ace::NG

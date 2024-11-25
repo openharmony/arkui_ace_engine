@@ -81,7 +81,8 @@ void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleN
     property->UpdateRequestFormInfo(formInfo);
 }
 
-void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {
+void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
+{
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(property);
