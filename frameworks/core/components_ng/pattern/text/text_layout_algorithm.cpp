@@ -110,6 +110,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
     ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        return std::nullopt;
+    }
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());

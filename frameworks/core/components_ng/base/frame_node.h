@@ -1143,6 +1143,8 @@ public:
 
     std::list<RefPtr<FrameNode>> GetActiveChildren();
 
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
