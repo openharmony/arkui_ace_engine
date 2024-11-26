@@ -24,8 +24,8 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
