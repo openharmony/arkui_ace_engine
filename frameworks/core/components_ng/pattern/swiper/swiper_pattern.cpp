@@ -1100,14 +1100,16 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 float offset =
                     isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
                 targetPos -= offset;
-
-                context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
-                                                nextIndex = iter->first]() {
-                    auto swiper = weak.Upgrade();
-                    CHECK_NULL_VOID(swiper);
-                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
-                    swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
-                });
+                if (!usePropertyAnimation_ && targetIndex_ != runningTargetIndex_) {
+                    context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
+                                                    nextIndex = iter->first]() {
+                        auto swiper = weak.Upgrade();
+                        CHECK_NULL_VOID(swiper);
+                        swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
+                        swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
+                    });
+                }
+                runningTargetIndex_ = targetIndex_;
             } else {
                 PlayTranslateAnimation(
                     currentOffset_, currentOffset_ - targetPos, iter->first, false, velocity_.value_or(0.0f));
@@ -4769,6 +4771,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 void SwiperPattern::OnTranslateFinish(
     int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop, bool isInterrupt)
 {
+    runningTargetIndex_.reset();
     if (forceStop && !isFinishAnimation) {
         TriggerAnimationEndOnForceStop(isInterrupt);
     } else {
