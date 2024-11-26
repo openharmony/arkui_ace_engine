@@ -280,17 +280,20 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
 }
 
 void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-    bool isAncestorRecent, bool isAncestorDirty, bool notSyncPosition)
+    bool isParentRecent, bool isParentDirty, bool isParentNotSyncPosition)
 {
     CHECK_NULL_VOID(rootNode);
     auto parentType = rootNode->GetWindowPatternType();
     for (auto& weakNode : rootNode->GetFrameChildren()) {
+        bool isAncestorRecent = isParentRecent;
+        bool isAncestorDirty = isParentDirty;
+        bool notSyncPosition = isParentNotSyncPosition;
         auto node = weakNode.Upgrade();
         // when current layer is invisible, no need traverse next
         if (!node || !IsNodeVisible(node)) {
             continue;
         }
-        // once delete in recent, need update Zorder
+        // once delete in recent, need update zorder
         uint32_t currentZorder = res.zOrderCnt_;
         if (WindowSceneHelper::IsWindowPattern(node)) {
             currentZorder = std::max(res.zOrderCnt_, static_cast<uint32_t>(GetNodeZIndex(node)));
@@ -301,15 +304,16 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
             res.zOrderCnt_ = currentZorder++; // keep last zorder as current zorder
         }
         notSyncPosition = (notSyncPosition || NoNeedSyncScenePanelGlobalPosition(node));
-
         // process recent and child node
-        if (isAncestorRecent || IsRecentContainerState(node)) {
-            isAncestorRecent = true;
-        } else {
+        if (!isAncestorRecent) {
             if (isAncestorDirty || IsNodeDirty(node)) {
                 isAncestorDirty = true;
                 UpdateGeometry(node, rootNode, WindowSceneHelper::IsTransformScene(parentType));
             }
+        }
+        // only scenepanel can change recent state
+        if (IsRecentContainerState(node)) {
+            isAncestorRecent = true;
         }
         // only window pattern but not transform scene need sync info
         if (hasWindowSession) {
