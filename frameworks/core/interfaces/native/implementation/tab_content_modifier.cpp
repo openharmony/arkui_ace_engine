@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -34,6 +35,114 @@ namespace {
     >;
 } // namespace
 
+namespace Validator {
+void ValidatePaddingProperty(PaddingProperty& opt)
+{
+    Validator::ValidateNonNegative(opt.left);
+    Validator::ValidateNonPercent(opt.left);
+    Validator::ValidateNonNegative(opt.top);
+    Validator::ValidateNonPercent(opt.top);
+    Validator::ValidateNonNegative(opt.right);
+    Validator::ValidateNonPercent(opt.right);
+    Validator::ValidateNonNegative(opt.bottom);
+    Validator::ValidateNonPercent(opt.bottom);
+    Validator::ValidateNonNegative(opt.start);
+    Validator::ValidateNonPercent(opt.start);
+    Validator::ValidateNonNegative(opt.end);
+    Validator::ValidateNonPercent(opt.end);
+}
+} // namespace Validator
+
+auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& style) {
+    // content
+    std::optional<std::string> content = std::nullopt;
+    LOGE("TabContentAttributeModifier.TabBar1Impl content is not supported yet.");
+
+    // indicator
+    auto indicator = Converter::OptConvert<Ark_IndicatorStyle>(style._indicator);
+    if (indicator) {
+        LOGE("TabContentAttributeModifier.TabBar1Impl indicator style is not supported yet.");
+    }
+    // selectedMode
+    TabContentModelNG::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
+    // board
+    TabContentModelNG::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
+    // labelStyle
+    auto labelStyle = Converter::OptConvert<Ark_LabelStyle>(style._labelStyle);
+    if (labelStyle) {
+        LOGE("TabContentAttributeModifier.TabBar1Impl labelStyle is not supported yet.");
+    }
+    // padding
+    auto paddingProperty = Converter::OptConvert<PaddingProperty>(style._padding).value_or(PaddingProperty());
+    Validator::ValidatePaddingProperty(paddingProperty);
+    bool useLocalizedPadding = false;
+    if (paddingProperty.start) {
+        paddingProperty.left = paddingProperty.start;
+        useLocalizedPadding = true;
+    }
+    if (paddingProperty.end) {
+        paddingProperty.right = paddingProperty.end;
+        useLocalizedPadding = true;
+    }
+    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    // id
+    auto id = Converter::OptConvert<std::string>(style._id);
+    TabContentModelNG::SetId(frameNode, id);
+
+    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
+    TabContentModelNG::SetTabBar(frameNode, content, std::nullopt, nullptr);
+};
+
+auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarStyle& style) {
+    // text
+    std::optional<std::string> text = Converter::OptConvert<std::string>(style._text);
+    // icon
+    std::optional<std::string> icon = std::nullopt;
+    Converter::VisitUnion(style._icon,
+        [&icon](const Ark_ResourceStr& arkIcon) {
+            icon = Converter::OptConvert<std::string>(arkIcon);
+        },
+        [](const Ark_TabBarSymbol& arkTabBarSymbol) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl tabBarSymbol is not supported yet.");
+        },
+        []() {}
+    );
+    // layoutMode
+    TabContentModelNG::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
+    // padding
+    auto paddingProperty = Converter::OptConvert<PaddingProperty>(style._padding).value_or(PaddingProperty());
+    Validator::ValidatePaddingProperty(paddingProperty);
+    bool useLocalizedPadding = false;
+    if (paddingProperty.start) {
+        paddingProperty.left = paddingProperty.start;
+        useLocalizedPadding = true;
+    }
+    if (paddingProperty.end) {
+        paddingProperty.right = paddingProperty.end;
+        useLocalizedPadding = true;
+    }
+    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
+    // verticalAlign
+    TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
+    // symmetricExtensible
+    TabContentModelNG::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
+    // labelStyle
+    auto labelStyle = Converter::OptConvert<Ark_LabelStyle>(style._labelStyle);
+    if (labelStyle) {
+        LOGE("TabContentAttributeModifier.TabBar1Impl labelStyle is not supported yet.");
+    }
+    // iconStyle
+    TabContentModelNG::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
+    // id
+    auto id = Converter::OptConvert<std::string>(style._id);
+    TabContentModelNG::SetId(frameNode, id);
+
+    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModelNG::SetTabBar(frameNode, text, icon, nullptr);
+};
+
 namespace Converter {
 template<>
 TabBarOptions Convert(const Ark_Literal_Union_String_Resource_icon_text& src)
@@ -42,6 +151,54 @@ TabBarOptions Convert(const Ark_Literal_Union_String_Resource_icon_text& src)
     options.text = OptConvert<std::string>(src.text);
     options.icon = OptConvert<std::string>(src.icon);
     return options;
+}
+
+template<>
+IconStyle Convert(const Ark_TabBarIconStyle& src)
+{
+    IconStyle iconStyle;
+    auto selectedColor = OptConvert<Color>(src.selectedColor);
+    if (selectedColor) {
+        iconStyle.selectedColor = selectedColor.value();
+    }
+    auto unselectedColor = OptConvert<Color>(src.unselectedColor);
+    if (unselectedColor) {
+        iconStyle.unselectedColor = unselectedColor.value();
+    }
+    return iconStyle;
+}
+
+template<>
+void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src)
+{
+    switch (src) {
+        case ARK_SELECTED_MODE_INDICATOR: dst = SelectedMode::INDICATOR; break;
+        case ARK_SELECTED_MODE_BOARD: dst = SelectedMode::BOARD; break;
+        default: LOGE("Unexpected enum value in Ark_SelectedMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src)
+{
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        dst = BoardStyle();
+        dst->borderRadius = borderRadius.value();
+    }
+}
+
+template<>
+void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
+{
+    switch (src) {
+        case ARK_LAYOUT_MODE_AUTO: dst = LayoutMode::AUTO; break;
+        case ARK_LAYOUT_MODE_VERTICAL: dst = LayoutMode::VERTICAL; break;
+        case ARK_LAYOUT_MODE_HORIZONTAL: dst = LayoutMode::HORIZONTAL; break;
+        default: LOGE("Unexpected enum value in Ark_LayoutMode: %{public}d", src);
+    }
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -92,8 +249,15 @@ void TabBar1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabContentModelNG::SetTabBar1(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_SubTabBarStyle& style) {
+            g_setSubTabBarStyle(frameNode, style);
+        },
+        [frameNode](const Ark_BottomTabBarStyle& style) {
+            g_setBottomTabBarStyle(frameNode, style);
+        },
+        []() {}
+    );
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     const VoidCallback* value)

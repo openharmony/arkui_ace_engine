@@ -690,19 +690,114 @@ void TabContentModelNG::SetTabBar(FrameNode* node, const std::optional<std::stri
     frameNodePattern->SetTabBar(label.value_or(""), icon.value_or(""), std::nullopt, std::move(builder));
 }
 
-void TabContentModelNG::SetLayoutMode(FrameNode* node, LayoutMode layoutMode)
+void TabContentModelNG::SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode)
 {
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetLayoutMode(layoutMode);
+    frameNodePattern->SetLayoutMode(layoutMode.value_or(LayoutMode::VERTICAL));
 }
 
-void TabContentModelNG::SetId(FrameNode* node, const std::string& id)
+void TabContentModelNG::SetId(FrameNode* node, const std::optional<std::string>& id)
 {
     CHECK_NULL_VOID(node);
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetId(id);
+    frameNodePattern->SetId(id.value_or(""));
+}
+
+void TabContentModelNG::SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarStyle(tabBarStyle);
+}
+
+void TabContentModelNG::SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSelectedMode(selectedMode.value_or(SelectedMode::INDICATOR));
+}
+
+void TabContentModelNG::SetBoard(FrameNode* node, const std::optional<BoardStyle>& board)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetBoardStyle(board.value_or(BoardStyle()));
+}
+
+void TabContentModelNG::SetPadding(FrameNode* node, PaddingProperty& padding, bool isSubTabStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (isSubTabStyle) {
+        if (padding.top) {
+            padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
+        }
+        if (padding.bottom) {
+            padding.bottom = NG::CalcLength(tabTheme->GetSubTabBottomPadding());
+        }
+        if (padding.left) {
+            padding.left = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        }
+        if (padding.right) {
+            padding.right = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        }
+    } else {
+        if (padding.top) {
+            padding.top = NG::CalcLength(0.0_vp);
+        }
+        if (padding.bottom) {
+            padding.bottom = NG::CalcLength(0.0_vp);
+        }
+        if (padding.left) {
+            padding.left = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+        if (padding.right) {
+            padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+    }
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
+}
+
+void TabContentModelNG::SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetVerticalAlign(verticalAlign.value_or(FlexAlign::CENTER));
+}
+
+void TabContentModelNG::SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSymmetricExtensible(isExtensible.value_or(false));
+}
+
+void TabContentModelNG::SetIconStyle(FrameNode* node, const  std::optional<IconStyle>& iconStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetIconStyle(iconStyle.value_or(IconStyle()));
 }
 } // namespace OHOS::Ace::NG

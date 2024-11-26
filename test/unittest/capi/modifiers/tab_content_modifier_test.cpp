@@ -137,6 +137,35 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setTabBar1BottomStyleTestText
+ * @tc.desc: check setTabBar1 interface work with only text in BottomStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabContentModifierTest, setTabBar1BottomStyleTestText, TestSize.Level1)
+{
+    const std::string PROP_NAME("text");
+    const std::string TEXT_VALUE("test");
+    std::unique_ptr<JsonValue> jsonValue;
+
+    ASSERT_NE(modifier_->setTabBar1, nullptr);
+    Ark_BottomTabBarStyle style;
+    style._text = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEXT_VALUE));
+    style._icon = Converter::ArkValue<Opt_Union_ResourceStr_TabBarSymbol>(Ark_Empty());
+    style._iconStyle = Converter::ArkValue<Opt_TabBarIconStyle>(Ark_Empty());
+    style._id = Converter::ArkValue<Opt_String>(Ark_Empty());
+    style._labelStyle = Converter::ArkValue<Opt_LabelStyle>(Ark_Empty());
+    style._layoutMode = Converter::ArkValue<Opt_LayoutMode>(Ark_Empty());
+    style._padding = Converter::ArkValue<Opt_Union_Padding_Dimension_LocalizedPadding>(Ark_Empty());
+    style._symmetricExtensible = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    style._verticalAlign = Converter::ArkValue<Opt_VerticalAlign>(Ark_Empty());
+    auto args = ArkUnion<Ark_Union_SubTabBarStyle_BottomTabBarStyle, Ark_BottomTabBarStyle>(style);
+    modifier_->setTabBar1(node_, &args);
+    jsonValue = GetJsonValue(node_);
+    auto checkInitial = GetAttrValue<std::string>(jsonValue, PROP_NAME);
+    EXPECT_EQ(checkInitial, TEXT_VALUE);
+}
+
+/*
  * @tc.name: DISABLED_setOnWillShowTest
  * @tc.desc:
  * @tc.type: FUNC
