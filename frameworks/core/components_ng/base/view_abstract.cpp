@@ -2507,9 +2507,14 @@ void ViewAbstract::SetInvert(const InvertVariant& invert)
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
 }
 
-void ViewAbstract::SetInvert(FrameNode* frameNode, const InvertVariant& invert)
+void ViewAbstract::SetInvert(FrameNode *frameNode, const std::optional<InvertVariant>& invert)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
+    if (invert.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontInvert, frameNode);
+    }
 }
 
 void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
@@ -2533,9 +2538,14 @@ void ViewAbstract::SetHueRotate(float hueRotate)
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
 }
 
-void ViewAbstract::SetHueRotate(FrameNode* frameNode, float hueRotate)
+void ViewAbstract::SetHueRotate(FrameNode *frameNode, const std::optional<float>& hueRotate)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate, frameNode);
+    if (hueRotate.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontHueRotate, frameNode);
+    }
 }
 
 void ViewAbstract::SetColorBlend(const Color& colorBlend)
@@ -2546,9 +2556,15 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
 }
 
-void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
+void ViewAbstract::SetColorBlend(FrameNode *frameNode, const std::optional<Color>& colorBlend)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (colorBlend.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontColorBlend, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
@@ -2780,6 +2796,17 @@ void ViewAbstract::SetFreeze(bool freeze)
     }
     ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
 }
+
+void ViewAbstract::SetFreeze(FrameNode* frameNode, const std::optional<bool>& freeze)
+{
+    if (freeze.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze.value());
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_RENDER_CONTEXT(target, Freeze);
+    }
+}
+
 
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
 {
@@ -3176,19 +3203,34 @@ void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleO
     }
 }
 
-void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option)
+void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
+    if (option.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, PixelStretchEffect, frameNode);
+    }
 }
 
-void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
+void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LightUpEffect, frameNode);
+    }
 }
 
-void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, double radio)
+void ViewAbstract::SetSphericalEffect(FrameNode* frameNode, std::optional<double> radio)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio, frameNode);
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SphericalEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SphericalEffect, frameNode);
+    }
 }
 
 void ViewAbstract::SetRenderGroup(FrameNode* frameNode, bool isRenderGroup)

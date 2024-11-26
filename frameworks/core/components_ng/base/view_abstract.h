@@ -424,6 +424,7 @@ public:
     static void SetUseEffect(bool useEffect, EffectType effectType);
 
     static void SetFreeze(bool freeze);
+    static void SetFreeze(FrameNode* frameNode, const std::optional<bool>& freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);
 
     static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
@@ -499,15 +500,15 @@ public:
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius, const std::optional<BlurOption> &blurOption);
-    static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
+    static void SetInvert(FrameNode* frameNode, const std::optional<InvertVariant>& invert);
     static void SetSepia(FrameNode* frameNode, const std::optional<Dimension>& sepia);
     static void SetSaturate(FrameNode* frameNode, const std::optional<Dimension>& saturate);
-    static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
+    static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
     static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
     static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
     static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
     static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
-    static void SetHueRotate(FrameNode* frameNode, float hueRotate);
+    static void SetHueRotate(FrameNode* frameNode, const std::optional<float>& hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
@@ -538,9 +539,9 @@ public:
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
-    static void SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectOption& option);
-    static void SetLightUpEffect(FrameNode* frameNode, double radio);
-    static void SetSphericalEffect(FrameNode* frameNode, double radio);
+    static void SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option);
+    static void SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio);
+    static void SetSphericalEffect(FrameNode* frameNode, std::optional<double> radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
