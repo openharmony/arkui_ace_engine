@@ -15,18 +15,33 @@
 
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 
+#include <string>
+
+#include "base/utils/utils.h"
+#include "bridge/cj_frontend/cppview/canvas_pattern.h"
+
 using namespace OHOS;
 
 namespace OHOS::Ace::Framework {
-
+std::unordered_map<int32_t, std::shared_ptr<Pattern>> NativeCanvasRenderer::pattern_;
+unsigned int NativeCanvasRenderer::patternCount_ = 0;
 namespace {
 const int EVEN_CHECK = 2;
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr double DIFF = 1e-10;
 } // namespace
 
 NativeCanvasRenderer::NativeCanvasRenderer(bool antialias) : FFIData()
 {
     renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
     antialias_ = antialias;
+    density_ = PipelineBase::GetCurrentDensity();
+}
+
+NativeCanvasRenderer::NativeCanvasRenderer() : FFIData()
+{
+    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    density_ = PipelineBase::GetCurrentDensity();
 }
 
 NativeCanvasRenderer::~NativeCanvasRenderer()
@@ -66,9 +81,15 @@ void NativeCanvasRenderer::SetFillStyle(const sptr<NativeCanvasGradient>& native
     renderingContext2DModel_->SetFillGradient(gradient);
 }
 
+void NativeCanvasRenderer::SetFillStyle(const sptr<NativeCanvasPattern>& nativeCanvasPattern)
+{
+    auto id = nativeCanvasPattern->GetId();
+    renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+}
+
 void NativeCanvasRenderer::SetLineWidth(const double lineWidth)
 {
-    renderingContext2DModel_->SetLineWidth(lineWidth);
+    renderingContext2DModel_->SetLineWidth(lineWidth * GetDensity());
 }
 
 void NativeCanvasRenderer::SetStrokeStyle(const Color& color)
@@ -80,6 +101,12 @@ void NativeCanvasRenderer::SetStrokeStyle(const sptr<NativeCanvasGradient>& nati
 {
     auto gradient = std::make_shared<Gradient>(nativeCanvasGradient->GetGradient());
     renderingContext2DModel_->SetStrokeGradient(gradient);
+}
+
+void NativeCanvasRenderer::SetStrokeStyle(const sptr<NativeCanvasPattern>& nativeCanvasPattern)
+{
+    auto id = nativeCanvasPattern->GetId();
+    renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
 }
 
 void NativeCanvasRenderer::SetLineCap(const LineCapStyle lineCap)
@@ -94,7 +121,7 @@ void NativeCanvasRenderer::SetLineJoin(const LineJoinStyle lineJoin)
 
 void NativeCanvasRenderer::SetMiterLimit(double limit)
 {
-    renderingContext2DModel_->SetMiterLimit(limit);
+    renderingContext2DModel_->SetMiterLimit(limit * GetDensity());
 }
 
 void NativeCanvasRenderer::SetFont(
@@ -108,6 +135,10 @@ void NativeCanvasRenderer::SetFont(
     renderingContext2DModel_->SetFontSize(fontSize);
     renderingContext2DModel_->SetFontFamilies(families);
 
+    paintState_.SetFontWeight(weight);
+    paintState_.SetFontStyle(fontStyle);
+    paintState_.SetFontFamilies(families);
+    paintState_.SetFontSize(fontSize);
     style_.SetFontStyle(fontStyle);
     style_.SetFontWeight(weight);
     style_.SetFontSize(fontSize);
@@ -116,12 +147,13 @@ void NativeCanvasRenderer::SetFont(
 
 void NativeCanvasRenderer::SetTextAlign(const TextAlign align)
 {
-    renderingContext2DModel_->SetTextAlign(align);
     paintState_.SetTextAlign(align);
+    renderingContext2DModel_->SetTextAlign(align);
 }
 
 void NativeCanvasRenderer::SetTextBaseline(const TextBaseline baseline)
 {
+    paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
     style_.SetTextBaseline(baseline);
 }
@@ -136,13 +168,26 @@ void NativeCanvasRenderer::SetLineDash(std::vector<double>& lineDash)
     if (lineDash.size() % EVEN_CHECK != 0) {
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
-
+    double density = GetDensity();
+    for (auto i = 0U; i < lineDash.size(); i++) {
+        lineDash[i] *= density;
+    }
     renderingContext2DModel_->SetLineDash(lineDash);
+}
+
+std::vector<double> NativeCanvasRenderer::GetLineDash()
+{
+    std::vector<double> lineDash = renderingContext2DModel_->GetLineDash();
+    double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
+    for (auto i = 0U; i < lineDash.size(); i++) {
+        lineDash[i] /= density;
+    }
+    return lineDash;
 }
 
 void NativeCanvasRenderer::SetLineDashOffset(const double lineDashOffset)
 {
-    renderingContext2DModel_->SetLineDashOffset(lineDashOffset);
+    renderingContext2DModel_->SetLineDashOffset(lineDashOffset * GetDensity());
 }
 
 void NativeCanvasRenderer::SetGlobalCompositeOperation(const CompositeOperation type)
@@ -162,12 +207,12 @@ void NativeCanvasRenderer::SetShadowColor(const Color& color)
 
 void NativeCanvasRenderer::SetShadowOffsetX(const double offsetX)
 {
-    renderingContext2DModel_->SetShadowOffsetX(offsetX);
+    renderingContext2DModel_->SetShadowOffsetX(offsetX * GetDensity());
 }
 
 void NativeCanvasRenderer::SetShadowOffsetY(const double offsetY)
 {
-    renderingContext2DModel_->SetShadowOffsetX(offsetY);
+    renderingContext2DModel_->SetShadowOffsetX(offsetY * GetDensity());
 }
 
 void NativeCanvasRenderer::SetImageSmoothingEnabled(const bool enabled)
@@ -177,53 +222,99 @@ void NativeCanvasRenderer::SetImageSmoothingEnabled(const bool enabled)
 
 void NativeCanvasRenderer::SetImageSmoothingQuality(const std::string& quality)
 {
-    LOGE("canvas error: imageSmoothingQuality is not support in new pipeline");
+    if ((QUALITY_TYPE.find(quality) != QUALITY_TYPE.end())) {
+        renderingContext2DModel_->SetSmoothingQuality(quality);
+    } else {
+        LOGE("canvas error: Wrong quality");
+    }
+}
+
+std::string NativeCanvasRenderer::ToDataURL(const std::string& dataUrl, double quality)
+{
+    std::string result = renderingContext2DModel_->ToDataURL(dataUrl, quality);
+    return result;
 }
 
 void NativeCanvasRenderer::FillRect(const Rect& rect)
 {
-    renderingContext2DModel_->FillRect(rect);
+    renderingContext2DModel_->FillRect(rect * GetDensity());
 }
 
 void NativeCanvasRenderer::StrokeRect(const Rect& rect)
 {
-    renderingContext2DModel_->StrokeRect(rect);
+    renderingContext2DModel_->StrokeRect(rect * GetDensity());
 }
 
 void NativeCanvasRenderer::ClearRect(const Rect& rect)
 {
-    renderingContext2DModel_->ClearRect(rect);
+    renderingContext2DModel_->ClearRect(rect * GetDensity());
 }
 
 void NativeCanvasRenderer::FillText(const double x, const double y, const std::string& text)
 {
+    double density = GetDensity();
     FillTextInfo textInfo;
     textInfo.text = text;
-    textInfo.x = x;
-    textInfo.y = y;
+    textInfo.x = x * density;
+    textInfo.y = y * density;
+    renderingContext2DModel_->SetFillText(paintState_, textInfo);
+}
+
+void NativeCanvasRenderer::FillText(double x, double y, const std::string& text, double maxWidth)
+{
+    double density = GetDensity();
+    FillTextInfo textInfo;
+    textInfo.text = text;
+    textInfo.x = x * density;
+    textInfo.y = y * density;
+    textInfo.maxWidth = maxWidth * density;
     renderingContext2DModel_->SetFillText(paintState_, textInfo);
 }
 
 void NativeCanvasRenderer::StrokeText(const double x, const double y, const std::string& text)
 {
     FillTextInfo textInfo;
+    double density = GetDensity();
     textInfo.text = text;
-    textInfo.x = x;
-    textInfo.y = y;
+    textInfo.x = x * density;
+    textInfo.y = y * density;
+    renderingContext2DModel_->SetStrokeText(paintState_, textInfo);
+}
+
+void NativeCanvasRenderer::StrokeText(double x, double y, const std::string& text, double maxWidth)
+{
+    FillTextInfo textInfo;
+    double density = GetDensity();
+    textInfo.text = text;
+    textInfo.x = x * density;
+    textInfo.y = y * density;
+    textInfo.maxWidth = maxWidth * density;
     renderingContext2DModel_->SetStrokeText(paintState_, textInfo);
 }
 
 Metrics NativeCanvasRenderer::MeasureText(const std::string& text)
 {
     paintState_.SetTextStyle(style_);
-    double width = 0.0;
-    double height = 0.0;
 
+    double density = Positive(GetDensity()) ? GetDensity() : 1;
     TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
-    width = textMetrics.width;
-    height = textMetrics.height;
+    double width = textMetrics.width / density;
+    double height = textMetrics.height / density;
+    double actualBoundingBoxLeft = textMetrics.actualBoundingBoxLeft / density;
+    double actualBoundingBoxRight = textMetrics.actualBoundingBoxRight / density;
+    double actualBoundingBoxAscent = textMetrics.actualBoundingBoxAscent / density;
+    double actualBoundingBoxDescent = textMetrics.actualBoundingBoxDescent / density;
+    double alphabeticBaseline = textMetrics.alphabeticBaseline / density;
+    double emHeightAscent = textMetrics.emHeightAscent / density;
+    double emHeightDescent = textMetrics.emHeightDescent / density;
+    double fontBoundingBoxAscent = textMetrics.fontBoundingBoxAscent / density;
+    double fontBoundingBoxDescent = textMetrics.fontBoundingBoxDescent / density;
+    double hangingBaseline = textMetrics.hangingBaseline / density;
+    double ideographicBaseline = textMetrics.ideographicBaseline / density;
 
-    Metrics metrics = { width, height };
+    Metrics metrics = { width, height, actualBoundingBoxLeft, actualBoundingBoxRight, actualBoundingBoxAscent,
+        actualBoundingBoxDescent, alphabeticBaseline, emHeightAscent, emHeightDescent, fontBoundingBoxAscent,
+        fontBoundingBoxDescent, hangingBaseline, ideographicBaseline };
     return metrics;
 }
 
@@ -248,12 +339,14 @@ void NativeCanvasRenderer::BeginPath()
 
 void NativeCanvasRenderer::MoveTo(const double x, const double y)
 {
-    renderingContext2DModel_->MoveTo(x, y);
+    double density = GetDensity();
+    renderingContext2DModel_->MoveTo(x * density, y * density);
 }
 
 void NativeCanvasRenderer::LineTo(const double x, const double y)
 {
-    renderingContext2DModel_->LineTo(x, y);
+    double density = GetDensity();
+    renderingContext2DModel_->LineTo(x * density, y * density);
 }
 
 void NativeCanvasRenderer::ClosePath()
@@ -263,32 +356,64 @@ void NativeCanvasRenderer::ClosePath()
 
 void NativeCanvasRenderer::BezierCurveTo(const BezierCurveParam& param)
 {
-    renderingContext2DModel_->BezierCurveTo(param);
+    double density = GetDensity();
+    BezierCurveParam beParam;
+    beParam.cp1x = param.cp1x * density;
+    beParam.cp1y = param.cp1y * density;
+    beParam.cp2x = param.cp2x * density;
+    beParam.cp2y = param.cp2y * density;
+    beParam.x = param.x * density;
+    beParam.y = param.y * density;
+    renderingContext2DModel_->BezierCurveTo(beParam);
 }
 
 void NativeCanvasRenderer::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-    renderingContext2DModel_->QuadraticCurveTo(param);
+    double density = GetDensity();
+    QuadraticCurveParam quParam;
+    quParam.cpx = param.cpx * density;
+    quParam.cpy = param.cpy * density;
+    quParam.x = param.x * density;
+    quParam.y = param.y * density;
+    renderingContext2DModel_->QuadraticCurveTo(quParam);
 }
 
 void NativeCanvasRenderer::Arc(const ArcParam& param)
 {
-    renderingContext2DModel_->Arc(param);
+    ArcParam arcParam;
+    double density = GetDensity();
+    arcParam.x = param.x * density;
+    arcParam.y = param.y * density;
+    arcParam.radius = param.radius * density;
+    renderingContext2DModel_->Arc(arcParam);
 }
 
 void NativeCanvasRenderer::ArcTo(const ArcToParam& param)
 {
+    ArcToParam arcToParam;
+    double density = GetDensity();
+    arcToParam.x1 = param.x1 * density;
+    arcToParam.y1 = param.y1 * density;
+    arcToParam.x2 = param.x2 * density;
+    arcToParam.y2 = param.y2 * density;
+    arcToParam.radius = param.radius * density;
     renderingContext2DModel_->ArcTo(param);
 }
 
 void NativeCanvasRenderer::Ellipse(const EllipseParam& param)
 {
-    renderingContext2DModel_->Ellipse(param);
+    EllipseParam elParam;
+    double density = GetDensity();
+    elParam.x = param.x * density;
+    elParam.y = param.y * density;
+    elParam.radiusX = param.radiusX * density;
+    elParam.radiusY = param.radiusY * density;
+    renderingContext2DModel_->Ellipse(elParam);
 }
 
 void NativeCanvasRenderer::NormalRect(const Rect& rect)
 {
-    renderingContext2DModel_->AddRect(rect);
+    renderingContext2DModel_->AddRect(rect * GetDensity());
 }
 
 void NativeCanvasRenderer::Fill()
@@ -298,10 +423,38 @@ void NativeCanvasRenderer::Fill()
     renderingContext2DModel_->SetFillRuleForPath(fillRule);
 }
 
+void NativeCanvasRenderer::Fill(const std::string& ruleStr)
+{
+    auto fillRule = ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    renderingContext2DModel_->SetFillRuleForPath(fillRule);
+    return;
+}
+
+void NativeCanvasRenderer::Fill(const sptr<NativeCanvasPath>& canvasPath, const std::string& ruleStr)
+{
+    auto fillRule = ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto path = canvasPath->GetCanvasPath2d();
+    renderingContext2DModel_->SetFillRuleForPath2D(fillRule, path);
+}
+
 void NativeCanvasRenderer::Clip()
 {
     auto fillRule = CanvasFillRule::NONZERO;
     renderingContext2DModel_->SetClipRuleForPath(fillRule);
+}
+
+void NativeCanvasRenderer::Clip(const std::string& ruleStr)
+{
+    auto fillRule = ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    renderingContext2DModel_->SetClipRuleForPath(fillRule);
+    return;
+}
+
+void NativeCanvasRenderer::Clip(const sptr<NativeCanvasPath>& canvasPath, const std::string& ruleStr)
+{
+    auto fillRule = ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto path = canvasPath->GetCanvasPath2d();
+    renderingContext2DModel_->SetClipRuleForPath2D(fillRule, path);
 }
 
 void NativeCanvasRenderer::Rotate(const double angle)
@@ -311,7 +464,8 @@ void NativeCanvasRenderer::Rotate(const double angle)
 
 void NativeCanvasRenderer::Scale(const double x, const double y)
 {
-    renderingContext2DModel_->CanvasRendererScale(x, y);
+    double density = GetDensity();
+    renderingContext2DModel_->CanvasRendererScale(x * density, y * density);
 }
 
 void NativeCanvasRenderer::Transform(const TransformParam& param)
@@ -321,28 +475,49 @@ void NativeCanvasRenderer::Transform(const TransformParam& param)
 
 void NativeCanvasRenderer::SetTransform(TransformParam param)
 {
+    double density = GetDensity();
+    param.translateX *= density;
+    param.translateY *= density;
     renderingContext2DModel_->SetTransform(param, true);
+}
+
+void NativeCanvasRenderer::SetTransformByMatrix(const sptr<NativeMatrix2d>& matrix2d)
+{
+    TransformParam param = matrix2d->GetTransform();
+    renderingContext2DModel_->SetTransform(param, false);
+}
+
+void NativeCanvasRenderer::ResetTransform()
+{
+    renderingContext2DModel_->ResetTransform();
 }
 
 void NativeCanvasRenderer::Translate(const double x, const double y)
 {
-    renderingContext2DModel_->Translate(x, y);
+    double density = GetDensity();
+    renderingContext2DModel_->Translate(x * density, y * density);
 }
 
 void NativeCanvasRenderer::Restore()
 {
+    if (!savePaintState_.empty()) {
+        paintState_ = savePaintState_.back();
+        savePaintState_.pop_back();
+    }
     renderingContext2DModel_->Restore();
 }
 
 void NativeCanvasRenderer::Save()
 {
+    savePaintState_.push_back(paintState_);
     renderingContext2DModel_->CanvasRendererSave();
 }
 
 int64_t NativeCanvasRenderer::CreateLinearGradient(const double x0, const double y0, const double x1, const double y1)
 {
-    Offset beginOffset = Offset(x0, y0);
-    Offset endOffset = Offset(x1, y1);
+    double density = GetDensity();
+    Offset beginOffset = Offset(x0 * density, y0 * density);
+    Offset endOffset = Offset(x1 * density, y1 * density);
 
     Gradient gradient = Gradient();
     gradient.SetType(GradientType::LINEAR);
@@ -359,15 +534,32 @@ int64_t NativeCanvasRenderer::CreateLinearGradient(const double x0, const double
 int64_t NativeCanvasRenderer::CreateRadialGradient(
     const double x0, const double y0, const double r0, const double x1, const double y1, const double r1)
 {
-    Offset innerCenter = Offset(x0, y0);
-    Offset outerCenter = Offset(x1, y1);
+    double density = GetDensity();
+    Offset innerCenter = Offset(x0 * density, y0 * density);
+    Offset outerCenter = Offset(x1 * density, y1 * density);
 
     Gradient gradient = Gradient();
     gradient.SetType(GradientType::RADIAL);
     gradient.SetBeginOffset(innerCenter);
     gradient.SetEndOffset(outerCenter);
-    gradient.SetInnerRadius(r0);
-    gradient.SetOuterRadius(r1);
+    gradient.SetInnerRadius(r0 * density);
+    gradient.SetOuterRadius(r1 * density);
+
+    auto nativeCanvasGradient = FFIData::Create<NativeCanvasGradient>(gradient);
+    if (nativeCanvasGradient == nullptr) {
+        return FFI_ERROR_CODE;
+    }
+    return nativeCanvasGradient->GetID();
+}
+
+int64_t NativeCanvasRenderer::CreateRadialGradient(const double startAngle, const double x, const double y)
+{
+    double density = GetDensity();
+    Gradient gradient = Gradient();
+    gradient.SetType(GradientType::CONIC);
+    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * M_PI))));
+    gradient.GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
+    gradient.GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
 
     auto nativeCanvasGradient = FFIData::Create<NativeCanvasGradient>(gradient);
     if (nativeCanvasGradient == nullptr) {
@@ -413,11 +605,18 @@ int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width,
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         return 0;
     }
+    double density = GetDensity();
     ImageSize imageSize;
-    imageSize.left = left;
-    imageSize.top = top;
-    imageSize.width = finalWidth;
-    imageSize.height = finalHeight;
+    imageSize.left = left * density;
+    imageSize.top = top * density;
+    imageSize.width = finalWidth * density + DIFF;
+    imageSize.height = finalHeight * density + DIFF;
+    finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    finalHeight = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (height > 0 && width > (UINT32_MAX / height)) {
+        LOGE("NativeCanvasRenderer GetPixelMap failed");
+        return 0;
+    }
     auto pixelmap = renderingContext2DModel_->GetPixelMap(imageSize);
     if (pixelmap) {
         auto ret = FFIData::Create<OHOS::Media::PixelMapImpl>(pixelmap->GetPixelMapSharedPtr());
@@ -430,4 +629,91 @@ int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width,
         return 0;
     }
 }
+
+void NativeCanvasRenderer::SetFilter(const std::string& filterStr)
+{
+    renderingContext2DModel_->SetFilterParam(filterStr);
+}
+
+void NativeCanvasRenderer::SetDirection(const std::string& directionStr)
+{
+    auto direction = ConvertStrToTextDirection(directionStr);
+    renderingContext2DModel_->SetTextDirection(direction);
+}
+
+std::string NativeCanvasRenderer::GetJsonData(const std::string& path)
+{
+    std::string jsonData = renderingContext2DModel_->GetJsonData(path);
+    return jsonData;
+}
+
+void NativeCanvasRenderer::SaveLayer()
+{
+    renderingContext2DModel_->SaveLayer();
+}
+
+void NativeCanvasRenderer::RestoreLayer()
+{
+    renderingContext2DModel_->RestoreLayer();
+}
+
+void NativeCanvasRenderer::Reset()
+{
+    paintState_ = PaintState();
+    std::vector<PaintState>().swap(savePaintState_);
+    isInitializeShadow_ = false;
+    renderingContext2DModel_->Reset();
+}
+
+int64_t NativeCanvasRenderer::CreatePattern(std::unique_ptr<RenderImage> cjImage, const std::string& repeat)
+{
+    auto pattern = std::make_shared<Pattern>();
+    pattern->SetImgSrc(cjImage->src);
+    pattern->SetImageWidth(cjImage->width_);
+    pattern->SetImageHeight(cjImage->height_);
+    pattern->SetRepetition(repeat);
+
+    pattern_[patternCount_] = pattern;
+    auto nativeCanvasPattern = FFIData::Create<NativeCanvasPattern>();
+    if (nativeCanvasPattern == nullptr) {
+        return FFI_ERROR_CODE;
+    }
+    nativeCanvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
+    nativeCanvasPattern->SetId(patternCount_);
+    nativeCanvasPattern->SetUnit(GetUnit());
+    patternCount_++;
+    return nativeCanvasPattern->GetID();
+}
+
+std::shared_ptr<Pattern> NativeCanvasRenderer::GetPatternPtr(int32_t id)
+{
+    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
+        return std::shared_ptr<Pattern>();
+    }
+    return pattern_[id];
+}
+
+int64_t NativeCanvasRenderer::getTransform()
+{
+    TransformParam param = renderingContext2DModel_->GetTransform();
+    auto nativeMatrix2d = FFIData::Create<NativeMatrix2d>();
+    nativeMatrix2d->SetTransform(param);
+    return nativeMatrix2d->GetID();
+}
+
+void NativeCanvasRenderer::SetPixelMap(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+{
+#if !defined(PREVIEW)
+    ImageInfo imageInfo;
+    imageInfo.pixelMap = pixelMap;
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
+#endif
+}
+
+void NativeCanvasRenderer::SetDensity()
+{
+    double density = GetDensity(true);
+    renderingContext2DModel_->SetDensity(density);
+}
+
 } // namespace OHOS::Ace::Framework
