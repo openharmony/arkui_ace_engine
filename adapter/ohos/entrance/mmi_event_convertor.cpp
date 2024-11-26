@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 
 void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(pointerEvent);
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
