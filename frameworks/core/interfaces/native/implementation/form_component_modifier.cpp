@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#ifdef FORM_SUPPORTED
 #include "core/components_ng/pattern/form/form_model_ng.h"
+#endif
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components/common/layout/constants.h"
