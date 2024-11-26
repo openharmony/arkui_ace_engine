@@ -35,6 +35,12 @@ void NGNativeTextInputController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void FfiOHOSAceFrameworkTextInputSetCustomKeyboard(void (*keybordBuild)())
+{
+    auto func = CJLambda::Create(keybordBuild);
+    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(func), true);
+}
+
 void NGNativeTextInputController::SetTextSelection(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
