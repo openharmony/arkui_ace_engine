@@ -281,6 +281,12 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
+    uint64_t GetDisplayId() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, -1);
+        return uiWindow_->GetDisplayId();
+    }
+
     Orientation GetOrientation() override
     {
         CHECK_NULL_RETURN(uiWindow_, Orientation::UNSPECIFIED);
