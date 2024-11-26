@@ -714,6 +714,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                     GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
+        InteractionInterface::GetInstance()->SetDraggableState(true);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
