@@ -3111,6 +3111,7 @@ class ArkComponent {
   }
   setNodePtr(nodePtr) {
     this.nativePtr = nodePtr;
+    this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
   }
   setInstanceId(instanceId) {
     this._instanceId = instanceId;
@@ -3147,7 +3148,7 @@ class ArkComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr, this)) {
+      if (!this._weakPtr?.invalid() && value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });

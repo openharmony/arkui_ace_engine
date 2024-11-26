@@ -901,6 +901,9 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
     }
 }
 
+void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
+
+void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace

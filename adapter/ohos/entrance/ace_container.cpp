@@ -1733,8 +1733,8 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     auto context = runtimeContext_.lock();
-    DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
-    DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
+    DumpLog::GetInstance().Print("bundleName:" + GetBundleName());
+    DumpLog::GetInstance().Print("moduleName:" + GetModuleName());
     result = DumpInfo(params);
     const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
     auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());

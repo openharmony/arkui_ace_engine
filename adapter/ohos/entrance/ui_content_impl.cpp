@@ -20,13 +20,17 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
 #include "configuration.h"
+#include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
 #include "service_extension_context.h"
+#include "system_ability_definition.h"
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
@@ -104,11 +108,11 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #endif
 #include "pipeline/rs_node_map.h"
+#include "screen_session_manager_client.h"
 #include "transaction/rs_transaction_data.h"
 #include "ui/rs_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "screen_session_manager_client.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -2768,7 +2772,19 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     CHECK_NULL_VOID(window_);
     RefPtr<Container> container;
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
-
+    int32_t deviceWidth = 0;
+    int32_t deviceHeight = 0;
+    float density = 1.0f;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        auto displayInfo = defaultDisplay->GetDisplayInfo();
+        if (displayInfo) {
+            density = displayInfo->GetDensityInCurResolution();
+        }
+        deviceWidth = defaultDisplay->GetWidth();
+        deviceHeight = defaultDisplay->GetHeight();
+    }
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();
     bool isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
@@ -2808,8 +2824,17 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
-        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-        container->SetApiTargetVersion(apiTargetVersion);
+        // if window don't have context,like service eject a toast,find target version in bundle.
+        auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_NULL_VOID(systemAbilityMgr);
+        auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_NULL_VOID(bundleObj);
+        auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+        CHECK_NULL_VOID(bundleMgrProxy);
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleMgrProxy->GetBundleInfoForSelf(
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        container->SetApiTargetVersion(bundleInfo.targetVersion % 1000);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);

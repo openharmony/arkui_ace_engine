@@ -919,6 +919,8 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+    void RegisterAttachedNode(UINode* uiNode);
+    void RemoveAttachedNode(UINode* uiNode);
 
     void PostKeyboardAvoidTask();
 
@@ -1181,6 +1183,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    std::unordered_set<UINode*> attachedNodeSet_;
 
     friend class ScopedLayout;
 };
