@@ -41,6 +41,12 @@ void NGNativeTextInputController::SetTextSelection(
     }
 }
 
+void FfiOHOSAceFrameworkTextInputSetCustomKeyboard(void (*keybordBuild)())
+{
+    auto func = CJLambda::Create(keybordBuild);
+    TextFieldModel::GetInstance()->SetCustomKeyboard(std::move(func), true);
+}
+
 void NGNativeTextInputController::StopEditing()
 {
     if (controller_) {

@@ -49,6 +49,21 @@ void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param)
     frontend->Back(url, param);
 }
 
+void FfiOHOSAceFrameworkRouterReplace(const char* url, const char* param, int32_t modeValue)
+{
+    if (Container::CurrentId() < 0) {
+        LOGE("RouterBack fail, no current container");
+        return;
+    }
+    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
+    if (!frontend) {
+        LOGE("can not get frontend.");
+        return;
+    }
+    auto mode = static_cast<CJPageRouterAbstract::RouterMode>(modeValue);
+    frontend->Replace(url, param, mode);
+}
+
 ExternalString FfiOHOSAceFrameworkRouterGetParams()
 {
     if (Container::CurrentId() < 0) {

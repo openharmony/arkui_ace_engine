@@ -52,6 +52,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerCaretPosition(int64_t selfI
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerSetTextSelection(
     int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t menuPolicy = -1);
 CJ_EXPORT void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextInputSetCustomKeyboard(void (*keybordBuild)());
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTINPUT_FFI_H
