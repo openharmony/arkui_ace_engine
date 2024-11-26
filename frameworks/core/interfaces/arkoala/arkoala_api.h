@@ -5179,6 +5179,16 @@ struct ArkUICustomNodeExtModifier {
     void (*setIsAtomic)(ArkUINodeHandle node, const ArkUI_Bool isAtomic);
 };
 
+struct ArkUIThemeModifier {
+    ArkUINodeHandle (*createWithThemeNode)(ArkUI_Int32 id);
+    ArkUINodeHandle (*getWithThemeNode)(ArkUI_Int32 id);
+    ArkUINodeHandle (*createTheme)(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, ArkUI_Int32 colorMode);
+    void (*createThemeScope)(ArkUINodeHandle node, ArkUINodeHandle theme);
+    void (*setDefaultTheme)(const ArkUI_Uint32* colors, ArkUI_Bool isDark);
+    void (*removeFromCache)(ArkUI_Int32 themeId);
+    void (*setOnThemeScopeDestroy)(ArkUINodeHandle node, void* callback);
+};
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -5291,6 +5301,7 @@ struct ArkUINodeModifiers {
     const ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
     const ArkUICustomNodeExtModifier* (*getCustomNodeExtModifier)();
+    const ArkUIThemeModifier* (*getThemeModifier)();
 };
 
 // same as inner defines in property.h

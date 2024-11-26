@@ -444,6 +444,7 @@ FrameNode::FrameNode(
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
+    paintProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
@@ -5844,6 +5845,13 @@ void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, Notificat
 void FrameNode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
+}
+
+void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
