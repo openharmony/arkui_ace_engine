@@ -171,7 +171,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     std::string moduleName;
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-    if (!srcValid && !isCard) {
+    if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (Framework::IsDrawable(info[1])) {
             pixmap = Framework::GetDrawablePixmap(info[1]);
