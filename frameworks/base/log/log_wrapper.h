@@ -49,6 +49,8 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #endif
 #define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
+#define SEC_PARAM(...) __VA_ARGS__ // secure param
+#define SEC_PLD(placeholder, ...) #placeholder __VA_ARGS__ // secure placeholder
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
     do {                                                                                                      \
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \

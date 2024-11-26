@@ -305,11 +305,13 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
         vTrans.emplace_back(localMat);
         //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:"
+                SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
             break;
         }
         if ((postEventNodeId == host->GetId()) && isPostEventResult) {
-            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:"
+                SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
             break;
         }
         host = host->GetAncestorNodeOfFrame();
@@ -483,12 +485,12 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
         for (const auto& item : responseRegion) {
             responseInfo.append(item.ToString()).append("; ");
         }
-        TAG_LOGW(AceLogTag::ACE_GESTURE,
+        TAG_LOGW(AceLogTag::ACE_GESTURE, SEC_PLD(,
             "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s, point = "
-            "%{public}s, frameRect = %{public}s, %{public}s",
-            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
+            "%{public}s, frameRect = %{public}s, %{public}s"),
+            SEC_PARAM(AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
             localPoint.ToString().c_str(), host->GetFrameRectWithoutSafeArea().ToString().c_str(),
-            responseInfo.c_str());
+            responseInfo.c_str()));
     }
     return result;
 }
@@ -513,9 +515,10 @@ bool NGGestureRecognizer::AboutToAddCurrentFingers(const TouchEvent& event)
     if (fingersId_.find(event.id) != fingersId_.end()) {
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "Recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
+            "Recognizer has already receive touchId: %{public}d event, "
+            "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
             event.id, node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
         return false;
     }
     currentFingers_++;
@@ -529,9 +532,10 @@ bool NGGestureRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
     }
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Recognizer has already receive touchId: %{public}d up event, node tag = %{public}s, id = %{public}s",
+        "Recognizer has already receive touchId: %{public}d up event, "
+        "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
         touchId, node ? node->GetTag().c_str() : "null",
-        node ? std::to_string(node->GetId()).c_str() : "invalid");
+        SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
     return false;
 }
 } // namespace OHOS::Ace::NG
