@@ -2043,4 +2043,13 @@ void XComponentPattern::EnableSecure(bool isSecure)
     renderContextForSurface_->SetSecurityLayer(isSecure);
     isEnableSecure_ = isSecure;
 }
+
+void XComponentPattern::HdrBrightness(float hdrBrightness)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
+}
 } // namespace OHOS::Ace::NG
