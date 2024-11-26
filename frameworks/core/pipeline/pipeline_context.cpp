@@ -1627,9 +1627,13 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType != UIInputEventType::KEY) {
+        return false;
+    }
+    const auto& event = static_cast<const KeyEvent&>(nonPointerEvent);
     if (!rootElement_) {
         LOGE("the root element is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
@@ -1660,17 +1664,23 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
+    CHECK_NULL_RETURN(rootElement_, false);
     auto lastPage = GetLastPage();
+    bool isHandleByTabIndex = false;
     if (lastPage) {
-        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
-            return eventManager_->DispatchKeyEvent(event, rootElement_);
-        }
+        isHandleByTabIndex = rootElement_->HandleFocusByTabIndex(event, lastPage);
     } else {
-        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
-            return eventManager_->DispatchKeyEvent(event, rootElement_);
-        }
+        isHandleByTabIndex = rootElement_->HandleFocusByTabIndex(event, rootElement_);
     }
-    return true;
+    if (isHandleByTabIndex) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Tab index focus system handled this event");
+        return true;
+    }
+    if (rootElement_->HandleKeyEvent(event)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
+        return true;
+    }
+    return false;
 }
 
 bool PipelineContext::RequestDefaultFocus()
@@ -2965,7 +2975,7 @@ void PipelineContext::ProcessDragEvent(
                 insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
             }
 
-            if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+            if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {
                 (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
                 return;
             }
@@ -3019,7 +3029,7 @@ void PipelineContext::ProcessDragEventEnd(
             insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
         }
 
-        if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+        if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             SetPreTargetRenderNode(nullptr);
             SetInitRenderNode(nullptr);

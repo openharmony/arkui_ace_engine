@@ -3420,137 +3420,17 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     return mouseStyle->ChangePointerStyle(GetFocusWindowId(), format);
 }
 
-bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
-{
-    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    if (event.isPreIme) {
-        return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
-    }
-
-    if (!IsSkipShortcutAndFocusMove() && DispatchTabKey(event, curFocusView)) {
-        return true;
-    } else {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Do not dispatch tab key because Web is current focus");
-    }
-    return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
-}
-
-bool PipelineContext::IsSkipShortcutAndFocusMove()
-{
-    // Web component will NOT dispatch shortcut during the first event dispatch process.
-    // Web component will NOT trigger focus move during the third event dispatch process.
-    auto focusHub = focusManager_ ? focusManager_->GetCurrentFocus() : nullptr;
-    RefPtr<FrameNode> curFrameNode = focusHub ? focusHub->GetFrameNode() : nullptr;
-    return EventManager::IsSkipEventNode(curFrameNode);
-}
-
-bool PipelineContext::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
-{
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
-    bool isDPADDown = false;
-    if (event.action == KeyAction::DOWN && event.IsDirectionalKey() &&
-        curEntryFocusViewFrame && curEntryFocusViewFrame->GetFocusHub() &&
-        curEntryFocusViewFrame->GetFocusHub()->GetDirectionalKeyFocus()) {
-        isDPADDown = true;
-    }
-    auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
-    isTabJustTriggerOnKeyEvent_ = false;
-
-    if ((isKeyTabDown || isDPADDown) && isViewRootScopeFocused && curFocusView) {
-        // Current focused on the view root scope. Tab key used to extend focus.
-        // If return true. This tab key will just trigger onKeyEvent process.
-        isTabJustTriggerOnKeyEvent_ = curFocusView->TriggerFocusMove();
-    }
-
-    // Tab key set focus state from inactive to active.
-    // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = (isKeyTabDown || isDPADDown) && SetIsFocusActive(true);
-    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent_ || isHandleFocusActive;
-    if (eventManager_->DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
-        return true;
-    }
-    return false;
-}
-
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 {
     CHECK_NULL_VOID(eventManager_);
     TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
         keyEvent.action);
-    // Set keyEvent coming from Redispatch
-    keyEvent.isRedispatch = true;
-
-    if (eventManager_->DispatchKeyboardShortcut(keyEvent)) {
-        return;
-    }
-
-    auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
-    auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
-    auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    if (DispatchTabKey(keyEvent, curFocusView)) {
-        return;
-    }
-    eventManager_->DispatchKeyEventNG(keyEvent, curEntryFocusViewFrame);
+    eventManager_->ReDispatch(keyEvent);
 }
 
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
-    if (event.eventType == UIInputEventType::KEY) {
-        const KeyEvent* keyEvent = static_cast<const KeyEvent*>(&event);
-        return OnKeyEvent(*keyEvent);
-    }
-    return false;
-}
-
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
-{
-    CHECK_NULL_RETURN(eventManager_, false);
-    eventManager_->SetPressedKeyCodes(event.pressedCodes);
-
-    // onKeyPreIme
-    if (event.isPreIme) {
-        if (TriggerKeyEventDispatch(event)) {
-            return true;
-        }
-        if (!IsSkipShortcutAndFocusMove()) {
-            return eventManager_->DispatchKeyboardShortcut(event);
-        } else {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because Web is current focus");
-        }
-        return false;
-    }
-
-    // process drag cancel
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        auto manager = GetDragDropManager();
-        if (manager && manager->IsMSDPDragging()) {
-            manager->SetIsDragCancel(true);
-            manager->OnDragEnd(DragPointerEvent(0, 0), "");
-            manager->SetIsDragCancel(false);
-            return true;
-        }
-    }
-
-    // OnKeyEvent
-    if (TriggerKeyEventDispatch(event)) {
-        return true;
-    }
-
-    // process exit overlay
-    if (event.code == KeyCode::KEY_ESCAPE && event.action == KeyAction::DOWN) {
-        CHECK_NULL_RETURN(overlayManager_, false);
-        auto currentContainer = Container::Current();
-        if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
-            return overlayManager_->RemoveOverlayInSubwindow();
-        } else {
-            return overlayManager_->RemoveOverlay(false);
-        }
-    }
-    return false;
+    return eventManager_->OnNonPointerEvent(event);
 }
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)

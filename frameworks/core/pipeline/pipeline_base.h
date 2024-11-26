@@ -190,10 +190,6 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    virtual bool OnKeyEvent(const KeyEvent& event) = 0;
-
-    // Called by container when key event received.
-    // if return false, then this event needs platform to handle it.
     virtual bool OnNonPointerEvent(const NonPointerEvent& event) = 0;
 
     // Called by view when mouse event received.

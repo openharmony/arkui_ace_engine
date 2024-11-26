@@ -999,7 +999,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -1010,7 +1010,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1022,7 +1022,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1034,7 +1034,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -1055,11 +1055,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
     context_->ReDispatch(event);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
 
     event.isPreIme = 1;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 }
 
 /**
