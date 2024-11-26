@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
@@ -152,7 +152,7 @@ public:
         themeStyle->SetAttr("icon_size", { .value = THEME_ICON_SIZE });
         themeStyle->SetAttr("font_color", { .value = THEME_FONT_COLOR });
         themeStyle->SetAttr("font_size", { .value = THEME_FONT_SIZE });
-        themeStyle->SetAttr("text_icon_pading", { .value = THEME_TEXT_ICON_SPACE });
+        themeStyle->SetAttr("text_icon_padding", { .value = THEME_TEXT_ICON_SPACE });
 
         SetupTheme<SecurityComponentTheme>();
 

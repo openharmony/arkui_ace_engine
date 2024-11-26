@@ -17,9 +17,9 @@
 
 #include "accessor_test_base.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
-#include "core/interfaces/arkoala/implementation/children_main_size_peer.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/children_main_size_peer.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "node_api.h"
 
 namespace OHOS::Ace::NG {

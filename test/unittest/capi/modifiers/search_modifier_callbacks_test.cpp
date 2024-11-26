@@ -16,16 +16,16 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 

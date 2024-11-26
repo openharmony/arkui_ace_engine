@@ -16,9 +16,9 @@
 #include "swiper_modifier_test.h"
 #include "modifier_test_base.h"
 
-#include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 

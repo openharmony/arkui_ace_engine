@@ -20,7 +20,7 @@
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
 
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"

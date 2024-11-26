@@ -18,7 +18,7 @@
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/counter/counter_pattern.h"
 
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;

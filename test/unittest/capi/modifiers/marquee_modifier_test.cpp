@@ -17,7 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -419,7 +419,7 @@ HWTEST_F(MarqueeModifierTest, setMarqueeOptionsTestDefaultValues, TestSize.Level
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-    
+
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_STEP_DEFAULT_VALUE);
 

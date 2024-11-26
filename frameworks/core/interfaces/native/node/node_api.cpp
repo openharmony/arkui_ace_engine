@@ -15,7 +15,7 @@
 
 #include "core/interfaces/native/node/node_api.h"
 #ifdef INCLUDE_GENERATED_SOURCES
-#include "core/interfaces/arkoala/generated/interface/arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #endif
 
 #include <securec.h>

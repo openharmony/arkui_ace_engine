@@ -21,8 +21,8 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;

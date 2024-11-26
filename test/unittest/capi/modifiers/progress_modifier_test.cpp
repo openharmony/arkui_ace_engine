@@ -16,7 +16,7 @@
 #include "modifiers_test_utils.h"
 
 #include "core/components/progress/progress_theme.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 
 #include "accessor_test_base.h"
 #include "node_api.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"
 

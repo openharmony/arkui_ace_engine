@@ -24,7 +24,7 @@
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 
 namespace OHOS::Ace::NG {

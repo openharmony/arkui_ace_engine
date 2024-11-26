@@ -23,7 +23,7 @@
 #include "arkoala_api.h"
 #include "test_fixtures_enums.h"
 
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Fixtures {
 enum ResID {

@@ -17,12 +17,12 @@
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "canvas_rendering_context2d_accessor_test.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/interfaces/arkoala/implementation/canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 

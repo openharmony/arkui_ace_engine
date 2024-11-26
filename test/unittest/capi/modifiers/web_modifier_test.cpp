@@ -17,10 +17,10 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/implementation/web_controller_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/web_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/unittest/capi/stubs/mock_web_pattern.h"
 #include "arkoala_api_generated.h"
 

@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -456,7 +456,7 @@ HWTEST_F(SymbolGlyphModifierTest, setFontColorTest, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SYMBOL_COLOR_LIST_NAME);
     auto resultJson = attrValue.get();
-    
+
     for (int i = 0; i < fontColorVector.size(); i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
         expectedStr = std::get<1>(fontColorVectorValues[i]);

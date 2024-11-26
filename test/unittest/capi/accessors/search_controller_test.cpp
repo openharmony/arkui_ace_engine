@@ -18,9 +18,9 @@
 #include "node_api.h"
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/interfaces/arkoala/implementation/search_controller_accessor_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 

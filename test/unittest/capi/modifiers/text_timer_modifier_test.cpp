@@ -22,9 +22,9 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/implementation/text_timer_controller_peer_impl.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

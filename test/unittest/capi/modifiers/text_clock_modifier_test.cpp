@@ -17,9 +17,9 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/implementation/text_clock_controller_peer_impl.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/text_clock_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
@@ -73,7 +73,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     internalController->OnStop([&checkInvokeStop]() {
         checkInvokeStop = true;
     });
-    
+
 
     TextClockControllerPeer peer;
     Opt_TextClockController controller = { .tag = ARK_TAG_OBJECT, .value.ptr = &peer };
