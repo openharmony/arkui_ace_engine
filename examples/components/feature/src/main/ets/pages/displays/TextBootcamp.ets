@@ -33,8 +33,6 @@ export struct TextBootcamp {
   @State customSelectionMenu: boolean = false;
   @State enableSystemSelectionMenu: boolean = true;
   @State systemSelectionMenu: boolean = true;
-  @State start: number = 0;
-  @State end: number = 0;
   paragraph1: string =
     'They can be classified as built-in components–those directly provided by the ArkUI framework and custom components – \n\n';
   paragraph2: string =
@@ -56,15 +54,6 @@ export struct TextBootcamp {
   controller: TextController = new TextController();
   private expandedMenuOptions: Array<ExpandedMenuOptions> =
     [
-      {
-        startIcon: $r('sys.media.ohos_ic_public_select_all'), content: '全选', action: () => {
-        if (!this.controller) {
-          return;
-        }
-        this.start = 0;
-        this.end = this.mutableStyledString1.length;
-      }
-      },
       {
         startIcon: $r('app.media.indent_plus'), content: '首行缩进+', action: () => {
         if (!this.controller) {
@@ -135,16 +124,11 @@ export struct TextBootcamp {
               this.sliderShow = false;
             }
           } : undefined)
-        .onTextSelectionChange((selectionStart: number, selectionEnd: number) => {
-          this.start = selectionStart;
-          this.end = selectionEnd;
-        })
         .copyOption(CopyOptions.LocalDevice)
         .draggable(true)
         .textAlign(useEnabled(this.enableTextAlign, this.textAlign))
         .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
         .selectedBackgroundColor(useEnabled(this.enableBackgroundColor, this.compBackgroundColor))
-        .selection(this.start, this.end)
         .margin({
           start: LengthMetrics.vp(24),
           end: LengthMetrics.vp(24)
