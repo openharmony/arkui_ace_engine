@@ -48,7 +48,7 @@ HWTEST_F(GridScrollerEventTestNg, ScrollablePattern001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     double itemHeight = ITEM_HEIGHT;
     EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
     EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
@@ -74,7 +74,7 @@ HWTEST_F(GridScrollerEventTestNg, ScrollablePattern001, TestSize.Level1)
     model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_START));
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
     EXPECT_TRUE(pattern_->OnScrollCallback(-ITEM_HEIGHT, SCROLL_FROM_UPDATE));
@@ -100,7 +100,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScroll(event);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
@@ -183,7 +183,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScrollIndex(event);
     CreateFixedItems(12);
-    CreateDone(frameNode_);
+    CreateDone();
 
     ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 2);
@@ -207,7 +207,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnReachStart(event);
     CreateFixedItems(12);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
@@ -294,7 +294,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg004, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnReachEnd(event);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     isTrigger = false;
     UpdateCurrentOffset(-ITEM_HEIGHT * 3);
@@ -392,7 +392,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg005, TestSize.Level1)
     model.SetOnScrollStart(scrollStart);
     model.SetOnScrollStop(scrollStop);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -421,7 +421,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg006, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScrollFrameBegin(event);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     auto scrollableEvent = pattern_->GetScrollableEvent();
     ASSERT_NE(scrollableEvent, nullptr);
@@ -445,7 +445,7 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg007, TestSize.Level1)
     model.SetOnScrollStart(scrollStart);
     model.SetOnScrollStop(scrollStop);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(isScrollStartCalled);
@@ -527,7 +527,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
     EXPECT_TRUE(isOnReachStartCallBack);
@@ -591,7 +591,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithoutAnimation00
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -647,7 +647,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation001, 
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
     /**
@@ -707,7 +707,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithoutScrollBarWithAnimation002, 
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -769,7 +769,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -825,7 +825,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithoutAnimation
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -881,7 +881,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation001
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -942,7 +942,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithoutScrollBarWithAnimation002
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1002,7 +1002,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1059,7 +1059,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1116,7 +1116,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation001, Tes
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1178,7 +1178,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithAnimation002, Tes
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1240,7 +1240,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1296,7 +1296,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
     model.SetOnReachStart(onReachStart);
     model.SetOnReachEnd(onReachEnd);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1353,7 +1353,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation001, T
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1415,7 +1415,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithAnimation002, T
     model.SetOnReachEnd(onReachEnd);
     model.SetSupportAnimation(true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(isOnReachStartCallBack);
     isOnReachStartCallBack = false;
 
@@ -1485,7 +1485,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll001, TestSize.Level1
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScroll(onScroll);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1550,7 +1550,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
     model.SetRowsTemplate("1fr 1fr");
     model.SetOnScroll(onScroll);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1617,7 +1617,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
     model.SetRowsTemplate("1fr 1fr");
     model.SetOnScroll(onScroll);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1684,7 +1684,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll004, TestSize.Level1
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScroll(onScroll);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1751,7 +1751,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll005, TestSize.Level1
     model.SetColumnsTemplate("1fr 1fr");
     model.SetOnScroll(onScroll);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 
@@ -1819,7 +1819,7 @@ HWTEST_F(GridScrollerEventTestNg, onWillScrollAndOnDidScroll006, TestSize.Level1
     model.SetOnScroll(onScroll);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetOnWillScroll(onWillScroll);
     eventHub_->SetOnDidScroll(onDidScroll);
 

@@ -938,7 +938,7 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign013, TestSize.Level1)
      * @tc.expected: The item(index:2) align to end
      */
     SetChildrenMainSize(frameNode_, 0, { 200 });
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
 }
 } // namespace OHOS::Ace::NG

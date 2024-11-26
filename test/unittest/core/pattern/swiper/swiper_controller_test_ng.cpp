@@ -39,21 +39,21 @@ public:
 AssertionResult SwiperControllerTestNg::VerifyShowNext(int32_t expectIndex)
 {
     controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
 {
     controller_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex)
 {
     controller_->ChangeIndex(targetIndex, useAnimation);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
@@ -199,7 +199,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
     CreateDefaultSwiper();
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -301,7 +301,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex006, TestSize.Le
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -489,7 +489,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext005, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowNext
@@ -530,7 +530,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowNext
@@ -577,7 +577,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowPrevious
@@ -619,7 +619,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowPrevious
@@ -677,7 +677,7 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems001, TestSize.Level1)
     const std::set<int32_t>& indexSet = { 1, 2 };
     controller_->PreloadItems(indexSet);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     EXPECT_EQ(forEachNode->TotalChildCount(), 4);
 }
@@ -693,7 +693,7 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
     const std::set<int32_t>& indexSet = { 1, 2 };
     controller_->PreloadItems(indexSet);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->TotalChildCount(), 5);
 }
 
@@ -716,7 +716,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
     CreateSwiperDone();
 
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     VerifyChangeIndex(2, false, 3);
     VerifyChangeIndex(5, false, 5);
@@ -766,7 +766,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
     controller_->ChangeIndex(1, false);
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
 }
 } // namespace OHOS::Ace::NG

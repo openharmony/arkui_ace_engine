@@ -26,6 +26,7 @@ public:
     static void SetUpTestSuite()
     {
         MockPipelineContext::SetUp();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     }
     static void TearDownTestSuite()
     {

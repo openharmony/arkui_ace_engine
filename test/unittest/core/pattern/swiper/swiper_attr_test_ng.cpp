@@ -113,11 +113,10 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex005, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_EQ(pattern_->currentIndex_, 0);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -1);
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 3);
 }
 
@@ -252,7 +251,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
     EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(196.05f, 768.02f, 87.9f, 31.98f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode_);
+    auto wrapper = indicatorNode_->CreatePaintWrapper();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_FALSE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::FromString("#182431"));
@@ -298,7 +297,7 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
     EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(10.f, 10.f, 114.5f, 37.3f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode_);
+    auto wrapper = indicatorNode_->CreatePaintWrapper();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_TRUE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::RED);
@@ -1398,7 +1397,7 @@ HWTEST_F(SwiperAttrTestNg, LoopChange001, TestSize.Level1)
      */
     layoutProperty_->UpdateLoop(true);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_NE(pattern_->itemPosition_.find(-1), pattern_->itemPosition_.end());
 }
 } // namespace OHOS::Ace::NG

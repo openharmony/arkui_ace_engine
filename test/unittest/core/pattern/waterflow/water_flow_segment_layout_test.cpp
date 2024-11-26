@@ -34,6 +34,7 @@ public:
     static void SetUpTestSuite()
     {
         MockPipelineContext::SetUp();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     }
     static void TearDownTestSuite()
     {
@@ -1706,7 +1707,7 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowGetChildrenExpandedSize001, TestSize.Lev
     model.SetLayoutDirection(FlexDirection::ROW);
     model.SetRowsTemplate("1fr 1fr");
     CreateWaterFlowItems(60);
-    CreateDone(frameNode_);
+    CreateDone();
 
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     childCnt = static_cast<int32_t>(info->itemInfos_.size());

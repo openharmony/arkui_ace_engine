@@ -105,7 +105,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetCachedCount(10); // 10 lines
     model.SetLayoutOptions({});
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 30);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
@@ -139,7 +139,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateItems1();
     model.SetCachedCount(10); // 10 lines
-    CreateDone(frameNode_);
+    CreateDone();
 
     for (int32_t i = 0; i < 25; i++) {
         pattern_->ScrollBy(100);
@@ -175,7 +175,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
     CreateItems2();
     model.SetCachedCount(6); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
 
     for (int32_t i = 0; i < 14; i++) {
         pattern_->ScrollBy(100);
@@ -211,7 +211,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
     model.SetCachedCount(1); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
@@ -239,7 +239,7 @@ HWTEST_F(GridCacheLayoutTestNg, Create005, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
     model.SetCachedCount(1, true); // 6 lines
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 11);
 
@@ -263,7 +263,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache001, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(1, true);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
@@ -303,7 +303,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache002, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(2, true);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
@@ -353,7 +353,7 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache003, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(3, true);
     ViewAbstract::SetPadding(CalcLength(5));
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.endIndex_, 7);
     EXPECT_EQ(GetChildX(frameNode_, 0), 5.0f);
@@ -381,7 +381,7 @@ HWTEST_F(GridCacheLayoutTestNg, Cache001, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetCachedCount(2); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
@@ -432,7 +432,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetCachedCount(1);
     CreateFixedItems(40);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive()); // the fifth row
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive()); // the sixth row
 

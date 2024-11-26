@@ -45,7 +45,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayout001, TestSize.Level1)
     model.SetMinCount(4);
     model.SetMaxCount(2);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
@@ -70,7 +70,7 @@ HWTEST_F(GridLayoutTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level
 {
     CreateGrid();
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto focusHub = GetChildFocusHub(frameNode_, 0);
     auto GetInnerFocusPaintRect = focusHub->getInnerFocusRectFunc_;
@@ -114,7 +114,7 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSiz
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateBigItem(1, 2, 1, 2);
     CreateFocusableGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Find target child with specified index parameters.
@@ -170,7 +170,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. call InitGridCeils
@@ -196,7 +196,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
     model.SetColumnsTemplate("");
     model.SetRowsTemplate("");
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Change to smaller mainSize
@@ -223,7 +223,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
     model.SetColumnsTemplate(emptyString);
     model.SetRowsTemplate(emptyString);
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Change to smaller mainSize
@@ -253,7 +253,7 @@ HWTEST_F(GridLayoutTestNg, LayoutRTL001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItems(12, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     int32_t colsNumber = 4; // 4 * 120(itemWidth) = 480(gridWidth)
     for (int32_t index = 0; index < 10; index++) {
@@ -281,7 +281,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL001, TestSize.Level1)
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
@@ -313,7 +313,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL002, TestSize.Level1)
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
@@ -346,7 +346,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL003, TestSize.Level1)
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
@@ -378,7 +378,7 @@ HWTEST_F(GridLayoutTestNg, AdaptiveLayoutRTL004, TestSize.Level1)
     model.SetMaxCount(2);
     model.SetIsRTL(TextDirection::RTL);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. While the before set minCount > maxCount
@@ -410,7 +410,7 @@ HWTEST_F(GridLayoutTestNg, LayoutWithAutoStretch001, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     CreateGridItems(25, itemWidth, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
 
     int32_t rowsNumber = 5;
     int32_t columnsNumber = 5;
@@ -439,7 +439,7 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetRowsGap(Dimension(10));
     CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(GRID_WIDTH, ITEM_HEIGHT * 5 + 10 * 4));
 
     auto padding = 10.f;
@@ -452,7 +452,7 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
     model.SetRowsTemplate("1fr 1fr");
     model.SetColumnsGap(Dimension(10));
     CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_WIDTH * 5 + 10 * 4, GRID_HEIGHT));
 
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));

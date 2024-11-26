@@ -27,7 +27,6 @@ COMMON_SRC = [
 ace_unittest("grid_test_regular") {
   type = "new"
   sources = COMMON_SRC
-
   sources += [
     "grid_attr_test_ng.cpp",
     "grid_layout_test_ng.cpp",

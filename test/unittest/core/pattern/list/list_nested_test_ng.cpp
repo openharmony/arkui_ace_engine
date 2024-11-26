@@ -45,6 +45,7 @@ void ListNestedTestNg::SetUpTestSuite()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void ListNestedTestNg::TearDownTestSuite()

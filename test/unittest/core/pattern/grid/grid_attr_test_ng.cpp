@@ -54,7 +54,7 @@ HWTEST_F(GridAttrTestNg, Property001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     model.SetScrollEnabled(false);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Test ToJsonValue
@@ -113,7 +113,7 @@ HWTEST_F(GridAttrTestNg, Property002, TestSize.Level1)
     model.SetRowsGap(Dimension(-5));
     model.SetColumnsGap(Dimension(-10));
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(layoutProperty_->GetRowsGap(), std::nullopt);
     EXPECT_EQ(layoutProperty_->GetColumnsGap(), std::nullopt);
 }
@@ -183,7 +183,7 @@ HWTEST_F(GridAttrTestNg, Property004, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     CreateFixedItems(4);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. set invalid values.
@@ -233,7 +233,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate001, TestSize.Level1)
     model.SetColumnsGap(Dimension(COL_GAP));
     model.SetRowsGap(Dimension(ROW_GAP));
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
 
@@ -261,7 +261,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 2fr 3fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float parts = 1 + 2 + 3 + 1; // 7
     float firstItemWidth = GRID_WIDTH / parts;
     EXPECT_EQ(GetChildWidth(frameNode_, 0), firstItemWidth * 1);
@@ -285,7 +285,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate003, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 0fr 0fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
@@ -307,7 +307,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("repeat(auto-fit, 90px)");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float minItemWidth = 90.f;
     int32_t cols = floor(GRID_WIDTH / minItemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
@@ -329,7 +329,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate005, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("repeat(auto-fill, 90px)");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float itemWidth = 90.f;
     int32_t cols = floor(GRID_WIDTH / itemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
@@ -350,7 +350,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate006, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), 1);
 }
 
@@ -371,7 +371,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate001, TestSize.Level1)
     model.SetColumnsGap(Dimension(COL_GAP));
     model.SetRowsGap(Dimension(ROW_GAP));
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
 
@@ -399,7 +399,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 2fr 3fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float parts = 1 + 2 + 3 + 1; // 7
     float firstItemHeight = GRID_HEIGHT / parts;
     EXPECT_EQ(GetChildHeight(frameNode_, 0), firstItemHeight * 1);
@@ -423,7 +423,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate003, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 0fr 0fr 1fr");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_GT(GetChildHeight(frameNode_, 0), 0.f);
     EXPECT_EQ(GetChildHeight(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildHeight(frameNode_, 2), 0.f);
@@ -445,7 +445,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("repeat(auto-fit, 90px)");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float minItemHeight = 90.f;
     int32_t rows = floor(GRID_HEIGHT / minItemHeight); // 8
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
@@ -467,7 +467,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate005, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("repeat(auto-fill, 90px)");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     float itemHeight = 90.f;
     int32_t rows = floor(GRID_HEIGHT / itemHeight); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
@@ -488,7 +488,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate006, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("");
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), 1);
 }
 
@@ -508,7 +508,7 @@ HWTEST_F(GridAttrTestNg, ColumnsRows001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
     EXPECT_TRUE(IsEqual(GetChildSize(frameNode_, 0), SizeF(ITEM_WIDTH, ITEM_HEIGHT)));
 }
@@ -533,7 +533,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection001, TestSize.Level1)
     model.SetColumnsGap(Dimension(COL_GAP));
     model.SetRowsGap(Dimension(ROW_GAP));
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
     EXPECT_EQ(pattern_->GetCrossCount(), 3);
 
@@ -561,7 +561,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection002, TestSize.Level1)
     model.SetMinCount(minCount);
     model.SetMaxCount(4);
     CreateGridItems(10, itemWidth, ITEM_HEIGHT);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), minCount);
     EXPECT_GT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
 }
@@ -586,7 +586,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection003, TestSize.Level1)
     model.SetMinCount(2);
     model.SetMaxCount(maxCount);
     CreateGridItems(10, ITEM_WIDTH, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_LT(GetChildY(frameNode_, 0), GetChildY(frameNode_, 1));
     EXPECT_LT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
     EXPECT_LT(GetChildY(frameNode_, 2), GetChildY(frameNode_, 3));
@@ -611,7 +611,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection004, TestSize.Level1)
     model.SetMinCount(2);
     model.SetMaxCount(4);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_GT(GetChildY(frameNode_, 0), GetChildY(frameNode_, 1));
     EXPECT_GT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
     EXPECT_GT(GetChildY(frameNode_, 2), GetChildY(frameNode_, 3));
@@ -636,7 +636,7 @@ HWTEST_F(GridAttrTestNg, BigItem001, TestSize.Level1)
     CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
     CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH, ITEM_HEIGHT, ITEM_WIDTH * 2, ITEM_HEIGHT * 2)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, 0.f, ITEM_WIDTH * 3, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 3, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
@@ -667,7 +667,7 @@ HWTEST_F(GridAttrTestNg, BigItem002, TestSize.Level1)
     CreateBigRowItem(0, 2);
     CreateBigRowItem(2, 3);
     CreateFixedItems(7);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT * 2)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT * 2)));
@@ -698,7 +698,7 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
     CreateBigColItem(0, 2);
     CreateBigColItem(2, 1);
     CreateFixedItems(7);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH * 3, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
@@ -727,7 +727,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateBigColItem(2, 3);
     CreateFixedItems(7);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));        // normal item
 
@@ -754,7 +754,7 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetScrollEnabled(true);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(layoutProperty_->GetScrollEnabledValue());
 }
 
@@ -768,7 +768,7 @@ HWTEST_F(GridAttrTestNg, EnableScrollInteraction002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetScrollEnabled(false);
     CreateFixedItems(10);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(layoutProperty_->GetScrollEnabledValue());
 }
 
@@ -787,7 +787,7 @@ HWTEST_F(GridAttrTestNg, Gap001, TestSize.Level1)
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -809,7 +809,7 @@ HWTEST_F(GridAttrTestNg, Gap002, TestSize.Level1)
     model.SetColumnsGap(Dimension(COL_GAP));
     model.SetRowsGap(Dimension(ROW_GAP));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), COL_GAP);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), ROW_GAP);
 }
@@ -831,7 +831,7 @@ HWTEST_F(GridAttrTestNg, Gap003, TestSize.Level1)
     model.SetColumnsGap(Dimension(-1));
     model.SetRowsGap(Dimension(-1));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -853,7 +853,7 @@ HWTEST_F(GridAttrTestNg, Gap004, TestSize.Level1)
     model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
     model.SetRowsGap(Dimension(GRID_HEIGHT / 3 + 1));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
 }
@@ -874,7 +874,7 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
     model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
     model.SetRowsGap(Dimension(GRID_HEIGHT / 3));
     CreateFixedItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(layoutProperty_->IsConfiguredScrollable());
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), GRID_HEIGHT / 3);
@@ -891,7 +891,7 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(20);
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -907,7 +907,7 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(20);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -923,7 +923,7 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(3); // 3 is item count
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_FALSE(pattern_->scrollable_);
 }
@@ -939,7 +939,7 @@ HWTEST_F(GridAttrTestNg, EdgeEffectOption004, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(3); // 3 is item count
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->scrollable_);
 }
@@ -958,7 +958,7 @@ HWTEST_F(GridAttrTestNg, GridSetFriction001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetFriction(-1.0);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 }
 
@@ -976,7 +976,7 @@ HWTEST_F(GridAttrTestNg, GridSetFriction002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetFriction(0.0);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 }
 
@@ -994,7 +994,7 @@ HWTEST_F(GridAttrTestNg, GridSetFriction003, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetFriction(1.0);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), 1.0);
 }
 
@@ -1008,7 +1008,7 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
+    CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
@@ -1040,7 +1040,7 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
+    CreateDone();
     auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
@@ -1082,7 +1082,7 @@ HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Get gridItemPattern.
@@ -1108,7 +1108,7 @@ HWTEST_F(GridAttrTestNg, GridItemDisableEventTest001, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
@@ -1137,7 +1137,7 @@ HWTEST_F(GridAttrTestNg, GridItemDisableEventTest002, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     CreateFixedItems(10, GridItemStyle::PLAIN);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.

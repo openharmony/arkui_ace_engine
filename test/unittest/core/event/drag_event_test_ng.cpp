@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void DragEventTestNg::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "DragEventTestNg SetUpTestCase";
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void DragEventTestNg::TearDownTestSuite()

@@ -330,7 +330,7 @@ HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
     model.SetScroller(model.CreateScrollController(), model.CreateScrollBarProxy());
     GetWaterFlow();
     CreateWaterFlowItems(TOTAL_LINE_NUMBER);
-    FlushLayoutTask(frameNode_);
+    CreateDone();
     EXPECT_FALSE(layoutProperty_->HasItemLayoutConstraint());
     EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
     EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));

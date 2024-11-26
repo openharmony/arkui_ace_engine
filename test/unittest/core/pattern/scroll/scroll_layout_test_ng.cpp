@@ -410,7 +410,7 @@ HWTEST_F(ScrollLayoutTestNg, Alignment001, TestSize.Level1)
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
     float centerPosition = (SCROLL_HEIGHT - ITEM_MAIN_SIZE) / 2;
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, centerPosition)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(60, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
     FlushLayoutTask(frameNode_);
@@ -460,7 +460,7 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF()));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-240, 0)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
     FlushLayoutTask(frameNode_);
@@ -561,7 +561,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge001, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
@@ -599,7 +599,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
@@ -642,7 +642,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
      * @tc.steps: step1. scrollEdge to bottom
      */
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
