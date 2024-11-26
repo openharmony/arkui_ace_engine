@@ -444,6 +444,7 @@ FrameNode::FrameNode(
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
+    paintProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
@@ -5762,6 +5763,13 @@ void FrameNode::OnForegroundColorUpdate(const Color& value)
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->OnForegroundColorUpdate(value);
+}
+
+void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)

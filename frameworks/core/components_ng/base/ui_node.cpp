@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
 
@@ -400,6 +401,7 @@ void UINode::ResetParent()
 {
     parent_.Reset();
     depth_ = -1;
+    UpdateThemeScopeId(0);
 }
 
 namespace {
@@ -486,6 +488,10 @@ void UINode::DoAddChild(
     }
 
     child->SetParent(Claim(this));
+    auto themeScopeId = GetThemeScopeId();
+    if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
+        child->UpdateThemeScopeId(themeScopeId);
+    }
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
@@ -1794,4 +1800,71 @@ void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, Notifica
         parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
+
+int32_t UINode::GetThemeScopeId() const
+{
+    return themeScopeId_;
+}
+
+void UINode::SetThemeScopeId(int32_t themeScopeId)
+{
+    themeScopeId_ = themeScopeId;
+    auto children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        child->SetThemeScopeId(themeScopeId);
+    }
+}
+
+void UINode::UpdateThemeScopeId(int32_t themeScopeId)
+{
+    if (GetThemeScopeId() == themeScopeId) {
+        return;
+    }
+    themeScopeId_ = themeScopeId;
+    OnThemeScopeUpdate(themeScopeId);
+    auto children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        child->UpdateThemeScopeId(themeScopeId);
+    }
+}
+
+void UINode::UpdateThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (GetThemeScopeId() != themeScopeId) {
+        return;
+    }
+    OnThemeScopeUpdate(themeScopeId);
+    if (needCallChildrenUpdate_) {
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            child->UpdateThemeScopeUpdate(themeScopeId);
+        }
+    }
+}
+
+void UINode::AllowUseParentTheme(bool isAllow)
+{
+    isAllowUseParentTheme_ = isAllow;
+}
+
+bool UINode::IsAllowUseParentTheme() const
+{
+    return isAllowUseParentTheme_;
+}
+
+ColorMode UINode::GetLocalColorMode() const
+{
+    auto theme = TokenThemeStorage::GetInstance()->GetTheme(GetThemeScopeId());
+    return theme ? theme->GetColorMode() : ColorMode::COLOR_MODE_UNDEFINED;
+}
+
 } // namespace OHOS::Ace::NG
