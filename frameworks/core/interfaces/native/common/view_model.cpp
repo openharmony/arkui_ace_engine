@@ -372,7 +372,7 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    auto frameNode = CalendarPickerModelNG::CreateEmptyFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

@@ -25,6 +25,7 @@ namespace {
     constexpr int32_t NUM_2 = 2;
     constexpr int32_t NUM_3 = 3;
     constexpr int32_t NUM_4 = 4;
+    constexpr int32_t STD_TM_START_YEAR = 1900;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -212,8 +213,8 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
         date = start;
     }
     std::tm tm {};
-    tm.tm_year = date.GetYear();
-    tm.tm_mon = date.GetMonth() - 1;
+    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
     dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
@@ -1266,7 +1267,9 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     auto timestamp = reinterpret_cast<int64_t>(src);
     time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&time);
-    dst = PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
+    // tm_year is years since 1900
+    // tm_mon from 0 to 11
+    dst = PickerDate(local->tm_year + STD_TM_START_YEAR, local->tm_mon + 1, local->tm_mday);
     auto maxDay = PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth());
     if (dst->GetYear() < DATE_MIN.GetYear() || dst->GetYear() > DATE_MAX.GetYear()) {
         dst = DATE_MIN;
