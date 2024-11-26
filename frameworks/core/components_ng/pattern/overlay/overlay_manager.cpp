@@ -6308,7 +6308,25 @@ void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto focusHub = node->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->LostFocusToViewRoot();
+    focusHub->LostFocus();
+
+    bool hasVisibleNode = false;
+    for (auto& child : overlayNode_->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!(layoutProperty->GetVisibility().has_value() &&
+            layoutProperty->GetVisibilityValue() == VisibleType::GONE)) {
+            hasVisibleNode = true;
+            break;
+        }
+    }
+    if (!hasVisibleNode) {
+        auto focusView = overlayNode_->GetPattern<FocusView>();
+        CHECK_NULL_VOID(focusView);
+        focusView->FocusViewClose();
+    }
 }
 
 void OverlayManager::ShowAllNodesOnOverlay()
