@@ -244,7 +244,9 @@ public:
     void ReceivePreviewTextStyle(const std::string& style) override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewTextStyle: [%{public}s]", style.c_str());
-        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PreviewTextStyle, style);
+        auto property = GetLayoutProperty<RichEditorLayoutProperty>();
+        CHECK_NULL_VOID(property && !style.empty());
+        property->UpdatePreviewTextStyle(style);
     }
 
     const Color& GetPreviewTextDecorationColor() const;
