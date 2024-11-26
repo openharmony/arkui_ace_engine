@@ -75,6 +75,35 @@ public:
         return jsonArray->ToString();
     }
 
+    std::string InteractionModeToJson() const
+    {
+        static const std::array<std::string, 3> SLIDER_INTERACTION_MODE_TO_STRING = {
+            "SliderInteraction.SLIDE_AND_CLICK",
+            "SliderInteraction.SLIDE_ONLY",
+            "SliderInteraction.SLIDE_AND_CLICK_UP",
+        };
+        auto interactionIndex =
+            static_cast<size_t>(GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
+        if (interactionIndex < SLIDER_INTERACTION_MODE_TO_STRING.size()) {
+            return SLIDER_INTERACTION_MODE_TO_STRING.at(interactionIndex);
+        }
+        return "";
+    }
+
+    std::string BlockTypeToJson() const
+    {
+        static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
+            "BlockStyleType.DEFAULT",
+            "BlockStyleType.IMAGE",
+            "BlockStyleType.SHAPE",
+        };
+        auto blockTypeIndex = static_cast<size_t>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT));
+        if (blockTypeIndex < SLIDER_BLOCK_TYPE_TO_STRING.size()) {
+            return SLIDER_BLOCK_TYPE_TO_STRING.at(blockTypeIndex);
+        }
+        return "";
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
@@ -115,26 +144,12 @@ public:
         if (GetSelectedBorderRadius().has_value()) {
             json->PutExtAttr("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str(), filter);
         }
-        static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
-            "BlockStyleType.DEFAULT",
-            "BlockStyleType.IMAGE",
-            "BlockStyleType.SHAPE",
-        };
-        json->PutExtAttr("blockType",
-            SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
-                .c_str(), filter);
+        json->PutExtAttr("blockType", BlockTypeToJson().c_str(), filter);
         json->PutExtAttr("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str(), filter);
         if (GetCustomContent().has_value()) {
             json->PutFixedAttr("content", GetCustomContent().value().c_str(), filter, FIXED_ATTR_CONTENT);
         }
-        static const std::array<std::string, 2> SLIDER_INTERACTION_MODE_TO_STRING = {
-            "SliderInteraction.SLIDE_AND_CLICK",
-            "SliderInteraction.SLIDE_ONLY",
-        };
-        json->PutExtAttr("sliderInteractionMode",
-            SLIDER_INTERACTION_MODE_TO_STRING
-                .at(static_cast<int>(GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK)))
-                .c_str(), filter);
+        json->PutExtAttr("sliderInteractionMode", InteractionModeToJson().c_str(), filter);
         json->PutExtAttr("minResponsiveDistance",
             std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str(), filter);
         auto slideRangeValues = GetValidSlideRange();

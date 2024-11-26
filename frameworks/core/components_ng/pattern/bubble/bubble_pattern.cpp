@@ -63,6 +63,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
+    hostWindowRect_ = bubbleLayoutAlgorithm->GetHostWindowRect();
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
@@ -433,7 +434,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
@@ -547,7 +548,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(rect);
                 } else {
-                    auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+                    auto parentWindowRect = pattern->GetHostWindowRect();
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
                         pattern->GetChildSize().Width(), pattern->GetChildSize().Height());
                     rects.emplace_back(parentWindowRect);
