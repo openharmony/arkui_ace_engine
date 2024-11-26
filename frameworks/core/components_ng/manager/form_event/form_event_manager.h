@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_FORM_EVENT_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_FORM_EVENT_MANAGER_H
 
-
 #include <functional>
 #include <unordered_map>
 #include <memory>
@@ -41,11 +40,11 @@ public:
 
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
-    void AddEtsCardAxisEventCallback(int32_t pointId, EtsCardAxisEventCallbac&& callback);
+    void AddEtsCardAxisEventCallback(int32_t pointId, EtsCardAxisEventCallback&& callback);
 
-    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture& serializedGesture);
+    void HandleEtsCardTouchEvent(const TouchEvent &point, SerializedGesture& serializedGesture);
 
-    void HandleEtsCardAxisEvent(const AxisEvent& point, SerializedGesture& serializedGesture);
+    void HandleEtsCardAxisEvent(const AxisEvent &point, SerializedGesture& serializedGesture);
 
     void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 

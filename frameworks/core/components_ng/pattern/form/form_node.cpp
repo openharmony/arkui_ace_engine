@@ -205,7 +205,7 @@ FormNode::~FormNode()
 
 #ifdef FORM_MOUSE_AXIS_SUPPORT
 HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF &parentRevertPoint, TouchRestrict &touchRestrict, AxisTestResult &axisResult)
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
 {
     auto testResult = FrameNode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, axisResult);
     if (testResult == HitTestResult::OUT_OF_REGION) {
