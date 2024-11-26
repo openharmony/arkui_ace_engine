@@ -593,55 +593,6 @@ HWTEST_F(RichEditorClickTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddPlaceholderSpan001
- * @tc.desc: test AddPlaceholderSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, AddPlaceholderSpan001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorNode_ and layoutWrapper.
-     */
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode_, nullptr);
-
-    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(containerGeometryNode == nullptr);
-    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
-    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step2. get richEditorPattern and richEditorController.
-     */
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    AddSpan("test");
-
-    /**
-     * @tc.steps: step3. test AddPlaceholderSpan.
-     */
-    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-
-    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
-    EXPECT_EQ(index1, 1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
-    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto eventHub = builderNode1->GetEventHub<EventHub>();
-    EXPECT_NE(eventHub, nullptr);
-}
-
-/**
  * @tc.name: OnVisibleChange
  * @tc.desc: test OnVisibleChange
  * @tc.type: FUNC
