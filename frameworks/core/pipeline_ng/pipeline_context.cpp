@@ -2392,9 +2392,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     } while (false);
 #endif
 
+    auto formEventMgr = this->GetFormEventManager();
     SerializedGesture etsSerializedGesture;
-    if (point.type != TouchType::DOWN) {
-        HandleEtsCardTouchEvent(point, etsSerializedGesture);
+    if (point.type != TouchType::DOWN && formEventMgr) {
+        formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
     auto oriPoint = point;
@@ -2450,7 +2451,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
             return;
         }
 
-        HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+        if (formEventMgr) {
+            formEventMgr->HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+        }
 
         if (etsSerializedGesture.data.size() != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
@@ -2520,11 +2523,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
-        if (!eventManager_->GetInnerFlag()) {
+        if (!eventManager_->GetInnerFlag() && formEventMgr) {
             auto mockPoint = point;
             mockPoint.type = TouchType::CANCEL;
-            HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
-            RemoveEtsCardTouchEventCallback(mockPoint.id);
+            formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
+            formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
@@ -2552,7 +2555,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
-        RemoveEtsCardTouchEventCallback(point.id);
+        if (formEventMgr) {
+            formEventMgr->RemoveEtsCardTouchEventCallback(point.id);
+        }
         ResetDraggingStatus(scalePoint, node);
     }
     if (scalePoint.type != TouchType::MOVE) {
@@ -3509,6 +3514,13 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+#ifdef  FORM_MOUSE_AXIS_SUPPORT
+    auto formEventMgr = this->GetFormEventManager();
+    SerializedGesture etsSerializedGesture;
+    if (event.action != AxisAction::BEGIN && formEventMgr) {
+        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
+    }
+#endif
 
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
@@ -3533,9 +3545,19 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         eventManager_->AxisTest(scaleEvent, node);
         eventManager_->DispatchAxisEventNG(scaleEvent);
     }
+#ifdef  FORM_MOUSE_AXIS_SUPPORT
+    if (event.action == AxisAction::BEGIN && formEventMgr) {
+        formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
+    }
+#endif
 
     auto mouseEvent = ConvertAxisToMouse(event);
     OnMouseMoveEventForAxisEvent(mouseEvent, node);
+#ifdef  FORM_MOUSE_AXIS_SUPPORT
+    if (formEventMgr && ((scaleEvent.action == AxisAction::END) || (scaleEvent.action == AxisAction::CANCEL))) {
+        formEventMgr->RemoveEtsCardAxisEventCallback(event.id);
+    }
+#endif
 }
 
 void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
@@ -3868,6 +3890,11 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     SetDestroyed();
+    auto formEventMgr = this->GetFormEventManager();
+    if (formEventMgr) {
+        formEventMgr->ClearEtsCardTouchEventCallback();
+        formEventMgr->ClearEtsCardAxisEventCallback();
+    }
     rootNode_->DetachFromMainTree();
     std::unordered_set<UINode*> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);

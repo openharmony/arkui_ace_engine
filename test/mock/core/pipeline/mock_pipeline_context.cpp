@@ -1016,8 +1016,6 @@ bool PipelineBase::MaybeRelease()
     return AceType::MaybeRelease();
 }
 
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
-
 double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {
     if (dimension.Unit() == DimensionUnit::PX) {

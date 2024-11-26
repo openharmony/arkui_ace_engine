@@ -94,6 +94,10 @@ foreach(item, ace_platforms) {
       defines = []
     }
 
+    if (ace_engine_feature_enable_form_mouse_axis_support) {
+      defines += [ "FORM_MOUSE_AXIS_SUPPORT" ]
+    }
+
     if (defined(config.cflags_cc)) {
       cflags_cc = config.cflags_cc
     } else {
