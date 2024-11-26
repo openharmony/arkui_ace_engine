@@ -3483,10 +3483,6 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetSyncLoad));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetSyncLoad));
-    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageMatrix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageMatrix));
-    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageMatrix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageMatrix));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetObjectFit));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
