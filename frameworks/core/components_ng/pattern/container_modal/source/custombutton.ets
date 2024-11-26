@@ -12,7 +12,9 @@ const MENU_MARGIN_V: string = '8vp'
 const MENU_MARGIN_H: string = '12vp'
 const MENU_TITLE_MARGIN_V: string = '10vp'
 const MENU_TITLE_TEXT_FONT_SIZE: string = '16fp'
-const HOVER_TIME: number = 1000
+const HOVER_TIME: number = 1000; // Hover time: 1000ms
+const MENU_AUTO_DISAPPEAR_TIME: number = 2000; // Menu auto-disappear: 2000ms
+const MENU_MOUSEOUT_DISAPPEAR_TIME: number = 1000; // Menu mouseout disappear: 1000ms
 
 const EVENT_NAME_CUSTOM_MAX_CLICK: string = 'arkui_custom_max_click'
 const EVENT_NAME_MIN_CLICK: string = 'arkui_custom_min_click'
@@ -183,6 +185,7 @@ struct Index {
   isDark: boolean = false;
   isHoverShowMenu: boolean = false
   showMenuTimeoutId: number = -1
+  menuDisappearTimeoutId: number = -1
   hideSplit: boolean = false
 
   onWindowFocused() {
@@ -340,6 +343,7 @@ struct Index {
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
+        this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
       }, HOVER_TIME)
     }
   }
@@ -432,6 +436,26 @@ struct Index {
         }
       })
     }.width(this.menuWidth)
+    .onHover((isHover: boolean, event: HoverEvent) => {
+      if (isHover) {
+        this.cancelMenuDisappearTimer()
+      } else {
+        this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
+      }
+    })
+  }
+
+  menuDisappearTimer(disappearTime : number ) {
+    this.cancelMenuDisappearTimer()
+    this.menuDisappearTimeoutId = setTimeout(() => {
+      this.isShowMenu = false
+    }, disappearTime)
+  }
+
+  cancelMenuDisappearTimer() {
+    if (this.menuDisappearTimeoutId != -1) {
+      clearTimeout(this.menuDisappearTimeoutId)
+    }
   }
 
   build() {
@@ -463,6 +487,7 @@ struct Index {
         .bindMenu(this.isShowMenu, this.MenuBuilder, {
           placement: Placement.BottomRight, aboutToDisappear: () => {
             this.isShowMenu = false;
+            this.cancelMenuDisappearTimer();
           }
         })
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
