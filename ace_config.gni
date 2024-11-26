@@ -99,6 +99,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+c_utils_path = "//commonlibrary/c_utils/base/include"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
