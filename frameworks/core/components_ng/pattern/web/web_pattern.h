@@ -865,6 +865,8 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    void HandleScaleGestureStart(const GestureEvent& event);
+    void HandleScaleGestureEnd(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
