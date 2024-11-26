@@ -2053,7 +2053,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
             textLayoutProperty->UpdateTextColor(
                 labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
             !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
