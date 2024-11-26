@@ -355,6 +355,7 @@ enum class ImageFit {
     BOTTOM,
     BOTTOM_END,
     COVER_TOP_LEFT,
+    MATRIX,
 };
 
 enum class DynamicRangeMode {

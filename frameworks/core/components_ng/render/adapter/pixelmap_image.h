@@ -20,6 +20,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,6 +63,7 @@ public:
     {
         return GetPixelMap();
     }
+    static RSMatrix ToDrawingMatrix(const Matrix4& matrix4);
 
 private:
     RefPtr<PixelMap> pixelMap_;

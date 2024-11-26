@@ -2273,6 +2273,8 @@ struct ArkUIImageModifier {
     void (*resetRenderMode)(ArkUINodeHandle node);
     void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoadValue);
     void (*resetSyncLoad)(ArkUINodeHandle node);
+    void (*setImageMatrix)(ArkUINodeHandle node, const ArkUI_Float32* matrix);
+    void (*resetImageMatrix)(ArkUINodeHandle node);
     void (*setObjectFit)(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber);
     void (*resetObjectFit)(ArkUINodeHandle node);
     void (*setFitOriginalSize)(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue);
