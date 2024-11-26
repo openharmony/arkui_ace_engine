@@ -192,7 +192,7 @@ void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
 }
 
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    InspectorChildrenParameters& inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
+    InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
 {
     // Span is a special case in Inspector since span inherits from UINode
@@ -318,7 +318,7 @@ void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
 }
 
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    InspectorChildrenParameters& inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
+    InspectorChildrenParameters inspectorParameters, const InspectorFilter& filter = InspectorFilter(),
     uint32_t depth = UINT32_MAX)
 {
     // Span is a special case in Inspector since span inherits from UINode
