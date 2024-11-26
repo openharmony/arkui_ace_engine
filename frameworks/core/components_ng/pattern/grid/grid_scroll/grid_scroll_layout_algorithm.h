@@ -95,7 +95,8 @@ private:
     void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
     // Fill forward one line, but do not update startMainLineIndex_ and startIndex_
-    void FillOneLineForwardWithoutUpdatingStartIndex(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+    virtual void FillOneLineForwardWithoutUpdatingStartIndex(
+        float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
