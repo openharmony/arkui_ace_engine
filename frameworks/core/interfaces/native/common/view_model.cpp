@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
@@ -667,7 +668,10 @@ void* createEffectComponentNode(ArkUI_Int32 nodeId)
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)

@@ -17,6 +17,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
+#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
+#include "core/components_ng/pattern/shape/ellipse_pattern.h"
 #include "core/components_ng/pattern/shape/path_layout_algorithm.h"
 #include "core/components_ng/render/animation_utils.h"
 
@@ -31,6 +33,12 @@ RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::CreateFrameNode(
         V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
+}
+
+RefPtr<NG::FrameNode> NG::EllipseModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(
+        V2::ELLIPSE_ETS_TAG, nodeId, AceType::MakeRefPtr<EllipsePattern>());
 }
 
 std::optional<NG::SizeF> NG::ShapeContainerLayoutAlgorithm::MeasureContent(

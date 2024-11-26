@@ -42,6 +42,7 @@ ace_unittest("capi_all_modifiers_test") {
     "data_panel_modifier_test.cpp",
     "date_picker_modifier_test.cpp",
     "divider_modifier_test.cpp",
+    "ellipse_modifier_test.cpp",
     "folder_stack_modifier_test.cpp",
     "form_component_modifier_test.cpp",
     "form_link_modifier_test.cpp",
