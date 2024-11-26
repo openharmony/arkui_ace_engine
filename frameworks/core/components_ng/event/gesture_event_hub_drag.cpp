@@ -528,6 +528,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+    CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
     if (dragPreviewInfo.inspectorId != "") {
@@ -678,7 +680,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsDragWithContextMenu(false);
     }
     float defaultPixelMapScale = GetDefaultPixelMapScale(info, isMenuShow, pixelMap);
-    CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
     auto windowScale = dragDropManager->GetWindowScale();
     float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
