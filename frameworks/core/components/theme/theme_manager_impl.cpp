@@ -16,6 +16,7 @@
 #include "core/components/theme/theme_manager_impl.h"
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
@@ -73,6 +74,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -148,6 +150,16 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::ScrollableTheme::TypeId(), &ThemeBuildFunc<NG::ScrollableTheme::Builder> },
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
 };
+
+template<class T>
+RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
+{
+    return T().BuildWrapper(themeConstants);
+}
+
+const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
+    TOKEN_THEME_WRAPPER_BUILDERS = {
+    };
 } // namespace
 
 ThemeManagerImpl::ThemeManagerImpl()
@@ -171,9 +183,72 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     if (builderIter == THEME_BUILDERS.end()) {
         return nullptr;
     }
+
+    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
+        ColorMode localMode = pipelineContext->GetLocalColorMode();
+        ColorMode systemMode = SystemProperties::GetColorMode();
+        bool needRestore = false;
+        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
+            // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
+            ResourceManager::GetInstance().UpdateColorMode(systemMode);
+            pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+            needRestore = true;
+        }
+        auto theme = builderIter->second(themeConstants_);
+        if (needRestore) {
+            pipelineContext->SetLocalColorMode(localMode);
+            ResourceManager::GetInstance().UpdateColorMode(localMode);
+        }
+        themes_.emplace(type, theme);
+        return theme;
+    }
+    
     auto theme = builderIter->second(themeConstants_);
     themes_.emplace(type, theme);
     return theme;
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId themeScopeId)
+{
+    auto tokenTheme = NG::TokenThemeStorage::GetInstance()->GetTheme(themeScopeId);
+    if (!tokenTheme) {
+        return GetTheme(type);
+    }
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, GetTheme(type));
+    ColorMode currentMode = GetCurrentColorMode();
+    ColorMode themeMode = tokenTheme->GetColorMode();
+    auto& themeWrappers = GetThemeWrappers(themeMode == ColorMode::COLOR_MODE_UNDEFINED ? currentMode : themeMode);
+    auto findIter = themeWrappers.find(type);
+    if (findIter != themeWrappers.end()) {
+        auto wrapper = findIter->second;
+        wrapper->ApplyTokenTheme(*tokenTheme);
+        return AceType::DynamicCast<Theme>(wrapper);
+    }
+
+    auto builderIter = TOKEN_THEME_WRAPPER_BUILDERS.find(type);
+    if (builderIter == TOKEN_THEME_WRAPPER_BUILDERS.end()) {
+        return GetTheme(type);
+    }
+
+    bool needRestore = false;
+    if (themeMode != ColorMode::COLOR_MODE_UNDEFINED && themeMode != currentMode) {
+        // Local color mode of the current theme does not match actual color scheme.
+        // Current color mode is system. Need to switch to local color mode temporarily.
+        ResourceManager::GetInstance().UpdateColorMode(themeMode);
+        pipelineContext->SetLocalColorMode(themeMode);
+        needRestore = true;
+    }
+    auto wrapper = builderIter->second(themeConstants_);
+    if (needRestore) {
+        // Switching resource manager back into system color mode
+        pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+        ResourceManager::GetInstance().UpdateColorMode(currentMode);
+    }
+    wrapper->ApplyTokenTheme(*tokenTheme);
+    themeWrappers.emplace(type, wrapper);
+    return AceType::DynamicCast<Theme>(wrapper);
 }
 
 Color ThemeManagerImpl::GetBackgroundColor() const
@@ -203,6 +278,22 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 void ThemeManagerImpl::LoadResourceThemes()
 {
     themes_.clear();
+    themeWrappersLight_.clear();
+    themeWrappersDark_.clear();
     themeConstants_->LoadTheme(currentThemeId_);
+}
+
+ThemeManagerImpl::ThemeWrappers& ThemeManagerImpl::GetThemeWrappers(ColorMode mode)
+{
+    return mode == ColorMode::DARK ? themeWrappersDark_ : themeWrappersLight_;
+}
+
+ColorMode ThemeManagerImpl::GetCurrentColorMode() const
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    ColorMode systemMode = SystemProperties::GetColorMode();
+    CHECK_NULL_RETURN(pipelineContext, systemMode);
+    ColorMode localMode = pipelineContext->GetLocalColorMode();
+    return localMode == ColorMode::COLOR_MODE_UNDEFINED ? systemMode : localMode;
 }
 } // namespace OHOS::Ace

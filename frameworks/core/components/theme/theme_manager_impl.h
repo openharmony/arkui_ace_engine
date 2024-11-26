@@ -18,6 +18,7 @@
 
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT ThemeManagerImpl : public ThemeManager {
@@ -93,6 +94,18 @@ public:
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
 
+    /*
+     * Get the theme and update it according to the TokenTheme, that given in param.
+     * @return Target component theme.
+     */
+    RefPtr<Theme> GetTheme(ThemeType type, int32_t themeScopeId) override;
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        return AceType::DynamicCast<T>(GetTheme(T::TypeId()), themeScopeId);
+    }
+
     void LoadResourceThemes() override;
 
     uint32_t GetResourceLimitKeys() const override
@@ -101,11 +114,18 @@ public:
     }
 
 private:
+    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
+    ThemeWrappers themeWrappersLight_;
+    ThemeWrappers themeWrappersDark_;
+
     RefPtr<ThemeConstants> themeConstants_;
     int32_t currentThemeId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ThemeManagerImpl);
+
+    ThemeWrappers& GetThemeWrappers(ColorMode mode);
+    ColorMode GetCurrentColorMode() const;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
