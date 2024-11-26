@@ -114,13 +114,17 @@ public:
     }
 
 private:
+    using ThemeWrappers = std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>>;
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
-    std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>> themeWrappers_;
+    ThemeWrappers themeWrappersLight_;
+    ThemeWrappers themeWrappersDark_;
+
     RefPtr<ThemeConstants> themeConstants_;
     int32_t currentThemeId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ThemeManagerImpl);
 
+    ThemeWrappers& GetThemeWrappers(ColorMode mode);
     ColorMode GetCurrentColorMode() const;
 };
 } // namespace OHOS::Ace

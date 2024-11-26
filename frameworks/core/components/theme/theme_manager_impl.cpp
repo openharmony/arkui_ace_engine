@@ -215,8 +215,13 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId t
         return GetTheme(type);
     }
 
-    auto findIter = themeWrappers_.find(type);
-    if (findIter != themeWrappers_.end()) {
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, GetTheme(type));
+    ColorMode currentMode = GetCurrentColorMode();
+    ColorMode themeMode = tokenTheme->GetColorMode();
+    auto& themeWrappers = GetThemeWrappers(themeMode == ColorMode::COLOR_MODE_UNDEFINED ? currentMode : themeMode);
+    auto findIter = themeWrappers.find(type);
+    if (findIter != themeWrappers.end()) {
         auto wrapper = findIter->second;
         wrapper->ApplyTokenTheme(*tokenTheme);
         return AceType::DynamicCast<Theme>(wrapper);
@@ -227,11 +232,6 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId t
         return GetTheme(type);
     }
 
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, GetTheme(type));
-
-    ColorMode currentMode = GetCurrentColorMode();
-    ColorMode themeMode = tokenTheme->GetColorMode();
     bool needRestore = false;
     if (themeMode != ColorMode::COLOR_MODE_UNDEFINED && themeMode != currentMode) {
         // Local color mode of the current theme does not match actual color scheme.
@@ -247,7 +247,7 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, NG::TokenThemeScopeId t
         ResourceManager::GetInstance().UpdateColorMode(currentMode);
     }
     wrapper->ApplyTokenTheme(*tokenTheme);
-    themeWrappers_.emplace(type, wrapper);
+    themeWrappers.emplace(type, wrapper);
     return AceType::DynamicCast<Theme>(wrapper);
 }
 
@@ -278,8 +278,14 @@ Color ThemeManagerImpl::GetBackgroundColor() const
 void ThemeManagerImpl::LoadResourceThemes()
 {
     themes_.clear();
-    themeWrappers_.clear();
+    themeWrappersLight_.clear();
+    themeWrappersDark_.clear();
     themeConstants_->LoadTheme(currentThemeId_);
+}
+
+ThemeManagerImpl::ThemeWrappers& ThemeManagerImpl::GetThemeWrappers(ColorMode mode)
+{
+    return mode == ColorMode::DARK ? themeWrappersDark_ : themeWrappersLight_;
 }
 
 ColorMode ThemeManagerImpl::GetCurrentColorMode() const
