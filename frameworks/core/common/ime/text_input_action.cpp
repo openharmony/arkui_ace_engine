@@ -24,4 +24,13 @@ TextInputAction CastToTextInputAction(int32_t value)
     }
     return static_cast<TextInputAction>(value);
 }
+
+AutoCapitalizationMode CastToAutoCapitalizationMode(int32_t value)
+{
+    if (value< static_cast<int32_t>(AutoCapitalizationMode::NONE) ||
+        value > static_cast<int32_t>(AutoCapitalizationMode::ALL_CHARACTERS)) {
+        return AutoCapitalizationMode::NONE;
+    }
+    return static_cast<AutoCapitalizationMode>(value);
+}
 } // namespace OHOS::Ace
