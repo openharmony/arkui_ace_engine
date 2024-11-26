@@ -51,5 +51,6 @@ ace_unittest("water_flow_test_sw") {
     "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
     "water_flow_test_ng.cpp",
+    "water_flow_estimation_test.cpp",
   ]
 }

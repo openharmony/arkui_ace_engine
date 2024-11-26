@@ -286,6 +286,8 @@ private:
      */
     float EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const;
 
+    float GetAverageItemHeight() const;
+
     void ClearData();
 
     /**
@@ -297,7 +299,7 @@ private:
      * @brief cache main-axis length of measured FlowItems.
      */
     std::unordered_map<int32_t, float> idxToHeight_;
-    float heightSum_ = 0.0f; // cache to calculate average height
+    mutable float heightSum_ = 0.0f; // cache to calculate average height
 
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 

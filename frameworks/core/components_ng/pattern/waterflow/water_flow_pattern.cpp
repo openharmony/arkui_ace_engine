@@ -850,7 +850,7 @@ SizeF WaterFlowPattern::GetChildrenExpandedSize()
     float estimatedHeight = 0.0f;
     if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
         auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-        estimatedHeight = info->EstimateContentHeight();
+        estimatedHeight = info->EstimateTotalHeight();
     }
 
     if (axis == Axis::VERTICAL) {

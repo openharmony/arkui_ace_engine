@@ -785,27 +785,37 @@ void WaterFlowLayoutInfoSW::ClearData()
     endIndex_ = -1;
 }
 
+float WaterFlowLayoutInfoSW::GetAverageItemHeight() const
+{
+    if (heightSum_ == 0) {
+        heightSum_ = std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
+            [](float sum, const auto& pair) { return sum + pair.second; });
+    }
+    return heightSum_ / static_cast<float>(idxToHeight_.size());
+}
+
 float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
 {
-    const float average = (heightSum_ == 0) ? std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
-                                                  [](float sum, const auto& pair) { return sum + pair.second; }) /
-                                                  static_cast<float>(idxToHeight_.size())
-                                            : heightSum_ / static_cast<float>(idxToHeight_.size());
-    float height = -totalOffset_ - EndPos();
-    for (uint32_t i = GetSegment(EndIndex() + 1); i < lanes_.size(); ++i) {
-        height += EstimateSectionHeight(i, average, EndIndex() + 1, INT_MAX);
+    if (!synced_){ 
+        return 0.0f;
+    }
+    const float average = GetAverageItemHeight();
+    float height = std::max(-totalOffset_, 0.0f) // to eliminate top overScroll
+                   + (endPos_ - startPos_);
+    if (itemEnd_) {
+        float bottomOverScroll = std::max(BottomFinalPos(lastMainSize_), 0.0f);
+        return height - bottomOverScroll + BotMargin() + footerHeight_;
+    }
+
+    for (uint32_t i = GetSegment(endIndex_ + 1); i < lanes_.size(); ++i) {
+        height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
     return std::max(height, maxHeight_);
 }
 
 void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t startIdx)
 {
-    if (heightSum_ == 0) {
-        heightSum_ = std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
-            [](float sum, const auto& pair) { return sum + pair.second; });
-    }
-    const float average = heightSum_ / static_cast<float>(idxToHeight_.size());
-
+    const float average = GetAverageItemHeight();
     const int32_t section = GetSegment(startIdx);
     const float prevOffset = totalOffset_;
     totalOffset_ = StartPos();
@@ -822,7 +832,8 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
     }
 }
 
-float WaterFlowLayoutInfoSW::EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const
+float WaterFlowLayoutInfoSW::EstimateSectionHeight(
+    uint32_t section, float average, int32_t startBound, int32_t endBound) const
 {
     if (segmentTails_.size() <= section || lanes_.size() <= section || mainGap_.size() <= section ||
         margins_.size() <= section) {
