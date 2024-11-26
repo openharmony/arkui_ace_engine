@@ -181,9 +181,8 @@ void MinFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontSize = Converter::OptConvert<Dimension>(*value);
-    if (fontSize) {
-        TextModelNG::SetAdaptMinFontSize(frameNode, fontSize.value());
-    }
+    Validator::ValidateNonNegative(fontSize);
+    TextModelNG::SetAdaptMinFontSize(frameNode, fontSize);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -192,9 +191,8 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontSize = Converter::OptConvert<Dimension>(*value);
-    if (fontSize) {
-        TextModelNG::SetAdaptMaxFontSize(frameNode, fontSize.value());
-    }
+    Validator::ValidateNonNegative(fontSize);
+    TextModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
 }
 
 void MinFontScaleImpl(Ark_NativePointer node,
@@ -204,9 +202,10 @@ void MinFontScaleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto minFontScale = Converter::OptConvert<float>(*value);
-    if (minFontScale) {
-        TextModelNG::SetMinFontScale(frameNode, minFontScale.value());
-    }
+    Validator::ValidatePositive(minFontScale);
+    const auto maxValue = 1.f;
+    Validator::ValidateLessOrEqual(minFontScale, maxValue);
+    TextModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Ark_Union_Number_Resource* value)
@@ -215,9 +214,9 @@ void MaxFontScaleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto maxFontScale = Converter::OptConvert<float>(*value);
-    if (maxFontScale) {
-        TextModelNG::SetMaxFontScale(frameNode, maxFontScale.value());
-    }
+    const auto minValue = 1.f;
+    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
+    TextModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
@@ -260,9 +259,8 @@ void LineSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto lineSpacing = Converter::OptConvert<Dimension>(*value);
-    if (lineSpacing) {
-        TextModelNG::SetLineSpacing(frameNode, lineSpacing.value());
-    }
+    Validator::ValidateNonNegative(lineSpacing);
+    TextModelNG::SetLineSpacing(frameNode, lineSpacing);
 }
 void TextAlignImpl(Ark_NativePointer node,
                    Ark_TextAlign value)
@@ -301,9 +299,8 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    if (families) {
-        TextModelNG::SetFontFamily(frameNode, families.value());
-    }
+    Validator::ValidateNonEmpty(families);
+    TextModelNG::SetFontFamily(frameNode, families);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -321,19 +318,13 @@ void DecorationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto decoration = Converter::OptConvert<TextDecoration>(value->type);
-    if (decoration) {
-        TextModelNG::SetTextDecoration(frameNode, decoration.value());
-    }
+    TextModelNG::SetTextDecoration(frameNode, decoration);
 
     auto color = Converter::OptConvert<Color>(value->color);
-    if (color) {
-        TextModelNG::SetTextDecorationColor(frameNode, color.value());
-    }
+    TextModelNG::SetTextDecorationColor(frameNode, color);
 
     auto style = Converter::OptConvert<TextDecorationStyle>(value->style);
-    if (style) {
-        TextModelNG::SetTextDecorationStyle(frameNode, style.value());
-    }
+    TextModelNG::SetTextDecorationStyle(frameNode, style);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
                        const Ark_Union_Number_String* value)
@@ -342,9 +333,8 @@ void LetterSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto spacing = Converter::OptConvert<Dimension>(*value);
-    if (spacing) {
-        TextModelNG::SetLetterSpacing(frameNode, spacing.value());
-    }
+    Validator::ValidateNonPercent(spacing);
+    TextModelNG::SetLetterSpacing(frameNode, spacing);
 }
 void TextCaseImpl(Ark_NativePointer node,
                   Ark_TextCase value)
@@ -361,9 +351,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto offset = Converter::OptConvert<Dimension>(*value);
-    if (offset) {
-        TextModelNG::SetBaselineOffset(frameNode, offset.value());
-    }
+    TextModelNG::SetBaselineOffset(frameNode, offset);
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
@@ -405,9 +393,7 @@ void TextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto indent = Converter::OptConvert<Dimension>(*value);
-    if (indent) {
-        TextModelNG::SetTextIndent(frameNode, indent.value());
-    }
+    TextModelNG::SetTextIndent(frameNode, indent);
 }
 void WordBreakImpl(Ark_NativePointer node,
                    Ark_WordBreak value)
@@ -422,7 +408,8 @@ void LineBreakStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineBreakStrategy(frameNode, static_cast<LineBreakStrategy>(value));
+    auto convValue = Converter::OptConvert<LineBreakStrategy>(value);
+    TextModelNG::SetLineBreakStrategy(frameNode, convValue);
 }
 void OnCopyImpl(Ark_NativePointer node,
                 const Callback_String_Void* value)

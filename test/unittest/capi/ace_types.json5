@@ -436,6 +436,34 @@
             "invalidValues": ["-2.3_vp", "-4.5_fp", "-5.6_px", "-0.8_pct"],
         },
         {
+            "name": "BaselineOffsetNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["123", "123"],
+                ["0", "0"],
+                ["-2", "-2"],
+            ],
+        },
+        {
+            "name": "BaselineOffsetStr",
+            "type": "Ark_String",
+            "validValues": [
+                ["\"123vp\"", "123"],
+                ["\"-123vp\"", "-123"],
+                ["\"0vp\"", "0"],
+                ["\"123fp\"", "123"],
+                ["\"-123fp\"", "-123"],
+                ["\"0fp\"", "0"],
+                ["\"123px\"", "123"],
+                ["\"-123px\"", "-123"],
+                ["\"0px\"", "0"],
+                ["\"1.23px\"", "1"],
+                ["\"123lpx\"", "123"],
+                ["\"-123lpx\"", "-123"],
+                ["\"0lpx\"", "0"],
+            ],
+        },
+        {
             "name": "DimensionsNumNonNeg",
             "type": "Ark_Number",
             "validValues": [
@@ -546,6 +574,44 @@
             ],
             "invalidValues": [
                 "-123._vp", "-123._vp", "-123._px", "0.2_pct", "-0.2_pct",
+            ],
+        },
+        {
+            "name": "MaxFontScaleNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["1", "1.000000"],
+                ["2.5", "2.500000"],
+                ["100", "100.000000"],
+            ],
+        },
+        {
+            "name": "MaxFontScaleRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["1.0f", "1.000000"],
+                ["3.41f", "3.410000"],
+                ["50.f", "50.000000"],
+            ],
+        },
+        {
+            "name": "MinFontScaleNum",
+            "type": "Ark_Number",
+            "validValues": [
+                ["0.1", "0.100000"],
+                ["0.89", "0.890000"],
+                ["1", "1.000000"],
+            ],
+        },
+        {
+            "name": "MinFontScaleRes",
+            "type": "Ark_Resource",
+            "resType": "FLOAT",
+            "validValues": [
+                ["0.125f", "0.125000"],
+                ["0.5f", "0.500000"],
+                ["1.0f", "1.000000"],
             ],
         },
         {
@@ -2801,6 +2867,29 @@
             "themes": ["TextTheme"],
             "attributes": [
                 {
+                    "name": "baselineOffset",
+                    "default": "0",
+                    "fixtures": ["BaselineOffsetNum", "BaselineOffsetStr"]
+                },
+                {
+                    "name": "decoration",
+                    "type": "DecorationStyleInterface",
+                    "attributes": [
+                        {
+                            "name": "type",
+                            "default": "TextDecorationType.None",
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                        },
+                        {
+                            "name": "style",
+                            "default": "TextDecorationStyle.SOLID",
+                        },
+                    ],
+                },
+                {
                     "name": "draggable",
                     "default": "false",
                 },
@@ -2819,6 +2908,11 @@
                 {
                     "name": "fontColor",
                     "default": "#FF000000"
+                },
+                {
+                    "name": "fontFamily",
+                    "default": "Harmony\"\"OS Sans",
+                    "type": "FontFamily"
                 },
                 {
                     "name": "fontSize",
@@ -2847,12 +2941,37 @@
                     "default": "TextHeightAdaptivePolicy.MAX_LINES_FIRST",
                 },
                 {
+                    "name": "letterSpacing",
+                    "fixtures": ["DimensionsNumAny", "DimensionsStrNonPerc"]
+                },
+                {
+                    "name": "lineBreakStrategy",
+                    "default": "greedy",
+                    "fixtures": ["TextInputLineBreakStrategy"]
+                },
+                {
                     "name": "lineHeight",
                     "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "maxLines",
                     "fixtures": ["NumberPosIntFloor"],
+                },
+                {
+                    "name": "maxFontScale",
+                    "fixtures": ["MaxFontScaleNum", "MaxFontScaleRes"],
+                },
+                {
+                    "name": "maxFontSize",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "minFontScale",
+                    "fixtures": ["MinFontScaleNum", "MinFontScaleRes"],
+                },
+                {
+                    "name": "minFontSize",
+                    "type": "DimensionNonNegNonPct",
                 },
                 {
                     "name": "privacySensitive",
@@ -2866,6 +2985,11 @@
                 {
                     "name": "textCase",
                     "default": "TextCase.Normal",
+                },
+                {
+                    "name": "textIndent",
+                    "default": "0.00vp",
+                    "fixtures": ["LengthAny"]
                 },
                 {
                     "name": "textSelectable",
@@ -2883,18 +3007,11 @@
                 },
             ],
             "disable": [
-                "setBaselineOffsetTestBaselineOffsetInvalidValues",
-                "setBaselineOffsetTestBaselineOffsetValidValues",
-                "setBaselineOffsetTestDefaultValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestDefaultValues",
                 "setDataDetectorConfigTestDefaultValues",
                 "setDataDetectorConfigTestValidValues",
-                "setDecorationTestDecorationColorInvalidValues",
-                "setDecorationTestDecorationStyleInvalidValues",
-                "setDecorationTestDecorationTypeInvalidValues",
-                "setDecorationTestDefaultValues",
                 "setFont0TestDefaultValues",
                 "setFont0TestFontFamilyInvalidValues",
                 "setFont0TestFontFamilyValidValues",
@@ -2914,34 +3031,8 @@
                 "setFont1TestFontFontValueWeightValidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
                 "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
-                "setFontFamilyTestDefaultValues",
-                "setFontFamilyTestFontFamilyInvalidValues",
-                "setFontFamilyTestFontFamilyValidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
-                "setLetterSpacingTestDefaultValues",
-                "setLetterSpacingTestLetterSpacingInvalidValues",
-                "setLetterSpacingTestLetterSpacingValidValues",
-                "setLineBreakStrategyTestDefaultValues",
-                "setLineBreakStrategyTestLineBreakStrategyInvalidValues",
-                "setLineBreakStrategyTestLineBreakStrategyValidValues",
-                "setMaxFontScaleTestDefaultValues",
-                "setMaxFontScaleTestMaxFontScaleInvalidValues",
-                "setMaxFontScaleTestMaxFontScaleValidValues",
-                "setMaxFontSizeTestDefaultValues",
-                "setMaxFontSizeTestMaxFontSizeInvalidValues",
-                "setMaxFontSizeTestMaxFontSizeValidValues",
-                "setMinFontScaleTestDefaultValues",
-                "setMinFontScaleTestMinFontScaleInvalidValues",
-                "setMinFontScaleTestMinFontScaleValidValues",
-                "setMinFontSizeTestDefaultValues",
-                "setMinFontSizeTestMinFontSizeInvalidValues",
-                "setMinFontSizeTestMinFontSizeValidValues",
-                "setSelectionTestDefaultValues",
-                "setSelectionTestSelectionSelectionEndValidValues",
-                "setSelectionTestSelectionSelectionStartValidValues",
-                "setTextIndentTestDefaultValues",
-                "setTextIndentTestTextIndentInvalidValues",
                 "setTextOptionsTestDefaultValues",
                 "setTextOptionsTestValidValues",
                 "setTextShadowTestDefaultValues",
@@ -2967,10 +3058,25 @@
                 "setLineSpacingTestValidValues", // new attribute
 
                 // Default value is not clear
+                "setLetterSpacingTestDefaultValues",
+                "setLetterSpacingTestLetterSpacingInvalidValues",
                 "setLineHeightTestDefaultValues",
                 "setLineHeightTestLineHeightInvalidValues",
+                "setMaxFontScaleTestDefaultValues",
+                "setMaxFontScaleTestMaxFontScaleInvalidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
                 "setMaxLinesTestDefaultValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
+                "setMinFontScaleTestDefaultValues",
+                "setMinFontScaleTestMinFontScaleInvalidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+
+                // Tested value is not stored in a property
+                "setSelectionTestDefaultValues",
+                "setSelectionTestSelectionSelectionEndValidValues",
+                "setSelectionTestSelectionSelectionStartValidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",

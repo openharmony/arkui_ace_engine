@@ -18,6 +18,52 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::Text;
 /*
+ * @tc.name: setLetterSpacingTestLetterSpacingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setLetterSpacingTestLetterSpacingInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_String initValueLetterSpacing;
+
+    // Initial setup
+    initValueLetterSpacing =
+        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
+
+    auto checkValue = [this, &initValueLetterSpacing](const std::string& input, const Ark_Union_Number_String& value) {
+        Ark_Union_Number_String inputValueLetterSpacing = initValueLetterSpacing;
+
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        inputValueLetterSpacing = value;
+        modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonPercInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_String, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setTextCaseTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextCaseTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_CASE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_CASE_DEFAULT_VALUE) << "Default value for attribute 'textCase'";
+}
+
+/*
  * @tc.name: setTextCaseTestTextCaseValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -80,7 +126,7 @@ HWTEST_F(TextModifierTest, setTextCaseTestTextCaseInvalidValues, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setBaselineOffsetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -94,13 +140,13 @@ HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setBaselineOffsetTestBaselineOffsetValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String initValueBaselineOffset;
 
     // Initial setup
-    initValueBaselineOffset =
-        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueBaselineOffset = ArkUnion<Ark_Union_Number_String, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureBaselineOffsetNumValidValues[0]));
 
     auto checkValue = [this, &initValueBaselineOffset](const std::string& input, const std::string& expectedStr,
                           const Ark_Union_Number_String& value) {
@@ -114,10 +160,10 @@ HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetValidValu
             "Input value is: " << input << ", method: setBaselineOffset, attribute: baselineOffset";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureBaselineOffsetNumValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureBaselineOffsetStrValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String, Ark_String>(value));
     }
 }
@@ -127,13 +173,13 @@ HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetValidValu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setBaselineOffsetTestBaselineOffsetInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setBaselineOffsetTestBaselineOffsetInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_String initValueBaselineOffset;
 
     // Initial setup
-    initValueBaselineOffset =
-        ArkUnion<Ark_Union_Number_String, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+    initValueBaselineOffset = ArkUnion<Ark_Union_Number_String, Ark_Number>(
+        std::get<1>(Fixtures::testFixtureBaselineOffsetNumValidValues[0]));
 
     auto checkValue = [this, &initValueBaselineOffset](const std::string& input, const Ark_Union_Number_String& value) {
         Ark_Union_Number_String inputValueBaselineOffset = initValueBaselineOffset;
@@ -909,7 +955,7 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvali
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setTextIndentTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextIndentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -928,7 +974,7 @@ HWTEST_F(TextModifierTest, setTextIndentTestTextIndentValidValues, TestSize.Leve
     Ark_Length initValueTextIndent;
 
     // Initial setup
-    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
+    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]);
 
     auto checkValue = [this, &initValueTextIndent](
                           const std::string& input, const std::string& expectedStr, const Ark_Length& value) {
@@ -942,37 +988,8 @@ HWTEST_F(TextModifierTest, setTextIndentTestTextIndentValidValues, TestSize.Leve
             "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setTextIndentTestTextIndentInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextModifierTest, DISABLED_setTextIndentTestTextIndentInvalidValues, TestSize.Level1)
-{
-    Ark_Length initValueTextIndent;
-
-    // Initial setup
-    initValueTextIndent = std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]);
-
-    auto checkValue = [this, &initValueTextIndent](const std::string& input, const Ark_Length& value) {
-        Ark_Length inputValueTextIndent = initValueTextIndent;
-
-        modifier_->setTextIndent(node_, &inputValueTextIndent);
-        inputValueTextIndent = value;
-        modifier_->setTextIndent(node_, &inputValueTextIndent);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_INDENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setTextIndent, attribute: textIndent";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, value);
     }
 }
 
@@ -1053,7 +1070,7 @@ HWTEST_F(TextModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineBreakStrategyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1068,12 +1085,12 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineBreakStrategyTestLineBreakStrategyValidValues, TestSize.Level1)
 {
     Ark_LineBreakStrategy initValueLineBreakStrategy;
 
     // Initial setup
-    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureEnumLineBreakStrategyValidValues[0]);
+    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureTextInputLineBreakStrategyValidValues[0]);
 
     auto checkValue = [this, &initValueLineBreakStrategy](const std::string& input, const std::string& expectedStr,
                           const Ark_LineBreakStrategy& value) {
@@ -1087,7 +1104,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyVal
             "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumLineBreakStrategyValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextInputLineBreakStrategyValidValues) {
         checkValue(input, expected, value);
     }
 }
@@ -1097,12 +1114,12 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyInvalidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalidValues, TestSize.Level1)
 {
     Ark_LineBreakStrategy initValueLineBreakStrategy;
 
     // Initial setup
-    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureEnumLineBreakStrategyValidValues[0]);
+    initValueLineBreakStrategy = std::get<1>(Fixtures::testFixtureTextInputLineBreakStrategyValidValues[0]);
 
     auto checkValue = [this, &initValueLineBreakStrategy](
                           const std::string& input, const Ark_LineBreakStrategy& value) {
@@ -1117,7 +1134,7 @@ HWTEST_F(TextModifierTest, DISABLED_setLineBreakStrategyTestLineBreakStrategyInv
             "Input value is: " << input << ", method: setLineBreakStrategy, attribute: lineBreakStrategy";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureEnumLineBreakStrategyInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureTextInputLineBreakStrategyInvalidValues) {
         checkValue(input, value);
     }
 }

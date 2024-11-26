@@ -376,17 +376,6 @@ std::vector<std::tuple<std::string, Ark_ItemAlign>> testFixtureEnumItemAlignInva
     { "INT_MAX", static_cast<Ark_ItemAlign>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_LineBreakStrategy, std::string>> testFixtureEnumLineBreakStrategyValidValues = {
-    { "ARK_LINE_BREAK_STRATEGY_GREEDY", ARK_LINE_BREAK_STRATEGY_GREEDY, "LineBreakStrategy.GREEDY" },
-    { "ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY", ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY, "LineBreakStrategy.HIGH_QUALITY" },
-    { "ARK_LINE_BREAK_STRATEGY_BALANCED", ARK_LINE_BREAK_STRATEGY_BALANCED, "LineBreakStrategy.BALANCED" },
-};
-
-std::vector<std::tuple<std::string, Ark_LineBreakStrategy>> testFixtureEnumLineBreakStrategyInvalidValues = {
-    { "-1", static_cast<Ark_LineBreakStrategy>(-1) },
-    { "INT_MAX", static_cast<Ark_LineBreakStrategy>(INT_MAX) },
-};
-
 std::vector<std::tuple<std::string, Ark_MixedMode, std::string>> testFixtureEnumMixedModeValidValues = {
     { "ARK_MIXED_MODE_ALL", ARK_MIXED_MODE_ALL, "MixedMode.All" },
     { "ARK_MIXED_MODE_COMPATIBLE", ARK_MIXED_MODE_COMPATIBLE, "MixedMode.Compatible" },
