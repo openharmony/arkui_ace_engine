@@ -151,6 +151,8 @@ export struct InnerFullScreenLaunchComponent {
       flags: this.options?.flags,
       parameters: this.options?.parameters
     })
+      .backgroundColor($r('sys.color.ohos_id_color_titlebar_bg'))
+      .defaultFocus(true)
       .height('100%')
       .width('100%')
       .onRelease(

@@ -42,6 +42,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
@@ -282,6 +283,9 @@ public:
     double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
+    void CleanErrorNode();
+    float CalcDecoratorWidth(const RefPtr<FrameNode>& decoratorNode);
+    float CalcDecoratorHeight(const RefPtr<FrameNode>& decoratorNode);
     void UltralimitShake();
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
@@ -302,6 +306,11 @@ public:
     WeakPtr<LayoutWrapper> GetCounterNode()
     {
         return counterTextNode_;
+    }
+
+    WeakPtr<FrameNode> GetErrorNode() const
+    {
+        return errorTextNode_;
     }
 
     bool GetShowCounterStyleValue() const
@@ -411,11 +420,6 @@ public:
         return paragraph_;
     }
 
-    const RefPtr<Paragraph>& GetErrorParagraph() const
-    {
-        return errorParagraph_;
-    }
-
     bool GetCursorVisible() const
     {
         return cursorVisible_;
@@ -453,42 +457,17 @@ public:
         caretUpdateType_ = type;
     }
 
-    float GetPaddingTop() const
-    {
-        return utilPadding_.top.value_or(0.0f);
-    }
+    float GetPaddingTop() const;
 
-    float GetPaddingBottom() const
-    {
-        return utilPadding_.bottom.value_or(0.0f);
-    }
+    float GetPaddingBottom() const;
 
-    float GetPaddingLeft() const
-    {
-        return utilPadding_.left.value_or(0.0f);
-    }
+    float GetPaddingLeft() const;
 
-    float GetPaddingRight() const
-    {
-        return utilPadding_.right.value_or(0.0f);
-    }
+    float GetPaddingRight() const;
 
-    const PaddingPropertyF& GetUtilPadding() const
-    {
-        return utilPadding_;
-    }
-
-    float GetHorizontalPaddingAndBorderSum() const
-    {
-        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f) + GetBorderLeft() +
-               GetBorderRight();
-    }
-
-    float GetVerticalPaddingAndBorderSum() const
-    {
-        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f) + GetBorderTop() +
-               GetBorderBottom();
-    }
+    float GetHorizontalPaddingAndBorderSum() const;
+    float GetVerticalPaddingAndBorderSum() const;
+    BorderWidthProperty GetBorderWidthProperty() const;
 
     double GetPercentReferenceWidth() const
     {
@@ -499,45 +478,10 @@ public:
         return 0.0f;
     }
 
-    float GetBorderLeft() const
-    {
-        auto leftBorderWidth = lastBorderWidth_.leftDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (leftBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return leftBorderWidth.Value() * percentReferenceWidth;
-        }
-        return leftBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderTop() const
-    {
-        auto topBorderWidth = lastBorderWidth_.topDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (topBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return topBorderWidth.Value() * percentReferenceWidth;
-        }
-        return topBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderBottom() const
-    {
-        auto bottomBorderWidth = lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (bottomBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return bottomBorderWidth.Value() * percentReferenceWidth;
-        }
-        return bottomBorderWidth.ConvertToPx();
-    }
-
-    float GetBorderRight() const
-    {
-        auto rightBorderWidth = lastBorderWidth_.rightDimen.value_or(Dimension(0.0f));
-        auto percentReferenceWidth = GetPercentReferenceWidth();
-        if (rightBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
-            return rightBorderWidth.Value() * percentReferenceWidth;
-        }
-        return rightBorderWidth.ConvertToPx();
-    }
+    float GetBorderLeft(BorderWidthProperty border) const;
+    float GetBorderTop(BorderWidthProperty border) const;
+    float GetBorderBottom(BorderWidthProperty border) const;
+    float GetBorderRight(BorderWidthProperty border) const;
 
     const RectF& GetTextRect() override
     {
@@ -886,6 +830,7 @@ public:
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    void InitTheme();
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1272,8 +1217,8 @@ public:
 
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
     void CleanNodeResponseKeyEvent();
-    bool IsUnderlineMode();
-    bool IsInlineMode();
+    bool IsUnderlineMode() const;
+    bool IsInlineMode() const;
     bool IsShowError();
     bool IsShowCount();
     void ResetContextAttr();
@@ -1635,7 +1580,10 @@ private:
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
+    bool IsAccessibilityClick();
     bool IsOnUnitByPosition(const Offset& globalOffset);
+    bool IsOnPasswordByPosition(const Offset& globalOffset);
+    bool IsOnCleanNodeByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
@@ -1741,7 +1689,7 @@ private:
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
-    RefPtr<Paragraph> errorParagraph_;
+    WeakPtr<FrameNode> errorTextNode_;
     RefPtr<Paragraph> dragParagraph_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
@@ -1762,9 +1710,7 @@ private:
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;
-    PaddingPropertyF utilPadding_;
-
-    BorderWidthProperty lastBorderWidth_;
+    std::optional<PaddingPropertyF> utilPadding_;
 
     bool setBorderFlag_ = true;
     BorderWidthProperty lastDiffBorderWidth_;
@@ -1820,6 +1766,8 @@ private:
     bool changeSelectedRects_ = false;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
+    RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
+    WeakPtr<TextFieldTheme> textFieldTheme_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     int32_t dragTextStart_ = 0;
@@ -1901,7 +1849,6 @@ private:
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
 
     bool isDetachFromMainTree_ = false;
-    bool showKeyBoardOnFocus_ = true;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
@@ -1912,6 +1859,7 @@ private:
     PreviewRange lastCursorRange_ = {};
     std::string lastTextValue_ = "";
     float lastCursorTop_ = 0.0f;
+    bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;

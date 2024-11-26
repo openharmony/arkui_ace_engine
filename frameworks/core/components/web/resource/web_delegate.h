@@ -685,6 +685,7 @@ public:
     void UpdateUserAgent(const std::string& userAgent);
     void UpdateBackgroundColor(const int backgroundColor);
     void UpdateInitialScale(float scale);
+    void UpdateLayoutMode(WebLayoutMode mode);
     void UpdateJavaScriptEnabled(const bool& isJsEnabled);
     void UpdateAllowFileAccess(const bool& isFileAccessEnabled);
     void UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled);
@@ -796,10 +797,10 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -989,7 +990,6 @@ public:
     void OnTextSelected();
     void OnDestroyImageAnalyzerOverlay();
 
-    void StartVibraFeedback(const std::string& vibratorType);
     void SetSurfaceId(const std::string& surfaceId);
 
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
@@ -1019,6 +1019,10 @@ public:
     {
         return instanceId_;
     }
+
+    void StartVibraFeedback(const std::string& vibratorType);
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     void InitWebEvent();

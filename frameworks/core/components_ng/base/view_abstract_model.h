@@ -154,7 +154,7 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(float value) = 0;
-    virtual void SetPixelRound(uint8_t value) = 0;
+    virtual void SetPixelRound(uint16_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
@@ -255,7 +255,8 @@ public:
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
-    virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
+    virtual void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}

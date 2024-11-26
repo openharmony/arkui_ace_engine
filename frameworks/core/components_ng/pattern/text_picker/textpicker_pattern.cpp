@@ -48,6 +48,7 @@ const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
 const Dimension FOUCS_WIDTH = 2.0_vp;
 const Dimension MARGIN_SIZE = 12.0_vp;
+constexpr float DISABLE_ALPHA = 0.6f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -80,6 +81,13 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 {
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
+    if (GetIsShowInDialog()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto parentNode = host->GetParent();
+        CHECK_NULL_RETURN(parentNode, false);
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     return true;
 }
 
@@ -312,8 +320,13 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!enabled_) {
+        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<FrameNode> TextPickerPattern::GetColumnNode()

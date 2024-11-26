@@ -155,7 +155,7 @@ bool ScrollPattern::ScrollSnapTrigger()
     }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalePredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
             return true;

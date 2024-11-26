@@ -195,6 +195,11 @@ public:
         return prevOffset_;
     }
 
+    int32_t GetDefaultCachedCount() const
+    {
+        return layoutInfo_->defCachedCount_;
+    }
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

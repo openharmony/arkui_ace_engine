@@ -148,16 +148,6 @@ public:
         renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 
-    std::vector<uint32_t> GetLineDash() const
-    {
-        return lineDash_;
-    }
-
-    void SetLineDash(const std::vector<uint32_t> lineDash)
-    {
-        lineDash_ = lineDash;
-    }
-
     void SetAnti(bool anti)
     {
         anti_ = anti;
@@ -178,9 +168,13 @@ public:
         return unit_;
     }
 
-    inline double GetDensity()
+    inline double GetDensity(bool useSystemDensity = false)
     {
-        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        if (useSystemDensity) {
+            return !NearZero(density_) ? density_ : 1.0;
+        } else {
+            return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        }
     }
 
     void SetInstanceId(int32_t id) override
@@ -220,7 +214,6 @@ private:
     static unsigned int patternCount_;
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
     Pattern GetPattern(unsigned int id);
-    std::vector<uint32_t> lineDash_;
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;

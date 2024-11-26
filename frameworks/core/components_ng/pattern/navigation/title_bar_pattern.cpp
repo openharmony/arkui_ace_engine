@@ -94,9 +94,9 @@ void SetTextColor(const RefPtr<FrameNode>& textNode, const Color& color)
     auto property = textNode->GetLayoutPropertyPtr<TextLayoutProperty>();
     CHECK_NULL_VOID(property);
     property->UpdateTextColor(color);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, textNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, textNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, textNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, textNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, textNode);
 }
 
 void SetImageSourceInfoFillColor(ImageSourceInfo& imageSourceInfo)
@@ -1243,6 +1243,8 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     UpdateBackgroundStyle(host);
+    SetNeedResetMainTitleProperty(true);
+    SetNeedResetSubTitleProperty(true);
 
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(host);
     CHECK_NULL_VOID(titleBarNode);
@@ -1465,8 +1467,8 @@ void TitleBarPattern::InitBackButtonLongPressEvent(const RefPtr<FrameNode>& back
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    auto longPressCallback = [weak = WeakClaim(this), weakNode = WeakClaim(RawPtr(backButtonNode))](
-        GestureEvent& info) {
+    auto longPressCallback = [weak = WeakClaim(this), weakNode = WeakClaim(RawPtr(backButtonNode))]
+        (GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto backButtonNode = weakNode.Upgrade();

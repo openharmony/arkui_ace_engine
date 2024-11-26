@@ -642,6 +642,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
+    FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
@@ -800,6 +801,11 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
 
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "Can not flush implicit animation task after layout because implicit animation is open.");
+        return;
+    }
     window_->Lock();
     taskScheduler_->FlushAfterLayoutCallbackInImplicitAnimationTask();
     window_->Unlock();
@@ -1363,19 +1369,7 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             if (!textFieldManager_) {
                 break;
             }
-            auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-            if (textFieldManager && textFieldManager->GetLaterAvoid()) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
-                taskExecutor_->PostTask([weakContext = WeakClaim(this),
-                    keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
-                    positionY = textFieldManager->GetLaterAvoidPositionY(),
-                    height = textFieldManager->GetLaterAvoidHeight()] {
-                        auto context = weakContext.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
-                    }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                textFieldManager->SetLaterAvoid(false);
-            }
+            PostKeyboardAvoidTask();
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -1387,6 +1381,36 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             SetRootRect(width, height, 0.0f);
         }
     }
+}
+
+void PipelineContext::PostKeyboardAvoidTask()
+{
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
+    CHECK_NULL_VOID(textFieldManager);
+    CHECK_NULL_VOID(textFieldManager->GetLaterAvoid());
+    auto container = Container::Current();
+    if (container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
+            textFieldManager->SetLaterAvoid(false);
+            return;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
+    taskExecutor_->PostTask(
+        [weakContext = WeakClaim(this), keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
+            positionY = textFieldManager->GetLaterAvoidPositionY(),
+            height = textFieldManager->GetLaterAvoidHeight(),
+            weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+            auto manager = weakManager.Upgrade();
+            CHECK_NULL_VOID(manager);
+            manager->SetLaterAvoid(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
 
 void PipelineContext::StartWindowMaximizeAnimation(
@@ -1996,7 +2020,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
-            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
+            hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay(true);
             hasOverlay |= overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
@@ -2027,8 +2051,9 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(stageManager);
             auto lastPage = stageManager->GetLastPage();
             CHECK_NULL_VOID(lastPage);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage));
+                AceType::DynamicCast<NavigationGroupNode>(context->FindNavigationNodeToHandleBack(lastPage, isEntry));
             if (navigationGroupNode) {
                 result = true;
             }
@@ -2060,7 +2085,7 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     CHECK_NULL_RETURN(node, nullptr);
     const auto& children = node->GetChildren();
@@ -2078,15 +2103,21 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(childNode);
             auto topChild = navigationGroupNode->GetTopDestination();
             // find navigation from top destination
-            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild);
+            auto targetNodeFromDestination = FindNavigationNodeToHandleBack(topChild, isEntry);
             if (targetNodeFromDestination) {
                 return targetNodeFromDestination;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             targetNodeFromDestination = childNode;
             auto targetNavigation = AceType::DynamicCast<NavigationGroupNode>(targetNodeFromDestination);
             // check if the destination responds
-            if (targetNavigation && targetNavigation->CheckCanHandleBack()) {
+            if (targetNavigation && targetNavigation->CheckCanHandleBack(isEntry)) {
                 return targetNavigation;
+            }
+            if (isEntry) {
+                return nullptr;
             }
             // if the destination does not responds, find navigation from navbar
             auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
@@ -2095,15 +2126,18 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode);
+            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
             if (targetNodeFromNavbar) {
                 return targetNodeFromNavbar;
             }
             return nullptr;
         }
-        auto target = FindNavigationNodeToHandleBack(child);
+        auto target = FindNavigationNodeToHandleBack(child, isEntry);
         if (target) {
             return target;
+        }
+        if (isEntry) {
+            return nullptr;
         }
     }
     return nullptr;
@@ -2149,6 +2183,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+
+    HandlePenHoverOut(point);
 
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -2407,14 +2443,7 @@ void PipelineContext::ResetDraggingStatus(const TouchEvent& touchPoint, const Re
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsDraggingPressed(touchPoint.id)) {
-        manager->SetDraggingPressedState(false);
-    }
-    if (manager->IsDragging() && manager->IsSameDraggingPointer(touchPoint.id)) {
-        manager->OnDragEnd(
-            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
-    }
+    manager->ResetDraggingStatus(touchPoint);
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -2750,12 +2779,20 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     CHECK_RUN_ON(UI);
     auto scaleEvent = point.CreateScalePoint(viewScale_);
     if (scaleEvent.type != TouchType::HOVER_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+#ifdef IS_RELEASE_VERSION
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnAccessibilityHoverEvent event id:%{public}d, fingerId:%{public}d,"
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type, scaleEvent.isInjected);
+#else
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "OnAccessibilityHoverEvent event id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f "
             "type=%{public}d, "
             "inject=%{public}d",
             scaleEvent.touchEventId, scaleEvent.id, scaleEvent.x, scaleEvent.y, (int)scaleEvent.type,
             scaleEvent.isInjected);
+#endif
     }
     auto targerNode = node ? node : rootNode_;
     if (accessibilityManagerNG_ != nullptr) {
@@ -2769,6 +2806,49 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     eventManager_->AccessibilityHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchAccessibilityHoverEventNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    if (scaleEvent.type != TouchType::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type,
+            scaleEvent.isInjected);
+    }
+
+    auto targerNode = node ? node : rootNode_;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.touchEvent.type = scaleEvent.type;
+    touchRestrict.touchEvent.force = scaleEvent.force;
+
+    // use mouse to collect pen hover target
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    RequestFrame();
+}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || NearZero(point.force)) {
+        return;
+    }
+
+    CHECK_RUN_ON(UI);
+    auto oriPoint = point;
+    oriPoint.type = TouchType::PROXIMITY_OUT;
+
+    TouchTestResult testResult;
+    eventManager_->UpdatePenHoverNode(oriPoint, testResult);
+    eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -3463,12 +3543,12 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace(nodeId);
+    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
 }
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.erase(nodeId);
+    onWindowFocusChangedCallbacks_.remove(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
@@ -4410,6 +4490,23 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
     rootNode_->NotifyWebPattern(isRegister);
 }
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
+{
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    if (scalePoint.type == TouchType::DOWN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
+            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
+        return isTouchTarget;
+    }
+    return false;
+}
+#endif
+
 void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight)
 {
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
@@ -4467,23 +4564,6 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
     taskExecutor_->PostDelayedTask(
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
-
-#if defined(SUPPORT_TOUCH_TARGET_TEST)
-
-bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
-{
-    auto scalePoint = point.CreateScalePoint(GetViewScale());
-    if (scalePoint.type == TouchType::DOWN) {
-        TouchRestrict touchRestrict { TouchRestrict::NONE };
-        touchRestrict.sourceType = point.sourceType;
-        touchRestrict.touchEvent = point;
-        bool isTouchTarget = eventManager_->TouchTargetHitTest(
-            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
-        return isTouchTarget;
-    }
-    return false;
-}
-#endif
 
 bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
@@ -4578,5 +4658,25 @@ void PipelineContext::RegisterAttachedNode(UINode* uiNode)
 void PipelineContext::RemoveAttachedNode(UINode* uiNode)
 {
     attachedNodeSet_.erase(uiNode);
+}
+
+ScopedLayout::ScopedLayout(PipelineContext* pipeline)
+{
+    if (!pipeline) {
+        return;
+    }
+    // save flag before measure
+    pipeline_ = pipeline;
+    isLayouting_ = pipeline_->IsLayouting();
+    pipeline_->SetIsLayouting(true);
+}
+
+ScopedLayout::~ScopedLayout()
+{
+    if (!pipeline_) {
+        return;
+    }
+    // set layout flag back
+    pipeline_->SetIsLayouting(isLayouting_);
 }
 } // namespace OHOS::Ace::NG

@@ -16,14 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <cstdint>
-#include "base/geometry/ng/rect_t.h"
-#include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "base/geometry/ng/rect_t.h"
+#include "core/pipeline/base/element_register.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -287,8 +286,6 @@ public:
                 "[%{public}d:%{public}s] reset children while in use", hostNode_->GetId(), hostNode_->GetTag().c_str());
             if (SystemProperties::GetLayoutDetectEnabled()) {
                 abort();
-            } else {
-                LogBacktrace();
             }
             delayReset_ = true;
             needResetChild_ = needResetChild;
@@ -495,7 +492,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false);
+        OnDetachFromMainTree(false, GetContextWithCheck());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -744,15 +741,14 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
     }
-    if (geometryNode_->GetParentLayoutConstraint().has_value())
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
-                                           .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
-    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
-        DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                           .append(" left: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
     }
+    DumpLog::GetInstance().AddDesc(std::string("top: ")
+        .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+        .append(" left: ")
+        .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
     if (static_cast<int32_t>(IsActive()) != 1) {
         DumpLog::GetInstance().AddDesc(
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
@@ -900,6 +896,9 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
         if (renderContext_->GetBackgroundColor() &&
             renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
             json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
+        }
+        if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+            json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
         }
     }
     if (layoutProperty_) {
@@ -1261,11 +1260,6 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (ndkColorModeUpdateCallback_ && colorMode_ != SystemProperties::GetColorMode()) {
-            auto colorModeChange = ndkColorModeUpdateCallback_;
-            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
-            colorMode_ = SystemProperties::GetColorMode();
-        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1336,7 +1330,7 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
     NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive)
+void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1351,6 +1345,12 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
+    if (context) {
+        const auto& safeAreaManager = context->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
+        }
+    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1554,8 +1554,8 @@ RectF FrameNode::GetRectWithFrame()
     auto currFrameRect = geometryNode_->GetFrameRect();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
-            auto renderPosition =
-                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            auto renderPosition = ContextPositionConvertToPX(
+                renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
             currFrameRect.SetOffset(
                 { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
         }
@@ -1808,20 +1808,32 @@ void FrameNode::ThrottledVisibleTask()
         return;
     }
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
+    auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
+    RectF frameRect = visibleResult.frameRect;
+    RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+    if (visibleAreaRealTime) {
+        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            throttledCallbackOnTheWay_ = false;
+            return;
+        }
+        ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+        lastThrottledVisibleRatio_ = ratio;
         throttledCallbackOnTheWay_ = false;
-        return;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    } else {
+        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
+            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
+            lastThrottledVisibleRatio_ = ratio;
+        }
+        throttledCallbackOnTheWay_ = false;
+        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
-    ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-    lastThrottledVisibleRatio_ = ratio;
-    throttledCallbackOnTheWay_ = false;
-    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback()
@@ -2560,8 +2572,19 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
-        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-        targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+
+        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
+            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+        }
+
+        if (GetExposeInnerGestureFlag()) {
+            auto pattern = GetPattern();
+            if (pattern) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            }
+        }
     }
 }
 
@@ -2614,7 +2637,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         targetComponent_ = targetComponent;
     }
     targetComponent->SetNode(WeakClaim(this));
-    AddJudgeToTargetComponent(targetComponent);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -2717,6 +2739,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
 
+    AddJudgeToTargetComponent(targetComponent);
+
     // first update HitTestResult by children status.
     if (consumed) {
         testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
@@ -2742,11 +2766,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 responseLinkResult.splice(responseLinkResult.end(), std::move(newComingResponseLinkTargets));
             }
         } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
-            auto mouseHub = eventHub_->GetInputEventHub();
-            if (mouseHub) {
-                const auto coordinateOffset = globalPoint - localPoint;
-                preventBubbling = mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
-            }
+            preventBubbling = ProcessMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
         }
     }
 
@@ -2774,6 +2794,22 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     // consume by self and children.
     return testResult;
+}
+
+bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
+{
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (!mouseHub) {
+        return false;
+    }
+
+    const auto coordinateOffset = globalPoint - localPoint;
+    if (touchRestrict.touchEvent.IsPenHoverEvent()) {
+        return mouseHub->ProcessPenHoverTestHit(coordinateOffset, newComingTargets);
+    }
+
+    return mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
@@ -3007,17 +3043,11 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(true);
-    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(false);
-    }
     pattern_->OnWindowUnfocused();
 }
 
@@ -3221,7 +3251,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
 {
     Point pMax = pointList[0];
     Point pMin = pointList[0];
-    
+
     for (auto &point: pointList) {
         if (point.GetX() > pMax.GetX()) {
             pMax.SetX(point.GetX());
@@ -3824,6 +3854,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
         geometryNode_->SetFrameSize(SizeF());
+        geometryNode_->UpdateMargin(MarginPropertyF());
         isLayoutDirtyMarked_ = false;
         ACE_LAYOUT_TRACE_END()
         return;
@@ -4017,7 +4048,7 @@ bool FrameNode::SelfExpansive()
 
 bool FrameNode::SelfExpansiveToKeyboard()
 {
-    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     return opts && opts->ExpansiveToKeyboard();
 }
 
@@ -4057,6 +4088,16 @@ void FrameNode::ProcessAccessibilityVirtualNode()
         auto constraint = GetLayoutConstraint();
         virtualFrameNode->ApplyConstraint(constraint);
         ProcessOffscreenNode(virtualFrameNode);
+    }
+}
+
+void FrameNode::UpdateAccessibilityNodeRect()
+{
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (isFocus && !IsAccessibilityVirtualNode()) {
+        renderContext_->UpdateAccessibilityRoundRect();
     }
 }
 
@@ -4118,7 +4159,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
-        auto pipeline = GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
     }
@@ -4130,7 +4171,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    renderContext_->UpdateAccessibilityRoundRect();
+    UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -4182,6 +4223,10 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     if (needSyncRsNode) {
         pattern_->BeforeSyncGeometryProperties(config);
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
+        if (SystemProperties::GetSyncDebugTraceEnabled()) {
+            ACE_LAYOUT_TRACE_BEGIN("TriggerOnSizeChangeNode:[%s][id:%d]", GetTag().c_str(), GetId());
+            ACE_LAYOUT_TRACE_END()
+        }
         TriggerOnSizeChangeCallback();
     }
 
@@ -4257,7 +4302,6 @@ ChildrenListWithGuard FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
             child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         }
     }
-
     return children;
 }
 
@@ -4843,11 +4887,6 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
     }
 }
 
-void FrameNode::ChangeSensitiveStyle(bool isSensitive)
-{
-    pattern_->OnSensitiveStyleChange(isSensitive);
-}
-
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     UINode::AttachContext(context, recursive);
@@ -5007,6 +5046,11 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     cachedVisibleRectResult_ = { timestamp,
         { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
     return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+}
+
+void FrameNode::ChangeSensitiveStyle(bool isSensitive)
+{
+    pattern_->OnSensitiveStyleChange(isSensitive);
 }
 
 bool FrameNode::IsContextTransparent()
@@ -5311,23 +5355,6 @@ void FrameNode::TriggerShouldParallelInnerWith(
     }
 }
 
-void FrameNode::GetInspectorValue()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    if (GetTag() == V2::WEB_ETS_TAG) {
-        UiSessionManager::GetInstance().WebTaskNumsChange(1);
-        auto pattern = GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
-            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
-            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
-        };
-        pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
-    }
-#endif
-    UINode::GetInspectorValue();
-}
-
 void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
 {
     // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree
@@ -5416,6 +5443,23 @@ void FrameNode::OnNodeTransitionInfoUpdate()
     AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSITION_START);
 }
 
+void FrameNode::GetInspectorValue()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        UiSessionManager::GetInstance().WebTaskNumsChange(1);
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto cb = [](std::shared_ptr<JsonValue> value, int32_t webId) {
+            UiSessionManager::GetInstance().AddValueForTree(webId, value->ToString());
+            UiSessionManager::GetInstance().WebTaskNumsChange(-1);
+        };
+        pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
+    }
+#endif
+    UINode::GetInspectorValue();
+}
+
 void FrameNode::NotifyWebPattern(bool isRegister)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
@@ -5455,16 +5499,16 @@ void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, Notificat
     }
 }
 
-uint32_t FrameNode::GetWindowPatternType() const
-{
-    CHECK_NULL_RETURN(pattern_, 0);
-    return pattern_->GetWindowPatternType();
-}
-
 // for Grid refresh GridItems
 void FrameNode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
+}
+
+uint32_t FrameNode::GetWindowPatternType() const
+{
+    CHECK_NULL_RETURN(pattern_, 0);
+    return pattern_->GetWindowPatternType();
 }
 
 void FrameNode::ResetPredictNodes()

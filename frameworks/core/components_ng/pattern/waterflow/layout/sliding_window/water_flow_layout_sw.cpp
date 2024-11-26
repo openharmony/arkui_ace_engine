@@ -40,6 +40,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
     Init(size);
     if (!IsDataValid(info_, itemCnt_)) {
+        info_->isDataValid_ = false;
         return;
     }
     CheckReset();
@@ -64,12 +65,15 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
         TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Lanes not initialized, can't perform layout");
         return;
     }
-    if (!IsDataValid(info_, itemCnt_)) {
+    if (!info_->isDataValid_) {
         return;
     }
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
-    const int32_t cacheCount = props->GetCachedCountValue(1);
+    const int32_t cacheCount = props->GetCachedCountValue(info_->defCachedCount_);
+    if (!props->HasCachedCount()) {
+        info_->UpdateDefaultCachedCount();
+    }
     info_->BeginCacheUpdate();
     RecoverCacheItems(cacheCount);
 
@@ -174,15 +178,15 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
     if (updateIdx > -1) {
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
-            FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+            FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
+            return;
         } else {
             info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-        return;
     }
 
     const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
@@ -694,6 +698,7 @@ void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
         return;
     }
     auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(footer);
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
@@ -718,6 +723,9 @@ inline int32_t WaterFlowLayoutSW::nodeIdx(int32_t idx) const
 
 bool WaterFlowLayoutSW::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
+    if (!IsDataValid(info_, itemCnt_)) {
+        return false;
+    }
     cacheDeadline_ = deadline;
     wrapper_ = host;
     const int32_t start = info_->StartIndex();

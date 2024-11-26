@@ -125,7 +125,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(float value);
-    static void SetPixelRound(uint8_t value);
+    static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
@@ -164,7 +164,8 @@ public:
     static void* GetFrameNode();
     static void SetDragPreview(const NG::DragDropInfo& info);
     static void SetBorderImage(const RefPtr<BorderImage>& borderImage);
-    static void SetBorderImageSource(const std::string& bdImageSrc);
+    static void SetBorderImageSource(
+        const std::string& bdImageSrc, const std::string& bundleName = "", const std::string& moduleName = "");
 
     // visual
     static void SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect);
@@ -260,7 +261,8 @@ public:
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
-    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverFunc&& onHoverEventFunc);
@@ -747,7 +749,7 @@ public:
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
-    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
+    static void SetPixelRound(FrameNode* frameNode, uint16_t value);
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);

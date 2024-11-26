@@ -249,11 +249,7 @@ void SheetPresentationPattern::CheckBuilderChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scrollNode);
-    auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(builderNode);
     auto eventHub = builderNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -317,6 +313,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     scale_ = pipelineContext->GetFontScale();
+    InitFoldState();
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
@@ -345,15 +342,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the touch event.");
     };
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
-    auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(
-        [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
-            if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->isFoldStatusChanged_ = true;
-            }
-        });
-    UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
 void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
@@ -368,9 +356,6 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
-    if (HasFoldDisplayModeChangedCallbackId()) {
-        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
-    }
 }
 
 void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
@@ -1515,9 +1500,9 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
-    auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
-    if (windowGlobalRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx() &&
-        windowGlobalRect.Width() <= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsFoldable() && container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
 #else
     if (IsFold() && !sheetTheme->IsOnlyBottom()) {
 #endif
@@ -1879,7 +1864,7 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     // If ScrollHeight is larger than childHeight
     // there will be a scene that is still larger than childHeight after reducing Scrollheight to moving sheet up
     // At this point, even if JumpToPosition is negative, the Scroll will still not to scroll
-    auto buildContent = AceType::DynamicCast<FrameNode>(scroll->GetChildAtIndex(0));
+    auto buildContent = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_RETURN(buildContent, false);
     auto scrollHeight = scroll->GetGeometryNode() ? scroll->GetGeometryNode()->GetFrameSize().Height() : .0f;
     auto childHeight = buildContent->GetGeometryNode() ? buildContent->GetGeometryNode()->GetFrameSize().Height() : .0f;
@@ -1915,11 +1900,7 @@ float SheetPresentationPattern::GetFirstChildHeight() const
 
 void SheetPresentationPattern::SetColumnMinSize(bool reset)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scroll);
-    auto buildContent = AceType::DynamicCast<FrameNode>(scroll->GetChildAtIndex(0));
+    auto buildContent = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(buildContent);
     auto geometryNode = buildContent->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -2011,9 +1992,7 @@ float SheetPresentationPattern::GetFitContentHeight()
     auto titleColumn = DynamicCast<FrameNode>(sheetNode->GetFirstChild());
     CHECK_NULL_RETURN(titleColumn, 0.0f);
     auto titleGeometryNode = titleColumn->GetGeometryNode();
-    auto scrollNode = DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
-    CHECK_NULL_RETURN(scrollNode, 0.0f);
-    auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_RETURN(builderNode, 0.0f);
     auto builderGeometryNode = builderNode->GetGeometryNode();
     return builderGeometryNode->GetMarginFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
@@ -2099,13 +2078,20 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
     return overlay;
 }
 
-void SheetPresentationPattern::GetBuilderInitHeight()
+RefPtr<FrameNode> SheetPresentationPattern::GetFirstFrameNodeOfBuilder() const
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scroll);
-    auto buildContent = AceType::DynamicCast<FrameNode>(scroll->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(host, nullptr);
+    auto scrollNode = host->GetChildAtIndex(1);
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto buildNode = scrollNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(buildNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
+}
+
+void SheetPresentationPattern::GetBuilderInitHeight()
+{
+    auto buildContent = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(buildContent);
     auto geometryNode = buildContent->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -2383,6 +2369,18 @@ bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
         return false;
     }
     return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+}
+
+bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
+        preStyle.sheetMode == sheetStyle.sheetMode) {
+        return false;
+    }
+    return true;
 }
 
 void SheetPresentationPattern::OverlayDismissSheet()

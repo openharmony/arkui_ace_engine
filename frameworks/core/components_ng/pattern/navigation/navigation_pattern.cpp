@@ -335,7 +335,7 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
         static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
     if (foldStatus != currentFoldStatus_) {
         currentFoldStatus_ = foldStatus;
@@ -536,13 +536,18 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
 
 void NavigationPattern::SyncWithJsStackIfNeeded()
 {
-    if (!needSyncWithJsStack_ || !isFinishInteractiveAnimation_) {
+    if (!needSyncWithJsStack_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+            "not need SyncWithJsStack, needSyncWithJsStack_ %{public}d", needSyncWithJsStack_);
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
     needSyncWithJsStack_ = false;
+    if (!isFinishInteractiveAnimation_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "not need SyncWithJsStack, interactive animation: %{public}d", isFinishInteractiveAnimation_);
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
@@ -1800,8 +1805,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
                 pattern->RecoveryToLastStack(preDestination, topDestination);
+                pattern->SyncWithJsStackIfNeeded();
             }
-            pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
         };
@@ -2737,5 +2742,20 @@ void NavigationPattern::RemoveProxyById(uint64_t id)
             return;
         }
     }
+}
+
+void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    if (!NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty)) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation height is auto, content need to measure after pushAnimation ends");
+    auto contentNode = navigationNode->GetContentNode();
+    CHECK_NULL_VOID(contentNode);
+    contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

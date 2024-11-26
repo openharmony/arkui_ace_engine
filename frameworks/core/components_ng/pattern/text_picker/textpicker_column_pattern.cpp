@@ -518,12 +518,37 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
             textLayoutProperty->UpdateContent(optionValue.text_);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
+        UpdateTextAccessibilityProperty(textNode, virtualIndex, iter, virtualIndexValidate);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
     selectedIndex_ = currentIndex;
+}
+
+void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
+    std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
+{
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!NotLoopOptions() || virtualIndexValidate) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+        return;
+    }
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (virtualIndex == -1 && isFocus) {
+        auto nextTextNode = DynamicCast<FrameNode>(*(++iter));
+        CHECK_NULL_VOID(nextTextNode);
+        nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        --iter;
+    } else if (virtualIndex == static_cast<int32_t>(GetOptionCount()) && isFocus) {
+        auto preTextNode = DynamicCast<FrameNode>(*(--iter));
+        CHECK_NULL_VOID(preTextNode);
+        preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        ++iter;
+    }
 }
 
 void TextPickerColumnPattern::FlushCurrentImageOptions()
@@ -567,6 +592,7 @@ void TextPickerColumnPattern::FlushCurrentImageOptions()
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
+        UpdateTextAccessibilityProperty(rangeNode, virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -642,6 +668,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
+        UpdateTextAccessibilityProperty(linearLayoutNode, virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
@@ -657,25 +684,24 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
 
 void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
 {
-    if (!animationProperties_.size()) {
+    const size_t size = animationProperties_.size();
+    if (size == 0) {
         return;
     }
     if (isDown) {
-        for (size_t i = 0; i < animationProperties_.size(); i++) {
+        for (size_t i = 0; i < size; i++) {
             if (i > 0) {
                 animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
                 animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
                 animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
-
                 animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
                 animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
                 animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
             }
-            if (i + 1 == animationProperties_.size()) {
+            if (i + 1 == size) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
                 animationProperties_[i].downFontSize = Dimension();
-
                 animationProperties_[i].upColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
                 animationProperties_[i].currentColor =
@@ -684,12 +710,11 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() ? animationProperties_.size() - 1 : 0;; i--) {
+        for (size_t i = size - 1;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
                 animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
-
                 animationProperties_[i].upColor = Color();
                 animationProperties_[i].downColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
@@ -700,7 +725,6 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
                 animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
                 animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
                 animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
-
                 animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
                 animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
                 animationProperties_[i].downColor = animationProperties_[i - 1].downColor;

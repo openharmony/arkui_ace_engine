@@ -118,7 +118,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentIdealSize.SetMainSize(totalMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
-    layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountValue(1) * lanes_);
+    layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
 }
 
 float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
@@ -152,7 +152,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float crossSize = GetCrossAxisSize(size, axis_);
     CHECK_NULL_VOID(listLayoutProperty_);
     itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
-    SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountValue(1));
+    SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountWithDefault());
 
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         if (layoutDirection_ == TextDirection::RTL && axis_ == Axis::HORIZONTAL) {
@@ -359,6 +359,9 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     if (totalItemCount_ <= 0) {
+        if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
+            adjustReferenceDelta_ = totalMainSize_ - (headerMainSize_ + footerMainSize_);
+        }
         totalMainSize_ = headerMainSize_ + footerMainSize_;
         itemPosition_.clear();
         layoutedItemInfo_.reset();

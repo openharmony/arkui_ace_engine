@@ -275,6 +275,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSDatePicker>::StaticMethod("opacity", &JSDatePicker::JsOpacity);
     // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -457,6 +458,12 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
@@ -1311,6 +1318,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
+    JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1321,6 +1329,12 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
     CreateTimePicker(info, paramObject);
+}
+
+void JSTimePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TimePickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 void JSTimePicker::Loop(const JSCallbackInfo& info)

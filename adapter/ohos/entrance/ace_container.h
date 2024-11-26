@@ -668,7 +668,7 @@ public:
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
 
     bool NeedFullUpdate(uint32_t limitKey);
-    void NotifyDensityUpdate();
+    void NotifyDensityUpdate(double density);
     void NotifyDirectionUpdate();
 
     void SetRegisterComponents(const std::vector<std::string>& registerComponents)
@@ -689,6 +689,8 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
+
+    void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
 private:
     virtual bool MaybeRelease() override;

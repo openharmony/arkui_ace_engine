@@ -422,4 +422,19 @@ HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
     onReachEndEvent();
     EXPECT_TRUE(isCalled);
 }
+
+/**
+ * @tc.name: BoxSelectTest001
+ * @tc.desc: Test ScrollablePattern::HandleDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableEventTest, BoxSelectTest001, TestSize.Level1)
+{
+    GestureEvent info;
+    info.SetRawGlobalLocation(Offset(50, 50));
+    info.SetOffsetX(5);
+    info.SetOffsetY(10);
+    pattern_->HandleDragStart(info);
+    EXPECT_EQ(pattern_->mouseStartOffset_, OffsetF(45, 40));
+}
 } // namespace OHOS::Ace::NG

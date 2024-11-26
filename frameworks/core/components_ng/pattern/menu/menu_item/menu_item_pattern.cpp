@@ -348,16 +348,44 @@ void MenuItemPattern::ShowSubMenu()
     auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
+
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
         static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
 }
 
-void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
+RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode)
 {
+    CHECK_NULL_RETURN(customNode, nullptr);
     if (customNode->GetTag() == V2::MENU_ETS_TAG) {
         auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-        CHECK_NULL_VOID(frameNode);
+        return frameNode;
+    }
+    uint32_t depth = 0;
+    auto child = customNode->GetFrameChildByIndex(0, false);
+    while (child && depth < MAX_SEARCH_DEPTH) {
+        if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
+            continue;
+        }
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        child  = child->GetChildAtIndex(0);
+        ++depth;
+    }
+    return nullptr;
+}
+
+void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
+{
+    auto frameNode = GetSubMenu(customNode);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(props);
         auto pattern = frameNode->GetPattern<MenuPattern>();
@@ -379,7 +407,6 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SetClickMenuItemId(host->GetId());
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -390,6 +417,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     CHECK_NULL_VOID(menuWrapper);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode_ == SubMenuExpandingMode::STACK) {
+        SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         menuPattern->SetSubMenuShow();
@@ -688,6 +716,23 @@ void MenuItemPattern::OnClick()
     CloseMenu();
 }
 
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto menuWrapper = GetMenuWrapper();
+    // When menu wrapper exists, the pressed state is handed over to the menu wrapper
+    if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return;
+    }
+    // change menu item paint props on press
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
 void MenuItemPattern::NotifyPressStatus(bool isPress)
 {
     auto host = GetHost();
@@ -710,12 +755,6 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
     auto canChangeColor = !(expandingMode_ == SubMenuExpandingMode::STACK
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
-    if (IsCustomMenuItem()) {
-        if (isPress && menuWrapperPattern) {
-            menuWrapperPattern->SetLastTouchItem(host);
-        }
-        return;
-    }
     if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
@@ -1134,6 +1173,9 @@ void MenuItemPattern::AddClickableArea()
         !clickableArea_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto hostAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(hostAccessibilityProperty);
+        hostAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_VOID(clickableArea);
@@ -1369,8 +1411,40 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
     }
-    UpdateTextOverflow(textProperty);
+    UpdateFont(menuProperty, theme, isLabel);
+    textProperty->UpdateContent(content);
+    UpdateTextOverflow(textProperty, theme);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
+    RefPtr<SelectTheme>& theme)
+{
+    if (theme && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (theme->GetExpandDisplay()) {
+            textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textProperty->UpdateMaxLines(1);
+        } else {
+            textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        }
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textProperty->UpdateMaxLines(1);
+    }
+    UpdateMaxLinesFromTheme(textProperty);
+}
+
+void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto& node = isLabel ? label_ : content_;
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
@@ -1394,16 +1468,10 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
-    textProperty->UpdateContent(content);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty)
 {
-    textProperty->UpdateMaxLines(1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

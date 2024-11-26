@@ -132,6 +132,10 @@ public:
 
     virtual void RegisterBufferCallback() {}
 
+    virtual void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
+
+    virtual void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

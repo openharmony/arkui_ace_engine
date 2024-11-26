@@ -179,6 +179,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}
@@ -575,7 +579,7 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom) {}
 
-RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry)
 {
     return nullptr;
 }
@@ -858,6 +862,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
     return Dimension();
 }
 
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+}
+
 void PipelineBase::SetUiDvsyncSwitch(bool on)
 {
 }
@@ -896,5 +904,7 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
 void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
 
 void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
+NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
+NG::ScopedLayout::~ScopedLayout() {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

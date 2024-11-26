@@ -184,6 +184,8 @@ public:
     virtual void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) = 0;
 
+    void UpdateDefaultCachedCount();
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
@@ -191,6 +193,7 @@ public:
      */
     bool itemEnd_ = false;
     bool offsetEnd_ = false; // last item's bottom is in viewport
+    bool isDataValid_ = true;
 
     Axis axis_ = Axis::VERTICAL;
 
@@ -215,6 +218,8 @@ public:
     mutable std::unordered_map<int32_t, int32_t> segmentCache_;
     // margin of each segment
     std::vector<PaddingPropertyF> margins_;
+    // default cached count
+    int32_t defCachedCount_ = 1;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

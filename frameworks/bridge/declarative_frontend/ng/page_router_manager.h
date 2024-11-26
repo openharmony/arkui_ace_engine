@@ -35,8 +35,8 @@ namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
-using LoadPageByBufferCallback = std::function<bool(
-    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::function<void(const std::string&, int32_t)>&)>;
+using LoadPageByBufferCallback = std::function<bool(const std::shared_ptr<std::vector<uint8_t>>& content,
+    const std::function<void(const std::string&, int32_t)>&, const std::string& contentName)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId, const std::string&)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 using UpdateRootComponentCallback = std::function<bool()>;
@@ -183,6 +183,9 @@ protected:
     }
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
+    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStackByRouteName(const std::string& name) const;
+
+    void SetPageInfoRouteName(const RefPtr<EntryPageInfo>& info, bool isNamedRouterMode);
 
     void LoadOhmUrl(const RouterPageInfo& target);
     void PushOhmUrl(const RouterPageInfo& target);

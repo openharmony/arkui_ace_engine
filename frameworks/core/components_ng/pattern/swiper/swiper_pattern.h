@@ -641,6 +641,7 @@ private:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
+    bool InsideIndicatorRegion(const TouchLocationInfo& locationInfo);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
@@ -717,6 +718,7 @@ private:
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
+    void HandleVisibleChange(bool visible);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
     void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false,

@@ -206,12 +206,16 @@ public:
         } else {
             key = keyGenFunc_(params[paramType::Data], index);
         }
+
         auto expiringIter = expiringItems.find(key);
         if (expiringIter != expiringItems.end()) {
             info.first = key;
             info.second = expiringIter->second.second;
             expiringItems.erase(expiringIter);
-            return info;
+            // if info.second is null, the following ui node creation process is needed to fill info.second
+            if (info.second != nullptr) {
+                return info;
+            }
         }
 
         NG::ScopedViewStackProcessor scopedViewStackProcessor;

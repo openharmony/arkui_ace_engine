@@ -46,7 +46,6 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
-constexpr float SPRING_ACCURACY = 0.1f;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -1413,6 +1412,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select start");
     auto mouseOffsetX = static_cast<float>(info.GetRawGlobalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetRawGlobalLocation().GetY());
+    mouseOffsetX -= info.GetOffsetX();
+    mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
     if (!IsItemSelected(info)) {
         ClearMultiSelect();
@@ -3266,10 +3267,8 @@ float ScrollablePattern::GetNestedScrollVelocity()
     if (NearZero(nestedScrollVelocity_)) {
         return 0.0f;
     }
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    uint64_t currentVsync = pipeline->GetVsyncTime();
-    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
     if (diff >= MAX_VSYNC_DIFF_TIME) {
         nestedScrollVelocity_ = 0.0f;
     }

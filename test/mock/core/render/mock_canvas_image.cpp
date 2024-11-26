@@ -16,6 +16,7 @@
 #include "mock_canvas_image.h"
 
 #include "base/image/pixel_map.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
@@ -30,7 +31,7 @@ RefPtr<CanvasImage> CanvasImage::Create()
 
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
-    return nullptr;
+    return MakeRefPtr<PixelMapImage>(pixelMap);
 }
 
 } // namespace OHOS::Ace::NG

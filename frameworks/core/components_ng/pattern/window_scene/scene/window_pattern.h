@@ -76,6 +76,7 @@ protected:
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnRemoveBlank() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<FrameNode> appWindow_;
@@ -94,6 +95,7 @@ protected:
 
 private:
     void UpdateSnapshotWindowProperty();
+    bool CheckAndAddStartingWindowAboveLocked();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
 

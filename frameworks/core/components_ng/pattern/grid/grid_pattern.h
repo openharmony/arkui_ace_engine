@@ -252,6 +252,11 @@ public:
         return gridLayoutInfo_.axis_;
     }
 
+    int32_t GetDefaultCachedCount() const
+    {
+        return gridLayoutInfo_.defCachedCount_;
+    }
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

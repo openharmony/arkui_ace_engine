@@ -71,11 +71,6 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
-struct ReachEdge {
-    bool atStart = false;
-    bool atEnd = false;
-};
-
 struct ViewDataCommon {
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
     std::string pageUrl;
@@ -429,7 +424,6 @@ public:
     /**
      *  End of NestableScrollContainer implementations
      */
-    
     void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
@@ -672,12 +666,11 @@ public:
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-
+    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -688,11 +681,11 @@ public:
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
     bool GetActiveStatus() const;
+    void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
         return treeId_;
     }
-    void StartVibraFeedback(const std::string& vibratorType);
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
@@ -700,6 +693,11 @@ public:
     void SetImageOverlaySelectedStatus(bool isSelected)
     {
         imageOverlayIsSelected_ = isSelected;
+    }
+
+    bool IsPreviewImageNodeExist() const
+    {
+        return previewImageNodeId_.has_value();
     }
 
     void SetNewDragStyle(bool isNewDragStyle)
@@ -723,6 +721,8 @@ public:
         const WebElementType& type, const ResponseType& responseType);
 
     bool IsPreviewMenuNotNeedShowPreview();
+
+    bool GetAccessibilityVisible(int64_t accessibilityId);
 
 private:
     friend class WebContextSelectOverlay;
@@ -885,7 +885,7 @@ private:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
 
     void HandleTouchCancel(const TouchEventInfo& info);
-    
+
     void HandleTouchClickEventFromOverlay(const GestureEvent& info);
     RectF ChangeHandleHeight(
         const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
@@ -957,7 +957,6 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     bool IsDialogNested();
-    void UpdateFlingReachEdgeState(const float value, bool status);
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void SetTooltipTextLayoutPropertyInner(const RefPtr<PipelineContext>& pipeline,
         const std::string& tooltip, RefPtr<OverlayManager>& overlayManager);
@@ -1003,12 +1002,11 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
-    int32_t GetBufferSizeByDeviceType();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
+    int32_t GetBufferSizeByDeviceType();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1130,7 +1128,6 @@ private:
     TouchEventInfo touchEventInfo_{"touchEvent"};
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
-    ReachEdge isFlingReachEdge_ = { false, false };
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
@@ -1170,6 +1167,8 @@ private:
     bool imageOverlayIsSelected_ = false;
     int32_t densityCallbackId_ = 0;
     bool isLayoutModeChanged_ = false;
+    float touchPointX = 0;
+    float touchPointY = 0;
     bool isDragEnd_ = false;
 
 protected:

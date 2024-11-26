@@ -118,7 +118,6 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
-
     UpdateMenuProperty(menuItem, menuItemProps);
 }
 

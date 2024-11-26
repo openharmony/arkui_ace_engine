@@ -80,6 +80,8 @@ void TextStyle::UpdateColorByResourceId()
 {
     textColor_.UpdateColorByResourceId();
     textDecorationColor_.UpdateColorByResourceId();
+    std::for_each(renderColors_.begin(), renderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+    std::for_each(textShadows_.begin(), textShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
 }
 
 std::string TextStyle::ToString() const

@@ -56,6 +56,7 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
+        InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
@@ -152,6 +153,7 @@ public:
     }
 
     void SetSliderValue(double value, int32_t mode);
+    void InitAccessibilityVirtualNodeTask();
 
 private:
     void OnAttachToFrameNode() override;
@@ -231,6 +233,7 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
@@ -240,6 +243,7 @@ private:
     void HandleTextOnAccessibilityFocusCallback();
     void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
+    void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();
     SizeF GetStepPointAccessibilityVirtualNodeSize();
@@ -308,6 +312,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+    bool isTouchUpFlag_ = false;
 
     // tip Parameters
     bool bubbleFlag_ = false;
@@ -317,11 +322,12 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
 
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-    int64_t lastAccessibilityValueTime_ = 0;
+    uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);

@@ -102,6 +102,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_hour.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_minute.png" desc="自研的二进制图片"/>
                 <filteritem type="filepath" name="frameworks/base/resource/binary/fa_clock_widget_second.png" desc="自研的二进制图片"/>
+				<filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc=" 自研的音振效果文件"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>

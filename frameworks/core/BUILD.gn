@@ -51,6 +51,7 @@ template("ace_core_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -90,6 +91,7 @@ template("ace_core_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
@@ -631,6 +633,7 @@ template("ace_core_ng_source_set") {
       # animation
       "animation/animatable_data.cpp",
       "animation/animatable_properties.cpp",
+      "animation/animation_pub.cpp",
       "animation/animation_util.cpp",
       "animation/animator.cpp",
       "animation/animator_group.cpp",
@@ -667,6 +670,7 @@ template("ace_core_ng_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",

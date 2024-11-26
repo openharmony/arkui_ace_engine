@@ -143,7 +143,7 @@ public:
         popAnimations_.clear();
     }
 
-    bool CheckCanHandleBack();
+    bool CheckCanHandleBack(bool& isEntry);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
@@ -211,7 +211,7 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
     RefPtr<FrameNode> GetTopDestination();
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);

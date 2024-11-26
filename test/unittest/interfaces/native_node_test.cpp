@@ -1460,6 +1460,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_TEXT_FONT, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_FONT_FAMILY, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_CONTENT, &fontItem);
+    nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem);
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_TEXT_HALF_LEADING, &item);
     decoration[2].i32 = -1;

@@ -54,7 +54,7 @@ public:
         return navDestinationNode_;
     }
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void OnOffscreenProcess(bool recursive) override;

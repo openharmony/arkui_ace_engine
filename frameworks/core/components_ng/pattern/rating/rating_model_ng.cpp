@@ -36,7 +36,7 @@ void RatingModelNG::Create(double rating, bool indicator)
 
 void RatingModelNG::SetRatingScore(double value)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
     ACE_UPDATE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, value);
 }
 
@@ -153,7 +153,6 @@ void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&
 
 void RatingModelNG::SetChangeValue(FrameNode* frameNode, double value)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRatingScore(value);

@@ -198,6 +198,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
     JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
+    JSClass<JSTextPicker>::StaticMethod("opacity", &JSTextPicker::JsOpacity);
 
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -227,6 +228,12 @@ void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+}
+
+void JSTextPicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)

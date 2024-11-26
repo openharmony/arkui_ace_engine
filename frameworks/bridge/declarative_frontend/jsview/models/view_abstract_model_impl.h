@@ -85,7 +85,7 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override {}
 
     void SetLayoutPriority(int32_t priority) override;
-    void SetPixelRound(uint8_t value) override;
+    void SetPixelRound(uint16_t value) override;
     void SetLayoutWeight(float value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
@@ -181,7 +181,8 @@ public:
     void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
     {}
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override {}
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;

@@ -233,11 +233,11 @@ protected:
     RefPtr<FrameNode> GetMenuWrapper();
 
 private:
-    friend class ServiceCollaborationMenuAceHelper;
+friend class ServiceCollaborationMenuAceHelper;
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info) {};
+    virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
     {
@@ -252,7 +252,9 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
-    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -310,6 +312,7 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
+
     RefPtr<FrameNode> embeddedMenu_ = nullptr;
     RefPtr<FrameNode> clickableArea_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;

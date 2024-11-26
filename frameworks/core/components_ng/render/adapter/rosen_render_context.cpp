@@ -111,6 +111,10 @@ constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
+constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                    static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -256,6 +260,10 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
+        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
+    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -269,7 +277,6 @@ void RosenRenderContext::DetachModifiers()
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
     }
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }
@@ -900,22 +907,6 @@ void RosenRenderContext::SetBackBlurFilter()
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
-void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
-{
-    if (GetBackBlurStyle().has_value() &&
-        GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto blurStyle = GetBackBlurStyle().value();
-        blurStyle.isWindowFocused = isFocused;
-        UpdateBackBlurStyle(blurStyle);
-    }
-    if (GetBackgroundEffect().has_value() &&
-        GetBackgroundEffect()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto effect = GetBackgroundEffect().value();
-        effect.isWindowFocused = isFocused;
-        UpdateBackgroundEffect(effect);
-    }
-}
-
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -943,38 +934,6 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle)
-{
-    if (!bgBlurStyle.has_value()) {
-        return false;
-    }
-    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
-    if (bgBlurStyle->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(bgBlurStyle->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
-{
-    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
-    if (efffectOption->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(efffectOption->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -992,11 +951,6 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
-
-    if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
-        rsNode_->SetBackgroundFilter(nullptr);
-        return;
-    }
     SetBackBlurFilter();
 }
 
@@ -1009,10 +963,6 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
     groupProperty->propEffectOption = effectOption;
     if (!effectOption.has_value()) {
-        return;
-    }
-    if (!UpdateBlurBackgroundColor(effectOption)) {
-        rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
     auto context = PipelineBase::GetCurrentContext();
@@ -2256,6 +2206,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -2362,6 +2313,19 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
+        auto context = GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
+            [self = WeakClaim(this)](double density) {
+            auto renderContext = self.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            auto borderRadius = renderContext->GetBorderRadius();
+            if (borderRadius.has_value()) {
+                renderContext->SetBorderRadius(borderRadius.value());
+            }
+        });
+    }
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2795,6 +2759,13 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
+    auto firstCallback = callback;
+    SnapshotParam firstParam;
+    firstParam.delay = 0;
+    firstParam.checkImageStatus = true;
+    firstParam.options.waitUntilRenderFinished = true;
+    NG::ComponentSnapshot::Create(customNode, std::move(firstCallback), false, firstParam, true);
+    
     SnapshotParam param;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
@@ -3191,7 +3162,7 @@ void RosenRenderContext::RoundToPixelGrid()
     }
 }
 
-void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
+void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
 {
     CHECK_NULL_VOID(rsNode_);
     auto frameNode = GetHost();
@@ -3203,14 +3174,14 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
     float nodeHeight = geometryNode->GetFrameSize().Height();
     float absoluteRight = relativeLeft + nodeWidth;
     float absoluteBottom = relativeTop + nodeHeight;
-    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
     // round node
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
@@ -3296,7 +3267,7 @@ void RosenRenderContext::OnePixelRounding()
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
 }
 
-void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
+void RosenRenderContext::OnePixelRounding(uint16_t flag)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -3309,23 +3280,27 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
     float roundToPixelErrorY = 0.0f;
     float absoluteRight = relativeLeft + nodeWidth;
     float absoluteBottom = relativeTop + nodeHeight;
-    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool noRoundLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool noRoundTop = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool noRoundRight = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    bool noRoundBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 
-    float nodeLeftI = OnePixelValueRounding(relativeLeft, isRound, ceilLeft, floorLeft);
-    float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
+    float nodeLeftI = OnePixelValueRounding(relativeLeft, !noRoundLeft, ceilLeft, floorLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop, !noRoundTop, ceilTop, floorTop);
     roundToPixelErrorX += nodeLeftI - relativeLeft;
     roundToPixelErrorY += nodeTopI - relativeTop;
     geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
 
-    float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
-    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, isRound, ceilRight, floorRight);
+    float nodeWidthI = OnePixelValueRounding(absoluteRight, !noRoundRight, ceilRight, floorRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, !noRoundRight, ceilRight, floorRight);
     roundToPixelErrorX += nodeWidthI - nodeWidth;
     if (roundToPixelErrorX > 0.5f) {
         nodeWidthI -= 1.0f;
@@ -3340,8 +3315,8 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         nodeWidthI = nodeWidthTemp;
     }
 
-    float nodeHeightI = OnePixelValueRounding(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
-    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, isRound, ceilBottom, floorBottom);
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom, !noRoundBottom, ceilBottom, floorBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, !noRoundBottom, ceilBottom, floorBottom);
     roundToPixelErrorY += nodeHeightI - nodeHeight;
     if (roundToPixelErrorY > 0.5f) {
         nodeHeightI -= 1.0f;
@@ -3472,6 +3447,7 @@ void RosenRenderContext::SetPositionToRSNode()
             rect.Width(), rect.Height());
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
@@ -4420,6 +4396,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::CleanTransition()
@@ -5340,6 +5317,12 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
+        const auto& groupProperty = GetOrCreateBackground();
+        if (groupProperty->propEffectOption.has_value()) {
+            auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
+            DumpLog::GetInstance().AddDesc(
+                 std::string("backgroundEffect:").append(backgroundEffect));
+        }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(
                 std::string("CameraDistance:")
@@ -5746,15 +5729,19 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
-    if (!host->IsVisible() && !host->IsDisappearing()) {
+    if (!host->IsVisible()) {
         // trigger transition through visibility
-        if (transitionOutCallback_) {
-            transitionOutCallback_();
+        if (host->IsOnMainTree()) {
+            if (transitionOutCallback_) {
+                transitionOutCallback_();
+            }
+            parent->MarkNeedSyncRenderTree();
+            parent->RebuildRenderContextTree();
+            FireTransitionUserCallback(false);
+            return;
         }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
-        FireTransitionUserCallback(false);
-        return;
     }
     RefPtr<UINode> breakPointChild = host;
     RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
@@ -6289,7 +6276,7 @@ void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
     rsNode_->MarkNodeGroup(isNodeGroup);
 }
 
-void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
+void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6297,14 +6284,13 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (!SystemProperties::GetPixelRoundEnabled()) {
+        //isRound is the switch of pixelRound of lower version
         isRound = false;
+        //flag is the switch of pixelRound of upper version
+        flag = NO_FORCE_ROUND;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (isRound && flag == 0) {
-            OnePixelRounding(); // call OnePixelRounding without param to improve performance
-        } else {
-            OnePixelRounding(isRound, flag);
-        }
+        OnePixelRounding(flag);
     } else {
         if (isRound && flag == 0) {
             RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance

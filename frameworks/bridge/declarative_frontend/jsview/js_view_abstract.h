@@ -145,7 +145,6 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
-    static void ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
@@ -230,6 +229,7 @@ public:
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
     static void ParseBorderImageLengthMetrics(
         const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
+    static void UpdateGradientWithDirection(NG::Gradient& lineGradient, NG::GradientDirection direction);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset);
     static void JsUseEffect(const JSCallbackInfo& info);
     static void JsUseShadowBatching(const JSCallbackInfo& info);

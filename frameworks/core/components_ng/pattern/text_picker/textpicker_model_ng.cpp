@@ -1168,7 +1168,8 @@ std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)
     for (auto& valueRet : values) {
         result.append(valueRet + ';');
     }
-    result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+    const size_t length = result.length();
+    result = result.substr(0, length > 0 ? length - 1 : 0);
     return result;
 }
  
@@ -1213,6 +1214,17 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
+}
+
+void TextPickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
 
 } // namespace OHOS::Ace::NG

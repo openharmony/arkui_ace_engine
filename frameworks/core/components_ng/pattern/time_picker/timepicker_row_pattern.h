@@ -86,6 +86,17 @@ public:
     {
         return isShowInDialog_;
     }
+
+    void SetIsShowInDatePickerDialog(bool isShowInDatePickerDialog)
+    {
+        isShowInDatePickerDialog_ = isShowInDatePickerDialog;
+    }
+
+    bool GetIsShowInDatePickerDialog() const
+    {
+        return isShowInDatePickerDialog_;
+    }
+    
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
@@ -546,6 +557,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -605,6 +621,8 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
 
+    double curOpacity_ = 1.0;
+
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 
     WeakPtr<FrameNode> buttonTitleNode_;
@@ -627,6 +645,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
+    bool isShowInDatePickerDialog_ = false;
 };
 } // namespace OHOS::Ace::NG
 

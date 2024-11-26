@@ -139,7 +139,7 @@ public:
     static constexpr char WINDOW_TITLE_BAR_RECOVER[] = "WINDOW_TITLE_BAR_RECOVER";
 
     // PC start app from transition
-    static constexpr char LAUNCHER_APP_LAUNCHE_FROM_TRANSITION[] = "LAUNCHER_APP_LAUNCHE_FROM_TRANSITION";
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_TRANSITION[] = "LAUNCHER_APP_LAUNCH_FROM_TRANSITION";
 
     // navigation interactive animation
     static constexpr char ABILITY_OR_PAGE_SWITCH_INTERACTIVE[] = "ABILITY_OR_PAGE_SWITCH_INTERACTIVE";

@@ -502,13 +502,25 @@ public:
         onAccessibilityHoverCallback_ = onAccessibilityHoverCallback;
     }
 
+    void SetPenHoverCallback(const OnHoverFunc& onPenHoverEventCallback)
+    {
+        onPenHoverEventCallback_ = onPenHoverEventCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
 
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
+    bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
     bool IsAccessibilityHoverTarget()
     {
         return onAccessibilityHoverCallback_ != nullptr;
+    }
+
+    bool IsPenHoverTarget() const
+    {
+        return onPenHoverEventCallback_ != nullptr;
     }
 
     bool HandleHoverEvent(bool isHovered)
@@ -535,6 +547,7 @@ private:
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
+    OnHoverFunc onPenHoverEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

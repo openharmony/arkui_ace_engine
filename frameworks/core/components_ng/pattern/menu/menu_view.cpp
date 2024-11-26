@@ -63,22 +63,6 @@ const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
-void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
-{
-    CHECK_NULL_VOID(customNode);
-    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    if (frameNode) {
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        gestureEventHub->SetDragForbiddenForcely(true);
-    }
-    for (const auto& child : customNode->GetChildren()) {
-        SetSelfAndChildDraggableFalse(child);
-    }
-}
-
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
 {
     CHECK_NULL_VOID(previewCustomNode);
@@ -109,6 +93,9 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
     previewNode->AddChild(previewCustomNode);
 
     CHECK_NULL_VOID(menuParam.isShowHoverImage);
+    auto pipeline = previewNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    ScopedLayout scope(pipeline);
     previewNode->Measure(layoutProperty->GetLayoutConstraint());
     auto previewSize = previewNode->GetGeometryNode()->GetFrameSize();
     previewPattern->SetIsShowHoverImage(true);
@@ -117,8 +104,6 @@ void CustomPreviewNodeProc(const RefPtr<FrameNode>& previewNode, const MenuParam
 
     auto previewScaleTo = menuParam.previewAnimationOptions.scaleTo;
     CHECK_NULL_VOID(previewScaleTo);
-    auto pipeline = previewNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     previewScaleTo = LessOrEqual(previewScaleTo, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : previewScaleTo;
@@ -181,10 +166,6 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     textProperty->UpdateCalcLayoutProperty(layoutConstraint);
-
-    auto eventHub = textNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabled(false);
 
     textNode->MountToParent(column);
     textNode->MarkModifyDone();
@@ -1183,7 +1164,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
-        SetSelfAndChildDraggableFalse(previewCustomNode);
         MountTextNode(wrapperNode, previewCustomNode);
     }
     return wrapperNode;

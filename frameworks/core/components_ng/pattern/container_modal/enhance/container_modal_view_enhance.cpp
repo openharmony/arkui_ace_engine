@@ -294,7 +294,6 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
         CHECK_NULL_VOID(pattern);
         if (!hover) {
             ResetHoverTimer();
-            pattern->SetIsHoveredMenu(false);
             return;
         }
         if (sIsMenuPending_ || sIsForbidMenuEvent_ || !pattern->GetIsFocus()) {

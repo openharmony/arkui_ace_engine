@@ -151,7 +151,8 @@ constexpr float TEXT_RECT_TOP_ONE = 10.0f;
 constexpr float TEXT_RECT_TOP_TWO = 20.0f;
 constexpr float TEXT_CONTENT_SIZE = 50.0f;
 const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
-                                       "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
+    "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
+    "\"HarmonyOS Sans\"}";
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;

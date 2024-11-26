@@ -314,14 +314,9 @@ void NavBarPattern::MountTitleBar(
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
     BuildTitleBar(hostNode, titleBarNode);
     bool hideTitleBar = navBarLayoutProperty->GetHideTitleBarValue(false);
-    /**
-     * if titlebar is the first time to hide/display
-     * doesn't require animation or isn't currently being animated and the
-     * hidden/display status hasn't changed.
-     */
+    // At the initial state, animation is not required.
     if (!currHideTitleBar_.has_value() ||
-        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
-        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false)) {
         currHideTitleBar_ = hideTitleBar;
         HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
         return;
@@ -329,9 +324,9 @@ void NavBarPattern::MountTitleBar(
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode();
 
-    //set condition for titlebar animation
+    // Animation is needed only when the status changed.
+    needRunTitleBarAnimation = currHideTitleBar_.value() != hideTitleBar;
     currHideTitleBar_ = hideTitleBar;
-    needRunTitleBarAnimation = true;
 }
 
 OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
@@ -460,6 +455,10 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (preWidth_.has_value() && preWidth_.value() != width) {
+        AbortBarAnimation();
+    }
+    preWidth_ = width;
     // change menu num in landscape and orientation
     do {
         if (navBarNode->GetPrevMenuIsCustomValue(false)) {

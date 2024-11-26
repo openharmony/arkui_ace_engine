@@ -381,11 +381,7 @@ public:
         return developerEnabled_;
     }
 
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-        developerEnabled_ = enabled;
-    }
+    void SetEnabled(bool enabled);
 
     void SetEnabledInternal(bool enabled)
     {

@@ -139,7 +139,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
         const auto cacheItemIter = node4key_.find(key);
         if (cacheItemIter != node4key_.end()) {
             // TS onGetKeys4Range_ has made any needed updates for this key -> UINode
-            cacheItemIter->second.isValid=true;
+            cacheItemIter->second.isValid = true;
         }
         from1++;
     }
@@ -161,8 +161,8 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d", static_cast<int32_t>(index));
 
-    const auto& key = GetKey4Index(index, false);
-    const auto& node4Key = GetCachedNode4Key(key);
+    const auto key = GetKey4Index(index, false);
+    const auto node4Key = GetCachedNode4Key(key);
     const auto& ttype = GetTType4Index(index);
 
     if (!key.has_value() || !ttype.has_value() || !node4Key.has_value()) {
@@ -205,6 +205,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 
 void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
 {
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "AddKeyToL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.emplace(key);
 
     if (!shouldTriggerReuse) {
@@ -228,9 +229,16 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     child->OnReuse();
 }
 
+void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index,
+    bool shouldTriggerRecycle)
+{
+    onUpdateNode_(key, index);
+    AddKeyToL1(key, shouldTriggerRecycle);
+}
 
  void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
  {
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "RemoveKeyFromL1 key:%{public}s", key.c_str());
     activeNodeKeysInL1_.erase(key);
 
     if (!shouldTriggerRecycle) {
@@ -252,6 +260,23 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     // fire OnRecycle to trigger node pattern handlers
     TAG_LOGD(AceLogTag::ACE_REPEAT, "OnRecycle() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
     child->OnRecycle();
+}
+
+bool RepeatVirtualScrollCaches::CheckTTypeChanged(uint32_t index)
+{
+    std::string oldTType;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        oldTType = iter->second;
+    }
+
+    FetchMoreKeysTTypes(index, index, false);
+
+    std::string newTType;
+    if (auto iter = ttype4index_.find(index); iter != ttype4index_.end()) {
+        newTType = iter->second;
+    }
+
+    return oldTType != newTType;
 }
 
 /** scenario:
@@ -302,13 +327,13 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no ttype for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const auto& ttype = iterTType->second;
+    const auto ttype = iterTType->second;
     const auto iterNewKey = key4index_.find(forIndex);
     if (iterNewKey == key4index_.end()) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "no key for index %{public}d",  static_cast<int32_t>(forIndex));
         return nullptr;
     }
-    const std::string& forKey = iterNewKey->second;
+    const std::string forKey = iterNewKey->second;
 
     const auto& oldKey = GetL2KeyToUpdate(ttype);
     if (!oldKey) {

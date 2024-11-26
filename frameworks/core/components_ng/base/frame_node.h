@@ -247,6 +247,11 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
     void CleanVisibleAreaInnerCallback()
     {
         eventHub_->CleanVisibleAreaCallback(false);
@@ -490,7 +495,7 @@ public:
         AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive) override;
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     bool RenderCustomChild(int64_t deadline) override;
@@ -973,6 +978,8 @@ public:
         return false;
     }
 
+    void UpdateAccessibilityNodeRect();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -1091,6 +1098,21 @@ public:
     void RemoveCustomProperty(const std::string& key);
 
     LayoutConstraintF GetLayoutConstraint() const;
+
+    WeakPtr<TargetComponent> GetTargetComponent() const
+    {
+        return targetComponent_;
+    }
+
+    void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
+    {
+        exposeInnerGestureFlag_ = exposeInnerGestureFlag;
+    }
+
+    bool GetExposeInnerGestureFlag() const
+    {
+        return exposeInnerGestureFlag_;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1220,6 +1242,9 @@ private:
 
     void ResetPredictNodes();
 
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -1315,6 +1340,8 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
+    bool exposeInnerGestureFlag_ = false;
+
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
@@ -1328,7 +1355,7 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
         RectF lastFrameRect;

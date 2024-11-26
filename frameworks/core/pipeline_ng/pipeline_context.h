@@ -43,6 +43,7 @@
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -138,6 +139,10 @@ public:
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
+    void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
+    void HandlePenHoverOut(const TouchEvent& point) override;
 
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
@@ -257,7 +262,7 @@ public:
 
     bool OnBackPressed();
 
-    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> FindNavigationNodeToHandleBack(const RefPtr<UINode>& node, bool& isEntry);
 
     void AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty);
 
@@ -700,7 +705,6 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
 
@@ -729,6 +733,11 @@ public:
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
         return navigationMgr_;
+    }
+
+    const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
+    {
+        return formVisibleMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -771,6 +780,7 @@ public:
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
     bool IsContainerModalVisible() override;
+
     void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
     {
         isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
@@ -821,7 +831,7 @@ public:
     void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
-    
+
     void SetVsyncListener(VsyncCallbackFun vsync)
     {
         vsyncListener_ = std::move(vsync);
@@ -889,6 +899,16 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    bool IsDirtyNodesEmpty() const override
+    {
+        return dirtyNodes_.empty();
+    }
+
+    bool IsDirtyLayoutNodesEmpty() const override
+    {
+        return taskScheduler_->IsDirtyLayoutNodesEmpty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe() const;
     void AnimateOnSafeAreaUpdate();
@@ -901,6 +921,8 @@ public:
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
     void RegisterAttachedNode(UINode* uiNode);
     void RemoveAttachedNode(UINode* uiNode);
+
+    void PostKeyboardAvoidTask();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1030,7 +1052,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::set<int32_t> onWindowFocusChangedCallbacks_;
+    std::list<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -1141,6 +1163,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
@@ -1161,6 +1184,22 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     std::unordered_set<UINode*> attachedNodeSet_;
+
+    friend class ScopedLayout;
+};
+
+/**
+ * @description: only protect isLayouting_ flag in pipeline and
+ * the user needs to guarantee that current layout is not nested
+ */
+class ACE_FORCE_EXPORT ScopedLayout final {
+public:
+    ScopedLayout(PipelineContext* pipeline);
+    ~ScopedLayout();
+
+private:
+    PipelineContext* pipeline_ = nullptr;
+    bool isLayouting_ = false;
 };
 } // namespace OHOS::Ace::NG
 

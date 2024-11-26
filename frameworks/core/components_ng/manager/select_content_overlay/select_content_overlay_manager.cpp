@@ -511,13 +511,6 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
             node->ShowSelectOverlay(animation);
         }
     }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-    });
 }
 
 std::list<RefPtr<UINode>>::const_iterator SelectContentOverlayManager::FindSelectOverlaySlot(
@@ -682,21 +675,6 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     parentNode->RemoveChild(overlay);
     parentNode->MarkNeedSyncRenderTree();
     parentNode->RebuildRenderContextTree();
-    auto rootNode = GetSelectOverlayRoot();
-    if (rootNode != DynamicCast<FrameNode>(parentNode)) {
-        return;
-    }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(parentNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        if (AceType::InstanceOf<FrameNode>(hostNode)) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
-            CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-        }
-    });
 }
 
 void SelectContentOverlayManager::ClearAllStatus()
@@ -1045,5 +1023,14 @@ void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->SetIsHandleLineShow(isShow);
+}
+
+void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
 }
 } // namespace OHOS::Ace::NG

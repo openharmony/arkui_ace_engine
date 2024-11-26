@@ -341,6 +341,10 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 
     napi_value jsDisplaySync = nullptr;
     displaySync->NapiSerializer(env, jsDisplaySync);
+    if (!jsDisplaySync) {
+        delete displaySync;
+        return nullptr;
+    }
 
     napi_property_descriptor resultFuncs[] = {
         DECLARE_NAPI_FUNCTION("setExpectedFrameRateRange", JSSetExpectedFrameRateRange),

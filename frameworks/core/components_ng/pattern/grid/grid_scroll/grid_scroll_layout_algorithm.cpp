@@ -93,7 +93,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // update cache info.
-    const int32_t cacheCnt = static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_);
+    const int32_t cacheCnt = static_cast<int32_t>(
+        gridLayoutProperty->GetCachedCountValue(gridLayoutInfo_.defCachedCount_) * crossCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     gridLayoutInfo_.lastMainSize_ = mainSize;
@@ -296,7 +297,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(gridLayoutInfo_.defCachedCount_);
+    if (!gridLayoutProperty->HasCachedCount()) {
+        gridLayoutInfo_.UpdateDefaultCachedCount();
+    }
     if (!gridLayoutInfo_.hasMultiLineItem_) {
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_);
     }
@@ -1264,7 +1268,7 @@ void GridScrollLayoutAlgorithm::SkipLargeOffset(float mainSize, LayoutWrapper* l
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(gridLayoutInfo_.defCachedCount_);
     cacheCount = std::max(cacheCount, 1);
     SkipForwardLines(cacheCount * mainSize, layoutWrapper);
     SkipBackwardLines(cacheCount * mainSize, layoutWrapper);
@@ -1977,7 +1981,7 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
 void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(gridLayoutInfo_.defCachedCount_);
     if (gridLayoutInfo_.reachEnd_ || cacheCount == 0) {
         return;
     }
@@ -2315,6 +2319,9 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         isChildrenUpdated_ = true;
         if (gridLayoutInfo_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
+        } else {
+            gridLayoutInfo_.startIndex_ = 0;
+            gridLayoutInfo_.startMainLineIndex_ = 0;
         }
         if (IsScrollToEndLine()) {
             gridLayoutInfo_.currentOffset_ =

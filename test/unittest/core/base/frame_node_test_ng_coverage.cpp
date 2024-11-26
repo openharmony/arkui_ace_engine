@@ -1257,8 +1257,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
+    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->TriggerVisibleAreaChangeCallback(0, false);
+    frameNode->eventHub_->visibleAreaUserCallback_.callback = nullptr;
     frameNode->eventHub_->visibleAreaInnerCallback_ = callbackInfo;
-
+    frameNode->TriggerVisibleAreaChangeCallback(0, false);
+    EXPECT_NE(frameNode->eventHub_, nullptr);
+    frameNode->isCalculateInnerVisibleRectClip_ = true;
+    frameNode->lastInnerVisibleRatio_ = 10.0;
+    frameNode->lastVisibleRatio_ = 10.0;
+    frameNode->TriggerVisibleAreaChangeCallback(0, true);
+    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
     /**
      * @tc.steps: step2. create layoutProperty.
      */
@@ -1272,6 +1281,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->TriggerVisibleAreaChangeCallback(false);
     frameNode->ProcessAllVisibleCallback(ratios, callbackInfo, 1.0, 0.0, true);
+    EXPECT_NE(frameNode->eventHub_, nullptr);
 }
 
 /**

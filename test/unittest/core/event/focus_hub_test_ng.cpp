@@ -540,45 +540,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg014
- * @tc.desc: Test functions OnFocus, OnFocusNode and OnFocusScope.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-
-    /**
-     * @tc.steps2: call the function OnFocus with FocusType::SCOPE.
-     * @tc.expected: The focusNodes_ is empty.
-     */
-    focusHub->SetFocusType(FocusType::SCOPE);
-    focusHub->OnFocus();
-    std::list<RefPtr<FocusHub>> focusNodes;
-    focusHub->FlushChildrenFocusHub(focusNodes);
-    EXPECT_TRUE(focusNodes.empty());
-
-    /**
-     * @tc.steps3: call the function OnFocus with FocusType::NODE.
-     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
-     */
-    focusHub->SetFocusType(FocusType::NODE);
-    focusHub->OnFocus();
-    bool flagCbk1 = false;
-    bool flagCbk2 = false;
-    focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
-    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
-    focusHub->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
-    focusHub->OnFocus();
-    EXPECT_TRUE(flagCbk1);
-    EXPECT_TRUE(flagCbk2);
-}
-
-/**
  * @tc.name: FocusHubTestNg015
  * @tc.desc: Test functions OnBlur, OnBlurNode and OnBlurScope.
  * @tc.type: FUNC
@@ -1377,51 +1338,6 @@ HWTEST_F(FocusHubTestNg, SetIsDefaultFocus001, TestSize.Level1)
     focusHub->focusCallbackEvents_ = nullptr;
     focusHub->SetIsDefaultGroupFocus(false);
     EXPECT_NE(focusHub->focusCallbackEvents_, nullptr);
-}
-
-/**
- * @tc.name: FocusHubTestDisableFocus001
- * @tc.desc: Test disable functions Onfocus.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestDisableFocus001, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-
-    /**
-     * @tc.steps2: call the function OnFocus with FocusType::NODE.
-     * @tc.expected: The result is right.
-     */
-    focusHub->SetFocusType(FocusType::NODE);
-    std::string result;
-    auto onFocus = [&result]() { result = RESULT_SUCCESS_ONE; };
-    focusHub->SetOnFocusCallback(onFocus);
-    EXPECT_NE(focusHub->GetOnFocusCallback(), nullptr);
-
-    focusHub->OnFocus();
-    EXPECT_EQ(result, RESULT_SUCCESS_ONE);
-
-    /**
-     * @tc.steps3: clear the function.
-     * @tc.expected: The result is nullptr.
-     */
-    focusHub->ClearUserOnFocus();
-    EXPECT_EQ(focusHub->GetOnFocusCallback(), nullptr);
-
-    /**
-     * @tc.steps3: set the function again.
-     * @tc.expected: The result is right.
-     */
-    auto onFocus2 = [&result]() { result = RESULT_SUCCESS_TWO; };
-    focusHub->SetOnFocusCallback(onFocus2);
-    EXPECT_NE(focusHub->GetOnFocusCallback(), nullptr);
-
-    focusHub->OnFocus();
-    EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
 
 /**

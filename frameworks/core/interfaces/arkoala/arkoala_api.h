@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 126
+#define ARKUI_FULL_API_VERSION 128
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 126
+#define ARKUI_NODE_API_VERSION 128
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1419,7 +1419,6 @@ struct ArkUIDragAction {
     bool hasTouchPoint = false;
     void** pixelmapNativeList;
 };
-
 struct ArkUI_SystemFontStyleEvent {
     ArkUI_Float64 fontSize;
     ArkUI_Float64 fontWeight;
@@ -1536,7 +1535,8 @@ struct ArkUICommonModifier {
         const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
+        ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
         ArkUI_Bool isAlign, ArkUI_Int32 size);
@@ -4034,6 +4034,7 @@ struct ArkUITextPickerModifier {
     ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Int32 dUnit);
+    void (*resetTextPickerDividerNull)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {

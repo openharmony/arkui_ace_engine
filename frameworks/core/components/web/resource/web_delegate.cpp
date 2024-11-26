@@ -1367,7 +1367,12 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     return;
                 }
 
-                result = focusHub->RequestFocusImmediately(true);
+                auto host = webPattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (host->IsOnMainTree()) {
+                    focusHub->RequestFocus();
+                    result = false;
+                }
                 return;
             }
 
@@ -3009,6 +3014,23 @@ void WebDelegate::SetSurfaceDensity(const double& density)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceDensity");
+}
+
+void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                delegate->nweb_->SetFitContentMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateLayoutMode");
 }
 
 void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
@@ -5348,7 +5370,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
         return false;
     }
 
-    if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
+    if (dragData->IsDragNewStyle() && (!webPattern->IsNewDragStyle() || !webPattern->IsPreviewImageNodeExist())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
         CHECK_NULL_RETURN(context, false);
@@ -7239,5 +7261,11 @@ bool WebDelegate::CloseImageOverlaySelection()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
     return webPattern->CloseImageOverlaySelection();
+}
+
+bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    CHECK_NULL_RETURN(nweb_, true);
+    return nweb_->GetAccessibilityVisible(accessibilityId);
 }
 } // namespace OHOS::Ace

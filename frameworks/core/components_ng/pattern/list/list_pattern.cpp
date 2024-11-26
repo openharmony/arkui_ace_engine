@@ -198,17 +198,13 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isNeedCheckOffset_ = false;
     prevStartOffset_ = startMainPos_;
     prevEndOffset_ = endMainPos_ - contentMainSize_ + contentEndOffset_;
-    float prevContentSize = contentMainSize_ - contentStartOffset_ - contentEndOffset_;
-    float prevTotalSize = endMainPos_ - startMainPos_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    bool sizeDiminished = !chainAnimation_ &&
-        LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
-        GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
+    auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     CheckScrollable();
 
     bool indexChanged = false;
@@ -237,6 +233,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
+    bool sizeDiminished =
+        !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
@@ -805,7 +803,7 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(bool useCurrentDelta) const
     if (endIndex >= maxListItemIndex_ && groupAtEnd) {
         endMainPos = endMainPos + GetChainDelta(endIndex);
         auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-        if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
+        if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
             endMainPos = startMainPos + contentMainSize;
         }
         if (useCurrentDelta) {

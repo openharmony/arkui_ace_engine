@@ -184,6 +184,7 @@ public:
 
     // performance.
     PipelineContext* GetContext() const;
+    PipelineContext* GetAttachedContext() const;
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
@@ -819,7 +820,7 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false);
+    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
     virtual void OnFreezeStateChange() {}

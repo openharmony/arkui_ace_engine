@@ -33,6 +33,27 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     return !hoverInfo.IsStopPropagation();
 }
 
+bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& event)
+{
+    if (!onPenHoverEventCallback_) {
+        return false;
+    }
+    HoverInfo hoverInfo;
+    hoverInfo.SetTimeStamp(event.time);
+    hoverInfo.SetDeviceId(event.deviceId);
+    hoverInfo.SetSourceDevice(event.sourceType);
+    hoverInfo.SetSourceTool(event.sourceTool);
+    if (event.tiltX.has_value()) {
+        hoverInfo.SetTiltX(event.tiltX.value_or(0.0f));
+    }
+    if (event.tiltY.has_value()) {
+        hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
+    }
+    hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    onPenHoverEventCallback_(isHovered, hoverInfo);
+    return !hoverInfo.IsStopPropagation();
+}
+
 void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event)
 {
     if (!onAccessibilityHoverCallback_) {
@@ -76,6 +97,8 @@ AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(Touch
         case TouchType::PULL_MOVE:
         case TouchType::PULL_IN_WINDOW:
         case TouchType::PULL_OUT_WINDOW:
+        case TouchType::PROXIMITY_IN:
+        case TouchType::PROXIMITY_OUT:
         case TouchType::UNKNOWN:
             return AccessibilityHoverAction::UNKNOWN;
     }

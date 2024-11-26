@@ -362,6 +362,8 @@ struct GridLayoutInfo {
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
 
+    void UpdateDefaultCachedCount();
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -421,6 +423,9 @@ struct GridLayoutInfo {
     std::map<int32_t, bool> irregularLines_;
 
     bool clearStretch_ = false;
+
+    // default cached count
+    int32_t defCachedCount_ = 1;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

@@ -76,6 +76,7 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
 constexpr int NUM_24 = 24;
+constexpr int NUM_36 = 36;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
@@ -103,6 +104,7 @@ constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
 constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
+const double DEFAULT_DASH_DIMENSION = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
@@ -1769,21 +1771,64 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+void SetBorderWidth(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderWidthProperty& borderWidth, ArkUI_Bool isLocalizedBorderWidth, FrameNode* frameNode)
+{
+    if (isLocalizedBorderWidth) {
+        SetOptionalBorder(borderWidth.startDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.endDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    }
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
+        borderWidth.bottomDimen.has_value() || borderWidth.startDimen.has_value() || borderWidth.endDimen.has_value()) {
+        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    }
+}
+
+void SetBorderBorderRadius(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderRadiusProperty& borderRadius, ArkUI_Bool isLocalizedBorderRadius, FrameNode* frameNode)
+{
+    if (isLocalizedBorderRadius) {
+        SetOptionalBorder(borderRadius.radiusTopStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopEnd, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomEnd, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    }
+
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value() ||
+        borderRadius.radiusTopStart.has_value() || borderRadius.radiusTopEnd.has_value() ||
+        borderRadius.radiusBottomStart.has_value() || borderRadius.radiusBottomEnd.has_value()) {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
+}
+
 /**
  * @param src source borderWidth and and BorderRadius value
  * @param options option value
- * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
- * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth start/left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth end/right(hasValue, value, unit)
  * values[offset + 6], option[offset + 7], option[offset + 8]: borderWidth top(hasValue, value, unit)
  * values[offset + 9], option[offset + 10], option[offset + 11]: borderWidth bottom(hasValue, value, unit)
- * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopLeft(hasValue, value, unit)
- * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopRight(hasValue, value, unit)
- * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomLeft(hasValue, value, unit)
- * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomRight(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopStart/Left(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopEnd/Right(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomStart/Left(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomEnd/Right(hasValue, value, unit)
  * @param optionsLength options valuesSize
  * @param src source color and Style value
- * colorAndStyle[offset + 0], option[offset + 1]: borderColors leftColor(hasValue, value)
- * colorAndStyle[offset + 2], option[offset + 3]: borderColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 0], option[offset + 1]: borderColors startColor/leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: borderColors endColor/rightColor(hasValue, value)
  * colorAndStyle[offset + 4], option[offset + 5]: borderColors topColor(hasValue, value)
  * colorAndStyle[offset + 6], option[offset + 7]: borderColors bottomColor(hasValue, value)
  * colorAndStyle[offset + 8], option[offset + 9]: borderStyles styleLeft(hasValue, value)
@@ -1791,9 +1836,13 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
  * colorAndStyle[offset + 12], option[offset + 12]: borderStyles styleTop(hasValue, value)
  * colorAndStyle[offset + 14], option[offset + 15]: borderStyles styleBottom(hasValue, value)
  * @param optionsLength options colorAndStyleSize
+ * @param isLocalizedBorderWidth options isLocalizedBorderWidth
+ * @param isLocalizedBorderColor options isLocalizedBorderColor
+ * @param isLocalizedBorderRadius options isLocalizedBorderRadius
  */
 void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, const uint32_t* colorAndStyle,
-    int32_t colorAndStyleSize)
+    int32_t colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth, ArkUI_Bool isLocalizedBorderColor,
+    ArkUI_Bool isLocalizedBorderRadius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1803,33 +1852,18 @@ void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
 
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderWidth;
-
-    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
-    borderWidth.multiValued = true;
-    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
-        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
-    }
-
+    SetBorderWidth(values, valuesSize, offset, borderWidth, isLocalizedBorderWidth, frameNode);
     NG::BorderRadiusProperty borderRadius;
-    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
-
-    borderRadius.multiValued = true;
-    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
-        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-    }
-
+    SetBorderBorderRadius(values, valuesSize, offset, borderRadius, isLocalizedBorderRadius, frameNode);
     int32_t colorAndStyleOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
-    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    if (isLocalizedBorderColor) {
+        SetOptionalBorderColor(borderColors.startColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.endColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    } else {
+        SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    }
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
@@ -3589,7 +3623,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, { .isShowBadge = true } });
+        { true, false, false, false, false, false, true, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
@@ -5679,81 +5713,6 @@ void ResetFocusScopePriority(ArkUINodeHandle node)
     ViewAbstract::SetFocusScopePriority(frameNode, scopeId, priority);
 }
 
-PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_CEIL_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_CEIL_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_FLOOR_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_FLOOR_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
-{
-    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
-        ret = ConvertCeilPixelRoundPolicy(index);
-    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
-        ret = ConvertFloorPixelRoundPolicy(index);
-    }
-    return static_cast<uint8_t>(ret);
-}
-
-void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    uint8_t value = 0;
-    for (ArkUI_Int32 index = 0; index < length; index++) {
-        value |= ConvertPixelRoundPolicy(values[index], index);
-    }
-    ViewAbstract::SetPixelRound(frameNode, value);
-}
-
-void ResetPixelRound(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
-}
-
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5916,6 +5875,99 @@ ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_CEIL_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_CEIL_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_FLOOR_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_FLOOR_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+PixelRoundPolicy ConvertNoPixelRoundPolicy(ArkUI_Int32 index)
+{
+    switch (index) {
+        case 0:
+            return PixelRoundPolicy::NO_FORCE_ROUND_START;
+        case 1:
+            return PixelRoundPolicy::NO_FORCE_ROUND_TOP;
+        case 2: // 2:index of end
+            return PixelRoundPolicy::NO_FORCE_ROUND_END;
+        case 3: // 3:index of bottom
+            return PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
+        default:
+            return PixelRoundPolicy::ALL_FORCE_ROUND;
+    }
+}
+
+uint16_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
+{
+    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
+        ret = ConvertCeilPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
+        ret = ConvertFloorPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::NO_FORCE_ROUND) {
+        ret = ConvertNoPixelRoundPolicy(index);
+    }
+    return static_cast<uint16_t>(ret);
+}
+
+void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    uint16_t value = 0;
+    for (ArkUI_Int32 index = 0; index < length; index++) {
+        value |= ConvertPixelRoundPolicy(values[index], index);
+    }
+    ViewAbstract::SetPixelRound(frameNode, value);
+}
+
+void ResetPixelRound(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
+}
+
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
 {
     CHECK_NULL_RETURN(option, nullptr);
@@ -6046,20 +6098,29 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_24)) {
+    if ((values == nullptr) || (valuesSize != NUM_36)) {
         return;
     }
-
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderDashGap;
     SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.bottomDimen, values, valuesSize, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+    }
     borderDashGap.multiValued = true;
     if (borderDashGap.leftDimen.has_value() || borderDashGap.rightDimen.has_value() ||
         borderDashGap.topDimen.has_value() || borderDashGap.bottomDimen.has_value()) {
         ViewAbstract::SetDashGap(frameNode, borderDashGap);
+    } else {
+        ViewAbstract::SetDashGap(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
 
     NG::BorderWidthProperty borderDashWidth;
@@ -6067,10 +6128,19 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashWidth.bottomDimen, values, valuesSize, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+    }
     borderDashWidth.multiValued = true;
     if (borderDashWidth.leftDimen.has_value() || borderDashWidth.rightDimen.has_value() ||
         borderDashWidth.topDimen.has_value() || borderDashWidth.bottomDimen.has_value()) {
         ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
+    } else {
+        ViewAbstract::SetDashWidth(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
 }
 

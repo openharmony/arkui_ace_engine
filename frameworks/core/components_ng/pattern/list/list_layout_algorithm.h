@@ -453,6 +453,7 @@ protected:
     std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
         const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView);
     void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
+    int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -507,6 +508,7 @@ private:
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
     std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
         const RefPtr<LayoutWrapper>& wrapper) const;
+    int32_t GetListItemGroupItemCount(const RefPtr<LayoutWrapper>& wrapper) const;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;

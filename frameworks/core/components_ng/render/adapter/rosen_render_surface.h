@@ -120,6 +120,17 @@ public:
     }
 
     bool CompareBufferSize(int32_t width, int32_t height, std::shared_ptr<SurfaceBufferNode> surfaceNode);
+
+    void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) override
+    {
+        isNeedSyncGeometryProperties_ = isNeedSyncGeometryProperties;
+    }
+
+    void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) override
+    {
+        keyBoardAvoidRect_ = keyBoardAvoidRect;
+    }
+
 #endif
 
     void ReleaseSurfaceBuffers() override;
@@ -150,6 +161,8 @@ private:
     void PostRenderOnlyTaskToUI();
 
     std::mutex surfaceNodeMutex_;
+    bool isNeedSyncGeometryProperties_ = false;
+    RectF keyBoardAvoidRect_;
     OffsetF orgin_ { 0, 0 };
     std::string patternType_;
     int32_t queueSize_ = SURFACE_QUEUE_SIZE;

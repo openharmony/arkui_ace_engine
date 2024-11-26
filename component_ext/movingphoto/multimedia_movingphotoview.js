@@ -85,7 +85,7 @@ class MovingPhotoView extends JSViewAbstract {
     }
 
     static autoPlayPeriod(startTime, endTime) {
-        __MovingPhotoView__.remoteMessage(startTime, endTime);
+        __MovingPhotoView__.autoPlayPeriod(startTime, endTime);
     }
 
     static autoPlay(value) {
@@ -93,7 +93,7 @@ class MovingPhotoView extends JSViewAbstract {
     }
 
     static repeatPlay(value) {
-        __MovingPhotoView__.loop(value);
+        __MovingPhotoView__.repeatPlay(value);
     }
 }
 

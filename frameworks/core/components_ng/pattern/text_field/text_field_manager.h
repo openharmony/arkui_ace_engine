@@ -200,12 +200,13 @@ public:
         laterAvoid_ = laterAvoid;
     }
 
-    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height)
+    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height, int32_t orientation)
     {
         laterAvoid_ = true;
         laterAvoidKeyboardArea_ = keyboardArea;
         laterAvoidPositionY_ = positionY;
         laterAvoidHeight_ = height;
+        laterOrientation_ = orientation;
     }
 
     Rect GetLaterAvoidKeyboardRect()
@@ -221,6 +222,11 @@ public:
     double GetLaterAvoidHeight()
     {
         return laterAvoidHeight_;
+    }
+
+    int32_t GetLaterOrientation()
+    {
+        return laterOrientation_;
     }
 
     void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
@@ -286,6 +292,7 @@ private:
     Rect laterAvoidKeyboardArea_;
     double laterAvoidPositionY_ = 0.0;
     double laterAvoidHeight_ = 0.0;
+    int32_t laterOrientation_ = -1;
     bool isImeAttached_ = false;
 };
 

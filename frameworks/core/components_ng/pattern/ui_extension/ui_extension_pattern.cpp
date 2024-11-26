@@ -186,11 +186,7 @@ UIExtensionPattern::UIExtensionPattern(
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
     isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    CHECK_NULL_VOID(uiExtensionManager);
-    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
+    uiExtensionId_ = UIExtensionIdUtility::GetInstance().ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
     accessibilitySessionAdapter_ =
@@ -206,11 +202,11 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
+    UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
-    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
 
     if (accessibilityChildTreeCallback_ == nullptr) {
@@ -493,9 +489,12 @@ void UIExtensionPattern::OnWindowShow()
 
 void UIExtensionPattern::OnWindowHide()
 {
-    UIEXT_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    UIEXT_LOGI("The window is being hidden and the component is %{public}s, state is '%{public}s.",
+        isVisible_ ? "visible" : "invisible", ToString(state_));
     if (isVisible_) {
         NotifyBackground();
+    } else if (state_ == AbilityState::FOREGROUND) {
+        NotifyBackground(false);
     }
 }
 
@@ -515,12 +514,12 @@ void UIExtensionPattern::NotifyForeground()
     }
 }
 
-void UIExtensionPattern::NotifyBackground()
+void UIExtensionPattern::NotifyBackground(bool isHandleError)
 {
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ == AbilityState::FOREGROUND) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'BACKGROUND'.", ToString(state_));
         state_ = AbilityState::BACKGROUND;
-        sessionWrapper_->NotifyBackground();
+        sessionWrapper_->NotifyBackground(isHandleError);
     }
 }
 
@@ -862,7 +861,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    Platform::CalculatePointerEvent(pointerEvent, host);
+    Platform::CalculatePointerEvent(pointerEvent, host, true);
     Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }

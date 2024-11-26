@@ -1026,7 +1026,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1034,7 +1034,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 
     maxWidth = 10.0;
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1042,7 +1042,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 }
 
 /**
@@ -1197,7 +1197,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize
 
 /**
  * @tc.name: CanvasCustomPaintMethodTest033
- * @tc.desc: Test the function 'RestoreMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.desc: Test the function 'RestoreProperties' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
 
@@ -1209,9 +1209,9 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize
      */
     auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
-    paintMethod->SaveMatrix();
-    paintMethod->RestoreMatrix();
-    paintMethod->RestoreMatrix();
+    paintMethod->SaveProperties();
+    paintMethod->RestoreProperties();
+    paintMethod->RestoreProperties();
     EXPECT_TRUE(paintMethod->matrixStates_.empty());
 }
 
@@ -1380,5 +1380,69 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize
     filter.filterType_ = FilterType::HUE_ROTATE;
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest040
+ * @tc.desc: Test the function 'InitImagePaint' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    RSBrush brush(RSColor(0xffffffff));
+    paintMethod->smoothingQuality_ = "medium";
+    float percentNum = 1.0f;
+    FilterProperty filter;
+    RSSamplingOptions options;
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->smoothingQuality_ = "high";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+    paintMethod->smoothingQuality_ = "test";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    paintMethod->smoothingEnabled_ = false;
+    paintMethod->smoothingQuality_ = "high";
+    paintMethod->InitImagePaint(&pen, &brush, options);
+    EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest041
+ * @tc.desc: Test the function 'UpdatePaintShader' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    paintMethod->state_.strokeState.SetLineDash({ { 1.0, 0.0 }, 1.0 });
+    paintMethod->state_.strokeState.SetLineDashOffset(1.0);
+    paintMethod->UpdateLineDash(pen);
+    RSBrush brush(RSColor(0xffffffff));
+    Ace::Gradient gradient;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::LINEAR);
+    gradient.type_ = Ace::GradientType::CONIC;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::CONIC);
+    gradient.type_ = Ace::GradientType::SWEEP;
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    RSPoint beginPoint = RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX()),
+        static_cast<RSScalar>(gradient.GetBeginOffset().GetY()));
+    RSPoint endPoint = RSPoint(
+        static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
+    EXPECT_FALSE(gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint);
 }
 } // namespace OHOS::Ace::NG

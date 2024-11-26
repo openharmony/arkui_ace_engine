@@ -601,7 +601,7 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
         ohAccessibilityProvider, jsAccessibilityManager, frameNode);
 
-    int32_t treeId = 3;
+    int32_t treeId = 0;
     jsInteractionOperation->SetBelongTreeId(treeId);
     int32_t pageId = 4;
     frameNode->SetHostPageId(pageId);

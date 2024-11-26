@@ -302,7 +302,16 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurStyle(bgBlurStyle);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
 }
 
 void ViewAbstract::SetForegroundEffect(float radius)
@@ -331,7 +340,18 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
 }
 
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
@@ -382,7 +402,7 @@ void ViewAbstract::SetLayoutWeight(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
-void ViewAbstract::SetPixelRound(uint8_t value)
+void ViewAbstract::SetPixelRound(uint16_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -390,7 +410,7 @@ void ViewAbstract::SetPixelRound(uint8_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
 }
 
-void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint8_t value)
+void ViewAbstract::SetPixelRound(FrameNode* frameNode, uint16_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value, frameNode);
 }
@@ -1011,8 +1031,13 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetExposeInnerGestureFlag(exposeInnerGestureFlag);
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
@@ -2428,12 +2453,13 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
 }
 
-void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
+void ViewAbstract::SetBorderImageSource(
+    const std::string& bdImageSrc, const std::string& bundleName, const std::string& moduleName)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ImageSourceInfo imageSourceInfo(bdImageSrc);
+    ImageSourceInfo imageSourceInfo(bdImageSrc, bundleName, moduleName);
     ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
     ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, true);
 }
@@ -3007,13 +3033,6 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
-    } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
-    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackgroundEffect().has_value()) {
@@ -3061,6 +3080,7 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -3514,13 +3534,6 @@ void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& m
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
-    } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
-    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackBlurRadius().has_value()) {
@@ -3846,13 +3859,22 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto instanceId = context->GetInstanceId();
-    ContainerScope scope(instanceId);
     if (value) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->RequestFocus();
     } else {
+        auto context = frameNode->GetAttachedContext();
+        if (!context) {
+            TAG_LOGW(AceLogTag::ACE_FOCUS,
+                "Can't find Node %{public}s/%{public}d attachedContext, please check the timing of the function call.",
+                frameNode->GetTag().c_str(), frameNode->GetId());
+            return;
+        }
+        auto instanceId = context->GetInstanceId();
+        ContainerScope scope(instanceId);
         focusHub->LostFocusToViewRoot();
     }
 }

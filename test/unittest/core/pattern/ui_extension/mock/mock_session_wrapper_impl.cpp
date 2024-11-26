@@ -157,7 +157,7 @@ void SessionWrapperImpl::NotifyForeground()
 {
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
 }
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)

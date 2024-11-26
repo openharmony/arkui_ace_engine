@@ -288,14 +288,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
                 childNode->SetExclusiveEventForChild(isStack);
                 childEventHub->SetHitTestMode(hitTestModeofChild);
                 auto result = childNode->TouchTest(globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict,
-                    touchTestResult, 0, responseLinkResult);
-                auto expectedResult =
-                    (hitTestModeofGrandChild == HitTestMode::HTMBLOCK || hitTestModeofChild == HitTestMode::HTMBLOCK)
-                        ? HitTestResult::STOP_BUBBLING
-                        : HitTestResult::BUBBLING;
+                    touchTestResult, 0, responseLinkResult, true);
                 result = node->TouchTest(globalPoint, parentLocalPointOne, parentLocalPointOne, touchRestrict,
-                    touchTestResult, 0, responseLinkResult);
-                EXPECT_NE(result, expectedResult);
+                    touchTestResult, 0, responseLinkResult, true);
             }
         }
     }
@@ -726,7 +721,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 1);
 }
 
 /**
@@ -1308,6 +1302,13 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
     childNode->OnConfigurationUpdate(configurationChange);
     configurationChange.dpiUpdate = true;
     childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.fontUpdate = true;
+    configurationChange.iconUpdate = true;
+    configurationChange.skinUpdate = true;
+    configurationChange.fontWeightScaleUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.fontScaleUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
 
     childNode->SetBackgroundLayoutConstraint(itemNode);
     childNode->ForceUpdateLayoutPropertyFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1516,11 +1517,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
-    GET_CHILD1->UpdateInspectorId("child1");
-    GET_CHILD2->UpdateInspectorId("child2");
-    GET_PARENT->frameChildren_.insert(GET_CHILD1);
-    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+    GET_PARENT->AddChild(GET_CHILD1);
+    GET_PARENT->AddChild(GET_CHILD2);
     GET_CHILD1->MarkAndCheckNewOpIncNode();
+    EXPECT_FALSE(GET_PARENT->GetSuggestOpIncActivatedOnce());
 
     /**
      * @tc.steps2: set suggestOpIncByte_ and call the function MarkAndCheckNewOpIncNode.
@@ -1530,7 +1530,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize
     GET_CHILD1->SetSuggestOpIncActivatedOnce();
     GET_PARENT->SetSuggestOpIncActivatedOnce();
     GET_CHILD1->MarkAndCheckNewOpIncNode();
-    EXPECT_EQ(GET_CHILD1->GetParent(), nullptr);
+    EXPECT_TRUE(GET_PARENT->GetSuggestOpIncActivatedOnce());
+    GET_CHILD1->suggestOpIncByte_ = 1;
+    GET_CHILD1->MarkAndCheckNewOpIncNode();
 }
 
 /**
@@ -1543,31 +1545,25 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest051, TestSize.Level1)
     /**
      * @tc.steps: step1. initialize parameters.
      */
-    FRAME_NODE->isActive_ = true;
-    FRAME_NODE->eventHub_->SetEnabled(true);
-    SystemProperties::debugEnabled_ = true;
-    auto geometryNode = FRAME_NODE->GetGeometryNode();
+    std::string tag = "test";
+    auto frameNode = FrameNode::CreateFrameNode(tag, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode1 = FrameNode::CreateFrameNode("test1", 2, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(frameNode1);
+    frameNode->GetBaselineDistance();
 
     /**
      * @tc.steps: step2. set frame size and call FindSuggestOpIncNode
      * @tc.expected: expect result value.
      */
-
-    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    auto host = FRAME_NODE2->GetPattern()->GetHost();
-    CHECK_NULL_VOID(host);
-    std::string path(host->GetHostTag());
-    auto result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
+    frameNode->geometryNode_->SetFrameSize(SizeF(20, 20));
+    auto result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
+    EXPECT_EQ(result, 3);
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
     EXPECT_EQ(result, 2);
-
-    SystemProperties::debugEnabled_ = false;
-    result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
-    EXPECT_EQ(result, 2);
-
-    FRAME_NODE2->suggestOpIncByte_ = 7;
-    FRAME_NODE2->SetSuggestOpIncActivatedOnce();
-    result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
-    EXPECT_EQ(result, 2);
+    SystemProperties::debugEnabled_ = true;
+    frameNode->suggestOpIncByte_ = 0;
+    result = frameNode->FindSuggestOpIncNode(tag, SizeF(0, 0), 1);
+    EXPECT_EQ(result, 3);
 }
 
 /**

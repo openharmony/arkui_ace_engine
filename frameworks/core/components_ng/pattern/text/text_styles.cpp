@@ -200,4 +200,22 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
     }
     return text;
 }
+
+void FontStyle::UpdateColorByResourceId()
+{
+    if (propTextColor) {
+        propTextColor->UpdateColorByResourceId();
+    }
+    if (propTextDecorationColor) {
+        propTextDecorationColor->UpdateColorByResourceId();
+    }
+    if (propTextShadow) {
+        auto& shadows = propTextShadow.value();
+        std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+    }
+    if (propSymbolColorList) {
+        auto& colors = propSymbolColorList.value();
+        std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -215,17 +215,34 @@ void MenuPattern::OnAttachToFrameNode()
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
+    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(wrapperPattern);
+        wrapperPattern->SetHasFoldModeChangedTransition(true);
+    };
+    foldDisplayModeChangedCallbackId_ =
+        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
 }
 
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
+
+    if (foldDisplayModeChangedCallbackId_.has_value()) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
 }
 
 void MenuPattern::OnModifyDone()
@@ -1244,17 +1261,16 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
 MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
-    auto menuItem = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(menuItem, menuItemInfo);
-    if (menuItem->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+    CHECK_NULL_RETURN(child, menuItemInfo);
+    if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
         menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (menuItem->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto groupChildren = menuItem->GetChildren();
+    } else {
+        const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
-            menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
+            menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
                 return menuItemInfo;
             }
@@ -1342,12 +1358,11 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
     option.SetCurve(MENU_ANIMATION_CURVE);
     auto subImageNode = GetImageNode(subMenuNode);
-    CHECK_NULL_VOID(subImageNode);
-    auto subImageContext = subImageNode->GetRenderContext();
-    AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
+    AnimationUtils::Animate(option, [subImageNode]() {
+        CHECK_NULL_VOID(subImageNode);
+        auto subImageContext = subImageNode->GetRenderContext();
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     });
 
     option.SetCurve(Curves::FRICTION);
@@ -1691,8 +1706,8 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
     if (parent->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
         nextNode = GetForEachMenuItem(parent, true);
     } else {
-        const auto& children = parent->GetChildren();
-        if (index >= static_cast<int32_t>(children.size() - 1)) {
+        const size_t size = parent->GetChildren().size();
+        if (size == 0 || index >= static_cast<int32_t>(size - 1)) {
             return;
         }
         nextNode = parent->GetChildAtIndex(index + 1);
@@ -1739,9 +1754,9 @@ RefPtr<UINode> MenuPattern::GetForEachMenuItem(const RefPtr<UINode>& parent, boo
         auto forEachNode = AceType::DynamicCast<UINode>(parent->GetParent());
         CHECK_NULL_RETURN(forEachNode, nullptr);
         auto syntIndex = forEachNode->GetChildIndex(parent);
-        const auto& children = forEachNode->GetChildren();
+        const size_t size = forEachNode->GetChildren().size();
         if (next) {
-            if (syntIndex < static_cast<int32_t>(children.size() - 1)) { // next is inside forEach
+            if (size > 0 && syntIndex < static_cast<int32_t>(size - 1)) { // next is inside forEach
                 auto nextSyntax = forEachNode->GetChildAtIndex(syntIndex + 1);
                 CHECK_NULL_RETURN(nextSyntax, nullptr);
                 return nextSyntax->GetFirstChild();
@@ -1772,8 +1787,8 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     CHECK_NULL_RETURN(parentForEachNode, nullptr);
     auto forEachIndex = parentForEachNode->GetChildIndex(forEachNode);
     int32_t shift = next ? 1 : -1;
-    const auto& children = parentForEachNode->GetChildren();
-    if ((forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(children.size() - 1)) {
+    const size_t size = parentForEachNode->GetChildren().size();
+    if (size > 0 && (forEachIndex + shift) >= 0 && (forEachIndex + shift) <= static_cast<int32_t>(size - 1)) {
         return parentForEachNode->GetChildAtIndex(forEachIndex + shift);
     } else {
         return nullptr;

@@ -211,6 +211,27 @@ void MenuWrapperPattern::HideMenu()
     HideMenu(menuNode);
 }
 
+void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode,
+    bool& hasAnimation)
+{
+    CHECK_NULL_VOID(subMenu);
+    auto subMenuNode = DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuNode);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    hasAnimation = subMenuPattern->GetDisappearAnimation();
+    auto menuItem = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
+    CHECK_NULL_VOID(menuItem);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto menuNode = menuItemPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    menuItemPattern->SetIsSubMenuShowed (false);
+}
+
 void MenuWrapperPattern::HideSubMenu()
 {
     auto host = GetHost();
@@ -225,16 +246,6 @@ void MenuWrapperPattern::HideSubMenu()
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
-    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
-    if (subMenuPattern) {
-        subMenuPattern->RemoveParentHoverStyle();
-        auto frameNode = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
-        CHECK_NULL_VOID(frameNode);
-        auto menuItem = frameNode->GetPattern<MenuItemPattern>();
-        if (menuItem) {
-            menuItem->SetIsSubMenuShowed(false);
-        }
-    }
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
     auto innerMenu = GetMenuChild(focusMenu);
@@ -245,7 +256,6 @@ void MenuWrapperPattern::HideSubMenu()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
     }
-    CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
@@ -254,6 +264,7 @@ void MenuWrapperPattern::HideSubMenu()
     auto outterMenuPattern = focusMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
     bool hasAnimation = outterMenuPattern->GetDisappearAnimation();
+    GetExpandingMode(subMenu, expandingMode, hasAnimation);
     if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
     } else {
@@ -528,6 +539,28 @@ void MenuWrapperPattern::CheckAndShowAnimation()
     }
 }
 
+void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->SetDragForbiddenForcely(true);
+}
+
+void MenuWrapperPattern::MarkAllMenuNoDraggable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& child : host->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_ETS_TAG) {
+            MarkWholeSubTreeNoDraggable(node);
+        }
+    }
+}
+
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -548,6 +581,8 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
+    MarkAllMenuNoDraggable();
+    MarkWholeSubTreeNoDraggable(GetPreview());
     CheckAndShowAnimation();
     return false;
 }

@@ -174,11 +174,7 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
@@ -217,12 +213,7 @@ class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
@@ -299,12 +290,7 @@ class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } 
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonFontSizeModifier extends ModifierWithKey<Length> {
@@ -318,12 +304,7 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {

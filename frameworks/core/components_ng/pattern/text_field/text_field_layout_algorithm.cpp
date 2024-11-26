@@ -521,6 +521,10 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     RectF contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
     RefPtr<GeometryNode> textGeometryNode = counterNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
 
     countX = contentRect.GetX();
     auto responseArea = pattern->GetResponseArea();
@@ -539,8 +543,10 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
             countX += cleanNodeResponseArea->GetAreaRect().Width();
         }
     }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Bottom() - frameRect.Top() +
-        COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx()));
+    auto curFontScale = pipeline->GetFontScale();
+    auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
+        (frameRect.Bottom() - frameRect.Top() + COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx());
+    textGeometryNode->SetFrameOffset(OffsetF(countX, countY));
     counterNode->Layout();
 }
 
@@ -736,10 +742,11 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateFrameSizeConstraint(
     CHECK_NULL_RETURN(frameNode, frameSizeConstraintF);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, frameSizeConstraintF);
-    auto left = pattern->GetBorderLeft() + pattern->GetPaddingLeft();
-    auto right = pattern->GetBorderRight() + pattern->GetPaddingRight();
-    auto top = pattern->GetBorderTop() + pattern->GetPaddingTop();
-    auto bottom = pattern->GetBorderBottom() + pattern->GetPaddingBottom();
+    auto border = pattern->GetBorderWidthProperty();
+    auto left = pattern->GetBorderLeft(border) + pattern->GetPaddingLeft();
+    auto right = pattern->GetBorderRight(border) + pattern->GetPaddingRight();
+    auto top = pattern->GetBorderTop(border) + pattern->GetPaddingTop();
+    auto bottom = pattern->GetBorderBottom(border) + pattern->GetPaddingBottom();
     frameSizeConstraintF.maxSize.AddPadding(left, right, top, bottom);
     frameSizeConstraintF.minSize.AddPadding(left, right, top, bottom);
     return frameSizeConstraintF;

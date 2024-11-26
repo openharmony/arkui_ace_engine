@@ -1621,7 +1621,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     }
     if (!UseIrregularLayout()) {
         const float delta = info.currentOffset_ - info.prevOffset_;
-        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_.rbegin()->second)) {
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lastMainSize_)) {
             // old layout can't handle large overScroll offset. Avoid by skipping this layout.
             // Spring animation plays immediately afterwards, so losing this frame's offset is fine
             info.currentOffset_ = info.prevOffset_;
@@ -2006,7 +2006,8 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(0) * gridLayoutInfo_.crossCount_;
+    auto cacheCount = gridLayoutProperty->GetCachedCountValue(gridLayoutInfo_.defCachedCount_) *
+        gridLayoutInfo_.crossCount_;
     return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
 }
 

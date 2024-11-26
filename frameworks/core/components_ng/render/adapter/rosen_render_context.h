@@ -232,7 +232,6 @@ public:
     void ClipWithOval(const RectF& rectF) override;
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
-    void UpdateWindowFocusState(bool isFocused) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -398,7 +397,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
@@ -555,8 +554,6 @@ protected:
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
-    bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
-    bool UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption);
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
@@ -607,9 +604,9 @@ protected:
     float OnePixelValueRounding(float value);
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
-    void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void RoundToPixelGrid(bool isRound, uint16_t flag);
     void OnePixelRounding();
-    void OnePixelRounding(bool isRound, uint8_t flag);
+    void OnePixelRounding(uint16_t flag = 0);
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
@@ -645,6 +642,8 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    int32_t densityChangedCallbackId_ = DEFAULT_CALLBACK_ID;
+    static constexpr int32_t DEFAULT_CALLBACK_ID = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;

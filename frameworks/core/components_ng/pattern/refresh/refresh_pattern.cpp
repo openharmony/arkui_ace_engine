@@ -216,6 +216,10 @@ void RefreshPattern::InitProgressNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
@@ -227,15 +231,10 @@ void RefreshPattern::InitProgressNode()
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    }
-    layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
 }
@@ -304,11 +303,7 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    if (layoutProperty->HasProgressColor()) {
-        progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
-    } else {
-        progressPaintProperty->UpdateColor(theme->GetProgressColor());
-    }
+    progressPaintProperty->UpdateColor(theme->GetProgressColor());
     if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
@@ -564,7 +559,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
 
     if (!isCustomBuilderExist_) {
         if (progressChild_) {
-            if (hasLoadingText_) {
+            if (columnNode_) {
                 host->RemoveChild(columnNode_);
                 columnNode_ = nullptr;
                 loadingTextNode_ = nullptr;
@@ -727,7 +722,7 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
     CHECK_NULL_VOID(host);
     int32_t childCount = host->TotalChildCount();
     // If the refresh has no children without loadingProgress and text, it does not need to update offset.
-    if (childCount < 2 || (childCount == 2 && hasLoadingText_)) { // 2 means loadingProgress and text child components.
+    if (childCount < 2 || (childCount == 2 && columnNode_)) { // 2 means loadingProgress and text child components.
         return;
     }
     // Need to search for frameNode and skip ComponentNode
@@ -788,7 +783,7 @@ float RefreshPattern::GetLoadingVisibleHeight()
     CHECK_NULL_RETURN(renderContext, 0.0f);
     auto geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
-    if (hasLoadingText_) {
+    if (loadingTextNode_) {
         auto loadingTextGeometryNode = loadingTextNode_->GetGeometryNode();
         CHECK_NULL_RETURN(loadingTextGeometryNode, 0.0f);
         loadingHeight = geometryNode->GetFrameSize().Height() + loadingTextGeometryNode->GetFrameSize().Height() +
@@ -911,6 +906,7 @@ void RefreshPattern::ResetAnimation()
         CHECK_NULL_VOID(offsetProperty_);
         offsetProperty_->Set(currentOffset);
     } else {
+        CHECK_NULL_VOID(lowVersionOffset_);
         lowVersionOffset_->Set(currentOffset);
     }
 }
@@ -1010,6 +1006,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
 {
     UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     if (isDrag) {
         option.SetCurve(AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f));
@@ -1025,6 +1022,7 @@ void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)
 void RefreshPattern::LoadingProgressExit()
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
@@ -1060,6 +1058,7 @@ void RefreshPattern::UpdateLoadingProgress()
 void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     if (isDrag) {
         option.SetCurve(AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f));
@@ -1075,6 +1074,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation(bool isDrag)
 void RefreshPattern::CustomBuilderExit()
 {
     ResetAnimation();
+    CHECK_NULL_VOID(lowVersionOffset_);
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_ANIMATION_DURATION);
     option.SetCurve(DEFAULT_CURVE);

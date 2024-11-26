@@ -683,8 +683,9 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
+    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive);
+    OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -816,7 +817,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool) {}
+void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -1048,13 +1049,12 @@ PipelineContext* UINode::GetContext() const
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
     }
-
-    if (context && context->IsDestroyed()) {
-        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
-            context_? " not" : "");
-    }
-
     return context;
+}
+
+PipelineContext* UINode::GetAttachedContext() const
+{
+    return context_;
 }
 
 PipelineContext* UINode::GetContextWithCheck()
@@ -1590,8 +1590,13 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
+    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }
@@ -1655,30 +1660,6 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
-int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
-{
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += changeIdx;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
-    return updateFrom;
-}
-
-void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
-{
-    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
-    auto accessibilityId = GetAccessibilityId();
-    auto parent = GetParent();
-    if (parent) {
-        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
-    }
-}
-
 void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
@@ -1713,6 +1694,30 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
+    }
+}
+
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += changeIdx;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

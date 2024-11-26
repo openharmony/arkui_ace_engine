@@ -47,8 +47,10 @@ void CanvasPattern::OnDetachFromMainTree()
 
 void CanvasPattern::AttachRenderContext()
 {
-    isAttached_ = true;
-    FireOnContext2DAttach();
+    if (!isAttached_) {
+        isAttached_ = true;
+        FireOnContext2DAttach();
+    }
 }
 
 void CanvasPattern::DetachRenderContext()
@@ -903,7 +905,7 @@ void CanvasPattern::Save()
 #else
     paintMethod_->PushTask<SaveOp>();
 #endif
-    paintMethod_->SaveMatrix();
+    paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
@@ -916,7 +918,7 @@ void CanvasPattern::Restore()
 #else
     paintMethod_->PushTask<RestoreOp>();
 #endif
-    paintMethod_->RestoreMatrix();
+    paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
@@ -1205,13 +1207,6 @@ void CanvasPattern::ReleaseImageAnalyzer()
     imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
-int32_t CanvasPattern::GetId()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, -1);
-    return host->GetId();
-}
-
 void CanvasPattern::DumpInfo()
 {
     CHECK_NULL_VOID(paintMethod_);
@@ -1231,6 +1226,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
+    paintMethod_->ResetLineDash();
     SetTextDirection(TextDirection::INHERIT);
 }
 
@@ -1241,6 +1237,7 @@ void CanvasPattern::OnLanguageConfigurationUpdate()
 
 void CanvasPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     UpdateTextDefaultDirection();
 }
 
@@ -1255,6 +1252,13 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+int32_t CanvasPattern::GetId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
 }
 
 void CanvasPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)

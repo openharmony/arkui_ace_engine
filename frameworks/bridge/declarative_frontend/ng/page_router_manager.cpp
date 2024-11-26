@@ -140,6 +140,7 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_RUN_ON(JS);
     RouterPageInfo info;
     info.content = content;
+    info.params = params;
 
 #if !defined(PREVIEW)
     auto container = Container::Current();
@@ -224,17 +225,10 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     }
     CleanPageOverlay();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto PageInfoByUrl = FindPageInStack(target.url);
-        auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
+        auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
         if (PageInfoByUrl.second) {
-            // get pageInfo by url, find page in stack, move postion and update params.
+            // find page in stack, move postion and update params.
             MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
-            return;
-        }
-        auto PageInfoByPagePath = FindPageInStack(pagePath);
-        if (PageInfoByPagePath.second) {
-            // get pageInfo by pagePath, find page in stack, move postion and update params.
-            MovePageToFront(PageInfoByPagePath.first, PageInfoByPagePath.second, target, true);
             return;
         }
     }
@@ -882,6 +876,25 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
 }
 
+std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStackByRouteName(const std::string& name) const
+{
+    auto iter = std::find_if(pageRouterStack_.rbegin(), pageRouterStack_.rend(),
+        [name](const WeakPtr<FrameNode>& item) {
+            auto pageNode = item.Upgrade();
+            CHECK_NULL_RETURN(pageNode, false);
+            auto pagePattern = pageNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            auto entryPageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_RETURN(entryPageInfo, false);
+            return entryPageInfo->GetRouteName() == name;
+        });
+    if (iter == pageRouterStack_.rend()) {
+        return { INVALID_PAGE_INDEX, nullptr };
+    }
+    // Returns to the forward position.
+    return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
+}
+
 void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
 {
     RouterOptScope scope(this);
@@ -1219,7 +1232,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     pageRouterStack_.emplace_back(pageNode);
 
     if (target.content && !target.content->empty()) {
-        loadJsByBuffer_(target.content, target.errorCallback);
+        loadJsByBuffer_(target.content, target.errorCallback, target.params);
     } else {
         loadJs_(target.path, target.errorCallback);
     }
@@ -1252,6 +1265,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         keyInfo = moduleName + keyInfo;
     }
 #endif
+    SetPageInfoRouteName(entryPageInfo, target.isNamedRouterMode);
     auto pagePath = Framework::JsiDeclarativeEngine::GetFullPathInfo(keyInfo);
     if (pagePath.empty()) {
         auto container = Container::Current();
@@ -1687,5 +1701,21 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #if defined(ENABLE_SPLIT_MODE)
     stageManager->SetIsNewPageReplacing(false);
 #endif
+}
+
+void PageRouterManager::SetPageInfoRouteName(const RefPtr<EntryPageInfo>& info, bool isNamedRouterMode)
+{
+    std::optional<std::string> routeName = std::nullopt;
+    if (isNamedRouterMode) {
+        // info->GetPageUrl() represents the name of namedRoute
+        routeName = info->GetPageUrl();
+    } else {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        // info->GetPageUrl() represents the url of destination page
+        routeName = Framework::JsiDeclarativeEngine::GetRouteNameByUrl(
+            info->GetPageUrl(), container->GetBundleName(), container->GetModuleName());
+    }
+    info->SetRouteName(routeName);
 }
 } // namespace OHOS::Ace::NG

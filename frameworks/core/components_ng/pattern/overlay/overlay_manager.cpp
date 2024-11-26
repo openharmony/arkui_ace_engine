@@ -88,6 +88,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -1199,6 +1200,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
+    CHECK_NULL_VOID(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
@@ -1218,7 +1220,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     wrapperPattern->CallMenuAboutToDisappearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
-    if (wrapperPattern->HasTransitionEffect()) {
+    if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
         if (wrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
             ShowPreviewDisappearAnimation(wrapperPattern);
         }
@@ -1226,6 +1228,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
         auto renderContext = menu->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (wrapperPattern->HasFoldModeChangedTransition()) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Close menu when foldMode is changed, disappear transiton is %{public}d",
+                renderContext->HasDisappearTransition());
+        }
+
         if (renderContext->HasDisappearTransition()) {
             renderContext->SetTransitionOutCallback(
                 [rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(),
@@ -1921,7 +1929,8 @@ void OverlayManager::HideAllPopups()
     if (popupMap_.empty()) {
         return;
     }
-    for (const auto& popup : popupMap_) {
+    auto tempPopupMap = popupMap_;
+    for (const auto& popup : tempPopupMap) {
         auto popupInfo = popup.second;
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
             auto targetNodeId = popupInfo.target.Upgrade()->GetId();
@@ -3113,12 +3122,14 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // remove navDestination in navigation first
         do {
             CHECK_NULL_BREAK(rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG);
+            bool isEntry = false;
             auto navigationGroupNode =
-                AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay));
+                AceType::DynamicCast<NavigationGroupNode>(pipeline->FindNavigationNodeToHandleBack(overlay, isEntry));
             CHECK_NULL_BREAK(navigationGroupNode);
             return true;
         } while (0);
         if (!modalStack_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "Modal consumed backpressed event");
             if (isPageRouter) {
                 return RemoveAllModalInOverlay();
             } else {
@@ -4150,8 +4161,8 @@ void OverlayManager::CleanInvalidModalNode(const WeakPtr<FrameNode>& invalidNode
         }
         modalStack_.pop();
     }
-    for (auto iter : sheetVector) {
-        modalStack_.push(iter);
+    for (auto iter = sheetVector.rbegin(); iter != sheetVector.rend(); ++iter) {
+        modalStack_.push(*iter);
     }
 }
 
@@ -4174,37 +4185,47 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         SaveLastModalNode();
         return;
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scrollNode);
-    auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(builder);
-    sheetNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
-    if (builder->GetRenderContext()->HasDisappearTransition()) {
-        if (!sheetNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
-            sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->SetShowState(false);
+    auto buildContent = sheetPattern->GetFirstFrameNodeOfBuilder();
+    CHECK_NULL_VOID(buildContent);
+    auto buildRenderContext = buildContent->GetRenderContext();
+    CHECK_NULL_VOID(buildRenderContext);
+    sheetPattern->OnWillDisappear();
+    if (buildRenderContext->HasDisappearTransition()) {
+        if (!sheetPattern->IsExecuteOnDisappear()) {
+            sheetPattern->OnDisappear();
         }
-        sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+        sheetPattern->OnDisappear();
         sheetNode->Clean(false, true);
         sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     ModalPageLostFocus(sheetNode);
-    auto maskNode = GetSheetMask(sheetNode);
-    if (maskNode) {
-        PlaySheetMaskTransition(maskNode, false);
-    }
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
-    if (sheetType == SheetType::SHEET_POPUP) {
-        PlayBubbleStyleSheetTransition(sheetNode, false);
-    } else {
-        PlaySheetTransition(sheetNode, false);
-    }
-    sheetNode->GetPattern<SheetPresentationPattern>()->SetDismissProcess(true);
+    PlaySheetTransitionWhenClose(sheetNode);
+    sheetPattern->SetDismissProcess(true);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
     FireModalPageHide();
     SaveLastModalNode();
+}
+
+void OverlayManager::PlaySheetTransitionWhenClose(const RefPtr<FrameNode>& sheetNode)
+{
+    CHECK_NULL_VOID(sheetNode);
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        PlaySheetMaskTransition(maskNode, false);
+    }
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetType = sheetPattern->GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP) {
+        PlayBubbleStyleSheetTransition(sheetNode, false);
+    } else {
+        PlaySheetTransition(sheetNode, false);
+    }
 }
 
 void OverlayManager::DismissSheet()
@@ -4328,8 +4349,8 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
         }
         modalStack_.pop();
     }
-    for (auto iter : sheetVector) {
-        modalStack_.push(iter);
+    for (auto iter = sheetVector.rbegin(); iter != sheetVector.rend(); ++iter) {
+        modalStack_.push(*iter);
     }
 }
 
@@ -4395,6 +4416,7 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
+        ACE_SCOPED_TRACE("Sheet start admission");
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -4403,7 +4425,6 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
-        sheetPattern->SetFoldStatusChanged(false);
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
@@ -4459,7 +4480,15 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     // build content
-    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    RefPtr<UINode> sheetContentNode = buildNodeFunc();
+    CHECK_NULL_VOID(sheetContentNode);
+    auto frameChildNode = sheetContentNode->GetFrameChildByIndex(0, true);
+    if (!frameChildNode) {
+        // The function should return if the frameNodeChild of the builder is empty,
+        // otherwise an exception will occur when unmount an empty node.
+        TAG_LOGE(AceLogTag::ACE_SHEET, "sheet buildNode is nullptr");
+        return;
+    }
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -4572,6 +4601,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    auto customHeightOrDetentsChanged = sheetNodePattern->IsCustomHeightOrDetentsChanged(sheetStyle);
     if (isStartByUIContext) {
         auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
@@ -4592,7 +4622,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
-    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
+    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() && customHeightOrDetentsChanged) {
         PlaySheetTransition(sheetNode, true, false);
     }
 }
@@ -4627,7 +4657,7 @@ void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& shee
 }
 
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-    const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -4637,7 +4667,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     CHECK_NULL_VOID(sheetContentNode);
-    sheetContentNode->GetRenderContext()->SetIsModalRootNode(true);
     auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
     if (titleBuilder) {
         titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
@@ -4713,7 +4742,7 @@ void OverlayManager::SetSheetProperty(
 }
 
 void OverlayManager::SaveSheePageNode(
-    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
     const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     int32_t targetId = targetNode->GetId();
@@ -5858,7 +5887,9 @@ int32_t OverlayManager::CreateModalUIExtension(
     const ModalUIExtensionConfig& config)
 {
     isProhibitBack_ = config.isProhibitBack;
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
+    NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig = { .isAsyncModalBinding = config.isAsyncModalBinding,
+        .isDensityFollowHost = config.isDensityFollowHost };
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
     }

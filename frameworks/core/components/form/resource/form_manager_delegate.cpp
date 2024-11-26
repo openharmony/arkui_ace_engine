@@ -219,6 +219,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        CheckWhetherSurfaceChangeFailed();
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
@@ -226,6 +227,28 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
+    }
+}
+
+void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
+{
+    float width = 0.0f;
+    float height = 0.0f;
+    float borderWidth = 0.0f;
+    bool needRedispatch = false;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (notifySurfaceChangeFailedRecord_.isfailed == true) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "redispatch surface change event");
+            needRedispatch = true;
+            notifySurfaceChangeFailedRecord_.isfailed = false;
+            width = notifySurfaceChangeFailedRecord_.expectedWidth;
+            height = notifySurfaceChangeFailedRecord_.expectedHeight;
+            borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+        }
+    }
+    if (needRedispatch) {
+        formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
     }
 }
 
@@ -727,9 +750,16 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
-    if (formRendererDispatcher_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
-        return;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (formRendererDispatcher_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
+            notifySurfaceChangeFailedRecord_.isfailed = true;
+            notifySurfaceChangeFailedRecord_.expectedWidth = width;
+            notifySurfaceChangeFailedRecord_.expectedHeight = height;
+            notifySurfaceChangeFailedRecord_.expectedBorderWidth = borderWidth;
+            return;
+        }
     }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
 }

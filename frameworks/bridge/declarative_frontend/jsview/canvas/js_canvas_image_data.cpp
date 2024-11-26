@@ -19,6 +19,10 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 
 namespace OHOS::Ace::Framework {
+constexpr size_t FIRST_PARAM = 0;
+constexpr size_t SECOND_PARAM = 1;
+constexpr size_t THIRD_PARAM = 2;
+constexpr size_t FOURTH_PARAM = 3;
 constexpr double DIFF = 1e-10;
 constexpr int32_t PIXEL_SIZE = 4;
 void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
@@ -27,14 +31,14 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     jsCanvasImageData->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCanvasImageData));
 
-    if (args.Length() < 2) {
+    if (args.Length() < 2) { // Invalid argument, the arguments should be at least 2: width, height
         return;
     }
     int32_t finalWidth = 0;
     int32_t finalHeight = 0;
     int32_t unit = 0;
 
-    if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+    if (args.GetInt32Arg(FOURTH_PARAM, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
         jsCanvasImageData->SetUnit(CanvasUnit::PX);
     }
     if (!jsCanvasImageData->GetImageDataSize(args, finalWidth, finalHeight)) {
@@ -44,7 +48,7 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     jsCanvasImageData->width_ = finalWidth;
     jsCanvasImageData->height_ = finalHeight;
 
-    if (args.Length() == 2) {
+    if (args.Length() == 2) { // 2 arguments: width, height
         JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(result);
         args.SetSize(static_cast<size_t>(arrayBuffer->ByteLength()));
         // return the transparent black image
@@ -55,8 +59,8 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
         }
         jsCanvasImageData->colorArray_ =
             JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-    } else if (args.Length() >= 3 && args[2]->IsUint8ClampedArray()) {
-        JSRef<JSUint8ClampedArray> data = JSRef<JSUint8ClampedArray>::Cast(args[2]);
+    } else if (args.Length() >= 3 && args[THIRD_PARAM]->IsUint8ClampedArray()) { // 3 arguments: width, height, data
+        JSRef<JSUint8ClampedArray> data = JSRef<JSUint8ClampedArray>::Cast(args[THIRD_PARAM]);
         auto buffer = data->GetArrayBuffer();
         args.SetSize(static_cast<size_t>(buffer->ByteLength()));
         if ((static_cast<CanvasUnit>(unit) == CanvasUnit::PX) && (buffer->ByteLength() != result)) {
@@ -73,8 +77,8 @@ bool JSCanvasImageData::GetImageDataSize(const JSCallbackInfo& args, int32_t& fi
     double width = 0.0;
     double height = 0.0;
     double density = GetDensity();
-    args.GetDoubleArg(0, width);
-    args.GetDoubleArg(1, height);
+    args.GetDoubleArg(FIRST_PARAM, width);
+    args.GetDoubleArg(SECOND_PARAM, height);
     width *= density;
     height *= density;
     if (NonPositive(width) || NonPositive(height)) {

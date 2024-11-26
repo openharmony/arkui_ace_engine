@@ -819,6 +819,8 @@ void AceContainer::InitializeCallback()
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
+            } else if (event.IsPenHoverEvent()) {
+                context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
                     context->OnTouchEvent(event, node);
@@ -958,8 +960,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
-                aceContainer->UpdateResourceDensity(density);
-                aceContainer->NotifyDensityUpdate();
+                aceContainer->NotifyDensityUpdate(density);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -1969,17 +1970,16 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     resRegister_ = aceView_->GetPlatformResRegister();
 #ifndef NG_BUILD
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
+        LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
 #else
-    LOGI("New pipeline version creating...");
     pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
@@ -2081,6 +2081,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireAccessibilityEventCallback(eventId, parameter);
+    };
+    pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
+
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
@@ -2286,6 +2294,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -3017,7 +3026,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed()) {
+            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
                 for (const auto& callback : callbacksIter->second) {
                     if (callback) {
                         callback();
@@ -3209,6 +3218,24 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
         TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
 }
 
+void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), eventId, parameter] {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            auto pipelineContext = container->GetPipelineContext();
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(ngPipeline);
+            auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
+}
+
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -3276,12 +3303,15 @@ bool AceContainer::NeedFullUpdate(uint32_t limitKey)
     return true;
 }
 
-void AceContainer::NotifyDensityUpdate()
+void AceContainer::NotifyDensityUpdate(double density)
 {
     bool fullUpdate = NeedFullUpdate(DENSITY_KEY);
     auto frontend = GetFrontend();
     if (frontend) {
         frontend->FlushReload();
+    }
+    if (fullUpdate) {
+        UpdateResourceDensity(density);
     }
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);

@@ -18,13 +18,15 @@
 
 #include "gtest/gtest.h"
 
+#define private public
+#define protected public
+
 #include "core/components/form/resource/form_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
-#define private public
-#define protected public
 #include "mock/mock_form_utils.h"
 #include "mock/mock_sub_container.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -77,6 +79,9 @@ void FormTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
 }
 
 void FormTestNg::TearDownTestSuite()
@@ -722,87 +727,6 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionEvent
- * @tc.desc: Verify the OnActionEvent Interface of FormPattern work correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a FormPattern and build a subContainer .
-     */
-    RefPtr<FrameNode> frameNode = CreateFromNode();
-    auto pattern = frameNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->SetOnRouter([](const std::string& string) {
-        auto json = JsonUtil::Create(true);
-        json->Put("noaction", "");
-        json->Put("action", "router");
-        auto actionJson = JsonUtil::Create(true);
-        actionJson->Put("action", json);
-        ASSERT_EQ(string, actionJson->ToString());
-    });
-
-    /**
-     * @tc.steps: step2.the action is nullptr.
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    pattern->OnActionEvent("");
-
-    /**
-     * @tc.steps: step3.the action dose not contians "action".
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    auto action = JsonUtil::Create(true);
-    action->Put("noaction", "");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step4.the actionType in action dose not contians "router" or "message" or "call".
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    action->Put("action", "none");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step4.the actionType in action contians "router".
-     * @tc.expected: pattern will call FireOnRouterEvent.
-     */
-    action->Replace("action", "router");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step4.the actionType in action contians "message".
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    action->Replace("action", "message");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step4.the actionType in action contians "call".
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    action->Replace("action", "call");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step5.support uri deeplink without abilityName.
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    action->Put("uri", "schema://host/pathStartWith");
-    pattern->OnActionEvent(action->ToString());
-
-    /**
-     * @tc.steps: step6.support uri deeplink with abilityName.
-     * @tc.expected: pattern will not call FireOnRouterEvent.
-     */
-    action->Put("abilityName", "abilityName");
-    pattern->OnActionEvent(action->ToString());
-}
-
-/**
  * @tc.name: UpdateConfiguration
  * @tc.desc: Verify the UpdateConfiguration Interface of FormPattern work correctly.
  * @tc.type: FUNC
@@ -1076,7 +1000,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     pattern->cardInfo_.width = Dimension(cardWidth);
     pattern->cardInfo_.height = Dimension(cardHeight);
     pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_2_4);
-    
+
     /**
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.

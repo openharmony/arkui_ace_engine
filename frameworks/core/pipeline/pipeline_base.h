@@ -188,6 +188,10 @@ public:
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+    virtual void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
+    virtual void HandlePenHoverOut(const TouchEvent& point) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -1389,6 +1393,16 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
+
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
         isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
@@ -1398,6 +1412,22 @@ public:
     {
         return isOpenInvisibleFreeze_;
     }
+
+    void SetVisibleAreaRealTime(bool visibleAreaRealTime)
+    {
+        visibleAreaRealTime_ = visibleAreaRealTime;
+    }
+
+    bool GetVisibleAreaRealTime() const
+    {
+        return visibleAreaRealTime_;
+    }
+
+    void SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback);
+
+    void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
+
+    void FireAccessibilityEvents();
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1568,6 +1598,8 @@ private:
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
+    // whether visible area need to be calculate at each vsync after approximate timeout.
+    bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
     bool destroyed_ = false;
     uint32_t frameCount_ = 0;
@@ -1579,6 +1611,8 @@ private:
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
     std::function<double()> windowDensityCallback_;
+    std::function<void(uint32_t, int64_t)> accessibilityCallback_;
+    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

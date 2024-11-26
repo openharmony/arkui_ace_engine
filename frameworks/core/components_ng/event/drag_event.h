@@ -141,7 +141,8 @@ public:
     static void UpdatePreviewPositionAndScale(
         const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale = -1.0f);
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
-    static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
+    static void CreatePreviewNode(
+        const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
         const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
@@ -267,8 +268,8 @@ public:
 
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
-    static RefPtr<FrameNode> CreateBadgeTextNode(
-        const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
+    static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
+        float previewScale, bool isUsePixelMapOffset = false, OffsetF previewOffset = { 0.0f, 0.0f });
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
@@ -291,9 +292,11 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode) const;
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
+    void HandleOnPanActionCancel();
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

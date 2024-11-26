@@ -546,7 +546,7 @@ public:
         }
     }
 
-    bool IsDragForbidden();
+    bool IsDragForbidden() const;
 
     void SetDragForbiddenForcely(bool isDragForbidden);
 
@@ -637,7 +637,7 @@ public:
 
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
-        bool isCalculateInSubwindow = false) const;
+        bool isCalculateInSubwindow = false, const RectF& innerRect = RectF()) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -831,7 +831,8 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
-    bool isDragForbidden_ = false;
+    // disable drag for the node itself and its all children
+    bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

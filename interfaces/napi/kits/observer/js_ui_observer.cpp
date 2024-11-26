@@ -70,8 +70,8 @@ static constexpr uint32_t ON_SHOW = 0;
 static constexpr uint32_t ON_HIDE = 1;
 
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
-constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
+constexpr char SCROLL_EVENT[] = "scrollEvent";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
 constexpr char LAYOUT_DONE[] = "didLayout";
 constexpr char DRAW_COMMAND_SEND[] = "willDraw";
@@ -125,6 +125,16 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     napi_value navigationId = nullptr;
     napi_get_named_property(env, obj, "navigationId", &navigationId);
     return ParseStringFromNapi(env, navigationId, navigationStr);
+}
+
+bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
+{
+    napi_value resultId = nullptr;
+    napi_get_named_property(env, obj, "id", &resultId);
+    if (!MatchValueType(env, resultId, napi_string)) {
+        return false;
+    }
+    return ParseStringFromNapi(env, resultId, result);
 }
 
 bool IsNavDestSwitchOptions(napi_env env, napi_value obj, std::string& navigationId)
@@ -299,16 +309,6 @@ bool ParseNavDestSwitchUnRegisterParams(
     }
 
     return true;
-}
-
-bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
-{
-    napi_value resultId = nullptr;
-    napi_get_named_property(env, obj, "id", &resultId);
-    if (!MatchValueType(env, resultId, napi_string)) {
-        return false;
-    }
-    return ParseStringFromNapi(env, resultId, result);
 }
 } // namespace
 

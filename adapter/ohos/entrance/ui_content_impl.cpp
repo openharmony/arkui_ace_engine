@@ -63,6 +63,7 @@
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
+#include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
@@ -378,6 +379,9 @@ public:
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         if (pipeline) {
             ContainerScope scope(instanceId_);
+            auto manager = pipeline->GetSafeAreaManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetRawKeyboardHeight(keyboardRect.Height());
             auto uiExtMgr = pipeline->GetUIExtensionManager();
             if (uiExtMgr) {
                 SetUIExtensionImeShow(keyboardRect, pipeline);
@@ -415,6 +419,15 @@ private:
         CHECK_NULL_RETURN(context, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         CHECK_NULL_RETURN(pipeline, false);
+        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_RETURN(textFieldManager, false);
+        auto windowManager = pipeline->GetWindowManager();
+        CHECK_NULL_RETURN(windowManager, false);
+        auto windowMode = windowManager->GetWindowMode();
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            textFieldManager->SetLaterAvoid(false);
+            return false;
+        }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
         uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
@@ -426,8 +439,6 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
-        CHECK_NULL_RETURN(textFieldManager, false);
         if (textFieldManager->GetLaterAvoid()) {
             auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
             if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
@@ -440,7 +451,7 @@ private:
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
                 "later avoid %{public}s %{public}f %{public}f",
                 lastRotation, keyboardRect.ToString().c_str(), positionY, height);
-            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height, lastRotation);
             return true;
         }
         return false;
@@ -808,8 +819,11 @@ void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::st
 
 void UIContentImpl::RunFormPage()
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl: %{public}s",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize startUrl: %{public}s, \
+        formData_.size:%{public}zu",
+        bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_, startUrl_.c_str(),
+        formData_.size());
     // run page.
     Platform::AceContainer::RunPage(instanceId_, startUrl_, formData_, false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
@@ -825,8 +839,15 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return InitializeInner(window, url, storage, false);
 }
 
-UIContentErrorCode UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+    {
+        std::string contentName = "";
+        return Initialize(window, content, storage, contentName);
+    }
+
+UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window,
+    const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage, const std::string& contentName)
 {
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, "", storage);
@@ -835,7 +856,7 @@ UIContentErrorCode UIContentImpl::Initialize(
     if (content) {
         LOGI("Initialize by buffer, size:%{public}zu", content->size());
         // run page.
-        errorCode = Platform::AceContainer::RunPage(instanceId_, content, "");
+        errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
         CHECK_ERROR_CODE_RETURN(errorCode);
     } else {
         LOGE("Initialize failed, buffer is null");
@@ -1167,6 +1188,10 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
+#ifdef APS_ENABLE
+    auto apsMonitor = std::make_shared<ApsMonitorImpl>();
+    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
+#endif
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -1440,11 +1465,12 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
         return;
     }
     float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
     if (isFormRender_ && !fontScaleFollowSystem_) {
         TAG_LOGW(AceLogTag::ACE_FORM, "setFontScale form default size");
         fontScale = 1.0f;
+        fontWeightScale = 1.0f;
     }
-    float fontWeightScale = SystemProperties::GetFontWeightScale();
     container->SetFontScale(instanceId, fontScale);
     container->SetFontWeightScale(instanceId, fontWeightScale);
 }
@@ -1860,6 +1886,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetFocusWindowId(focusWindowId);
     }
 
+    auto realHostWindowId = window_->GetRealParentId();
+    if (realHostWindowId != 0) {
+        container->SetRealHostWindowId(static_cast<uint32_t>(realHostWindowId));
+    }
+    LOGI("focusWindowId: %{public}u, realHostWindowId: %{public}d",
+        focusWindowId, realHostWindowId);
+
     // after frontend initialize
     if (window_->IsFocused()) {
         Focus();
@@ -1870,7 +1903,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Use metadata to control the center-alignment of text at line height.
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    bool visibleAreaRealTime =
+        std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+            return metaDataItem.name == "ArkTSVisibleAreaRealTime" && metaDataItem.value == "true";
+        });
     pipeline->SetHalfLeading(halfLeading);
+    pipeline->SetVisibleAreaRealTime(visibleAreaRealTime);
     bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
         [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
                 if (metaDataItem.name == "can_preview_text") {
@@ -2121,6 +2159,24 @@ void UIContentImpl::Destroy()
         Platform::AceContainer::DestroyContainer(instanceId_);
     }
     ContainerScope::RemoveAndCheck(instanceId_);
+    UnregisterDisplayManagerCallback();
+}
+
+void UIContentImpl::UnregisterDisplayManagerCallback()
+{
+    auto& manager = Rosen::DisplayManager::GetInstance();
+    if (foldStatusListener_) {
+        manager.UnregisterFoldStatusListener(foldStatusListener_);
+        foldStatusListener_ = nullptr;
+    }
+    if (foldDisplayModeListener_) {
+        manager.UnregisterDisplayModeListener(foldDisplayModeListener_);
+        foldDisplayModeListener_ = nullptr;
+    }
+    if (availableAreaChangedListener_) {
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_);
+        availableAreaChangedListener_ = nullptr;
+    }
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -2353,11 +2409,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
+                parsedConfig.fontWeightScale = "1.0";
             } else {
                 parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-            }
-            parsedConfig.fontWeightScale =
+                parsedConfig.fontWeightScale =
                         config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+            }
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
@@ -2534,6 +2591,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
 {
+    std::lock_guard<std::mutex> lock(updateDecorVisibleMutex_);
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDeco: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDeco);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2547,11 +2605,16 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
         pipelineContext->ShowContainerTitle(visible, hasDeco);
         pipelineContext->ChangeDarkModeBrightness();
     };
+
+    // Cancel the pending task
+    updateDecorVisibleTask_.Cancel();
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
     if (uiTaskRunner.IsRunOnCurrentThread()) {
         task();
     } else {
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+        updateDecorVisibleTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
+        taskExecutor->PostTask(updateDecorVisibleTask_,
+            TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
     }
 }
 
@@ -3263,6 +3326,25 @@ void UIContentImpl::FocusMoveSearch(
     container->FocusMoveSearchNG(elementId, direction, baseParent, output);
 }
 
+void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isVisible]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto mgr = pipeline->GetFormVisibleManager();
+            if (mgr) {
+                mgr->HandleFormVisibleChangeEvent(isVisible);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionVisibleChange");
+}
+
 bool UIContentImpl::NotifyExecuteAction(
     int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
@@ -3421,7 +3503,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             auto popupParam = CreateCustomPopupParam(true, config);
             popupParam->SetBlockEvent(false);
-            auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
+            NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig;
+            innerModalUIExtensionConfig.isModal = false;
+            auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
                 focusHub->SetFocusable(config.isFocusable);

@@ -110,13 +110,19 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
-    auto textFieldTheme = frameNode->GetContext()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(renderContext, frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, frameNode);
+    auto textFieldTheme = context->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, frameNode);
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, frameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, frameNode);
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
     pattern->UpdateChangeEvent(textFieldPattern->GetTextValue());
     return frameNode;
@@ -779,6 +785,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
+    pattern->SetMaxFontSizeScale(MAX_FONT_SCALE);
 }
 
 void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)

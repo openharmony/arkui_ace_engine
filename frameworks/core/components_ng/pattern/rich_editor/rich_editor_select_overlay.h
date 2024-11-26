@@ -51,6 +51,8 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnHandleMarkInfoChange(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();
@@ -72,6 +74,7 @@ public:
     {
         return isHandleMoving_;
     }
+    float GetHandleHotZoneRadius();
 
 private:
     void RemoveAreaChangeInner();
@@ -83,6 +86,7 @@ private:
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
     bool handleIsHidden_ = true;
+    std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

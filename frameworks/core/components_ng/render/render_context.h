@@ -290,7 +290,6 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
-    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -334,7 +333,7 @@ public:
         return {};
     }
 
-    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 

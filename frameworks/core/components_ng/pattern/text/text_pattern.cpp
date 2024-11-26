@@ -725,6 +725,11 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (dataDetectorAdapter_->GetCloseMenuForAISpanFlag()) {
+            selectOverlay_->EnableMenu();
+            dataDetectorAdapter_->SetCloseMenuForAISpanFlag(false);
+            return;
+        }
         selectOverlay_->ToggleMenu();
         selectOverlay_->SwitchToOverlayMode();
         return;
@@ -739,6 +744,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         selectOverlay_->DisableMenu();
+        dataDetectorAdapter_->SetCloseMenuForAISpanFlag(true);
         return;
     }
 
@@ -836,7 +842,7 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
 
 void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan)
 {
-    if (IsSelectableAndCopy()) {
+    if (IsSelectableAndCopy() || NeedShowAIDetect()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
     TAG_LOGD(AceLogTag::ACE_TEXT, "HandleSpanSingleClickEvent clickedSpanPosition_: %{public}d", clickedSpanPosition_);
@@ -939,7 +945,9 @@ bool TextPattern::ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFu
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
-
+    if (calculateHandleFunc == nullptr) {
+        CalculateHandleOffsetAndShowOverlay();
+    }
     bool isShowCopy = true;
     bool isShowSelectText = true;
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -1931,7 +1939,7 @@ void TextPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
-    ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
     DumpRecord(std::to_string(nowTime));
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
@@ -3948,15 +3956,28 @@ void TextPattern::BeforeCreatePaintWrapper()
     }
 }
 
+void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+{
+    scrollableParent_ = selectOverlay_->FindScrollableParent();
+    TextGestureSelector::StartGestureSelection(start, end, startOffset);
+}
+
 int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 {
+    OffsetF deltaOffset;
+    if (scrollableParent_.Upgrade()) {
+        auto parentGlobalOffset = GetParentGlobalOffset();
+        deltaOffset = parentGlobalOffset - parentGlobalOffset_;
+    }
     auto paragraphOffset =
-        offset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
+        offset - deltaOffset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
     return GetHandleIndex({ paragraphOffset.GetX(), paragraphOffset.GetY() });
 }
 
 void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
+    selectOverlay_->TriggerScrollableParentToScroll(
+        scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     if (magnifierController_) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
@@ -3969,6 +3990,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
 
 void TextPattern::OnTextGenstureSelectionEnd()
 {
+    selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), Offset(), true);
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }

@@ -476,7 +476,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
@@ -505,7 +506,7 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetPixelRound(uint8_t value) override
+    void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);
     }
@@ -902,9 +903,10 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {
-        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override

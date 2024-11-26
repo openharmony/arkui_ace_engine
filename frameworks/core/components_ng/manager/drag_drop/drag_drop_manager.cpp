@@ -55,7 +55,7 @@ constexpr int32_t SQUARE_NUMBER = 2;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
-constexpr float MIN_SPRING_RESPONSE = 0.002f;
+constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
 constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 } // namespace
@@ -749,6 +749,18 @@ void DragDropManager::DoDragReset()
     isDragWithContextMenu_ = false;
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
+}
+
+void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
+{
+    if (IsDraggingPressed(touchPoint.id)) {
+        SetDraggingPressedState(false);
+    }
+    if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
+        OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+            "");
+    }
 }
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
@@ -2141,8 +2153,13 @@ double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& 
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DRAG_PANEL);
         auto gridContainer = columnInfo->GetParent();
         if (gridContainer) {
+            auto rootWidth = context->GetRootWidth();
+            if (LessOrEqual(rootWidth, 0.0)) {
+                auto mainPipeline = PipelineContext::GetMainPipelineContext();
+                rootWidth = GridSystemManager::GetInstance().GetScreenWidth(mainPipeline);
+            }
             // cannot handle multi-screen
-            gridContainer->BuildColumnWidth(context->GetRootWidth());
+            gridContainer->BuildColumnWidth(rootWidth);
         }
         dragDropMgr->columnInfo_ = columnInfo;
     }

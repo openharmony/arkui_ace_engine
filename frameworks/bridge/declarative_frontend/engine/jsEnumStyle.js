@@ -1065,8 +1065,8 @@ var RichEditorResponseType;
 
 let MenuType;
 (function (MenuType) {
-  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
-  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+  MenuType[MenuType.SELECTION_MENU = 0] = 'SELECTION_MENU';
+  MenuType[MenuType.PREVIEW_MENU = 1] = 'PREVIEW_MENU';
 })(MenuType || (MenuType = {}));
 
 var MenuPreviewMode;
@@ -1449,19 +1449,6 @@ var BlurStyle;
   BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
-
-var BlurStyleActivePolicy;
-(function (BlurStyleActivePolicy) {
-  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
-  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
-})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
-
-var BlurType;
-(function (BlurType) {
-  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
-  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
-})(BlurType || (BlurType = {}));
 
 var ThemeColorMode;
 (function (ThemeColorMode) {
@@ -3292,12 +3279,12 @@ let MenuPolicy;
 
 let DataOperationType;
 (function (DataOperationType) {
-  DataOperationType['ADD'] = "add";
-  DataOperationType['DELETE'] = "delete";
-  DataOperationType['CHANGE'] = "change";
-  DataOperationType['MOVE'] = "move";
-  DataOperationType['EXCHANGE'] = "exchange";
-  DataOperationType['RELOAD'] = "reload";
+  DataOperationType['ADD'] = 'add';
+  DataOperationType['DELETE'] = 'delete';
+  DataOperationType['CHANGE'] = 'change';
+  DataOperationType['MOVE'] = 'move';
+  DataOperationType['EXCHANGE'] = 'exchange';
+  DataOperationType['RELOAD'] = 'reload';
 })(DataOperationType || (DataOperationType = {}));
 
 let PreDragStatus;
@@ -3377,12 +3364,12 @@ let HeightBreakpoint;
   HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
 })(HeightBreakpoint || (HeightBreakpoint = {}));
 
-var WebElementType;
+let WebElementType;
 (function (WebElementType) {
   WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
 })(WebElementType || (WebElementType = {}));
 
-var WebResponseType;
+let WebResponseType;
 (function (WebResponseType) {
   WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
 })(WebResponseType || (WebResponseType = {}));

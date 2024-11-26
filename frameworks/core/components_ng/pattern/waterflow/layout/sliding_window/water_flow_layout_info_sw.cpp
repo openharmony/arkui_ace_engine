@@ -28,6 +28,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
     if (startIndex_ > endIndex_) {
+        SyncOnEmptyLanes();
         return;
     }
     if (!idxToLane_.count(startIndex_) || lanes_[GetSegment(startIndex_)].size() <= idxToLane_.at(startIndex_)) {
@@ -640,6 +641,8 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         }
         margins_.clear();
         return true;
+    } else {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
     }
     return false;
 }
@@ -684,6 +687,8 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
             }
         }
     }
+    startIndex_ = StartIndex();
+    endIndex_ = EndIndex();
 }
 
 void WaterFlowLayoutInfoSW::BeginCacheUpdate()
@@ -712,5 +717,17 @@ void WaterFlowLayoutInfoSW::ClearData()
     synced_ = false;
     startIndex_ = 0;
     endIndex_ = -1;
+}
+
+void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
+{
+    startPos_ = 0.0f;
+    endPos_ = 0.0f;
+    itemStart_ = true;
+    itemEnd_ = true;
+    offsetEnd_ = true;
+    maxHeight_ = footerHeight_;
+    newStartIndex_ = EMPTY_NEW_START_INDEX;
+    synced_ = true;
 }
 } // namespace OHOS::Ace::NG

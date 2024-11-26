@@ -96,6 +96,8 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
             break;
         case TouchType::CANCEL:
             DoTextSelectionTouchCancel();
+            isStarted_ = false;
+            isSelecting_ = false;
             break;
         default:
             break;
