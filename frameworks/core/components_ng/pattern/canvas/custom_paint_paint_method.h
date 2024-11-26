@@ -311,7 +311,7 @@ protected:
     void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
-    std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
+    std::shared_ptr<RSShaderEffect> MakeConicGradient(const Ace::Gradient& gradient);
 
     void Path2DFill();
     void Path2DStroke();

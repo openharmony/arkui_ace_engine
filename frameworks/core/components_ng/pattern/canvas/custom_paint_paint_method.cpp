@@ -211,7 +211,7 @@ void CustomPaintPaintMethod::UpdateFontFamilies()
     }
 }
 
-std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient)
+std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(const Ace::Gradient& gradient)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
@@ -268,7 +268,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
         shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, pos, mode);
     } else if (gradient.GetType() == Ace::GradientType::CONIC) {
-        shaderEffect = MakeConicGradient(nullptr, gradient);
+        shaderEffect = MakeConicGradient(gradient);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
             shaderEffect = RSShaderEffect::CreateRadialGradient(endPoint, gradient.GetOuterRadius(), colors, pos, mode);
