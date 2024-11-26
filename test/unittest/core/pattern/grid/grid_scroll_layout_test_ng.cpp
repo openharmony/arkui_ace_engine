@@ -1371,6 +1371,52 @@ HWTEST_F(GridScrollLayoutTestNg, MarginPadding001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateFixedItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(-100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(200);
+    ASSERT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateFixedItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(-200);
+    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+}
+
+/**
  * @tc.name: SpringAnimationTest001
  * @tc.desc: Test Grid change height during spring animation. GridItem is not fully filled Grid.
  * @tc.type: FUNC
