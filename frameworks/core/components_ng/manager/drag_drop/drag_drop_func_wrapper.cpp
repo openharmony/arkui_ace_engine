@@ -474,7 +474,9 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
 
 [[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
 {
-    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, -1.0f);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, -1.0f);
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
