@@ -44,6 +44,7 @@ public:
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
     void OnTouchEvent(const TouchEvent& touchEvent);
+    void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
 
 private:
@@ -51,6 +52,8 @@ private:
     ~ResSchedReport() {}
     void HandleTouchDown(const TouchEvent& touchEvent);
     void HandleTouchUp(const TouchEvent& touchEvent);
+    void HandleKeyDown(const KeyEvent& event);
+    void HandleKeyUp(const KeyEvent& event);
     void HandleTouchMove(const TouchEvent& touchEvent);
     void HandleTouchCancel(const TouchEvent& touchEvent);
     void HandleTouchPullDown(const TouchEvent& touchEvent);

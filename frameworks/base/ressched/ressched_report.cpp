@@ -25,6 +25,7 @@ constexpr uint32_t RES_TYPE_SLIDE           = 11;
 constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
 constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
+constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -32,6 +33,8 @@ constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
+constexpr int32_t KEY_DOWN_EVENT = 1;
+constexpr int32_t KEY_UP_EVENT = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
@@ -49,6 +52,7 @@ constexpr char UID[] = "uid";
 constexpr char BUNDLE_NAME[] = "bundleName";
 constexpr char ABILITY_NAME[] = "abilityName";
 constexpr char CLICK[] = "click";
+constexpr char KEY_EVENT[] = "key_event";
 constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
@@ -58,6 +62,7 @@ constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
 constexpr char UP_SPEED_KEY[] = "up_speed";
+constexpr char KEY_CODE[] = "key_code";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -186,6 +191,20 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
+void ResSchedReport::OnKeyEvent(const KeyEvent& event)
+{
+    switch (event.action) {
+        case KeyAction::DOWN:
+            HandleKeyDown(event);
+            break;
+        case KeyAction::UP:
+            HandleKeyUp(event);
+            break;
+        default:
+            break;
+    }
+}
+
 void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
     if (enforce) {
@@ -206,6 +225,14 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     isInTouch_ = true;
 }
 
+void ResSchedReport::HandleKeyDown(const KeyEvent& event)
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload[Ressched::NAME] = KEY_EVENT;
+    payload[KEY_CODE] = std::to_string(static_cast<int>(event.code));
+    ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_DOWN_EVENT, payload);
+}
+
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
@@ -216,6 +243,14 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
     isInSlide_ = false;
     isInTouch_ = false;
     averageDistance_.Reset();
+}
+
+void ResSchedReport::HandleKeyUp(const KeyEvent& event)
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload[Ressched::NAME] = KEY_EVENT;
+    payload[KEY_CODE] = std::to_string(static_cast<int>(event.code));
+    ResSchedDataReport(RES_TYPE_KEY_EVENT, KEY_UP_EVENT, payload);
 }
 
 void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
