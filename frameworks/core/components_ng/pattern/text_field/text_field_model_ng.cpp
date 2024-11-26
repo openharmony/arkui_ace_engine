@@ -35,7 +35,7 @@ namespace {
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 }
 void TextFieldModelNG::CreateNode(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
+    const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value, bool isTextArea)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -52,12 +52,12 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
-    auto textValue = pattern->GetTextValue();
+    auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
     }
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
@@ -97,8 +97,8 @@ void TextFieldModelNG::CreateNode(
     }
 }
 
-RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
-    const std::optional<std::string>& value, bool isTextArea)
+RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::u16string>& placeholder,
+    const std::optional<std::u16string>& value, bool isTextArea)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
@@ -106,11 +106,11 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
-    auto textValue = pattern->GetTextValue();
+    auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
@@ -237,7 +237,7 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
 }
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+    const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     CreateNode(placeholder, value, false);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -252,7 +252,7 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
 };
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
+    const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
     CreateNode(placeholder, value, true);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -441,12 +441,13 @@ void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 
-void TextFieldModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError)
+void TextFieldModelNG::SetInputFilter(const std::string& value,
+    const std::function<void(const std::u16string&)>&& func)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnInputFilterError(onError);
+    eventHub->SetOnInputFilterError(std::move(func));
 }
 
 void TextFieldModelNG::SetInputStyle(InputStyle value)
@@ -490,7 +491,7 @@ void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldComm
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
+void TextFieldModelNG::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -526,28 +527,28 @@ void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& fu
     eventHub->SetOnScrollChangeEvent(std::move(func));
 }
 
-void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
 }
 
-void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnCut(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCut(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnPaste(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -616,7 +617,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
     pattern->SetUnitNode(unitNode);
 }
 
-void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
+void TextFieldModelNG::SetShowError(const std::u16string& errorText, bool visible)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible);
@@ -769,7 +770,7 @@ void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
 }
 
-void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1281,7 +1282,7 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     }
 }
 
-void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)
+void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ErrorText, errorText, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowErrorText, visible, frameNode);
@@ -1295,7 +1296,8 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 
-void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func)
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&,
+    PreviewText&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1311,17 +1313,17 @@ void TextFieldModelNG::SetOnContentSizeChange(FrameNode* frameNode, std::functio
     eventHub->SetOnContentSizeChange(std::move(func));
 }
 
-void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::string& value)
+void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::u16string& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto textValue = pattern->GetTextValue();
+    auto textValue = pattern->GetTextUtf16Value();
     if (value != textValue) {
         pattern->InitEditingValueText(value);
     }
 }
 
-void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder)
+void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::u16string& placeholder)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1345,7 +1347,7 @@ void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int3
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1354,7 +1356,7 @@ void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const s
 }
 
 void TextFieldModelNG::SetOnPasteWithEvent(
-    FrameNode* frameNode, std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+    FrameNode* frameNode, std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1401,19 +1403,19 @@ void TextFieldModelNG::SetCancelSymbolIcon(FrameNode* frameNode,
     layoutProperty->SetCancelIconSymbol(iconSymbol);
 }
 
-std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
+std::u16string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)
 {
-    std::string value;
+    std::u16string value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, Placeholder, value, frameNode, value);
     return value;
 }
 
-std::string TextFieldModelNG::GetTextFieldText(FrameNode* frameNode)
+std::u16string TextFieldModelNG::GetTextFieldText(FrameNode* frameNode)
 {
-    std::string value;
+    std::u16string value;
     CHECK_NULL_RETURN(frameNode, value);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    return pattern->GetTextValue();
+    return pattern->GetTextUtf16Value();
 }
 
 Color TextFieldModelNG::GetCaretColor(FrameNode* frameNode)
@@ -1614,7 +1616,7 @@ void TextFieldModelNG::SetTextSelection(FrameNode* frameNode, int32_t start, int
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto wideText = pattern->GetWideText();
+    auto wideText = pattern->GetTextUtf16Value();
     int32_t length = static_cast<int32_t>(wideText.length());
     start = std::clamp(start, 0, length);
     end = std::clamp(end, 0, length);
@@ -1721,7 +1723,7 @@ void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(
 }
 
 void TextFieldModelNG::SetInputFilter(FrameNode* frameNode,
-    const std::string& value, const std::function<void(const std::string&)>& onError)
+    const std::string& value, const std::function<void(const std::u16string&)>& onError)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
@@ -1738,7 +1740,7 @@ void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<vo
     eventHub->SetOnScrollChangeEvent(std::move(func));
 }
 
-void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1769,7 +1771,8 @@ void TextFieldModelNG::SetInputFilter(FrameNode* frameNode, const std::string& v
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
 }
 
-void TextFieldModelNG::SetInputFilterError(FrameNode* frameNode, const std::function<void(const std::string&)>& onError)
+void TextFieldModelNG::SetInputFilterError(FrameNode* frameNode,
+    const std::function<void(const std::u16string&)>& onError)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();

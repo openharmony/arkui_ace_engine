@@ -36,7 +36,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     // Construct text style.
     TextStyle textStyle;
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
-    std::replace(textContent_.begin(), textContent_.end(), '\n', ' ');
+    std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
@@ -348,7 +348,7 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
             auto border = params.pattern->GetBorderWidthProperty();
             textRectOffsetX = params.pattern->GetPaddingLeft() + params.pattern->GetBorderLeft(border);
         }
-        bool isEmptyTextEditValue = params.pattern->GetTextValue().empty();
+        bool isEmptyTextEditValue = params.pattern->GetTextUtf16Value().empty();
         bool isInlineStyle = params.pattern->IsNormalInlineState();
         if (!isEmptyTextEditValue && !isInlineStyle) {
             TextAlign textAlign = params.layoutProperty->GetTextAlignValue(TextAlign::START);
@@ -383,7 +383,7 @@ float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrap
     return static_cast<float>(textFieldTheme->GetContentHeight().ConvertToPx());
 }
 
-bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     // update child position.
