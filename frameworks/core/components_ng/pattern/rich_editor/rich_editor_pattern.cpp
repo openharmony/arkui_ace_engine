@@ -10991,7 +10991,6 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
         return;
     }
     if (IsPreviewTextInputting()) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "do not handle DeleteForward in previewTextInputting");
         return;
     }
     OperationRecord record;
