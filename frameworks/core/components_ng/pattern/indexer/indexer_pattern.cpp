@@ -936,12 +936,12 @@ void IndexerPattern::UpdateBubbleView()
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     auto actualIndex =
-        autoCollapse_ && selected_ > 0
+        autoCollapse_ && selected_ > 0 && selected_ < itemCount_
             ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
                   fullArrayValue_.begin()
             : selected_;
     auto actualChildIndex =
-        autoCollapse_ && childPressIndex_ > 0
+        autoCollapse_ && childPressIndex_ > 0 && childPressIndex_ < itemCount_
             ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
                   fullArrayValue_.begin()
             : childPressIndex_;
@@ -1930,7 +1930,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = autoCollapse_ ?
-            selected_ > 0 ?
+            selected_ > 0 && selected_ < itemCount_ ?
                 std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                     arrayValue_.at(selected_).first) - fullArrayValue_.begin() :
                 selected_ :
