@@ -672,6 +672,7 @@ public:
     void FireHoverModeChangeCallback();
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
+    void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -709,7 +710,10 @@ private:
     void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
         uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
-    std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
+    void CalculateAloneSheetRadius(
+        std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius);
+    bool IsSheetBottom();
+    std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string MoveTo(double x, double y);
