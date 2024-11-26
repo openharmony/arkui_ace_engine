@@ -14,9 +14,29 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#ifdef FORM_SUPPORTED
+#include "core/components_ng/pattern/form/form_model_ng.h"
+#endif
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components/common/layout/constants.h"
 
+namespace OHOS::Ace::NG {
+    struct LiteralDimension {
+    Dimension width;
+    Dimension height;
+};
+namespace Converter {
+template<>
+LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
+{
+    return LiteralDimension {
+        .width = Converter::Convert<Dimension>(src.width),
+        .height = Converter::Convert<Dimension>(src.height)
+    };
+}
+} // namespace OHOS::Ace::NG::Converter
+} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
@@ -33,20 +53,24 @@ namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
               const Ark_Literal_Number_height_width* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetSize(frameNode, convValue);
+    auto dimension = Converter::Convert<LiteralDimension>(*value);
+    FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
+#endif // FORM_SUPPORTED
 }
 void ModuleNameImpl(Ark_NativePointer node,
                     const Ark_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //FormComponentModelNG::SetModuleName(frameNode, convValue);
+    auto name = Converter::Convert<std::string>(*value);
+    FormModelNG::SetModuleName(frameNode, name);
+#endif // FORM_SUPPORTED
 }
 void DimensionImpl(Ark_NativePointer node,
                    Ark_FormDimension value)
@@ -60,10 +84,12 @@ void DimensionImpl(Ark_NativePointer node,
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //FormComponentModelNG::SetAllowUpdate(frameNode, convValue);
+    FormModelNG::AllowUpdate(frameNode, convValue);
+#endif // FORM_SUPPORTED
 }
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)

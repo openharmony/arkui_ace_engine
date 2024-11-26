@@ -18,7 +18,9 @@
 
 #include <unordered_map>
 
+#ifndef ARKUI_CAPI_UNITTEST
 #include "transaction/rs_interfaces.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
@@ -33,6 +35,12 @@ namespace OHOS {
 namespace MMI {
 class PointerEvent;
 } // namespace MMI
+
+#ifdef ARKUI_CAPI_UNITTEST
+namespace Rosen {
+class RSSurfaceNode;
+}
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace Ace {
 class SubContainer;

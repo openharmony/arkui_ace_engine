@@ -20,7 +20,11 @@
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifndef ARKUI_CAPI_UNITTEST
 #include "pointer_event.h"
+#else
+#include "test/unittest/capi/stubs/mock_pointer_event.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 namespace {
