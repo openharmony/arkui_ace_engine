@@ -16,6 +16,8 @@
 
 #include <regex>
 
+#include "cj_lambda.h"
+
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -81,11 +83,7 @@ void CompleteResourceObjectFromParams(
     }
     auto identity = identityValue->GetString();
     if (!ViewAbstract::ParseDollarResource(
-        identity,
-        targetModule,
-        resType,
-        resName,
-        obj.type == UNKNOWN_RESOURCE_TYPE)) {
+            identity, targetModule, resType, resName, obj.type == UNKNOWN_RESOURCE_TYPE)) {
         return;
     }
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
@@ -709,5 +707,72 @@ bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std
         return true;
     }
     return false;
+}
+
+void ViewAbstract::ParseOnCreateMenu(CjOnCreateMenu& cjOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(cjOnCreateMenu), node = frameNode, instanceId = Container::CurrentId()](
+                          const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        std::vector<NG::MenuOptionsParam> menuParams;
+        CHECK_NULL_RETURN(pipelineContext, menuParams);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto cjMenuItems = new std::vector<FfiTextMenuItem>(systemMenuItems.size());
+        for (size_t i = 0; i < systemMenuItems.size(); i++) {
+            FfiTextMenuItem item;
+            auto content = systemMenuItems[i].menuOptionsParam.content;
+            auto icon = systemMenuItems[i].menuOptionsParam.icon;
+            item.content = content.has_value() ? Utils::MallocCString(content.value()) : Utils::MallocCString("");
+            item.icon = icon.has_value() ? Utils::MallocCString(icon.value()) : Utils::MallocCString("");
+            item.id = Utils::MallocCString(systemMenuItems[i].menuOptionsParam.id);
+            (*cjMenuItems)[i] = item;
+        }
+        auto vectorResult = func(cjMenuItems);
+        auto menuItemsArray = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vectorResult);
+        for (size_t i = 0; i < menuItemsArray->size(); i++) {
+            auto ffiMenuItem = (*menuItemsArray)[i];
+            NG::MenuOptionsParam menuOptionsParam;
+            menuOptionsParam.content =
+                ffiMenuItem.content.value ? std::make_optional(ffiMenuItem.content.value) : std::nullopt;
+            menuOptionsParam.icon = ffiMenuItem.icon.value ? std::make_optional(ffiMenuItem.icon.value) : std::nullopt;
+            menuOptionsParam.id = ffiMenuItem.id.value;
+            menuParams.emplace_back(menuOptionsParam);
+        }
+        delete menuItemsArray;
+        return menuParams;
+    };
+    onCreateMenuCallback = cjCallback;
+}
+
+void ViewAbstract::ParseOnMenuItemClick(
+    CjOnMenuItemClick& cjOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClick)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(cjOnMenuItemClick), node = frameNode,
+                          instanceId = Container::CurrentId()](NG::MenuItemParam menuOptionsParam) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto content = menuOptionsParam.menuOptionsParam.content;
+        auto icon = menuOptionsParam.menuOptionsParam.icon;
+        FfiTextMenuItem ffiTextMenuItem;
+        ffiTextMenuItem.content =
+            content.has_value() ? Utils::MallocCString(content.value()) : Utils::MallocCString("");
+        ffiTextMenuItem.icon = icon.has_value() ? Utils::MallocCString(icon.value()) : Utils::MallocCString("");
+        ffiTextMenuItem.id = Utils::MallocCString(menuOptionsParam.menuOptionsParam.id);
+        return func(ffiTextMenuItem, menuOptionsParam.start, menuOptionsParam.end);
+    };
+    onMenuItemClick = cjCallback;
+}
+
+bool ViewAbstract::ParseEditMenuOptions(CjOnCreateMenu& cjOnCreateMenu, CjOnMenuItemClick& cjOnMenuItemClick,
+    NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClick)
+{
+    ParseOnCreateMenu(cjOnCreateMenu, onCreateMenuCallback);
+    ParseOnMenuItemClick(cjOnMenuItemClick, onMenuItemClick);
+    return true;
 }
 } // namespace OHOS::Ace::Framework

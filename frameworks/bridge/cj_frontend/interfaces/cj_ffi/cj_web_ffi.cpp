@@ -205,6 +205,31 @@ void RequestPermissionsFromUserWeb(CJWebPermissionRequest& request)
 
     free(cPermission);
 }
+
+void ParseScriptItems(VectorScriptItemHandle& handle, ScriptItems& scriptItems)
+{
+    auto ffiScriptItemVec = *reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
+    for (size_t i = 0; i < ffiScriptItemVec.size(); i++) {
+        auto script = ffiScriptItemVec[i].script;
+        auto scriptRulesVec = ffiScriptItemVec[i].scriptRules;
+        auto scriptRules = *reinterpret_cast<std::vector<std::string>*>(scriptRulesVec);
+        if (scriptItems.find(script) == scriptItems.end()) {
+            scriptItems.insert(std::make_pair(script, scriptRules));
+        }
+    }
+}
+
+void EraseSpace(std::string& data)
+{
+    auto iter = data.begin();
+    while (iter != data.end()) {
+        if (isspace(*iter)) {
+            iter = data.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
 } // namespace OHOS::Ace::Framework
 std::unordered_map<int32_t, CJWebWindowNewHandler::ChildWindowInfo> CJWebWindowNewHandler::controller_map_;
 extern "C" {
@@ -534,5 +559,416 @@ void FfiOHOSAceFrameworkWebDarkMode(int32_t darkMode)
 void FfiOHOSAceFrameworkWebForceDarkAccess(bool access)
 {
     WebModel::GetInstance()->SetForceDarkAccess(access);
+}
+
+void FfiWebEnableNativemediaPlayer(bool enable, bool shouldOverlay)
+{
+    WebModel::GetInstance()->SetNativeVideoPlayerConfig(enable, shouldOverlay);
+}
+
+void FfiWebOnControllerAttached(void (*callback)())
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [func = CJLambda::Create(callback), node = frameNode]() {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope(webNode->GetInstanceId());
+        auto context = PipelineBase::GetCurrentContext();
+        if (context) {
+            context->UpdateCurrentActiveNode(node);
+        }
+        auto executor = Container::CurrentTaskExecutorSafely();
+        CHECK_NULL_VOID(executor);
+        executor->PostSyncTask([func]() { func(); }, TaskExecutor::TaskType::UI, "ArkUIWebControllerAttached");
+    };
+    WebModel::GetInstance()->SetOnControllerAttached(std::move(lambda));
+}
+
+void FfiWebOnPermissionRequest(void (*callback)(COnPermissionRequestEvent))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+        auto permissionObj = new CJWebPermissionRequest();
+        permissionObj->SetEvent(*eventInfo);
+
+        auto denyWrapper = [](void* objPtr) {
+            auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+            permission->Deny();
+        };
+        auto getOriginWrapper = [](void* objPtr) -> ExternalString {
+            auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+            return Utils::MallocCString(permission->GetOrigin());
+        };
+        auto getAccessibleResourceWrapper = [](void* objPtr) -> VectorStringHandle {
+            auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+            auto result = new std::vector<std::string>;
+            *result = permission->GetAccessibleResources();
+            return result;
+        };
+        auto grantWrapper = [](VectorStringHandle resources, void* objPtr) {
+            auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+            auto resVec = reinterpret_cast<std::vector<std::string>*>(resources);
+            permission->Grant(*resVec);
+        };
+        auto freeWrapper = [](void* objPtr) {
+            if (objPtr) {
+                auto permission = reinterpret_cast<CJWebPermissionRequest*>(objPtr);
+                delete permission;
+            }
+        };
+        CPermissionRequest cRequest { .deny = denyWrapper,
+            .getOrigin = getOriginWrapper,
+            .getAccessibleResource = getAccessibleResourceWrapper,
+            .grant = grantWrapper,
+            .permissionPtr = permissionObj,
+            .free = freeWrapper };
+
+        COnPermissionRequestEvent cEvent { .request = cRequest };
+        func(cEvent);
+    };
+    WebModel::GetInstance()->SetPermissionRequestEventId(lambda);
+}
+
+void FfiWebJavaScriptAccess(bool javaScriptAccess)
+{
+    WebModel::GetInstance()->SetJsEnabled(javaScriptAccess);
+}
+
+void FfiWebOverScrollMode(int32_t overScrollMode)
+{
+    auto mode = OverScrollMode::NEVER;
+    switch (overScrollMode) {
+        case 0:
+            mode = OverScrollMode::NEVER;
+            break;
+        case 1:
+            mode = OverScrollMode::ALWAYS;
+            break;
+        default:
+            mode = OverScrollMode::NEVER;
+            break;
+    }
+    WebModel::GetInstance()->SetOverScrollMode(mode);
+}
+
+void FfiWebOverviewModeAccess(bool overviewModeAccess)
+{
+    WebModel::GetInstance()->SetOverviewModeAccessEnabled(overviewModeAccess);
+}
+
+void FfiWebDatabaseAccess(bool databaseAccess)
+{
+    WebModel::GetInstance()->SetDatabaseAccessEnabled(databaseAccess);
+}
+
+void FfiWebMediaPlayGestureAccess(bool access)
+{
+    WebModel::GetInstance()->SetMediaPlayGestureAccess(access);
+}
+
+void FfiWebMultiWindowAccess(bool multiWindow)
+{
+    WebModel::GetInstance()->SetMultiWindowAccessEnabled(multiWindow);
+}
+
+void FfiWebHorizontalScrollBarAccess(bool horizontalScrollBar)
+{
+    WebModel::GetInstance()->SetHorizontalScrollBarAccessEnabled(horizontalScrollBar);
+}
+
+void FfiWebCacheMode(int32_t cacheMode)
+{
+    auto mode = WebCacheMode::DEFAULT;
+    switch (cacheMode) {
+        case static_cast<int32_t>(WebCacheMode::DEFAULT):
+            mode = WebCacheMode::DEFAULT;
+            break;
+        case static_cast<int32_t>(WebCacheMode::USE_CACHE_ELSE_NETWORK):
+            mode = WebCacheMode::USE_CACHE_ELSE_NETWORK;
+            break;
+        case static_cast<int32_t>(WebCacheMode::USE_NO_CACHE):
+            mode = WebCacheMode::USE_NO_CACHE;
+            break;
+        case static_cast<int32_t>(WebCacheMode::USE_CACHE_ONLY):
+            mode = WebCacheMode::USE_CACHE_ONLY;
+            break;
+        default:
+            mode = WebCacheMode::DEFAULT;
+            break;
+    }
+    WebModel::GetInstance()->SetCacheMode(mode);
+}
+
+void FfiWebCopyOptions(int32_t value)
+{
+    auto mode = CopyOptions::Local;
+    switch (value) {
+        case static_cast<int32_t>(CopyOptions::None):
+            mode = CopyOptions::None;
+            break;
+        case static_cast<int32_t>(CopyOptions::InApp):
+            mode = CopyOptions::InApp;
+            break;
+        case static_cast<int32_t>(CopyOptions::Local):
+            mode = CopyOptions::Local;
+            break;
+        case static_cast<int32_t>(CopyOptions::Distributed):
+            mode = CopyOptions::Distributed;
+            break;
+        default:
+            mode = CopyOptions::Local;
+            break;
+    }
+    WebModel::GetInstance()->SetCopyOptionMode(mode);
+}
+
+void FfiWebTextZoomRatio(int32_t textZoomRatio)
+{
+    WebModel::GetInstance()->SetTextZoomRatio(textZoomRatio);
+}
+
+void FfiWebInitialScale(float percent)
+{
+    WebModel::GetInstance()->InitialScale(percent);
+}
+
+void FfiWebBlockNetwork(bool block)
+{
+    WebModel::GetInstance()->SetBlockNetwork(block);
+}
+
+void FfiWebDefaultFixedFontSize(int32_t size)
+{
+    WebModel::GetInstance()->SetDefaultFixedFontSize(size);
+}
+
+void FfiWebDefaultFontSize(int32_t size)
+{
+    WebModel::GetInstance()->SetDefaultFontSize(size);
+}
+
+void FfiWebMinFontSize(int32_t size)
+{
+    WebModel::GetInstance()->SetMinFontSize(size);
+}
+
+void FfiWebMinLogicalFontSize(int32_t size)
+{
+    WebModel::GetInstance()->SetMinLogicalFontSize(size);
+}
+
+void FfiWebFixedFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebFixedFont(family);
+}
+
+void FfiWebSansSerifFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebSansSerifFont(family);
+}
+
+void FfiWebSerifFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebSerifFont(family);
+}
+
+void FfiWebStandardFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebStandardFont(family);
+}
+
+void FfiWebFantasyFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebFantasyFont(family);
+}
+
+void FfiWebCursiveFont(const char* family)
+{
+    WebModel::GetInstance()->SetWebCursiveFont(family);
+}
+
+VectorScriptItemHandle FfiVectorScriptItemCreate(int64_t size)
+{
+    return new std::vector<FfiScriptItem>(size);
+}
+
+void FfiVectorScriptItemSetElement(VectorScriptItemHandle handle, int64_t index, FfiScriptItem item)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
+    (*actualVec)[index] = item;
+}
+
+void FfiVectorScriptItemDelete(VectorScriptItemHandle handle)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiScriptItem>*>(handle);
+    delete actualVec;
+}
+
+void FfiWebPinchSmooth(bool isEnabled)
+{
+    WebModel::GetInstance()->SetPinchSmoothModeEnabled(isEnabled);
+}
+
+void FfiWebAllowWindowOpenMethod(bool flag)
+{
+    WebModel::GetInstance()->SetAllowWindowOpenMethod(flag);
+}
+
+void FfiWebMediaOptions(int32_t resumeInterval, bool audioExclusive)
+{
+    WebModel::GetInstance()->SetAudioResumeInterval(resumeInterval);
+    WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
+}
+
+void FfiWebJavaScriptOnDocumentStart(VectorScriptItemHandle handle)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(handle, scriptItems);
+    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+}
+
+void FfiWebJavaScriptOnDocumentEnd(VectorScriptItemHandle handle)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(handle, scriptItems);
+    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void FfiWebLayoutMode(int32_t layoutMode)
+{
+    auto mode = WebLayoutMode::NONE;
+    switch (layoutMode) {
+        case 0:
+            mode = WebLayoutMode::NONE;
+            break;
+        case 1:
+            mode = WebLayoutMode::FIT_CONTENT;
+            break;
+        default:
+            mode = WebLayoutMode::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetLayoutMode(mode);
+}
+
+void FfiWebEnableNativeEmbedMode(bool enable)
+{
+    WebModel::GetInstance()->SetNativeEmbedModeEnabled(enable);
+}
+void FfiWebRegisterNativeEmbedRule(const char* tag, const char* type)
+{
+    WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
+}
+
+void FfiWebDefaultTextEncodingFormat(const char* format)
+{
+    std::string textEncodingFormat = std::string(format);
+    EraseSpace(textEncodingFormat);
+    if (textEncodingFormat.empty()) {
+        WebModel::GetInstance()->SetDefaultTextEncodingFormat("UTF-8");
+        return;
+    }
+    WebModel::GetInstance()->SetDefaultTextEncodingFormat(textEncodingFormat);
+}
+
+void FfiWebMetaViewport(bool enabled)
+{
+    WebModel::GetInstance()->SetMetaViewport(enabled);
+}
+
+void FfiWebTextAutosizing(bool textAutosizing)
+{
+    WebModel::GetInstance()->SetTextAutosizing(textAutosizing);
+}
+
+VectorExpandedMenuItemOptionsHandle FfiVectorExpandedMenuItemOptionsCreate(int64_t size)
+{
+    return new std::vector<FfiExpandedMenuItemOptions>(size);
+}
+
+void FfiVectorExpandedMenuItemOptionsSetElement(
+    VectorExpandedMenuItemOptionsHandle handle, int64_t index, FfiExpandedMenuItemOptions item)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
+    (*actualVec)[index] = item;
+}
+
+void FfiVectorExpandedMenuItemOptionsDelete(VectorExpandedMenuItemOptionsHandle handle)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
+    delete actualVec;
+}
+
+void FfiWebSelectionMenuOptions(VectorExpandedMenuItemOptionsHandle handle)
+{
+    auto actualVec = *reinterpret_cast<std::vector<FfiExpandedMenuItemOptions>*>(handle);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WebMenuOptionsParam optionParam;
+    NG::MenuOptionsParam menuOption;
+    for (size_t i = 0; i < actualVec.size(); i++) {
+        auto ffiOption = actualVec[i];
+        menuOption.content = ffiOption.content;
+        menuOption.icon.reset();
+        if (ffiOption.hasStartIcon) {
+            menuOption.icon = ffiOption.startIcon;
+        }
+        auto actionCallback = [node = frameNode, func = CJLambda::Create(ffiOption.action)](
+                                  const std::string selectInfo) {
+            auto webNode = node.Upgrade();
+            CHECK_NULL_VOID(webNode);
+            ContainerScope(webNode->GetInstanceId());
+            auto context = PipelineBase::GetCurrentContext();
+            if (context) {
+                context->UpdateCurrentActiveNode(node);
+                context->SetCallBackNode(node);
+            }
+            func(selectInfo.c_str());
+        };
+        menuOption.action = std::move(actionCallback);
+        optionParam.menuOption.push_back(menuOption);
+    }
+    WebModel::GetInstance()->SetSelectionMenuOptions(std::move(optionParam));
+}
+
+void FfiWebOnAdsBlocked(void (*callback)(FfiAdsBlockedDetails details))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto lambda = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+        auto blocked = eventInfo->GetAdsBlocked();
+        auto resBlocked = new std::vector<std::string>(blocked.size());
+        for (size_t i = 0; i < blocked.size(); i++) {
+            (*resBlocked)[i] = blocked[i];
+        }
+        FfiAdsBlockedDetails details { .url = eventInfo->GetUrl().c_str(), .adsBlocked = resBlocked };
+        func(details);
+    };
+    WebModel::GetInstance()->SetAdsBlockedEventId(lambda);
+}
+
+void FfiWebKeyboardAvoidMode(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAvoidMode::RESIZE_VISUAL) ||
+        mode > static_cast<int32_t>(WebKeyboardAvoidMode::DEFAULT)) {
+        return;
+    }
+    WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
+}
+
+void FfiWebEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 }
