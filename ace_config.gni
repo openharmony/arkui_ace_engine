@@ -327,3 +327,7 @@ if (ace_engine_feature_enable_nav_split_mode) {
 if (ace_engine_feature_wearable) {
   ace_common_defines += [ "ARKUI_WEARABLE" ]
 }
+
+if (ace_engine_feature_enable_form_mouse_axis_support) {
+  ace_common_defines += [ "FORM_MOUSE_AXIS_SUPPORT" ]
+}

@@ -80,6 +80,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     return pointerEvent;
 }
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const AxisEvent& point,
     const WeakPtr<FrameNode>& node)
 {
@@ -121,7 +122,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     pointerEvent->SetTargetDisplayId(point.targetDisplayId);
     return pointerEvent;
 }
-
+#endif
 
 class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
@@ -202,6 +203,7 @@ FormNode::~FormNode()
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
 }
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
 HitTestResult FormNode::AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint,
     const PointF &parentRevertPoint, TouchRestrict &touchRestrict, AxisTestResult &axisResult)
 {
@@ -232,6 +234,7 @@ HitTestResult FormNode::AxisTest(const PointF &globalPoint, const PointF &parent
     }
     return testResult;
 }
+#endif
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
@@ -270,9 +273,6 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         if (mgr) {
             mgr->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
         }
-        if (touchRestrict.inputEventType == InputEventType::AXIS) {
-            return HitTestResult::STOP_BUBBLING;
-        }
         return testResult;
     }
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
@@ -293,6 +293,7 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
 void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     SerializedGesture& serializedGesture)
 {
@@ -303,6 +304,7 @@ void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this));
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
+#endif
 
 OffsetF FormNode::GetFormOffset() const
 {
