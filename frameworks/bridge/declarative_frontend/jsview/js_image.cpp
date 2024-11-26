@@ -313,7 +313,7 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     RefPtr<PixelMap> pixmap = nullptr;
 
     // input is PixelMap / Drawable
-    if (!srcValid && !isCard) {
+    if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         std::vector<RefPtr<PixelMap>> pixelMaps;
         int32_t duration = -1;
