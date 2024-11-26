@@ -1259,6 +1259,7 @@ private:
 #else
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
+    const bool isAPI14Plus;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
