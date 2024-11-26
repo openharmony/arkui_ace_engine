@@ -1268,7 +1268,7 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();

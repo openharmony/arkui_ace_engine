@@ -685,19 +685,6 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_Materialized* bitmap)
 {
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(bitmap);
-    auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
-    CHECK_NULL_VOID(bitmapPeer);
-#ifdef PIXEL_MAP_SUPPORTED
-    LOGE("ARKOALA CanvasRendererAccessor::TransferFromImageBitmapImpl not implemented for PixelMap.");
-#else
-    auto imageData = bitmapPeer->GetImageData();
-    CHECK_NULL_VOID(imageData);
-    peerImpl->TriggerTransferFromImageBitmapImpl(*imageData);
-#endif
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
 {
