@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-#include "commonlibrary/ets_utils/js_concurrent_module/worker/worker.h"
+#include "worker.h"
 #include "jsnapi.h"
 #include "native_engine.h"
 
