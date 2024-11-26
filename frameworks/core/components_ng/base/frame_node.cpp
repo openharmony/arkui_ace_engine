@@ -1249,7 +1249,7 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
@@ -1260,38 +1260,41 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         FireColorNDKCallback();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.dpiUpdate) {
         pattern_->OnDpiConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (configurationChange.fontUpdate) {
         pattern_->OnFontConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.iconUpdate) {
         pattern_->OnIconConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.skinUpdate) {
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (configurationChange.fontScaleUpdate) {
         pattern_->OnFontScaleConfigurationUpdate();
         MarkModifyDone();
-        MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
