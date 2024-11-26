@@ -198,8 +198,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (direction_.type == PanDirection::NONE) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, node tag = %{public}s, id = %{public}s",
-            node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, "
+            "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
+            node ? node->GetTag().c_str() : "null",
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
