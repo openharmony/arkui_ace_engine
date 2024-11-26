@@ -658,6 +658,18 @@ public:
 
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
+    virtual bool OnThemeScopeUpdate(int32_t themeScopeId)
+    {
+        return false;
+    }
+
+    int32_t GetThemeScopeId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, 0);
+        return host->GetThemeScopeId();
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

@@ -74,6 +74,8 @@ const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 const char JS_REPEAT_ETS_TAG[] = "Repeat";
 // js if else node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js with theme node
+const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
