@@ -398,15 +398,14 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
         if (!argsPtr) {
             event.componentAsyncEvent.data[0].i32 = 0;
             event.componentAsyncEvent.data[1].i32 = 0;
-        } else {
-            auto hour = argsPtr->GetValue("hour");
-            auto minute = argsPtr->GetValue("minute");
-            if (hour && hour->IsNumber()) {
-                event.componentAsyncEvent.data[0].i32 = hour->GetInt();
-            }
-            if (minute && minute->IsNumber()) {
-                event.componentAsyncEvent.data[1].i32 = minute->GetInt();
-            }
+        }
+        auto hour = argsPtr ? argsPtr->GetValue("hour") : nullptr;
+        auto minute = argsPtr ? argsPtr->GetValue("minute") : nullptr;
+        if (hour && hour->IsNumber()) {
+            event.componentAsyncEvent.data[0].i32 = hour->GetInt();
+        }
+        if (minute && minute->IsNumber()) {
+            event.componentAsyncEvent.data[1].i32 = minute->GetInt();
         }
         SendArkUIAsyncEvent(&event);
     };
