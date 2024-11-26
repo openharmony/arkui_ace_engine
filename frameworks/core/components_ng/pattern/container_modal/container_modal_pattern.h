@@ -235,6 +235,7 @@ protected:
     bool floatingTitleSettedShow_ = true;
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
+    bool isInitButtonsRect_ = false;
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     Color activeColor_;
     Color inactiveColor_;

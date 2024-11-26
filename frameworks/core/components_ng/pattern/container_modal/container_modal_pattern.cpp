@@ -712,9 +712,10 @@ void ContainerModalPattern::CallButtonsRectChange()
     RectF containerModal;
     RectF buttons;
     GetContainerModalButtonsRect(containerModal, buttons);
-    if (buttonsRect_ == buttons) {
+    if (isInitButtonsRect_ && buttonsRect_ == buttons) {
         return;
     }
+    isInitButtonsRect_ = true;
     buttonsRect_ = buttons;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
