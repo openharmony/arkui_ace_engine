@@ -172,7 +172,6 @@ int32_t StylusDetectorCallBack::DeleteText(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -207,7 +206,6 @@ int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -253,7 +251,6 @@ int32_t StylusDetectorCallBack::InsertSpace(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset centerGlobalOffset = Offset(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
