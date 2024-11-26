@@ -354,6 +354,7 @@ public:
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
+    void ClearDragEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual std::function<void(Offset)> GetThumbnailCallback();
@@ -796,6 +797,7 @@ protected:
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
+    void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
@@ -1013,6 +1015,7 @@ private:
     std::optional<std::function<void()>> afterLayoutCallback_;
     Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
+    bool shiftFlag_ = false;
 };
 } // namespace OHOS::Ace::NG
 

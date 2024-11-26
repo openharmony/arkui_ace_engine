@@ -2418,7 +2418,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     if (mouseStatus_ != MouseStatus::MOVE) {
-        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        UpdateCaretByClick(info.GetLocalLocation());
         UpdateCaretInfoToController();
     }
     StartTwinkling();
@@ -2987,7 +2987,9 @@ void TextFieldPattern::OnModifyDone()
     FilterInitializeText();
     InitDisableColor();
     ProcessResponseArea();
-    InitDragEvent();
+    if (!shiftFlag_) {
+        InitDragEvent();
+    }
     Register2DragDropManager();
     ProcessUnderlineColorOnModifierDone();
     if (!clipboard_ && context) {
@@ -3762,7 +3764,8 @@ void TextFieldPattern::HandleLeftMouseEvent(MouseInfo& info)
 
 void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
 {
-    isPressSelectedBox_ = (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation()));
+    isPressSelectedBox_ =
+        (IsSelected() && BetweenSelectedPosition(info.GetGlobalLocation()) && !shiftFlag_);
     if (isPressSelectedBox_ || GetIsPreviewText()) {
         blockPress_ = true;
         return;
@@ -3786,11 +3789,39 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
         StopTwinkling();
         return;
     }
-    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
-    StartTwinkling();
+    UpdateCaretByClick(info.GetLocalLocation());
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = false;
+    if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
+        flag = true;
+    }
+    if (flag != shiftFlag_) {
+        shiftFlag_ = flag;
+        if (!shiftFlag_) {
+            // open drag
+            InitDragEvent();
+        } else  {
+            // close drag
+            ClearDragDropEvent();
+        }
+    }
+}
+
+void TextFieldPattern::UpdateCaretByClick(const Offset& localOffset)
+{
+    if (shiftFlag_) {
+        selectController_->UpdateSecondHandleInfoByMouseOffset(localOffset);
+        StopTwinkling();
+    } else {
+        selectController_->UpdateCaretInfoByOffset(localOffset);
+        StartTwinkling();
+    }
 }
 
 void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)

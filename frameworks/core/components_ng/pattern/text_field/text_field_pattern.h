@@ -1613,6 +1613,8 @@ private:
     void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
+    void UpdateShiftFlag(const KeyEvent& keyEvent) override;
+    void UpdateCaretByClick(const Offset& localOffset);
     void HandleRightMouseEvent(MouseInfo& info);
     void HandleRightMousePressEvent(MouseInfo& info);
     void HandleRightMouseReleaseEvent(MouseInfo& info);

@@ -160,6 +160,7 @@ void TextInputClient::NotifyKeyboardHeight(uint32_t height)
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }

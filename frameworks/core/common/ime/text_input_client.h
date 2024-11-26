@@ -148,6 +148,7 @@ public:
     }
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    virtual void UpdateShiftFlag(const KeyEvent& keyEvent) {}
 
     virtual bool HandleOnEscape()
     {
@@ -220,6 +221,7 @@ public:
     virtual void DeleteRange(int32_t start, int32_t end) {}
 protected:
     int32_t instanceId_ = -1;
+    bool shiftFlag_ = false;
 };
 
 } // namespace OHOS::Ace

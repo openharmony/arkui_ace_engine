@@ -156,7 +156,7 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !shiftFlag_) {
         HandleSelectionChange(-1, -1);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -953,7 +953,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 
 void TextPattern::HandleClickOnTextAndSpan(GestureEvent& info)
 {
-    if (textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE) {
+    if (textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -1587,8 +1587,13 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     }
     mouseStatus_ = MouseStatus::PRESSED;
     CHECK_NULL_VOID(pManager_);
-    auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
-    textSelector_.Update(start, start);
+    if (shiftFlag_) {
+        auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    } else {
+        auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
+        textSelector_.Update(start, start);
+    }
     // auto scroll.
     scrollableParent_ = selectOverlay_->FindScrollableParent();
     auto host = GetHost();
@@ -1624,11 +1629,11 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     CHECK_NULL_VOID(pManager_);
     auto start = textSelector_.baseOffset;
     auto end = textSelector_.destinationOffset;
-    if (!IsSelected()) {
+    if (!IsSelected() && !textSelector_.IsValid()) {
         start = -1;
         end = -1;
     }
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
         HandleSelectionChange(start, end);
     }
 
@@ -1656,7 +1661,7 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         leftMousePressed_ = false;
         return;
     }
-    if (blockPress_) {
+    if (blockPress_ && !shiftFlag_) {
         dragBoxes_ = GetTextBoxes();
         return;
     }
@@ -1775,8 +1780,27 @@ void TextPattern::InitKeyEvent()
     keyEventInitialized_ = true;
 }
 
+void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = false;
+    if (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT)) {
+        flag = true;
+    }
+    if (flag != shiftFlag_) {
+        shiftFlag_ = flag;
+        if (!shiftFlag_) {
+            // open drag
+            InitDragEvent();
+        } else  {
+            // close drag
+            ClearDragEvent();
+        }
+    }
+}
+
 bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -2265,6 +2289,22 @@ void TextPattern::InitDragEvent()
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 }
 
+void TextPattern::ClearDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(false);
+    gestureHub->SetIsTextDraggable(false);
+    gestureHub->SetThumbnailCallback(nullptr);
+    eventHub->SetDefaultOnDragStart(nullptr);
+    eventHub->SetOnDragMove(nullptr);
+    eventHub->SetOnDragEnd(nullptr);
+}
+
 std::function<void(Offset)> TextPattern::GetThumbnailCallback()
 {
     return [wk = WeakClaim(this)](const Offset& point) {
@@ -2660,7 +2700,7 @@ void TextPattern::OnModifyDone()
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
         }
         InitLongPressEvent(gestureEventHub);
-        if (host->IsDraggable()) {
+        if (host->IsDraggable() && !shiftFlag_) {
             InitDragEvent();
         }
         InitKeyEvent();
