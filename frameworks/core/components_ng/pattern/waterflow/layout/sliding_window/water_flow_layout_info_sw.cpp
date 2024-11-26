@@ -785,6 +785,19 @@ void WaterFlowLayoutInfoSW::ClearData()
     endIndex_ = -1;
 }
 
+float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
+{
+    const float average = (heightSum_ == 0) ? std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
+                                                  [](float sum, const auto& pair) { return sum + pair.second; }) /
+                                                  static_cast<float>(idxToHeight_.size())
+                                            : heightSum_ / static_cast<float>(idxToHeight_.size());
+    float height = -totalOffset_ - EndPos();
+    for (uint32_t i = GetSegment(EndIndex() + 1); i < lanes_.size(); ++i) {
+        height += EstimateSectionHeight(i, average, EndIndex() + 1, INT_MAX);
+    }
+    return std::max(height, maxHeight_);
+}
+
 void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t startIdx)
 {
     if (heightSum_ == 0) {
@@ -798,7 +811,7 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
     totalOffset_ = StartPos();
 
     for (int32_t i = 0; i <= section; ++i) {
-        totalOffset_ -= EstimateSectionHeight(i, average, startIdx - 1);
+        totalOffset_ -= EstimateSectionHeight(i, average, INT_MIN, startIdx - 1);
     }
 
     // filter unreasonable estimates
@@ -809,17 +822,18 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
     }
 }
 
-float WaterFlowLayoutInfoSW::EstimateSectionHeight(uint32_t section, float average, int32_t bound) const
+float WaterFlowLayoutInfoSW::EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const
 {
     if (segmentTails_.size() <= section || lanes_.size() <= section || mainGap_.size() <= section ||
         margins_.size() <= section) {
         return 0.0f;
     }
-    bound = std::min(segmentTails_[section], bound);
+    startBound = std::max((section == 0) ? 0 : segmentTails_[section - 1] + 1, startBound);
+    endBound = std::min(segmentTails_[section], endBound);
     const size_t crossCnt = lanes_[section].size();
 
     float height = 0.0f;
-    for (int32_t i = (section == 0) ? 0 : segmentTails_[section - 1] + 1; i <= bound; ++i) {
+    for (int32_t i = startBound; i <= endBound; ++i) {
         height += GetCachedHeight(i).value_or(average) + mainGap_[section];
     }
     height /= static_cast<float>(crossCnt);

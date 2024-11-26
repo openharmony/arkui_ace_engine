@@ -123,14 +123,15 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     auto viewSize = geometryNode->GetFrameSize();
     auto overScroll = 0.0f;
     auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    if (Positive(info->currentOffset_)) {
-        overScroll = info->currentOffset_;
+    if (Positive(info->Offset())) {
+        overScroll = info->Offset();
     } else {
+        // distance to bottom
         overScroll = GetMainContentSize() - (info->GetContentHeight() + info->currentOffset_);
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(-info->currentOffset_, info->EstimateContentHeight(),
+    UpdateScrollBarRegion(-info->Offset(), info->EstimateTotalHeight(),
         Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 

@@ -206,6 +206,8 @@ public:
      */
     void EstimateTotalOffset(int32_t prevStart, int32_t startIdx);
 
+    float EstimateTotalHeight() const override;
+
     /**
      * @brief prepare lanes in the current section.
      *
@@ -282,7 +284,7 @@ private:
      * @param average item height
      * @param bound item index boundary (inclusive)
      */
-    float EstimateSectionHeight(uint32_t section, float average, int32_t bound) const;
+    float EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const;
 
     void ClearData();
 
