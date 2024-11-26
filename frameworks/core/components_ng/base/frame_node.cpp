@@ -604,7 +604,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         node->UpdateLayoutPropertyFlag();
         node->SetActive();
         node->isLayoutDirtyMarked_ = true;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = node->GetContext();
         if (pipeline) {
             pipeline->FlushUITaskWithSingleDirtyNode(node);
         }
