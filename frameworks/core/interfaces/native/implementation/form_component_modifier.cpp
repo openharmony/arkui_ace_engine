@@ -22,10 +22,19 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-    struct LiteralDimension {
+struct LiteralDimension {
     Dimension width;
     Dimension height;
 };
+namespace {
+const auto FORM_DIMENSION_DIMENSION_1_2 = 1;
+const auto FORM_DIMENSION_DIMENSION_2_2 = 2;
+const auto FORM_DIMENSION_DIMENSION_2_4 = 3;
+const auto FORM_DIMENSION_DIMENSION_4_4 = 4;
+const auto FORM_DIMENSION_DIMENSION_2_1 = 5;
+const auto FORM_DIMENSION_DIMENSION_1_1 = 6;
+const auto FORM_DIMENSION_DIMENSION_6_4 = 7;
+} // namespace
 namespace Converter {
 template<>
 LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
@@ -34,6 +43,30 @@ LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
         .width = Converter::Convert<Dimension>(src.width),
         .height = Converter::Convert<Dimension>(src.height)
     };
+}
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_FormDimension& src)
+{
+    switch (src) {
+        case ARK_FORM_DIMENSION_DIMENSION_1_2: dst = FORM_DIMENSION_DIMENSION_1_2; break;
+        case ARK_FORM_DIMENSION_DIMENSION_2_2: dst = FORM_DIMENSION_DIMENSION_2_2; break;
+        case ARK_FORM_DIMENSION_DIMENSION_2_4: dst = FORM_DIMENSION_DIMENSION_2_4; break;
+        case ARK_FORM_DIMENSION_DIMENSION_4_4: dst = FORM_DIMENSION_DIMENSION_4_4; break;
+        case ARK_FORM_DIMENSION_DIMENSION_2_1: dst = FORM_DIMENSION_DIMENSION_2_1; break;
+        case ARK_FORM_DIMENSION_DIMENSION_1_1: dst = FORM_DIMENSION_DIMENSION_1_1; break;
+        case ARK_FORM_DIMENSION_DIMENSION_6_4: dst = FORM_DIMENSION_DIMENSION_6_4; break;
+        default: LOGE("Unexpected enum value in Ark_FormDimension: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
+{
+    switch (src) {
+        case ARK_VISIBILITY_VISIBLE: dst = VisibleType::VISIBLE; break;
+        case ARK_VISIBILITY_HIDDEN: dst = VisibleType::INVISIBLE; break;
+        case ARK_VISIBILITY_NONE: dst = VisibleType::GONE; break;
+        default: LOGE("Unexpected enum value in Ark_Visibility: %{public}d", src);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
@@ -45,8 +78,8 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetSetFormComponentOptions(frameNode, convValue);
+    LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
+        "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
@@ -75,11 +108,13 @@ void ModuleNameImpl(Ark_NativePointer node,
 void DimensionImpl(Ark_NativePointer node,
                    Ark_FormDimension value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    #ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //FormComponentModelNG::SetDimension(frameNode, convValue);
+    auto opt = Converter::OptConvert<int32_t>(value);
+    CHECK_NULL_VOID(opt);
+    FormModelNG::SetDimension(frameNode, *opt);
+    #endif // FORM_SUPPORTED
 }
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -94,11 +129,11 @@ void AllowUpdateImpl(Ark_NativePointer node,
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //FormComponentModelNG::SetVisibility(frameNode, convValue);
+    auto opt = Converter::OptConvert<VisibleType>(value);
+    CHECK_NULL_VOID(opt);
+    FormModelNG::SetVisibility(frameNode, *opt);
 }
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
