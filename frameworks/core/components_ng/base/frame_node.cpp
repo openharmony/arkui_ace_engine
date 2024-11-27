@@ -2645,11 +2645,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is %{public}s in %{public}s, depth: %{public}d",
-            parentRevertPoint.ToString().c_str(), GetTag().c_str(), GetDepth());
-        for (const auto& rect : responseRegionList) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is %{public}s, point is %{public}s",
-                rect.ToString().c_str(), parentRevertPoint.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
+            SEC_PARAM(parentRevertPoint.ToString().c_str()), GetTag().c_str(), GetDepth());
+        for ([[maybe_unused]] const auto& rect : responseRegionList) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is " SEC_PLD(%{public}s)
+                ", point is " SEC_PLD(%{public}s),
+                SEC_PARAM(rect.ToString().c_str()), SEC_PARAM(parentRevertPoint.ToString().c_str()));
         }
     }
     {
@@ -2698,15 +2699,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
         touchRes = GetOnChildTouchTestRet(touchInfos);
         if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
-                touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: "
+                "id = " SEC_PLD(%{public}s) ", strategy = %{public}d.",
+                SEC_PARAM(touchRes.id.c_str()), static_cast<int32_t>(touchRes.strategy));
             touchRes.strategy = TouchTestStrategy::DEFAULT;
         }
 
         auto childNode = GetDispatchFrameNode(touchRes);
         if (childNode != nullptr) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
-                childNode->GetInspectorId()->c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(%{public}s) " do TouchTest, parameter isDispatch is true.",
+                SEC_PARAM(childNode->GetInspectorId()->c_str()));
             auto hitResult = childNode->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
                 newComingTargets, touchId, responseLinkResult, true);
             if (touchRes.strategy == TouchTestStrategy::FORWARD ||
