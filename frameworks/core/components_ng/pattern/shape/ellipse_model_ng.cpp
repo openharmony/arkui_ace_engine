@@ -34,5 +34,10 @@ void EllipseModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> EllipseModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(V2::ELLIPSE_ETS_TAG, nodeId, AceType::MakeRefPtr<EllipsePattern>());
+}
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_MODEL_NG_CPP
