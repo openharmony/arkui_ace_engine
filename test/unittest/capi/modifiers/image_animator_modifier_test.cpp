@@ -43,6 +43,8 @@ namespace  {
     const auto ATTRIBUTE_IMAGES_DURATION_TEST_VALUE = "1";
     const auto ATTRIBUTE_ITERATIONS_NAME = "iterations";
     const auto ATTRIBUTE_ITERATIONS_DEFAULT_VALUE = "1";
+
+    const auto ATTRIBUTE_SIZE_TEST_VALUE = 100;
 } // namespace
 
 class ImageAnimatorModifierTest : public ModifierTestBase<
@@ -50,19 +52,21 @@ class ImageAnimatorModifierTest : public ModifierTestBase<
     &GENERATED_ArkUINodeModifiers::getImageAnimatorModifier,
     GENERATED_ARKUI_IMAGE_ANIMATOR> {
 public:
-    static void SetUpTestCase() {
+    static void SetUpTestCase()
+    {
         ModifierTestBase::SetUpTestCase();
         AddResource(IMAGES_OK_STR, ATTRIBUTE_IMAGES_SRC_TEST_VALUE);
     }
 
-    void InitPattern( OHOS::Ace::RefPtr<ImageAnimatorPattern> pattern) {
+    void InitPattern(OHOS::Ace::RefPtr<ImageAnimatorPattern> pattern)
+    {
         std::vector<ImageProperties> images;
         void* voidPtr = static_cast<void*>(new char[0]);
         ImageProperties image;
         image.src = "test";
         image.pixelMap = PixelMap::CreatePixelMap(voidPtr);
-        image.width = 100;
-        image.height = 100;
+        image.width = ATTRIBUTE_SIZE_TEST_VALUE;
+        image.height = ATTRIBUTE_SIZE_TEST_VALUE;
         image.top = 0;
         image.left = 0;
         image.duration = 1;
@@ -99,8 +103,8 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
                 ATTRIBUTE_IMAGES_SRC_TEST_VALUE),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
-            .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(100),
-            .left = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(100),
+            .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
+            .left = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
             .duration = Converter::ArkValue<Opt_Number>(1),
         },
         {
@@ -108,8 +112,8 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
                 CreateResource(IMAGES_OK_STR.c_str(), NodeModifier::ResourceType::STRING)),
             .width = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("auto"),
             .height = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("100px"),
-            .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(100),
-            .left = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(100),
+            .top = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
+            .left = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(ATTRIBUTE_SIZE_TEST_VALUE),
             .duration = Converter::ArkValue<Opt_Number>(1),
         },
     };
@@ -240,7 +244,6 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 
 /*
@@ -250,7 +253,6 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnPauseTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 
 /*
@@ -260,7 +262,6 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnPauseTest, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnRepeatTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 
 /*
@@ -270,7 +271,6 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnRepeatTest, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnCancelTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 
 /*
@@ -280,6 +280,5 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnCancelTest, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 } // namespace OHOS::Ace::NG
