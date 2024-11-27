@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -703,16 +704,19 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
         if (menuParam.previewBorderRadius) {
             imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
         DragAnimationHelper::UpdateGatherNodeToTop();
+        DragDropFuncWrapper::UpdatePositionFromFrameNode(imageNode, target, width, height);
+        imageOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(target) -
+            OffsetF(width / HALF_DIVIDE, height / HALF_DIVIDE);
+        imageOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(imageNode->GetContextRefPtr());
         MountTextNode(wrapperNode, previewNode);
     }
-    
+
     auto geometryNode = imageNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameOffset(imageOffset);
