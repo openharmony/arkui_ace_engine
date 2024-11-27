@@ -1120,7 +1120,7 @@ void MovingPhotoPattern::StopAnimation()
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT || historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     } else {
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     }
     image->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
