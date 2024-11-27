@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/text/text_emoji_processor.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -58,7 +59,12 @@ void SpanModelNG::Create(const std::string& content)
     auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     stack->Push(spanNode);
 
-    ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
+    if (StringUtils::ToWstring(content).length() == 0 && content.length() != 0) {
+        ACE_UPDATE_SPAN_PROPERTY(Content, TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(content),
+            PropertyInfo::NONE);
+    } else {
+        ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
+    }
 }
 
 RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content)
