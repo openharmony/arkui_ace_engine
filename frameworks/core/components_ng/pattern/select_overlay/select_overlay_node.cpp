@@ -1700,7 +1700,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
             if (!button) {
                 continue;
             }
-            if (remainderWidth >= buttonWidth) {
+            if (GreatOrEqual(remainderWidth, buttonWidth)) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
                 index++;
