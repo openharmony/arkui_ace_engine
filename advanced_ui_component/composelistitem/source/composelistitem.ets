@@ -710,6 +710,8 @@ export struct ComposeListItem {
   }
 
   onPropChange() {
+    this.containerDirection = this.decideContainerDirection();
+    this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
         this.operateItem?.icon !== undefined ||
