@@ -1636,7 +1636,6 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadBothValues, TestSize.Lev
     ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().direction.has_value());
     EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().style.has_value());
-
 }
 
 } // namespace OHOS::Ace::NG

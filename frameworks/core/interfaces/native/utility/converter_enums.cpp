@@ -1084,7 +1084,7 @@ void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
     switch (src) {
         case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;
         case ARK_AXIS_HORIZONTAL: dst = LineDirection::HORIZONTAL; break;
-    default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
+        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
     }
 }
 
