@@ -34,7 +34,6 @@ constexpr int32_t HALF = 2;
 constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
-constexpr int64_t VIDEO_PLAYTIME_END_POSITION = 3000;
 constexpr int32_t IMAGE_LOADING_COMPLETE = 0;
 constexpr int32_t DURATION_FLAG = -1;
 const std::string THUMBNAIL_MEDIUM_JOINT = "?&oper=thumbnail&width=-1&height=-1&path=";
