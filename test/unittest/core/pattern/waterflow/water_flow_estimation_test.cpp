@@ -28,7 +28,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateWaterFlowItems(100);
     CreateDone();
-    
+
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->Offset(), 0.0f);
 
@@ -78,7 +78,7 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateWaterFlowItems(3);
     model.SetFooter(GetDefaultHeaderBuilder());
-    model.SetEdgeEffect(EdgeEffect::SPRING,true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone();
     auto info = pattern_->layoutInfo_;
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
@@ -97,4 +97,4 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
     EXPECT_FLOAT_EQ(info->Offset(), GetChildY(frameNode_, 1));
     EXPECT_NEAR(info->EstimateTotalHeight(), 300.0f, 0.1);
 }
-}
+} // namespace OHOS::Ace::NG

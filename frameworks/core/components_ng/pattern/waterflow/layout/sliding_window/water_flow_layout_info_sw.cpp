@@ -796,7 +796,7 @@ float WaterFlowLayoutInfoSW::GetAverageItemHeight() const
 
 float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
 {
-    if (!synced_){ 
+    if (!synced_) {
         return 0.0f;
     }
     const float average = GetAverageItemHeight();
