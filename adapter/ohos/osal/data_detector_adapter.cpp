@@ -134,6 +134,8 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
                    menuOption.second)) {
         std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
             mainContainerId_, textForAI_, bundleName, aiSpan.start, aiSpan.content);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "textForAI:%{public}d, start:%{public}d, aiSpan.length:%{public}d",
+            static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
     }
