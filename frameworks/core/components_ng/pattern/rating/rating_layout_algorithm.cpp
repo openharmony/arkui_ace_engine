@@ -37,6 +37,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(ratingLayoutProperty, std::nullopt);
     auto stars = ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum());
     CHECK_EQUAL_RETURN(stars, 0, std::nullopt);
     // case 2: rating component is only set with valid width or height
@@ -77,6 +78,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(ratingLayoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
