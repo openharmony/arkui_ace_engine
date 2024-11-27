@@ -235,6 +235,12 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
         actionStart_(gestureInfo);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        TouchEvent touchEvent;
+        eventManager->CleanRecognizersForDragBegin(touchEvent);
     }
 }
 
