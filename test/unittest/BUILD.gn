@@ -267,6 +267,7 @@ ohos_source_set("ace_components_manager") {
   sources = [
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",

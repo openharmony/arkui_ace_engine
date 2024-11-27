@@ -42,6 +42,7 @@
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -919,11 +920,15 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
             SetMouseDragMonitorState(false);
         }
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::APP_REFUSE_DRAG);
         return;
     }
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = GetUnifiedData(frameNode->GetTag(), dragDropInfo, dragEvent);
+    if (unifiedData) {
+        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
+    }
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -937,6 +942,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto ret = SetDragData(unifiedData, udKey);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
     }
 
     std::map<std::string, int64_t> summary;
@@ -1126,6 +1132,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+    DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, container->GetInstanceId());
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
@@ -1136,6 +1143,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         std::string str = udkey + "-" + std::to_string(recordSize) + ";";
         summarys += str;
     }
+    DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, id is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, pointerId %{public}d, "
@@ -1145,6 +1153,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAGFWK_START_FAIL);
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
             SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
@@ -1152,6 +1161,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
+    DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     if (isSwitchToSubWindow && subWindowOverlayManager) {
         std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
         auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager,
@@ -2093,6 +2103,8 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
         if (pixelMap != nullptr) {
             dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        } else {
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
         }
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);

@@ -33,6 +33,7 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -304,6 +305,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
+        auto containerId = Container::CurrentId();
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action start.");
         auto actuator = weak.Upgrade();
         if (!actuator) {
@@ -318,6 +320,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->SetGatherNode(nullptr);
         actuator->isDragPrepareFinish_ = false;
         if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
+            DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::REPEAT_DRAG_FAIL);
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
@@ -346,6 +350,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     dragDropManager->ResetDragging();
                     gestureHub->SetIsTextDraggable(false);
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
+                    DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+                    DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
                     return;
                 }
                 if (gestureHub->GetIsTextDraggable()) {
@@ -377,6 +383,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     dragDropManager->ResetDragging();
                     gestureHub->SetIsTextDraggable(false);
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Text isSelected: %{public}d, stop dragging.", pattern->IsSelected());
+                    DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+                    DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
@@ -819,6 +827,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                             TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     } else {
                         TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
+                        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
                     }
                 };
                 SnapshotParam param;
@@ -2500,6 +2509,7 @@ void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>&
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     if (!context->CreateThumbnailPixelMapAsyncTask(true, std::move(callback))) {
+        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Create thumbnail pixelMap async task failed!");
     }
 }

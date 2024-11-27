@@ -151,6 +151,18 @@ struct EventInfo {
     std::string pageUrl;
 };
 
+struct DragInfo {
+    int32_t isCrossing = -1;
+    int32_t result = -1;
+    int32_t summaryNum = -1;
+    std::string dragBehavior;
+    std::string pNameId;
+    std::string pVersionId;
+    std::string hostName;
+    std::string summaryType;
+    std::string allowDropType;
+};
+
 class ACE_FORCE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
@@ -197,6 +209,7 @@ public:
         int32_t appRotation, int32_t windowMode);
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                   const std::string& pageName);
+    static void ReportDragInfo(const DragInfo& dragInfo);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
