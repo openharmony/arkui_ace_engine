@@ -170,6 +170,7 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
     JSClass<JSPasteButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSPasteButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSPasteButton>::StaticMethod("align", &JSSecButtonBase::SetAlign);
     JSClass<JSPasteButton>::StaticMethod("onClick", &JSPasteButton::JsOnClick);
     JSClass<JSPasteButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSPasteButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
