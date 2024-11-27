@@ -78,6 +78,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
@@ -2715,6 +2716,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterRatingAttributes(object, vm);
     RegisterTimepickerAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
+    RegisterThemeAttributes(object, vm);
     RegisterWaterFlowAttributes(object, vm);
     RegisterCheckboxAttributes(object, vm);
     RegisterDataPanelAttributes(object, vm);
@@ -2844,6 +2846,20 @@ void ArkUINativeModule::RegisterTextpickerAttributes(Local<panda::ObjectRef> obj
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGradientHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetGradientHeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textpicker"), textpicker);
+}
+
+void ArkUINativeModule::RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto theme = panda::ObjectRef::New(vm);
+    theme->Set(vm, panda::StringRef::NewFromUtf8(vm, "createAndBindTheme"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ThemeBridge::Create));
+    theme->Set(vm, panda::StringRef::NewFromUtf8(vm, "pop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ThemeBridge::Pop));
+    theme->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDefaultTheme"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ThemeBridge::SetDefaultTheme));
+    theme->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeFromCache"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ThemeBridge::RemoveFromCache));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "theme"), theme);
 }
 
 void ArkUINativeModule::RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)

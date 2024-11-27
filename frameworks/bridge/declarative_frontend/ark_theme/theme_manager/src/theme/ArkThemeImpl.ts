@@ -15,14 +15,22 @@
 
 /// <reference path='../import.ts' />
 
-class ArkThemeImpl implements ThemeInternal {
-    colors: Colors;
-    shapes: Shapes;
-    typography: Typography;
-
-    constructor(baselineTheme: ThemeInternal, colors?: CustomColors, shapes?: CustomShapes, typography?: CustomTypography) {
-      this.colors = new ArkColorsImpl(colors, baselineTheme.colors);
-      this.shapes = new ArkShapesImpl(shapes, baselineTheme.shapes);
-      this.typography = new ArkTypographyImpl(typography, baselineTheme.typography);
+class ArkThemeImpl extends ArkThemeBase {
+    constructor(
+        customTheme: CustomThemeInternal,
+        colorMode: ThemeColorMode,
+        baselineTheme: ArkThemeBase,
+    ) {
+        if (!customTheme) {
+            super(baselineTheme.id, undefined, colorMode,
+              new ArkColorsImpl(undefined, baselineTheme.colors),
+              new ArkShapesImpl(undefined, baselineTheme.shapes),
+              new ArkTypographyImpl(undefined, baselineTheme.typography))
+            return;
+        }
+        super(baselineTheme.id, customTheme, colorMode,
+          new ArkColorsImpl(customTheme.colors, baselineTheme.colors),
+          new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes),
+          new ArkTypographyImpl(customTheme.typography, baselineTheme.typography))
     }
 }

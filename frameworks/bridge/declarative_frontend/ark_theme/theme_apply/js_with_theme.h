@@ -21,10 +21,13 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+// keep for backward compatibility
+// remove whent new theme solution done
 class JSWithTheme : public JSViewAbstract {
 public:
     static void SendThemeToNative(const JSCallbackInfo& info);
     static void RemoveThemeInNative(const JSCallbackInfo& info);
+    static void SetThemeScopeId(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 };
 

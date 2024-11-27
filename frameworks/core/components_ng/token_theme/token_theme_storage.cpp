@@ -58,9 +58,35 @@ void TokenThemeStorage::SetDefaultTheme(const RefPtr<NG::TokenTheme>& theme, Col
     (colorMode == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_) = theme;
 }
 
+void TokenThemeStorage::UpdateDefaultThemeBySystemTheme(ColorMode colorMode)
+{
+    RefPtr<TokenTheme>& theme = colorMode == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_;
+    if (!theme) {
+        return;
+    }
+    auto sysTheme = ObtainSystemTheme();
+    if (!sysTheme) {
+        return;
+    }
+    std::vector<bool>& colorSet = colorMode == ColorMode::DARK ? darkThemeColorSet_ : lightThemeColorSet_;
+    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        if (!colorSet[i]) {
+            auto color = sysTheme->Colors()->GetByIndex(i);
+            theme->Colors()->GetColors()[i] = color;
+            colorSet[i] = true;
+        }
+    }
+}
+
 const RefPtr<TokenTheme>& TokenThemeStorage::GetDefaultTheme()
 {
-    return CheckLocalAndSystemColorMode() == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_;
+    auto colorMode = CheckLocalAndSystemColorMode();
+    if (systemTokenThemeCreated_[static_cast<uint32_t>(colorMode)]) {
+        return colorMode == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_;
+    }
+
+    UpdateDefaultThemeBySystemTheme(colorMode);
+    return colorMode == ColorMode::DARK ? defaultDarkTheme_ : defaultLightTheme_;
 }
 
 ColorMode TokenThemeStorage::CheckLocalAndSystemColorMode()
@@ -100,6 +126,7 @@ RefPtr<TokenTheme> TokenThemeStorage::ObtainSystemTheme()
 {
     RefPtr<TokenTheme> theme = nullptr;
     auto colorMode = CheckLocalAndSystemColorMode();
+    systemTokenThemeCreated_[static_cast<uint32_t>(colorMode)] = false;
     if (colorMode == ColorMode::DARK) {
         theme = CacheGet(TokenThemeStorage::SYSTEM_THEME_DARK_ID);
     } else {
@@ -109,17 +136,14 @@ RefPtr<TokenTheme> TokenThemeStorage::ObtainSystemTheme()
         theme = CreateSystemTokenTheme(colorMode);
         CacheSet(theme);
     }
+    if (theme) {
+        systemTokenThemeCreated_[static_cast<uint32_t>(colorMode)] = true;
+    }
     return theme;
 }
 
 RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode)
 {
-    auto themeId = colorMode == ColorMode::DARK ?
-        TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
-    auto tokenColors = AceType::MakeRefPtr<TokenColors>();
-    auto tokenTheme = AceType::MakeRefPtr<NG::TokenTheme>(themeId);
-    tokenTheme->SetColors(tokenColors);
-
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, tokenTheme);
     auto pipelineContext = container->GetPipelineContext();
@@ -129,6 +153,12 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, tokenTheme);
 
+    auto themeId = colorMode == ColorMode::DARK ?
+        TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
+    auto tokenColors = AceType::MakeRefPtr<TokenColors>();
+    auto tokenTheme = AceType::MakeRefPtr<NG::TokenTheme>(themeId);
+    tokenTheme->SetColors(tokenColors);
+
     std::vector<Color> colors;
     colors.reserve(TokenColors::TOTAL_NUMBER);
     for (size_t resId = 0; resId < TokenColors::TOTAL_NUMBER; ++resId) {
@@ -136,5 +166,10 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     }
     tokenColors->SetColors(std::move(colors));
     return tokenTheme;
+}
+
+std::vector<bool>& TokenThemeStorage::GetThemeColorSet(bool isDark)
+{
+    return isDark ? darkThemeColorSet_ : lightThemeColorSet_;
 }
 } // namespace OHOS::Ace::NG

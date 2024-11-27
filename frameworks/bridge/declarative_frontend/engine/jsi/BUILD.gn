@@ -303,6 +303,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_text_input_bridge.cpp",
       "nativeModule/arkts_native_text_timer_bridge.cpp",
       "nativeModule/arkts_native_textpicker_bridge.cpp",
+      "nativeModule/arkts_native_theme_bridge.cpp",
       "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",

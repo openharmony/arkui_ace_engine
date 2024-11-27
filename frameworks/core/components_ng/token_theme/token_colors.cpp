@@ -87,6 +87,11 @@ void TokenColors::SetColors(const std::vector<Color>& colors)
     colors_ = colors;
 }
 
+std::vector<Color>& TokenColors::GetColors()
+{
+    return colors_;
+}
+
 Color TokenColors::Brand() const
 {
     return colors_[BRAND];
