@@ -24,9 +24,15 @@ class WaterFlowLayoutBase : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
 
 public:
-    void SetCanOverScroll(bool canOverScroll)
+
+    void SetCanOverScrollStart(bool canOverScroll)
     {
-        overScroll_ = canOverScroll;
+        canOverScrollStart_ = canOverScroll;
+    }
+
+    void SetCanOverScrollEnd(bool canOverScroll)
+    {
+        canOverScrollEnd_ = canOverScroll;
     }
 
     virtual void StartCacheLayout()
@@ -46,11 +52,6 @@ public:
     }
 
 protected:
-    bool CanOverScroll() const
-    {
-        return overScroll_;
-    }
-
     /**
      * @brief Register an IdleTask to preload (create/measure/layout) items in cache range.
      */
@@ -61,6 +62,9 @@ protected:
      * need sync load to display cache items on screen.
      */
     void SyncPreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
+    
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
 
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
@@ -79,7 +83,6 @@ private:
         const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount, bool force);
     static void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
-    bool overScroll_ = false;
 };
 
 enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };

@@ -236,7 +236,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     info_.endIndex_ = endIdx;
 
     // adjust offset
-    if (!overScroll_ && info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (!canOverScrollEnd_ && info_.endIndex_ == info_.childrenCount_ - 1) {
         float overDis =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
@@ -258,7 +258,7 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
-    if (!overScroll_ && res.row == 0) {
+    if (!canOverScrollStart_ && res.row == 0) {
         res.pos = std::min(res.pos, 0.0f);
     }
     UpdateStartInfo(info_, res);

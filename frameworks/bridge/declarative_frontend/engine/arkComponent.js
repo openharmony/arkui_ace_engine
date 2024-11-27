@@ -6237,14 +6237,15 @@ class GridEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b;
+    let _a, _b, _c;
     if (reset) {
       getUINativeModule().grid.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().grid.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.alwaysEnabled, (_c = this.value.options) === null ||
+            _c === void 0 ? void 0 : _c.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -17644,13 +17645,14 @@ class ScrollEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().scroll.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().scroll.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
-      void 0 ? void 0 : _a.alwaysEnabled);
+        void 0 ? void 0 : _a.alwaysEnabled, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -27526,13 +27528,14 @@ class ListEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().list.resetListEdgeEffect(node);
     }
     else {
       getUINativeModule().list.setListEdgeEffect(node, this.value.value, (_a = this.value.options) === null ||
-      _a === void 0 ? void 0 : _a.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.alwaysEnabled, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.effectEdge);
     }
   }
   checkObjectDiff() {
@@ -29987,14 +29990,15 @@ class WaterFlowEdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b;
+    let _a, _b, _c;
     if (reset) {
       getUINativeModule().waterFlow.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().waterFlow.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
+        _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.alwaysEnabled, (_c = this.value.options) === null ||
+            _c === void 0 ? void 0 : _c.effectEdge);
     }
   }
   checkObjectDiff() {
