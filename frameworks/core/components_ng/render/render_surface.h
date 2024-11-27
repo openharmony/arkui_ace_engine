@@ -136,6 +136,8 @@ public:
 
     virtual void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
 
+    virtual void OnWindowStateChange(bool isShow) {}
+
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

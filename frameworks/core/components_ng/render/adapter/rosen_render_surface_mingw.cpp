@@ -114,4 +114,6 @@ void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
 
 void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
 
+void RosenRenderSurface::OnWindowStateChange(bool isShow) {}
+
 } // namespace OHOS::Ace::NG
