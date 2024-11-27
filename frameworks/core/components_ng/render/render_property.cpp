@@ -141,11 +141,6 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     if (filter.IsFastFilter()) {
         return;
     }
-    auto systemBarEffect = propSystemBarEffect.has_value() ? propSystemBarEffect.value() : false;
-    json->PutExtAttr("systemBarEffect", systemBarEffect, filter);
-    auto useEffect = propUseEffect.has_value() ? propUseEffect.value() : false;
-    json->PutExtAttr("useEffect", useEffect, filter);
-
     json->PutExtAttr("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0, filter);
     json->PutExtAttr("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0, filter);
     json->PutExtAttr("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0, filter);

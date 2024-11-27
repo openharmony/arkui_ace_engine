@@ -2807,7 +2807,6 @@ void ViewAbstract::SetFreeze(FrameNode* frameNode, const std::optional<bool>& fr
     }
 }
 
-
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

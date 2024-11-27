@@ -540,8 +540,8 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetPixelStretchEffect(FrameNode* frameNode, const std::optional<PixStretchEffectOption>& option);
-    static void SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio);
-    static void SetSphericalEffect(FrameNode* frameNode, std::optional<double> radio);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetRenderGroup(FrameNode* frameNode, bool isRenderGroup);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
