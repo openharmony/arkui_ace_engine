@@ -76,12 +76,12 @@ public:
      * @param deleteCount number of sections to delete at index [start].
      * @param newSections to insert at index [start].
      */
-    ACE_FORCE_EXPORT void ChangeData(size_t start, size_t deleteCount, const std::vector<Section>& newSections);
+    void ChangeData(size_t start, size_t deleteCount, const std::vector<Section>& newSections);
 
     // replace all sections from start
-    ACE_FORCE_EXPORT void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
+    void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
 
-    ACE_FORCE_EXPORT const std::vector<Section>& GetSectionInfo() const
+    const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
     }
