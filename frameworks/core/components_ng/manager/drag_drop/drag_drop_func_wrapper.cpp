@@ -283,7 +283,7 @@ void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPoint
 }
 
 void DragDropFuncWrapper::DecideWhetherToStopDragging(
-    const DragPointerEvent& pointerEvent, const std::string& extraParams, int32_t currentPointerId, int32_t containerId)
+    const PointerEvent& pointerEvent, const std::string& extraParams, int32_t currentPointerId, int32_t containerId)
 {
     auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
     CHECK_NULL_VOID(pipelineContext);

@@ -234,7 +234,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     NG::PointF hoverPoint(x, y);
     std::string summary;
     std::string detail;
-    DragPointerEvent pointerEvent;
+    PointerEvent pointerEvent;
 
     TimeStamp time;
     

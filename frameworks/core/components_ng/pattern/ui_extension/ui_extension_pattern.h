@@ -110,7 +110,7 @@ public:
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
-    void HandleDragEvent(const DragPointerEvent& info) override;
+    void HandleDragEvent(const PointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void FireModalOnDestroy();

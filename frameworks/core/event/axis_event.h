@@ -21,8 +21,8 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/event/event_constants.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -56,29 +56,20 @@ enum class AxisAction : int32_t {
     END,
     CANCEL,
 };
-
 struct UIInputEvent {
     virtual ~UIInputEvent() = default;
-    TimeStamp time;
-    UIInputEventType eventType = UIInputEventType::NONE;
-};
-
-
-struct PointerEvent : public UIInputEvent {
-    virtual ~PointerEvent() = default;
-    explicit PointerEvent(float x = {}, float y = {}, float screenX = {},
+    explicit UIInputEvent(float x = {}, float y = {}, float screenX = {},
         float screenY = {}, TimeStamp time = {})
-        :x(x), y(y), screenX(screenX), screenY(screenY)
-    {
-        this->time = time;
-    }
+        :x(x), y(y), screenX(screenX), screenY(screenY), time(time)
+    {}
     float x = {};
     float y = {};
     float screenX = {};
     float screenY = {};
+    TimeStamp time = {};
 };
 
-struct AxisEvent final : public PointerEvent {
+struct AxisEvent final : public UIInputEvent {
     ~AxisEvent() = default;
     int32_t id = 0;
 
@@ -103,22 +94,18 @@ struct AxisEvent final : public PointerEvent {
     int32_t originalId = 0;
     bool isInjected = false;
 
-    AxisEvent()
-    {
-        eventType = UIInputEventType::AXIS;
-    }
+    AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
         int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
         std::vector<KeyCode> pressedCodes, int32_t targetDisplayId, int32_t originalId, bool isInjected)
-        : PointerEvent(x, y, screenX, screenY, timestamp), id(id), verticalAxis(verticalAxis),
+        : UIInputEvent(x, y, screenX, screenY, timestamp), id(id), verticalAxis(verticalAxis),
         horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
         isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
         sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), pressedCodes(pressedCodes),
         targetDisplayId(targetDisplayId), originalId(originalId), isInjected(isInjected)
     {
-        eventType = UIInputEventType::AXIS;
     }
 
     AxisEvent CreateScaleEvent(float scale) const

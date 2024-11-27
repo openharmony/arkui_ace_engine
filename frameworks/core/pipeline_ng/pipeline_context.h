@@ -174,7 +174,6 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
-    bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
@@ -200,11 +199,11 @@ public:
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
         std::string extraInfo,
         const RefPtr<FrameNode>& node,
-        const std::list<DragPointerEvent>& pointEvent);
+        const std::list<PointerEvent>& pointEvent);
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
+        std::unordered_map<int32_t, PointerEvent> newIdPoints,
         std::string& extraInfo,
-        std::unordered_map<int, DragPointerEvent> &idToPoints,
+        std::unordered_map<int, PointerEvent> &idToPoints,
         const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
@@ -217,7 +216,7 @@ public:
         return false;
     }
 
-    void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
@@ -1090,9 +1089,9 @@ private:
 
     bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
-    void CompensatePointerMoveEvent(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
+    void CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node);
 
-    bool CompensatePointerMoveEventFromUnhandledEvents(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
+    bool CompensatePointerMoveEventFromUnhandledEvents(const PointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
@@ -1149,7 +1148,7 @@ private:
 
     std::list<TouchEvent> touchEvents_;
     
-    std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<PointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
@@ -1175,7 +1174,7 @@ private:
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
-    std::unordered_map<int32_t, std::vector<DragPointerEvent>> historyPointsEventById_;
+    std::unordered_map<int32_t, std::vector<PointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -1245,7 +1244,7 @@ private:
     RefPtr<PostEventManager> postEventManager_;
 
     std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
+    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 

@@ -161,7 +161,7 @@ HWTEST_F(PlatformPatternTestNg, PlatformPatternTest003, TestSize.Level1)
      * @tc.steps: step3. call InitializeDynamicComponent.
      * @tc.expected: expect dynamicComponentRenderer_ is not null.
      */
-    OHOS::Ace::DragPointerEvent event;
+    OHOS::Ace::PointerEvent event;
     platformPattern->HandleDragEvent(event);
 }
 

@@ -906,18 +906,18 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
+    auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, &event, &result, id]() {
+            [context, event, &result, id]() {
                 ContainerScope scope(id);
-                result = context->OnNonPointerEvent(event);
+                result = context->OnKeyEvent(event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent", PriorityType::VIP);
         return result;
     };
-    aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
+    aceView_->RegisterKeyEventCallback(keyEventCallback);
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -1023,7 +1023,7 @@ void AceContainer::InitializeCallback()
 void AceContainer::InitDragEventCallback()
 {
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const DragPointerEvent& pointerEvent,
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
                                        const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);

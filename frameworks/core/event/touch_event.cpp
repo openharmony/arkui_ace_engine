@@ -205,7 +205,6 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.isPrivacyMode = isPrivacyMode;
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
-    event.eventType = UIInputEventType::TOUCH;
     return event;
 }
 

@@ -583,7 +583,7 @@ void DragDropManager::OnDragStart(const Point& point)
 }
 
 void DragDropManager::PrintDragFrameNode(
-    const OHOS::Ace::DragPointerEvent& pointerEvent, const RefPtr<FrameNode>& dragFrameNode)
+    const OHOS::Ace::PointerEvent& pointerEvent, const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
     auto container = Container::Current();
@@ -651,7 +651,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     dampingOverflowCount_ = 0;
 }
 
-void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
+void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
 {
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
@@ -690,7 +690,7 @@ bool DragDropManager::isDistanceLimited(const Point& point)
     return false;
 }
 
-bool DragDropManager::isTimeLimited(const DragPointerEvent& pointerEvent, const Point& point)
+bool DragDropManager::isTimeLimited(const PointerEvent& pointerEvent, const Point& point)
 {
     uint64_t currentTimeStamp = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
@@ -701,7 +701,7 @@ bool DragDropManager::isTimeLimited(const DragPointerEvent& pointerEvent, const 
     return false;
 }
 
-bool DragDropManager::ReachMoveLimit(const DragPointerEvent& pointerEvent, const Point& point)
+bool DragDropManager::ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point)
 {
     if (pointerEvent.sourceTool == SourceTool::MOUSE) {
         if (isTimeLimited(pointerEvent, point) && isDistanceLimited(point)) {
@@ -711,7 +711,7 @@ bool DragDropManager::ReachMoveLimit(const DragPointerEvent& pointerEvent, const
     return false;
 }
 
-void DragDropManager::HandleOnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+void DragDropManager::HandleOnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
@@ -727,7 +727,7 @@ void DragDropManager::HandleOnDragMove(const DragPointerEvent& pointerEvent, con
     preTargetFrameNode_ = dragFrameNode;
 }
 
-void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
     RequireSummaryIfNecessary(pointerEvent);
@@ -838,14 +838,13 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
         SetDraggingPressedState(false);
     }
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
-        SetIsDisableDefaultDropAnimation(true);
-        OnDragEnd(DragPointerEvent(
-            touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
+        OnDragEnd(
+            PointerEvent(touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
             "");
     }
 }
 
-void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& dragFrameNode)
 {
     CHECK_NULL_VOID(dragFrameNode);
@@ -881,7 +880,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     }
 }
 
-void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
+void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node)
 {
     Point point = pointerEvent.GetPoint();
@@ -962,7 +961,7 @@ void DragDropManager::RequestDragSummaryInfoAndPrivilege()
     }
 }
 
-void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
+void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
     const RefPtr<UnifiedData>& unifiedData, const std::string& udKey)
 {
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -996,8 +995,8 @@ RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string&
     return udData;
 }
 
-void DragDropManager::TryGetDataBackGround(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
-    const std::string& udKey, int32_t count)
+void DragDropManager::TryGetDataBackGround(
+    const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey, int32_t count)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1035,7 +1034,7 @@ void DragDropManager::TryGetDataBackGround(const RefPtr<FrameNode>& dragFrameNod
 }
 
 bool DragDropManager::CheckRemoteData(
-    const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey)
+    const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey)
 {
     if (udKey.empty()) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::GET_UDKEY_FAIL);
@@ -1055,7 +1054,7 @@ bool DragDropManager::CheckRemoteData(
 }
 
 void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
-    const OHOS::Ace::DragPointerEvent& pointerEvent)
+    const OHOS::Ace::PointerEvent& pointerEvent)
 {
     auto point = pointerEvent.GetPoint();
     CHECK_NULL_VOID(dragFrameNode);
@@ -1213,7 +1212,7 @@ void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventH
 }
 
 void DragDropManager::FireOnDragEvent(
-    const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent,
+    const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent,
     DragEventType type, const std::string& extraInfo)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1589,8 +1588,7 @@ void DragDropManager::UpdateNotifyDragEvent(
     }
 }
 
-void DragDropManager::UpdateDragEvent(
-    RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::DragPointerEvent& pointerEvent)
+void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::PointerEvent& pointerEvent)
 {
     auto point = pointerEvent.GetPoint();
     event->SetX(point.GetX());
@@ -1686,7 +1684,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     return true;
 }
 
-bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
+bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
     if (!(IsNeedDisplayInSubwindow() || isDragWithContextMenu_) || isDragFwkShow_) {
         return false;
@@ -1786,7 +1784,7 @@ float DragDropManager::GetCurrentDistance(float x, float y)
     return std::max(distance, gatherDistance);
 }
 
-void DragDropManager::DoDragMoveAnimate(const DragPointerEvent& pointerEvent)
+void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
     bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent);
     if (!needDoDragMoveAnimate) {
@@ -2159,7 +2157,7 @@ void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
 }
 
 void DragDropManager::FireOnDragLeave(
-    const RefPtr<FrameNode>& preTargetFrameNode, const DragPointerEvent& pointerEvent, const std::string& extraInfo)
+    const RefPtr<FrameNode>& preTargetFrameNode, const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
     auto point = pointerEvent.GetPoint();
     if (preTargetFrameNode) {
@@ -2212,7 +2210,7 @@ bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
 }
 
 void DragDropManager::HandleUIExtensionDragEvent(
-    const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent, DragEventType type)
+    const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent, DragEventType type)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
@@ -2344,12 +2342,12 @@ bool DragDropManager::IsAllAnimationFinished()
     return currentAnimationCnt_ == 0;
 }
 
-bool DragDropManager::CheckIsNewDrag(const DragPointerEvent& pointerEvent) const
+bool DragDropManager::CheckIsNewDrag(const PointerEvent& pointerEvent) const
 {
     return (pointerEvent.pullId != -1) && (pointerEvent.pullId != currentPullId_);
 }
 
-void DragDropManager::RequireSummaryIfNecessary(const DragPointerEvent& pointerEvent)
+void DragDropManager::RequireSummaryIfNecessary(const PointerEvent& pointerEvent)
 {
     if (CheckIsNewDrag(pointerEvent)) {
         currentPullId_ = pointerEvent.pullId;

@@ -234,7 +234,7 @@ void PlatformPattern::HandleHoverEvent(bool isHover)
     DispatchPointerEvent(lastPointerEvent_);
 }
 
-void PlatformPattern::HandleDragEvent(const DragPointerEvent& info)
+void PlatformPattern::HandleDragEvent(const PointerEvent& info)
 {
     const auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);

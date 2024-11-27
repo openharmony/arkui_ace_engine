@@ -68,14 +68,14 @@ public:
     
     ~ResampleAlgo() = delete;
 
-    static AvgPoint GetAvgPoint(const std::vector<PointerEvent>&& events,
+    static AvgPoint GetAvgPoint(const std::vector<UIInputEvent>&& events,
         bool isScreen);
 
     static ResamplePoint LinearInterpolation(const AvgPoint& history, const AvgPoint& current,
         uint64_t nanoTimeStamp);
 
-    static ResamplePoint GetResampleCoord(const std::vector<PointerEvent>&& history,
-        const std::vector<PointerEvent>&& current, uint64_t nanoTimeStamp,
+    static ResamplePoint GetResampleCoord(const std::vector<UIInputEvent>&& history,
+        const std::vector<UIInputEvent>&& current, uint64_t nanoTimeStamp,
         bool isScreen);
 };
 } // namespace OHOS::Ace

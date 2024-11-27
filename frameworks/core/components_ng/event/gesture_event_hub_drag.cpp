@@ -887,7 +887,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (!dragDropManager->IsDraggingPressed(info.GetPointerId())) {
         dragDropManager->SetIsDisableDefaultDropAnimation(true);
         dragDropManager->OnDragEnd(
-            DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
+            PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
 }
 

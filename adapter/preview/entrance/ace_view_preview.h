@@ -55,9 +55,7 @@ public:
         ACE_DCHECK(callback);
         keyEventCallback_ = std::move(callback);
     }
-
-    void RegisterNonPointerEventCallback(NonPointerEventCallback&& callback) override {}
-
+    
     void RegisterMouseEventCallback(MouseEventCallback&& callback) override
     {
         ACE_DCHECK(callback);

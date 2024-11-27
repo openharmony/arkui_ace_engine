@@ -56,7 +56,7 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_END = 22,
 };
 
-struct DragPointerEvent final : public PointerEvent {
+struct PointerEvent final : public UIInputEvent {
     int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     int32_t pullId = -1;
@@ -74,16 +74,16 @@ struct DragPointerEvent final : public PointerEvent {
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
     std::vector<KeyCode> pressedKeyCodes_;
     PointerAction action = PointerAction::UNKNOWN;
-    std::vector<DragPointerEvent> history;
+    std::vector<PointerEvent> history;
 
-    DragPointerEvent() = default;
-    DragPointerEvent(float x, float y)
-        :PointerEvent(x, y)
+    PointerEvent() = default;
+    PointerEvent(float x, float y)
+        :UIInputEvent(x, y)
     {}
-    DragPointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
-    DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    PointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
 
