@@ -11023,7 +11023,7 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
     record.deleteText = StringUtils::ToString(deleteText);
     record.afterCaretPosition = caretPosition_;
     AddOperationRecord(record);
-    AfterChangeText(changeValue);
+    AfterContentChange(changeValue);
 }
 
 TextStyle RichEditorPattern::GetDefaultTextStyle()
