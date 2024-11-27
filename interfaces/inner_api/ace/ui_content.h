@@ -457,6 +457,8 @@ public:
     {
         return false;
     }
+
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
 };
 
 } // namespace OHOS::Ace

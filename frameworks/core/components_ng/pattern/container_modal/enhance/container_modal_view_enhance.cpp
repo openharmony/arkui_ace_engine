@@ -42,6 +42,19 @@ namespace OHOS::Ace::NG {
  *          |--[maxRecover, minimize, close](button)
  */
 
+void ContainerModalViewEnhance::OnContainerModalEvent(
+    RefPtr<PipelineContext> pipelineContext, const std::string& name, const std::string& value)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->OnContainerModalEvent(name, value);
+}
+
 RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
 {
     auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
