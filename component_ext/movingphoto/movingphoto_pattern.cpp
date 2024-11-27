@@ -1110,21 +1110,18 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT || historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-    } else {
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    }
-    video->MarkModifyDone();
     
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT || historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
     } else {
         imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     }
     image->MarkModifyDone();
+    video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
