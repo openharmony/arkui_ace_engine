@@ -7962,13 +7962,14 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         end = std::clamp(end, 0, GetTextContentLength());
     }
     CHECK_NULL_VOID(!ResetOnInvalidSelection(start, end));
+    AdjustSelector(start, end);
     if (start != end) {
         StopTwinkling();
         if (start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd()) {
             FireOnSelect(start, end);
         }
     }
-    UpdateSelector(start, end);
+    textSelector_.Update(start, end);
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
@@ -10939,36 +10940,29 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "index is invalid");
         return false;
     }
-    auto ret = SetCaretOffset(index);
-    CHECK_NULL_RETURN(ret, false);
-    auto curTextSelectInfo = GetSpansInfo(index, index, GetSpansMethod::GETSPANS);
-    auto curResults = curTextSelectInfo.GetSelection().resultObjects;
-    auto curIt = std::find_if(curResults.begin(), curResults.end(), [index](const ResultObject& textIter) {
-        int32_t newStart = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-        int32_t newEnd = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND];
-        auto wtext = StringUtils::ToWstring(textIter.valueString);
-        return (index >= newStart && index < newEnd && textIter.type == SelectSpanType::TYPESPAN
-            && wtext[textIter.offsetInSpan[0]] == L' ');
-    });
-    if (curIt != curResults.end()) {
+    bool success = SetCaretPosition(index);
+    CHECK_NULL_RETURN(success, false);
+    CloseSelectOverlay();
+    ResetSelection();
+
+    auto curIt = GetSpanIter(index);
+    std::wstring curText = StringUtils::ToWstring((*curIt)->content);
+    if (curIt != spans_.end() && (*curIt)->spanItemType == SpanItemType::NORMAL
+        && index >= (&curIt)->rangeStart && curText[index - (&curIt)->rangeStart] == L' ') {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete forward");
         DeleteForward(1);
         return true;
     }
-    auto preTextSelectInfo = GetSpansInfo(index - 1, index - 1, GetSpansMethod::GETSPANS);
-    auto preResults = preTextSelectInfo.GetSelection().resultObjects;
-    auto preIt = std::find_if(preResults.begin(), preResults.end(), [index](const ResultObject& textIter) {
-        int32_t newStart = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGESTART];
-        int32_t newEnd = textIter.spanPosition.spanRange[RichEditorSpanRange::RANGEEND];
-        auto wtext = StringUtils::ToWstring(textIter.valueString);
-        return (index - 1 >= newStart && index - 1 < newEnd && textIter.type == SelectSpanType::TYPESPAN
-            && wtext[textIter.offsetInSpan[0]] == L' ');
-    });
-    if (preIt != preResults.end()) {
+
+    auto preIt = GetSpanIter(index - 1);
+    std::wstring preText = StringUtils::ToWstring((*preIt)->content);
+    if (preIt != spans_.end() && (*preIt)->spanItemType == SpanItemType::NORMAL
+        && index - 1 >= (&preIt)->rangeStart && preText[index - 1 - (&preIt)->rangeStart] == L' ') {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete backward");
         DeleteBackward(1);
         return true;
     }
+
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "insert value");
     InsertValue("", true);
     return true;
