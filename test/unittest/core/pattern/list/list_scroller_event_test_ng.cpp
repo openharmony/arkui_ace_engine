@@ -142,11 +142,11 @@ HWTEST_F(ListScrollerEventTestNg, Event001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Event002
+ * @tc.name: OnScrollIndex001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex001, TestSize.Level1)
 {
     int32_t startIndex;
     int32_t endIndex;
@@ -169,6 +169,138 @@ HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
     ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
+    EXPECT_EQ(centerIndex, 3);
+}
+
+/**
+ * @tc.name: OnScrollIndex002
+ * @tc.desc: Test List center snap over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex002, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetOnScrollIndex(event);
+    CreateListItems(2);
+    CreateDone();
+
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 0);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 200, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), -300, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 1);
+
+    DragAction(frameNode_, Offset(), -200, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 1);
+}
+
+/**
+ * @tc.name: OnScrollIndex003
+ * @tc.desc: Test List center snap over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex003, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetOnScrollIndex(event);
+    CreateListItems(4);
+    CreateDone();
+
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 10, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), 10, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), 80, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+}
+
+/**
+ * @tc.name: OnScrollIndex004
+ * @tc.desc: Test List with content offset over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex004, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(50);
+    model.SetContentEndOffset(50);
+    model.SetOnScrollIndex(event);
+    CreateListItems(5);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->currentOffset_, -50);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 3);
+    EXPECT_EQ(centerIndex, 1);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 100, 0);
+    EXPECT_EQ(pattern_->currentOffset_, -150);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 3);
+    EXPECT_EQ(centerIndex, 1);
+
+    pattern_->ScrollToIndex(4, false, ScrollAlign::END);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 150);
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 4);
+    EXPECT_EQ(centerIndex, 3);
+
+    DragAction(frameNode_, Offset(), -100, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 250);
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 4);
     EXPECT_EQ(centerIndex, 3);
 }
 
