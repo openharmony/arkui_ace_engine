@@ -3682,7 +3682,12 @@ void TextFieldPattern::ChangeMouseState(
 #endif
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
-        if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (!isRTL && GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
+            RestoreDefaultMouseState();
+        } else if (isRTL && LessNotEqual(location.GetX(), responseAreaWidth)) {
             RestoreDefaultMouseState();
         } else {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ChangeMouseState Id:%{public}d, winId:%{public}d", frameId, windowId);
