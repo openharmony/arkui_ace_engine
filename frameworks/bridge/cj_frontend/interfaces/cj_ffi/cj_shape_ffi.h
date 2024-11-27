@@ -60,5 +60,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkShapeSetInsSize(
     int64_t shapeId, double width, int32_t widthUnit, double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetInsOffset(int64_t shapeId, double x, int32_t xUnit, double y, int32_t yUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetInsFill(int64_t shapeId, uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkShapeSetForegroundColor(uint32_t color);
 };
 #endif

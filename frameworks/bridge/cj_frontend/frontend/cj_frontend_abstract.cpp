@@ -236,6 +236,12 @@ void CJFrontendAbstract::ShowDialog(const std::string& title, const std::string&
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void CJFrontendAbstract::Replace(const std::string& url, const std::string& params,
+    CJPageRouterAbstract::RouterMode modeValue)
+{
+    pageRouterManager_->Replace({ url }, params, modeValue);
+}
+
 void CJFrontendAbstract::ShowDialogInner(DialogProperties& dialogProperties,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {

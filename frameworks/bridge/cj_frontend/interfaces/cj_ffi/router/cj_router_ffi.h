@@ -25,6 +25,7 @@ extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkRouterPush(const char* url, const char* param);
 CJ_EXPORT void FfiOHOSAceFrameworkRouterBack(const char* url, const char* param);
 CJ_EXPORT ExternalString FfiOHOSAceFrameworkRouterGetParams();
+CJ_EXPORT void FfiOHOSAceFrameworkRouterReplace(const char* url, const char* param, int32_t modeValue);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_ROUTER_CJ_ROUTER_FFI_H
