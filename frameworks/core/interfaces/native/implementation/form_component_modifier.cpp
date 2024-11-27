@@ -108,13 +108,13 @@ void ModuleNameImpl(Ark_NativePointer node,
 void DimensionImpl(Ark_NativePointer node,
                    Ark_FormDimension value)
 {
-    #ifdef FORM_SUPPORTED
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto opt = Converter::OptConvert<int32_t>(value);
     CHECK_NULL_VOID(opt);
     FormModelNG::SetDimension(frameNode, *opt);
-    #endif // FORM_SUPPORTED
+#endif // FORM_SUPPORTED
 }
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -129,12 +129,14 @@ void AllowUpdateImpl(Ark_NativePointer node,
 void VisibilityImpl(Ark_NativePointer node,
                     Ark_Visibility value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto opt = Converter::OptConvert<VisibleType>(value);
     CHECK_NULL_VOID(opt);
     FormModelNG::SetVisibility(frameNode, *opt);
 }
+#endif // FORM_SUPPORTED
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
 {
