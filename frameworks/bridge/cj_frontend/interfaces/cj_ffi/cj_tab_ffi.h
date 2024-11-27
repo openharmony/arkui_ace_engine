@@ -144,9 +144,9 @@ struct CJTabsBackgroundEffectOptions {
 };
 
 struct CJTabsAnimationEvent {
-    int32_t currentOffset;
-    int32_t targetOffset;
-    int32_t velocity;
+    float currentOffset;
+    float targetOffset;
+    float velocity;
 };
 
 typedef void (*TransitionFunc)(int32_t from, int32_t to, int64_t id);
