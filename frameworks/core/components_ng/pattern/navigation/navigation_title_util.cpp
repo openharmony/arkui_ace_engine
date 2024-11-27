@@ -416,6 +416,7 @@ void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButto
 {
     int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(imageNode);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto theme = NavigationGetTheme();
