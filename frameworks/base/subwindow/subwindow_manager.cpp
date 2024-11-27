@@ -117,10 +117,11 @@ void SubwindowManager::AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> s
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "add toast subwindow failed.");
         return;
     }
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Add toast into map, instanceId is %{public}d, subwindow id is %{public}d.",
         instanceId, subwindow->GetSubwindowId());
     std::lock_guard<std::mutex> lock(toastMutex_);
-    auto result = toastWindowMap_.try_emplace(instanceId, subwindow);
+    auto result = toastWindowMap_.try_emplace(searchKey, subwindow);
     if (!result.second) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add toast failed of this instance %{public}d", instanceId);
         return;
@@ -133,11 +134,12 @@ void SubwindowManager::AddSystemToastWindow(int32_t instanceId, RefPtr<Subwindow
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "add system toast subwindow failed.");
         return;
     }
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "Add system toast into map, instanceId is %{public}d, subwindow id is %{public}d.",
         instanceId, subwindow->GetSubwindowId());
     std::lock_guard<std::mutex> lock(systemToastMutex_);
-    auto result = systemToastWindowMap_.try_emplace(instanceId, subwindow);
+    auto result = systemToastWindowMap_.try_emplace(searchKey, subwindow);
     if (!result.second) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Add system toast failed of this instance %{public}d", instanceId);
         return;
@@ -181,25 +183,27 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
 
 const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
 {
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
     std::lock_guard<std::mutex> lock(toastMutex_);
-    auto result = toastWindowMap_.find(instanceId);
+    auto result = toastWindowMap_.find(searchKey);
     if (result != toastWindowMap_.end()) {
         return result->second;
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in toastWindowMap_, instanceId is %{public}d.",
-        instanceId);
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in toastWindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
     return nullptr;
 }
 
 const RefPtr<Subwindow> SubwindowManager::GetSystemToastWindow(int32_t instanceId)
 {
+    SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
     std::lock_guard<std::mutex> lock(systemToastMutex_);
-    auto result = systemToastWindowMap_.find(instanceId);
+    auto result = systemToastWindowMap_.find(searchKey);
     if (result != systemToastWindowMap_.end()) {
         return result->second;
     }
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in systemToastWindowMap_, instanceId is %{public}d.",
-        instanceId);
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in systemToastWindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
     return nullptr;
 }
 
