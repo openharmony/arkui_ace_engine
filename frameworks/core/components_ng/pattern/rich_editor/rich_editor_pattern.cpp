@@ -4972,7 +4972,7 @@ std::vector<RectF> RichEditorPattern::GetPreviewTextRects()
 
 PreviewTextStyle RichEditorPattern::GetPreviewTextStyle() const
 {
-    auto previewTextStyle = PreviewTextStyle::UNDERLINE;
+    auto previewTextStyle = PreviewTextStyle::NORMAL;
     auto property = GetLayoutProperty<RichEditorLayoutProperty>();
     if (property && property->HasPreviewTextStyle()) {
         auto style = property->GetPreviewTextStyle();

@@ -307,6 +307,9 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, Tes
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
 
     std::string previewTextValue = INIT_VALUE_1;
     PreviewRange previewRange;
@@ -1478,6 +1481,10 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextDecorationColor001, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto layoutproperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutproperty, nullptr);
+    layoutproperty->UpdatePreviewTextStyle("underline");
+
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
