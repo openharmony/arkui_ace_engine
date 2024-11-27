@@ -193,6 +193,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
+    isLayouted_ = false;
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -728,6 +729,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!isLayouted_) {
+        itemPosition_ = pattern->GetItemPosition();
+    }
     preStartIndex_ = pattern->GetStartIndex();
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         auto it = itemPosition_.find(jumpIndex_.value());
@@ -1509,6 +1513,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         listLayoutProperty->SetDefaultCachedCount(newCacheCount);
     }
     ProcessCacheCount(layoutWrapper, cacheCount);
+    isLayouted_ = true;
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
