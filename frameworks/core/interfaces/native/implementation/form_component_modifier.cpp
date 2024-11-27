@@ -135,7 +135,7 @@ void VisibilityImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<VisibleType>(value);
     CHECK_NULL_VOID(opt);
     FormModelNG::SetVisibility(frameNode, *opt);
-#endif // FORM_SUPPORTED    
+#endif // FORM_SUPPORTED
 }
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
