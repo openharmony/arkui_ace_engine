@@ -39,41 +39,24 @@ std::string DatePickerAccessibilityProperty::GetText() const
 
     std::string result;
     if (pattern->GetIsShowInDialog() && pattern->ShowMonthDays()) {
-        auto stackMonthDays = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-        CHECK_NULL_RETURN(stackMonthDays, "");
-        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
-        CHECK_NULL_RETURN(blendMonthDays, "");
-        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
-        CHECK_NULL_RETURN(monthDaysColumnNode, "");
-        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
-        CHECK_NULL_RETURN(columnPattern, "");
-        auto index = columnPattern->GetCurrentIndex();
-        auto options = columnPattern->GetOptions();
-        auto it = options.find(monthDaysColumnNode);
-        if (it != options.end()) {
-            if (it->second.size() <= index) {
-                result = "";
-            }
-            auto date = it->second.at(index);
-            result = DatePickerPattern::GetFormatString(date);
-            result.append(" ");
-        } else {
-            result = "";
-        }
+        result = GetColumnsText(frameNode, true);
+        result.append(" ");
         result.append(GetShowTimePickerText());
     } else {
         if (!pattern->IsShowLunar()) {
             result = std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
                      std::to_string(pickerDate.GetDay());
         } else {
-            result = GetLunarAllColumnsText(frameNode);
+            result = GetColumnsText(frameNode, false);
         }
     }
     return result;
 }
 
-std::string DatePickerAccessibilityProperty::GetLunarAllColumnsText(const RefPtr<FrameNode>& frameNode) const
+std::string DatePickerAccessibilityProperty::GetColumnsText(
+    const RefPtr<FrameNode>& frameNode, bool isMonthDaysDateNode) const
 {
+    CHECK_NULL_RETURN(frameNode, "");
     std::string result = "";
     for (const auto& child : frameNode->GetChildren()) {
         auto stackMonthDays = AceType::DynamicCast<FrameNode>(child);
@@ -87,14 +70,12 @@ std::string DatePickerAccessibilityProperty::GetLunarAllColumnsText(const RefPtr
         auto index = columnPattern->GetCurrentIndex();
         auto options = columnPattern->GetOptions();
         auto it = options.find(monthDaysColumnNode);
-        if (it != options.end()) {
-            if (it->second.size() <= index) {
-                result.append("");
-            }
+        if (it != options.end() && index >= 0 && index < it->second.size()) {
             auto date = it->second.at(index);
             result.append(DatePickerPattern::GetFormatString(date));
-        } else {
-            result.append("");
+        }
+        if (isMonthDaysDateNode) {
+            break;
         }
     }
     return result;
@@ -116,7 +97,7 @@ std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
     CHECK_NULL_RETURN(hourPickerColumnPattern, "");
 
     std::string result;
-    auto hour = static_cast<int32_t>(hourPickerColumnPattern->GetCurrentIndex()); // + 1;
+    auto hour = static_cast<int32_t>(hourPickerColumnPattern->GetCurrentIndex());
     if (!timePickerRowPattern->GetHour24()) {
         hour += 1;
     }

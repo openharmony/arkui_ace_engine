@@ -147,17 +147,12 @@ std::string TimePickerRowAccessibilityProperty::GetShowDatePickerText() const
     CHECK_NULL_RETURN(columnPattern, "");
     auto index = columnPattern->GetCurrentIndex();
     auto options = columnPattern->GetOptions();
-    std::string result;
+    std::string result = "";
     auto it = options.find(monthDaysColumnNode);
-    if (it != options.end()) {
-        if (it->second.size() <= index) {
-            result = "";
-        }
+    if (it != options.end() && index >= 0 && index < it->second.size()) {
         auto date = it->second.at(index);
         result = DatePickerPattern::GetFormatString(date);
         result.append(" ");
-    } else {
-        result = "";
     }
     return result;
 }
