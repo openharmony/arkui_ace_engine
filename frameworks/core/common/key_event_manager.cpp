@@ -15,6 +15,7 @@
 #include "key_event_manager.h"
 
 #include "base/input_manager/input_manager.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -525,6 +526,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 
     // onKeyPreIme
     if (event.isPreIme) {
+        ResSchedReport::GetInstance().OnKeyEvent(event);
         if (TriggerKeyEventDispatch(event)) {
             return true;
         }
