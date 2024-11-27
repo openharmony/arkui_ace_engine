@@ -95,10 +95,8 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 
     auto text = Converter::OptConvert<std::string>(*content);
     if (text) {
-#if 0
-        // Need convert std::string to std::u16string
-        TextModelNG::InitText(frameNode, text.value());
-#endif
+        std::u16string content = UtfUtils::Str8ToStr16(text.value());
+        TextModelNG::InitText(frameNode, content);
     }
 
     if (value && value->tag != ARK_TAG_UNDEFINED) {
@@ -107,32 +105,16 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 }
 } // TextInterfaceModifier
 namespace TextAttributeModifier {
-constexpr Dimension DEFAULT_FONT_SIZE;
-constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
-constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-
 static void FontImplInternal(Ark_NativePointer node,
                              const Ark_Font* value,
                              std::optional<bool> enableVariableFontWeight = std::nullopt)
 {
-    CHECK_NULL_VOID(value);
-
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 
-    Font font;
-    font.fontSize = Converter::ConvertOrDefault(value->size, DEFAULT_FONT_SIZE);
-    font.fontStyle = Converter::ConvertOrDefault(value->style, DEFAULT_FONT_STYLE);
-    font.fontWeight = Converter::ConvertOrDefault(value->weight, DEFAULT_FONT_WEIGHT);
+    Font font = Converter::Convert<Font>(*value);
     font.enableVariableFontWeight = enableVariableFontWeight;
-
-    std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(value->family); fontfamiliesOpt) {
-        families = fontfamiliesOpt->families;
-    }
-    if (families) {
-        font.fontFamilies = std::move(families.value());
-    }
     TextModelNG::SetFont(frameNode, font);
 }
 
@@ -145,13 +127,13 @@ void Font1Impl(Ark_NativePointer node,
                const Ark_Font* fontValue,
                const Opt_FontSettingOptions* options)
 {
+    std::optional<bool> enableVariableFontWeight;
     if (options) {
         if (auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options); settings) {
-            FontImplInternal(node, fontValue, settings->enableVariableFontWeight);
+            enableVariableFontWeight = settings->enableVariableFontWeight;
         }
-    } else {
-        FontImplInternal(node, fontValue);
     }
+    FontImplInternal(node, fontValue, enableVariableFontWeight);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -245,12 +227,14 @@ void FontWeight1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     FontWeight0Impl(node, weight);
 
+    std::optional<bool> enableVariableFontWeight;
     if (options) {
         auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
-        if (settings && settings->enableVariableFontWeight) {
-            TextModelNG::SetEnableVariableFontWeight(frameNode, settings->enableVariableFontWeight.value());
+        if (settings) {
+            enableVariableFontWeight = settings->enableVariableFontWeight;
         }
     }
+    TextModelNG::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
 }
 void LineSpacingImpl(Ark_NativePointer node,
                      const Ark_LengthMetrics* value)
@@ -358,7 +342,8 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetCopyOption(frameNode, static_cast<CopyOptions>(value));
+    auto convValue = Converter::OptConvert<CopyOptions>(value);
+    TextModelNG::SetCopyOption(frameNode, convValue);
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -374,9 +359,7 @@ void TextShadowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
-    if (shadowList) {
-        TextModelNG::SetTextShadow(frameNode, shadowList.value());
-    }
+    TextModelNG::SetTextShadow(frameNode, shadowList);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)

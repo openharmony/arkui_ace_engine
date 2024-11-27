@@ -467,6 +467,30 @@ std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctIn
     { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
 };
 
+// Fixture 'LengthPosNonPct' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPosNonPctValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPosNonPctInvalidValues = {
+    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct) },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp) },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp) },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px) },
+};
+
 // Fixture 'LengthNonPct' for type 'Ark_Length'
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonPctValidValues = {
     { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
@@ -699,6 +723,32 @@ std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureBaselin
     { "\"123lpx\"", Converter::ArkValue<Ark_String>("123lpx"), "123" },
     { "\"-123lpx\"", Converter::ArkValue<Ark_String>("-123lpx"), "-123" },
     { "\"0lpx\"", Converter::ArkValue<Ark_String>("0lpx"), "0" },
+};
+
+// Fixture 'CopyOptions' for type 'Ark_CopyOptions'
+std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureCopyOptionsValidValues = {
+    { "ARK_COPY_OPTIONS_NONE", Converter::ArkValue<Ark_CopyOptions>(ARK_COPY_OPTIONS_NONE), "CopyOptions.None" },
+    { "ARK_COPY_OPTIONS_IN_APP", Converter::ArkValue<Ark_CopyOptions>(ARK_COPY_OPTIONS_IN_APP), "CopyOptions.InApp" },
+    { "ARK_COPY_OPTIONS_LOCAL_DEVICE", Converter::ArkValue<Ark_CopyOptions>(ARK_COPY_OPTIONS_LOCAL_DEVICE),
+        "CopyOptions.Local" },
+    { "ARK_COPY_OPTIONS_CROSS_DEVICE", Converter::ArkValue<Ark_CopyOptions>(ARK_COPY_OPTIONS_CROSS_DEVICE),
+        "CopyOptions.Distributed" },
+};
+
+std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureCopyOptionsInvalidValues = {
+    { "static_cast<Ark_CopyOptions>(-1)", Converter::ArkValue<Ark_CopyOptions>(static_cast<Ark_CopyOptions>(-1)) },
+    { "static_cast<Ark_CopyOptions>(INT_MAX)",
+        Converter::ArkValue<Ark_CopyOptions>(static_cast<Ark_CopyOptions>(INT_MAX)) },
+};
+
+// Fixture 'DummyColoringStrategy' for type 'Ark_ColoringStrategy'
+std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
+    testFixtureDummyColoringStrategyValidValues = {};
+
+// Fixture 'ShadowType' for type 'Ark_ShadowType'
+std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureShadowTypeValidValues = {
+    { "ARK_SHADOW_TYPE_COLOR", Converter::ArkValue<Ark_ShadowType>(ARK_SHADOW_TYPE_COLOR), "0" },
+    { "ARK_SHADOW_TYPE_BLUR", Converter::ArkValue<Ark_ShadowType>(ARK_SHADOW_TYPE_BLUR), "1" },
 };
 
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'

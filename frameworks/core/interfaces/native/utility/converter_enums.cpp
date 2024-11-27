@@ -289,6 +289,16 @@ void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrat
 }
 
 template<>
+void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src)
+{
+    switch (src) {
+        case ARK_SHADOW_TYPE_COLOR: dst = ShadowType::COLOR; break;
+        case ARK_SHADOW_TYPE_BLUR: dst = ShadowType::BLUR; break;
+        default: LOGE("Unexpected enum value in Ark_ShadowType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src)
 {
     switch (src) {

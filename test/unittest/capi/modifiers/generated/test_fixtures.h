@@ -298,6 +298,10 @@ extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableF
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
 
+// Fixture 'LengthPosNonPct' for type 'Ark_Length'
+extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPosNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPosNonPctInvalidValues;
+
 // Fixture 'LengthNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonPctInvalidValues;
@@ -329,6 +333,17 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixture
 
 // Fixture 'BaselineOffsetStr' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureBaselineOffsetStrValidValues;
+
+// Fixture 'CopyOptions' for type 'Ark_CopyOptions'
+extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureCopyOptionsValidValues;
+extern std::vector<std::tuple<std::string, Ark_CopyOptions>> testFixtureCopyOptionsInvalidValues;
+
+// Fixture 'DummyColoringStrategy' for type 'Ark_ColoringStrategy'
+extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
+    testFixtureDummyColoringStrategyValidValues;
+
+// Fixture 'ShadowType' for type 'Ark_ShadowType'
+extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureShadowTypeValidValues;
 
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensionsNumNonNegValidValues;

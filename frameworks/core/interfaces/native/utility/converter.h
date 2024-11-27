@@ -426,7 +426,6 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> Ark_NativePointer Convert(const Ark_Materialized& src);
-    template<> ShadowType Convert(const Ark_ShadowType& src);
     template<> ShadowColorStrategy Convert(const Ark_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
@@ -501,6 +500,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
+    template<> void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src);
     template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
     template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);

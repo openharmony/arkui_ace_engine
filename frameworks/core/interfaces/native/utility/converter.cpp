@@ -662,12 +662,6 @@ Ark_NativePointer Convert(const Ark_Materialized& src)
 }
 
 template<>
-ShadowType Convert(const Ark_ShadowType& src)
-{
-    return static_cast<ShadowType>(src);
-}
-
-template<>
 ShadowColorStrategy Convert(const Ark_Color& src)
 {
     return ShadowColorStrategy::NONE;
