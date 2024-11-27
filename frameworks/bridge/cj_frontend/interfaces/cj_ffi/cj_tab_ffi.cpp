@@ -16,7 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_tab_ffi.h"
 
 #include "cj_lambda.h"
-#include "cj_view_abstract_ffi.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
