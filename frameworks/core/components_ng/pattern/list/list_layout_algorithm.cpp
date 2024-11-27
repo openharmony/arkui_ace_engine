@@ -2388,9 +2388,12 @@ float ListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index,
     float predictSnapEndPos = 0;
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
         predictSnapEndPos = totalOffset_ + itemPosition_[index].startPos - contentStartOffset_;
-        if ((GetEndIndex() == totalItemCount_ - 1) &&
-            GreatNotEqual(predictSnapEndPos + contentMainSize_, totalOffset_ + GetEndPosition())) {
-            predictSnapEndPos = totalOffset_ + GetEndPosition() - contentMainSize_ + contentEndOffset_;
+        float endPos = GetEndPosition();
+        float itemTotalSize = endPos - GetStartPosition();
+        float contentSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
+        if ((GetEndIndex() == totalItemCount_ - 1) && GreatNotEqual(itemTotalSize, contentSize) &&
+            GreatNotEqual(predictSnapEndPos + contentMainSize_ - contentEndOffset_, totalOffset_ + endPos)) {
+            predictSnapEndPos = totalOffset_ + endPos - contentMainSize_ + contentEndOffset_;
         }
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
         float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos;
