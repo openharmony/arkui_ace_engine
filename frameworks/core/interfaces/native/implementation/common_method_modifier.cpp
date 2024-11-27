@@ -32,7 +32,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
-// #include "core/interfaces/arkoala/utility/converter_union.h"
 
 namespace {
 constexpr double FULL_DIMENSION = 100.0;
@@ -670,7 +669,8 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
     return dst;
 }
 template<>
-Ark_InvertOptions Convert(const Ark_Number& src) {
+Ark_InvertOptions Convert(const Ark_Number& src)
+{
     return {src, src, src, src};
 }
 template<>
@@ -746,8 +746,7 @@ std::optional<PixStretchEffectOption> OptConvert(const Ark_PixelStretchEffectOpt
     Dimension dBottom = bottom.has_value() ? Convert<Dimension>(bottom.value()) : Dimension();
     Dimension dLeft = left.has_value() ? Convert<Dimension>(left.value()) : Dimension();
     Dimension dRight = right.has_value() ? Convert<Dimension>(right.value()) : Dimension();
-    return std::optional<PixStretchEffectOption>(
-        {.left = dLeft, .top = dTop, .right = dRight, .bottom = dBottom});
+    return std::optional<PixStretchEffectOption>({.left = dLeft, .top = dTop, .right = dRight, .bottom = dBottom});
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -1744,14 +1743,16 @@ void InvertImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstract::SetInvert(frameNode, std::nullopt);
     }
+    const float minValue = 0.0;
+    const float maxValue = 100.0;
     auto convValue = Converter::OptConvert<InvertVariant>(*value);
     if (convValue) {
-        Validator::ValidateByRange(convValue, 0.0, 100.0);
+        Validator::ValidateByRange(convValue, minValue, maxValue);
         ViewAbstract::SetInvert(frameNode, convValue);
         return;
     }
     auto convValue2 = Converter::OptConvert<float>(*value);
-    Validator::ValidateByRange(convValue2, 0.0, 100.0);
+    Validator::ValidateByRange(convValue, minValue, maxValue);
     ViewAbstract::SetInvert(frameNode, convValue2);
 }
 void HueRotateImpl(Ark_NativePointer node,
@@ -1797,7 +1798,6 @@ void UseEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    std::cout << "\n********* " << (convValue ? "true" : "false") << "\n";
     ViewAbstract::SetUseEffect(frameNode, convValue);
 }
 void RenderGroupImpl(Ark_NativePointer node,
@@ -2488,7 +2488,9 @@ void SphericalEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value
         ? Converter::OptConvert<float>(*value) : std::nullopt;
-    Validator::ValidateByRange(convValue, 0.0, 1.0);
+    const float minValue = 0.0;
+    const float maxValue = 1.0;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
     ViewAbstract::SetSphericalEffect(frameNode, convValue);
 }
 void LightUpEffectImpl(Ark_NativePointer node,
@@ -2498,7 +2500,9 @@ void LightUpEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value
         ? Converter::OptConvert<float>(*value) : std::nullopt;
-    Validator::ValidateByRange(convValue, 0.0, 1.0);
+    const float minValue = 0.0;
+    const float maxValue = 1.0;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
     ViewAbstract::SetLightUpEffect(frameNode, convValue);
 }
 void PixelStretchEffectImpl(Ark_NativePointer node,

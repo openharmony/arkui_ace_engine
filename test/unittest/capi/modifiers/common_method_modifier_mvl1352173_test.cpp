@@ -56,17 +56,15 @@ namespace {
     const auto ATTRIBUTE_LIGHT_UP_EFFECT_NAME = "lightUpEffect";
     const auto ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE = 0.0;
     const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME = "pixelStretchEffect";
-    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE = "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
+    const auto ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE =
+        "{\"left\":\"0.00px\",\"right\":\"0.00px\",\"top\":\"0.00px\",\"bottom\":\"0.00px\"}";
 }
-struct PixelStretchEffect
-{
+struct PixelStretchEffect {
     float left = 0.0;
     float top = 0.0;
     float right = 0.0;
     float bottom = 0.0;
 };
-
-
 namespace Converter {
     template<>
     Ark_InvertOptions ArkValue(const float& value)
@@ -149,7 +147,8 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestValidValues, TestS
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_PINK), "#FFFFC0CB"},
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_RED), "#FFFF0000"},
         {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_YELLOW), "#FFFFFF00"},
-        {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_TRANSPARENT), "#00000000"},
+        {Converter::ArkUnion<Ark_Union_Color_String_Resource, Ark_Color>(Ark_Color::ARK_COLOR_TRANSPARENT),
+            "#00000000"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setColorBlend(node_, &inputValue);
@@ -327,7 +326,6 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setUseEffectValidValues, T
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setUseEffect(node_, inputValue);
         auto fullJson = GetJsonValue(node_);
-        // std::cout << "\n *********Valid " << fullJson->ToString() << "\n";
         auto resultValue = fullJson->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");
     }
@@ -540,7 +538,8 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectValidValues, Test
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSphericalEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME, ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
+        auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
+            ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
@@ -563,7 +562,8 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectInvalidValues, Te
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setSphericalEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
-        auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME, ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
+        auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
+            ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
