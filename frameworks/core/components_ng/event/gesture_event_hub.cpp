@@ -629,6 +629,12 @@ const RefPtr<T> GestureEventHub::GetAccessibilityRecognizer()
             return re;
         }
     }
+    for (const auto& recognizer : modifierGestureHierarchy_) {
+        const auto& re = AccessibilityRecursionSearchRecognizer<T>(recognizer);
+        if (re != nullptr) {
+            return re;
+        }
+    }
     return nullptr;
 }
 
