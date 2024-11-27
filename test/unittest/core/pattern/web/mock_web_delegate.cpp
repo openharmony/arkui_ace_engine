@@ -889,6 +889,10 @@ bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::v
 {
     return false;
 }
+bool WebDelegate::SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent)
+{
+    return false;
+}
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count) {}
 void WebDelegate::WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent) {}
 void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason) {}

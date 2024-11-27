@@ -5783,6 +5783,12 @@ bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction,
     return nweb_->WebSendKeyEvent(keyCode, keyAction, pressedCodes);
 }
 
+bool WebDelegate::SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent)
+{
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->SendKeyboardEvent(keyboardEvent);
+}
+
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
