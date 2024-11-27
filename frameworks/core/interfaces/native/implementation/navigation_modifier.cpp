@@ -159,7 +159,7 @@ void BackButtonIconImpl(Ark_NativePointer node,
     std::function<void(WeakPtr<FrameNode>)> symbolApply = nullptr;
 
     auto parseStringFunc = [&imgSrcInfoOpt, &imageOption](const Ark_String& src) {
-        imgSrcInfoOpt = Converter::Convert<ImageSourceInfo>(src);
+        imgSrcInfoOpt = Converter::OptConvert<ImageSourceInfo>(src);
         imageOption.isValidImage = true;
     };
 
