@@ -2892,11 +2892,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        auto root = JsonUtil::Create(true);
-        rootNode_->DumpSimplifyTree(0, root);
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        DumpLog::GetInstance().Print(json);
+        rootNode_->DumpTree(0);
+        DumpLog::GetInstance().OutPutByCompress();
     }
     return true;
 }
