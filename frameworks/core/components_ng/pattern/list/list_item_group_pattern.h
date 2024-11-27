@@ -61,6 +61,8 @@ struct ListMainSizeValues {
     std::optional<float> layoutStartMainPos;
     std::optional<float> layoutEndMainPos;
     float referencePos = 0.0f;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };

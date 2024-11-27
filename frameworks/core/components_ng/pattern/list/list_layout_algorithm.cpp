@@ -1447,6 +1447,10 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
         if (!items.empty()) {
             ListMainSizeValues value = { startMainPos_, endMainPos_, jumpIndexInGroup_, prevContentMainSize_,
                 scrollAlign_, layoutStartMainPos_, layoutEndMainPos_ };
+            if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
+                value.contentStartOffset = contentStartOffset_;
+                value.contentEndOffset = contentEndOffset_;
+            }
             PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() }, value, show);
         } else {
             auto pattern = host->GetPattern<ListPattern>();
@@ -2181,6 +2185,8 @@ bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const
     values.prevContentMainSize = listMainSizeValues.prevContentMainSize;
     values.forward = listMainSizeValues.forward;
     values.backward = listMainSizeValues.backward;
+    values.contentStartOffset = listMainSizeValues.contentStartOffset;
+    values.contentEndOffset = listMainSizeValues.contentEndOffset;
     groupPattern->LayoutCache(constraint, deadline, forwardCached, backwardCached, values);
     return true;
 }
