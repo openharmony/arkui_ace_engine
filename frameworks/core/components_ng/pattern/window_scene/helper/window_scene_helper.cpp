@@ -246,10 +246,11 @@ bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent
     CHECK_NULL_RETURN(keyEvent, false);
     if (!SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            SEC_PLD(, "KeyEvent Process to inject, eventInfo: id:%{public}d, "
             "keyEvent info: keyCode is %{public}d, "
-            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64),
+            SEC_PARAM(keyEvent->GetId(), keyEvent->GetKeyCode(),
+            keyEvent->GetKeyAction(), keyEvent->GetActionTime()));
     }
 
     auto container = Container::Current();
