@@ -51,7 +51,9 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& panEvent : actuator->panEvents_) {
+        // In the actionStart callback, actuator->panEvents_ may be modified
+        auto copyPanEvents = actuator->panEvents_;
+        for (const auto& panEvent : copyPanEvents) {
             auto actionStart = panEvent->GetActionStartEventFunc();
             if (actionStart) {
                 actionStart(info);
@@ -71,7 +73,9 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& panEvent : actuator->panEvents_) {
+        // In the actionUpdate callback, actuator->panEvents_ may be modified
+        auto copyPanEvents = actuator->panEvents_;
+        for (const auto& panEvent : copyPanEvents) {
             auto actionUpdate = panEvent->GetActionUpdateEventFunc();
             if (actionUpdate) {
                 actionUpdate(info);
@@ -91,8 +95,8 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        auto copyPanEvents_ = actuator->panEvents_;
-        for (const auto& panEvent : copyPanEvents_) {
+        auto copyPanEvents = actuator->panEvents_;
+        for (const auto& panEvent : copyPanEvents) {
             auto actionEnd = panEvent->GetActionEndEventFunc();
             if (actionEnd) {
                 actionEnd(info);
@@ -112,7 +116,9 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionCancel = [weak = WeakClaim(this)]() {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& panEvent : actuator->panEvents_) {
+        // In the actionCancel callback, actuator->panEvents_ may be modified
+        auto copyPanEvents = actuator->panEvents_;
+        for (const auto& panEvent : copyPanEvents) {
             auto actionCancel = panEvent->GetActionCancelEventFunc();
             if (actionCancel) {
                 actionCancel();
