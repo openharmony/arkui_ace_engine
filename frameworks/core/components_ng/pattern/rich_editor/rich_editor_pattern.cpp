@@ -6047,6 +6047,7 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
         } else {
             newPos = caretPosition_ - 1;
         }
+        AdjustSelectorForSymbol(newPos, HandleType::FIRST, SelectorAdjustPolicy::INCLUDE);
         return newPos;
     }
     auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, false, DELETE_COUNT);
@@ -6056,6 +6057,7 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
         } else {
             newPos = caretPosition_ + 1;
         }
+        AdjustSelectorForSymbol(newPos, HandleType::SECOND, SelectorAdjustPolicy::INCLUDE);
     }
     return newPos;
 }
