@@ -5547,14 +5547,16 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
     std::wstring deleteText = textContent.substr(
         static_cast<uint32_t>(std::clamp(caretPosition_, 0, static_cast<int32_t>(textContent.length()))),
         static_cast<uint32_t>(end - caretPosition_));
-    if (caretPosition_ == GetTextContentLength()) {
-        return deleteText;
-    }
     RichEditorDeleteValue info;
     info.SetOffset(caretPosition_);
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::FORWARD);
-    info.SetLength(length);
     int32_t currentPosition = caretPosition_;
+    if (currentPosition == GetTextContentLength()) {
+        info.SetLength(0);
+        DoDeleteActions(currentPosition, 0, info);
+        return deleteText;
+    }
+    info.SetLength(length);
     if (!spans_.empty()) {
         CalcDeleteValueObj(currentPosition, length, info);
         bool doDelete = DoDeleteActions(currentPosition, length, info);
