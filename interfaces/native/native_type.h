@@ -1996,6 +1996,8 @@ typedef enum {
     ARKUI_ERROR_CODE_NO_ERROR = 0,
     /** Invalid parameters. */
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
+    /** CAPI init error. */
+    ARKUI_ERROR_CODE_CAPI_INIT_ERROR = 500,
     /** The component does not support specific attributes or events. */
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
     /** The specific operation is not allowed on the node created by ArkTS. */
@@ -2018,6 +2020,10 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
     /** invalid styled string */
     ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
+    /** The uiContext is invalid. */
+    ARKUI_ERROR_CODE_UI_CONTEXT_INVALID = 190001,
+    /** The callback function is invalid. */
+    ARKUI_ERROR_CODE_CALLBACK_INVALID = 190002,
 } ArkUI_ErrorCode;
 
 /**
