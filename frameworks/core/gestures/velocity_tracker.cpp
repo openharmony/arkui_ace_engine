@@ -71,11 +71,12 @@ double GetLinearSlope(const LeastSquareImpl& axis)
         }
         auto previousIndex = count - index;
         auto lastIndex = count - 1;
-        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, SEC_PLD(,
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
             "GetLinearSlope points time is same y[%{public}d]: %{public}f y[%{public}d]: %{public}f x[%{public}d]: "
-            "%{public}f x[%{public}d]: %{public}f"),
-            SEC_PARAM(previousIndex, y[previousIndex], lastIndex, y[lastIndex], previousIndex,
-            x[previousIndex], lastIndex, x[lastIndex]));
+            "%{public}f x[%{public}d]: "
+            "%{public}f",
+            previousIndex, y[previousIndex], lastIndex, y[lastIndex], previousIndex, x[previousIndex], lastIndex,
+            x[lastIndex]);
         index++;
     }
     if (index > MAX_INDEX || index > count) {

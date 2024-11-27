@@ -222,9 +222,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
-            SEC_PLD(%{public}s) ".",
+            "%{public}s",
             refereeState_, node ? node->GetTag().c_str() : "null",
-            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
         return;
     }
     InitGlobalValue(event.sourceType);
