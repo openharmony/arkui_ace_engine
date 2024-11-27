@@ -19,7 +19,7 @@
 #pragma once
 
 #include <type_traits>
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 template<typename CallbackType,
@@ -57,7 +57,7 @@ public:
         }
     }
 protected:
-    const CallbackType callback_  = {
+    CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},
         .call = nullptr
     };

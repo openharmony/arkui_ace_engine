@@ -62,6 +62,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1615,6 +1616,19 @@ void NavigationModelNG::SetNavigationStack(FrameNode* frameNode)
         auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
         pattern->SetNavigationStack(std::move(navigationStack));
     }
+}
+
+RefPtr<NavigationStack> NavigationModelNG::GetOrCreateNavigationStack(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigationStack = pattern->GetNavigationStack();
+    if (!navigationStack) {
+        auto navigationStack = AceType::MakeRefPtr<GeneratedModifier::NavigationContext::NavigationStack>();
+        pattern->SetNavigationStack(std::move(navigationStack));
+    }
+    return navigationStack;
 }
 
 void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,

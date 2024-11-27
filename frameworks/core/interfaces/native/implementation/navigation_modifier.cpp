@@ -23,6 +23,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -88,6 +89,12 @@ BarItem Convert(const Ark_NavigationMenuItem& src)
     dst.action = nullptr;
     return dst;
 }
+
+template<>
+NavPathStackPeer* Convert(const Ark_Materialized &src)
+{
+    return reinterpret_cast<NavPathStackPeer *>(src.ptr);
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -108,8 +115,17 @@ void SetNavigationOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pathInfos);
-    //auto convValue = Converter::OptConvert<type_name>(*pathInfos);
-    //NavigationModelNG::SetSetNavigationOptions1(frameNode, convValue);
+    auto peerImplPtr = Converter::Convert<NavPathStackPeer*>(*pathInfos);
+    CHECK_NULL_VOID(peerImplPtr);
+    // auto stack = NavigationModelNG::GetOrCreateNavigationStack(frameNode);
+    // auto navStack = AceType::DynamicCast<NavigationContext::NavigationStack>(stack);
+    // CHECK_NULL_VOID(navStack);
+    // peerImplPtr->SetInstanceId(Container::CurrentId());
+    // navStack->SetDataSourceObj(peerImplPtr->GetNavPathStack());
+
+    RefPtr<NavigationStack> navStack = NavigationModelNG::GetOrCreateNavigationStack(frameNode);
+    peerImplPtr->SetInstanceId(Container::CurrentId());
+    peerImplPtr->SetNavigationStack(navStack);
 }
 } // NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
