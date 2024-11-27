@@ -16,6 +16,7 @@
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, ColorBlock, useEnabled } from 'common';
 import { LengthMetrics } from '@kit.ArkUI';
+import UTD from '@ohos.data.uniformTypeDescriptor';
 
 @Component
 export struct TextAreaBootcamp {
@@ -66,6 +67,8 @@ export struct TextAreaBootcamp {
         .textAlign(useEnabled(this.enableTextAlign, this.textAlign))
         .style(useEnabled(this.enableTextStyle, this.textStyle))
         .type(useEnabled(this.enableTextareaType, this.textareaType))
+        .allowDrop([UTD.UniformDataType.TEXT, UTD.UniformDataType.PLAIN_TEXT])
+        .draggable(true)
         .margin({
           start: LengthMetrics.vp(24),
           end: LengthMetrics.vp(24)
