@@ -606,7 +606,12 @@ void SubwindowManager::UpdateCustomDialogNG(
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
+#ifdef OHOS_STANDARD_SYSTEM
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+#else
+    auto subwindow =
+        GetSubwindow(GetParentContainerId(instanceId) != -1 ? GetParentContainerId(instanceId) : instanceId);
+#endif
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
