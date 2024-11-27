@@ -3146,7 +3146,7 @@ void ResetGridOffset(ArkUINodeHandle node)
     ViewAbstract::SetGrid(frameNode, std::nullopt, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
 }
 
-void SetGridSpan(ArkUINodeHandle node, std::optional<ArkUI_Int32> value)
+void SetGridSpan(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

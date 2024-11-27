@@ -729,7 +729,9 @@ Ark_String Convert(const Ark_Number& src)
     auto floatValue = Convert<float>(src);
     std::ostringstream oss;
     oss << floatValue;
-    auto result = Converter::ArkValue<Ark_String>(oss.str());
+    // Explicitly create a string from the stream result
+    std::string str = oss.str();
+    auto result = Converter::ArkValue<Ark_String>(str);
     return result;
 }
 template<>
@@ -1738,7 +1740,7 @@ void SepiaImpl(Ark_NativePointer node,
 void InvertImpl(Ark_NativePointer node,
                 const Ark_Union_Number_InvertOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstract::SetInvert(frameNode, std::nullopt);
@@ -1758,7 +1760,7 @@ void InvertImpl(Ark_NativePointer node,
 void HueRotateImpl(Ark_NativePointer node,
                    const Ark_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (!value) {
         ViewAbstract::SetHueRotate(frameNode, std::nullopt);

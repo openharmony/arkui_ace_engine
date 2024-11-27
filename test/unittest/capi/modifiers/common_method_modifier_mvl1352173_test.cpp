@@ -13,28 +13,19 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "common_method_modifier_test.h"
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "generated/test_fixtures.h"
-#include "generated/type_helpers.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "common_method_modifier_test.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "core/components/common/properties/invert.h"
-#include "core/components_ng/base/view_abstract_model.h"
 
 using namespace testing;
 using namespace testing::ext;
-// using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 
 namespace {
-    // GENERATED_ArkUICommonMethodModifier
     const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
     const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_INVERT_NAME = "invert";
