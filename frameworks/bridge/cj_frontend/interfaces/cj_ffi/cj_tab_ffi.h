@@ -90,6 +90,7 @@ private:
 } // namespace OHOS::Ace::Framework
 
 using VectorInt32Ptr = void*;
+using VectorFloat32Ptr = void*;
 
 extern "C" {
 struct CJTabsScrollableBarModeOptions {
@@ -109,7 +110,7 @@ struct CJTabsDividerStyle {
 };
 
 struct CJTabsBlurOptions {
-    std::vector<float> grayscale;
+    VectorFloat32Ptr grayscale;
 };
 
 struct CJTabsBarBackgroundBlurStyleOptions {

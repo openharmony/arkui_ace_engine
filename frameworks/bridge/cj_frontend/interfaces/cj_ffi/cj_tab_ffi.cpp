@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_tab_ffi.h"
 
 #include "cj_lambda.h"
+#include "cj_view_abstract_ffi.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -299,11 +300,10 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyleWithOptions(
     styleOption.scale = std::clamp(scale, 0.0, 1.0);
 
     BlurOption blurOption;
-    std::vector<float> grayscale(GRAY_SCALE_ARRAY_SIZE);
-    if (options.blurOptions.grayscale.size() == GRAY_SCALE_ARRAY_SIZE) {
-        grayscale = options.blurOptions.grayscale;
+    const auto& cjGrayScale = *reinterpret_cast<std::vector<float>*>(options.blurOptions.grayscale);
+    if (cjGrayScale.size() == GRAY_SCALE_ARRAY_SIZE) {
+        blurOption.grayscale = cjGrayScale;
     }
-    blurOption.grayscale = grayscale;
     styleOption.blurOption = blurOption;
     TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
 }
@@ -363,11 +363,10 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundEffect(CJTabsBackgroundEffectOptions
     }
 
     BlurOption blurOption;
-    std::vector<float> grayscale(GRAY_SCALE_ARRAY_SIZE);
-    if (options.blurOptions.grayscale.size() == GRAY_SCALE_ARRAY_SIZE) {
-        grayscale = options.blurOptions.grayscale;
+    const auto& cjGrayScale = *reinterpret_cast<std::vector<float>*>(options.blurOptions.grayscale);
+    if (cjGrayScale.size() == GRAY_SCALE_ARRAY_SIZE) {
+        blurOption.grayscale = cjGrayScale;
     }
-    blurOption.grayscale = grayscale;
     effectOption.blurOption = blurOption;
 
     auto policy = options.policy;
