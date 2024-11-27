@@ -232,6 +232,7 @@
                 }
             ],
             "test": [
+                "//foundation/arkui/ace_engine/test/unittest:run_linux_unittest_capi",
                 "//foundation/arkui/ace_engine/test/unittest:unittest"
             ]
         }
