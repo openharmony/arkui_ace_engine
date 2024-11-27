@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -3297,7 +3298,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager_->RemoveOverlayInSubwindow();
         } else {
-            return overlayManager_->RemoveOverlay(false);
+            return overlayManager_->RemoveOverlay(false) || SheetManager::GetInstance().RemoveSheetByESC();
         }
     }
     return false;
