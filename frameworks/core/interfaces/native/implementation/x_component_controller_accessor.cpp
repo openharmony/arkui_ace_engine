@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#endif //XCOMPONENT_SUPPORTED
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
@@ -30,7 +32,9 @@ static void DestroyPeer(XComponentControllerPeer *peer)
 XComponentControllerPeer* CtorImpl()
 {
     auto peer = new XComponentControllerPeer();
+#ifdef XCOMPONENT_SUPPORTED
     peer->controller = std::make_shared<OHOS::Ace::NG::XComponentControllerNG>();
+#endif //XCOMPONENT_SUPPORTED
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -39,29 +43,36 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void GetXComponentSurfaceIdImpl(XComponentControllerPeer* peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     auto surfaceId = peer->controller->GetSurfaceId();
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceIdImpl - return surfaceId need to be supported");
+#endif //XCOMPONENT_SUPPORTED
 }
 Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
+#endif //XCOMPONENT_SUPPORTED
     return 0;
 }
 void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
                                   const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
 {
+#ifdef XCOMPONENT_SUPPORTED
     //This API is deprecated since API version 12. Should be used SetXComponentSurfaceRectImpl instead.
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(value);
     uint32_t surfaceWidth = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceWidth));
     uint32_t surfaceHeight = static_cast<uint32_t>(Converter::Convert<int32_t>(value->surfaceHeight));
     peer->controller->ConfigSurface(surfaceWidth, surfaceHeight);
+#endif //XCOMPONENT_SUPPORTED
 }
 void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer,
                                   const Ark_SurfaceRect* rect)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(rect);
     auto offsetX = Converter::OptConvert<float>(rect->offsetX);
@@ -81,9 +92,11 @@ void SetXComponentSurfaceRectImpl(XComponentControllerPeer* peer,
         peer->controller->ClearIdealSurfaceOffset(true);
     }
     peer->controller->UpdateSurfaceBounds();
+#endif //XCOMPONENT_SUPPORTED
 }
 Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     float offsetX = 0.0f;
     float offsetY = 0.0f;
@@ -92,62 +105,77 @@ Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
     peer->controller->GetSurfaceOffset(offsetX, offsetY);
     peer->controller->GetSurfaceSize(width, height);
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRectImpl - return value need to be supported");
+#endif //XCOMPONENT_SUPPORTED
     return 0;
 }
 void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     CHECK_NULL_VOID(rotationOptions);
     auto lock = Converter::OptConvert<bool>(rotationOptions->lock);
     peer->controller->SetSurfaceRotation(lock.value_or(false));
+#endif //XCOMPONENT_SUPPORTED
 }
 Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     bool lock = peer->controller->GetSurfaceRotation();
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRotationImpl - return value need to be supported");
+#endif //XCOMPONENT_SUPPORTED
     return 0;
 }
 void OnSurfaceCreatedImpl(XComponentControllerPeer* peer,
                           const Ark_String* surfaceId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     auto pattern = peer->controller->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto frameNode = pattern->GetHost();
     LOGE("XComponentControllerAccessor::OnSurfaceCreatedImpl - callback need to be supported");
+#endif //XCOMPONENT_SUPPORTED
 }
 void OnSurfaceChangedImpl(XComponentControllerPeer* peer,
                           const Ark_String* surfaceId,
                           const Ark_SurfaceRect* rect)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     auto pattern = peer->controller->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto frameNode = pattern->GetHost();
     LOGE("XComponentControllerAccessor::OnSurfaceChangedImpl - callback need to be supported");
+#endif //XCOMPONENT_SUPPORTED
 }
 void OnSurfaceDestroyedImpl(XComponentControllerPeer* peer,
                             const Ark_String* surfaceId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     auto pattern = peer->controller->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto frameNode = pattern->GetHost();
     LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
+#endif //XCOMPONENT_SUPPORTED
 }
 Ark_NativePointer StartImageAnalyzerImpl(XComponentControllerPeer* peer,
                                          const Ark_ImageAnalyzerConfig* config)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     LOGE("XComponentControllerAccessor::StartImageAnalyzerImpl - return promise need to be supported");
+#endif //XCOMPONENT_SUPPORTED
     return 0;
 }
 void StopImageAnalyzerImpl(XComponentControllerPeer* peer)
 {
+#ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer && peer->controller);
     peer->controller->StopImageAnalyzer();
+#endif //XCOMPONENT_SUPPORTED
 }
 } // XComponentControllerAccessor
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()
