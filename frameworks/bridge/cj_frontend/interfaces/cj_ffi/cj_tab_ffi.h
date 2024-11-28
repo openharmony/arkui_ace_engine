@@ -90,6 +90,7 @@ private:
 } // namespace OHOS::Ace::Framework
 
 using VectorInt32Ptr = void*;
+using VectorFloat32Ptr = void*;
 
 extern "C" {
 struct CJTabsScrollableBarModeOptions {
@@ -109,14 +110,14 @@ struct CJTabsDividerStyle {
 };
 
 struct CJTabsBlurOptions {
-    std::vector<float> grayscale;
+    VectorFloat32Ptr grayscale;
 };
 
 struct CJTabsBarBackgroundBlurStyleOptions {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJTabsBlurOptions blurOptions;
-    double scale;
+    float scale;
     int32_t policy;
     uint32_t inactiveColor;
 };
@@ -143,9 +144,9 @@ struct CJTabsBackgroundEffectOptions {
 };
 
 struct CJTabsAnimationEvent {
-    int32_t currentOffset;
-    int32_t targetOffset;
-    int32_t velocity;
+    float currentOffset;
+    float targetOffset;
+    float velocity;
 };
 
 typedef void (*TransitionFunc)(int32_t from, int32_t to, int64_t id);

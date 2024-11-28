@@ -299,11 +299,10 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyleWithOptions(
     styleOption.scale = std::clamp(scale, 0.0, 1.0);
 
     BlurOption blurOption;
-    std::vector<float> grayscale(GRAY_SCALE_ARRAY_SIZE);
-    if (options.blurOptions.grayscale.size() == GRAY_SCALE_ARRAY_SIZE) {
-        grayscale = options.blurOptions.grayscale;
+    const auto& cjGrayScale = *reinterpret_cast<std::vector<float>*>(options.blurOptions.grayscale);
+    if (cjGrayScale.size() == GRAY_SCALE_ARRAY_SIZE) {
+        blurOption.grayscale = cjGrayScale;
     }
-    blurOption.grayscale = grayscale;
     styleOption.blurOption = blurOption;
     TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
 }
@@ -363,11 +362,10 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundEffect(CJTabsBackgroundEffectOptions
     }
 
     BlurOption blurOption;
-    std::vector<float> grayscale(GRAY_SCALE_ARRAY_SIZE);
-    if (options.blurOptions.grayscale.size() == GRAY_SCALE_ARRAY_SIZE) {
-        grayscale = options.blurOptions.grayscale;
+    const auto& cjGrayScale = *reinterpret_cast<std::vector<float>*>(options.blurOptions.grayscale);
+    if (cjGrayScale.size() == GRAY_SCALE_ARRAY_SIZE) {
+        blurOption.grayscale = cjGrayScale;
     }
-    blurOption.grayscale = grayscale;
     effectOption.blurOption = blurOption;
 
     auto policy = options.policy;
