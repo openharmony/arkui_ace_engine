@@ -79,6 +79,7 @@ struct UpdateSpanStyle {
         updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
+        updateTextBackgroundStyle.reset();
 
         updateLineHeight.reset();
         updateLetterSpacing.reset();
@@ -108,6 +109,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
+    std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
