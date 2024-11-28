@@ -206,6 +206,12 @@ void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
     }
 }
 
+void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
+{
+    AssignArkValue(dst, static_cast<ListItemGroupArea>(src));
+}
+
+
 void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src)
 {
     switch (src) {
@@ -251,6 +257,19 @@ void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
         default: {
             dst = static_cast<Ark_NavigationMode>(-1);
             LOGE("Unexpected enum value in NavigationMode: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src)
+{
+    switch (src) {
+        case NavigationTitleMode::FREE: dst = ARK_NAVIGATION_TITLE_MODE_FREE; break;
+        case NavigationTitleMode::FULL: dst = ARK_NAVIGATION_TITLE_MODE_FULL; break;
+        case NavigationTitleMode::MINI: dst = ARK_NAVIGATION_TITLE_MODE_MINI; break;
+        default: {
+            dst = static_cast<Ark_NavigationTitleMode>(-1);
+            LOGE("Unexpected enum value in NavigationTitleMode: %{public}d", src);
         }
     }
 }

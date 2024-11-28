@@ -21,6 +21,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_model_data.h"
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -53,6 +54,13 @@ namespace  {
     const auto ATTRIBUTE_HIDE_TOOL_BAR_DEFAULT_VALUE = false;
     const auto ATTRIBUTE_RECOVERABLE_NAME = "recoverable";
     const auto ATTRIBUTE_RECOVERABLE_DEFAULT_VALUE = false;
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME = "ignoreLayoutSafeAreaTypes";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_DEFAULT_VALUE = "SAFE_AREA_TYPE_NONE";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_EDGES_NAME = "ignoreLayoutSafeAreaEdges";
+    const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_EDGES_DEFAULT_VALUE = "SAFE_AREA_Edge_NONE";
+    const auto ATTRIBUTE_MENUS_NAME = "menus";
+    const auto ATTRIBUTE_MENUS_DEFAULT_VALUE = "";
+    const auto MENU_ITEM_COUNT = 3.0;
 
     struct EventsTracker {
         static inline GENERATED_ArkUINavigationEventsReceiver navigationEventReceiver {};
@@ -71,6 +79,11 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+
+        // set test values to Theme Pattern as data for the Theme building
+        auto themeStyle = SetupThemeStyle(THEME_PATTERN_NAVIGATION_BAR);
+        themeStyle->SetAttr("navigation_bar_most_menu_item_count_in_bar", { .value = MENU_ITEM_COUNT });
+        SetupTheme<NavigationBarTheme>();
 
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
@@ -248,15 +261,15 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMinValues, TestSize
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "1.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>("23.00%"), "23.00%, 0.00px" },
+        { Converter::ArkValue<Ark_Length>(1), "1.00px, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "23.00%, 432.00vp" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -280,15 +293,15 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMaxValues, TestSize
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(1), "0.00px, 1.00px" },
-        { Converter::ArkValue<Ark_Length>(2.45f), "0.00px, 2.45vp" },
-        { Converter::ArkValue<Ark_Length>(5.0_px), "0.00px, 5.00px" },
-        { Converter::ArkValue<Ark_Length>(22.35_px), "0.00px, 22.35px" },
-        { Converter::ArkValue<Ark_Length>(7.0_vp), "0.00px, 7.00vp" },
-        { Converter::ArkValue<Ark_Length>(1.65_vp), "0.00px, 1.65vp" },
-        { Converter::ArkValue<Ark_Length>(65.0_fp), "0.00px, 65.00fp" },
-        { Converter::ArkValue<Ark_Length>(4.3_fp), "0.00px, 4.30fp" },
-        { Converter::ArkValue<Ark_Length>("23.00%"), "0.00px, 23.00%" },
+        { Converter::ArkValue<Ark_Length>(1), "240.00vp, 1.00px" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "240.00vp, 2.45vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "240.00vp, 5.00px" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "240.00vp, 22.35px" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "240.00vp, 7.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "240.00vp, 1.65vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "240.00vp, 65.00fp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "240.00vp, 4.30fp" },
+        { Converter::ArkValue<Ark_Length>("23.00%"), "240.00vp, 23.00%" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -322,14 +335,14 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMinValues, TestSi
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(-1), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-3.56f), "0.00vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-8.0_px), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-15.6_px), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-21.0_vp), "0.00vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-8.6_vp), "0.00vp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-32.0_fp), "0.00fp, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-9.99_fp), "0.00fp, 0.00px" },
+        { Converter::ArkValue<Ark_Length>(-1), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-3.56f), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-8.0_px), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-15.6_px), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-21.0_vp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-8.6_vp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-32.0_fp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-9.99_fp), "240.00vp, 432.00vp" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -353,14 +366,14 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMaxValues, TestSi
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Length>(-1), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-3.56f), "0.00px, 0.00vp" },
-        { Converter::ArkValue<Ark_Length>(-8.0_px), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-15.6_px), "0.00px, 0.00px" },
-        { Converter::ArkValue<Ark_Length>(-21.0_vp), "0.00px, 0.00vp" },
-        { Converter::ArkValue<Ark_Length>(-8.6_vp), "0.00px, 0.00vp" },
-        { Converter::ArkValue<Ark_Length>(-32.0_fp), "0.00px, 0.00fp" },
-        { Converter::ArkValue<Ark_Length>(-9.99_fp), "0.00px, 0.00fp" },
+        { Converter::ArkValue<Ark_Length>(-1), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-3.56f), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-8.0_px), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-15.6_px), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-21.0_vp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-8.6_vp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-32.0_fp), "240.00vp, 432.00vp" },
+        { Converter::ArkValue<Ark_Length>(-9.99_fp), "240.00vp, 432.00vp" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -955,4 +968,143 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestInvalidValues, TestSize.Level
     EXPECT_EQ(boolResult, ATTRIBUTE_RECOVERABLE_DEFAULT_VALUE);
 }
 #endif
-} // namespace OHOS::Ace::NG
+
+/*
+ * @tc.name: DISABLED_setIgnoreLayoutSafeAreaDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ *
+ * DISABLED due to nothing values in the json
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_DEFAULT_VALUE) <<
+        "Default value for attribute 'ignoreLayoutSafeAreaTypes'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_EDGES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_EDGES_DEFAULT_VALUE) <<
+        "Default value for attribute 'ignoreLayoutSafeAreaEdges'";
+}
+
+/*
+ * @tc.name: DISABLED_setIgnoreLayoutSafeAreaType
+ * @tc.desc:
+ * @tc.type: FUNC
+ *
+ * DISABLED due to nothing values in the json
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaType, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    ASSERT_NE(modifier_->setIgnoreLayoutSafeArea, nullptr);
+
+    std::initializer_list<Ark_LayoutSafeAreaType> indexList = {ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM};
+    Converter::ArkArrayHolder<Array_LayoutSafeAreaType> holderTypes(indexList);
+    auto arkTypeValid = holderTypes.OptValue<Opt_Array_LayoutSafeAreaType>();
+    auto arkTypeEmpty = Converter::ArkValue<Opt_Array_LayoutSafeAreaType>(Ark_Empty());
+
+    modifier_->setIgnoreLayoutSafeArea(node_, &arkTypeValid, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME);
+    EXPECT_EQ(resultStr, "SAFE_AREA_TYPE_SYSTEM");
+
+    modifier_->setIgnoreLayoutSafeArea(node_, &arkTypeEmpty, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME);
+    EXPECT_EQ(resultStr, "SAFE_AREA_TYPE_NONE");
+
+    modifier_->setIgnoreLayoutSafeArea(node_, &arkTypeValid, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME);
+    EXPECT_EQ(resultStr, "SAFE_AREA_TYPE_SYSTEM");
+
+    modifier_->setIgnoreLayoutSafeArea(node_, nullptr, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME);
+    EXPECT_EQ(resultStr, "SAFE_AREA_TYPE_NONE");
+}
+
+/*
+ * @tc.name: DISABLED_setMenusTestDefault
+ * @tc.desc:
+ * @tc.type: FUNC
+ *
+ * DISABLED due to nothing values in the json
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setMenusTestDefault, TestSize.Level1)
+{
+    auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_MENUS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MENUS_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: DISABLED_setMenusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ *
+ * DISABLED due to nothing values in the json
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setMenusTest, TestSize.Level1)
+{
+    using namespace Converter;
+    std::string resultStr;
+
+    ASSERT_NE(modifier_->setMenus, nullptr);
+
+    Ark_NavigationMenuItem oneItem {
+        .value = ArkUnion<Ark_Union_String_Resource, Ark_String>(std::string()),
+        .icon = ArkUnion<Opt_Union_String_Resource, Ark_String>("iconPath"),
+        .symbolIcon = ArkValue<Opt_CustomObject>(),
+        .isEnabled = ArkValue<Opt_Boolean>(true),
+        .action = ArkValue<Opt_Callback_Void>()
+    };
+    ArkArrayHolder<Array_NavigationMenuItem> holderItems({oneItem});
+
+    auto arkItems =
+        ArkUnion<Ark_Union_Array_NavigationMenuItem_CustomBuilder, Array_NavigationMenuItem>(holderItems.ArkValue());
+    modifier_->setMenus(node_, &arkItems);
+
+    // trigger the menu building
+    auto fnode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(fnode, nullptr);
+    fnode->MarkModifyDone();
+
+    resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_MENUS_NAME);
+    EXPECT_EQ(resultStr, "{\"items\":[[\"iconPath\",\"\"]]}");
+}
+/**
+ * @tc.name: onTitleModeChangeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, onTitleModeChangeTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<Ark_NavigationTitleMode> checkInvoke;
+    auto checkFunc =
+        [](const Ark_Int32 resourceId, Ark_NavigationTitleMode titleMode) { checkInvoke = titleMode; };
+    auto arkCallback = Converter::ArkValue<Callback_NavigationTitleMode_Void>(checkFunc, contextId);
+    modifier_->setOnTitleModeChange(node_, &arkCallback);
+
+    checkInvoke.reset();
+    NavigationTitleModeChangeEvent changeTitleModeMini(true);
+    eventHub->FireChangeEvent(&changeTitleModeMini);
+    ASSERT_TRUE(checkInvoke.has_value());
+    EXPECT_EQ(*checkInvoke, ARK_NAVIGATION_TITLE_MODE_MINI);
+
+    checkInvoke.reset();
+    NavigationTitleModeChangeEvent changeTitleModeFull(false);
+    eventHub->FireChangeEvent(&changeTitleModeFull);
+    ASSERT_TRUE(checkInvoke.has_value());
+    EXPECT_EQ(*checkInvoke, ARK_NAVIGATION_TITLE_MODE_FULL);
+}} // namespace OHOS::Ace::NG

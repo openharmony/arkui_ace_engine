@@ -117,10 +117,8 @@ namespace OHOS::Ace::NG::Converter {
     // Complex types
     inline void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
     {
-        dst = {
-            .offset = ArkValue<Ark_Number>(src.offset),
-            .value = ArkValue<Ark_String>(src.value)
-        };
+        dst.offset = ArkValue<Ark_Number>(src.offset);
+        dst.value = ArkValue<Ark_String>(src.value);
     }
 
     inline void AssignArkValue(Ark_Length& dst, const int& src)
@@ -184,6 +182,12 @@ namespace OHOS::Ace::NG::Converter {
         dst.alwaysEnabled = src;
     }
 
+    inline void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<Dimension, Dimension>& src)
+    {
+        dst.value0 = ArkValue<Ark_Length>(src.first);
+        dst.value1 = ArkValue<Ark_Length>(src.second);
+    }
+
     // SORTED_SECTION
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
@@ -204,11 +208,13 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
+    void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src);
     void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src);
     void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
     void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
+    void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
@@ -244,11 +250,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
-
-    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
-    {
-        AssignArkValue(dst, static_cast<ListItemGroupArea>(src));
-    }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

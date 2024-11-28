@@ -267,16 +267,16 @@ std::optional<std::string> ResourceConverter::ToString()
             break;
 
         case NodeModifier::ResourceType::RAWFILE:
-            if (params_.size() > 0) {
-                result = themeConstants_->GetRawfile(params_[0]);
+            if (!params_.empty()) {
+                result = themeConstants_->GetRawfile(params_.front());
             }
             break;
 
         case NodeModifier::ResourceType::MEDIA:
             if (id_ != -1) {
                 result = themeConstants_->GetMediaPath(id_);
-            } else if (params_.size() > 0) {
-                result = themeConstants_->GetMediaPathByName(params_[0]);
+            } else if (!params_.empty()) {
+                result = themeConstants_->GetMediaPathByName(params_.front());
             }
             break;
 

@@ -31,6 +31,18 @@ std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
     { FONT_FAMILY_RESOURCE_1_ID, FONT_FAMILY_RESOURCE_1_STR, "Arial, Sans Serif" },
     { FONT_FAMILY_RESOURCE_2_ID, FONT_FAMILY_RESOURCE_2_STR, "" },
     { COLORS_RES_0_ID, COLORS_RES_0_STR, Color(0xA1FAC0DE) },
+    { RES_DATA_FOR_LENGTH_0_ID, RES_DATA_FOR_LENGTH_0_STR, 432.0_vp },
+    { RES_DATA_FOR_LENGTH_1_ID, RES_DATA_FOR_LENGTH_1_STR, 123.0_fp },
+    { RES_DATA_FOR_LENGTH_2_ID, RES_DATA_FOR_LENGTH_2_STR, 22.55_px },
+    { RES_DATA_FOR_LENGTH_3_ID, RES_DATA_FOR_LENGTH_3_STR, 0.5_pct },
+    { RES_DATA_FOR_LENGTH_4_ID, RES_DATA_FOR_LENGTH_4_STR, 0.0_vp },
+    { RES_DATA_FOR_LENGTH_5_ID, RES_DATA_FOR_LENGTH_5_STR, 0.0_fp },
+    { RES_DATA_FOR_LENGTH_6_ID, RES_DATA_FOR_LENGTH_6_STR, 0.0_px },
+    { RES_DATA_FOR_LENGTH_7_ID, RES_DATA_FOR_LENGTH_7_STR, 0.0_pct },
+    { RES_DATA_FOR_LENGTH_8_ID, RES_DATA_FOR_LENGTH_8_STR, -2.3_vp },
+    { RES_DATA_FOR_LENGTH_9_ID, RES_DATA_FOR_LENGTH_9_STR, -4.5_fp },
+    { RES_DATA_FOR_LENGTH_10_ID, RES_DATA_FOR_LENGTH_10_STR, -5.6_px },
+    { RES_DATA_FOR_LENGTH_11_ID, RES_DATA_FOR_LENGTH_11_STR, -0.8_pct },
     { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
     { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
     { DIMENSIONS_RES_NON_NEG_2_ID, DIMENSIONS_RES_NON_NEG_2_STR, 1.23_vp },
@@ -499,6 +511,129 @@ std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidV
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
     { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'LengthPositive' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthPositiveValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), "123.00vp" },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), "1.23vp" },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), "123.00fp" },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), "1.23fp" },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), "123.00px" },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), "1.23px" },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), "50.00%" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositiveInvalidValues = {
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp) },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp) },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px) },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
+    { "-1", Converter::ArkValue<Ark_Length>(-1) },
+    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+// Fixture 'ResDataForLength' for type 'Ark_Resource'
+std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDataForLengthValidValues = {
+    { "ResId:RES_DATA_FOR_LENGTH_0_ID", CreateResource(RES_DATA_FOR_LENGTH_0_ID, NodeModifier::ResourceType::FLOAT),
+        "432.00vp" },
+    { "ResName:RES_DATA_FOR_LENGTH_0_STR", CreateResource(RES_DATA_FOR_LENGTH_0_STR, NodeModifier::ResourceType::FLOAT),
+        "432.00vp" },
+    { "ResId:RES_DATA_FOR_LENGTH_1_ID", CreateResource(RES_DATA_FOR_LENGTH_1_ID, NodeModifier::ResourceType::FLOAT),
+        "123.00fp" },
+    { "ResName:RES_DATA_FOR_LENGTH_1_STR", CreateResource(RES_DATA_FOR_LENGTH_1_STR, NodeModifier::ResourceType::FLOAT),
+        "123.00fp" },
+    { "ResId:RES_DATA_FOR_LENGTH_2_ID", CreateResource(RES_DATA_FOR_LENGTH_2_ID, NodeModifier::ResourceType::FLOAT),
+        "22.55px" },
+    { "ResName:RES_DATA_FOR_LENGTH_2_STR", CreateResource(RES_DATA_FOR_LENGTH_2_STR, NodeModifier::ResourceType::FLOAT),
+        "22.55px" },
+    { "ResId:RES_DATA_FOR_LENGTH_3_ID", CreateResource(RES_DATA_FOR_LENGTH_3_ID, NodeModifier::ResourceType::FLOAT),
+        "50.00%" },
+    { "ResName:RES_DATA_FOR_LENGTH_3_STR", CreateResource(RES_DATA_FOR_LENGTH_3_STR, NodeModifier::ResourceType::FLOAT),
+        "50.00%" },
+    { "ResId:RES_DATA_FOR_LENGTH_4_ID", CreateResource(RES_DATA_FOR_LENGTH_4_ID, NodeModifier::ResourceType::FLOAT),
+        "0.00vp" },
+    { "ResName:RES_DATA_FOR_LENGTH_4_STR", CreateResource(RES_DATA_FOR_LENGTH_4_STR, NodeModifier::ResourceType::FLOAT),
+        "0.00vp" },
+    { "ResId:RES_DATA_FOR_LENGTH_5_ID", CreateResource(RES_DATA_FOR_LENGTH_5_ID, NodeModifier::ResourceType::FLOAT),
+        "0.00fp" },
+    { "ResName:RES_DATA_FOR_LENGTH_5_STR", CreateResource(RES_DATA_FOR_LENGTH_5_STR, NodeModifier::ResourceType::FLOAT),
+        "0.00fp" },
+    { "ResId:RES_DATA_FOR_LENGTH_6_ID", CreateResource(RES_DATA_FOR_LENGTH_6_ID, NodeModifier::ResourceType::FLOAT),
+        "0.00px" },
+    { "ResName:RES_DATA_FOR_LENGTH_6_STR", CreateResource(RES_DATA_FOR_LENGTH_6_STR, NodeModifier::ResourceType::FLOAT),
+        "0.00px" },
+    { "ResId:RES_DATA_FOR_LENGTH_7_ID", CreateResource(RES_DATA_FOR_LENGTH_7_ID, NodeModifier::ResourceType::FLOAT),
+        "0.00%" },
+    { "ResName:RES_DATA_FOR_LENGTH_7_STR", CreateResource(RES_DATA_FOR_LENGTH_7_STR, NodeModifier::ResourceType::FLOAT),
+        "0.00%" },
+    { "ResId:RES_DATA_FOR_LENGTH_8_ID", CreateResource(RES_DATA_FOR_LENGTH_8_ID, NodeModifier::ResourceType::FLOAT),
+        "-2.30vp" },
+    { "ResName:RES_DATA_FOR_LENGTH_8_STR", CreateResource(RES_DATA_FOR_LENGTH_8_STR, NodeModifier::ResourceType::FLOAT),
+        "-2.30vp" },
+    { "ResId:RES_DATA_FOR_LENGTH_9_ID", CreateResource(RES_DATA_FOR_LENGTH_9_ID, NodeModifier::ResourceType::FLOAT),
+        "-4.50fp" },
+    { "ResName:RES_DATA_FOR_LENGTH_9_STR", CreateResource(RES_DATA_FOR_LENGTH_9_STR, NodeModifier::ResourceType::FLOAT),
+        "-4.50fp" },
+    { "ResId:RES_DATA_FOR_LENGTH_10_ID", CreateResource(RES_DATA_FOR_LENGTH_10_ID, NodeModifier::ResourceType::FLOAT),
+        "-5.60px" },
+    { "ResName:RES_DATA_FOR_LENGTH_10_STR",
+        CreateResource(RES_DATA_FOR_LENGTH_10_STR, NodeModifier::ResourceType::FLOAT), "-5.60px" },
+    { "ResId:RES_DATA_FOR_LENGTH_11_ID", CreateResource(RES_DATA_FOR_LENGTH_11_ID, NodeModifier::ResourceType::FLOAT),
+        "-80.00%" },
+    { "ResName:RES_DATA_FOR_LENGTH_11_STR",
+        CreateResource(RES_DATA_FOR_LENGTH_11_STR, NodeModifier::ResourceType::FLOAT), "-80.00%" },
+};
+
+// Fixture 'LengthResPositive' for type 'Ark_Length'
+std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthResPositiveValidValues = {
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_0_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_0_ID }),
+        "432.00vp" },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_1_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_1_ID }),
+        "123.00fp" },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_2_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_2_ID }),
+        "22.55px" },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_3_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_3_ID }),
+        "50.00%" },
+};
+
+std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthResPositiveInvalidValues = {
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_4_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_4_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_5_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_5_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_6_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_6_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_7_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_7_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_8_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_8_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_9_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_9_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_10_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_10_ID }) },
+    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_11_ID}",
+        Converter::ArkValue<Ark_Length>(
+            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_11_ID }) },
 };
 
 // Fixture 'LengthAny' for type 'Ark_Length'
@@ -1071,6 +1206,36 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureOpaci
         "1.000000" },
     { "ResName:OPACITY_RESOURCE_7_STR", CreateResource(OPACITY_RESOURCE_7_STR, NodeModifier::ResourceType::FLOAT),
         "1.000000" },
+};
+
+// Fixture 'FixtureNavBarWidthRange' for type 'Ark_Tuple_Dimension_Dimension'
+std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension, std::string>>
+    testFixtureFixtureNavBarWidthRangeValidValues = {
+        { "std::pair<Dimension, Dimension>{0.1_fp, 10.0_vp}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.1_fp, 10.0_vp }),
+            "0.10fp, 10.00vp" },
+        { "std::pair<Dimension, Dimension>{0.1_px, 112.0_vp}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.1_px, 112.0_vp }),
+            "0.10px, 112.00vp" },
+        { "std::pair<Dimension, Dimension>{5, 6}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 5, 6 }),
+            "5.00px, 6.00px" },
+        { "std::pair<Dimension, Dimension>{0.5_pct, 100}",
+            Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0.5_pct, 100 }),
+            "50.00%, 100.00px" },
+    };
+
+std::vector<std::tuple<std::string, Ark_Tuple_Dimension_Dimension>> testFixtureFixtureNavBarWidthRangeInvalidValues = {
+    { "std::pair<Dimension, Dimension>{0, 0}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0, 0 }) },
+    { "std::pair<Dimension, Dimension>{-0.1f, INT_MIN}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { -0.1f, INT_MIN }) },
+    { "std::pair<Dimension, Dimension>{-123._px, 0._fp}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { -123._px, 0._fp }) },
+    { "std::pair<Dimension, Dimension>{0, -0.15_pct}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0, -0.15_pct }) },
+    { "std::pair<Dimension, Dimension>{0._px, -432.01_vp}",
+        Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<Dimension, Dimension> { 0._px, -432.01_vp }) },
 };
 
 // Fixture 'TextInputBarState' for type 'Ark_BarState'

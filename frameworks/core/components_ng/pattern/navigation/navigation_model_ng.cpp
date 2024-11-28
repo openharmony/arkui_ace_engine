@@ -887,6 +887,17 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
+void NavigationModelNG::SetOnTitleModeChange(FrameNode* frameNode,
+    std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+    std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto eventHub = navigationGroupNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnTitleModeChange(std::move(eventInfo));
+}
+
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode);
@@ -1086,7 +1097,7 @@ void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension
 void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    Dimension minNavBarWidth = value.IsNonPositive() ? Dimension(0, value.Unit()) : value;
+    Dimension minNavBarWidth = value.IsNonPositive() ? DEFAULT_MIN_NAV_BAR_WIDTH : value;
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -1098,7 +1109,7 @@ void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension&
 void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    Dimension maxNavBarWidth = value.IsNonPositive() ? Dimension(0, value.Unit()) : value;
+    Dimension maxNavBarWidth = value.IsNonPositive() ? DEFAULT_MAX_NAV_BAR_WIDTH : value;
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -1144,6 +1155,13 @@ void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
     const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
     const ImageOption& imageOption, RefPtr<PixelMap>& pixMap)
 {
+    SetBackButtonIcon(frameNode, symbolApply, ImageSourceInfo(src, "", ""), imageOption, pixMap);
+}
+
+void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
+    const ImageSourceInfo& imageSourceInfo, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap)
+{
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -1154,7 +1172,6 @@ void NavigationModelNG::SetBackButtonIcon(FrameNode* frameNode,
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    ImageSourceInfo imageSourceInfo(src);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, imageOption.noPixMap, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap, frameNode);

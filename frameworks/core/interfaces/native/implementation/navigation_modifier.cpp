@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#include "base/image/pixel_map.h"
+#include "base/memory/type_info_base.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -52,6 +56,38 @@ void AssignCast(std::optional<NavigationTitleMode>& dst, const Ark_NavigationTit
         default: LOGE("Unexpected enum value in Ark_NavigationTitleMode: %{public}d", src);
     }
 }
+
+template<>
+uint32_t Convert(const Ark_LayoutSafeAreaType& src)
+{
+    switch (src) {
+        case Ark_LayoutSafeAreaType::ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM: return SAFE_AREA_TYPE_SYSTEM;
+        default: return SAFE_AREA_TYPE_NONE;
+    }
+}
+template<>
+uint32_t Convert(const Ark_LayoutSafeAreaEdge& src)
+{
+    switch (src) {
+        case Ark_LayoutSafeAreaEdge::ARK_LAYOUT_SAFE_AREA_EDGE_TOP: return SAFE_AREA_EDGE_TOP;
+        case Ark_LayoutSafeAreaEdge::ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM: return SAFE_AREA_EDGE_BOTTOM;
+        default: return SAFE_AREA_EDGE_NONE;
+    }
+}
+
+template<>
+BarItem Convert(const Ark_NavigationMenuItem& src)
+{
+    BarItem dst;
+    dst.text = OptConvert<std::string>(src.value);
+    LOGE("BarItem Converter::Convert(const Ark_NavigationMenuItem&), 'symbolIcon' not implemented");
+    dst.iconSymbol = std::nullopt;
+    dst.icon = OptConvert<std::string>(src.icon);
+    dst.isEnabled = OptConvert<bool>(src.isEnabled);
+    LOGE("BarItem Converter::Convert(const Ark_NavigationMenuItem&), 'action' not implemented");
+    dst.action = nullptr;
+    return dst;
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -77,8 +113,6 @@ void NavBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need to check Resource to Dimension conversion
-    LOGE("ARKOALA NavBarWidthImpl conversion from Resource to Dimension is not implemented.");
     NavigationModelNG::SetNavBarWidth(frameNode, Converter::Convert<Dimension>(*value));
 }
 void NavBarPositionImpl(Ark_NativePointer node,
@@ -94,12 +128,8 @@ void NavBarWidthRangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need to check Resource to Dimension conversion
-    LOGE("ARKOALA NavBarWidthImpl conversion from Resource to Dimension is not implemented.");
-    std::pair<Dimension, Dimension> tupleValue =
-        Converter::Convert<std::pair<Dimension, Dimension>>(*value);
-    NavigationModelNG::SetMinNavBarWidth(frameNode, tupleValue.first);
-    NavigationModelNG::SetMaxNavBarWidth(frameNode, tupleValue.second);
+    NavigationModelNG::SetMinNavBarWidth(frameNode, Converter::Convert<Dimension>(value->value0));
+    NavigationModelNG::SetMaxNavBarWidth(frameNode, Converter::Convert<Dimension>(value->value1));
 }
 void MinContentWidthImpl(Ark_NativePointer node,
                          const Ark_Length* value)
@@ -107,8 +137,6 @@ void MinContentWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need to check Resource to Dimension conversion
-    LOGE("ARKOALA MinContentWidthImpl conversion from Resource to Dimension is not implemented.");
     NavigationModelNG::SetMinContentWidth(frameNode, Converter::Convert<Dimension>(*value));
 }
 void ModeImpl(Ark_NativePointer node,
@@ -124,8 +152,43 @@ void BackButtonIconImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavigationModelNG::SetBackButtonIcon(frameNode, convValue);
+
+    ImageOption imageOption { .noPixMap = true, .isValidImage = false };
+    std::optional<ImageSourceInfo> imgSrcInfoOpt;
+    RefPtr<PixelMap> pixelMap = nullptr;
+    std::function<void(WeakPtr<FrameNode>)> symbolApply = nullptr;
+
+    auto parseStringFunc = [&imgSrcInfoOpt, &imageOption](const Ark_String& src) {
+        imgSrcInfoOpt = Converter::OptConvert<ImageSourceInfo>(src);
+        imageOption.isValidImage = true;
+    };
+
+    auto parsePixelMapFunc = [&pixelMap](const Ark_PixelMap& src) {
+        LOGE("NaviagtionAttributeModifier::BackButtonIconImpl, the PixelMap support not implemented");
+        pixelMap = nullptr;
+    };
+
+    auto parseResourceFunc = [&imgSrcInfoOpt, &imageOption](const Ark_Resource& src) {
+        imgSrcInfoOpt = Converter::OptConvert<ImageSourceInfo>(src);
+        imageOption.isValidImage = imgSrcInfoOpt && imgSrcInfoOpt->IsValid();
+    };
+
+    auto parseSymbolGlyphModifierFunc = [&symbolApply](const Ark_CustomObject& src) {
+        LOGE("NaviagtionAttributeModifier::BackButtonIconImpl, the SymbolGlyphModifier support not implemented");
+        symbolApply = nullptr;
+    };
+
+    Converter::VisitUnion(
+        *value,
+        parseStringFunc,
+        parsePixelMapFunc,
+        parseResourceFunc,
+        parseSymbolGlyphModifierFunc,
+        []() {}
+    );
+    NavigationModelNG::SetBackButtonIcon(frameNode,
+        symbolApply, imgSrcInfoOpt.value_or(ImageSourceInfo()), imageOption, pixelMap
+    );
 }
 void HideNavBarImpl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -180,8 +243,22 @@ void MenusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavigationModelNG::SetMenus(frameNode, convValue);
+
+    auto parseArrayMenuItem = [frameNode](const Array_NavigationMenuItem& arkItems) {
+        auto convValue = Converter::OptConvert<std::vector<BarItem>>(arkItems);
+        if (convValue) {
+            auto menuItems = *convValue;
+            NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+        }
+    };
+    auto parseCustomBuilder = [](const Callback_Any& arkItems) {
+        LOGE("NavigationAttributeModifier::MenusImpl, CustomBuilder support not implemented");
+    };
+    Converter::VisitUnion(*value,
+        parseArrayMenuItem,
+        parseCustomBuilder,
+        []() {}
+    );
 }
 void ToolBarImpl(Ark_NativePointer node,
                  const Ark_Union_Object_CustomBuilder* value)
@@ -216,8 +293,17 @@ void OnTitleModeChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavigationModelNG::SetOnTitleModeChange(frameNode, convValue);
+    auto onTitleModeChange = [callback = CallbackHelper(*value)](NG::NavigationTitleMode mode) {
+        callback.Invoke(Converter::ArkValue<Ark_NavigationTitleMode>(mode));
+    };
+    auto eventInfo = [callback = CallbackHelper(*value)](const BaseEventInfo* baseInfo) {
+        CHECK_NULL_VOID(baseInfo);
+        auto changeTitleModeInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
+        CHECK_NULL_VOID(changeTitleModeInfo);
+        auto mode = changeTitleModeInfo->IsMiniBar() ? NavigationTitleMode::MINI : NavigationTitleMode::FULL;
+        callback.Invoke(Converter::ArkValue<Ark_NavigationTitleMode>(mode));
+    };
+    NavigationModelNG::SetOnTitleModeChange(frameNode, std::move(onTitleModeChange), std::move(eventInfo));
 }
 void OnNavBarStateChangeImpl(Ark_NativePointer node,
                              const Callback_Boolean_Void* value)
@@ -306,9 +392,22 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(types);
-    //auto convValue = Converter::OptConvert<type>(types); // for enums
-    //NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, convValue);
+    SafeAreaExpandOpts convValue;
+    if (types) {
+        if (auto arrayOpt = Converter::OptConvert<std::vector<uint32_t>>(*types); arrayOpt) {
+            for (auto &value: *arrayOpt) {
+                convValue.type |= value;
+            }
+        }
+    }
+    if (edges) {
+        if (auto arrayOpt = Converter::OptConvert<std::vector<uint32_t>>(*edges); arrayOpt) {
+            for (auto &value: *arrayOpt) {
+                convValue.edges |= value;
+            }
+        }
+    }
+    NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, convValue);
 }
 } // NavigationAttributeModifier
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
