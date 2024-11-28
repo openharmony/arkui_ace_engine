@@ -645,7 +645,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
     auto surfaceOffsetX = 0.0f;
     auto surfaceOffsetY = 0.0f;
     xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
-    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    xcomponentController->GetSurfaceOffset(surfaceOffsetX, surfaceOffsetY);
     EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
     EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
     EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
