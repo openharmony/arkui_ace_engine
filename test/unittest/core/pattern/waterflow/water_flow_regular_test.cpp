@@ -674,4 +674,42 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 20);
 }
+
+/**
+ * @tc.name: ScrollToEdge009
+ * @tc.desc: scrollEdge to bottom from top and trigger reach end
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge009, TestSize.Level1)
+{
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. scrollEdge to end
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    isReachEndCalled = false;
+
+    /**
+     * @tc.steps: step2. scrollEdge to top
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0.0f);
+
+    /**
+     * @tc.steps: step3. scrollEdge to end again
+     * @tc.expected: Trigger reach end
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isReachEndCalled);
+    EXPECT_LE(pattern_->layoutInfo_->Offset(), -14200.0f);
+}
 } // namespace OHOS::Ace::NG
