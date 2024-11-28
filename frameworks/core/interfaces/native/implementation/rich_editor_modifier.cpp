@@ -18,7 +18,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "rich_editor_controller_peer_impl.h"
 
@@ -214,6 +216,7 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
     ret.fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(src.font.value.style);
     dst = ret;
 }
+
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -547,10 +550,46 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(spanType);
-    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
-    //RichEditorModelNG::SetBindSelectionMenu(frameNode, convValue);
-    LOGW("RichEditorModifier::BindSelectionMenuImpl is not implemented yet. Due to Ark_CustomBuilder");
+    CHECK_NULL_VOID(responseType);
+    CHECK_NULL_VOID(options);
+    auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
+    CHECK_NULL_VOID(aceSpanType);
+    auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
+    CHECK_NULL_VOID(aceResponseType); // A required parameter
+    auto arkMenuOptions = Converter::OptConvert<Ark_SelectionMenuOptions>(*options);
+    SelectMenuParam menuParam;
+    menuParam.onAppear = [](int32_t start, int32_t end) {};
+    menuParam.onDisappear = []() {};
+    if (arkMenuOptions) {
+        auto appearCb = Converter::OptConvert<MenuOnAppearCallback>(arkMenuOptions->onAppear);
+        auto disappearCb = Converter::OptConvert<Callback_Void>(arkMenuOptions->onDisappear);
+
+        CHECK_NULL_VOID(appearCb);
+        auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
+        menuParam.onAppear =
+            [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
+            if (appearCbPtr) {
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+            }
+        };
+
+        CHECK_NULL_VOID(disappearCb);
+        auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
+        menuParam.onDisappear =
+            [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
+            if (disappearCbPtr) {
+                arkCallback.Invoke();
+            }
+        };
+    }
+
+    std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content)]() {
+        Callback_CustomObject_void continuation;
+        arkCallback.Invoke(continuation);
+    };
+
+    RichEditorModelNG::BindSelectionMenu(
+        frameNode, aceSpanType.value(), aceResponseType.value(), buildFunc, menuParam);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const Callback_Any* value,
@@ -558,10 +597,20 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //RichEditorModelNG::SetCustomKeyboard(frameNode, convValue);
-    LOGW("RichEditorModifier::CustomKeyboardImpl is not implemented yet. Due to Ark_CustomBuilder");
+    CHECK_NULL_VOID(options);
+    auto convValue = Converter::OptConvert<Ark_KeyboardOptions>(*options);
+    std::optional<bool> supportAvoidance;
+    if (convValue) {
+        supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
+    }
+    std::function<void()> callback = []() {};
+    if (value) {
+        callback = [arkCallback = CallbackHelper(*value)]() -> void {
+            Callback_CustomObject_void continuation;
+            arkCallback.Invoke(continuation);
+        };
+    }
+    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(callback), supportAvoidance);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

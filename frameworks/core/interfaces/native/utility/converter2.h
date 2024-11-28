@@ -22,10 +22,14 @@
 #include <optional>
 
 #include "core/components_ng/pattern/toggle/toggle_model.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
+    template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);
+    template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src);
+    template<> void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

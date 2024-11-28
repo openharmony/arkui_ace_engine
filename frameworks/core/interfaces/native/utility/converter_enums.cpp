@@ -1116,6 +1116,39 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
 }
 
 template<>
+void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src)
+{
+    switch (src) {
+        case ARK_RICH_EDITOR_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
+        case ARK_RICH_EDITOR_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
+        case ARK_RICH_EDITOR_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        case ARK_RICH_EDITOR_SPAN_TYPE_BUILDER: dst = TextSpanType::BUILDER; break;
+        default: LOGE("Unexpected enum value in Ark_RichEditorSpanType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_ResponseType& src)
+{
+    switch (src) {
+        case ARK_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        default: LOGE("Unexpected enum value in Ark_ResponseType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorResponseType& src)
+{
+    switch (src) {
+        case ARK_RICH_EDITOR_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        case ARK_RICH_EDITOR_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        default: LOGE("Unexpected enum value in Ark_RichEditorResponseType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedType& src)
 {
     switch (src) {
