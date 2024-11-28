@@ -4526,6 +4526,9 @@ void TextPattern::UpdateFontColor(const Color& value)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto& fontStyle = textLayoutProperty->GetOrCreateFontStyle();
+    CHECK_NULL_VOID(fontStyle);
+    CHECK_NULL_VOID(!fontStyle->CheckTextColor(value));
     textLayoutProperty->UpdateTextColor(value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
