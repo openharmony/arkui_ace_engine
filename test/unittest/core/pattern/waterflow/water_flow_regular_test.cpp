@@ -583,4 +583,95 @@ HWTEST_F(WaterFlowTestNg, Delete003, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_EQ(GetChildRect(frameNode_, 0).Bottom(), 50.0f);
 }
+
+/**
+ * @tc.name: Jump002
+ * @tc.desc: Test jump function after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Jump002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+
+    AddItemsAtSlot(1, 100.0f, 14);
+    frameNode_->ChildrenUpdatedFrom(12);
+    pattern_->ScrollToIndex(14, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 14);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+
+    AddItemsAtSlot(1, 100.0f, 40);
+    frameNode_->ChildrenUpdatedFrom(45);
+    pattern_->ScrollToIndex(45, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 45);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+
+    AddItemsAtSlot(1, 100.0f, 100);
+    frameNode_->ChildrenUpdatedFrom(100);
+    pattern_->ScrollToIndex(101, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 97);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 102);
+
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);
+}
+
+/**
+ * @tc.name: Jump003
+ * @tc.desc: Test jump function after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetCachedCount(10);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+
+    frameNode_->RemoveChildAtIndex(12);
+    frameNode_->ChildrenUpdatedFrom(12);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    
+    pattern_->ScrollToIndex(12, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 16);
+
+    pattern_->ScrollToIndex(60, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+
+    for (int i = 22; i > 10; i--) {
+        frameNode_->RemoveChildAtIndex(i);
+        frameNode_->ChildrenUpdatedFrom(i);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 20);
+}
 } // namespace OHOS::Ace::NG
