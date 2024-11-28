@@ -222,6 +222,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textStyleResult));
+    SetJsTextBackgroundStyle(textStyleObj, textStyleResult);
 
     return textStyleObj;
 }
@@ -245,6 +246,22 @@ JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const std::vector<Sha
         index++;
     }
     return textShadowArray;
+}
+
+void JSRichEditor::SetJsTextBackgroundStyle(JSRef<JSObject>& textStyleObj, const TextStyleResult& textSpanResult)
+{
+    auto textBackgroundStyle = textSpanResult.textBackgroundStyle;
+    CHECK_NULL_VOID(textBackgroundStyle.has_value());
+    textStyleObj->SetPropertyObject("textBackgroundStyle", CreateJsTextBackgroundStyle(textBackgroundStyle.value()));
+}
+
+JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    JSRef<JSObject> textBackgroundStyleObj = JSRef<JSObject>::New();
+    textBackgroundStyleObj->SetProperty<std::string>("color", style.backgroundColor->ColorToString());
+    textBackgroundStyleObj->SetProperty<std::string>(
+        "BorderRadiusProperty", style.backgroundRadius->ToString());
+    return textBackgroundStyleObj;
 }
 
 JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult)
@@ -682,6 +699,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetProperty<std::string>("fontFamily", textSpanResult.GetFontFamily());
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textSpanResult.GetTextStyle()));
+    SetJsTextBackgroundStyle(textStyleObj, textSpanResult.GetTextStyle());
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
     onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
     onIMEInputCompleteObj->SetProperty<std::string>("previewText", textSpanResult.GetPreviewText());
@@ -900,6 +918,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     textStyleObj->SetProperty<std::string>("fontFamily", spanResult.GetFontFamily());
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(spanResult.GetTextStyle()));
+    SetJsTextBackgroundStyle(textStyleObj, spanResult.GetTextStyle());
 }
 
 void JSRichEditor::CreateImageStyleObj(
@@ -2326,6 +2345,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
     ParseTextShadow(styleObject, style, updateSpanStyle);
+    ParseTextBackgroundStyle(styleObject, style, updateSpanStyle);
 }
 
 void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
@@ -2439,6 +2459,17 @@ void JSRichEditorBaseController::ParseTextShadow(
     }
 }
 
+void JSRichEditorBaseController::ParseTextBackgroundStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto backgroundObject = styleObject->GetProperty("textBackgroundStyle");
+    CHECK_NULL_VOID(!backgroundObject->IsNull() && !backgroundObject->IsUndefined());
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(backgroundObject);
+    style.SetTextBackgroundStyle(textBackgroundValue);
+    updateSpanStyle.updateTextBackgroundStyle = textBackgroundValue;
+}
+
 void JSRichEditorBaseController::GetTypingStyle(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2497,7 +2528,10 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         tyingStyleObj->SetProperty<std::string>(
             "fontFeature", UnParseFontFeatureSetting(typingStyle.updateFontFeature.value()));
     }
-
+    if (typingStyle.updateTextBackgroundStyle.has_value()) {
+        tyingStyleObj->SetPropertyObject("textBackgroundStyle",
+            JSRichEditor::CreateJsTextBackgroundStyle(typingStyle.updateTextBackgroundStyle.value()));
+    }
     return tyingStyleObj;
 }
 
