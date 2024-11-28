@@ -7618,18 +7618,24 @@ void TextFieldPattern::AfterLayoutProcessCleanResponse(
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([cleanNodeResponseArea]() {
-        cleanNodeResponseArea->Refresh();
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
+        auto cleanNodeResponseArea = weak.Upgrade();
+        CHECK_NULL_VOID(cleanNodeResponseArea);
         cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
     });
 }
 
-void TextFieldPattern::ProcessResponseArea()
+void TextFieldPattern::ProcessCancelButton()
 {
     if (IsShowCancelButtonMode()) {
         auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
         if (cleanNodeResponseArea) {
-            AfterLayoutProcessCleanResponse(cleanNodeResponseArea);
+            cleanNodeResponseArea->Refresh();
+            if (cleanNodeResponseArea->IsShow()) {
+                AfterLayoutProcessCleanResponse(cleanNodeResponseArea);
+            } else {
+                UpdateCancelNode();
+            }
         } else {
             cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
             cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -7642,6 +7648,11 @@ void TextFieldPattern::ProcessResponseArea()
             cleanNodeResponseArea_.Reset();
         }
     }
+}
+
+void TextFieldPattern::ProcessResponseArea()
+{
+    ProcessCancelButton();
     if (IsInPasswordMode()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
         if (passwordArea) {

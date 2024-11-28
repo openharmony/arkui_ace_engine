@@ -1667,6 +1667,7 @@ private:
 #endif
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
+    void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool isFromKeyBoard = false);
