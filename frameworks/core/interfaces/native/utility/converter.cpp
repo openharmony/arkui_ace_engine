@@ -219,6 +219,26 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
 }
 
+void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
+{
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
+}
+
+void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
+{
+    dst.width = Converter::ArkValue<Ark_Number>(src.GetWidth());
+    dst.height = Converter::ArkValue<Ark_Number>(src.GetHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.loadingStatus = Converter::ArkValue<Ark_Number>(src.GetLoadingStatus());
+    dst.contentWidth = Converter::ArkValue<Ark_Number>(src.GetContentWidth());
+    dst.contentHeight = Converter::ArkValue<Ark_Number>(src.GetContentHeight());
+    dst.contentOffsetX = Converter::ArkValue<Ark_Number>(src.GetContentOffsetX());
+    dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
+}
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;

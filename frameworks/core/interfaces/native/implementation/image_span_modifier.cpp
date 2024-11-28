@@ -15,8 +15,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
@@ -80,8 +82,11 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageSpanModelNG::SetOnComplete(frameNode, convValue);
+    auto onComplete = [arkCallback = CallbackHelper(*value)](const LoadImageSuccessEvent& info) {
+        Ark_ImageLoadResult result = Converter::ArkValue<Ark_ImageLoadResult>(info);
+        arkCallback.Invoke(result);
+    };
+    ImageSpanView::SetOnComplete(frameNode, std::move(onComplete));
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const ImageErrorCallback* value)
@@ -89,8 +94,11 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageSpanModelNG::SetOnError(frameNode, convValue);
+    auto onError = [arkCallback = CallbackHelper(*value)](const LoadImageFailEvent& info) {
+        Ark_ImageError result = Converter::ArkValue<Ark_ImageError>(info);
+        arkCallback.Invoke(result);
+    };
+    ImageSpanView::SetOnError(frameNode, std::move(onError));
 }
 void AltImpl(Ark_NativePointer node,
              const Ark_PixelMap* value)
