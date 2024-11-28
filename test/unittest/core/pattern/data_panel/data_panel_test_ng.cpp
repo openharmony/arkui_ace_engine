@@ -1455,6 +1455,141 @@ HWTEST_F(DataPanelTestNg, DataPanelOnDrawTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DataPanelSortGradientColorsOffsetTest001
+ * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement dataPanelModifier.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    DataPanelModifier dataPanelModifier;
+
+    /**
+     * @tc.steps: step2. Test positive sequence gradientColor.
+     */
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor::WHITE);
+    gradientColor1.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor::GRAY);
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor::BLACK);
+    gradientColor3.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor3);
+    auto result = dataPanelModifier.SortGradientColorsOffset(gradient).GetColors();
+    auto color0 = result.at(0).GetLinearColor();
+    EXPECT_EQ(color0, LinearColor::BLACK);
+    auto color1 = result.at(1).GetLinearColor();
+    EXPECT_EQ(color1, LinearColor::GRAY);
+    auto color2 = result.at(2).GetLinearColor();
+    EXPECT_EQ(color2, LinearColor::WHITE);
+}
+
+/**
+ * @tc.name: DataPanelSortGradientColorsOffsetTest002
+ * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelSortGradientColorsOffsetTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement dataPanelModifier.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    DataPanelModifier dataPanelModifier;
+
+    /**
+     * @tc.steps: step2. Test Reverse GradientColor.
+     */
+    Gradient gradient;
+    GradientColor gradientColor1;
+    gradientColor1.SetLinearColor(LinearColor::WHITE);
+    gradientColor1.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColor1);
+    GradientColor gradientColor2;
+    gradientColor2.SetLinearColor(LinearColor::GRAY);
+    gradientColor2.SetDimension(Dimension(0.5));
+    gradient.AddColor(gradientColor2);
+    GradientColor gradientColor3;
+    gradientColor3.SetLinearColor(LinearColor::BLACK);
+    gradientColor3.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColor3);
+    auto result = dataPanelModifier.SortGradientColorsOffset(gradient).GetColors();
+    auto color0 = result.at(0).GetLinearColor();
+    EXPECT_EQ(color0, LinearColor::WHITE);
+    auto color1 = result.at(1).GetLinearColor();
+    EXPECT_EQ(color1, LinearColor::GRAY);
+    auto color2 = result.at(2).GetLinearColor();
+    EXPECT_EQ(color2, LinearColor::BLACK);
+}
+
+/**
+ * @tc.name: DataPanelShadowTest001
+ * @tc.desc: Test DataPanel Modifier SortGradientColorsOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelShadowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement dataPanelModifier.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    DataPanelModifier dataPanelModifier;
+
+    /**
+     * @tc.steps: step2. Test the setting of Shadow attribute.
+     */
+    std::vector<Gradient> valueColors;
+    int length = 3;
+    size_t shadowColorsLastLength = MAX_COUNT;
+    GradientColorSet(valueColors, length);
+    DataPanelShadow shadowOption { true, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE,
+        valueColors };
+    dataPanelModifier.SetShadowVisible(shadowOption.isShadowVisible);
+    dataPanelModifier.SetShadowRadius(shadowOption.radius);
+    dataPanelModifier.SetShadowOffsetX(shadowOption.offsetX);
+    dataPanelModifier.SetShadowOffsetY(shadowOption.offsetY);
+    dataPanelModifier.SetShadowColors(shadowOption.colors, shadowColorsLastLength);
+    EXPECT_EQ(dataPanelModifier.isShadowVisible_, true);
+    EXPECT_EQ(dataPanelModifier.shadowRadiusFloat_->Get(), DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowOffsetXFloat_->Get(), DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowOffsetYFloat_->Get(), DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowColorsLastLength_, MAX_COUNT);
+
+    int length2 = 12;
+    std::vector<Gradient> valueColors2;
+    GradientColorSet(valueColors2, length2);
+    DataPanelShadow shadowOption2 { true, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE,
+        valueColors2 };
+    dataPanelModifier.SetShadowVisible(shadowOption2.isShadowVisible);
+    dataPanelModifier.SetShadowRadius(shadowOption2.radius);
+    dataPanelModifier.SetShadowOffsetX(shadowOption2.offsetX);
+    dataPanelModifier.SetShadowOffsetY(shadowOption2.offsetY);
+    dataPanelModifier.SetShadowColors(shadowOption2.colors, shadowColorsLastLength);
+    EXPECT_EQ(dataPanelModifier.isShadowVisible_, true);
+    EXPECT_EQ(dataPanelModifier.shadowRadiusFloat_->Get(), -DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowOffsetXFloat_->Get(), -DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowOffsetYFloat_->Get(), -DEFAULT_SHADOW_VALUE);
+    EXPECT_EQ(dataPanelModifier.shadowColorsLastLength_, MAX_COUNT);
+}
+
+/**
  * @tc.name: DataPanelUpdateContentModifierTest001
  * @tc.desc: Test DataPanel PaintMethod UpdateContentModifier
  * @tc.type: FUNC
