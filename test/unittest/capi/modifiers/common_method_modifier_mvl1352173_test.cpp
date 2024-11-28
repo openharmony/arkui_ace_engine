@@ -190,11 +190,13 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestValidValues, TestSize.
 {
     ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
-    InvertOption val1 = {1.0, 2.0, 3.0, 4.0};
+    InvertOption val1 = {1.0f, 2.0f, 3.0f, 4.0f};
     static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0)),
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(0.0f), "0"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(0.0f),
             "{\"low\":0,\"high\":0,\"threshold\":0,\"thresholdRange\":0}"},
-        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(Converter::ArkValue<Ark_Number>(1.0)),
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_Number>(1.0f), "1"},
+        {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(1.0f),
             "{\"low\":1,\"high\":1,\"threshold\":1,\"thresholdRange\":1}"},
         {Converter::ArkUnion<Ark_Union_Number_InvertOptions, Ark_InvertOptions>(
             Converter::ArkValue<Ark_InvertOptions>(val1)),

@@ -689,15 +689,16 @@ InvertVariant Convert(const Ark_InvertOptions& value)
     return std::variant<float, InvertOption>(invertOption);
 }
 template<>
-std::optional<InvertVariant> OptConvert(const Ark_Union_Number_InvertOptions& src)
+void AssignCast(std::optional<InvertVariant>& dst, const Ark_Union_Number_InvertOptions& src)
 {
     auto optInvertOptions = Converter::OptConvert<Ark_InvertOptions>(src);
     if (!optInvertOptions.has_value()) {
-        return std::nullopt;
+        dst = std::nullopt;
+        return;
     }
     auto arkDst = optInvertOptions.value();
     InvertVariant varVal = Convert<InvertVariant>(arkDst);
-    return std::optional<InvertVariant>(varVal);
+    dst = std::optional<InvertVariant>(varVal);
 }
 template<>
 Ark_Number Convert(const Ark_InvertOptions& src)
