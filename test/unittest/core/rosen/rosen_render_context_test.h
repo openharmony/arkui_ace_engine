@@ -30,6 +30,7 @@
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
+#include "frameworks/core/components_ng/render/image_painter.h"
 #undef private
 #undef protected
 

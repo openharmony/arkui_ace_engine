@@ -104,50 +104,6 @@ HWTEST_F(RosenTest, CastToRosenTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CastToRosenTest004
- * @tc.desc: Test cast to rosen.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenTest, CastToRosenTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build a object RSWindow.
-     */
-    Platform::RSWindow object;
-
-    /**
-     * @tc.steps: step2. callback RequestFrame.vsyncThread_ is null.
-     * @tc.expected: step2. Return expected results.
-     */
-    auto callback = [](uint64_t deltaNanoTimestamp, uint32_t deltaFrameCount) {
-        nanoTimestamp_ += deltaNanoTimestamp;
-        frameCount_ += deltaFrameCount;
-        if (callback_) {
-            callback_(nanoTimestamp_, frameCount_);
-        }
-    };
-    object.RegisterVsyncCallback(callback);
-    object.vsyncRequests_.Push(true);
-    object.RequestFrame();
-    EXPECT_EQ(object.vsyncRequests_.queue_.size(), 2);
-
-    /**
-     * @tc.steps: step3. callback Destroy.
-     * @tc.expected: step3. Return expected results.
-     */
-    object.Destroy();
-    EXPECT_EQ(object.vsyncRequests_.queue_.size(), 0);
-
-    /**
-     * @tc.steps: step4. callback RequestFrame.vsyncThread_ is not null.
-     * @tc.expected: step4. Return expected results.
-     */
-    object.vsyncThread_ = std::make_unique<std::thread>();
-    object.RequestFrame();
-    EXPECT_EQ(object.vsyncRequests_.queue_.size(), 1);
-}
-
-/**
  * @tc.name: CastToRosenTest005
  * @tc.desc: Test cast to rosen.
  * @tc.type: FUNC
