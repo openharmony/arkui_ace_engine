@@ -80,7 +80,10 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
         name = pathInfo->GetName();
         param = pathInfo->GetParamObj();
     }
-    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
+    NavDestinationMode mode = context->GetMode();
+    int32_t uniqueId = context->GetUniqueId();
+    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
+        navDestinationId, mode, uniqueId);
 }
 } // namespace
 
