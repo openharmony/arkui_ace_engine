@@ -2687,7 +2687,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
     if (auto focusHub = GetFocusHub(); focusHub) {
-        SetCaretPosition(position);
+        IF_TRUE(info.GetSourceDevice() != SourceType::MOUSE || blockPress_, SetCaretPosition(position));
         if (focusHub->IsCurrentFocus()) {
             HandleOnEditChanged(true);
         }
