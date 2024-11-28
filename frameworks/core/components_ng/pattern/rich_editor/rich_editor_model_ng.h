@@ -95,6 +95,8 @@ public:
     static void SetBarState(FrameNode* frameNode, const std::optional<DisplayMode>& mode);
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
+    static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* frameNode);
+    static void SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode);
 
 private:
     void SetDraggable(bool draggable);

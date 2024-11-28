@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -23,6 +24,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "rich_editor_controller_peer_impl.h"
+#include "rich_editor_styled_string_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -253,8 +255,22 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    //auto convValue = Converter::OptConvert<type_name>(*options);
-    //RichEditorModelNG::SetSetRichEditorOptions1(frameNode, convValue);
+    RichEditorModelNG::SetStyledStringMode(frameNode, true);
+    // obtain the internal Styled String RichEditorController
+    RefPtr<RichEditorBaseControllerBase> internalController =
+        RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
+    void *ptr = internalController.GetRawPtr();
+    RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
+    CHECK_NULL_VOID(rawPtr);
+    WeakPtr<RichEditorStyledStringController> controller;
+    controller = rawPtr;
+
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(
+        options->controller.ptr);
+    CHECK_NULL_VOID(peerImplPtr);
+
+    // pass the internal controller to external management
+    peerImplPtr->AddTargetController(controller);
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {
