@@ -36,11 +36,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    Matrix2D::Identity(peer->transform);
+    
+    LOGE("ARKOALA Matrix2DAccessor::IdentityImpl return type Ark_NativePointer "
+        "should be replaced with a Matrix2DPeer type.");
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
 {
-    return 0;
+    bool retValue = NG::Matrix2D::Invert(peer->transform);
+    if (!retValue) {
+        peer->transform.scaleX = NAN;
+        peer->transform.scaleY = NAN;
+        peer->transform.skewX = NAN;
+        peer->transform.skewY = NAN;
+        peer->transform.translateX = NAN;
+        peer->transform.translateY = NAN;
+    }
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
                                const Opt_Matrix2D* other)
@@ -64,7 +77,11 @@ Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
                                 const Opt_Number* tx,
                                 const Opt_Number* ty)
 {
-    return 0;
+    double density = peer->GetDensity();
+    tx *= density;
+    ty *= density;
+    NG::Matrix2D::Translate(peer->transform, tx, ty);
+    return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,
                             const Opt_Number* sx,
@@ -80,7 +97,7 @@ void SetScaleXImpl(Matrix2DPeer* peer,
                    const Ark_Number* scaleX)
 {
 }
-Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)
+Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)  
 {
     return 0;
 }
