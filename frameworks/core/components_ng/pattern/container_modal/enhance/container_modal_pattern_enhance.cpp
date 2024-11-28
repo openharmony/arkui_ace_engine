@@ -239,10 +239,12 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
         pattern->SetTapGestureEvent(customTitleRow);
         pattern->SetTapGestureEvent(gestureRow);
+        pattern->SetTapGestureEvent(floatingTitleRow);
         AddPanEvent(customTitleRow);
         AddPanEvent(gestureRow);
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
+        EventHubOnModifyDone(floatingTitleRow);
     }
     
     UpdateGestureRowVisible();
