@@ -28,6 +28,10 @@ const std::string EVENT_NAME_CLOSE_VISIBILITY = "arkui_close_visibility";
 const std::string EVENT_NAME_CLOSE_STATUS = "arkui_close_status";
 const std::string EVENT_NAME_MAXIMIZE_IS_RECOVER = "arkui_maximize_is_recover";
 const std::string EVENT_NAME_MENU_WIDTH_CHANGE = "arkui_menu_width_change";
+const std::string EVENT_NAME_BUTTON_SPACING_CHANGE = "arkui_button_spacing_change";
+const std::string EVENT_NAME_COLOR_CONFIGURATION_LOCKED = "arkui_color_mode_locked";
+const std::string EVENT_NAME_BUTTON_SIZE_CHANGE = "arkui_button_size_change";
+const std::string EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE = "arkui_button_right_offset_change";
 
 namespace {
 inline std::string BoolToString(bool value)
