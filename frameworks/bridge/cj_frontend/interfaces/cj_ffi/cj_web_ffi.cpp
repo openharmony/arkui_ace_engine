@@ -14,8 +14,10 @@
  */
 
 #include "cj_web_ffi.h"
+
 #include "application_context.h"
 #include "cj_lambda.h"
+
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -261,8 +263,8 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
         int32_t parentNWebId = -1;
         bool isPopup = CJWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(src, std::move(setIdCallback), std::move(setHapPathCallback),
-            parentNWebId, isPopup, renderMode, mode);
+        WebModel::GetInstance()->Create(
+            src, std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, mode);
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         if (!controller->customeSchemeCmdLine_.empty()) {
             WebModel::GetInstance()->SetCustomScheme(controller->customeSchemeCmdLine_);
@@ -284,21 +286,18 @@ void FfiOHOSAceFrameworkWebHandleCancel(void* result)
 {
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
     res->Cancel();
-    FfiOHOSAceFrameworkWebReleaseResult(result);
 }
 
 void FfiOHOSAceFrameworkWebHandleConfirm(void* result)
 {
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
     res->Confirm();
-    FfiOHOSAceFrameworkWebReleaseResult(result);
 }
 
 void FfiOHOSAceFrameworkWebHandlePromptConfirm(void* result, const char* message)
 {
     auto res = *reinterpret_cast<RefPtr<Result>*>(result);
     res->Confirm(message);
-    FfiOHOSAceFrameworkWebReleaseResult(result);
 }
 
 void FfiOHOSAceFrameworkWebReleaseResult(void* result)
@@ -415,7 +414,6 @@ void OnCommonDialog(bool (*callback)(FfiWebEvent event), int64_t dialogEventType
         auto result = new RefPtr<Result>(eventInfo->GetResult());
         cjEvent.result = result;
         auto res = webCallback(cjEvent);
-        delete result;
         return res;
     };
     WebModel::GetInstance()->SetOnCommonDialog(std::move(onDialog), dialogEventType);
@@ -469,36 +467,22 @@ void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
     free(mapToCFFIArray.value);
 }
 
-void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
+void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(void* event))
 {
-    auto instanceId = Container::CurrentId();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
-        const BaseEventInfo* info) -> bool  {
-        ContainerScope scope(instanceId);
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) -> bool {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_RETURN(webNode, false);
+        ContainerScope(webNode->GetInstanceId());
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
-        pipelineContext->UpdateCurrentActiveNode(node);
-
-        FfiWebResourceRequest cjWebResourceRequest {};
-        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
-        auto request = eventInfo->GetRequest();
-        MapToCFFIArray mapToCFFIArray;
-        auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
-        if (!wirteSuccess) {
-            return false;
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
         }
-        cjWebResourceRequest.url = request->GetUrl().c_str();
-        cjWebResourceRequest.isMainFrame = request->IsMainFrame();
-        cjWebResourceRequest.isRedirect = request->IsRedirect();
-        cjWebResourceRequest.hasGesture = request->HasGesture();
-        cjWebResourceRequest.method = request->GetMethod().c_str();
-        cjWebResourceRequest.mapToCFFIArray = &mapToCFFIArray;
-        auto res = func(cjWebResourceRequest);
-        MapToCFFIArrayToFreeMemory(mapToCFFIArray);
-        return res;
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
+        auto request = new RefPtr<WebRequest>(eventInfo->GetRequest());
+        return func(request);
     };
-    WebModel::GetInstance()->SetOnLoadIntercept(std::move(onLoadIntercept));
+    WebModel::GetInstance()->SetOnLoadIntercept(std::move(cjCallback));
 }
 
 void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url))
@@ -970,5 +954,253 @@ void FfiWebEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOn
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
     WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void FfiWebOnBeforeUnload(bool (*callback)(FfiWebEvent envent))
+{
+    OnCommonDialog(callback, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+}
+
+void FfiWebOnConfirm(bool (*callback)(FfiWebEvent event))
+{
+    OnCommonDialog(callback, DialogEventType::DIALOG_EVENT_CONFIRM);
+}
+
+void FfiWebOnPrompt(bool (*callback)(FfiWebEvent event))
+{
+    OnCommonDialog(callback, DialogEventType::DIALOG_EVENT_PROMPT);
+}
+
+void FfiWebOnConsole(bool (*callback)(void* event))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) -> bool {
+        bool result = false;
+        auto webNode = node.Upgrade();
+        CHECK_NULL_RETURN(webNode, false);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
+        auto message = new RefPtr<WebConsoleLog>(eventInfo->GetMessage());
+        result = func(message);
+        return result;
+    };
+    WebModel::GetInstance()->SetOnConsoleLog(std::move(cjCallback));
+}
+
+int32_t FfiWebConsoleGetLineNumber(void* msg)
+{
+    auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    return msgPtr->GetLineNumber();
+}
+
+ExternalString FfiWebConsoleGetMessage(void* msg)
+{
+    auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    return Utils::MallocCString(msgPtr->GetLog());
+}
+
+int32_t FfiWebConsoleGetMessageLevel(void* msg)
+{
+    auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    return static_cast<int32_t>(msgPtr->GetLogLevel());
+}
+
+ExternalString FfiWebConsoleGetSourceId(void* msg)
+{
+    auto msgPtr = *reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    return Utils::MallocCString(msgPtr->GetSourceId());
+}
+
+void FfiWebFreeConsoleMessage(void* msg)
+{
+    RefPtr<WebConsoleLog>* msgPtr = reinterpret_cast<RefPtr<WebConsoleLog>*>(msg);
+    if (msgPtr) {
+        delete msgPtr;
+    }
+}
+
+void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent event))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
+        FfiOnDownloadStartEvent event {};
+        event.url = eventInfo->GetUrl().c_str();
+        event.userAgent = eventInfo->GetUserAgent().c_str();
+        event.contentDisposition = eventInfo->GetContentDisposition().c_str();
+        event.mimeType = eventInfo->GetMimetype().c_str();
+        event.contentLength = eventInfo->GetContentLength();
+        func(event);
+    };
+    WebModel::GetInstance()->SetOnDownloadStart(std::move(cjCallback));
+}
+
+void FfiWebOnErrorReceive(void (*callback)(void* request, void* error))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
+        auto request = new RefPtr<WebRequest>(eventInfo->GetRequest());
+        auto error = new RefPtr<WebError>(eventInfo->GetError());
+        func(request, error);
+    };
+    WebModel::GetInstance()->SetOnErrorReceive(std::move(cjCallback));
+}
+
+ExternalString FfiWebGetErrorInfo(void* error)
+{
+    auto errPtr = *reinterpret_cast<RefPtr<WebError>*>(error);
+    return Utils::MallocCString(errPtr->GetInfo());
+}
+
+int32_t FfiWebGetErrorCode(void* error)
+{
+    auto errPtr = *reinterpret_cast<RefPtr<WebError>*>(error);
+    return errPtr->GetCode();
+}
+
+void FfiWebFreeResourceError(void* error)
+{
+    RefPtr<WebError>* errPtr = reinterpret_cast<RefPtr<WebError>*>(error);
+    if (errPtr) {
+        delete errPtr;
+    }
+}
+
+VectorHeaderHandle FfiVectorHeaderCreate(int64_t size)
+{
+    return new std::vector<FfiHeader>(size);
+}
+
+FfiHeader FfiVectorHeaderGet(int64_t index, VectorHeaderHandle handle)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
+    return (*actualVec)[index];
+}
+
+int64_t FfiVectorHeaderSize(VectorHeaderHandle handle)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
+    return actualVec->size();
+}
+
+void FfiVectorHeaderDelete(VectorHeaderHandle handle)
+{
+    auto actualVec = reinterpret_cast<std::vector<FfiHeader>*>(handle);
+    delete actualVec;
+}
+
+VectorHeaderHandle FfiWebGetRequestHeader(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    auto header = request->GetHeaders();
+    auto vecHeader = new std::vector<FfiHeader>(header.size());
+    for (const auto& it : header) {
+        size_t i = 0;
+        (*vecHeader)[i] = FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
+        i++;
+    }
+    return vecHeader;
+}
+
+ExternalString FfiWebGetRequestUrl(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    return Utils::MallocCString(request->GetUrl());
+}
+
+bool FfiWebIsMainFrame(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    return request->IsMainFrame();
+}
+
+bool FfiWebIsRedirect(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    return request->IsRedirect();
+}
+
+bool FfiWebIsRequestGesture(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    return request->HasGesture();
+}
+
+ExternalString FfiWebGetRequestMethod(void* ptr)
+{
+    auto request = *reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    return Utils::MallocCString(request->GetMethod());
+}
+
+void FfiWebFreeResourceRequest(void* ptr)
+{
+    RefPtr<WebRequest>* request = reinterpret_cast<RefPtr<WebRequest>*>(ptr);
+    if (request) {
+        delete request;
+    }
+}
+
+ExternalString FfiWebGetReasonMessage(void* prt)
+{
+    auto response = *reinterpret_cast<RefPtr<WebResponse>*>(prt);
+    return Utils::MallocCString(response->GetReason());
+}
+
+int32_t FfiWebGetResponseCode(void* ptr)
+{
+    auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    return response->GetStatusCode();
+}
+
+ExternalString FfiWebGetResponseData(void* ptr)
+{
+    auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    return Utils::MallocCString(response->GetData());
+}
+
+ExternalString FfiWebGetResponseEncoding(void* ptr)
+{
+    auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    return Utils::MallocCString(response->GetEncoding());
+}
+
+VectorHeaderHandle FfiWebGetResponseHeader(void* ptr)
+{
+    auto response = *reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    auto header = response->GetHeaders();
+    auto vecHeader = new std::vector<FfiHeader>(header.size());
+    for (const auto& it : header) {
+        size_t i = 0;
+        (*vecHeader)[i] = FfiHeader { .key = Utils::MallocCString(it.first), .value = Utils::MallocCString(it.second) };
+        i++;
+    }
+    return vecHeader;
+}
+
+void FfiWebFreeResourceResponse(void* ptr)
+{
+    RefPtr<WebResponse>* response = reinterpret_cast<RefPtr<WebResponse>*>(ptr);
+    if (response) {
+        delete response;
+    }
 }
 }
