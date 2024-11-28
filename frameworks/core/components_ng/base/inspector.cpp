@@ -873,6 +873,45 @@ void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)
     return GetInspectorTreeInfo(children, pageId, treesInfo);
 }
 
+void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo)
+{
+    CHECK_NULL_VOID(pageNode);
+    std::vector<RefPtr<NG::UINode>> children;
+    auto pageId = pageNode->GetPageId();
+    auto rootNode = AddInspectorTreeNode(pageNode, treesInfo);
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& item : pageNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId, false);
+    }
+    auto overlayNode = GetOverlayNode(pageNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId, false);
+    }
+    GetInspectorTreeInfo(children, pageId, treesInfo);
+}
+
+void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
+{
+    treesInfo.clear();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    for (const auto& item : stageNode->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(item);
+        if (frameNode == nullptr) {
+            continue;
+        }
+        auto pagePattern = frameNode->GetPattern<PagePattern>();
+        if (pagePattern == nullptr) {
+            continue;
+        }
+        RecordOnePageNodes(item, treesInfo);
+    }
+}
+
 RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes)
 {
     CHECK_NULL_RETURN(uiNode, nullptr);
