@@ -3142,7 +3142,9 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
     StopTwinkling();
     CloseSelectOverlay();
     ResetSelection();
-    CloseKeyboard(false);
+    if (!isVisible && HasFocus()) {
+        CloseKeyboard(false);
+    }
 }
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
