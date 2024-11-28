@@ -1496,4 +1496,146 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur_setShortOption, TestSize.Level1
     ASSERT_EQ(goodNumberFloat, renderMock->backdropBlurOption.grayscale[1]);
 }
 
+/*
+ * @tc.name: ChainModeImpl_SetValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetGoodValues, TestSize.Level1)
+{
+    Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
+    Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
+    modifier_->setChainMode(node_, direction, style);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty->GetFlexItemProperty(), nullptr);
+
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+
+    auto storedChainMode = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue();
+    ASSERT_TRUE(storedChainMode.direction.has_value());
+    EXPECT_EQ(LineDirection::HORIZONTAL, storedChainMode.direction.value());
+    ASSERT_TRUE(storedChainMode.style.has_value());
+    EXPECT_EQ(ChainStyle::SPREAD_INSIDE, storedChainMode.style.value());
+
+    modifier_->setChainMode(node_, direction, Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD);
+
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+
+    storedChainMode = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue();
+    ASSERT_TRUE(storedChainMode.direction.has_value());
+    EXPECT_EQ(LineDirection::HORIZONTAL, storedChainMode.direction.value());
+    ASSERT_TRUE(storedChainMode.style.has_value());
+    EXPECT_EQ(ChainStyle::SPREAD, storedChainMode.style.value());
+
+    direction = Ark_Axis::ARK_AXIS_VERTICAL;
+    style = Ark_ChainStyle::ARK_CHAIN_STYLE_PACKED;
+    modifier_->setChainMode(node_, direction, style);
+
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+    EXPECT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+
+    storedChainMode = layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue();
+    ASSERT_TRUE(storedChainMode.direction.has_value());
+    EXPECT_EQ(LineDirection::VERTICAL, storedChainMode.direction.value());
+    ASSERT_TRUE(storedChainMode.style.has_value());
+    EXPECT_EQ(ChainStyle::PACKED, storedChainMode.style.value());
+
+    storedChainMode = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue();
+    ASSERT_TRUE(storedChainMode.direction.has_value());
+    EXPECT_EQ(LineDirection::HORIZONTAL, storedChainMode.direction.value());
+    ASSERT_TRUE(storedChainMode.style.has_value());
+    EXPECT_EQ(ChainStyle::SPREAD, storedChainMode.style.value());
+}
+
+/*
+ * @tc.name: ChainModeImpl_SetBadDirectionValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadDirectionValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
+
+    Ark_Axis direction = static_cast<Ark_Axis>(INT_MAX);
+    Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
+    modifier_->setChainMode(node_, direction, style);
+    // empty direction optional creates both ChainStyle components but sets the style part of the VerticalChainStyle
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().direction.has_value());
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().style.has_value());
+    EXPECT_EQ(ChainStyle::SPREAD_INSIDE,
+        layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().style.value());
+
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().direction.has_value());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().style.has_value());
+}
+
+/*
+ * @tc.name: ChainModeImpl_SetBadStyleValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadStyleValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
+
+    Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
+    Ark_ChainStyle style = static_cast<Ark_ChainStyle>(INT_MIN);
+    modifier_->setChainMode(node_, direction, style);
+
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().direction.has_value());
+    EXPECT_EQ(LineDirection::HORIZONTAL,
+        layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().direction.value());
+
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().style.has_value());
+}
+
+/*
+ * @tc.name: ChainModeImpl_SetBadBothValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadBothValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_EQ(layoutProperty->GetFlexItemProperty(), nullptr);
+
+    Ark_Axis direction = static_cast<Ark_Axis>(INT_MAX);
+    Ark_ChainStyle style = static_cast<Ark_ChainStyle>(INT_MIN);
+    modifier_->setChainMode(node_, direction, style);
+
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasVerticalChainStyle());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().direction.has_value());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetVerticalChainStyleValue().style.has_value());
+
+    ASSERT_TRUE(layoutProperty->GetFlexItemProperty()->HasHorizontalChainStyle());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().direction.has_value());
+    EXPECT_FALSE(layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyleValue().style.has_value());
+}
+
 } // namespace OHOS::Ace::NG

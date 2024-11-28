@@ -22,16 +22,6 @@
 namespace OHOS::Ace::NG::Converter {
 
 template<>
-void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
-{
-    switch (src) {
-        case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;
-        case ARK_AXIS_HORIZONTAL: dst = LineDirection::HORIZONTAL; break;
-        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
-    }
-}
-
-template<>
 void AssignCast(std::optional<BarrierDirection>& dst, const Ark_BarrierDirection& src)
 {
     switch (src) {

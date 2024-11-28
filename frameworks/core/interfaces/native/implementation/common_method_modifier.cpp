@@ -2717,9 +2717,11 @@ void ChainModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(direction);
-    //auto convValue = Converter::OptConvert<type>(direction); // for enums
-    //CommonMethodModelNG::SetChainMode(frameNode, convValue);
+    ChainInfo chainInfo = {
+        .direction = Converter::OptConvert<LineDirection>(direction),
+        .style = Converter::OptConvert<ChainStyle>(style)
+    };
+    ViewAbstractModelNG::SetChainStyle(frameNode, chainInfo);
 }
 void DragPreviewOptionsImpl(Ark_NativePointer node,
                             const Ark_DragPreviewOptions* value,

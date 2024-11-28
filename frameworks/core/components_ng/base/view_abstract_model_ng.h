@@ -1499,6 +1499,11 @@ public:
     static void SetLightColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBloom(FrameNode *frameNode, const std::optional<float>& value,
         const RefPtr<ThemeConstants>& themeConstants);
+    
+    static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo)
+    {
+        ViewAbstract::SetChainStyle(frameNode, chainInfo);
+    }
 
 
 private:

@@ -1079,6 +1079,16 @@ void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_Symb
 }
 
 template<>
+void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
+{
+    switch (src) {
+        case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;
+        case ARK_AXIS_HORIZONTAL: dst = LineDirection::HORIZONTAL; break;
+        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
 {
     switch (src) {
@@ -1160,6 +1170,17 @@ void AssignCast(std::optional<Ark_IlluminatedType>& dst, const Ark_IlluminatedTy
         case ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT: dst = ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT; break;
         default:
             LOGE("Unknown illumination type: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src)
+{
+    switch (src) {
+        case ARK_CHAIN_STYLE_SPREAD: dst = ChainStyle::SPREAD; break;
+        case ARK_CHAIN_STYLE_SPREAD_INSIDE: dst = ChainStyle::SPREAD_INSIDE; break;
+        case ARK_CHAIN_STYLE_PACKED: dst = ChainStyle::PACKED; break;
+        default: LOGE("Unexpected enum value in Ark_ChainStyle: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
