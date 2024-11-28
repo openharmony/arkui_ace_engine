@@ -10979,9 +10979,7 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "start=%{public}d, end=%{public}d, not in the range", start, end);
         return;
     }
-    if (IsPreviewTextInputting()) {
-        return;
-    }
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     SetCaretPosition(start);
     auto length = end - start;
     if (isSpanStringMode_) {
