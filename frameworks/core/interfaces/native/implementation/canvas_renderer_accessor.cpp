@@ -15,8 +15,14 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "canvas_renderer_peer_impl.h"
+#include "canvas_path_peer.h"
+#include "canvas_pattern_peer.h"
+#include "canvas_gradient_peer.h"
+#include "matrix2d_peer.h"
+#include "image_bitmap_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +50,93 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "COPY", CompositeOperation::COPY },
     { "XOR", CompositeOperation::XOR }
 };
+
+const std::set<std::string> FONT_WEIGHTS = {
+    "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    "bold", "bolder", "lighter", "medium", "normal", "regular",
+};
+const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
+const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+constexpr double DEFAULT_QUALITY = 0.92;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr double DIFF = 1e-10;
+
+void FontParseSize(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
+{
+    if (fontProp.find("vp") != std::string::npos) {
+        Dimension dimension = StringUtils::StringToDimension(fontProp);
+        if (dimension.IsNegative()) {
+            return;
+        }
+        if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
+        } else if (dimension.Unit() == DimensionUnit::VP) {
+            if (dimension.IsNegative()) {
+                return;
+            }
+            peerImpl->TriggerUpdateFontSize(Dimension(dimension.Value()));
+            LOGE("ARKOALA CanvasRendererAccessor::SetFontImpl there is no implementation in controller "
+                 "for getter method of Dimension density.");
+        }
+        peerImpl->TriggerUpdateFontSize(Dimension(0.0));
+    } else {
+        std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+        Dimension dimension = Dimension(StringUtils::StringToDouble(fontProp));
+        if (dimension.IsNegative()) {
+            return;
+        }
+        peerImpl->TriggerUpdateFontSize(dimension);
+    }
+}
+void FontParseFamilies(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
+{
+    std::vector<std::string> fontFamilies;
+    std::stringstream stream(fontProp);
+    std::string fontFamily;
+    while (getline(stream, fontFamily, ',')) {
+        fontFamilies.emplace_back(fontFamily);
+    }
+    peerImpl->TriggerUpdateFontFamilies(fontFamilies);
+}
+void FontParseStyle(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
+{
+    auto fontStyle = fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
+    peerImpl->TriggerUpdateFontStyle(fontStyle);
+}
+void FontParseWeight(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontProp)
+{
+    auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
+    peerImpl->TriggerUpdateFontWeight(weight);
+}
+void FontParser(GeneratedModifier::CanvasRendererPeerImpl* peerImpl, std::string fontStr)
+{
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            FontParseWeight(peerImpl, fontProp);
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            FontParseStyle(peerImpl, fontProp);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            FontParseFamilies(peerImpl, fontProp);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            FontParseSize(peerImpl, fontProp);
+        }
+    }
+    if (!updateFontStyle) {
+        peerImpl->TriggerUpdateFontStyle(Ace::FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        peerImpl->TriggerUpdateFontWeight(Ace::FontWeight::NORMAL);
+    }
+}
 
 } // namespace
 namespace Converter {
@@ -168,6 +261,15 @@ void Stroke0Impl(CanvasRendererPeer* peer)
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Materialized* path)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
+    CHECK_NULL_VOID(pathPeer);
+    auto path2D = pathPeer->GetCanvasPath2D();
+    CHECK_NULL_VOID(path2D);
+    peerImpl->TriggerStroke1Impl(path2D);
 }
 Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
@@ -512,11 +614,25 @@ void SetTransform0Impl(CanvasRendererPeer* peer,
     if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
-    peerImpl->TriggerSetTransform0Impl(param);
+    peerImpl->TriggerSetTransformImpl(param);
 }
 void SetTransform1Impl(CanvasRendererPeer* peer,
                        const Opt_Matrix2D* transform)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(transform);
+    auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    CHECK_NULL_VOID(opt);
+    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    CHECK_NULL_VOID(matrixPeer);
+    auto param = matrixPeer->GetTransformParam();
+    CHECK_NULL_VOID(param);
+    if (param->scaleX < SCALE_LIMIT_MIN || param->scaleY < SCALE_LIMIT_MIN) {
+        return;
+    }
+    peerImpl->TriggerSetTransformImpl(*param);
 }
 void TransformImpl(CanvasRendererPeer* peer,
                    const Ark_Number* a,
@@ -546,7 +662,7 @@ void TransformImpl(CanvasRendererPeer* peer,
     if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
-    peerImpl->TriggerSetTransform0Impl(param);
+    peerImpl->TriggerTransformImpl(param);
 }
 void TranslateImpl(CanvasRendererPeer* peer,
                    const Ark_Number* x,
@@ -625,18 +741,26 @@ void SetGlobalCompositeOperationImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(peerImpl);
 
     auto opt = Converter::OptConvert<CompositeOperation>(*globalCompositeOperation);
-    if (!opt) {
-        return;
-    }
+    CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetGlobalCompositeOperationImpl(*opt);
 }
 void SetFillStyleImpl(CanvasRendererPeer* peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillStyle);
+    LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
 }
 void SetStrokeStyleImpl(CanvasRendererPeer* peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(strokeStyle);
+    LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
 }
 void GetFilterImpl(CanvasRendererPeer* peer)
 {
@@ -792,8 +916,9 @@ void SetShadowColorImpl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
 
-    auto color = Converter::Convert<Color>(*shadowColor);
-    peerImpl->TriggerSetShadowColorImpl(color);
+    auto opt = Converter::OptConvert<Color>(*shadowColor);
+    CHECK_NULL_VOID(opt);
+    peerImpl->TriggerSetShadowColorImpl(*opt);
 }
 Ark_Int32 GetShadowOffsetXImpl(CanvasRendererPeer* peer)
 {
@@ -850,6 +975,13 @@ void GetFontImpl(CanvasRendererPeer* peer)
 void SetFontImpl(CanvasRendererPeer* peer,
                  const Ark_String* font)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(font);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto fontStr = Converter::Convert<std::string>(*font);
+
+    FontParser(peerImpl, fontStr);
 }
 Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 {

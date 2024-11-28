@@ -15,17 +15,25 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "canvas_path_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
+static void DestroyPeer(CanvasPathPeer* peer)
+{
+    if (peer) {
+        delete peer;
+    }
+}
 CanvasPathPeer* CtorImpl()
 {
-    return nullptr;
+    return new CanvasPathPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void ArcImpl(CanvasPathPeer* peer,
              const Ark_Number* x,

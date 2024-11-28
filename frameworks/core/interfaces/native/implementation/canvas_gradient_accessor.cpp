@@ -15,17 +15,25 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "canvas_gradient_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
+static void DestroyPeer(CanvasGradientPeer* peer)
+{
+    if (peer) {
+        delete peer;
+    }
+}
 CanvasGradientPeer* CtorImpl()
 {
-    return nullptr;
+    return new CanvasGradientPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void AddColorStopImpl(CanvasGradientPeer* peer,
                       const Ark_Number* offset,

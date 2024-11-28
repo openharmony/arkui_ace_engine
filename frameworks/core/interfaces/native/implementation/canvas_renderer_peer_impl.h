@@ -23,6 +23,7 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -52,7 +53,7 @@ public:
     void TriggerSetGlobalAlphaImpl(double alpha);
     void TriggerFillTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void TriggerStrokeTextImpl(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    void TriggerSetTransform0Impl(const TransformParam& param);
+    void TriggerSetTransformImpl(const TransformParam& param);
     void TriggerTransformImpl(const TransformParam& param);
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
@@ -64,6 +65,23 @@ public:
     void TriggerSetShadowColorImpl(Color& color);
     void TriggerSetShadowOffsetXImpl(double offsetX);
     void TriggerSetShadowOffsetYImpl(double offsetY);
+
+    void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
+    #ifdef PIXEL_MAP_SUPPORTED
+    void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
+    #else
+    void TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData);
+    #endif
+    void TriggerSetFillStyleImpl(const Color& color);
+    void TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
+    void TriggerSetFillStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
+    void TriggerSetStrokeStyleImpl(const Color& color);
+    void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
+    void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
+    void TriggerUpdateFontWeight(Ace::FontWeight weight);
+    void TriggerUpdateFontStyle(Ace::FontStyle style);
+    void TriggerUpdateFontFamilies(const std::vector<std::string>& families);
+    void TriggerUpdateFontSize(const Dimension& size);
 
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {

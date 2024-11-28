@@ -192,7 +192,7 @@ void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
     }
     pattern_->StrokeText(text, x, y, maxWidth);
 }
-void CanvasRendererPeerImpl::TriggerSetTransform0Impl(const TransformParam& param)
+void CanvasRendererPeerImpl::TriggerSetTransformImpl(const TransformParam& param)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetTransform0Impl pattern "
@@ -299,6 +299,127 @@ void CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl(double offsetY)
         return;
     }
     pattern_->UpdateShadowOffsetY(offsetY);
+}
+void CanvasRendererPeerImpl::TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStroke1Impl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->Stroke(path);
+}
+#ifdef PIXEL_MAP_SUPPORTED
+void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->TransferFromImageBitmap(pixelMap);
+}
+#else
+void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->TransferFromImageBitmap(imageData);
+}
+#endif
+void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const Color& color)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillColor(color);
+}
+void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->SetFillGradient(gradient);
+}
+void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillPattern(pattern);
+}
+void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const Color& color)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateStrokeColor(color);
+}
+void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->SetStrokeGradient(gradient);
+}
+void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateStrokePattern(pattern);
+}
+void CanvasRendererPeerImpl::TriggerUpdateFontWeight(Ace::FontWeight weight)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontWeight pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFontWeight(weight);
+}
+void CanvasRendererPeerImpl::TriggerUpdateFontStyle(Ace::FontStyle style)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFontStyle(style);
+}
+void CanvasRendererPeerImpl::TriggerUpdateFontFamilies(const std::vector<std::string>& families)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->UpdateFontFamilies(families);
+}
+void CanvasRendererPeerImpl::TriggerUpdateFontSize(const Dimension& size)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontSize pattern "
+             "not bound to component.");
+        return;
+    }
+
+    pattern_->UpdateFontSize(size);
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
