@@ -256,7 +256,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnStartTest, TestSize.Level1)
     static bool isCalled = false;
     auto checkCallback = [](const Ark_Int32 resourceId) {
         isCalled = true;
-        EXPECT_EQ(resourceId, contextId); 
+        EXPECT_EQ(resourceId, contextId);
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
@@ -284,7 +284,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnPauseTest, TestSize.Level1)
     static bool isCalled = false;
     auto checkCallback = [](const Ark_Int32 resourceId) {
         isCalled = true;
-        EXPECT_EQ(resourceId, contextId); 
+        EXPECT_EQ(resourceId, contextId);
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
@@ -312,7 +312,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnRepeatTest, TestSize.Level1)
     static bool isCalled = false;
     auto checkCallback = [](const Ark_Int32 resourceId) {
         isCalled = true;
-        EXPECT_EQ(resourceId, contextId); 
+        EXPECT_EQ(resourceId, contextId);
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
@@ -340,7 +340,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnCancelTest, TestSize.Level1)
     static bool isCalled = false;
     auto checkCallback = [](const Ark_Int32 resourceId) {
         isCalled = true;
-        EXPECT_EQ(resourceId, contextId); 
+        EXPECT_EQ(resourceId, contextId);
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
@@ -368,7 +368,7 @@ HWTEST_F(ImageAnimatorModifierTest, setOnFinishTest, TestSize.Level1)
     static bool isCalled = false;
     auto checkCallback = [](const Ark_Int32 resourceId) {
         isCalled = true;
-        EXPECT_EQ(resourceId, contextId); 
+        EXPECT_EQ(resourceId, contextId);
     };
     // setup the callback object via C-API
     Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
