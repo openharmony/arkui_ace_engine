@@ -82,7 +82,8 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows);
-
+    static void SetJsTextBackgroundStyle(JSRef<JSObject>& textStyleObj, const TextStyleResult& textSpanResult);
+    static JSRef<JSObject> CreateJsTextBackgroundStyle(const TextBackgroundStyle& style);
     static void SetBarState(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
@@ -151,6 +152,8 @@ protected:
     void ParseTextDecoration(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextShadow(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextBackgroundStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
