@@ -18,6 +18,18 @@
 #include <climits>
 
 namespace OHOS::Ace::NG::Fixtures {
+std::vector<std::tuple<std::string, Ark_AnimationStatus, std::string>> testFixtureEnumAnimationStatusValidValues = {
+    { "ARK_ANIMATION_STATUS_INITIAL", ARK_ANIMATION_STATUS_INITIAL, "AnimationStatus.Initial" },
+    { "ARK_ANIMATION_STATUS_RUNNING", ARK_ANIMATION_STATUS_RUNNING, "AnimationStatus.Running" },
+    { "ARK_ANIMATION_STATUS_PAUSED", ARK_ANIMATION_STATUS_PAUSED, "AnimationStatus.Paused" },
+    { "ARK_ANIMATION_STATUS_STOPPED", ARK_ANIMATION_STATUS_STOPPED, "AnimationStatus.Stopped" },
+};
+
+std::vector<std::tuple<std::string, Ark_AnimationStatus>> testFixtureEnumAnimationStatusInvalidValues = {
+    { "-1", static_cast<Ark_AnimationStatus>(-1) },
+    { "INT_MAX", static_cast<Ark_AnimationStatus>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValues = {
     { "ARK_AXIS_VERTICAL", ARK_AXIS_VERTICAL, "Axis.Vertical" },
     { "ARK_AXIS_HORIZONTAL", ARK_AXIS_HORIZONTAL, "Axis.Horizontal" },
@@ -228,6 +240,18 @@ std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureE
 std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTypeInvalidValues = {
     { "-1", static_cast<Ark_EnterKeyType>(-1) },
     { "INT_MAX", static_cast<Ark_EnterKeyType>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_FillMode, std::string>> testFixtureEnumFillModeValidValues = {
+    { "ARK_FILL_MODE_NONE", ARK_FILL_MODE_NONE, "FillMode.None" },
+    { "ARK_FILL_MODE_FORWARDS", ARK_FILL_MODE_FORWARDS, "FillMode.Forwards" },
+    { "ARK_FILL_MODE_BACKWARDS", ARK_FILL_MODE_BACKWARDS, "FillMode.Backwards" },
+    { "ARK_FILL_MODE_BOTH", ARK_FILL_MODE_BOTH, "FillMode.Both" },
+};
+
+std::vector<std::tuple<std::string, Ark_FillMode>> testFixtureEnumFillModeInvalidValues = {
+    { "-1", static_cast<Ark_FillMode>(-1) },
+    { "INT_MAX", static_cast<Ark_FillMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues = {

@@ -23,6 +23,8 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Fixtures {
+extern std::vector<std::tuple<std::string, Ark_AnimationStatus, std::string>> testFixtureEnumAnimationStatusValidValues;
+extern std::vector<std::tuple<std::string, Ark_AnimationStatus>> testFixtureEnumAnimationStatusInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_Axis, std::string>> testFixtureEnumAxisValidValues;
 extern std::vector<std::tuple<std::string, Ark_Axis>> testFixtureEnumAxisInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_BarState, std::string>> testFixtureEnumBarStateValidValues;
@@ -60,6 +62,8 @@ extern std::vector<std::tuple<std::string, Ark_EllipsisMode, std::string>> testF
 extern std::vector<std::tuple<std::string, Ark_EllipsisMode>> testFixtureEnumEllipsisModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_EnterKeyType, std::string>> testFixtureEnumEnterKeyTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_EnterKeyType>> testFixtureEnumEnterKeyTypeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_FillMode, std::string>> testFixtureEnumFillModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_FillMode>> testFixtureEnumFillModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues;
 extern std::vector<std::tuple<std::string, Ark_FlexDirection>> testFixtureEnumFlexDirectionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_FontStyle, std::string>> testFixtureEnumFontStyleValidValues;

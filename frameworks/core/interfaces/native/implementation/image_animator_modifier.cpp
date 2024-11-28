@@ -15,7 +15,71 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_AnimationStatus& src)
+{
+    switch (src) {
+        case Ark_AnimationStatus::ARK_ANIMATION_STATUS_INITIAL: dst = static_cast<int32_t>(src); break;
+        case Ark_AnimationStatus::ARK_ANIMATION_STATUS_RUNNING: dst = static_cast<int32_t>(src); break;
+        case Ark_AnimationStatus::ARK_ANIMATION_STATUS_PAUSED: dst = static_cast<int32_t>(src); break;
+        case Ark_AnimationStatus::ARK_ANIMATION_STATUS_STOPPED: dst = static_cast<int32_t>(src); break;
+        default: LOGE("Unexpected enum value in Ark_AnimationStatus: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_FillMode& src)
+{
+    switch (src) {
+        case Ark_FillMode::ARK_FILL_MODE_NONE: dst = static_cast<int32_t>(src); break;
+        case Ark_FillMode::ARK_FILL_MODE_FORWARDS: dst = static_cast<int32_t>(src); break;
+        case Ark_FillMode::ARK_FILL_MODE_BACKWARDS: dst = static_cast<int32_t>(src); break;
+        case Ark_FillMode::ARK_FILL_MODE_BOTH: dst = static_cast<int32_t>(src); break;
+        default: LOGE("Unexpected enum value in Ark_FillMode: %{public}d", src);
+    }
+}
+
+template<>
+ImageProperties Convert(const Ark_ImageFrameInfo& src)
+{
+    using UnionStringResourcePixelMap = std::variant<Ark_String, Ark_Resource, Ark_PixelMap>;
+    ImageProperties options;
+    auto imageSrc = Converter::OptConvert<UnionStringResourcePixelMap>(src.src);
+    if (imageSrc.has_value()) {
+        if (auto srcArkStr = std::get_if<Ark_String>(&imageSrc.value());
+                    srcArkStr != nullptr) {
+            auto srcStr = Converter::Convert<std::string>(*srcArkStr);
+            if (!srcStr.empty()) {
+                options.src = srcStr;
+            }
+        } else if (auto srcArkRes = std::get_if<Ark_Resource>(&imageSrc.value());
+            srcArkRes != nullptr) {
+            auto srcStr = Converter::OptConvert<std::string>(*srcArkRes);
+            auto moduleName = Converter::Convert<std::string>(srcArkRes->moduleName);
+            auto bundleName = Converter::Convert<std::string>(srcArkRes->bundleName);
+            if (!srcStr->empty()) {
+                options.src = *srcStr;
+                options.moduleName = moduleName;
+                options.bundleName = bundleName;
+            }
+        } else if (auto srcArkPixelMap = std::get_if<Ark_PixelMap>(&imageSrc.value());
+            srcArkPixelMap != nullptr) {
+            LOGE("Convert Ark_ImageFrameInfo, the PixelMap support not implemented");
+        }
+
+        options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
+        options.height = OptConvert<Dimension>(src.height).value_or(CalcDimension(0));
+        options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0));
+        options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0));
+        options.duration = Converter::OptConvert<int32_t>(src.duration).value_or(0);
+    }
+    return options;
+}
+} // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnimatorInterfaceModifier {
@@ -35,17 +99,16 @@ void ImagesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetImages(frameNode, convValue);
+    auto images = Converter::Convert<std::vector<ImageProperties>>(*value);
+    ImageAnimatorModelNG::SetImages(frameNode, images);
 }
 void StateImpl(Ark_NativePointer node,
                Ark_AnimationStatus value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ImageAnimatorModelNG::SetState(frameNode, convValue);
+    auto stateOpt = Converter::OptConvert<int32_t>(value);
+    ImageAnimatorModelNG::SetState(frameNode, stateOpt);
 }
 void DurationImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -53,24 +116,23 @@ void DurationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetDuration(frameNode, convValue);
+    auto durationOpt = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateNonNegative(durationOpt);
+    ImageAnimatorModelNG::SetDuration(frameNode, durationOpt);
 }
 void ReverseImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //ImageAnimatorModelNG::SetReverse(frameNode, convValue);
+    ImageAnimatorModelNG::SetIsReverse(frameNode, Converter::Convert<bool>(value));
 }
 void FixedSizeImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //ImageAnimatorModelNG::SetFixedSize(frameNode, convValue);
+    ImageAnimatorModelNG::SetFixedSize(frameNode, Converter::Convert<bool>(value));
 }
 void PreDecodeImpl(Ark_NativePointer node,
                    const Ark_Number* value)
@@ -86,9 +148,8 @@ void FillModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ImageAnimatorModelNG::SetFillMode(frameNode, convValue);
+    auto fillModeOpt = Converter::OptConvert<int32_t>(value);
+    ImageAnimatorModelNG::SetFillMode(frameNode, fillModeOpt);
 }
 void IterationsImpl(Ark_NativePointer node,
                     const Ark_Number* value)
@@ -96,8 +157,9 @@ void IterationsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetIterations(frameNode, convValue);
+    auto iterationOpt = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateGreatOrEqual(iterationOpt, -1);
+    ImageAnimatorModelNG::SetIteration(frameNode, iterationOpt);
 }
 void OnStartImpl(Ark_NativePointer node,
                  const Callback_Void* value)

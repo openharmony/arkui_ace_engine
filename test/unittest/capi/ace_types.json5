@@ -2521,6 +2521,43 @@
             ]
         },
         {
+            "name": "ImageAnimator",
+            "attributes": [
+                {
+                    "name": "state",
+                    "default": "AnimationStatus.Initial",
+                },
+                {
+                    "name": "duration",
+                    "default": "1000",
+                    "fixtures": ["NumberNonNegIntFloor"],
+                },
+                {
+                    "name": "reverse",
+                    "default": "false",
+                },
+                {
+                    "name": "fixedSize",
+                    "default": "true",
+                },
+                {
+                    "name": "fillMode",
+                    "default": "FillMode.Forwards",
+                }
+            ],
+            "disable": [
+                "setImagesTestDefaultValues",
+                "setImagesTestValidValues",
+                "setIterationsTestDefaultValues",
+                "setIterationsTestIterationsValidValues",
+                "setIterationsTestIterationsInvalidValues"
+            ],
+            "remove": [
+                "setPreDecodeTestDefaultValues",
+                "setPreDecodeTestPreDecodeValidValues"
+            ]
+        },
+        {
             "name": "Progress",
             "includes": ["core/components/progress/progress_theme.h"],
             "themes": ["ProgressTheme"],
