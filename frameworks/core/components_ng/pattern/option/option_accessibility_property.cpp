@@ -26,4 +26,13 @@ std::string OptionAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(optionPattern, "");
     return optionPattern->GetText();
 }
+
+bool OptionAccessibilityProperty::IsSelected() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto optionPattern = frameNode->GetPattern<OptionPattern>();
+    CHECK_NULL_RETURN(optionPattern, false);
+    return optionPattern->IsSelected();
+}
 } // namespace OHOS::Ace::NG

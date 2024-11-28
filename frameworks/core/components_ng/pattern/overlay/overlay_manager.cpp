@@ -1712,7 +1712,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
                 popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
             rects.emplace_back(rect);
         } else {
-            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto parentWindowRect = popupPattern->GetHostWindowRect();
             auto rect = Rect(popupPattern->GetChildOffset().GetX(), popupPattern->GetChildOffset().GetY(),
                 popupPattern->GetChildSize().Width(), popupPattern->GetChildSize().Height());
             rects.emplace_back(parentWindowRect);

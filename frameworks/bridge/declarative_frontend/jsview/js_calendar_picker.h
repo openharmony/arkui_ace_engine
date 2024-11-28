@@ -29,6 +29,9 @@ public:
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetBorder(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
+    static void JsBorderColor(const JSCallbackInfo& info);
+    static void JsBorderRadius(const JSCallbackInfo& info);
 
 private:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
@@ -38,6 +41,7 @@ private:
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+    static bool ParseJsDimensionVpWithCheck(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 
 class JSCalendarPickerDialog : JSAlertDialog {

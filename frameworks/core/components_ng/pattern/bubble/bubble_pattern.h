@@ -211,6 +211,11 @@ public:
         SetIsViewHasFocused(false);
     }
 
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -264,6 +269,7 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::optional<Placement> arrowPlacement_;

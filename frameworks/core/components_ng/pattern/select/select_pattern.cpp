@@ -781,6 +781,7 @@ void SelectPattern::ResetOptionProps()
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->SetSelected(false);
         pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
         pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
         pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
@@ -808,6 +809,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
         lastSelected->SetBgColor(newSelected->GetBgColor());
+        lastSelected->SetSelected(false);
         lastSelected->UpdateNextNodeDivider(true);
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
@@ -858,6 +860,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         auto selectedColor = theme->GetSelectedColor();
         newSelected->SetBgColor(selectedColor);
     }
+    newSelected->SetSelected(true);
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);

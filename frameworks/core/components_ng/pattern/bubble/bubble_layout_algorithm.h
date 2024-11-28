@@ -81,6 +81,11 @@ public:
         return touchRegion_;
     }
 
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
     const Border& GetBorder() const
     {
         return border_;
@@ -193,6 +198,7 @@ private:
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();
+    void UpdateHostWindowRect();
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -224,6 +230,7 @@ private:
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     SizeF selfSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     SizeF buttonRowSize_;
     OffsetF buttonRowOffset_;
 
