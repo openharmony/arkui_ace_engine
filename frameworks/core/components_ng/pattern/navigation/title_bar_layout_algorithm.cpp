@@ -884,6 +884,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_VOID(nodeBase);
     bool isCustomMenu = nodeBase->GetPrevMenuIsCustomValue(false);
     auto currentOffsetX = maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx();
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
@@ -906,6 +907,11 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
             return;
         }
         offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+        // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
+        if (isRightToLeft) {
+            offsetX = offsetX - geometryNode->GetMargin()->left.value_or(.0f) -
+                      geometryNode->GetMargin()->right.value_or(.0f);
+        }
         OffsetF menuOffset(offsetX, menuOffsetY + overDragOffset / MENU_OFFSET_RATIO);
         geometryNode->SetMarginFrameOffset(menuOffset);
         menuWrapper->Layout();
@@ -929,6 +935,11 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
             isCustomMenu ? menuOffsetX : (menuOffsetX - maxPaddingEnd_.ConvertToPx() + BUTTON_PADDING.ConvertToPx());
     }
     menuOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, menuOffsetX);
+    // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
+    if (isRightToLeft) {
+        menuOffsetX = menuOffsetX - geometryNode->GetMargin()->left.value_or(.0f) -
+                      geometryNode->GetMargin()->right.value_or(.0f);
+    }
     OffsetF menuOffset(menuOffsetX, menuOffsetY);
     geometryNode->SetMarginFrameOffset(menuOffset);
     menuWrapper->Layout();
