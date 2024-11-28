@@ -39,6 +39,10 @@ public:
         ASSERT_NE(accessor_->getFinalizer, nullptr);
         finalyzer_ = reinterpret_cast<void (*)(PeerType *)>(accessor_->getFinalizer());
         ASSERT_NE(finalyzer_, nullptr);
+
+        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 
     static void TearDownTestCase()
@@ -48,11 +52,6 @@ public:
         finalyzer_ = nullptr;
     }
 
-    virtual void SetUp(void)
-    {
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    };
-
     virtual void TearDown(void)
     {
         ASSERT_NE(finalyzer_, nullptr);
@@ -60,7 +59,7 @@ public:
         peer_ = nullptr;
     }
 
-private:
+protected:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
             GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),

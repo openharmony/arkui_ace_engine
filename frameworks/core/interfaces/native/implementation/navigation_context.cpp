@@ -910,8 +910,6 @@ void NavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 bool NavigationStack::GetNavDestinationNodeInUINode(
     RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
-        return {};
-/*
     RefPtr<NG::CustomNode> customNode;
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
@@ -938,7 +936,6 @@ bool NavigationStack::GetNavDestinationNodeInUINode(
         node = children.front();
     }
     return false;
-*/
 }
 
 int32_t NavigationStack::GetReplaceValue() const

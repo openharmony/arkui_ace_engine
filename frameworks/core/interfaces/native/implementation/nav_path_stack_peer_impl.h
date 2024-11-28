@@ -26,7 +26,7 @@ namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
 struct NavPathStackPeer {
 public:
-    NavPathStackPeer(): navStack_(OHOS::Ace::Referenced::MakeRefPtr<Nav::NavigationStack>()) {}
+    NavPathStackPeer(): navStack_(nullptr) {}
 
     void SetNavigationStack(const RefPtr<AceType>& stack)
     {

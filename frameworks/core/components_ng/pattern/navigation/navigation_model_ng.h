@@ -73,8 +73,8 @@ public:
     void SetEnableDragBar(bool enableDragBar) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static RefPtr<NavigationStack> GetOrCreateNavigationStack(FrameNode* frameNode);
     static void SetNavigationStack(FrameNode* frameNode);
+    static void SetNavigationStack(FrameNode* frameNode, const RefPtr<NG::NavigationStack>& navigationStack);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 
@@ -86,7 +87,6 @@ void PushPath0Impl(NavPathStackPeer* peer,
     LOGE("NavPathStackAccessor::PushPath0Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(info);
-    CHECK_NULL_VOID(animated);
     auto navStack = peer->GetNavPathStack();
     if (!navStack) {
         LOGE("NavPathStackAccessor::PushPath0Impl. Navigation Stack isn't bound to a component.");
@@ -382,7 +382,11 @@ Ark_NativePointer GetParentImpl(NavPathStackPeer* peer)
 }
 Ark_Int32 SizeImpl(NavPathStackPeer* peer)
 {
-    return 0;
+    Ark_Int32 invalid = -111;
+    CHECK_NULL_RETURN(peer, invalid);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalid);
+    return Converter::ArkValue<Ark_Int32>(static_cast<int>(navStack->Nav::PathStack::Size()));
 }
 void DisableAnimationImpl(NavPathStackPeer* peer,
                           Ark_Boolean value)

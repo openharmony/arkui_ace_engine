@@ -117,15 +117,10 @@ void SetNavigationOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(pathInfos);
     auto peerImplPtr = Converter::Convert<NavPathStackPeer*>(*pathInfos);
     CHECK_NULL_VOID(peerImplPtr);
-    // auto stack = NavigationModelNG::GetOrCreateNavigationStack(frameNode);
-    // auto navStack = AceType::DynamicCast<NavigationContext::NavigationStack>(stack);
-    // CHECK_NULL_VOID(navStack);
-    // peerImplPtr->SetInstanceId(Container::CurrentId());
-    // navStack->SetDataSourceObj(peerImplPtr->GetNavPathStack());
-
-    RefPtr<NavigationStack> navStack = NavigationModelNG::GetOrCreateNavigationStack(frameNode);
+    auto navStack = AceType::MakeRefPtr<GeneratedModifier::NavigationContext::NavigationStack>();
     peerImplPtr->SetInstanceId(Container::CurrentId());
     peerImplPtr->SetNavigationStack(navStack);
+    NavigationModelNG::SetNavigationStack(frameNode, navStack);
 }
 } // NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
