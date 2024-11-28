@@ -116,7 +116,7 @@ void FfiOHOSAceFrameworkWaterFlowSetFriction(double value)
 
 void FfiOHOSAceFrameworkWaterFlowSetLayoutDirection(int32_t value)
 {
-    if (value < static_cast<int32_t>(FlexDirection::COLUMN) ||
+    if (value < static_cast<int32_t>(FlexDirection::ROW) ||
         value > static_cast<int32_t>(FlexDirection::COLUMN_REVERSE)) {
         WaterFlowModel::GetInstance()->SetLayoutDirection(FlexDirection::COLUMN);
     } else {
