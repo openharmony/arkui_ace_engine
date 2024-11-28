@@ -2604,9 +2604,6 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            if (container->IsUIExtensionWindow()) {
-                pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
-            }
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
@@ -2656,6 +2653,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
@@ -2663,6 +2663,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
             "ArkUIPromiseViewportConfig");
     } else {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
