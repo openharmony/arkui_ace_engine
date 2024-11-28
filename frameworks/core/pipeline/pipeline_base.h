@@ -192,10 +192,6 @@ public:
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
 
-    // Called by container when key event received.
-    // if return false, then this event needs platform to handle it.
-    virtual bool OnNonPointerEvent(const NonPointerEvent& event) = 0;
-
     // Called by view when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event) = 0;
 
@@ -218,7 +214,7 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.

@@ -27,7 +27,6 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/non_pointer_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
 
@@ -92,9 +91,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event);
 
-void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::NonPointerAxisEvent& event);
-
-void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, DragPointerEvent& event);
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event);
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId);
 

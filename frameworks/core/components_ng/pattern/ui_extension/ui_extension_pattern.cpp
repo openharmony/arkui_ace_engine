@@ -954,7 +954,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     }
 }
 
-void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
+void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
 {
     auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
