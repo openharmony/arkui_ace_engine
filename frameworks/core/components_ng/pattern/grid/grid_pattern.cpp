@@ -95,6 +95,14 @@ void GridPattern::BeforeCreateLayoutWrapper()
     info_.childrenCount_ = host->GetTotalChildCount();
 }
 
+RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+{
+    auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
+    auto property = MakeRefPtr<GridPaintProperty>();
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
+}
+
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
