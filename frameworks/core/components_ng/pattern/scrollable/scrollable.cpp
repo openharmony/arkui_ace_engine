@@ -799,7 +799,7 @@ void Scrollable::ProcessListSnapMotion(double position)
         }
     }
     currentPos_ = position;
-    if (outBoundaryCallback_ && outBoundaryCallback_() && state_ == AnimationState::SNAP) {
+    if (canOverScroll_ && state_ == AnimationState::SNAP) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
         MarkNeedFlushAnimationStartTime();

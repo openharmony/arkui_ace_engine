@@ -1552,13 +1552,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessSnapMotion001, TestSize.Level1)
     scrollable->currentPos_ = 0.0;
     scrollable->skipRestartSpring_ = false;
     scrollable->state_ = Scrollable::AnimationState::SNAP;
-    bool outBoundaryIsCalled = false;
-    scrollable->outBoundaryCallback_ = [&outBoundaryIsCalled]() {
-        outBoundaryIsCalled = true;
-        return true;
-    };
     scrollable->ProcessListSnapMotion(0.0);
-    EXPECT_TRUE(outBoundaryIsCalled);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
     EXPECT_TRUE(scrollable->skipRestartSpring_);
     /**
