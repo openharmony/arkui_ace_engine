@@ -437,11 +437,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         }
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        UpdateFirstChildPlacement();
+        FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
-            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-                UpdateFirstChildPlacement();
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
@@ -451,7 +451,6 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
-        UpdateFirstChildPlacement();
     } else {
         HandleDragUpdateLowVersion(delta);
     }
@@ -1153,6 +1152,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
     if (NearZero(offset)) {
         return result;
     }
+    isSourceFromAnimation_ = (source == SCROLL_FROM_ANIMATION);
     auto parent = GetNestedScrollParent();
     if (state == NestedState::CHILD_SCROLL) {
         if (Negative(offset) && Positive(scrollOffset_)) {
