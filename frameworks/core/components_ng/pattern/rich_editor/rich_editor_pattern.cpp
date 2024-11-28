@@ -1214,7 +1214,14 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     spanNode->UpdateLineHeight(textStyle.GetLineHeight());
     spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
     spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
-    
+    UpdateTextBackgroundStyle(spanNode, textStyle);
+}
+
+void RichEditorPattern::UpdateTextBackgroundStyle(RefPtr<SpanNode> spanNode, const TextStyle& textStyle)
+{
+    auto backgroundStyle = textStyle.GetTextBackgroundStyle();
+    CHECK_NULL_VOID(backgroundStyle.has_value());
+    spanNode->UpdateTextBackgroundFromParent(backgroundStyle.value());
 }
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
@@ -1612,6 +1619,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
+    target->GetSpanItem()->backgroundStyle = source->GetSpanItem()->backgroundStyle;
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -1944,6 +1952,9 @@ void RichEditorPattern::UpdateTextStyle(
     UpdateDecoration(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextShadows.has_value()) {
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+    }
+    if (updateSpanStyle.updateTextBackgroundStyle.has_value()) {
+        UpdateTextBackgroundStyle(spanNode, textStyle);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -3894,6 +3905,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
         textStyle.lineBreakStrategy =
             static_cast<int32_t>(spanItem->textLineStyle->GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY));
     }
+    textStyle.textBackgroundStyle = spanItem->backgroundStyle;
     return textStyle;
 }
 
@@ -3955,8 +3967,8 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
             spanEnd += static_cast<int32_t>(placeholderGains);
         }
         newSpanItem->interval = {spanStart, spanEnd};
-        newSpanItem->position = spanStart;
-        newSpanItem->rangeStart = spanEnd;
+        newSpanItem->position = spanEnd;
+        newSpanItem->rangeStart = spanStart;
         newSpanItem->textLineStyle->ResetLeadingMargin();
         text.append(newSpanItem->content);
         subSpans.emplace_back(newSpanItem);
@@ -9680,6 +9692,7 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     textStyleResult.lineHeight = textStyle.GetLineHeight().ConvertToVp();
     textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
     textStyleResult.textShadows = textStyle.GetTextShadows();
+    textStyleResult.textBackgroundStyle = textStyle.GetTextBackgroundStyle();
     retInfo.SetTextStyle(textStyleResult);
     retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
     retInfo.SetLetterspacing(textStyle.GetLetterSpacing().ConvertToVp());
