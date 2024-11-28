@@ -787,7 +787,7 @@ void WaterFlowLayoutInfoSW::ClearData()
 
 float WaterFlowLayoutInfoSW::GetAverageItemHeight() const
 {
-    if (heightSum_ == 0) {
+    if (NearZero(heightSum_)) {
         heightSum_ = std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
             [](float sum, const auto& pair) { return sum + pair.second; });
     }
@@ -799,7 +799,6 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
     if (!synced_) {
         return 0.0f;
     }
-    const float average = GetAverageItemHeight();
     float height = std::max(-totalOffset_, 0.0f) // to eliminate top overScroll
                    + (endPos_ - startPos_);
     if (itemEnd_) {
@@ -807,6 +806,7 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
         return height - bottomOverScroll + BotMargin() + footerHeight_;
     }
 
+    const float average = GetAverageItemHeight();
     for (uint32_t i = GetSegment(endIndex_ + 1); i < lanes_.size(); ++i) {
         height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
