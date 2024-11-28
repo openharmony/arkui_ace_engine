@@ -2111,7 +2111,7 @@ void SheetPresentationPattern::CalculateAloneSheetRadius(
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    float half = 0.5;
+    float half = 0.5f;
     if (sheetStyleRadius.has_value() && GreatOrEqual(sheetStyleRadius->Value(), 0.0f)) {
         if (sheetStyleRadius->Unit() == DimensionUnit::PERCENT) {
             sheetRadius = Dimension(sheetStyleRadius->Value() * sheetSize.Width());
