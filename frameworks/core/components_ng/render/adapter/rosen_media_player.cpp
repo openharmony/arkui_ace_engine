@@ -511,4 +511,13 @@ int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
     return mediaPlayer_->SetPlayRange(startTime, endTime);
 }
 
+int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
+{
+    LOGI("Media player start to SetParameter.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    Media::Format format;
+    (void)format.PutIntValue(key, value);
+    return mediaPlayer_->SetParameter(format);
+}
+
 } // namespace OHOS::Ace::NG
