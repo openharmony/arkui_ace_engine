@@ -44,6 +44,7 @@ public:
         value->propIndex_ = CloneIndex();
         value->propItemSpace_ = CloneItemSpace();
         value->propCachedCount_ = CloneCachedCount();
+        value->propCachedIsShown_ = CloneCachedIsShown();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propDisplayCount_ = CloneDisplayCount();
         value->propMinSize_ = CloneMinSize();
@@ -79,6 +80,7 @@ public:
         ResetIndex();
         ResetItemSpace();
         ResetCachedCount();
+        ResetCachedIsShown();
         ResetDisplayMode();
         ResetDisplayCount();
         ResetMinSize();

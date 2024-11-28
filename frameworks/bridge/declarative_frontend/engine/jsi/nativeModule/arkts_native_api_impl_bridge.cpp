@@ -4893,6 +4893,10 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperCachedCount));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperCachedCount"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperCachedCount));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperIsShown"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperIsShown));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperIsShown"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperIsShown));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperDisplayMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperDisplayMode));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperDisplayMode"),

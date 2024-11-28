@@ -28,6 +28,7 @@ constexpr int32_t DEFAULT_DURATION = 400;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
+constexpr bool DEFAULT_CACHED_IS_SHOWN = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -622,6 +623,27 @@ void ResetSwiperCachedCount(ArkUINodeHandle node)
     SwiperModelNG::SetCachedCount(frameNode, value);
 }
 
+void SetSwiperIsShown(ArkUINodeHandle node, ArkUI_Bool isShown)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedIsShown(frameNode, isShown);
+}
+
+void ResetSwiperIsShown(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedIsShown(frameNode, DEFAULT_CACHED_IS_SHOWN);
+}
+
+ArkUI_Int32 GetSwiperCachedIsShown(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetCachedIsShown(frameNode));
+}
+
 void SetSwiperDisplayMode(ArkUINodeHandle node, ArkUI_Int32 displayMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1142,19 +1164,19 @@ const ArkUISwiperModifier* GetSwiperModifier()
         ResetSwiperPrevMargin, SetSwiperDisplayCount, ResetSwiperDisplayCount, SetSwiperSwipeByGroup,
         ResetSwiperSwipeByGroup, SetSwiperDisplayArrow, ResetSwiperDisplayArrow, SetSwiperCurve, ResetSwiperCurve,
         SetSwiperDisableSwipe, ResetSwiperDisableSwipe, SetSwiperEffectMode, ResetSwiperEffectMode,
-        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperDisplayMode, ResetSwiperDisplayMode, SetSwiperItemSpace,
-        ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical, SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval,
-        ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay, SetSwiperIndex, ResetSwiperIndex,
-        SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration, ResetSwiperDuration, SetSwiperEnabled,
-        ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex, GetSwiperVertical, GetSwiperDuration,
-        GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace,
-        GetSwiperShowIndicator, GetSwiperShowDisplayArrow, GetSwiperEffectMode, SetIndicatorInteractive,
-        ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
-        SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll, SetSwiperToIndex, GetSwiperPrevMargin,
-        GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
-        SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
-        SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
+        SetSwiperCachedCount, ResetSwiperCachedCount, SetSwiperIsShown, ResetSwiperIsShown, SetSwiperDisplayMode,
+        ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
+        SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
+        SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
+        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled, GetSwiperLoop, GetSwiperAutoPlay, GetSwiperIndex,
+        GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperCachedIsShown, GetSwiperInterval,
+        GetSwiperCurve, GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
+        GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
+        GetNodeAdapter, GetCachedCount, SetSwiperNestedScroll, ResetSwiperNestedScroll, GetSwiperNestedScroll,
+        SetSwiperToIndex, GetSwiperPrevMargin, GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator,
+        GetSwiperController, SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart,
+        ResetSwiperOnAnimationStart, SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe,
+        ResetSwiperOnGestureSwipe, SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
     return &modifier;
 }
 
