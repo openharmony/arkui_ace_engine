@@ -104,6 +104,7 @@ public:
     SecCompBackground bg_;
 
     int32_t windowId_;
+    uint64_t displayId_ = 0;
     int32_t nodeId_;
 };
 }  // namespace SecurityComponent
