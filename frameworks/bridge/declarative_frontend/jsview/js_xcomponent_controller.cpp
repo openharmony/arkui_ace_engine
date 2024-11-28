@@ -190,7 +190,7 @@ void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args
     float offsetY = 0.0f;
     float width = 0.0f;
     float height = 0.0f;
-    xcomponentController_->GetLocalLocation(offsetX, offsetY);
+    xcomponentController_->GetSurfaceOffset(offsetX, offsetY);
     xcomponentController_->GetSurfaceSize(width, height);
     retObj->SetProperty("offsetX", offsetX);
     retObj->SetProperty("offsetY", offsetY);
