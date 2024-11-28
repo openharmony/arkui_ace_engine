@@ -45,7 +45,6 @@ public:
     static void SetFixedSize(FrameNode* frameNode, bool fixedSize);
     static void SetFillMode(FrameNode* frameNode, const std::optional<int32_t>& fillMode);
     static void SetIteration(FrameNode* frameNode, const std::optional<int32_t>& iteration);
-    static void SetPreDecode(FrameNode* frameNode, int32_t preDecode);
     static bool IsReverse(FrameNode* frameNode);
     static int32_t GetDuration(FrameNode* frameNode);
     static int32_t GetState(FrameNode* frameNode);
