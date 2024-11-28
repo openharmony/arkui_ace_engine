@@ -10937,7 +10937,7 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
 {
     // delete or insert space
     if (index < 0 || index >= GetTextContentLength()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "index is invalid");
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "index is invalid, index=%{public}d", index);
         return false;
     }
     bool success = SetCaretPosition(index);
@@ -10976,15 +10976,16 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
     start = std::max(0, start);
     end = std::min(GetTextContentLength(), end);
     if (start > GetTextContentLength() || end < 0 || start == end) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "start=%{public}d, end=%{public}d, not in the range", start, end);
+        return;
+    }
+    if (IsPreviewTextInputting()) {
         return;
     }
     SetCaretPosition(start);
     auto length = end - start;
     if (isSpanStringMode_) {
         DeleteValueInStyledString(start, length, true, false);
-        return;
-    }
-    if (IsPreviewTextInputting()) {
         return;
     }
     OperationRecord record;
@@ -11012,7 +11013,7 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
             CHECK_NULL_VOID(doDelete);
         }
     }
-    CHECK_NULL_VOID(deleteText.length() == 0);
+    CHECK_NULL_VOID(deleteText.length() != 0);
     ClearRedoOperationRecords();
     record.deleteText = StringUtils::ToString(deleteText);
     record.afterCaretPosition = caretPosition_;
