@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_hyperlink_ffi.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 
@@ -32,10 +31,6 @@ void FfiOHOSAceFrameworkHyperlinkColor(uint32_t color)
 }
 void FfiOHOSAceFrameworkHyperlinkPop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        ViewStackModel::GetInstance()->PopContainer();
-        return;
-    }
-    HyperlinkModel::GetInstance()->Pop();
+    ViewStackModel::GetInstance()->PopContainer();
 }
 }
