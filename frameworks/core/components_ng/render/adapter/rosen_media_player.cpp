@@ -187,7 +187,12 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         return false;
     }
     MediaFileInfo fileInfo;
-    std::string videoFilePath = mediaPath.substr(mediaPath.find("resources/base"));
+    size_t pos = mediaPath.find("resources/base");
+    if (pos == std::string::npos) {
+        LOGE("substring is not found in mediaPath.");
+        return false;
+    }
+    std::string videoFilePath = mediaPath.substr(pos);
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
