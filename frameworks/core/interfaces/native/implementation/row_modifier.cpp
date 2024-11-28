@@ -31,17 +31,6 @@ struct RowOptions {
 
 namespace Converter {
 template<>
-void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src)
-{
-    switch (src) {
-        case ARK_VERTICAL_ALIGN_TOP: dst = FlexAlign::FLEX_START; break;
-        case ARK_VERTICAL_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
-        case ARK_VERTICAL_ALIGN_BOTTOM: dst = FlexAlign::FLEX_END; break;
-        default: LOGE("Unexpected enum value in Ark_VerticalAlign: %{public}d", src);
-    }
-}
-
-template<>
 RowOptions Convert(const Ark_RowOptions& src)
 {
     return {

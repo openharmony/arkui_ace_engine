@@ -143,5 +143,18 @@ void ValidateIntensity(std::optional<float>& opt)
 {
     ValidateByRange(opt, INTENSITY_MIN, INTENSITY_MAX);
 }
+void ValidateNonNegative(std::optional<CalcLength>& opt)
+{
+    if (opt.has_value() &&
+        opt.value().GetDimension().Unit() != DimensionUnit::CALC && opt.value().GetDimension().IsNegative()) {
+        opt.reset();
+    }
+}
+void ValidateNonPercent(std::optional<CalcLength>& opt)
+{
+    if (opt.has_value() && (opt.value().GetDimension().Unit() == DimensionUnit::PERCENT)) {
+        opt.reset();
+    }
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
