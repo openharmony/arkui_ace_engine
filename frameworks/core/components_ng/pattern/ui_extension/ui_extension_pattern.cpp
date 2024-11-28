@@ -228,7 +228,7 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
         return;
     }
     auto want = wantWrapOhos->GetWant();
-    want_ = want.ToString();
+    want_ = want.GetElement().GetBundleName().append(want.GetElement().GetAbilityName().c_str());
     UpdateWant(want);
 }
 
@@ -292,10 +292,16 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
-        if (sessionWrapper_->GetWant()->IsEquals(want)) {
+        auto sessionWant = sessionWrapper_->GetWant();
+        if (sessionWant == nullptr) {
+            UIEXT_LOGW("The sessionWrapper want is nulllptr.");
             return;
         }
-        UIEXT_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
+        if (sessionWant->IsEquals(want)) {
+            return;
+        }
+        UIEXT_LOGI("The old want bundle = %{public}s, ability = %{public}s",
+            sessionWant->GetElement().GetBundleName().c_str(), sessionWant->GetElement().GetAbilityName().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChildAtIndex(0);
