@@ -21,10 +21,12 @@
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -120,6 +122,10 @@ Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : call
 Scrollable::~Scrollable()
 {
     // If animation still runs, force stop it.
+    if (!IsStopped()) {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+        AceAsyncTraceEnd(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+    }
     StopFrictionAnimation();
     StopSpringAnimation();
     StopSnapAnimation();
