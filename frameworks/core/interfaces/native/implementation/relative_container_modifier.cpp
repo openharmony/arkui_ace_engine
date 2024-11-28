@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 
 namespace OHOS::Ace::NG::Converter {
 
