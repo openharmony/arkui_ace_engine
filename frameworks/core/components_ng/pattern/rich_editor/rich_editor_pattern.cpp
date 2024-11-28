@@ -7526,7 +7526,7 @@ void RichEditorPattern::ShowHandles()
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         CHECK_NULL_VOID(textSelector_.IsValid());
         CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({.animation = false});
+        selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
     }
 }
 
