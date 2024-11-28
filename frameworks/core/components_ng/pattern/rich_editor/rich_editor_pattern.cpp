@@ -2667,7 +2667,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
 
     if (dataDetectorAdapter_->hasClickedAISpan_ || dataDetectorAdapter_->pressedByLeftMouse_) {
-        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->DisableMenu());
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->HideMenu());
         return;
     }
 
