@@ -921,15 +921,10 @@ void FlexLayoutAlgorithm::SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& 
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        finalMainAxisSize = std::max(mainAxisSizeMin, std::min(finalMainAxisSize, mainAxisSizeMax));
-        finalCrossAxisSize = std::max(crossAxisSizeMin, std::min(finalCrossAxisSize, crossAxisSizeMax));
-    } else {
-        finalMainAxisSize = std::clamp(
-            finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-        finalCrossAxisSize = std::clamp(finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
-            std::max(crossAxisSizeMin, crossAxisSizeMax));
-    }
+    finalMainAxisSize = std::clamp(
+        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finalCrossAxisSize = std::clamp(
+        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
