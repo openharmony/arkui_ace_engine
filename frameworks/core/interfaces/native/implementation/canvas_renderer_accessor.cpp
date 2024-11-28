@@ -628,12 +628,11 @@ void SetTransform1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(opt);
     auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
     CHECK_NULL_VOID(matrixPeer);
-    auto param = matrixPeer->GetTransformParam();
-    CHECK_NULL_VOID(param);
-    if (param->scaleX < SCALE_LIMIT_MIN || param->scaleY < SCALE_LIMIT_MIN) {
+    auto param = matrixPeer->transform;
+    if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
-    peerImpl->TriggerSetTransformImpl(*param);
+    peerImpl->TriggerSetTransformImpl(param);
 }
 void TransformImpl(CanvasRendererPeer* peer,
                    const Ark_Number* a,

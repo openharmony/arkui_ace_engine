@@ -58,12 +58,14 @@ Ark_NativePointer InvertImpl(Matrix2DPeer* peer)
 Ark_NativePointer MultiplyImpl(Matrix2DPeer* peer,
                                const Opt_Matrix2D* other)
 {
+    LOGE("ARKOALA Matrix2DAccessor::MultiplyImpl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer Rotate0Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
+    LOGE("ARKOALA Matrix2DAccessor::Rotate0Impl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
@@ -71,16 +73,23 @@ Ark_NativePointer Rotate1Impl(Matrix2DPeer* peer,
                               const Opt_Number* rx,
                               const Opt_Number* ry)
 {
+    LOGE("ARKOALA Matrix2DAccessor::Rotate1Impl is not implemented as deprecated.");
     return 0;
 }
 Ark_NativePointer TranslateImpl(Matrix2DPeer* peer,
                                 const Opt_Number* tx,
                                 const Opt_Number* ty)
 {
+    auto optX = Converter::OptConvert<float>(*tx);
+    CHECK_NULL_RETURN(optX, nullptr);
+    auto optY = Converter::OptConvert<float>(*ty);
+    CHECK_NULL_RETURN(optY, nullptr);
+    double transX = static_cast<double>(*optX);
+    double transY = static_cast<double>(*optX);
     double density = peer->GetDensity();
-    tx *= density;
-    ty *= density;
-    NG::Matrix2D::Translate(peer->transform, tx, ty);
+    transX *= density;
+    transY *= density;
+    NG::Matrix2D::Translate(peer->transform, transX, transY);
     return reinterpret_cast<Ark_NativePointer>(peer);
 }
 Ark_NativePointer ScaleImpl(Matrix2DPeer* peer,

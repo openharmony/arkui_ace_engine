@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
+
+#include "test/mock/core/render/mock_matrix2d.h"
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
@@ -44,7 +45,6 @@ const double DEFAULT_DOUBLE_VALUE = 10.0;
 const double DEFAULT_SCALE_VALUE = 1.0;
 const std::string DEFAULT_STRING_VALUE = "text";
 const std::string INVALID_STRING_VALUE = "";
-const auto INVALID_COMPOSITE_VALUE = static_cast<CompositeOperation>(-1);
 
 // test plan
 std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_TEST_PLAN = {
@@ -74,14 +74,6 @@ std::vector<std::vector<double>> ARRAY_NUMBER_TEST_PLAN = {
     {},
 };
 
-std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("string text"), "string text" },
-    { Converter::ArkValue<Ark_String>(""), "" },
-    { Converter::ArkValue<Ark_String>("123"), "123" },
-    { Converter::ArkValue<Ark_String>("value %2"), "value %2" },
-    { Converter::ArkValue<Ark_String>("echo(%10)"), "echo(%10)" }
-};
-
 std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN = {
     { Converter::ArkValue<Opt_Number>(100), 100 },
     { Converter::ArkValue<Opt_Number>(0), 0 },
@@ -89,35 +81,6 @@ std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN 
     { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
     { Converter::ArkValue<Opt_Number>(-56.73), -56.73 },
     { Converter::ArkValue<Opt_Number>(Ark_Empty()), std::make_optional<double>() },
-};
-
-std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("source_OVER"), CompositeOperation::SOURCE_OVER },
-    { Converter::ArkValue<Ark_String>("  source_ATOP"), CompositeOperation::SOURCE_ATOP },
-    { Converter::ArkValue<Ark_String>("source_IN  "), CompositeOperation::SOURCE_IN },
-    { Converter::ArkValue<Ark_String>("  source_OUT  "), CompositeOperation::SOURCE_OUT },
-    { Converter::ArkValue<Ark_String>("DESTINATION_over"), CompositeOperation::DESTINATION_OVER },
-    { Converter::ArkValue<Ark_String>("  DESTINATION_atop"), CompositeOperation::DESTINATION_ATOP },
-    { Converter::ArkValue<Ark_String>("DESTINATION_in  "), CompositeOperation::DESTINATION_IN },
-    { Converter::ArkValue<Ark_String>("  DESTINATION_out "), CompositeOperation::DESTINATION_OUT },
-    { Converter::ArkValue<Ark_String>("LIGHTER  "), CompositeOperation::LIGHTER },
-    { Converter::ArkValue<Ark_String>(" copy"), CompositeOperation::COPY },
-    { Converter::ArkValue<Ark_String>("XOR"), CompositeOperation::XOR },
-    { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
-    { Converter::ArkValue<Ark_String>("unknown value"), static_cast<CompositeOperation>(-1) },
-};
-
-std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
-    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_String>(""), Color::BLACK },
-    { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
-};
-
-std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Boolean>(EXPECTED_FALSE), EXPECTED_FALSE },
-    { Converter::ArkValue<Ark_Boolean>(EXPECTED_TRUE), EXPECTED_TRUE },
 };
 
 std::vector<double> NUMBER_ALPHA_TEST_PLAN = {
@@ -132,79 +95,6 @@ std::vector<int32_t> INT32_TEST_PLAN = {
     100, 0, -100, 12, -56,
 };
 
-typedef std::tuple<PathCmd, double, double> Path2DTestStep;
-static const std::vector<Path2DTestStep> PATH2D_TEST_PLAN = {
-    { PathCmd::MOVE_TO, 0, 0 },
-    { PathCmd::MOVE_TO, -100, -100 },
-    { PathCmd::MOVE_TO, 100, 100 },
-    { PathCmd::MOVE_TO, 12.34, 53.76 },
-    { PathCmd::MOVE_TO, -12.34, 53.76 },
-    { PathCmd::LINE_TO, 0, 0 },
-    { PathCmd::LINE_TO, -100, -100 },
-    { PathCmd::LINE_TO, 100, 100 },
-    { PathCmd::LINE_TO, 12.34, 53.76 },
-    { PathCmd::LINE_TO, -12.34, 53.76 },
-};
-
-std::vector<std::pair<std::string, Ace::FontStyle>> FONT_STYLE_TEST_PLAN = {
-    { "normal", Ace::FontStyle::NORMAL },
-    { "none", Ace::FontStyle::NORMAL },
-    { "italic", Ace::FontStyle::ITALIC },
-    { "", Ace::FontStyle::NORMAL },
-    { "invalid", Ace::FontStyle::NORMAL },
-};
-
-std::vector<std::pair<std::string, Ace::FontWeight>> FONT_WEIGHT_TEST_PLAN = {
-    { "100", FontWeight::W100 },
-    { "200", FontWeight::W200 },
-    { "300", FontWeight::W300 },
-    { "400", FontWeight::W400 },
-    { "500", FontWeight::W500 },
-    { "600", FontWeight::W600 },
-    { "700", FontWeight::W700 },
-    { "800", FontWeight::W800 },
-    { "900", FontWeight::W900 },
-    { "bold", FontWeight::BOLD },
-    { "bolder", FontWeight::BOLDER },
-    { "lighter", FontWeight::LIGHTER },
-    { "medium", FontWeight::MEDIUM },
-    { "normal", FontWeight::NORMAL },
-    { "regular", FontWeight::REGULAR },
-    { "", Ace::FontWeight::NORMAL },
-    { "invalid", Ace::FontWeight::NORMAL },
-};
-
-std::vector<std::pair<std::string, Dimension>> FONT_SIZE_PX_TEST_PLAN = {
-    { "0px", Dimension(0, OHOS::Ace::DimensionUnit::PX) },
-    { "14px", Dimension(14, OHOS::Ace::DimensionUnit::PX) },
-    { "-56px", Dimension(-100) },
-    { "abcpx", Dimension(0, OHOS::Ace::DimensionUnit::PX) },
-    { "px200", Dimension(0, OHOS::Ace::DimensionUnit::PX) },
-    { "", Dimension(-100) },
-    { "invalid", Dimension(-100) },
-};
-
-std::vector<std::pair<std::string, Dimension>> FONT_SIZE_VP_TEST_PLAN = {
-    { "10vp", Dimension(10, DimensionUnit::VP) },
-    { "0vp", Dimension(0, DimensionUnit::VP) },
-    { "-10vp", Dimension(-10, DimensionUnit::VP) },
-    { "", Dimension() },
-    { "invalid", Dimension() },
-};
-
-std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TEST_PLAN = {
-    { "sans-serif", { "sans-serif" } },
-    { "monospace", { "monospace" } },
-    { "serif", { "serif" } },
-    { "", {} },
-    { "invalid", {} },
-};
-
-class MockCanvasPattern : public CanvasPattern {
-public:
-    MockCanvasPattern() = default;
-    ~MockCanvasPattern() override = default;
-};
 
 } // namespace
 
@@ -215,24 +105,13 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        mockPattern_ = new MockCanvasPattern();
-        mockPatternKeeper_ = AceType::Claim(mockPattern_);
-        ASSERT_NE(mockPatternKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetCanvasPattern(mockPatternKeeper_);
-        ASSERT_NE(mockPattern_, nullptr);
     }
 
     void TearDown() override
     {
         AccessorTestBaseParent::TearDown();
-        mockPatternKeeper_ = nullptr;
-        mockPattern_ = nullptr;
     }
 
-    MockCanvasPattern* mockPattern_ = nullptr;
-    RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
 };
 
 /**
@@ -468,279 +347,7 @@ HWTEST_F(CanvasRendererAccessorTest, saveTest, TestSize.Level1)
     holder->TearDown();
 }
 
-/**
- * @tc.name: resetTransformTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, resetTransformTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
 
-    ASSERT_NE(accessor_->resetTransform, nullptr);
-
-    accessor_->resetTransform(peer_);
-    accessor_->resetTransform(peer_);
-    accessor_->resetTransform(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
-}
-
-/**
- * @tc.name: rotateTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, rotateTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->rotate, nullptr);
-
-    for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
-        accessor_->rotate(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
-    }
-    holder->TearDown();
-}
-
-/**
- * @tc.name: scaleTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, scaleTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->scale, nullptr);
-
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
-            accessor_->scale(peer_, &x, &y);
-
-            if (expectedX < SCALE_LIMIT_MIN || expectedY < SCALE_LIMIT_MIN) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
-        }
-    }
-    holder->TearDown();
-}
-
-/**
- * @tc.name: translateTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, translateTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->translate, nullptr);
-
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
-            accessor_->translate(peer_, &x, &y);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
-        }
-    }
-    holder->TearDown();
-}
-
-/**
- * @tc.name: saveLayerTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, saveLayerTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->saveLayer, nullptr);
-
-    accessor_->saveLayer(peer_);
-    accessor_->saveLayer(peer_);
-    accessor_->saveLayer(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
-}
-
-/**
- * @tc.name: restoreLayerTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, restoreLayerTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->restoreLayer, nullptr);
-
-    accessor_->restoreLayer(peer_);
-    accessor_->restoreLayer(peer_);
-    accessor_->restoreLayer(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
-}
-
-/**
- * @tc.name: resetTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->reset, nullptr);
-
-    accessor_->reset(peer_);
-    accessor_->reset(peer_);
-    accessor_->reset(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
-}
-
-/**
- * @tc.name: setGlobalAlphaTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setGlobalAlphaTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->setGlobalAlpha, nullptr);
-
-    for (const auto& [actual, expected] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->setGlobalAlpha(peer_, &actual);
-
-        if (expected < ALPHA_LIMIT_MIN || expected > ALPHA_LIMIT_MAX) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
-    }
-    holder->TearDown();
-}
-
-/**
- * @tc.name: fillTextTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, fillTextTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->fillText, nullptr);
-
-    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
-
-    for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->fillText(peer_, &actual, &arkD, &arkD, &arkOpt);
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->text, expected);
-    }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
-            accessor_->fillText(peer_, &arkT, &x, &y, &arkOpt);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
-        }
-    }
-    for (const auto& [actual, expected] : OPT_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
-
-        EXPECT_EQ(holder->maxWidth.has_value(), expected.has_value());
-        if (expected.has_value()) {
-            EXPECT_TRUE(LessOrEqualCustomPrecision(*holder->maxWidth, *expected));
-        }
-        EXPECT_TRUE(holder->isCalled);
-    }
-    holder->TearDown();
-}
-
-/**
- * @tc.name: strokeTextTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
-    ASSERT_NE(accessor_->strokeText, nullptr);
-
-    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
-    auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
-
-    for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->strokeText(peer_, &actual, &arkD, &arkD, &arkOpt);
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->text, expected);
-    }
-    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
-        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
-            accessor_->strokeText(peer_, &arkT, &x, &y, &arkOpt);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
-        }
-    }
-    for (const auto& [actual, expected] : OPT_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
-
-        EXPECT_EQ(holder->maxWidth.has_value(), expected.has_value());
-        if (expected.has_value()) {
-            EXPECT_TRUE(LessOrEqualCustomPrecision(*holder->maxWidth, *expected));
-        }
-        EXPECT_TRUE(holder->isCalled);
-    }
-    holder->TearDown();
-}
 
 /**
  * @tc.name: setTransform0Test
@@ -1145,12 +752,14 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 
     for (const auto& expectedX : NUMBER_ALPHA_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_ALPHA_TEST_PLAN) {
-            peer->transform.scaleX = expectedX;
-            peer->transform.scaleY = expectedY;
-            peer->transform.skewX = valD;
-            peer->transform.skewY = valD;
-            peer->transform.translateX = valD;
-            peer->transform.translateY = valD;
+            auto param = std::make_shared<OHOS::Ace::TransformParam>();
+            param->scaleX = expectedX;
+            param->scaleY = expectedY;
+            param->skewX = valD;
+            param->skewY = valD;
+            param->translateX = valD;
+            param->translateY = valD;
+            peer->SetTransformParam(param);
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
@@ -1189,12 +798,14 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            peer->transform.scaleX = valS;
-            peer->transform.scaleY = valS;
-            peer->transform.skewX = expectedX;
-            peer->transform.skewY = expectedY;
-            peer->transform.translateX = valD;
-            peer->transform.translateY = valD;
+            auto param = std::make_shared<OHOS::Ace::TransformParam>();
+            param->scaleX = valS;
+            param->scaleY = valS;
+            param->skewX = expectedX;
+            param->skewY = expectedY;
+            param->translateX = valD;
+            param->translateY = valD;
+            peer->SetTransformParam(param);
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
@@ -1229,12 +840,14 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1
 
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            peer->transform.scaleX = valS;
-            peer->transform.scaleY = valS;
-            peer->transform.skewX = valD;
-            peer->transform.skewY = valD;
-            peer->transform.translateX = expectedX;
-            peer->transform.translateY = expectedY;
+            auto param = std::make_shared<OHOS::Ace::TransformParam>();
+            param->scaleX = valS;
+            param->scaleY = valS;
+            param->skewX = valD;
+            param->skewY = valD;
+            param->translateX = expectedX;
+            param->translateY = expectedY;
+            peer->SetTransformParam(param);
 
             holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);

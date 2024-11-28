@@ -17,23 +17,23 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/render/adapter/matrix2d.h"
 #include "core/pipeline/pipeline_base.h"
 
 struct Matrix2DPeer {
-public:
-    Matrix2DPeer(){
-        pointer = std::make_shared<OHOS::Ace::TransformParam>(transform); 
+    Matrix2DPeer() = default;
+    Matrix2DPeer(OHOS::Ace::CanvasUnit value){
+        Matrix2DPeer();
+        unit = value;
     }
-    ~Matrix2DPeer() {
-        pointer = nullptr;
-    }; 
+    ~Matrix2DPeer()  = default; 
     
     double GetDensity()
     {
-        double density = PipelineBase::GetCurrentDensity();
-        return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+        double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
+        return ((unit == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
-public:
+
     std::shared_ptr<OHOS::Ace::TransformParam> pointer = nullptr;
     OHOS::Ace::TransformParam transform;
     OHOS::Ace::CanvasUnit unit = OHOS::Ace::CanvasUnit::DEFAULT;

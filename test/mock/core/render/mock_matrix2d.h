@@ -13,13 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MATRIX2D_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MATRIX2D_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
 
 #include <string>
 #include "frameworks/core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::NG {
+class Matrix2DHolder {
+public:
+    Matrix2DHolder() = default;
+    ~Matrix2DHolder() = default;
+
+    static Matrix2DHolder* GetInstance()
+    {
+        static Matrix2DHolder instance;
+        return &instance;
+    }
+    void SetUp()
+    {
+        counter = 0;
+        isCalled = false;
+    }
+public:
+    bool isCalled = false;    
+    int counter = 0;
+};
+
 class Matrix2D final {
 public:
     static bool Invert(TransformParam& param);
@@ -29,9 +49,7 @@ public:
     static void Rotate(TransformParam& param, double degree, double dx, double dy);
     static std::string ToString();
 };
-#ifndef ARKUI_CAPI_UNITTEST
-Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint);
-#endif // ARKUI_CAPI_UNITTEST
+// Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint);
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MATRIX2D_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
 
