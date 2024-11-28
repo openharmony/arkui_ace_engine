@@ -75,6 +75,22 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
     }
     info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
 }
+
+void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, NavigationOperation operation)
+{
+    RefPtr<NavDestinationPattern> prePattern =
+        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    RefPtr<NavDestinationPattern> newPattern =
+        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
+        "top name: %{public}s, id: %{public}s",
+        operation, prePattern ? prePattern->GetName().c_str() : "null",
+        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
+        newPattern ? newPattern->GetName().c_str() : "null",
+        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
+}
 } // namespace
 
 NavigationPattern::NavigationPattern()
@@ -2205,17 +2221,7 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
-    RefPtr<NavDestinationPattern> prePattern =
-        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
-    RefPtr<NavDestinationPattern> newPattern =
-        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
-        "top name: %{public}s, id: %{public}s",
-        operation, prePattern ? prePattern->GetName().c_str() : "null",
-        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
-        newPattern ? newPattern->GetName().c_str() : "null",
-        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
+    LogCustomAnimationStart(preTopDestination, newTopNavDestination, operation);
     return onTransition_(preInfo, topInfo, operation);
 }
 
