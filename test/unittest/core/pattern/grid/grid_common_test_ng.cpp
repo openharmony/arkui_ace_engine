@@ -1401,6 +1401,7 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
     ASSERT_TRUE(ctx);
     auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_TRUE(AceType::InstanceOf<GridPaintProperty>(props));
 
     auto rect = AceType::MakeRefPtr<ShapeRect>();
     rect->SetWidth(Dimension(200.0f));
@@ -1414,8 +1415,12 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
     FlushLayoutTask(frameNode_);
 
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(2);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    FlushLayoutTask(frameNode_);
+
+    props->UpdateContentClip({ ContentClipMode::DEFAULT, nullptr });
+    EXPECT_EQ(props->GetDefaultContentClip(), ContentClipMode::BOUNDARY);
     FlushLayoutTask(frameNode_);
 }
 

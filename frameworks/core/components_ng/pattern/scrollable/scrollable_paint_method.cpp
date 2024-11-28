@@ -87,7 +87,7 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
 
         auto mode = clip->first;
         if (mode == ContentClipMode::DEFAULT) {
-            mode = GetDefaultContentClip();
+            mode = props->GetDefaultContentClip();
         }
         auto&& geo = wrapper->GetGeometryNode();
         switch (mode) {
