@@ -67,13 +67,15 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     return CreateCustomDialog(columnNode);
 }
 
-RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::string& message,
-    const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList, FontWeight fontWeight)
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
+    const std::string& message, const RefPtr<FrameNode>& iconNode)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
+    auto srcLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(srcLayoutProperty, nullptr);
     RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -81,10 +83,14 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::strin
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolProperty, nullptr);
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
-    symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
+    symbolProperty->UpdateSymbolSourceInfo(srcLayoutProperty->GetSymbolSourceInfoValue());
+    auto symbolColorList = srcLayoutProperty->GetSymbolColorListValue({});
     symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
                             : symbolProperty->UpdateSymbolColorList(symbolColorList);
+    auto fontWeight = srcLayoutProperty->GetFontWeightValue(FontWeight::NORMAL);
     symbolProperty->UpdateFontWeight(fontWeight);
+    auto renderStrategy = srcLayoutProperty->GetSymbolRenderingStrategyValue(0);
+    symbolProperty->UpdateSymbolRenderingStrategy(renderStrategy);
     MarginProperty symbolMargin;
     Dimension dialogHeight;
     if (message.empty()) {
