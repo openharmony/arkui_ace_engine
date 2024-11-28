@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -85,11 +86,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnimatorInterfaceModifier {
 void SetImageAnimatorOptionsImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //ImageAnimatorModelNG::SetSetImageAnimatorOptions(frameNode, convValue);
+    // No implementation is required
 }
 } // ImageAnimatorInterfaceModifier
 namespace ImageAnimatorAttributeModifier {
@@ -167,8 +164,10 @@ void OnStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetOnStart(frameNode, convValue);
+    auto onStart = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void OnPauseImpl(Ark_NativePointer node,
                  const Callback_Void* value)
@@ -176,8 +175,10 @@ void OnPauseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetOnPause(frameNode, convValue);
+    auto onPause = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onPause));
 }
 void OnRepeatImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -185,8 +186,10 @@ void OnRepeatImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetOnRepeat(frameNode, convValue);
+    auto onRepeat = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    ImageAnimatorModelNG::SetOnRepeat(frameNode, onRepeat);
 }
 void OnCancelImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -194,8 +197,10 @@ void OnCancelImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetOnCancel(frameNode, convValue);
+    auto onCancel = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    ImageAnimatorModelNG::SetOnCancel(frameNode, onCancel);
 }
 void OnFinishImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -203,8 +208,10 @@ void OnFinishImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageAnimatorModelNG::SetOnFinish(frameNode, convValue);
+    auto onFinish = [arkCallback = CallbackHelper(*value)]() -> void {
+        arkCallback.Invoke();
+    };
+    ImageAnimatorModelNG::SetOnFinish(frameNode, onFinish);
 }
 } // ImageAnimatorAttributeModifier
 const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
