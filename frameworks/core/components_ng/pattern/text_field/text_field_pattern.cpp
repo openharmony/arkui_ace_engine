@@ -997,6 +997,7 @@ void TextFieldPattern::HandleFocusEvent()
     }
     ProcessFocusStyle();
     RequestKeyboardByFocusSwitch();
+    ResetFirstClickAfterGetFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
 }
@@ -1309,6 +1310,8 @@ void TextFieldPattern::HandleBlurEvent()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d OnBlur", host->GetId());
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    firstClickResetTask_.Cancel();
+    firstClickAfterLosingFocus_ = true;
     UpdateBlurReason();
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
@@ -1821,7 +1824,6 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
-    hasFocusBeforeTouchDown_ = HasFocus();
     moveCaretState_.touchDownOffset = offset;
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
@@ -2372,10 +2374,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
-    } else if (!hasFocusBeforeTouchDown_.value_or(true)) {
-        firstGetFocus = true;
-        hasFocusBeforeTouchDown_.reset();
     }
+    firstGetFocus = firstGetFocus || firstClickAfterLosingFocus_;
+    firstClickAfterLosingFocus_ = false;
     if (!firstGetFocus && CheckMousePressedOverScrollBar(info)) {
         return;
     }
@@ -9534,5 +9535,26 @@ float TextFieldPattern::GetBorderRight(BorderWidthProperty border) const
         return rightBorderWidth.Value() * percentReferenceWidth;
     }
     return rightBorderWidth.ConvertToPx();
+}
+
+void TextFieldPattern::ResetFirstClickAfterGetFocus()
+{
+    if (!firstClickAfterLosingFocus_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    firstClickResetTask_.Cancel();
+    firstClickResetTask_.Reset([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->firstClickAfterLosingFocus_ = false;
+    });
+    taskExecutor->PostDelayedTask(
+        firstClickResetTask_, TaskExecutor::TaskType::UI, TWINKLING_INTERVAL_MS, "ResetFirstClickAfterGetFocusTask");
 }
 } // namespace OHOS::Ace::NG
