@@ -62,7 +62,8 @@ public:
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
     bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
-
+    void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode) override;
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();

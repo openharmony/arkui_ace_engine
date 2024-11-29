@@ -290,6 +290,7 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
     void SetContainerModalTitleHeight(int32_t height) override;
+    void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(

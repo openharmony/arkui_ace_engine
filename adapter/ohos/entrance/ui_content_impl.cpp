@@ -3821,6 +3821,23 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     }
 }
 
+void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, buttonStyle]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetContainerButtonStyle(buttonStyle.buttonBackgroundSize,
+                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
+        },
+        TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
+}
+
 int32_t UIContentImpl::GetContainerModalTitleHeight()
 {
     ContainerScope scope(instanceId_);
