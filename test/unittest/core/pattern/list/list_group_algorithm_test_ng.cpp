@@ -199,7 +199,7 @@ HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
     int32_t startIndex = 0;
     listLayoutAlgorithm.LayoutItem(
         wrapper, 0, listLayoutAlgorithm.itemPosition_.begin()->second, startIndex, crossSize);
-    float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width());
+    float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width(), false);
     auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
     EXPECT_EQ(0.f, crossOffset);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();

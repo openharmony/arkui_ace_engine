@@ -1426,17 +1426,19 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
     float crossOffset = 0.0f;
     if (GetLanes() > 1) {
         int32_t laneIndex = 0;
+        int32_t lanes = 1;
         if (pos.isGroup) {
             startIndex = index + 1;
         } else {
             laneIndex = (index - startIndex) % GetLanes();
+            lanes = GetLanes();
         }
 
         float laneGutter = GetLaneGutter();
-        crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * GetLanes());
+        crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize * lanes, pos.isGroup);
         crossOffset += ((crossSize + laneGutter) / GetLanes()) * laneIndex;
     } else {
-        crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
+        crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize, pos.isGroup);
     }
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
     if (isReverse_) {
@@ -1595,9 +1597,9 @@ void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     overlayGeometryNode->SetFrameSize(listFrameSize);
 }
 
-float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
+float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup)
 {
-    float delta = crossSize - GetLaneGutter() - childCrossSize;
+    float delta = isGroup ? crossSize - childCrossSize : crossSize - GetLaneGutter() - childCrossSize;
     if (LessOrEqual(delta, 0)) {
         return 0.0f;
     }
