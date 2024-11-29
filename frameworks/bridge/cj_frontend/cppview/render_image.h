@@ -17,18 +17,21 @@
 #define FRAMEWORKS_BRIDGE_CJ_FRONTEND_CPP_VIEW_RENDER_IMAGE_H
 
 #include "ffi_remote_data.h"
+
+#include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/render/canvas_image.h"
 namespace OHOS::Ace::Framework {
 
-class CJRenderImage : public OHOS::FFI::FFIData, public Referenced {
+class ACE_EXPORT CJRenderImage : public OHOS::FFI::FFIData, public Referenced {
 public:
     CJRenderImage();
-    CJRenderImage(const std::string& src);
-    CJRenderImage(const RefPtr<OHOS::Ace::PixelMap>& pixmap);
+    explicit CJRenderImage(const int32_t unit);
     ~CJRenderImage() override = default;
 
+    void InitCJRenderImage(const std::string& src);
+    void InitCJRenderImage(const RefPtr<OHOS::Ace::PixelMap>& pixmap);
     double GetHeight();
     double GetWidth();
     std::shared_ptr<Ace::ImageData> GetImageData() const
@@ -61,6 +64,16 @@ public:
         height_ = height;
     }
 
+    void SetPixelMapId(int64_t id)
+    {
+        pixelMapId_ = id;
+    }
+
+    int64_t GetPixelMapId()
+    {
+        return pixelMapId_;
+    }
+
     RefPtr<PixelMap> GetPixelMap() const
     {
         return pixelMap_;
@@ -76,6 +89,7 @@ public:
         double density = PipelineBase::GetCurrentDensity();
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
+
 private:
     void LoadImage(const std::string& src);
     void LoadImage(const RefPtr<OHOS::Ace::PixelMap>& pixmap);
@@ -88,6 +102,7 @@ private:
     RefPtr<PixelMap> pixelMap_;
     RefPtr<NG::ImageLoadingContext> loadingCtx_;
     std::shared_ptr<Ace::ImageData> imageData_;
+    int64_t pixelMapId_;
     ImageSourceInfo sourceInfo_;
     ImageFit imageFit_ = ImageFit::NONE;
 

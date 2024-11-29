@@ -26,8 +26,8 @@ namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeMatrix2d : public OHOS::FFI::FFIData, public Referenced {
 public:
-    explicit NativeMatrix2d(const int32_t unit);
     NativeMatrix2d();
+    explicit NativeMatrix2d(const int32_t unit);
     ~NativeMatrix2d() override;
     void Identity();
     void Invert();

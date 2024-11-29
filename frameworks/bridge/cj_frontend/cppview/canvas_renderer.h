@@ -26,6 +26,7 @@
 #include "bridge/cj_frontend/cppview/matrix2d.h"
 #include "bridge/cj_frontend/cppview/render_image.h"
 #include "bridge/cj_frontend/cppview/canvas_path.h"
+#include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
@@ -101,7 +102,11 @@ public:
     void SetFilter(const std::string& filterStr);
     void SetDirection(const std::string& directionStr);
     void SetDensity();
-    int64_t getTransform();
+    int64_t GetTransform();
+    int64_t CreateImageData(const double height, const double width);
+    int64_t CreateImageData(const sptr<NativeImageData> imageData);
+    void PutImageData(const sptr<NativeImageData> imageData, const double dx, const double dy, const double dirtyX,
+        const double dirtyY, const double dirtyWidth, const double dirtyHeight);
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
@@ -134,6 +139,7 @@ public:
     void Transform(const TransformParam& param);
     void ResetTransform();
     void SetTransform(TransformParam param);
+    void SetTransform(unsigned int id, const TransformParam& transform);
     void SetTransformByMatrix(const sptr<NativeMatrix2d>& matrix2d);
     void Translate(double x, double y);
     void Restore();
@@ -143,16 +149,21 @@ public:
     void Reset();
     int64_t CreateLinearGradient(double x0, double y0, double x1, double y1);
     int64_t CreateRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1);
-    int64_t CreateRadialGradient(const double startAngle, const double x, const double y);
+    int64_t CreateConicGradient(const double startAngle, const double x, const double y);
     void DrawImage(const CanvasImage& image);
     void DrawImage(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const CanvasImage& image);
     std::unique_ptr<ImageData> GetImageData(double fLeft, double fTop, double fWidth, double fHeight);
+    int64_t GetNativeImageData(const double left, const double top, const double width, const double height);
     int64_t GetPixelMap(double left, double top, double width, double height);
     std::string ToDataURL(const std::string& dataUrl, double quality);
     std::string GetJsonData(const std::string& path);
     std::vector<double> GetLineDash();
-    int64_t CreatePattern(std::unique_ptr<RenderImage> cjImage, const std::string& repeat);
+    int64_t CreatePattern(int64_t bitMapId, const std::string& repeat);
     void SetPixelMap(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
+    std::string ToDataUrl(const std::string type, const double quality);
+    double GetWidth();
+    double GetHeight();
+    void TransferFromImageBitmap(const sptr<CJRenderImage> cjImage);
 
     void SetUnit(CanvasUnit unit)
     {

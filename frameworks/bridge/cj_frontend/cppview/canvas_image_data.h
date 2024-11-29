@@ -28,6 +28,9 @@ class ACE_EXPORT NativeImageData : public OHOS::FFI::FFIData {
 public:
     NativeImageData();
     ~NativeImageData() override;
+    int32_t GetHeight() const;
+    int32_t GetWidth() const;
+    std::vector<uint8_t> GetData() const;
 
     int32_t width_ = 0;
     int32_t height_ = 0;

@@ -72,5 +72,5 @@ private:
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 
-} // namespace OHOS::Ace::Framework
+} //  namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_CJ_FRONTEND_CPP_VIEW_CAVANS_PATH_H

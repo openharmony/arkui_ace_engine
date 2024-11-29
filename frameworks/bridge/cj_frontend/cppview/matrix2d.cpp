@@ -21,6 +21,8 @@ using namespace OHOS::Ace;
 
 namespace OHOS::Ace::Framework {
 
+NativeMatrix2d::NativeMatrix2d() : FFIData() {}
+
 NativeMatrix2d::NativeMatrix2d(const int32_t unit) : FFIData()
 {
     unit_ = static_cast<CanvasUnit>(unit);

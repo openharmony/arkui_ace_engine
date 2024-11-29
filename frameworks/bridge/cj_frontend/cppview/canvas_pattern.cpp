@@ -23,14 +23,15 @@ NativeCanvasPattern::~NativeCanvasPattern()
     LOGI("Native Canvas Pattern Destroyed: %{public}" PRId64, GetID());
 }
 
-void NativeCanvasPattern::SetTransform(TransformParam transform)
+void NativeCanvasPattern::SetTransform(int64_t matrixId)
 {
-    double density = GetDensity();
-    transform.translateX *= density;
-    transform.translateY *= density;
-    auto canvasRenderer = canvasRenderWeak_.Upgrade();
-    if (canvasRenderer) {
-        canvasRenderer->SetTransform(transform);
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(matrixId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix by id: %{public}" PRId64, matrixId);
+        return;
+    }
+    if (canvasRenderWeak_) {
+        canvasRenderWeak_->SetTransform(GetId(), matrix2d->GetTransform());
     }
 }
 
