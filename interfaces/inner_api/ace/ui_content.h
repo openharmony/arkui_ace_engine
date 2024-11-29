@@ -462,6 +462,7 @@ public:
     }
 
     virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
+    virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 };
 
 } // namespace OHOS::Ace
