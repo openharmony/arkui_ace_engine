@@ -237,12 +237,12 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, std::function<float
 
     RepeatVirtualScrollModelNG repeatModel;
     std::function<void(uint32_t)> createFunc = [this, getSize](uint32_t idx) {
-        CreateGridItem(FILL_VALUE, getSize(idx));
+        CreateFocusableGridItems(1, FILL_VALUE, getSize(idx), GridItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Pop();
     };
     std::function<void(const std::string&, uint32_t)> updateFunc = [this, getSize](
                                                                        const std::string& value, uint32_t idx) {
-        CreateGridItem(FILL_VALUE, getSize(idx));
+        CreateFocusableGridItems(1, FILL_VALUE, getSize(idx), GridItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Finish();
     };
     std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {

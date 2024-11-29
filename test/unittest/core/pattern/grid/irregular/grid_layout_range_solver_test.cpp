@@ -800,4 +800,48 @@ HWTEST_F(GridLayoutRangeTest, Focus001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: Focus002
+ * @tc.desc: Test Grid changing focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
+{
+    auto model = CreateRepeatGrid(50, [](uint32_t idx) {
+        if (idx == 0 || idx == 2) {
+            return 400.0f;
+        }
+        if (idx == 22) {
+            return 1200.0f;
+        }
+        return 200.0f;
+    });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    const auto options = GetOptionDemo14();
+    model.SetLayoutOptions(options);
+    model.SetCachedCount(1);
+    CreateDone();
+    frameNode_->AttachToMainTree(false, PipelineContext::GetCurrentContextPtrSafely());
+
+    auto algo = pattern_->GetScopeFocusAlgorithm();
+    auto curFocus = GetChildFocusHub(frameNode_, 0);
+    EXPECT_TRUE(curFocus->IsFocusable());
+    for (int i = 1; i < 50; ++i) {
+        WeakPtr<FocusHub> next;
+        algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
+        ASSERT_TRUE(next.Upgrade());
+        EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
+        EXPECT_EQ(pattern_->focusIndex_, i);
+        curFocus = next.Upgrade();
+    }
+    for (int i = 48; i >= 0; --i) {
+        WeakPtr<FocusHub> next;
+        algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
+        ASSERT_TRUE(next.Upgrade());
+        EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
+        EXPECT_EQ(pattern_->focusIndex_, i);
+        curFocus = next.Upgrade();
+    }
+}
 } // namespace OHOS::Ace::NG
