@@ -128,7 +128,7 @@ void Scrollable::InitPanRecognizerNG()
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
     double distance = SystemProperties::GetScrollableDistance();
-    if (distance <= 0) {
+    if (LessOrEqual(distance, 0.0)) {
         distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
     panRecognizerNG_ =
