@@ -10946,21 +10946,25 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
     ResetSelection();
 
     auto curIt = GetSpanIter(index);
-    std::wstring curText = StringUtils::ToWstring((*curIt)->content);
-    if (curIt != spans_.end() && (*curIt)->spanItemType == SpanItemType::NORMAL
-        && index >= (*curIt)->rangeStart && curText[index - (*curIt)->rangeStart] == L' ') {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete forward");
-        DeleteForward(1);
-        return true;
+    if (curIt != spans_.end()) {
+        std::wstring curText = StringUtils::ToWstring((*curIt)->content);
+        if ((*curIt)->spanItemType == SpanItemType::NORMAL
+            && index >= (*curIt)->rangeStart && curText[index - (*curIt)->rangeStart] == L' ') {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete forward");
+            DeleteForward(1);
+            return true;
+        }
     }
 
     auto preIt = GetSpanIter(index - 1);
-    std::wstring preText = StringUtils::ToWstring((*preIt)->content);
-    if (preIt != spans_.end() && (*preIt)->spanItemType == SpanItemType::NORMAL
-        && index - 1 >= (*preIt)->rangeStart && preText[index - 1 - (*preIt)->rangeStart] == L' ') {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete backward");
-        DeleteBackward(1);
-        return true;
+    if (preIt != spans_.end()) {
+        std::wstring preText = StringUtils::ToWstring((*preIt)->content);
+        if ((*preIt)->spanItemType == SpanItemType::NORMAL
+            && index - 1 >= (*preIt)->rangeStart && preText[index - 1 - (*preIt)->rangeStart] == L' ') {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "delete backward");
+            DeleteBackward(1);
+            return true;
+        }
     }
 
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "insert value");
