@@ -15,9 +15,8 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { TextInputBootcamp } from './TextInputBootcamp';
-import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
-
+import { TextAreaBootcamp } from './TextAreaBootcamp';
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -25,17 +24,17 @@ export const inputsRoute: RouteGroup = {
   children: [
     { name: 'textInput', label: '单行文本框/TextInput' },
     { name: 'textArea', label: '多行文本框/TextArea' },
-    { name: 'richeditor', label: '富文本/RichEditor' },
+    { name: 'richEditor', label: '富文本/RichEditor' },
   ]
 };
 
 @Builder
 export function InputsDestination(name: string, route: Route) {
-  if (name === 'inputs/textInput') {
-    TextInputBootcamp({ title: route.label })
-  } else if (name === 'inputs/textArea') {
-    TextAreaBootcamp({ title: route.label })
-  } else if (name === 'inputs/richeditor') {
+  if (name === 'inputs/richEditor') {
     RichEditorBootcamp({ title: route.label })
+  }else if (name === 'inputs/textInput') {
+    TextInputBootcamp({ title: route.label })
+  }else if (name === 'inputs/textArea') {
+    TextAreaBootcamp({ title: route.label })
   }
 }
