@@ -28,6 +28,7 @@
 // SORTED_SECTION
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
+#include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -204,6 +205,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
+    void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
+    void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);

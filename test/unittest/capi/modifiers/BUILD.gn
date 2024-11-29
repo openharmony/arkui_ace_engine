@@ -55,6 +55,7 @@ ace_unittest("capi_all_modifiers_test") {
     "hyperlink_modifier_test.cpp",
     "image_animator_modifier_test.cpp",
     "image_modifier_test.cpp",
+    "image_span_modifier_test.cpp",
     "line_modifier_test.cpp",
     "list_item_group_modifier_test.cpp",
     "list_item_modifier_test.cpp",
