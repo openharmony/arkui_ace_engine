@@ -1733,6 +1733,17 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
+
+    if (!isFullScreen && mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
+        auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(videoLayoutProperty);
+        SizeF videoSize = SizeF(
+            static_cast<float>(mediaPlayer_->GetVideoWidth()),
+            static_cast<float>(mediaPlayer_->GetVideoHeight()));
+        videoLayoutProperty->UpdateVideoSize(videoSize);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+
     if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
