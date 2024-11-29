@@ -4306,12 +4306,6 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-    MiscServices::Configuration configuration;
-    configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(
-        static_cast<int32_t>(GetTextInputActionValue(GetDefaultTextInputAction()))));
-    configuration.SetTextInputType(
-        static_cast<MiscServices::TextInputType>(static_cast<int32_t>(TextInputType::UNSPECIFIED)));
-    MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
     if (richEditTextChangeListener_ == nullptr) {
         richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
     }
