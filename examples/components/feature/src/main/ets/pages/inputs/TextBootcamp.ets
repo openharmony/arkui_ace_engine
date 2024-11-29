@@ -205,10 +205,6 @@ export struct TextBootcamp {
           types: useEnabled(this.enableTextDataDetectorConfigTypes, this.textDataDetectorConfigTypes),
           onDetectResultUpdate: (result: string) => {
           },
-          // color : useEnabled(this.enableTextDataDetectorConfigColor,this.textDataDetectorConfigColor),
-          // decoration: {types:useEnabled(this.enableTextDataDetectorConfigDecorationType,this.textDataDetectorConfigDecorationType),
-          //   color:useEnabled(this.enableTextDataDetectorConfigDecorationColor,this.textDataDetectorConfigDecorationColor),
-          //   style:useEnabled(this.enableTextDataDetectorConfigDecorationStyle,this.textDataDetectorConfigDecorationStyle)}
         })
           // .bindSelectionMenu({TextSpanType:useEnabled(this.enableBindSelectionMenuSpanType,
           // this.bindSelectionMenuSpanType),
