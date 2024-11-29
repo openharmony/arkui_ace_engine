@@ -209,7 +209,7 @@ std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXW
     size_t index, const LinearVector<float>& itemHalfSizes)
 {
     if (isHorizontalAndRTL_) {
-        index = maxDisplayCount_ - 1 - index;
+        index = static_cast<size_t>(maxDisplayCount_) - 1 - index;
     }
 
     if (index >= animationEndCenterX_.size()) {
