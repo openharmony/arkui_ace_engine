@@ -355,7 +355,24 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
         return;
     }
 
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, value);
+    NG::BorderRadiusProperty borderRadius = BorderRadiusProperty(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
+}
+
+void SecurityComponentModelNG::SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
+    const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+    const std::optional<Dimension>& bottomRight)
+{
+    if (!IsBackgroundVisible()) {
+        SC_LOG_WARN("Can not set background padding without background");
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = topLeft;
+    borderRadius.radiusTopRight = topRight;
+    borderRadius.radiusBottomLeft = bottomLeft;
+    borderRadius.radiusBottomRight = bottomRight;
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,

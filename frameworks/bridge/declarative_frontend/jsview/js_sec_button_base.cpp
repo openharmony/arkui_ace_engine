@@ -183,6 +183,35 @@ void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 {
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> topLeft;
+        std::optional<CalcDimension> topRight;
+        std::optional<CalcDimension> bottomLeft;
+        std::optional<CalcDimension> bottomRight;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension topLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topLeft"), topLeftDimen)) {
+            topLeft = topLeftDimen;
+        }
+        CalcDimension topRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topRight"), topRightDimen)) {
+            topRight = topRightDimen;
+        }
+        CalcDimension bottomLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomLeft"), bottomLeftDimen)) {
+            bottomLeft = bottomLeftDimen;
+        }
+        CalcDimension bottomRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomRight"), bottomRightDimen)) {
+            bottomRight = bottomRightDimen;
+        }
+        
+        if (topLeft.has_value() || topRight.has_value() || bottomLeft.has_value() || bottomRight.has_value()) {
+            SecurityComponentModelNG::SetBackgroundBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+            return;
+        }
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
