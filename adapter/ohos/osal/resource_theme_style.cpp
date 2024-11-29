@@ -66,6 +66,7 @@ static const std::set<std::string> stringAttrs = {
     "description_export_to_gallery",
     "description_quick_save_to_gallery",
     "description_quick_resave_to_gallery",
+    "description_save_all",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
