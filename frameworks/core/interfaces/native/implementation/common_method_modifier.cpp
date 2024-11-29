@@ -1782,25 +1782,8 @@ void HueRotateImpl(Ark_NativePointer node,
         ViewAbstract::SetHueRotate(frameNode, std::nullopt);
         return;
     }
-    auto optFloatConvValue = Converter::OptConvert<float>(*value);
-    if (optFloatConvValue.has_value()) {
-        ViewAbstract::SetHueRotate(frameNode, optFloatConvValue);
-        return;
-    }
-    
-    auto optStrConvValue = Converter::OptConvert<Ark_String>(*value);
-    if (optStrConvValue.has_value()) {
-        auto strConvValue = std::string(optStrConvValue->chars);
-        char* endPtr;
-        float hueValue = std::strtof(strConvValue.c_str(), &endPtr);
-        // Check if the conversion was successful
-        if (endPtr != strConvValue.c_str()) {
-            auto optHueValue = std::optional<float>(hueValue);
-            ViewAbstract::SetHueRotate(frameNode, optHueValue);
-            return;
-        }
-    }
-    ViewAbstract::SetHueRotate(frameNode, std::nullopt);
+    auto convValue = Converter::OptConvert<float>(*value);
+    ViewAbstract::SetHueRotate(frameNode, convValue);
 }
 void UseShadowBatchingImpl(Ark_NativePointer node,
                            Ark_Boolean value)

@@ -98,7 +98,7 @@ namespace Converter {
         return dst;
     }
 }
-class CommonMethodModifierLmv1352173Test : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
+class CommonMethodModifierTest4 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
     GENERATED_ARKUI_BLANK // test common methods on frameNode for Blank component
     > {
@@ -111,7 +111,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_COLOR_BLEND_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE);
@@ -122,7 +122,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestDefaultValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setColorBlendTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColorBlend, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Color_String_Resource, std::string>;
@@ -154,7 +154,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestValidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setColorBlendTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColorBlend, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Color_String_Resource, std::string>;
@@ -175,7 +175,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setColorBlendTestInvalidValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setInvertTestDefaultValues, TestSize.Level1)
 {
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_INVERT_NAME);
     EXPECT_EQ(strResult, ATTRIBUTE_INVERT_DEFAULT_VALUE);
@@ -186,7 +186,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setInvertTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
@@ -215,7 +215,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setInvertTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInvert, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_InvertOptions, std::string>;
@@ -239,7 +239,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setInvertTestInvalidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
@@ -251,7 +251,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_String, float>;
@@ -275,7 +275,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Ark_Union_Number_String, float>;
@@ -296,7 +296,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setHueRotateInvalidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setUseEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setUseEffectDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
@@ -308,7 +308,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setUseEffectDefaultValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setUseEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setUseEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseEffect, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
@@ -329,7 +329,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setUseEffectValidValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setRenderGroupDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setRenderGroupDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_RENDER_GROUP_NAME, ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE);
@@ -341,7 +341,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setRenderGroupDefaultValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setRenderGroupValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setRenderGroup, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
@@ -362,7 +362,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setRenderGroupValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setFreezeDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setFreezeDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_FREEZE_NAME, ATTRIBUTE_FREEZE_DEFAULT_VALUE);
@@ -374,7 +374,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setFreezeDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setFreezeValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFreeze, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
@@ -395,7 +395,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, DISABLED_setFreezeValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridSpanDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_GRID_SPAN_NAME, ATTRIBUTE_GRID_SPAN_DEFAULT_VALUE);
@@ -407,7 +407,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanDefaultValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridSpanValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridSpan, nullptr);
     using OneTestStep = std::tuple<Ark_Number, int32_t>;
@@ -429,7 +429,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanValidValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridSpanInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridSpan, nullptr);
     using OneTestStep = std::tuple<Ark_Number, int32_t>;
@@ -450,7 +450,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridSpanInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridOffsetDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_GRID_OFFSET_NAME, ATTRIBUTE_GRID_OFFSET_DEFAULT_VALUE);
@@ -462,7 +462,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetDefaultValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridOffsetValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridOffset, nullptr);
     using OneTestStep = std::tuple<Ark_Number, int32_t>;
@@ -484,7 +484,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setGridOffsetInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGridOffset, nullptr);
     using OneTestStep = std::tuple<Ark_Number, int32_t>;
@@ -505,7 +505,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setGridOffsetInvalidValues, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_SPHERICAL_EFFECT_NAME, ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -517,7 +517,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectDefaultValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setSphericalEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
@@ -542,7 +542,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
@@ -566,7 +566,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setSphericalEffectInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
@@ -578,7 +578,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectDefaultValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setLightUpEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
@@ -602,7 +602,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Ark_Number, float>;
@@ -625,7 +625,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setLightUpEffectInvalidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setPixelStretchEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
@@ -637,7 +637,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setPixelStretchEffectDefaultValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setPixelStretchEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Ark_PixelStretchEffectOptions, std::string>;
@@ -665,7 +665,7 @@ HWTEST_F(CommonMethodModifierLmv1352173Test, setPixelStretchEffectValidValues, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierLmv1352173Test, setPixelStretchEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Ark_PixelStretchEffectOptions, std::string>;
