@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -101,7 +102,9 @@ public:
         if (!overlayModifier_) {
             overlayModifier_ = AceType::MakeRefPtr<TextDragOverlayModifier>(WeakClaim(this));
         }
-        return MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
+        auto paintMethod = AceType::MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
+        paintMethod->UpdateHandleInfo(info_);
+        return paintMethod;
     }
 
     const WeakPtr<Paragraph>& GetParagraph() const
@@ -209,6 +212,11 @@ public:
         return TEXT_DRAG_RADIUS;
     }
 
+    void UpdateHandleAnimationInfo(const DragInfo& info)
+    {
+        info_ = info;
+    }
+
     Color GetDragBackgroundColor();
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
@@ -240,6 +248,7 @@ private:
     std::shared_ptr<RSPath> selBackGroundPath_;
     std::list<RefPtr<FrameNode>> imageChildren_;
     std::vector<RectF> rectsForPlaceholders_;
+    DragInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

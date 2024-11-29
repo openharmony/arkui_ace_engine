@@ -7463,7 +7463,7 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
                 imageChildren.emplace_back(node);
             }
         }
-        RichEditorDragInfo info;
+        DragInfo info;
         info.selectedWidth = pattern->GetSelectedMaxWidth();
         info.handleColor = pattern->GetCaretColor();
         info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();

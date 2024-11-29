@@ -157,7 +157,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG001, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    DragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -217,7 +217,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG002, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    DragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -252,7 +252,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG003, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    DragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
@@ -313,7 +313,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.
     auto richEditorNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
     ASSERT_NE(richEditorNode, nullptr);
-    RichEditorDragInfo info;
+    DragInfo info;
     auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
     ASSERT_NE(dragNode, nullptr);
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
