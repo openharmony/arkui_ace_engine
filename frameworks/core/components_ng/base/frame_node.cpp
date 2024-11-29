@@ -681,7 +681,7 @@ void FrameNode::DumpSafeAreaInfo()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
-                                       .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                       .append(std::to_string(manager->IsIgnoreSafeArea()))
                                        .append(std::string(", isNeedAvoidWindow: ").c_str())
                                        .append(std::to_string(manager->IsNeedAvoidWindow()))
                                        .append(std::string(", isFullScreen: ").c_str())
@@ -951,27 +951,20 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
         if (parentRect != defaultValue) {
             json->Put("ParentSelfAdjust", parentRect.ToString().c_str());
         }
-        CHECK_EQUAL_VOID(GetTag(), V2::PAGE_ETS_TAG);
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsIgnoreAsfeArea()) {
-            json->Put("IgnoreSafeArea", manager->IsIgnoreAsfeArea());
-        }
-        if (!manager->IsNeedAvoidWindow()) {
-            json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
-        }
-        if (!manager->IsFullScreen()) {
-            json->Put("IsFullScreen", manager->IsFullScreen());
-        }
-        if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
-        }
-        if (!pipeline->GetUseCutout()) {
-            json->Put("IsUseCutout", pipeline->GetUseCutout());
-        }
     }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->KeyboardSafeAreaEnabled()) {
+        json->Put("KeyboardInset: ", manager->GetKeyboardInset().ToString().c_str());
+    }
+    json->Put("IgnoreSafeArea", manager->IsIgnoreSafeArea());
+    json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
+    json->Put("IsFullScreen", manager->IsFullScreen());
+    json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
+    json->Put("IsUseCutout", pipeline->GetUseCutout());
 }
 
 void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
@@ -5859,7 +5852,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
-    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
+    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreSafeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
     json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
