@@ -855,7 +855,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     auto& children = root->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
         auto node = AceType::DynamicCast<NG::FrameNode>(*child);
-        if (node && IsContextTransparent(node)) {
+        if (node && (IsContextTransparent(node) || !node->IsActive())) {
             continue;
         }
         res |= CheckSecurityComponentStatus(*child, nodeId2Rect, secNodeId, nodeId2Zindex);

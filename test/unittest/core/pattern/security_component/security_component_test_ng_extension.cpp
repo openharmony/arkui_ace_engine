@@ -1347,18 +1347,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVer
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->middle_.height_ = 2.0;
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->text_.width_ = 1.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 0.5); // (icon_.width_ - text_.width_) / 2
     EXPECT_EQ(offsetText.GetY(), 4.0); // icon_.height_ + middle_.height_
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.width_ = 3.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 0);
     EXPECT_EQ(offsetText1.GetY(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetIcon1.GetX(), 0.5); // (text_.width_ - icon_.width_) / 2
@@ -1383,18 +1384,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHor
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->middle_.width_ = 2.0;
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->text_.height_ = 1.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 4.0); // icon_.width_ + middle_.width_
     EXPECT_EQ(offsetText.GetY(), 0.5); // (icon_.height_ - text_.height_) / 2
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.height_ = 3.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetText1.GetY(), 0);
     EXPECT_EQ(offsetIcon1.GetY(), 0.5); // (text_.width_ - icon_.width_) / 2
