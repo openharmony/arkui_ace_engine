@@ -17,8 +17,7 @@ import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 
 class MyButtonModifierNormal implements AttributeModifier<SymbolSpanAttribute> {
-  isDark: boolean = false;
-
+  public isDark: boolean = false;
   applyNormalAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -29,8 +28,7 @@ class MyButtonModifierNormal implements AttributeModifier<SymbolSpanAttribute> {
 }
 
 class MyButtonModifierPressed implements AttributeModifier<SymbolSpanAttribute> {
-  isDark: boolean = false
-
+  public isDark: boolean = false
   applyPressedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -41,8 +39,7 @@ class MyButtonModifierPressed implements AttributeModifier<SymbolSpanAttribute> 
 }
 
 class MyButtonModifierFocused implements AttributeModifier<SymbolSpanAttribute> {
-  isDark: boolean = false
-
+  public isDark: boolean = false
   applyFocusedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -53,8 +50,7 @@ class MyButtonModifierFocused implements AttributeModifier<SymbolSpanAttribute> 
 }
 
 class MyButtonModifierDisabled implements AttributeModifier<SymbolSpanAttribute> {
-  isDark: boolean = false
-
+  public isDark: boolean = false
   applyDisabledAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -65,8 +61,7 @@ class MyButtonModifierDisabled implements AttributeModifier<SymbolSpanAttribute>
 }
 
 class MyButtonModifierSelected implements AttributeModifier<SymbolSpanAttribute> {
-  isDark: boolean = false
-
+  public isDark: boolean = false
   applySelectedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
