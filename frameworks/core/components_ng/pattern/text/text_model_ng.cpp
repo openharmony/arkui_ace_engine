@@ -217,7 +217,11 @@ void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, const std::optiona
 
 void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value.value_or(false), frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, frameNode);
+    }
 }
 
 void TextModelNG::SetMinFontScale(const float value)
