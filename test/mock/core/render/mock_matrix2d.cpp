@@ -13,37 +13,20 @@
  * limitations under the License.
  */
 
-#include "mock_matrix2d.h"
 #include "core/components_ng/render/adapter/matrix2d.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-    const auto TRANSFORM_UNITY_VALUE = 1.00;
-    const auto TRANSFORM_ZERO_VALUE = 0.00;
+const auto TRANSFORM_UNITY_VALUE = 1.00;
+const auto TRANSFORM_ZERO_VALUE = 0.00;
 } // namespace
+
 bool Matrix2D::Invert(TransformParam& param)
 {
-
-
-    // test!!!
-    std::printf("invert: matrix transform: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", param.scaleX, param.scaleY,
-        param.skewX, param.skewX, param.translateX, param.translateY);
-    // test!!!
-
-
     if (param.scaleX == TRANSFORM_ZERO_VALUE && param.scaleY == TRANSFORM_ZERO_VALUE &&
         param.skewX == TRANSFORM_ZERO_VALUE && param.skewY == TRANSFORM_ZERO_VALUE &&
         param.translateX == TRANSFORM_ZERO_VALUE && param.translateY == TRANSFORM_ZERO_VALUE) {
-
-
-        // test!!!
-        std::printf("invert: matrix2 transform: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", param.scaleX, param.scaleY,
-            param.skewX, param.skewX, param.translateX, param.translateY);
-        // test!!!
-
-
-
         return false;
     }
 
@@ -56,12 +39,6 @@ bool Matrix2D::Invert(TransformParam& param)
     tmp = param.translateX;
     param.translateX = param.translateY;
     param.translateY = tmp;
-
-    // test!!!
-        std::printf("invert: matrix3 transform: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", param.scaleX, param.scaleY,
-            param.skewX, param.skewX, param.translateX, param.translateY);
-    // test!!!
-
     return true;
 }
 

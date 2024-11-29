@@ -36,15 +36,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {
-    auto param = peer->transform;
-    std::printf("identity: accessor transform: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", param.scaleX, param.scaleY,
-            param.skewX, param.skewX, param.translateX, param.translateY);
     Matrix2D::Identity(peer->transform);
-
-    auto param2 = peer->transform; 
-    std::printf("identity: accessor2 transform: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", param2.scaleX, param2.scaleY,
-            param2.skewX, param2.skewX, param2.translateX, param2.translateY);
-
     LOGE("ARKOALA Matrix2DAccessor::IdentityImpl return type Ark_NativePointer "
         "should be replaced with a Matrix2DPeer type.");
     return reinterpret_cast<Ark_NativePointer>(peer);

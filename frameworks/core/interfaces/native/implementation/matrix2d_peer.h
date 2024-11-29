@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_MATRIX_2D_PEER_IMPL_H
 
@@ -26,15 +27,14 @@ struct Matrix2DPeer {
         Matrix2DPeer();
         unit = value;
     }
-    ~Matrix2DPeer()  = default; 
-    
+    ~Matrix2DPeer()  = default;
+
     double GetDensity()
     {
         double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
         return ((unit == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
 
-    std::shared_ptr<OHOS::Ace::TransformParam> pointer = nullptr;
     OHOS::Ace::TransformParam transform;
     OHOS::Ace::CanvasUnit unit = OHOS::Ace::CanvasUnit::DEFAULT;
 };
