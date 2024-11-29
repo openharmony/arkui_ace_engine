@@ -197,7 +197,8 @@ void TextLayoutAlgorithm::CheckNeedReCreateParagraph(
         textPattern->IsDragging() || textLayoutProperty->GetAdaptMaxFontSize().has_value() ||
         textLayoutProperty->GetAdaptMinFontSize().has_value() ||
         textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST) !=
-            TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+            TextHeightAdaptivePolicy::MAX_LINES_FIRST ||
+        textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE;
 }
 
 void TextLayoutAlgorithm::ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty)
