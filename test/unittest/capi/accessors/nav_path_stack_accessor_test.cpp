@@ -125,27 +125,137 @@ private:
 };
 
 /**
- * @tc.name: pushPath0Test
- * @tc.desc: Check the functionality of  NavPathStackAccessor::pushPath0Impl
+ * @tc.name: bothPushPath0Pop0Test
+ * @tc.desc: Check the functionality of both NavPathStackAccessor::PushPath0Impl and Pop0Impl
  * @tc.type: FUNC
  */
-HWTEST_F(NavPathStackAccessorTest, pushPath0Test, TestSize.Level1)
+HWTEST_F(NavPathStackAccessorTest, bothPushPath0Pop0Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->pushPath0, nullptr);
+    ASSERT_NE(accessor_->pop0, nullptr);
     ASSERT_NE(accessor_->size, nullptr);
 
     EXPECT_EQ(accessor_->size(peer_), 0);
 
-    Ark_NavPathInfo arkNavPathInfo {
+    Ark_NavPathInfo path {
         .name = ArkValue<Ark_String>("aaaa"),
         .param = ArkValue<Opt_CustomObject>(),
         .onPop = ArkValue<Opt_Callback_PopInfo_Void>(),
         .isEntry = ArkValue<Opt_Boolean>()
     };
     Opt_Boolean animated = ArkValue<Opt_Boolean>();
-    accessor_->pushPath0(peer_, &arkNavPathInfo, &animated);
+    accessor_->pushPath0(peer_, &path, &animated);
 
     EXPECT_EQ(accessor_->size(peer_), 1);
+
+    accessor_->pop0(peer_, &animated);
+
+    EXPECT_EQ(accessor_->size(peer_), 0);
 }
 
+/**
+ * @tc.name: pushPath1Test
+ * @tc.desc: Check the functionality of  NavPathStackAccessor::PushPath1Impl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavPathStackAccessorTest, pushPath1Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->pushPath1, nullptr);
+    ASSERT_NE(accessor_->pop0, nullptr);
+    ASSERT_NE(accessor_->size, nullptr);
+
+    EXPECT_EQ(accessor_->size(peer_), 0);
+
+    Ark_NavPathInfo path {
+        .name = ArkValue<Ark_String>(std::string()),
+        .param = ArkValue<Opt_CustomObject>(),
+        .onPop = ArkValue<Opt_Callback_PopInfo_Void>(),
+        .isEntry = ArkValue<Opt_Boolean>()
+    };
+    auto pathA = path; pathA.name = ArkValue<Ark_String>("PathA");
+    auto pathB = path; pathB.name = ArkValue<Ark_String>("PathB");
+    auto pathC = path; pathC.name = ArkValue<Ark_String>("PathC");
+    auto pathD = path; pathD.name = ArkValue<Ark_String>("PathD");
+
+    auto options = ArkValue<Opt_NavigationOptions>(Ark_NavigationOptions{
+        .launchMode = ArkValue<Opt_LaunchMode>(Ark_LaunchMode{ARK_LAUNCH_MODE_STANDARD}),
+        .animated = ArkValue<Opt_Boolean>()
+    });
+
+    accessor_->pushPath1(peer_, &pathA, &options);
+    accessor_->pushPath1(peer_, &pathB, &options);
+    accessor_->pushPath1(peer_, &pathC, &options);
+    accessor_->pushPath1(peer_, &pathD, &options);
+    EXPECT_EQ(accessor_->size(peer_), 4);
+
+    auto optionsMove = ArkValue<Opt_NavigationOptions>(Ark_NavigationOptions{
+        .launchMode = ArkValue<Opt_LaunchMode>(Ark_LaunchMode{ARK_LAUNCH_MODE_MOVE_TO_TOP_SINGLETON}),
+        .animated = ArkValue<Opt_Boolean>()
+    });
+    accessor_->pushPath1(peer_, &pathB, &optionsMove);
+    EXPECT_EQ(accessor_->size(peer_), 4); // the size is same, but B ia at top and over of D, C, A
+
+    auto optionsPop = ArkValue<Opt_NavigationOptions>(Ark_NavigationOptions{
+        .launchMode = ArkValue<Opt_LaunchMode>(Ark_LaunchMode{ARK_LAUNCH_MODE_POP_TO_SINGLETON}),
+        .animated = ArkValue<Opt_Boolean>()
+    });
+    accessor_->pushPath1(peer_, &pathC, &optionsPop);
+    EXPECT_EQ(accessor_->size(peer_), 2); // the stack reduced to top page C
+
+    Opt_Boolean animated = ArkValue<Opt_Boolean>();
+    accessor_->pop0(peer_, &animated);
+    accessor_->pop0(peer_, &animated);
+    EXPECT_EQ(accessor_->size(peer_), 0);
+}
+
+/**
+ * @tc.name: bothPushPath1Pop1Test
+ * @tc.desc: Check the functionality of  NavPathStackAccessor::pushPath1Impl, ::pop1Impl
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavPathStackAccessorTest, bothPushPath1Pop1ParamCallbackTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->pushPath1, nullptr);
+    ASSERT_NE(accessor_->pop1, nullptr);
+    ASSERT_NE(accessor_->size, nullptr);
+
+    EXPECT_EQ(accessor_->size(peer_), 0);
+
+    static const std::string expectedName = "PageA";
+    static const std::string expectedData = "smth custom data from developer";
+    static const ArkUI_Int32 expectedResId = 123;
+    static bool wasInvoke = false;
+    auto checkFunc = [](const Ark_Int32 resourceId, const Ark_PopInfo parameter) {
+        wasInvoke = true;
+        EXPECT_EQ(expectedResId, resourceId);
+        auto name = Convert<std::string>(parameter.info.name);
+        EXPECT_EQ(expectedName, name);
+        auto data = Convert<std::string>(parameter.result.string);
+        EXPECT_EQ(expectedData, data);
+    };
+
+    Ark_NavPathInfo path {
+        .name = ArkValue<Ark_String>(expectedName),
+        .param = ArkValue<Opt_CustomObject>(),
+        .onPop = ArkValue<Opt_Callback_PopInfo_Void>(ArkValue<Callback_PopInfo_Void>(checkFunc, expectedResId)),
+        .isEntry = ArkValue<Opt_Boolean>()
+    };
+
+    auto optionsPush = ArkValue<Opt_NavigationOptions>(Ark_NavigationOptions{
+        .launchMode = ArkValue<Opt_LaunchMode>(),
+        .animated = ArkValue<Opt_Boolean>()
+    });
+
+    accessor_->pushPath1(peer_, &path, &optionsPush);
+    EXPECT_EQ(accessor_->size(peer_), 1);
+
+    EXPECT_FALSE(wasInvoke);
+    Opt_Boolean animated = ArkValue<Opt_Boolean>();
+    Ark_CustomObject result = {.string = ArkValue<Ark_String>(expectedData)};
+    accessor_->pop1(peer_, &result, &animated);
+    EXPECT_TRUE(wasInvoke);
+
+    EXPECT_EQ(accessor_->size(peer_), 0);
+
+}
 } // namespace OHOS::Ace::NG

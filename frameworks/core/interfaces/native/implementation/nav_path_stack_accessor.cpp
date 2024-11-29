@@ -16,13 +16,27 @@
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_CustomObject& dst, const Nav::ExternalData& src)
+{
+    if (src) {
+        dst = src->data_;
+    }
+}
+void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
+{
+    dst.name = ArkValue<Ark_String>(src.name_);
+    dst.param = ArkValue<Opt_CustomObject>(src.param_);
+    dst.onPop = ArkValue<Opt_Callback_PopInfo_Void>(); // TODO why is it need??
+    dst.isEntry = ArkValue<Opt_Boolean>(src.isEntry_);
+}
+
 template<>
 Nav::ExternalData Convert(const Ark_CustomObject& src)
 {
@@ -62,7 +76,7 @@ Nav::Options Convert(const Ark_NavigationOptions& src)
         .animated = OptConvert<bool>(src.animated)
     };
 }
-}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
@@ -316,7 +330,7 @@ Ark_NativePointer Pop1Impl(NavPathStackPeer* peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalid);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    Nav::PopResultType convResult; // temp stub // Converter::Convert<Nav::ExternalData>(*result);
+    auto convResult = Converter::Convert<Nav::ExternalData>(*result);
     navStack->Nav::PathStack::Pop(convResult, convAnimated);
     // convert the result of above to Ark_NavPathInfo here
     LOGE("NavPathStackAccessor::Pop1Impl - the result type does not match to documentation");

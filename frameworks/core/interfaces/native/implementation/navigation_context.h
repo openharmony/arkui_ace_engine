@@ -78,12 +78,7 @@ public:
     int32_t mode_;
     bool needDelete_;
 
-    // TODO move to frameworks/core/interfaces/native/implementation/nav_path_stack_accessor.cpp for reverse convert
-    void InvokeOnPop(const PopInfo& popInfo)
-    {
-        Ark_PopInfo arkPopInfo; // TODO convert from popInfo
-        onPop_.Invoke(arkPopInfo);
-    }
+    void InvokeOnPop(const PopInfo& popInfo);
 };
 
 using PopResultType = ExternalData;
@@ -274,4 +269,9 @@ private:
     void SetNeedUpdatePathInfo(int32_t index, bool need);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_CustomObject& dst, const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_NavPathInfo& dst, const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
+} // namespace OHOS::Ace::NG::GeneratedModifier::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H

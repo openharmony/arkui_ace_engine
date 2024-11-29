@@ -14,10 +14,18 @@
  */
 
 #include "navigation_context.h"
-#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext {
+void PathInfo::InvokeOnPop(const PopInfo& popInfo)
+{
+    Ark_PopInfo arkPopInfo {
+        .info = ::OHOS::Ace::NG::Converter::ArkValue<Ark_NavPathInfo>(popInfo.info),
+        .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_CustomObject>(popInfo.result),
+    };
+    onPop_.Invoke(arkPopInfo);
+}
 
 int PathStack::GetJsIndexFromNativeIndex(int index)
 {
@@ -272,7 +280,7 @@ void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
     const PopResultType& result, const std::optional<bool>& animated)
 {
     auto currentPathInfo = pathArray_.back();
-    pathArray_.erase(it, pathArray_.end());
+    pathArray_.erase(std::next(it, 1), pathArray_.end());
     isReplace_ = NO_ANIM_NO_REPLACE;
 
     if (result) {
