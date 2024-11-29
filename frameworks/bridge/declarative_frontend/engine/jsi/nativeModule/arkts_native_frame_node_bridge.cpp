@@ -307,6 +307,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
             if (nodePtr) {
                 node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
                 node->SetIsArkTsFrameNode(true);
+                auto renderContext = node->GetRenderContext();
+                if (renderContext) {
+                    renderContext->SetNeedDebugBoundary(true);
+                }
                 // let 'node' take the reference, so decrease ref of C node
                 node->DecRefCount();
             }
