@@ -7962,14 +7962,14 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         end = std::clamp(end, 0, GetTextContentLength());
     }
     CHECK_NULL_VOID(!ResetOnInvalidSelection(start, end));
-    AdjustSelector(start, end);
-    if (start != end) {
+    UpdateSelector(start, end);
+
+    if (textSelector_.IsValid() && !textSelector_.StartEqualToDest()) {
         StopTwinkling();
         if (start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd()) {
-            FireOnSelect(start, end);
+            FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         }
     }
-    textSelector_.Update(start, end);
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
