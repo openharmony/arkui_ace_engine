@@ -2500,19 +2500,8 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         std::string family = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());
         tyingStyleObj->SetProperty<std::string>("fontFamily", family);
     }
-    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
-    if (typingStyle.updateTextDecoration.has_value()) {
-        decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
-    }
-    if (typingStyle.updateTextDecorationColor.has_value()) {
-        decorationObj->SetProperty<std::string>("color", typingStyle.updateTextDecorationColor.value().ColorToString());
-    }
-    if (typingStyle.updateTextDecorationStyle.has_value()) {
-        decorationObj->SetProperty<int32_t>("style",
-            static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
-    }
     if (typingStyle.isInitDecoration) {
-        tyingStyleObj->SetPropertyObject("decoration", decorationObj);
+        tyingStyleObj->SetPropertyObject("decoration", CreateJsDecorationObj(typingStyle));
     }
     if (typingStyle.updateTextShadows.has_value()) {
         tyingStyleObj->SetPropertyObject("textShadows",
@@ -2532,7 +2521,25 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         tyingStyleObj->SetPropertyObject("textBackgroundStyle",
             JSRichEditor::CreateJsTextBackgroundStyle(typingStyle.updateTextBackgroundStyle.value()));
     }
+
     return tyingStyleObj;
+}
+
+JSRef<JSObject> JSRichEditorBaseController::CreateJsDecorationObj(const struct UpdateSpanStyle& typingStyle)
+{
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
+    if (typingStyle.updateTextDecoration.has_value()) {
+        decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
+    }
+    if (typingStyle.updateTextDecorationColor.has_value()) {
+        decorationObj->SetProperty<std::string>(
+            "color", typingStyle.updateTextDecorationColor.value().ColorToString());
+    }
+    if (typingStyle.updateTextDecorationStyle.has_value()) {
+        decorationObj->SetProperty<int32_t>("style",
+            static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
+    }
+    return decorationObj;
 }
 
 void JSRichEditorBaseController::CloseSelectionMenu()
