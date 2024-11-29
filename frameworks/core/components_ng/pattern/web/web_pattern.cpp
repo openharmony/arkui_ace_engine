@@ -3804,13 +3804,14 @@ void WebPattern::CheckHandles(SelectHandleInfo& handleInfo,
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    float dipScale = std::ceil(pipeline->GetDipScale());
     float viewPortY = handle->GetViewPortY();
     RectF visibleRect;
     RectF visibleInnerRect;
     RectF frameRect;
     host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY - 1,
-        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY + 1);
+    visibleInnerRect.SetRect(visibleInnerRect.GetX(), visibleInnerRect.GetY() + viewPortY - dipScale,
+        visibleInnerRect.Width(), visibleInnerRect.Height() - viewPortY + dipScale);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() };
     PointF topPoint = { paintRect.Left(), paintRect.Top() };
