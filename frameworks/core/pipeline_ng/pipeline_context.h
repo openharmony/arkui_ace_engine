@@ -1106,6 +1106,9 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+                return nodeLeft->IsOnMainTree();
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
