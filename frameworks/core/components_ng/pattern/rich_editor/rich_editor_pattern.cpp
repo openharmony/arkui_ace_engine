@@ -8546,9 +8546,7 @@ void RichEditorPattern::StopAutoScroll()
     autoScrollTask_.Cancel();
     prevAutoScrollOffset_ = OffsetF(0.0f, 0.0f);
     auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarDisappearAnimation();
-    }
+    IF_PRESENT(scrollBar, ScheduleDisappearDelayTask());
 }
 
 bool RichEditorPattern::NeedAiAnalysis(
