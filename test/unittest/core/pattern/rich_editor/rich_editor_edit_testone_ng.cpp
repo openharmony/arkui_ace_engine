@@ -75,7 +75,7 @@ HWTEST_F(RichEditorEditTestOneNg, GetRightTextOfCursor001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "tesol";
+    richEditorPattern->textForDisplay_ = u"tesol";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 2;
@@ -130,10 +130,10 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), -1, 1);
-    ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), -1, 10);
-    ret = richEditorPattern->GetSelectedSpanText(StringUtils::ToWstring(INIT_VALUE_1), 0, 1);
-    EXPECT_EQ(ret, "h");
+    auto ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 1);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 10);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, 0, 1);
+    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "h");
 }
 
 /**
@@ -182,21 +182,20 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::string ori = "12345";
-    std::wstring value = StringUtils::ToWstring(ori);
+    std::u16string ori = u"12345";
 
     std::vector<int> start = { -1, 0, 15 };
     std::vector<int> end = { 10, -3 };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 2; ++j) {
-            auto ret = richEditorPattern->GetSelectedSpanText(value, start[i], end[j]);
-            EXPECT_EQ(ret, "");
+            auto ret = richEditorPattern->GetSelectedSpanText(ori, start[i], end[j]);
+            EXPECT_EQ(StringUtils::Str16ToStr8(ret), "");
         }
     }
 
-    auto ret = richEditorPattern->GetSelectedSpanText(value, 0, 1);
-    EXPECT_EQ(ret, "1");
+    auto ret = richEditorPattern->GetSelectedSpanText(ori, 0, 1);
+    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "1");
 }
 
 /**
@@ -463,7 +462,7 @@ HWTEST_F(RichEditorEditTestOneNg, CreateHandles001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "testShowHandles";
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 1;
@@ -647,7 +646,7 @@ HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite002, TestSize.Level1)
     auto start = richEditorPattern->operationRecords_.size();
 
     std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     richEditorPattern->HandleAIWriteResult(0, 5, buff);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 3);
@@ -692,10 +691,10 @@ HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite003, TestSize.Level1)
     /**
      * @tc.steps: step3. replace and recover placeholder for non-text.
      */
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>("");
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(u"");
     ASSERT_NE(spanString, nullptr);
     richEditorPattern->SetSubSpansWithAIWrite(spanString, 0, 12);
-    auto spanStr = AceType::MakeRefPtr<SpanString>("test![id1]占位符![id2]");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"test![id1]占位符![id2]");
     richEditorPattern->textSelector_.Update(0, 10);
     auto start = richEditorPattern->operationRecords_.size();
     richEditorPattern->AddSpansAndReplacePlaceholder(spanStr);
@@ -711,7 +710,7 @@ HWTEST_F(RichEditorEditTestOneNg, GetTextBoxes001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "testShowHandles";
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 1;

@@ -142,7 +142,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = "";
+    pattern->textForDisplay_ = u"";
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
     EXPECT_TRUE(pattern->GetTextForDisplay().empty());
     EXPECT_NE(pattern->textSelector_.GetTextStart(), 0);
@@ -167,7 +167,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->magnifierController_->magnifierNodeExist_ = false;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
@@ -194,7 +194,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->magnifierController_ = nullptr;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
@@ -220,7 +220,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->textSelector_.baseOffset = 2;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
@@ -247,7 +247,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->magnifierController_->magnifierNodeExist_ = false;
     pattern->textSelector_.baseOffset = 0;
@@ -268,7 +268,7 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->SetupMagnifier();
     pattern->magnifierController_->magnifierNodeExist_ = true;
     auto secondHandle_ = pattern->textSelector_.secondHandle;
@@ -288,7 +288,7 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->textForDisplay_ = "";
+    pattern->textForDisplay_ = u"";
     auto secondHandle_ = pattern->textSelector_.secondHandle;
     pattern->OnTextGenstureSelectionEnd();
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);

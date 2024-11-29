@@ -228,7 +228,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
     richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1);
     EXPECT_EQ(richEditorPattern->spans_.size(), 1);
     auto it = richEditorPattern->spans_.begin();
-    EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), PREVIEW_TEXT_VALUE1);
 }
 
 /**

@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "base/image/image_packer.h"
+#include "base/utils/utf_helper.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -549,7 +550,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
                 paragrapStart = out.length();
             }
             out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
-            auto content = item->GetSpanContent();
+            auto content = UtfUtils::Str16ToStr8(item->GetSpanContent());
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {
                 if (newLine) {

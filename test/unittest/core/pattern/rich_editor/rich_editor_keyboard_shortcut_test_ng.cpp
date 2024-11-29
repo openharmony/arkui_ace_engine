@@ -836,7 +836,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectParagraghPos001, TestSize
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test\n123";
+    it->content = u"test\n123";
     it->position = 4;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isSpanStringMode_ = true;
@@ -1094,7 +1094,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    std::string originalStr;
+    std::u16string originalStr;
     int32_t originalPos = 0;
     int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
     firstInfo.SetEraseLength(firstLength);
@@ -1135,7 +1135,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = INIT_VALUE_3;
+    it->content = INIT_U16VALUE_3;
     it->position = 0;
     richEditorPattern->caretPosition_ = 1;
 

@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_span_modifier.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
@@ -39,14 +40,14 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, content);
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = SpanModelNG::GetContent(uiNode);
+    g_strValue = UtfUtils::Str16ToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -54,7 +55,8 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::InitSpan(uiNode, src);
+    std::string content(src);
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)

@@ -112,12 +112,12 @@ void RichEditorDragTestNG::AddImageSpan()
     imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
     imageNode->MountToParent(frameNode_, frameNode_->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->placeholderIndex = 0;
     pattern_->spans_.emplace_back(spanItem);
     int32_t spanTextLength = 0;
     for (auto& span : pattern_->spans_) {
-        spanTextLength += StringUtils::ToWstring(span->content).length();
+        spanTextLength += span->content.length();
         span->position = spanTextLength;
     }
 }

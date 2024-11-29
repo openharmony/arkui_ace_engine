@@ -93,6 +93,7 @@ public:
     void SetEraseLength(int32_t eraseLength);
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
+    void SetValue(const std::u16string& value);
     const std::string& GetValue() const;
     void SetPreviewText(const std::string& previewText);
     const std::string& GetPreviewText() const;

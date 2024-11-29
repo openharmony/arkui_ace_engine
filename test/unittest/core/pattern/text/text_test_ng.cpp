@@ -259,8 +259,8 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     textModelNG.SetTextSelection(frameNode, startIndex, endIndex);
     EXPECT_NE(textPattern->textSelector_.GetStart(), startIndex);
 
-    std::string EventValue;
-    auto onCopyResult = [&EventValue](const std::string& param) { EventValue = param; };
+    std::u16string eventValue;
+    auto onCopyResult = [&eventValue](const std::u16string& param) { eventValue = param; };
 
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
@@ -487,7 +487,7 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
     pattern->ShowSelectOverlay();
     bool isFirstHandle[2] = { true, false };
     for (int i = 0; i < 2; i++) {
-        pattern->textForDisplay_ = "abcdefghij";
+        pattern->textForDisplay_ = u"abcdefghij";
         pattern->selectOverlay_->OnHandleMoveDone(handleRect, isFirstHandle[i]);
         EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
         EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
@@ -558,7 +558,7 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
      */
     textPattern->OnModifyDone();
     EXPECT_NE(textPattern->longPressEvent_, nullptr);
-    EXPECT_EQ(textPattern->textForDisplay_, TEXT_CONTENT);
+    EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), TEXT_CONTENT);
 }
 
 /**
@@ -683,7 +683,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm001, TestSize.Level1)
     RefPtr<SpanItem> span0 = nullptr;
     spans3_.emplace_back(span0);
     RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
-    span1->content = "span1\n";
+    span1->content = u"span1\n";
     spans3_.emplace_back(span1);
     auto pManager_2 = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_2, nullptr);
@@ -708,10 +708,10 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithm002, TestSize.Level1)
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     ASSERT_NE(pixelMap, nullptr);
     RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
-    span1->content = "span1\n";
+    span1->content = u"span1\n";
     spans_.emplace_back(span1);
     RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
-    span2->content = "span2\n";
+    span2->content = u"span2\n";
     spans_.emplace_back(span2);
     auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
     ASSERT_NE(pManager_, nullptr);
@@ -843,10 +843,10 @@ HWTEST_F(TextTestNg, UpdateParagraphForAISpan001, TestSize.Level1)
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
-    std::string textForAI = "";
+    std::u16string textForAI = u"";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), StringUtils::Str16ToStr8(textForAI));
     /**
      * @tc.steps: step3. change param and call function.
      */
@@ -859,7 +859,7 @@ HWTEST_F(TextTestNg, UpdateParagraphForAISpan001, TestSize.Level1)
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), StringUtils::Str16ToStr8(textForAI));
     /**
      * @tc.steps: step4. change param and call function.
      */
@@ -870,10 +870,10 @@ HWTEST_F(TextTestNg, UpdateParagraphForAISpan001, TestSize.Level1)
     aiSpan2.type = TextDataDetectType::PHONE_NUMBER;
     aiSpanMap[2] = aiSpan2;
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
-    textForAI = "Test1234";
+    textForAI = u"Test1234";
     pattern->dataDetectorAdapter_->textForAI_ = textForAI;
     rowLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AceType::RawPtr(frameNode), paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), StringUtils::Str16ToStr8(textForAI));
 }
 
 /**
@@ -919,9 +919,9 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanEnd = 3;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
-    pattern->dataDetectorAdapter_->textForAI_ = textForAI;
+    pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
     /**
      * @tc.steps: step3. change param and call function.
      * spanStart >= dragStart && spanEnd <= dragEnd
@@ -932,9 +932,9 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan001, TestSize.Level1)
     dragSpanPosition.spanEnd = 3;
     textForAI = "Test1234";
     wTextForAI = StringUtils::Str8ToStr16(textForAI);
-    pattern->dataDetectorAdapter_->textForAI_ = textForAI;
+    pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
 }
 
 /**
@@ -980,9 +980,9 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanEnd = 4;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
-    pattern->dataDetectorAdapter_->textForAI_ = textForAI;
+    pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
     /**
      * @tc.steps: step3. change param and call function.
      * default
@@ -993,9 +993,9 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan002, TestSize.Level1)
     dragSpanPosition.spanEnd = 4;
     textForAI = "Test1234";
     wTextForAI = StringUtils::Str8ToStr16(textForAI);
-    pattern->dataDetectorAdapter_->textForAI_ = textForAI;
+    pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
 }
 
 /**
@@ -1041,9 +1041,9 @@ HWTEST_F(TextTestNg, GrayDisplayAISpan003, TestSize.Level1)
     dragSpanPosition.spanEnd = 20;
     std::string textForAI = "Test1234";
     auto wTextForAI = StringUtils::Str8ToStr16(textForAI);
-    pattern->dataDetectorAdapter_->textForAI_ = textForAI;
+    pattern->dataDetectorAdapter_->textForAI_ = wTextForAI;
     rowLayoutAlgorithm->GrayDisplayAISpan(dragSpanPosition, wTextForAI, textStyle, true, paragraph);
-    EXPECT_EQ(pattern->dataDetectorAdapter_->textForAI_, textForAI);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dataDetectorAdapter_->textForAI_), textForAI);
 }
 
 /**
@@ -3351,7 +3351,7 @@ HWTEST_F(TextTestNg, create001, TestSize.Level1)
      /**
      * @tc.steps: step1. Create spanBases
      */
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567891");
     /**
      * @tc.steps: step2. call spanBases
      */
@@ -3408,7 +3408,7 @@ HWTEST_F(TextTestNg, InitSpanStringController001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
 
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567893421");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567893421");
 
     textModelNG.InitSpanStringController(frameNode, spanStringWithSpans);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -3630,7 +3630,7 @@ HWTEST_F(TextTestNg, TextPattern009, TestSize.Level1)
     auto [frameNode, pattern] = Init();
     pattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
     pattern->ProcessSpanString();
-    EXPECT_EQ(StringUtils::ToWstring(pattern->textForDisplay_).length(), 0);
+    EXPECT_EQ(pattern->textForDisplay_.length(), 0);
 }
 
 /**
@@ -3675,7 +3675,7 @@ HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans->BindWithSpans(spanBases);
     auto spans = spanStringWithSpans->GetSpanItems();
     pattern->SetSpanItemChildren(spans);
@@ -3684,7 +3684,7 @@ HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
      * @tc.steps: step3. test pattern MountImageNode
      */
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->placeholderIndex = 0;
     pattern->MountImageNode(spanItem);
     EXPECT_EQ(pattern->childNodes_.size(), 1);
