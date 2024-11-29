@@ -456,6 +456,8 @@ public:
     {
         return {};
     }
+
+    virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 };
 
 } // namespace OHOS::Ace
