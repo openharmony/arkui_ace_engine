@@ -4730,12 +4730,12 @@ int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool
         moveLineBeginOffset++;
         strIndex--;
         // stop moving caret if reaches \n, text head or caret line changed
-    } while (((strIndex > 0) && (wideTextValue[strIndex] != u'\n')) ||
-             (needToCheckLineChanged && !CharLineChanged(strIndex)));
+    } while (((strIndex > 0) && (wideTextValue[strIndex] != u'\n')) &&
+             (needToCheckLineChanged ? !CharLineChanged(strIndex) : true));
     if (strIndex < 0 || strIndex >= static_cast<int32_t>(wideTextValue.length())) {
         return 0;
     }
-    if (wideTextValue[strIndex] == u'\n') {
+    if (strIndex > 0) {
         moveLineBeginOffset--;
     }
     if (moveLineBeginOffset > originCaretPosition) {
@@ -4759,8 +4759,8 @@ int32_t TextFieldPattern::GetLineEndPosition(int32_t originCaretPosition, bool n
     }
     int32_t moveLineEndOffset = 0;
     int32_t strIndex = 0;
-    for (strIndex = originCaretPosition; (strIndex <= textLength && wideTextValue[strIndex] != u'\n') ||
-                                         (needToCheckLineChanged && !CharLineChanged(strIndex));
+    for (strIndex = originCaretPosition; (strIndex <= textLength && wideTextValue[strIndex] != u'\n') &&
+                                         (needToCheckLineChanged ? !CharLineChanged(strIndex) : true);
          strIndex++) {
         moveLineEndOffset++;
     }
@@ -4776,7 +4776,7 @@ bool TextFieldPattern::CharLineChanged(int32_t caretPosition)
         return true;
     }
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(selectController_->GetStartIndex(), caretMetrics);
+    CalcCaretMetricsByPosition(caretPosition, caretMetrics);
     return !NearEqual(caretMetrics.offset.GetY(), selectController_->GetCaretRect().GetY());
 }
 
@@ -4848,7 +4848,7 @@ bool TextFieldPattern::CursorMoveLineBegin()
     } else {
         UpdateCaretPositionWithClamp(0);
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
