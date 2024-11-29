@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
 
-#include <string>
 #include "frameworks/core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::NG {
@@ -32,24 +31,23 @@ public:
     }
     void SetUp()
     {
-        counter = 0;
         isCalled = false;
+        counter = 0;
+        request = true;
+    }
+    void TearDown()
+    {
+        isCalled = false;
+        counter = 0;
+        request = false;
     }
 public:
+    bool request = false;
     bool isCalled = false;    
     int counter = 0;
-};
+    TransformParam param;
 
-class Matrix2D final {
-public:
-    static bool Invert(TransformParam& param);
-    static void Identity(TransformParam& param);
-    static void Scale(TransformParam& param, double sx, double sy);
-    static void Translate(TransformParam& param, double tx, double ty);
-    static void Rotate(TransformParam& param, double degree, double dx, double dy);
-    static std::string ToString();
 };
-// Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix, const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint);
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOCK_MATRIX2D_H
 
