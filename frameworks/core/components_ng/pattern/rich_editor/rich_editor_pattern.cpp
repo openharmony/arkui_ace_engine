@@ -7306,6 +7306,9 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
             gesture->SetIsTextDraggable(false);
             return;
         }
+        if (pattern->dragBoxes_.empty()) {
+            pattern->dragBoxes_ = pattern->GetTextBoxes();
+        }
         auto host = pattern->GetHost();
         auto children = host->GetChildren();
         std::list<RefPtr<FrameNode>> imageChildren;
