@@ -16,12 +16,19 @@
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 
 #include "core/components_ng/base/node_flag.h"
+
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_web_pattern.h"
+#else
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif
+#endif // ARKUI_CAPI_UNITTEST
+
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -48,6 +55,39 @@ void RichTextModelNG::Create(const std::string& webData)
     pipeline->AddWindowSizeChangeCallback(nodeId);
 }
 
+RefPtr<NG::FrameNode> RichTextModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    frameNode->AddFlag(NodeFlag::WEB_TAG);
+    return frameNode;
+}
+
+void RichTextModelNG::SetRichTextOptions(FrameNode *frameNode, const std::string& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebData(options);
+}
+void RichTextModelNG::SetOnPageStart(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onStarted)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = onStarted;
+    auto onPageStartedEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageStartedEvent(std::move(onPageStartedEvent));
+}
+void RichTextModelNG::SetOnPageFinish(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onFinish)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = onFinish;
+    auto onPageFinishEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageFinishedEvent(std::move(onPageFinishEvent));
+}
 void RichTextModelNG::SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onPageStarted)
 {
 #ifdef IOS_PLATFORM

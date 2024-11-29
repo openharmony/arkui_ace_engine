@@ -83,6 +83,7 @@ ace_unittest("capi_all_modifiers_test") {
     "relative_container_modifier_test.cpp",
     "richeditor_modifier_callbacks_test.cpp",
     "richeditor_modifier_test.cpp",
+    "richtext_modifier_test.cpp",
     "row_modifier_test.cpp",
     "row_split_modifier_test.cpp",
     "save_button_modifier_test.cpp",

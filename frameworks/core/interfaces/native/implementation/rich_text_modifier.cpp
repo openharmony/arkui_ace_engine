@@ -13,9 +13,14 @@
  * limitations under the License.
  */
 
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/richtext_model_ng.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichTextInterfaceModifier {
@@ -25,8 +30,10 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(content);
+#ifdef WEB_SUPPORTED
     auto convValue = Converter::Convert<std::string>(*content);
-    //RichTextModelNG::SetSetRichTextOptions(frameNode, convValue);
+    RichTextModelNG::SetRichTextOptions(frameNode, convValue);
+#endif
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
@@ -36,8 +43,12 @@ void OnStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichTextModelNG::SetOnStart(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+        arkCallback.Invoke();
+    };
+    RichTextModelNG::SetOnPageStart(frameNode, std::move(onCallback));
+#endif
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     const Callback_Void* value)
@@ -45,8 +56,12 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RichTextModelNG::SetOnComplete(frameNode, convValue);
+#ifdef WEB_SUPPORTED
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+        arkCallback.Invoke();
+    };
+    RichTextModelNG::SetOnPageFinish(frameNode, std::move(onCallback));
+#endif
 }
 } // RichTextAttributeModifier
 const GENERATED_ArkUIRichTextModifier* GetRichTextModifier()
