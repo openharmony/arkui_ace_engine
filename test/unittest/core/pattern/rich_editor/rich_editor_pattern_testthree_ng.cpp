@@ -1065,7 +1065,11 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
-    richEditorPattern->textForDisplay_ = "test";
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = "test";
+    spanItem->rangeStart = 0;
+    spanItem->position = 4;
+    richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
 }
@@ -1080,7 +1084,10 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
-    richEditorPattern->textForDisplay_ = " test";
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = " test";
+    spanItem->rangeStart = 0;
+    spanItem->position = 4;
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
 }
