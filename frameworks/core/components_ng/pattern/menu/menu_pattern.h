@@ -462,7 +462,7 @@ public:
     }
 
     void ShowMenuDisappearAnimation();
-    void ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+    void ShowStackMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 
     void SetBuilderFunc(SelectMakeCallback&& makeFunc)
@@ -623,13 +623,17 @@ private:
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     void ShowMenuAppearAnimation();
-    void ShowStackExpandMenu();
-    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& outterMenu,
+    void ShowStackMenuAppearAnimation();
+    std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
         bool isNeedRestoreNodeId = false) const;
     MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
     MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+    void ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const;
+    void ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
+    std::vector<RefPtr<RenderContext>> GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const;
     void ShowArrowRotateAnimation() const;
-    RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetArrowNode(const RefPtr<FrameNode>& host) const; // arrowNode in subMenu
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
