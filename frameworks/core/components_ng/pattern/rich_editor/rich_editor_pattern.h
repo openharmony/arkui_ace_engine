@@ -1107,6 +1107,7 @@ private:
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
+    RefPtr<UINode> GetChildByIndex(int32_t index) const override;
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};

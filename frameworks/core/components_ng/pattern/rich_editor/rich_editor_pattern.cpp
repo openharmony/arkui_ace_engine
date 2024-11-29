@@ -1954,6 +1954,13 @@ void RichEditorPattern::UpdateSpanStyle(
     }
 }
 
+RefPtr<UINode> RichEditorPattern::GetChildByIndex(int32_t index) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return host->GetChildAtIndex(index);
+}
+
 void RichEditorPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
 {
     CHECK_NULL_VOID(spanItem);
