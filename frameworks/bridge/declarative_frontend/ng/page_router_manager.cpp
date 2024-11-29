@@ -1525,7 +1525,11 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     }
 
     if (target.isNamedRouterMode) {
-        manifestParser_->SetPagePath(target.url);
+        if (manifestParser_) {
+            manifestParser_->SetPagePath(target.url);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "set routeName in manifest failed, manifestParser is null!");
+        }
     }
 
     if (target.errorCallback != nullptr) {
