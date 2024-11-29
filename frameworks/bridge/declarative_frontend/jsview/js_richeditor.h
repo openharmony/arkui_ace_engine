@@ -149,6 +149,7 @@ protected:
     struct UpdateSpanStyle typingStyle_;
     bool isStyledStringMode_ = false;
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
+    static JSRef<JSObject> CreateJsDecorationObj(const struct UpdateSpanStyle& typingStyle);
     void ParseTextDecoration(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextShadow(
