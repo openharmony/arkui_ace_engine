@@ -900,4 +900,39 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
     result = exclusiveRecognizer.HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: ExclusiveRecognizerTest009
+ * @tc.desc: Test ExclusiveRecognizer function: CleanRecognizerState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+
+    /**
+     * @tc.steps: step3. set child recognizer state and call cleanRecognizerState function and compare result.
+     * @tc.steps: case1: touchPoints size is 1, clean success.
+     * @tc.expected: step3. clickRecognizer state set ready.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizer.CleanRecognizerState();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+
+    /**
+     * @tc.steps: step3. set child recognizer state and call cleanRecognizerState function and compare result.
+     * @tc.steps: case2: touchPoints size is 2, clean fail.
+     * @tc.expected: step3. clickRecognizer state set ready.
+     */
+    clickRecognizerPtr->touchPoints_[0] = {};
+    clickRecognizerPtr->touchPoints_[1] = {};
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizer.CleanRecognizerState();
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
+}
 } // namespace OHOS::Ace::NG
