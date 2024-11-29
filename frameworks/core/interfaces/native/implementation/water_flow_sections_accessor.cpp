@@ -20,7 +20,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-   template<>
+    template<>
 WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
 {
     WaterFlowSections::Section dst;
