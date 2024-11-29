@@ -20,6 +20,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string INIT_STRING_1 = "初始属性字符串";
+const std::u16string INIT_U16STRING_1 = u"初始属性字符串";
 const std::string INIT_STRING_2 = "Hellow World";
 const std::string INIT_STRING_3 = "123456";
 const std::string TEST_IMAGE_SOURCE = "src/image.png";
@@ -45,7 +46,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
-    RefPtr<MutableSpanString> CreateTextStyledString(const std::string& content);
+    RefPtr<MutableSpanString> CreateTextStyledString(const std::u16string& content);
     RefPtr<MutableSpanString> CreateImageStyledString();
     RefPtr<MutableSpanString> CreateCustomSpanStyledString();
     void SetTypingStyle();
@@ -81,7 +82,7 @@ void RichEditorStyledStringTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-RefPtr<MutableSpanString> RichEditorStyledStringTestNg::CreateTextStyledString(const std::string& content)
+RefPtr<MutableSpanString> RichEditorStyledStringTestNg::CreateTextStyledString(const std::u16string& content)
 {
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
@@ -205,7 +206,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller
@@ -221,7 +222,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
      */
     styledStringController->SetStyledString(mutableStr);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
-    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
+    EXPECT_EQ(StringUtils::Str16ToStr8(richEditorPattern->dataDetectorAdapter_->textForAI_), INIT_STRING_1);
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
@@ -332,7 +333,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -367,7 +368,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController005, TestSize.Level
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -420,7 +421,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller and set styledString
@@ -480,7 +481,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController007, TestSize.Level
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller and set styledString
@@ -536,7 +537,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller and set styledString
@@ -582,7 +583,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue001, TestSize.Leve
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -622,7 +623,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue002, TestSize.Leve
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -662,7 +663,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.L
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -702,7 +703,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.L
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -745,7 +746,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward001, TestSize.Le
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -785,7 +786,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
      * @tc.steps: step1. create styledString with customSpan、image and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     auto mutableImageStr = CreateImageStyledString();
     mutableStr->AppendSpanString(mutableTextStr);
     mutableStr->InsertSpanString(3, mutableImageStr);
@@ -825,7 +826,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
      * @tc.steps: step1. create styledString with customSpan and text
      */
     auto mutableStr = CreateCustomSpanStyledString();
-    auto mutableTextStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableTextStr = CreateTextStyledString(INIT_U16STRING_1);
     mutableStr->AppendSpanString(mutableTextStr);
 
     /**
@@ -875,7 +876,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level1)
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller and set styledString
@@ -960,7 +961,7 @@ HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller , set styledString and GetSelection
@@ -992,7 +993,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Le
 
     UpdateSpanStyle updateSpanStyle;
 
-    std::string content = "TEST123";
+    std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
 
@@ -1025,7 +1026,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Le
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->caretVisible_ = false;
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->DeleteValueInStyledString(0, 10, true);
@@ -1035,7 +1036,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Le
     richEditorPattern->DeleteValueInStyledString(0, 10, false);
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->DeleteValueInStyledString(0, 10, false);
-    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, u""), false);
 }
 
 /**
@@ -1046,7 +1047,7 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Le
 HWTEST_F(RichEditorStyledStringTestNg, GetUrlSpanString001, TestSize.Level1)
 {
     // 0: Create MutableSpanString
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     // 1: Create UrlSpan and add to spanString
     std::string address = "https://www.example.com";

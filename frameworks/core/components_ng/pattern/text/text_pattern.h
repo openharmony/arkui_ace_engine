@@ -176,7 +176,7 @@ public:
         return textSelector_;
     }
 
-    const std::string& GetTextForDisplay() const
+    const std::u16string& GetTextForDisplay() const
     {
         return textForDisplay_;
     }
@@ -231,7 +231,7 @@ public:
     {
         return dataDetectorAdapter_->aiSpanMap_;
     }
-    const std::string& GetTextForAI()
+    const std::u16string& GetTextForAI()
     {
         return dataDetectorAdapter_->textForAI_;
     }
@@ -282,7 +282,7 @@ public:
 
     int32_t GetDisplayWideTextLength()
     {
-        return StringUtils::ToWstring(textForDisplay_).length();
+        return textForDisplay_.length();
     }
 
     // ===========================================================
@@ -369,7 +369,7 @@ public:
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
-    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
+    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -851,7 +851,7 @@ protected:
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
+    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>(u"");
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
@@ -863,7 +863,7 @@ protected:
     RefPtr<TextOverlayModifier> overlayMod_;
     CopyOptions copyOption_ = CopyOptions::None;
 
-    std::string textForDisplay_;
+    std::u16string textForDisplay_;
     std::string paintInfo_ = "NA";
     std::string frameRecord_ = "NA";
     std::optional<TextStyle> textStyle_;
@@ -960,7 +960,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
     void ProcessMarqueeVisibleAreaCallback();
-    void ParseOriText(const std::string& currentText);
+    void ParseOriText(const std::u16string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);

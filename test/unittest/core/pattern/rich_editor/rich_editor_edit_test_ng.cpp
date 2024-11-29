@@ -91,7 +91,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     const std::string result1 = TEST_INSERT_VALUE;
-    EXPECT_EQ(result1, it1->spanItem_->content);
+    EXPECT_EQ(result1, StringUtils::Str16ToStr8(it1->spanItem_->content));
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 1;
@@ -103,14 +103,14 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it3 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     const std::string result3 = INIT_VALUE_1 + TEST_INSERT_VALUE;
-    EXPECT_EQ(result3, it3->spanItem_->content);
+    EXPECT_EQ(result3, StringUtils::Str16ToStr8(it3->spanItem_->content));
     ClearSpan();
     AddImageSpan();
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it4 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     const std::string result4 = TEST_INSERT_VALUE;
-    EXPECT_EQ(result4, it4->spanItem_->content);
+    EXPECT_EQ(result4, StringUtils::Str16ToStr8(it4->spanItem_->content));
     ClearSpan();
     richEditorPattern->InsertValue(" ");
     auto it5 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
@@ -133,7 +133,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue003, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result1 = INIT_VALUE_1 + TEST_INSERT_VALUE;
-    EXPECT_EQ(result1, it1->spanItem_->content);
+    EXPECT_EQ(result1, StringUtils::Str16ToStr8(it1->spanItem_->content));
 }
 
 /**
@@ -151,7 +151,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue004, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result1 = TEST_INSERT_VALUE;
-    EXPECT_EQ(result1, it1->spanItem_->content);
+    EXPECT_EQ(result1, StringUtils::Str16ToStr8(it1->spanItem_->content));
 }
 
 /**
@@ -170,7 +170,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     const std::string result1 = INIT_VALUE_1;
-    EXPECT_EQ(result1, it1->spanItem_->content);
+    EXPECT_EQ(result1, StringUtils::Str16ToStr8(it1->spanItem_->content));
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 1;
@@ -178,7 +178,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
     richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
     auto it2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result2 = EXCEPT_VALUE;
-    EXPECT_EQ(result2, it2->spanItem_->content);
+    EXPECT_EQ(result2, StringUtils::Str16ToStr8(it2->spanItem_->content));
 }
 
 /**
@@ -529,7 +529,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
     TextInsertValueInfo info;
-    it->content = "test123\n";
+    it->content = u"test123\n";
     it->position = 4;
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->moveLength_ = 2;
@@ -610,7 +610,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
     AddSpan("test1");
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test";
+    it->content = u"test";
     TextInsertValueInfo info;
     richEditorPattern->UpdateSpanPosition();
 
@@ -1493,7 +1493,7 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "tesol";
+    richEditorPattern->textForDisplay_ = u"tesol";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 2;

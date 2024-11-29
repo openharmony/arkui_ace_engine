@@ -2143,7 +2143,7 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
-    SpanString* spanString = new SpanString("");
+    SpanString* spanString = new SpanString(u"");
     spanString->DecodeTlvExt(vec, spanString);
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;

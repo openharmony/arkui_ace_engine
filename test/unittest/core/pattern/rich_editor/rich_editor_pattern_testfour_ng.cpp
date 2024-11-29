@@ -429,8 +429,7 @@ HWTEST_F(RichEditorPatternTestFourNg, InsertValueToSpanNode001, TestSize.Level1)
 
     auto spanItem = spanNode->GetSpanItem();
     auto text = spanItem->content;
-    std::wstring textTemp = StringUtils::ToWstring(text);
-    auto textTempSize = static_cast<int32_t>(textTemp.size());
+    auto textTempSize = static_cast<int32_t>(text.size());
 
     ASSERT_EQ(textTempSize, 0);
 }
@@ -712,42 +711,42 @@ HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Leve
     ResultObject obj;
 
     obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = " ";
+    obj.valueString = u" ";
     obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = "";
+    obj.valueString = u"";
     obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = " ";
+    obj.valueString = u" ";
     obj.valuePixelMap = nullptr;
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPEIMAGE;
-    obj.valueString = "";
+    obj.valueString = u"";
     obj.valuePixelMap = nullptr;
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = " ";
+    obj.valueString = u" ";
     obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = "";
+    obj.valueString = u"";
     obj.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = " ";
+    obj.valueString = u" ";
     obj.valuePixelMap = nullptr;
     resultObjectList.emplace_back(obj);
 
     obj.type = SelectSpanType::TYPESYMBOLSPAN;
-    obj.valueString = "";
+    obj.valueString = u"";
     obj.valuePixelMap = nullptr;
     resultObjectList.emplace_back(obj);
 
@@ -1092,11 +1091,11 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteValueInStyledString002, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->caretVisible_ = false;
     richEditorPattern->previewLongPress_ = true;
 
-    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, u""), false);
 
     richEditorPattern->DeleteValueInStyledString(0, 0, true, false);
 

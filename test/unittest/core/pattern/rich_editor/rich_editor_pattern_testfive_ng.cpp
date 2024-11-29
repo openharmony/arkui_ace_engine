@@ -145,11 +145,11 @@ HWTEST_F(RichEditorPatternTestFiveNg, BuilderSpanBindSelectionMenu001, TestSize.
     objText.type = SelectSpanType::TYPESPAN;
     ResultObject objImage;
     objImage.type = SelectSpanType::TYPEIMAGE;
-    objImage.valueString = " ";
+    objImage.valueString = u" ";
     objImage.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     ResultObject objBuilder;
     objBuilder.type = SelectSpanType::TYPEIMAGE;
-    objBuilder.valueString = " ";
+    objBuilder.valueString = u" ";
     objBuilder.valuePixelMap = nullptr;
     SelectionInfo originalSelection;
     SelectionInfo adjustedSelection;
@@ -322,7 +322,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanShowShadow001, TestSize.Level1)
     richEditorPattern->pManager_ = pManager;
 
     // 6: Create MutableSpanString and set to richEditorPattern
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("click here");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"click here");
     spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
     richEditorPattern->SetStyledString(spanString);
 

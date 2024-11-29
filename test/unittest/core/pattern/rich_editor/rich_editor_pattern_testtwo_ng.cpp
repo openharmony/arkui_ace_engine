@@ -568,7 +568,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectParagraghPos001, TestSize.Level
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test\n123";
+    it->content = u"test\n123";
     it->position = 4;
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->isSpanStringMode_ = true;
@@ -959,7 +959,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection002, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>(u"test123456");
     int32_t start = -1;
     int32_t end = -1;
     SelectionOptions options;
@@ -986,7 +986,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection003, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>(u"test123456");
     richEditorPattern->textSelector_ = TextSelector(0, 6);
 
     int32_t start = 1;
@@ -1015,7 +1015,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection004, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>(u"test123456");
     richEditorPattern->textSelector_ = TextSelector(2, 4);
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
@@ -1053,7 +1053,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection005, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>(u"test123456");
 
     richEditorPattern->textSelector_ = TextSelector(2, 4);
 
@@ -1093,7 +1093,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>("test123456");
+    richEditorPattern->styledString_ = AccessibilityManager::MakeRefPtr<MutableSpanString>(u"test123456");
     richEditorPattern->textSelector_ = TextSelector(2, 4);
 
     auto pipeline = PipelineContext::GetCurrentContext();

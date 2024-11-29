@@ -81,7 +81,7 @@ protected:
             ss << "[";
             for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
                 ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(item->content) << "], ";
+                   << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << "], ";
             });
             ss << "], ";
         }
@@ -113,10 +113,8 @@ private:
     {
         return 0.0f;
     }
-    template<typename T>
-    static TextDirection GetTextDirection(const T& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
     static TextDirection GetTextDirectionByContent(const std::u16string& content);
-    static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
@@ -153,20 +151,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
-
-template<typename T>
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const T& content, LayoutWrapper* layoutWrapper)
-{
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    return GetTextDirectionByContent(content);
-}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H

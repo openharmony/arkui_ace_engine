@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+
+#include "base/utils/utf_helper.h"
 #include "core/components/text_field/textfield_theme.h"
 
 using namespace testing;
@@ -20,6 +22,11 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 void RichEditorCommonTestNg::AddSpan(const std::string& content)
+{
+    AddSpan(UtfUtils::Str8ToStr16(content));
+}
+
+void RichEditorCommonTestNg::AddSpan(const std::u16string& content)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -56,14 +63,14 @@ void RichEditorCommonTestNg::AddImageSpan()
     imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
     imageNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->placeholderIndex = 0;
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->spans_.emplace_back(spanItem);
     int32_t spanTextLength = 0;
     for (auto& span : richEditorPattern->spans_) {
-        spanTextLength += StringUtils::ToWstring(span->content).length();
+        spanTextLength += span->content.length();
         span->position = spanTextLength;
     }
 }

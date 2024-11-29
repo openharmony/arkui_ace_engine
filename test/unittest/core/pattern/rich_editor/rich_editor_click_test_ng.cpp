@@ -179,7 +179,7 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton001, TestSize.Level1)
 HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     MouseInfo mouseInfo;
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     richEditorPattern->isMouseSelect_ = false;
@@ -329,7 +329,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 
-    AddSpan(INIT_VALUE_3);
+    AddSpan(INIT_U16VALUE_3);
     info.localLocation_ = Offset(50, 50);
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
@@ -355,7 +355,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
 HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent002, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    AddSpan(TEST_INSERT_VALUE);
+    AddSpan(TEST_INSERT_U16VALUE);
 
     TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 1,
@@ -478,7 +478,7 @@ HWTEST_F(RichEditorClickTestNg, MouseRightFocus001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("test1");
+    AddSpan(u"test1");
     AddImageSpan();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
@@ -823,7 +823,7 @@ HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span and Select text
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->textSelector_ = TextSelector(0, 2);
@@ -870,7 +870,7 @@ HWTEST_F(RichEditorClickTestNg, CreateStyledStringByTextStyle, TestSize.Level1)
     /**
      * @tc.steps: step3. add text
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     EXPECT_EQ(richEditorNode_->children_.size(), 1);
 
     /**
@@ -887,7 +887,7 @@ HWTEST_F(RichEditorClickTestNg, CreateStyledStringByTextStyle, TestSize.Level1)
     /**
      * @tc.steps: step5. test CreateStyledStringByTextStyle
      */
-    richEditorPattern->CreateStyledStringByTextStyle(INIT_VALUE_2, updateSpanStyle, textStyle);
+    richEditorPattern->CreateStyledStringByTextStyle(INIT_U16VALUE_2, updateSpanStyle, textStyle);
     auto spanItem = richEditorPattern->spans_.back();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
@@ -912,7 +912,7 @@ HWTEST_F(RichEditorClickTestNg, HandleDraggableFlag, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     AddImageSpan();
 
     /**
@@ -949,7 +949,7 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     AddImageSpan();
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
@@ -983,7 +983,7 @@ HWTEST_F(RichEditorClickTestNg, SetCaretOffset, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan("test");
+    AddSpan(u"test");
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 
     /**
@@ -1017,7 +1017,7 @@ HWTEST_F(RichEditorClickTestNg, HandleBlurEvent, TestSize.Level1)
     /**
      * @tc.steps: step2. add span and select
      */
-    AddSpan("test");
+    AddSpan(u"test");
     richEditorPattern->textSelector_.Update(1, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
 
@@ -1164,7 +1164,7 @@ HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span without setting style
      */
-    AddSpan(INIT_VALUE_2);
+    AddSpan(INIT_U16VALUE_2);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
     richEditorPattern->textSelector_.Update(0, 6);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
@@ -1202,9 +1202,9 @@ HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
     /**
      * @tc.steps: step2. add different type span and select
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     AddImageSpan();
-    AddSpan(INIT_VALUE_2);
+    AddSpan(INIT_U16VALUE_2);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
 
     richEditorPattern->textSelector_.Update(4, 10);

@@ -1400,7 +1400,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
@@ -1455,7 +1455,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
     /**
      * @tc.steps: step3. add text span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1598,7 +1598,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1688,7 +1688,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1999,7 +1999,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, CheckScrollable, TestSize.Level1)
     richEditorPattern->CheckScrollable();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
-    AddSpan(TEST_INSERT_VALUE);
+    AddSpan(TEST_INSERT_U16VALUE);
     richEditorPattern->CheckScrollable();
     EXPECT_TRUE(richEditorPattern->scrollable_);
 
