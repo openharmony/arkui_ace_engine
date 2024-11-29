@@ -683,7 +683,8 @@ template<>
 InvertVariant Convert(const Ark_InvertOptions& value)
 {
     InvertOption invertOption = {
-        .low_ = Converter::Convert<float>(value.low), .high_ = Converter::Convert<float>(value.high),
+        .low_ = Converter::Convert<float>(value.low),
+        .high_ = Converter::Convert<float>(value.high),
         .threshold_ = Converter::Convert<float>(value.threshold),
         .thresholdRange_ = Converter::Convert<float>(value.thresholdRange)};
     return std::variant<float, InvertOption>(invertOption);
@@ -701,6 +702,19 @@ void AssignCast(std::optional<InvertVariant>& dst, const Ark_Union_Number_Invert
     dst = std::optional<InvertVariant>(varVal);
 }
 template<>
+float Convert(const Ark_InvertOptions& value)
+{
+    auto low = Converter::Convert<float>(value.low);
+    auto high = Converter::Convert<float>(value.high);
+    auto threshold = Converter::Convert<float>(value.threshold);
+    auto thresholdRange = Converter::Convert<float>(value.thresholdRange);
+    if (NearEqual(low, high) && NearEqual(low, threshold) && NearEqual(low, thresholdRange)) {
+        return low;
+    }
+    float invalidValue = -1.0;
+    return invalidValue;
+}
+template<>
 Ark_Number Convert(const Ark_InvertOptions& src)
 {
     auto low = Converter::Convert<float>(src.low);
@@ -710,19 +724,20 @@ Ark_Number Convert(const Ark_InvertOptions& src)
     if (NearEqual(low, high) && NearEqual(low, threshold) && NearEqual(low, thresholdRange)) {
         return src.low;
     }
-    // Invalid value
-    return Converter::ArkValue<Ark_Number>(-1.0);
+    float invalidValue = -1.0;
+    return Converter::ArkValue<Ark_Number>(invalidValue);
 }
 template<>
-std::optional<float> OptConvert(const Ark_Union_Number_InvertOptions& src)
+void AssignCast(std::optional<float>& dst, const Ark_Union_Number_InvertOptions& src)
 {
     auto optNumOptions = Converter::OptConvert<Ark_Number>(src);
     if (!optNumOptions.has_value()) {
-        return std::nullopt;
+        dst = std::nullopt;
+        return;
     }
     auto arkDst = optNumOptions.value();
     float varVal = Convert<float>(arkDst);
-    return std::optional<float>(varVal);
+    dst = std::optional<float>(varVal);
 }
 template<>
 Ark_String Convert(const Ark_Number& src)
@@ -730,26 +745,26 @@ Ark_String Convert(const Ark_Number& src)
     auto floatValue = Convert<float>(src);
     std::ostringstream oss;
     oss << floatValue;
-    // Explicitly create a string from the stream result
     std::string str = oss.str();
     auto result = Converter::ArkValue<Ark_String>(str);
     return result;
 }
 template<>
-std::optional<PixStretchEffectOption> OptConvert(const Ark_PixelStretchEffectOptions& src)
+void AssignCast(std::optional<PixStretchEffectOption>& dst, const Ark_PixelStretchEffectOptions& src)
 {
     std::optional<Ark_Length> top = OptConvert<Ark_Length>(src.top);
     std::optional<Ark_Length> bottom = OptConvert<Ark_Length>(src.bottom);
     std::optional<Ark_Length> left = OptConvert<Ark_Length>(src.left);
     std::optional<Ark_Length> right = OptConvert<Ark_Length>(src.right);
     if (!top.has_value() && !bottom.has_value() && !left.has_value() && !right.has_value()) {
-        return std::nullopt;
+        dst = std::nullopt;
+        return;
     }
     Dimension dTop =  top.has_value() ? Convert<Dimension>(top.value()) : Dimension();
     Dimension dBottom = bottom.has_value() ? Convert<Dimension>(bottom.value()) : Dimension();
     Dimension dLeft = left.has_value() ? Convert<Dimension>(left.value()) : Dimension();
     Dimension dRight = right.has_value() ? Convert<Dimension>(right.value()) : Dimension();
-    return std::optional<PixStretchEffectOption>({.left = dLeft, .top = dTop, .right = dRight, .bottom = dBottom});
+    dst = std::optional<PixStretchEffectOption>({.left = dLeft, .top = dTop, .right = dRight, .bottom = dBottom});
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
