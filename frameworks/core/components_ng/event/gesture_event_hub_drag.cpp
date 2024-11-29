@@ -223,15 +223,10 @@ void GestureEventHub::CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNo
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (geometryNode) {
-            frameNodeSize_ = geometryNode->GetFrameSize();
-        } else {
-            frameNodeSize_ = SizeF(0.0f, 0.0f);
-        }
-        auto rectCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
-        frameNodeOffset_ = OffsetF(
-            rectCenter.GetX() - frameNodeSize_.Width() / 2.0f, rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
+        auto rect = DragDropFuncWrapper::GetPaintRectToScreen(frameNode) -
+            DragDropFuncWrapper::GetCurrentWindowOffset(PipelineContext::GetCurrentContextSafelyWithCheck());
+        frameNodeOffset_ = rect.GetOffset();
+        frameNodeSize_ = rect.GetSize();
 #ifdef WEB_SUPPORTED
         if (frameTag == V2::WEB_ETS_TAG) {
             auto webPattern = frameNode->GetPattern<WebPattern>();
