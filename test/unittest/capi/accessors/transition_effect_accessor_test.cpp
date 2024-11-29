@@ -113,10 +113,15 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->opacity, nullptr);
     Ark_Number value = Converter::ArkValue<Ark_Number>(33);
+<<<<<<< HEAD
     auto peer = accessor_->opacity(&value);
     ASSERT_NE(peer, nullptr);
     peer = accessor_->opacity(nullptr);
     ASSERT_EQ(peer, nullptr);
+=======
+    // should return value
+    accessor_->opacity(&value);
+>>>>>>> 27a55ad0ea4 (transition effects accessor)
 }
 
 /**
@@ -128,11 +133,15 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->move, nullptr);
 <<<<<<< HEAD
+<<<<<<< HEAD
     Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);
     auto peer = accessor_->move(value);
     ASSERT_NE(peer, nullptr);
 =======
     Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);    
+=======
+    Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);
+>>>>>>> 27a55ad0ea4 (transition effects accessor)
     // should return value
     accessor_->move(value);
 >>>>>>> 80927900318 (transition effects accessors)
