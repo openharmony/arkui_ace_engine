@@ -83,7 +83,7 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
     const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
 {
-    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed);
+    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed, imageDecodeFormat);
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
