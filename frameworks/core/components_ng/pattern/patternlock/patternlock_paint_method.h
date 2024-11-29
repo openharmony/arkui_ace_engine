@@ -77,6 +77,7 @@ private:
     OffsetF cellCenter_;
     bool isMoveEventValid_ = false;
     bool enableWaveEffect_ = true;
+    bool enableForeground_ = false;
     std::vector<PatternLockCell> choosePoint_;
     RefPtr<PatternLockModifier> patternlockModifier_;
 
