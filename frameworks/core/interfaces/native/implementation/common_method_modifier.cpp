@@ -669,11 +669,6 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
     return dst;
 }
 template<>
-Ark_InvertOptions Convert(const Ark_Number& src)
-{
-    return {src, src, src, src};
-}
-template<>
 InvertVariant Convert(const Ark_Number& value)
 {
     float fDst = Converter::Convert<float>(value);
@@ -690,18 +685,6 @@ InvertVariant Convert(const Ark_InvertOptions& value)
     return std::variant<float, InvertOption>(invertOption);
 }
 template<>
-void AssignCast(std::optional<InvertVariant>& dst, const Ark_Union_Number_InvertOptions& src)
-{
-    auto optInvertOptions = Converter::OptConvert<Ark_InvertOptions>(src);
-    if (!optInvertOptions.has_value()) {
-        dst = std::nullopt;
-        return;
-    }
-    auto arkDst = optInvertOptions.value();
-    InvertVariant varVal = Convert<InvertVariant>(arkDst);
-    dst = std::optional<InvertVariant>(varVal);
-}
-template<>
 float Convert(const Ark_InvertOptions& value)
 {
     auto low = Converter::Convert<float>(value.low);
@@ -715,56 +698,32 @@ float Convert(const Ark_InvertOptions& value)
     return invalidValue;
 }
 template<>
-Ark_Number Convert(const Ark_InvertOptions& src)
+void AssignCast(std::optional<float>& dst, const Ark_InvertOptions& src)
 {
     auto low = Converter::Convert<float>(src.low);
     auto high = Converter::Convert<float>(src.high);
     auto threshold = Converter::Convert<float>(src.threshold);
     auto thresholdRange = Converter::Convert<float>(src.thresholdRange);
     if (NearEqual(low, high) && NearEqual(low, threshold) && NearEqual(low, thresholdRange)) {
-        return src.low;
-    }
-    float invalidValue = -1.0;
-    return Converter::ArkValue<Ark_Number>(invalidValue);
-}
-template<>
-void AssignCast(std::optional<float>& dst, const Ark_Union_Number_InvertOptions& src)
-{
-    auto optNumOptions = Converter::OptConvert<Ark_Number>(src);
-    if (!optNumOptions.has_value()) {
-        dst = std::nullopt;
+        dst = low;
         return;
     }
-    auto arkDst = optNumOptions.value();
-    float varVal = Convert<float>(arkDst);
-    dst = std::optional<float>(varVal);
-}
-template<>
-Ark_String Convert(const Ark_Number& src)
-{
-    auto floatValue = Convert<float>(src);
-    std::ostringstream oss;
-    oss << floatValue;
-    std::string str = oss.str();
-    auto result = Converter::ArkValue<Ark_String>(str);
-    return result;
+    dst.reset();
 }
 template<>
 void AssignCast(std::optional<PixStretchEffectOption>& dst, const Ark_PixelStretchEffectOptions& src)
 {
-    std::optional<Ark_Length> top = OptConvert<Ark_Length>(src.top);
-    std::optional<Ark_Length> bottom = OptConvert<Ark_Length>(src.bottom);
-    std::optional<Ark_Length> left = OptConvert<Ark_Length>(src.left);
-    std::optional<Ark_Length> right = OptConvert<Ark_Length>(src.right);
+    auto invalidValue = 0.0_vp;
+    auto top = OptConvert<Dimension>(src.top);
+    auto bottom = OptConvert<Dimension>(src.bottom);
+    auto left = OptConvert<Dimension>(src.left);
+    auto right = OptConvert<Dimension>(src.right);
     if (!top.has_value() && !bottom.has_value() && !left.has_value() && !right.has_value()) {
         dst = std::nullopt;
         return;
     }
-    Dimension dTop =  top.has_value() ? Convert<Dimension>(top.value()) : Dimension();
-    Dimension dBottom = bottom.has_value() ? Convert<Dimension>(bottom.value()) : Dimension();
-    Dimension dLeft = left.has_value() ? Convert<Dimension>(left.value()) : Dimension();
-    Dimension dRight = right.has_value() ? Convert<Dimension>(right.value()) : Dimension();
-    dst = std::optional<PixStretchEffectOption>({.left = dLeft, .top = dTop, .right = dRight, .bottom = dBottom});
+    dst = {.left = left.value_or(invalidValue), .top = top.value_or(invalidValue),
+        .right = right.value_or(invalidValue), .bottom = bottom.value_or(invalidValue)};
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -1758,31 +1717,18 @@ void InvertImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value) {
-        ViewAbstract::SetInvert(frameNode, std::nullopt);
-    }
     const float minValue = 0.0;
     const float maxValue = 100.0;
-    auto convValue = Converter::OptConvert<InvertVariant>(*value);
-    if (convValue) {
-        Validator::ValidateByRange(convValue, minValue, maxValue);
-        ViewAbstract::SetInvert(frameNode, convValue);
-        return;
-    }
-    auto convValue2 = Converter::OptConvert<float>(*value);
+    auto convValue = value ? Converter::OptConvert<InvertVariant>(*value) : std::nullopt;
     Validator::ValidateByRange(convValue, minValue, maxValue);
-    ViewAbstract::SetInvert(frameNode, convValue2);
+    ViewAbstract::SetInvert(frameNode, convValue);
 }
 void HueRotateImpl(Ark_NativePointer node,
                    const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value) {
-        ViewAbstract::SetHueRotate(frameNode, std::nullopt);
-        return;
-    }
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     ViewAbstract::SetHueRotate(frameNode, convValue);
 }
 void UseShadowBatchingImpl(Ark_NativePointer node,
@@ -1854,7 +1800,7 @@ void GridSpanImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = value
-        ? Converter::OptConvert<ArkUI_Int32>(*value) : std::nullopt;
+        ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     ViewAbstract::SetGrid(frameNode, convValue, std::nullopt, GridSizeType::UNDEFINED);
 }
