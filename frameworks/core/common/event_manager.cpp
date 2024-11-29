@@ -1853,6 +1853,9 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     for (const auto& iter : downFingerIds_) {
         falsifyEvent.id = iter.first;
         falsifyEvent.pointers = lastTouchEvent_.pointers;
+        if (touchPoint.id != iter.first) {
+            falsifyEvent.history.clear();
+        }
         DispatchTouchEvent(falsifyEvent, sendOnTouch);
     }
 }
