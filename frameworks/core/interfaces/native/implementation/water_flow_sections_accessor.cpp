@@ -19,10 +19,10 @@
 #include "water_flow_sections_accessor_peer_impl.h"
 #include "arkoala_api_generated.h"
 
- namespace OHOS::Ace::NG::Converter {
-    template<>
- WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
- {
+namespace OHOS::Ace::NG::Converter {
+   template<>
+WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
+{
     WaterFlowSections::Section dst;
     dst.itemsCount = Converter::Convert<int32_t>(src.itemsCount);
     dst.crossCount = Converter::OptConvert<int32_t>(src.crossCount);
@@ -31,20 +31,20 @@
     dst.rowsGap = Converter::OptConvert<Dimension>(src.rowsGap);
     dst.margin = Converter::OptConvert<MarginProperty>(src.margin);
     return dst;
- }
+}
 
- template<>
- std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
- {
-     std::vector<WaterFlowSections::Section> dst;
+template<>
+std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
+{
+    std::vector<WaterFlowSections::Section> dst;
     auto length = Converter::Convert<int>(src.length);
     for (int i = 0; i < length; i++) {
         WaterFlowSections::Section newSession = Converter::Convert<WaterFlowSections::Section>(src.array[i]);
         dst.push_back(newSession);
     }
     return dst;
- }
- }
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {

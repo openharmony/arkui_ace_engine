@@ -31,10 +31,11 @@ public:
     MockWaterFlowSections() = default;
     ~MockWaterFlowSections() override = default;
 
-    const std::vector<Section>& GetSectionInfo() const {
+    const std::vector<Section>& GetSectionInfo() const
+    {
         counter++;
         return vector;
-   }
+    }
 public:
     mutable int counter = 0;
     std::vector<Section> vector;
@@ -48,7 +49,7 @@ public:
         AccessorTestBase::SetUp();
         mockWaterFlowSections_ = new MockWaterFlowSections();
         mockWaterFlowSectionsKeeper_ = AceType::Claim(mockWaterFlowSections_);
-        ASSERT_NE(mockWaterFlowSectionsKeeper_, nullptr);        
+        ASSERT_NE(mockWaterFlowSectionsKeeper_, nullptr);
         auto peerImpl = reinterpret_cast<WaterFlowSectionsPeer*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
         peerImpl->SetController(mockWaterFlowSectionsKeeper_);
