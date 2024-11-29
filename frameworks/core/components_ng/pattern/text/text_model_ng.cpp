@@ -521,7 +521,7 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
+void TextModelNG::InitText(FrameNode* frameNode, const std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }

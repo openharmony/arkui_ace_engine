@@ -93,10 +93,9 @@ void SetTextOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(content);
 
-    auto text = Converter::OptConvert<std::string>(*content);
+    auto text = Converter::OptConvert<std::u16string>(*content);
     if (text) {
-        std::u16string content = UtfUtils::Str8ToStr16(text.value());
-        TextModelNG::InitText(frameNode, content);
+        TextModelNG::InitText(frameNode, text.value());
     }
 
     if (value && value->tag != ARK_TAG_UNDEFINED) {

@@ -90,7 +90,7 @@ public:
     void SetEnableHapticFeedback(bool state) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
-    static void InitText(FrameNode* frameNode, std::u16string& value);
+    static void InitText(FrameNode* frameNode, const std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);

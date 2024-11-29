@@ -397,6 +397,7 @@ namespace Converter {
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
+    template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
@@ -437,6 +438,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
 
     // SORTED_SECTION: Enums specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
@@ -468,6 +470,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
@@ -532,7 +535,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
-    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
 
     template<>

@@ -91,6 +91,8 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME = "type";
 const auto ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME = "color";
 const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME = "offsetX";
 const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
+const auto ATTRIBUTE_CONTENT_NAME = "content";
+const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
 
     struct EventsTracker {
         static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
@@ -111,6 +113,11 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<TextTheme>();
+
+        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
 
         AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
         AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
@@ -1019,5 +1026,45 @@ HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
     EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME), "75.000000");
     EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME), "20.000000");
     EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME), "1");
+}
+
+/*
+ * @tc.name: setTextOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+}
+
+/*
+ * @tc.name: setTextOptionsTestContentValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestContentValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_String_Resource& value) {
+        auto textOptions = Converter::ArkValue<Opt_TextOptions>(Ark_Empty());
+
+        modifier_->setTextOptions(node_, &value, &textOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextOptions, attribute: content";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
+    }
 }
 }
