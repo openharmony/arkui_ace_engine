@@ -281,7 +281,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto UpdateImageNode start.");
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "UpdateImageNode start.%{public}d", movingPhotoFormat_);
     if (startAnimationFlag_) {
         needUpdateImageNode_ = true;
         return;
@@ -318,6 +318,13 @@ void MovingPhotoPattern::UpdateImageNode()
         auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        auto imagePattern = image->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        if (movingPhotoFormat_ == MovingPhotoFormat::RGBA_8888) {
+            imagePattern->SetExternalDecodeFormat(PixelFormat::RGBA_8888);
+        } else if (movingPhotoFormat_ == MovingPhotoFormat::NV21) {
+            imagePattern->SetExternalDecodeFormat(PixelFormat::NV21);
+        }
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
