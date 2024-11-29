@@ -15,6 +15,7 @@
 
 #include "image_source_ohos.h"
 
+#include "image_type.h"
 #include "media_errors.h"
 
 #include "base/image/pixel_map.h"
@@ -79,19 +80,25 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     return value;
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
+    const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
 {
     return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed);
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
-    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed)
+    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat imageDecodeFormat)
 {
     Media::DecodeOptions options;
     options.preferDma = true;
     // only hdr image need to decoder in hdr mode
     if (isHdrDecoderNeed) {
         options.desiredDynamicRange = Media::DecodeDynamicRange::AUTO;
+    }
+    if (imageDecodeFormat == PixelFormat::NV21) {
+        options.desiredPixelFormat = Media::PixelFormat::NV21;
+    } else if (imageDecodeFormat == PixelFormat::RGBA_8888) {
+        options.desiredPixelFormat = Media::PixelFormat::RGBA_8888;
     }
     options.resolutionQuality = static_cast<Media::ResolutionQuality>(imageQuality);
     // Pass imageQuality to imageFramework
