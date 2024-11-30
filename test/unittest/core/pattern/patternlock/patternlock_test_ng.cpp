@@ -1311,6 +1311,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest004, TestSize.Level1)
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
     EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 0, 0);
+    patternlockModifier->PaintActiveCircle(canvas, offset);
     /**
      * @tc.case: case3. Current Point (x, y) is checked, isMoveEventValid_ is true, isHover_is true, hover index is
      * current Point index and the selected Point is not the last Point.
@@ -1325,6 +1326,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest004, TestSize.Level1)
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
     EXPECT_CALL(canvas, DetachBrush()).Times(3).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 0, 0);
+    patternlockModifier->PaintActiveCircle(canvas, offset);
 }
 
 /**
@@ -1356,6 +1358,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest005, TestSize.Level1)
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
     EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
+    patternlockModifier->PaintActiveCircle(canvas, offset);
     /**
      * @tc.case: case2. last Point (x, y) is checked, isHover_is true, hover index is not current Point,
      * isMoveEventValid_ is true and challengeResult_ has value.
@@ -1373,6 +1376,7 @@ HWTEST_F(PatternLockTestNg, PatternLockModifierTest005, TestSize.Level1)
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
     EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
+    patternlockModifier->PaintActiveCircle(canvas, offset);
 }
 
 /**
