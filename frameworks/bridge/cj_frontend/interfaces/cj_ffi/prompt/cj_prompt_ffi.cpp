@@ -40,6 +40,8 @@ constexpr int32_t TOAST_TIME_MAX = 10000;    // ms
 constexpr int32_t TOAST_TIME_DEFAULT = 1500; // ms
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+const double SHADOW_OPTION_NONE = -1.000000;
+const int32_t SHADOW_STYLE_NONE = 100;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -285,8 +287,8 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
 
     // shadow
     Shadow shadow;
-    if (options.shadowOption.radius == -1.0) {
-        if (options.shadowStyle == -1) {
+    if (options.shadowOption.radius == SHADOW_OPTION_NONE) {
+        if (options.shadowStyle == SHADOW_STYLE_NONE) {
             shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
         } else {
             shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle(options.shadowStyle));
@@ -306,7 +308,7 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
         .autoCancel = options.autoCancel,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
         .transitionEffect = chainedEffect,
-        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
+        .backgroundColor = Color(options.backgroundColor),
         .shadow = shadow,
         .enableHoverMode = options.enableHoverMode,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
@@ -342,8 +344,8 @@ void SetShowDialog(DialogProperties& dialogProperties, const NativeShowDialogOpt
 
     // shadow
     Shadow shadow;
-    if (options.shadowOption.radius == -1.0) {
-        if (options.shadowStyle == -1) {
+    if (options.shadowOption.radius == SHADOW_OPTION_NONE) {
+        if (options.shadowStyle == SHADOW_STYLE_NONE) {
             shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
         } else {
             shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle(options.shadowStyle));
@@ -546,8 +548,8 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
         auto offset = DimensionOffset(dx, dy);
 
         Shadow shadow;
-        if (options.shadowOption.radius == -1.0) {
-            if (options.shadowStyle == -1) {
+        if (options.shadowOption.radius == SHADOW_OPTION_NONE) {
+            if (options.shadowStyle == SHADOW_STYLE_NONE) {
                 shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
             } else {
                 shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle(options.shadowStyle));
@@ -569,7 +571,7 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
             .showMode = NG::ToastShowMode(options.showMode),
             .alignment = options.alignment,
             .offset = offset,
-            .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
+            .backgroundColor = Color(options.backgroundColor),
             .textColor = Color(ColorAlphaAdapt(options.textColor)),
             .backgroundBlurStyle = options.backgroundBlurStyle,
             .shadow = shadow,
@@ -599,7 +601,7 @@ void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCa
         .buttons = buttons,
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
-        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
+        .backgroundColor = Color(options.backgroundColor),
         .backgroundBlurStyle = options.backgroundBlurStyle,
         .enableHoverMode = options.enableHoverMode,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea)
