@@ -829,6 +829,7 @@ void TextFieldPattern::UpdateSelectionOffset()
 void TextFieldPattern::CalcCaretMetricsByPosition(
     int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
+    CHECK_NULL_VOID(paragraph_);
     paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
     caretCaretMetric.offset.AddX(textRect_.GetX());
     caretCaretMetric.offset.AddY(textRect_.GetY());
@@ -1314,7 +1315,8 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }
-    
+
+    shiftFlag_ = false;
     ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
     ModifyInnerStateInBlurEvent();
