@@ -1216,6 +1216,12 @@ var OverScrollMode;
   OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
 })(OverScrollMode || (OverScrollMode = {}));
 
+var BlurOnKeyboardHideMode;
+(function (BlurOnKeyboardHideMode) {
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["SILENT"] = 0] = "SILENT";
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["BLUR"] = 1] = "BLUR";
+})(BlurOnKeyboardHideMode || (BlurOnKeyboardHideMode = {}));
+
 var RenderExitReason;
 (function (RenderExitReason) {
   RenderExitReason[RenderExitReason["ProcessAbnormalTermination"] = 0] = "ProcessAbnormalTermination";

@@ -141,6 +141,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
+    static void BlurOnKeyboardHideMode(int blurOnKeyboardHideMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
