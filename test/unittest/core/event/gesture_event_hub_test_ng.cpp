@@ -947,7 +947,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
 
 /**
  * @tc.name: GestureEventHubTest015
- * @tc.desc: Test StartDragTaskForWeb HandleNotallowDrag
+ * @tc.desc: Test StartDragTaskForWeb HandleNotAllowDrag
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
@@ -969,7 +969,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
     guestureEventHub->StartDragTaskForWeb();
     ASSERT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
 
-    guestureEventHub->HandleNotallowDrag(GestureEvent());
+    guestureEventHub->HandleNotAllowDrag(GestureEvent());
 
     frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
     guestureEventHub = frameNode->GetOrCreateGestureEventHub();
@@ -981,7 +981,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
     event->onDragStart_ = func;
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
-    guestureEventHub->HandleNotallowDrag(GestureEvent());
+    guestureEventHub->HandleNotAllowDrag(GestureEvent());
     ASSERT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
 }
 
