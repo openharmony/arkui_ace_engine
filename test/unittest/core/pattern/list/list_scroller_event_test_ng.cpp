@@ -571,6 +571,48 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll002, TestSize.Level1
 }
 
 /**
+ * @tc.name: onWillScrollAndOnDidScroll003
+ * @tc.desc: Test scrollToIndex trigger onDidScroll not trigger onWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1)
+{
+    bool isWillTrigger = false;
+    bool isDidTrigger = false;
+    Dimension willOffset;
+    Dimension didOffset;
+    auto willTriggerEvent = [&isWillTrigger, &willOffset](Dimension offset, ScrollState state, ScrollSource source) {
+        isWillTrigger = true;
+        willOffset = offset;
+        ScrollFrameResult result;
+        result.offset = offset;
+        return result;
+    };
+    auto didTriggerEvent = [&isDidTrigger, &didOffset](Dimension offset, ScrollState state) {
+        isDidTrigger = true;
+        didOffset = offset;
+    };
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    eventHub_->SetOnWillScroll(willTriggerEvent);
+    eventHub_->SetOnDidScroll(didTriggerEvent);
+    /**
+     * @tc.steps: Cover condition that onScroll && !NearZero(finalOffset)
+     */
+    isWillTrigger = false;
+    isDidTrigger = false;
+    willOffset.Reset();
+    didOffset.Reset();
+    pattern_->ScrollToIndex(1, false, ScrollAlign::START);
+    FlushUITasks();
+    EXPECT_FALSE(isWillTrigger);
+    EXPECT_TRUE(isDidTrigger);
+    EXPECT_EQ(willOffset.Value(), 0);
+    EXPECT_EQ(didOffset.Value(), ITEM_MAIN_SIZE);
+}
+
+/**
  * @tc.name: Pattern005
  * @tc.desc: Test OnScrollCallback
  * @tc.type: FUNC
