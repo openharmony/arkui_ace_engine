@@ -23,7 +23,8 @@
 
 struct Matrix2DPeer {
     Matrix2DPeer() = default;
-    Matrix2DPeer(OHOS::Ace::CanvasUnit value){
+    explicit Matrix2DPeer(OHOS::Ace::CanvasUnit value)
+    {
         Matrix2DPeer();
         unit = value;
     }

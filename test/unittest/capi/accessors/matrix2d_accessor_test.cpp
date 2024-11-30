@@ -43,7 +43,7 @@ std::vector<std::vector<double>>
     };
 
 std::vector<double> NUMBER_TEST_PLAN = {
-     100, 0, -0.54, 0.98, 1.00, 1.01, -100,
+    100, 0, -0.54, 0.98, 1.00, 1.01, -100,
 };
 } // namespace
 

@@ -105,7 +105,7 @@ void SetScaleXImpl(Matrix2DPeer* peer,
                    const Ark_Number* scaleX)
 {
 }
-Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)  
+Ark_Int32 GetRotateYImpl(Matrix2DPeer* peer)
 {
     return 0;
 }
