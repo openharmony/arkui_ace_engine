@@ -21,10 +21,10 @@ const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
 
 export class FullScreenLaunchComponent extends ViewPU {
-    constructor(v, w, x, y = -1, z = undefined, a1) {
-        super(v, x, y, a1);
-        if (typeof z === "function") {
-            this.paramsGenerator_ = z;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
         }
         this.content = this.doNothingBuilder;
         this.context = getContext(this);
@@ -32,69 +32,70 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.options = undefined;
         this.__isShow = new ObservedPropertySimplePU(false, this, "isShow");
         this.subscriber = null;
-        this.setInitiallyProvidedValue(w);
+        this.onError = undefined;
+        this.onTerminated = undefined;
+        this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(u) {
-        if (u.content !== undefined) {
-            this.content = u.content;
+    setInitiallyProvidedValue(params) {
+        if (params.content !== undefined) {
+            this.content = params.content;
         }
-        if (u.context !== undefined) {
-            this.context = u.context;
+        if (params.context !== undefined) {
+            this.context = params.context;
         }
-        if (u.appId !== undefined) {
-            this.appId = u.appId;
+        if (params.appId !== undefined) {
+            this.appId = params.appId;
         }
-        if (u.options !== undefined) {
-            this.options = u.options;
+        if (params.options !== undefined) {
+            this.options = params.options;
         }
-        if (u.isShow !== undefined) {
-            this.isShow = u.isShow;
+        if (params.isShow !== undefined) {
+            this.isShow = params.isShow;
         }
-        if (u.subscriber !== undefined) {
-            this.subscriber = u.subscriber;
+        if (params.subscriber !== undefined) {
+            this.subscriber = params.subscriber;
+        }
+        if (params.onError !== undefined) {
+            this.onError = params.onError;
+        }
+        if (params.onTerminated !== undefined) {
+            this.onTerminated = params.onTerminated;
         }
     }
-
-    updateStateVars(t) {
+    updateStateVars(params) {
     }
-
-    purgeVariableDependenciesOnElmtId(s) {
-        this.__isShow.purgeDependencyOnElmtId(s);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__isShow.purgeDependencyOnElmtId(rmElmtId);
     }
-
     aboutToBeDeleted() {
         this.__isShow.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get isShow() {
         return this.__isShow.get();
     }
-
-    set isShow(r) {
-        this.__isShow.set(r);
+    set isShow(newValue) {
+        this.__isShow.set(newValue);
     }
-
     aboutToAppear() {
-        let r = {
+        let subscribeInfo = {
             events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
         };
-        commonEventManager.createSubscriber(r, (t, u) => {
-            if (t) {
-                hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, err: %{public}s.', JSON.stringify(t));
+        commonEventManager.createSubscriber(subscribeInfo, (err, data) => {
+            if (err) {
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, err: %{public}s.', JSON.stringify(err));
                 return;
             }
-            if (u == null || u == undefined) {
+            if (data == null || data == undefined) {
                 hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.');
                 return;
             }
-            this.subscriber = u;
-            commonEventManager.subscribe(this.subscriber, (w, x) => {
-                if (w) {
-                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to subscribe common event, err: %{public}s.', JSON.stringify(w));
+            this.subscriber = data;
+            commonEventManager.subscribe(this.subscriber, (err, data) => {
+                if (err) {
+                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to subscribe common event, err: %{public}s.', JSON.stringify(err));
                     return;
                 }
                 hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.');
@@ -102,24 +103,21 @@ export class FullScreenLaunchComponent extends ViewPU {
             });
         });
     }
-
     aboutToDisappear() {
         if (this.subscriber !== null) {
-            commonEventManager.unsubscribe(this.subscriber, (s) => {
-                if (s) {
-                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(s));
+            commonEventManager.unsubscribe(this.subscriber, (err) => {
+                if (err) {
+                    hilog.error(0x3900, 'FullScreenLaunchComponent', 'UnsubscribeCallBack, err: %{public}s.', JSON.stringify(err));
                 }
                 else {
-                    hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe success.');
+                    hilog.info(0x3900, 'FullScreenLaunchComponent', 'Unsubscribe.');
                     this.subscriber = null;
                 }
             });
         }
     }
-
-    doNothingBuilder(q = null) {
+    doNothingBuilder(parent = null) {
     }
-
     resetOptions() {
         if (this.options?.parameters) {
             this.options.parameters['ohos.extra.param.key.showMode'] = 1;
@@ -137,12 +135,11 @@ export class FullScreenLaunchComponent extends ViewPU {
             };
         }
     }
-
     async checkAbility() {
         this.resetOptions();
         try {
-            const p = await abilityManager.isEmbeddedOpenAllowed(this.context, this.appId);
-            if (p) {
+            const i = await abilityManager.isEmbeddedOpenAllowed(this.context, this.appId);
+            if (i) {
                 this.isShow = true;
                 hilog.info(0x3900, 'FullScreenLaunchComponent', ' EmbeddedOpen is Allowed!');
             }
@@ -150,41 +147,36 @@ export class FullScreenLaunchComponent extends ViewPU {
                 this.popUp();
             }
         }
-        catch (o) {
-            hilog.error(0x3900, 'FullScreenLaunchComponent', 'isEmbeddedOpenAllowed called error!%{public}s', o.message);
+        catch (e) {
+            hilog.error(0x3900, 'FullScreenLaunchComponent', 'isEmbeddedOpenAllowed called error!%{public}s', e.message);
         }
     }
-
     async popUp() {
         this.isShow = false;
         try {
-            const n = await this.context.openAtomicService(this.appId, this.options);
-            hilog.info(0x3900, 'FullScreenLaunchComponent', '%{public}s open service success!', n.want);
+            const ability = await this.context.openAtomicService(this.appId, this.options);
+            hilog.info(0x3900, 'FullScreenLaunchComponent', '%{public}s open service success!', ability.want);
         }
-        catch (m) {
-            hilog.error(0x3900, 'FullScreenLaunchComponent', '%{public}s open service error!', m.message);
+        catch (e) {
+            hilog.error(0x3900, 'FullScreenLaunchComponent', '%{public}s open service error!', e.message);
         }
     }
-
     initialRender() {
-        this.observeComponentCreation2((i, j) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.justifyContent(FlexAlign.Center);
             Row.onClick(() => {
                 this.checkAbility();
             });
-            Row.bindContentCover({ value: this.isShow, changeEvent: l => {
-                this.isShow = l;
-            } }, { builder: () => {
-                this.uiExtensionBuilder.call(this);
-            } });
+            Row.bindContentCover({ value: this.isShow, changeEvent: newValue => { this.isShow = newValue; } }, { builder: () => {
+                    this.uiExtensionBuilder.call(this);
+                } });
         }, Row);
         this.content.bind(this)();
         Row.pop();
     }
-
-    uiExtensionBuilder(a = null) {
-        this.observeComponentCreation2((c, d) => {
+    uiExtensionBuilder(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             UIExtensionComponent.create({
                 bundleName: `com.atomicservice.${this.appId}`,
                 flags: this.options?.flags,
@@ -192,19 +184,24 @@ export class FullScreenLaunchComponent extends ViewPU {
             });
             UIExtensionComponent.height('100%');
             UIExtensionComponent.width('100%');
-            UIExtensionComponent.onRelease(() => {
+            UIExtensionComponent.onError(err => {
+                if (this.onError != undefined) {
+                    this.onError(err);
+                }
                 this.isShow = false;
-            });
-            UIExtensionComponent.onError(g => {
-                this.isShow = false;
-                hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', g.message);
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message);
                 this.getUIContext().showAlertDialog({
-                    message: g.message
+                    message: err.message
                 });
+            });
+            UIExtensionComponent.onTerminated(info => {
+                this.isShow = false;
+                if (this.onTerminated != undefined) {
+                    this.onTerminated(info);
+                }
             });
         }, UIExtensionComponent);
     }
-
     rerender() {
         this.updateDirtyElements();
     }
