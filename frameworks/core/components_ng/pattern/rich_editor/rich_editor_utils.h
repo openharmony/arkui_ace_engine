@@ -50,6 +50,7 @@ static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribut
     ss << "}";
     return ss.str();
 }
-}
+
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UTILS_H
