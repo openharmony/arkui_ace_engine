@@ -416,6 +416,7 @@ private:
 WebPattern::WebPattern()
 {
     InitMagnifier();
+    renderMode_ = RenderMode::ASYNC_RENDER;
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
