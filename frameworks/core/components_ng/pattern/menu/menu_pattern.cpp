@@ -33,8 +33,6 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -574,7 +572,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
         CHECK_NULL_VOID(childNode);
         if (i == 0) {
-            auto props = childNode->GetPaintProperty<OptionPaintProperty>();
+            auto props = childNode->GetPaintProperty<MenuItemPaintProperty>();
             CHECK_NULL_VOID(props);
             props->UpdateNeedDivider(false);
             auto focusHub = childNode->GetOrCreateFocusHub();
@@ -589,9 +587,9 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
         childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     for (size_t i = updateCount; i < paramCount; i++) {
-        auto optionNode = OptionView::CreateSelectOption(params.at(i), i);
+        auto optionNode = MenuView::CreateSelectOption(params.at(i), i);
         if (i == 0) {
-            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
             props->UpdateNeedDivider(false);
         }
         MountOption(optionNode);
