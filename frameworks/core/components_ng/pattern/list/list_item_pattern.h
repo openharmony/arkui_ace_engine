@@ -229,11 +229,6 @@ public:
 protected:
     void OnModifyDone() override;
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
 private:
     void InitSwiperAction(bool axisChanged);
     float GetFriction();

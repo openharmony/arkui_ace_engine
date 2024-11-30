@@ -342,12 +342,6 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 private:
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;

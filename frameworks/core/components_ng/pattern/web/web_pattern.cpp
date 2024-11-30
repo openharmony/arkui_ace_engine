@@ -46,6 +46,9 @@
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/ime/input_method_manager.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -318,6 +321,8 @@ const std::string STRING_LF = "\n";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
+using Recorder::EventRecorder;
+
 class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
     WebAccessibilityChildTreeCallback(const WeakPtr<WebPattern> &weakPattern, int64_t accessibilityId)
@@ -421,6 +426,7 @@ WebPattern::~WebPattern()
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
+        delegate_->UnRegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME);
     }
 
     if (observer_) {
@@ -3054,6 +3060,7 @@ void WebPattern::OnModifyDone()
                 TAG_LOGD(AceLogTag::ACE_WEB, "[getSurfaceId] set surfaceId is %{public}s", surfaceId.c_str());
             }
         }
+        RecordWebEvent(true);
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
         bool isApiGteTwelve =
@@ -3175,6 +3182,78 @@ void WebPattern::OnModifyDone()
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
     }
+}
+
+extern "C" {
+char* HandleWebMessage(const char** params, int32_t size)
+{
+#if defined(PREVIEW) || defined(ACE_UNITTEST)
+    return nullptr;
+#else
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
+        return nullptr;
+    }
+    if (size < Recorder::WEB_PARAM_SIZE) {
+        return nullptr;
+    }
+    for (int32_t i = 0; i < Recorder::WEB_PARAM_SIZE; i++) {
+        if (params[i] == nullptr) {
+            return nullptr;
+        }
+    }
+    if (!EventRecorder::Get().IsMessageValid(
+        params[Recorder::WEB_PARAM_INDEX_CATEGORY], params[Recorder::WEB_PARAM_INDEX_IDENTIFIER])) {
+        return nullptr;
+    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(Recorder::EventType::WEB_ACTION)
+        .SetEventCategory(Recorder::EventCategory::CATEGORY_WEB)
+        .SetType(V2::WEB_ETS_TAG)
+        .SetExtra(Recorder::KEY_WEB_CATEGORY, params[Recorder::WEB_PARAM_INDEX_CATEGORY])
+        .SetText(params[Recorder::WEB_PARAM_INDEX_CONTENT]);
+    EventRecorder::Get().OnEvent(std::move(builder));
+    return nullptr;
+#endif
+}
+}
+
+void WebPattern::RecordWebEvent(bool isInit)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web isInit %{public}d", isInit);
+    CHECK_NULL_VOID(delegate_);
+    if (isInit) {
+        std::vector<std::pair<std::string, NativeMethodCallback>> methodList = {
+            std::make_pair<std::string, NativeMethodCallback>(Recorder::WEB_METHOD_NAME, HandleWebMessage)
+        };
+        delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
+        return;
+    }
+    auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB) || cacheJsCode.empty()) {
+        return;
+    }
+    delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
+    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_);
+    UpdateJavaScriptOnDocumentEnd();
+    delegate_->JavaScriptOnDocumentEnd();
+#endif
+}
+
+void WebPattern::GetPageContentAsync(const std::string& jsCode)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto webId = host->GetId();
+    Recorder::InspectorTreeCollector::Get().IncreaseTaskNum();
+    delegate_->ExecuteTypeScript(jsCode, [webId](std::string result) {
+        std::string key = "Web_" + std::to_string(webId);
+        Recorder::InspectorTreeCollector::Get().GetJson()->Put(key.c_str(), result.c_str());
+        Recorder::InspectorTreeCollector::Get().DecreaseTaskNum();
+    });
+#endif
 }
 
 void WebPattern::InitInOfflineMode()
@@ -6354,6 +6433,7 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    EventRecorder::Get().SaveJavascriptItems(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
@@ -6370,7 +6450,9 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
 
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
-    if (delegate_ && onDocumentEndScriptItems_.has_value()) {
+    CHECK_NULL_VOID(delegate_);
+    EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
+    if (onDocumentEndScriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }

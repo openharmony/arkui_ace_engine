@@ -66,11 +66,6 @@ public:
         return isVertical_;
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void SetFlexMeasureResult(FlexMeasureResult measureResult)
     {
         measureResult_ = measureResult;

@@ -372,7 +372,11 @@ void RatingPattern::FireChangeEvent()
     auto inspectorId = host->GetInspectorId().value_or("");
     Recorder::EventParamsBuilder builder;
     auto score = ss.str();
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetText(score).SetDescription(host->GetAutoEventParamValue(""));
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetText(score)
+        .SetHost(host)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     if (inspectorId.empty()) {
         return;

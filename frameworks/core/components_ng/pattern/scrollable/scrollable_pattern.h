@@ -823,6 +823,8 @@ protected:
 
     void CheckScrollBarOff();
 
+    void RecordScrollEvent(Recorder::EventType eventType);
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -1032,6 +1034,7 @@ private:
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
     bool prevHasFadingEdge_ = false;
+    float scrollStartOffset_ = 0.0f;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

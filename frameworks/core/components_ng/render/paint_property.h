@@ -45,6 +45,8 @@ public:
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     void SetHost(const WeakPtr<FrameNode>& host);

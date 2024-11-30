@@ -8126,6 +8126,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
+        ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
         UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
             AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
         return true;
@@ -8305,6 +8306,7 @@ void RichEditorPattern::OnScrollEndCallback()
         selectOverlay_->ShowMenu();
     }
     if (AnimateStoped()) {
+        ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
         UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
             AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     }
