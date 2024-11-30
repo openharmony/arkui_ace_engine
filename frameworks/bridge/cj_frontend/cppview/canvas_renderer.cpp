@@ -15,10 +15,18 @@
 
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 
+#include <cstdint>
 #include <string>
+#include <vector>
+
+#include "ffi_remote_data.h"
 
 #include "base/utils/utils.h"
+#include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/cppview/canvas_pattern.h"
+#include "bridge/cj_frontend/cppview/render_image.h"
+#include "core/components/common/properties/paint_state.h"
+#include "core/pipeline/base/constants.h"
 
 using namespace OHOS;
 
@@ -27,8 +35,10 @@ std::unordered_map<int32_t, std::shared_ptr<Pattern>> NativeCanvasRenderer::patt
 unsigned int NativeCanvasRenderer::patternCount_ = 0;
 namespace {
 const int EVEN_CHECK = 2;
-const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr int32_t ALPHA_INDEX = 3;
+constexpr uint32_t PIXEL_SIZE = 4;
 constexpr double DIFF = 1e-10;
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 } // namespace
 
 NativeCanvasRenderer::NativeCanvasRenderer(bool antialias) : FFIData()
@@ -481,6 +491,13 @@ void NativeCanvasRenderer::SetTransform(TransformParam param)
     renderingContext2DModel_->SetTransform(param, true);
 }
 
+void NativeCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
+{
+    if (id >= 0 && id <= patternCount_) {
+        renderingContext2DModel_->SetTransform(pattern_[id], transform);
+    }
+}
+
 void NativeCanvasRenderer::SetTransformByMatrix(const sptr<NativeMatrix2d>& matrix2d)
 {
     TransformParam param = matrix2d->GetTransform();
@@ -552,7 +569,7 @@ int64_t NativeCanvasRenderer::CreateRadialGradient(
     return nativeCanvasGradient->GetID();
 }
 
-int64_t NativeCanvasRenderer::CreateRadialGradient(const double startAngle, const double x, const double y)
+int64_t NativeCanvasRenderer::CreateConicGradient(const double startAngle, const double x, const double y)
 {
     double density = GetDensity();
     Gradient gradient = Gradient();
@@ -596,6 +613,34 @@ std::unique_ptr<ImageData> NativeCanvasRenderer::GetImageData(
     imageSize.height = height;
     canvasData = renderingContext2DModel_->GetImageData(imageSize);
     return canvasData;
+}
+
+int64_t NativeCanvasRenderer::GetNativeImageData(
+    const double left, const double top, const double width, const double height)
+{
+    ImageSize imageSize;
+    double density = GetDensity();
+    imageSize.left = left * density;
+    imageSize.top = top * density;
+    imageSize.width = width * density + DIFF;
+    imageSize.height = height * density + DIFF;
+
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    int32_t length = finalHeight * finalWidth * 4;
+    std::vector<uint8_t> buffer(length, 0xff);
+    auto imagdata = FFI::FFIData::Create<NativeImageData>();
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        imagdata->setDirtyHeight(0);
+        imagdata->setDirtyWidth(0);
+        imagdata->data = buffer;
+        return imagdata->GetID();
+    }
+    renderingContext2DModel_->GetImageDataModel(imageSize, buffer.data());
+    imagdata->setDirtyHeight(finalHeight);
+    imagdata->setDirtyWidth(finalWidth);
+    imagdata->data = buffer;
+    return imagdata->GetID();
 }
 
 int64_t NativeCanvasRenderer::GetPixelMap(double left, double top, double width, double height)
@@ -665,20 +710,29 @@ void NativeCanvasRenderer::Reset()
     renderingContext2DModel_->Reset();
 }
 
-int64_t NativeCanvasRenderer::CreatePattern(std::unique_ptr<RenderImage> cjImage, const std::string& repeat)
+int64_t NativeCanvasRenderer::CreatePattern(int64_t bitMapId, const std::string& repeat)
 {
+    auto renderImage = FFIData::GetData<CJRenderImage>(bitMapId);
+    if (renderImage == nullptr) {
+        LOGE("canvas createCanvasPattern error, Cannot get CJRenderImage by id: %{public}" PRId64, bitMapId);
+        return 0;
+    }
     auto pattern = std::make_shared<Pattern>();
-    pattern->SetImgSrc(cjImage->src);
-    pattern->SetImageWidth(cjImage->width_);
-    pattern->SetImageHeight(cjImage->height_);
+    pattern->SetImgSrc(renderImage->GetSrc());
+    pattern->SetImageWidth(renderImage->GetWidth());
+    pattern->SetImageHeight(renderImage->GetHeight());
     pattern->SetRepetition(repeat);
+#if !defined(PREVIEW)
+    auto pixelMap = renderImage->GetPixelMap();
+    pattern->SetPixelMap(pixelMap);
+#endif
 
     pattern_[patternCount_] = pattern;
     auto nativeCanvasPattern = FFIData::Create<NativeCanvasPattern>();
     if (nativeCanvasPattern == nullptr) {
         return FFI_ERROR_CODE;
     }
-    nativeCanvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
+    nativeCanvasPattern->SetCanvasRenderer(this);
     nativeCanvasPattern->SetId(patternCount_);
     nativeCanvasPattern->SetUnit(GetUnit());
     patternCount_++;
@@ -693,7 +747,7 @@ std::shared_ptr<Pattern> NativeCanvasRenderer::GetPatternPtr(int32_t id)
     return pattern_[id];
 }
 
-int64_t NativeCanvasRenderer::getTransform()
+int64_t NativeCanvasRenderer::GetTransform()
 {
     TransformParam param = renderingContext2DModel_->GetTransform();
     auto nativeMatrix2d = FFIData::Create<NativeMatrix2d>();
@@ -714,6 +768,116 @@ void NativeCanvasRenderer::SetDensity()
 {
     double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
+}
+
+std::string NativeCanvasRenderer::ToDataUrl(const std::string type, const double quality)
+{
+    std::string result = renderingContext2DModel_->ToDataURL(type, quality);
+    return result;
+}
+
+double NativeCanvasRenderer::GetWidth()
+{
+    double width = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
+    canvasRenderingContext2DModel->GetWidth(width);
+    double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
+    width /= density;
+    return width;
+}
+
+double NativeCanvasRenderer::GetHeight()
+{
+    double height = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
+    canvasRenderingContext2DModel->GetHeight(height);
+    double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
+    height /= density;
+    return height;
+}
+
+void NativeCanvasRenderer::TransferFromImageBitmap(const sptr<CJRenderImage> cjImage)
+{
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+#ifdef PIXEL_MAP_SUPPORTED
+    canvasRenderingContext2DModel->TransferFromImageBitmap(cjImage->GetPixelMap());
+#else
+    auto imageData = cjImage->imageData;
+    CHECK_NULL_VOID(imageData);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
+#endif
+}
+
+int64_t NativeCanvasRenderer::CreateImageData(const double height, const double width)
+{
+    auto imageData = FFIData::Create<NativeImageData>();
+    double density = GetDensity();
+    int32_t finalWidth = static_cast<int32_t>(std::abs(width * density + DIFF));
+    int32_t finalHeight = static_cast<int32_t>(std::abs(height * density + DIFF));
+    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    std::vector<uint8_t> bufferArray;
+    for (int32_t i = 0; i < result; i++) {
+        bufferArray.emplace_back(0xff);
+    }
+    imageData->height_ = finalHeight;
+    imageData->width_ = finalHeight;
+    imageData->data = bufferArray;
+    return imageData->GetID();
+}
+
+int64_t NativeCanvasRenderer::CreateImageData(const sptr<NativeImageData> imageData)
+{
+    auto ret = FFIData::Create<NativeImageData>();
+    double density = GetDensity();
+    int32_t finalWidth = static_cast<int32_t>(std::abs(imageData->width_ * density + DIFF));
+    int32_t finalHeight = static_cast<int32_t>(std::abs(imageData->height_ * density + DIFF));
+    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    std::vector<uint8_t> bufferArray;
+    for (int32_t i = 0; i < result; i++) {
+        bufferArray.emplace_back(0xff);
+    }
+    ret->height_ = finalHeight;
+    ret->width_ = finalHeight;
+    ret->data = bufferArray;
+    return ret->GetID();
+}
+
+void NativeCanvasRenderer::PutImageData(const sptr<NativeImageData> imageData, const double dx, const double dy,
+    const double dirtyX, const double dirtyY, const double dirtyWidth, const double dirtyHeight)
+{
+    double density = GetDensity();
+    int32_t imgWidth = imageData->getDirtyWidth();
+    int32_t imgHeight = imageData->getDirtyHeight();
+    ImageData imageData_ = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
+    imageData_.x = static_cast<int32_t>(dx * density);
+    imageData_.y = static_cast<int32_t>(dirtyX * density);
+    imageData_.dirtyX = static_cast<int32_t>(dirtyX * density);
+    imageData_.dirtyY = static_cast<int32_t>(dirtyY * density);
+    imageData_.dirtyHeight = static_cast<int32_t>(dirtyHeight * density);
+    imageData_.dirtyWidth = static_cast<int32_t>(dirtyWidth * density);
+    imageData_.dirtyWidth = imageData_.dirtyX < 0 ? std::min(imageData_.dirtyX + imageData_.dirtyWidth, imgWidth)
+                                                  : std::min(imgWidth - imageData_.dirtyX, imageData_.dirtyWidth);
+    imageData_.dirtyHeight = imageData_.dirtyY < 0 ? std::min(imageData_.dirtyY + imageData_.dirtyHeight, imgHeight)
+                                                   : std::min(imgHeight - imageData_.dirtyY, imageData_.dirtyHeight);
+    auto buffer = imageData->data;
+    int32_t bufferLength = buffer.size();
+    imageData_.data = std::vector<uint32_t>();
+    for (int32_t i = std::max(imageData_.dirtyY, 0); i < imageData_.dirtyY + imageData_.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData_.dirtyX, 0); j < imageData_.dirtyX + imageData_.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
+                imageData_.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+    renderingContext2DModel_->PutImageData(imageData_);
 }
 
 } // namespace OHOS::Ace::Framework

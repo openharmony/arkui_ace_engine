@@ -47,4 +47,19 @@ bool NativeImageData::GetImageDataSize(double width, double height, int32_t& fin
     return true;
 }
 
+int32_t NativeImageData::GetHeight() const
+{
+    return height_;
+}
+
+int32_t NativeImageData::GetWidth() const
+{
+    return width_;
+}
+
+std::vector<uint8_t> NativeImageData::GetData() const
+{
+    return data;
+}
+
 } // namespace OHOS::Ace::Framework

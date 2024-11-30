@@ -14,12 +14,17 @@
  */
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "cj_lambda.h"
+#include "ffi_remote_data.h"
 
+#include "base/geometry/matrix4.h"
 #include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/cppview/canvas_pattern.h"
-#include "bridge/cj_frontend/cppview/rendering_context.h"
+#include "bridge/cj_frontend/cppview/render_image.h"
+#include "bridge/cj_frontend/cppview/offscreen_canvas.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_canvas_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components/common/properties/paint_state.h"
@@ -216,6 +221,19 @@ void FfiOHOSAceFrameworkRenderingContextSetFillStyleByGradient(int64_t contextId
         return;
     }
     context->SetFillStyle(nativeCanvasGradient);
+}
+
+void FfiOHOSAceFrameworkRenderingContextSetFillStyleByCanvasPattern(int64_t contextId, int64_t patternId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return;
+    }
+    auto nativeCanvasPattern = FFIData::GetData<NativeCanvasPattern>(patternId);
+    if (nativeCanvasPattern == nullptr) {
+        return;
+    }
+    context->SetFillStyle(nativeCanvasPattern);
 }
 
 void FfiOHOSAceFrameworkRenderingContextSetLineWidth(int64_t contextId, double lineWidth)
@@ -445,6 +463,26 @@ void FfiOHOSAceFrameworkRenderingContextSetImageSmoothingQuality(int64_t context
     }
 }
 
+void FfiOHOSAceFrameworkRenderingContextSetDirection(int64_t contextId, const char* direction)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->SetDirection(direction);
+    } else {
+        LOGE("canvas SetDirection error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextSetFilter(int64_t contextId, const char* filterStr)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->SetFilter(filterStr);
+    } else {
+        LOGE("canvas SetFilter error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
 void FfiOHOSAceFrameworkRenderingContextFillRect(int64_t contextId, double x, double y, double width, double height)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -488,6 +526,17 @@ void FfiOHOSAceFrameworkRenderingContextFillText(int64_t contextId, double x, do
     }
 }
 
+void FfiOHOSAceFrameworkRenderingContextFillTextWithMaxWidth(
+    int64_t contextId, double x, double y, const char* text, double maxWidth)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->FillText(x, y, text, maxWidth);
+    } else {
+        LOGE("canvas fillText error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
 void FfiOHOSAceFrameworkRenderingContextStrokeText(int64_t contextId, double x, double y, const char* text)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -495,6 +544,17 @@ void FfiOHOSAceFrameworkRenderingContextStrokeText(int64_t contextId, double x, 
         context->StrokeText(x, y, text);
     } else {
         LOGE("canvas strokeText error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextStrokeTextWithMaxWidth(
+    int64_t contextId, double x, double y, const char* text, double maxWidth)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->StrokeText(x, y, text, maxWidth);
+    } else {
+        LOGE("canvas fillText error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
     }
 }
 
@@ -776,29 +836,14 @@ void FfiOHOSAceFrameworkRenderingContextSetTransformByMatrix(int64_t contextId, 
     }
 }
 
-int64_t FfiOHOSAceFrameworkRenderingContextCreateCanvasPattern(
-    int64_t contextId, ImageBitMapParams imageBitMap, const char* repSrc)
+int64_t FfiOHOSAceFrameworkRenderingContextCreateCanvasPattern(int64_t contextId, int64_t bitMapId, const char* repSrc)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
-    if (context != nullptr) {
-        auto renderImage = FFIData::GetData<CJRenderImage>(imageBitMap.imageBitMapId);
-        if (renderImage == nullptr) {
-            LOGE("canvas createCanvasPattern error, Cannot get CJRenderImage by id: %{public}" PRId64,
-                imageBitMap.imageBitMapId);
-            return 0;
-        }
-        std::unique_ptr<RenderImage> image;
-        image->unit = renderImage->GetUnit();
-        image->width_ = renderImage->GetWidth();
-        image->height_ = renderImage->GetHeight();
-        image->src = renderImage->GetSrc();
-        image->imageData = renderImage->GetImageData();
-        image->pixMapID = imageBitMap.pixelMapId;
-        return context->CreatePattern(std::move(image), repSrc);
-    } else {
+    if (context == nullptr) {
         LOGE("canvas setTransform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return FFI_ERROR_CODE;
     }
-    return 0;
+    return context->CreatePattern(bitMapId, repSrc);
 }
 
 void FfiOHOSAceFrameworkRenderingContextTranslate(int64_t contextId, double x, double y)
@@ -839,7 +884,7 @@ int64_t FfiOHOSAceFrameworkRenderingContextCreateLinearGradient(
         return context->CreateLinearGradient(x0, y0, x1, y1);
     } else {
         LOGE("canvas createLinearGradient error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
-        return 0;
+        return FFI_ERROR_CODE;
     }
 }
 
@@ -851,7 +896,33 @@ int64_t FfiOHOSAceFrameworkRenderingContextCreateRadialGradient(
         return context->CreateRadialGradient(x0, y0, r0, x1, y1, r1);
     } else {
         LOGE("canvas createRadialGradient error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
-        return 0;
+        return FFI_ERROR_CODE;
+    }
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextCreateConicGradient(int64_t contextId, double startAngle, double x, double y)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->CreateConicGradient(startAngle, x, y);
+    } else {
+        LOGE("canvas createRadialGradient error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return FFI_ERROR_CODE;
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextDrawImageWithImageBitMap(
+    int64_t contextId, int64_t bitMapID, NativeImageInfo imageInfo)
+{
+    auto imageBitmap = FFIData::GetData<CJRenderImage>(bitMapID);
+    if (imageBitmap == nullptr) {
+        LOGE("canvas DrawImage error, Cannot get CJRenderImage by id: %{public}" PRId64, bitMapID);
+        return;
+    }
+    if (!imageBitmap->GetSrc().empty()) {
+        FfiOHOSAceFrameworkRenderingContextDrawImage(contextId, imageBitmap->GetSrc().c_str(), imageInfo);
+    } else {
+        FfiOHOSAceFrameworkRenderingContextDrawImageWithPixelMap(contextId, imageBitmap->GetPixelMapId(), imageInfo);
     }
 }
 
@@ -913,6 +984,7 @@ void FfiOHOSAceFrameworkRenderingContextDrawImageWithPixelMap(
         .dy = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dy),
         .dWidth = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dWidth),
         .dHeight = PipelineBase::Vp2PxWithCurrentDensity(imageInfo.dHeight) };
+    context->DrawImage(pixMapOhos, image);
 }
 
 int64_t FfiOHOSAceFrameworkRenderingContextGetPixelMap(
@@ -921,7 +993,7 @@ int64_t FfiOHOSAceFrameworkRenderingContextGetPixelMap(
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
     if (context == nullptr) {
         LOGE("canvas drawImage error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
-        return 0;
+        return FFI_ERROR_CODE;
     }
 
     return context->GetPixelMap(left, top, width, height);
@@ -939,14 +1011,207 @@ void FfiOHOSAceFrameworkCanvasGradientAddColorStop(int64_t contextId, double off
 
 double FfiOHOSAceFrameworkRenderingContextGetHight(int64_t contextId)
 {
-    auto context = FFIData::GetData<CJRenderingContext>(contextId);
-    return context->GetHeight();
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->GetHeight();
+    } else {
+        LOGE(
+            "NativeCanvasRenderer GetHeight error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return FFI_ERROR_CODE;
+    }
 }
 
 double FfiOHOSAceFrameworkRenderingContextGetWidth(int64_t contextId)
 {
-    auto context = FFIData::GetData<CJRenderingContext>(contextId);
-    return context->GetWidth();
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->GetWidth();
+    } else {
+        LOGE(
+            "NativeCanvasRenderer GetHeight error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+        return FFI_ERROR_CODE;
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextReset(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->Reset();
+    } else {
+        LOGE("NativeCanvasRenderer Reset error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextSavaLayer(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->SaveLayer();
+    } else {
+        LOGE(
+            "NativeCanvasRenderer SaveLayer error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64, contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextRestoreLayer(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->RestoreLayer();
+    } else {
+        LOGE("NativeCanvasRenderer RestoreLayer error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextResetTransform(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        context->ResetTransform();
+    } else {
+        LOGE("NativeCanvasRenderer ResetTransform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+    }
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextGetTransform(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->GetTransform();
+    } else {
+        LOGE("NativeCanvasRenderer GetTransform error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return FFI_ERROR_CODE;
+    }
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextCreateImageData(int64_t contextId, double height, double width)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->CreateImageData(height, width);
+    } else {
+        LOGE("NativeCanvasRenderer CreateImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return FFI_ERROR_CODE;
+    }
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextCreateImageDataWithImageData(int64_t contextId, int64_t imageDataId)
+{
+    auto imageData = FFIData::GetData<NativeImageData>(imageDataId);
+    if (imageData == nullptr) {
+        LOGE("NativeCanvasRenderer CreateImageData error, Cannot get NativeImageData by id: %{public}" PRId64,
+            contextId);
+        return FFI_ERROR_CODE;
+    }
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        return context->CreateImageData(imageData);
+    } else {
+        LOGE("NativeCanvasRenderer CreateImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return FFI_ERROR_CODE;
+    }
+}
+
+void FfiOHOSAceFrameworkRenderingContextSetPixelMap(int64_t contextId, int64_t pixelMapId)
+{
+    auto instance = FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
+    if (instance == nullptr) {
+        LOGE("canvas SetPixelMap error, Cannot get PixelMapProxy by id: %{public}" PRId64, pixelMapId);
+        return;
+    }
+    auto pixMap = instance->GetRealPixelMap();
+    if (pixMap == nullptr) {
+        LOGE("canvas SetPixelMap error, Cannot get pixMap in PixelMapProxy");
+        return;
+    }
+    auto pixMapOhos = PixelMap::CreatePixelMap(&pixMap);
+    if (pixMapOhos == nullptr) {
+        LOGE("canvas SetPixelMap error, Cannot create PixelMapOhos by pixMap");
+        return;
+    }
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context != nullptr) {
+        LOGE("NativeCanvasRenderer SetPixelMap error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return;
+    }
+    context->SetPixelMap(pixMapOhos);
+}
+
+int64_t FfiOHOSAceFrameworkRenderingContextGetImageData(
+    int64_t contextId, const double left, const double top, const double width, const double height)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return FFI_ERROR_CODE;
+    }
+    auto nativeImagedata = FFIData::Create<NativeImageData>();
+    return context->GetNativeImageData(left, top, width, height);
+}
+
+void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx, double dy,
+    double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+    }
+    auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
+    if (nativeImagedata == nullptr) {
+        LOGE("NativeCanvasRenderer PutImageData error, Cannot get NativeImageData by id: %{public}" PRId64, dataId);
+    }
+    context->PutImageData(nativeImagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+}
+
+VectorFloat64Ptr FfiOHOSAceFrameworkRenderingContextGetLineDash(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetLineDash error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+        return nullptr;
+    }
+    auto lineDash = context->GetLineDash();
+    VectorFloat64Ptr ret = static_cast<VectorFloat64Ptr>(&lineDash);
+    return ret;
+}
+
+const char* FfiOHOSAceFrameworkRenderingContextToDataURL(int64_t contextId, const char* type, double quality)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    std::string dataUrl;
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetLineDash error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+    } else {
+        dataUrl = context->ToDataURL(type, quality);
+    }
+    auto ret = strdup(dataUrl.c_str());
+    return ret;
+}
+
+void FfiOHOSAceFrameworkRenderingContextTransferFromImageBitmap(int64_t contextId, int64_t imageId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer TransferFromImageBitmap error, Cannot get NativeCanvasRenderer by id: "
+             "%{public}" PRId64,
+            contextId);
+    }
+    auto renderImage = FFIData::GetData<CJRenderImage>(imageId);
+    if (renderImage == nullptr) {
+        LOGE("imageBitMap invert error, Cannot get CJRenderImage by id: %{public}" PRId64, imageId);
+    }
+    context->TransferFromImageBitmap(renderImage);
 }
 
 // Canvas Path2d
@@ -1192,6 +1457,8 @@ void FfiOHOSAceFrameworkCanvasMatrixUpdate(int64_t selfId, TransformParams trans
     TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
     if (matrix2d != nullptr) {
+        params.translateX *= matrix2d->GetDensity();
+        params.translateY *= matrix2d->GetDensity();
         matrix2d->SetTransform(params);
     } else {
         LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
@@ -1199,42 +1466,37 @@ void FfiOHOSAceFrameworkCanvasMatrixUpdate(int64_t selfId, TransformParams trans
 }
 
 // Canvas ImageData
-ImageDataParams FfiOHOSAceFrameworkCanvasImageDataCtor(
-    double width, double heigth, VectorUInt8Prt dataHandle, int32_t unit)
+int64_t FfiOHOSAceFrameworkCanvasImageDataCtor(double width, double heigth, VectorUInt8Prt dataHandle, int32_t unit)
 {
     auto imageData = FFIData::Create<NativeImageData>();
 
     int32_t finalWidth = 0;
     int32_t finalHeight = 0;
-    ImageDataParams res;
     imageData->SetUnit(static_cast<CanvasUnit>(unit));
     if (!imageData->GetImageDataSize(width, heigth, finalWidth, finalHeight)) {
-        res.id = -1;
-        return res;
+        return FFI_ERROR_CODE;
     }
     int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
     imageData->width_ = finalWidth;
     imageData->height_ = finalHeight;
 
     const auto& colorArray = *reinterpret_cast<std::vector<uint8_t>*>(dataHandle);
+    if ((static_cast<CanvasUnit>(unit) == CanvasUnit::PX) && (colorArray.size() != result)) {
+        LOGE("Failed to construct 'ImageData': The input data length is not equal to (4 * widthPX * heightPX).");
+        return FFI_ERROR_CODE;
+    }
     imageData->data = colorArray;
-    res.id = imageData->GetID();
-    res.width = imageData->width_;
-    res.height = imageData->height_;
-    res.result = result;
-    return res;
+    return imageData->GetID();
 }
 
-ImageDataParams FfiOHOSAceFrameworkCanvasImageDataCtorWithNoData(double width, double heigth, int32_t unit)
+int64_t FfiOHOSAceFrameworkCanvasImageDataCtorWithNoData(double width, double heigth, int32_t unit)
 {
     auto imageData = FFIData::Create<NativeImageData>();
     int32_t finalWidth = 0;
     int32_t finalHeight = 0;
-    ImageDataParams res;
     imageData->SetUnit(static_cast<CanvasUnit>(unit));
     if (!imageData->GetImageDataSize(width, heigth, finalWidth, finalHeight)) {
-        res.id = 0;
-        return res;
+        return FFI_ERROR_CODE;
     }
     int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
     imageData->width_ = finalWidth;
@@ -1245,11 +1507,37 @@ ImageDataParams FfiOHOSAceFrameworkCanvasImageDataCtorWithNoData(double width, d
         bufferArray.emplace_back(0);
     }
     imageData->data = bufferArray;
-    res.id = imageData->GetID();
-    res.width = imageData->width_;
-    res.height = imageData->height_;
-    res.result = result;
-    return res;
+    return imageData->GetID();
+}
+
+int32_t FfiOHOSAceFrameworkCanvasImageDataGetHeight(int64_t selfId)
+{
+    auto imageData = FFIData::GetData<NativeImageData>(selfId);
+    if (imageData == nullptr) {
+        LOGE("canvas image data invert error, Cannot get NativeImageData by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return imageData->GetHeight();
+}
+
+int32_t FfiOHOSAceFrameworkCanvasImageDataGetWidth(int64_t selfId)
+{
+    auto imageData = FFIData::GetData<NativeImageData>(selfId);
+    if (imageData == nullptr) {
+        LOGE("canvas image data invert error, Cannot get NativeImageData by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return imageData->GetWidth();
+}
+
+VectorUInt8Handle FfiOHOSAceFrameworkCanvasImageDataGetData(int64_t selfId)
+{
+    auto imageData = FFIData::GetData<NativeImageData>(selfId);
+    if (imageData == nullptr) {
+        LOGE("canvas image data invert error, Cannot get NativeImageData by id: %{public}" PRId64, selfId);
+        return new std::vector<uint8_t>();
+    }
+    return new std::vector<uint8_t>(imageData->GetData());
 }
 
 // Canvas Pattern
@@ -1263,53 +1551,133 @@ int64_t FfiOHOSAceFrameworkCanvasPatternCtor()
 void FfiOHOSAceFrameworkCanvasPatternSetTransform(int64_t selfId, int64_t matrixId)
 {
     auto pattern = FFIData::GetData<NativeCanvasPattern>(selfId);
-    if (pattern != nullptr) {
-        auto matrix2d = FFIData::GetData<NativeMatrix2d>(matrixId);
-        if (matrix2d != nullptr) {
-            TransformParam param = matrix2d->GetTransform();
-            pattern->SetTransform(param);
-        } else {
-            LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix by id: %{public}" PRId64, matrixId);
-        }
-    } else {
+    if (pattern == nullptr) {
         LOGE("canvas pattern invert error, Cannot get NativeCanvasPattern by id: %{public}" PRId64, selfId);
+        return;
     }
+    pattern->SetTransform(matrixId);
 }
 // ImageBitmap
-ImageBitMapParams FfiOHOSAceFrameworkImageBitMapCtor(ImageBitMapParams params, const char* src)
+int64_t FfiOHOSAceFrameworkImageBitMapCtor(const char* src, int32_t unit)
 {
-    ImageBitMapParams ret = params;
     // ImageBitMap init by src
-    if (params.hasSrc) {
-        auto renderImage = FFIData::Create<CJRenderImage>(src);
-        renderImage->SetUnit(static_cast<CanvasUnit>(params.unit));
-        ret.height = renderImage->GetHeight();
-        ret.width = renderImage->GetWidth();
-        ret.imageBitMapId = renderImage->GetID();
-        return ret;
-    }
+    auto renderImage = FFIData::Create<CJRenderImage>(unit);
+    renderImage->InitCJRenderImage(src);
+    return renderImage->GetID();
+}
 
+int64_t FfiOHOSAceFrameworkImageBitMapCtorWithPixelMap(int64_t pixelMapId, int32_t unit)
+{
     // ImageBitMap init by PixelMap
-    auto instance = FFIData::GetData<OHOS::Media::PixelMapImpl>(params.pixelMapId);
+    auto instance = FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
     if (instance == nullptr) {
-        LOGE("canvas drawImage error, Cannot get PixelMapProxy by id: %{public}" PRId64, params.pixelMapId);
-        return ret;
+        LOGE("canvas drawImage error, Cannot get PixelMapProxy by id: %{public}" PRId64, pixelMapId);
+        return FFI_ERROR_CODE;
     }
     auto pixMap = instance->GetRealPixelMap();
     if (pixMap == nullptr) {
         LOGE("canvas drawImage error, Cannot get pixMap in PixelMapProxy");
-        return ret;
+        return FFI_ERROR_CODE;
     }
     auto pixMapOhos = PixelMap::CreatePixelMap(&pixMap);
     if (pixMapOhos == nullptr) {
         LOGE("canvas drawImage error, Cannot create PixelMapOhos by pixMap");
-        return ret;
+        return FFI_ERROR_CODE;
     }
-    auto renderImage = FFIData::Create<CJRenderImage>(pixMapOhos);
-    renderImage->SetUnit(static_cast<CanvasUnit>(params.unit));
-    ret.height = renderImage->GetHeight();
-    ret.width = renderImage->GetWidth();
-    ret.imageBitMapId = renderImage->GetID();
-    return ret;
+
+    auto renderImage = FFIData::Create<CJRenderImage>(unit);
+    renderImage->SetPixelMapId(pixelMapId);
+    renderImage->InitCJRenderImage(pixMapOhos);
+    return renderImage->GetID();
+}
+
+double FfiOHOSAceFrameworkImageBitMapGetHeight(int64_t selfId)
+{
+    auto renderImage = FFIData::GetData<CJRenderImage>(selfId);
+    if (renderImage == nullptr) {
+        LOGE("imageBitMap invert error, Cannot get CJRenderImage by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return renderImage->GetHeight();
+}
+
+double FfiOHOSAceFrameworkImageBitMapGetWidth(int64_t selfId)
+{
+    auto renderImage = FFIData::GetData<CJRenderImage>(selfId);
+    if (renderImage == nullptr) {
+        LOGE("imageBitMap invert error, Cannot get CJRenderImage by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return renderImage->GetWidth();
+}
+
+// Offscreen Canvas
+int64_t FfiOHOSAceFrameworkOffscreenCanvasCtor(double height, double width, int32_t unit)
+{
+    auto offscreenCanvas = FFIData::Create<NativeOffscreenCanvas>(height, width, unit);
+    return offscreenCanvas->GetID();
+}
+
+void FfiOHOSAceFrameworkOffscreenCanvasSetHeight(int64_t selfId, double height)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
+    if (offscreenCanvas == nullptr) {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+    }
+    offscreenCanvas->NativeSetHeihgt(height);
+}
+
+void FfiOHOSAceFrameworkOffscreenCanvasSetWidth(int64_t selfId, double width)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
+    if (offscreenCanvas == nullptr) {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+    }
+    offscreenCanvas->NativeSetWidth(width);
+}
+
+double FfiOHOSAceFrameworkOffscreenCanvasGetHeight(int64_t selfId)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
+    if (offscreenCanvas == nullptr) {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+    }
+    return offscreenCanvas->NativeGetHeihgt();
+}
+
+double FfiOHOSAceFrameworkOffscreenCanvasGetWidth(int64_t selfId)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
+    if (offscreenCanvas == nullptr) {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+    }
+    return offscreenCanvas->NativeGetWidth();
+}
+
+int64_t FfiOHOSAceFrameworkImageBitMapCtorByOffscreenCanvas(int64_t offscreenCanvasId)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(offscreenCanvasId);
+    if (offscreenCanvas == nullptr) {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64,
+            offscreenCanvasId);
+        return FFI_ERROR_CODE;
+    }
+    return offscreenCanvas->TransferToImageBitmap();
+}
+
+int64_t FfiOHOSAceFrameworkOffscreenCanvasRenderingContext2DCtor(
+    int64_t offscreenId, int32_t contextType, bool option, double width, double height)
+{
+    auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(offscreenId);
+    if (offscreenCanvas != nullptr) {
+        if (offscreenCanvas->IsDetached()) {
+            LOGE("OffscreenCanvas object is detached, id: %{public}" PRId64, offscreenId);
+            return FFI_ERROR_CODE;
+        }
+        return offscreenCanvas->GetContext(contextType, option, width, height);
+    } else {
+        LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, offscreenId);
+    }
+    return FFI_ERROR_CODE;
 }
 }

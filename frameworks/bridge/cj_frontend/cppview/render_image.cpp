@@ -13,41 +13,36 @@
  * limitations under the License.
  */
 
-#include "bridge/cj_frontend/cppview/render_image.h"
 #include <string>
+
+#include "bridge/cj_frontend/cppview/render_image.h"
 #include "core/image/image_source_info.h"
 
 using namespace OHOS;
 
 namespace OHOS::Ace::Framework {
+CJRenderImage::CJRenderImage() : FFIData() {}
+CJRenderImage::CJRenderImage(const int32_t unit) : FFIData()
+{
+    SetUnit(static_cast<CanvasUnit>(unit));
+}
 
-CJRenderImage::CJRenderImage(const std::string& src) : FFIData()
+void CJRenderImage::InitCJRenderImage(const std::string& src)
 {
     this->LoadImage(src);
 }
 
-CJRenderImage::CJRenderImage(const RefPtr<OHOS::Ace::PixelMap>& pixmap) : FFIData()
+void CJRenderImage::InitCJRenderImage(const RefPtr<OHOS::Ace::PixelMap>& pixmap)
 {
     this->LoadImage(pixmap);
 }
 
 void CJRenderImage::LoadImage(const ImageSourceInfo& sourceInfo)
 {
-    auto dataReadyCallback = [weak = AceType::WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto cjRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(cjRenderImage);
-        cjRenderImage->OnImageDataReady();
-    };
-    auto loadSuccessCallback = [weak = AceType::WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto cjRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(cjRenderImage);
-        cjRenderImage->OnImageLoadSuccess();
-    };
-    auto loadFailCallback = [weak = AceType::WeakClaim(this)](
-                                const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
-        auto cjRenderImage = weak.Upgrade();
-        CHECK_NULL_VOID(cjRenderImage);
-        cjRenderImage->OnImageLoadFail(errorMsg);
+    auto dataReadyCallback = [this](const ImageSourceInfo& sourceInfo) { this->OnImageDataReady(); };
+    auto loadSuccessCallback = [this](const ImageSourceInfo& sourceInfo) { this->OnImageLoadSuccess(); };
+    auto loadFailCallback = [this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+        this->OnImageLoadFail(errorMsg);
     };
     NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
     loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
@@ -104,4 +99,4 @@ double CJRenderImage::GetWidth()
     double density = !NearZero(GetDensity()) ? GetDensity() : 1.0;
     return width_ / density;
 }
-}
+} // namespace OHOS::Ace::Framework

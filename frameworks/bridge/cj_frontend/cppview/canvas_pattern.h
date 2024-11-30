@@ -30,9 +30,9 @@ public:
     NativeCanvasPattern();
     ~NativeCanvasPattern() override;
 
-    void SetTransform(TransformParam transform);
+    void SetTransform(int64_t matrixId);
 
-    void SetCanvasRenderer(const WeakPtr<NativeCanvasRenderer>& canvasRenderer)
+    void SetCanvasRenderer(const sptr<NativeCanvasRenderer>& canvasRenderer)
     {
         canvasRenderWeak_ = canvasRenderer;
     }
@@ -64,7 +64,7 @@ public:
     }
 private:
     TransformParam transform_;
-    WeakPtr<NativeCanvasRenderer> canvasRenderWeak_;
+    sptr<NativeCanvasRenderer> canvasRenderWeak_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     int32_t id_ = 0;
 };
