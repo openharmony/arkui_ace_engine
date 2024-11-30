@@ -832,6 +832,22 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     }
 }
 
+void ContainerModalPatternEnhance::CallContainerModalNative(const std::string& name, const std::string& value)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallContainerModalNative name = %{public}s , value = %{public}s", name.c_str(),
+        value.c_str());
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    windowManager->FireWindowCallNativeCallback(name, value);
+}
+
+void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(name, value);
+}
+
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
 {
     auto buttonRow = GetButtonRowByInspectorId();
