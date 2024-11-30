@@ -2333,6 +2333,7 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
     if (subWindowContainerId >= 0) {
         auto subPipeline = GetContextByContainerId(subWindowContainerId);
+        CHECK_NULL_RETURN(subPipeline, false);
         ContainerScope scope(subWindowContainerId);
         subPipeline->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
     }
