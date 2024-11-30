@@ -5897,6 +5897,7 @@ void RichEditorPattern::HandleOnSelectAll()
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    textResponseType_.reset();
     int32_t newPos = static_cast<int32_t>(GetTextContentLength());
     textSelector_.Update(0, newPos);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
