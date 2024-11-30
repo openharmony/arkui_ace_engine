@@ -1088,6 +1088,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
     spanItem->content = " test";
     spanItem->rangeStart = 0;
     spanItem->position = 4;
+    richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
 }
