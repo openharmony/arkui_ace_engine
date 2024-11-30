@@ -209,6 +209,15 @@ public:
     float EstimateTotalHeight() const override;
 
     /**
+     * @brief If delta is large enough, convert it to a jump to improve layout performance.
+     *
+     * @param viewport main-axis length of the viewport
+     * @param itemCnt total FlowItem count
+     * @return true if delta is converted to jump
+     */
+    bool TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt);
+
+    /**
      * @brief prepare lanes in the current section.
      *
      * @param idx current item index
@@ -228,7 +237,7 @@ public:
     const Lane* GetLane(int32_t itemIdx) const;
     Lane* GetMutableLane(int32_t itemIdx);
 
-    bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
+    bool LaneOutOfRange(size_t laneIdx, int32_t section) const;
 
     /**
      * @brief lanes in multiple sections.
@@ -278,7 +287,7 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
-    
+
     /**
      * @param section index of section to estimate
      * @param average item height
