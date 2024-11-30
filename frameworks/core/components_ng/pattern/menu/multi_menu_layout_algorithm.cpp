@@ -204,9 +204,9 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
-        auto childHight = std::max(child->GetGeometryNode()->GetMarginFrameSize().Height(),
+        auto childHeight = std::max(child->GetGeometryNode()->GetMarginFrameSize().Height(),
             child->GetGeometryNode()->GetContentSize().Height());
-        contentHeight += childHight;
+        contentHeight += childHeight;
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
