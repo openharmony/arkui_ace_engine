@@ -21,6 +21,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -294,7 +295,7 @@ void AppBarView::DestroyServicePanel()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-
+    ContainerScope scope(pipeline->GetInstanceId());
     overlayManager->CloseModalUIExtension(sessionId_);
     LOGI("ServicePanel release session:%{public}d", sessionId_);
 }
