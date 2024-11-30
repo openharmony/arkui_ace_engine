@@ -728,13 +728,14 @@ RefPtr<PopupParam> ServiceCollaborationAceCallback::GetPopupParam(bool isShow, S
     popupParam->SetBackgroundColor(Color::WHITE);
     popupParam->SetTargetSpace(Dimension(static_cast<float>(TARGET_SPACE), DimensionUnit::VP));
     popupParam->SetOnStateChange(
-        [WeakClaim(this), onStateChange](const std::string& isShow) {
-            bool show = JsonUtil::ParsejsonString(isShow)->GetBool("isVisible");
-            if (!show && !this->isMultiImage_) {
-                onStateChange(isShow);
-            }
+        [weakHelper = WeakClaim(this), onStateChange](const std::string& isShow) {
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(helper);
+        bool show = JsonUtil::ParseJsonString(isShow)->GetBool("isVisible");
+        if (!show && !helper->isMultiImage_) {
+            onStateChange(isShow);
         }
-    );
+    });
     Shadow shadow;
     auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
