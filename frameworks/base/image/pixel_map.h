@@ -48,6 +48,8 @@ enum class PixelFormat : int32_t {
     NV12 = 9,
     CMYK = 10,
     RGBA_1010102 = 14,
+    YCBCR_P010 = 16,
+    YCRCB_P010 = 17,
 };
 
 enum class AlphaType : int32_t {

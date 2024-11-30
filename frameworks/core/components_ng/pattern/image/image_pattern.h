@@ -140,7 +140,7 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
-        isImageQualityChange_ = (imageQuality_ != imageQuality);
+        isImageReloadNeeded_ = isImageReloadNeeded_  | (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
 
@@ -388,7 +388,7 @@ public:
     }
 
     // Sets the decoding format for the external domain.
-    // Note: Only NV21 and RGBA_8888 format is supported at this time.
+    // Note: Only NV21, RGBA_8888, RGBA_1010102, YCBCR_P010, YCRCB_P010 format is supported at this time.
     void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
 
     PixelFormat GetExternalDecodeFormat()
@@ -550,8 +550,9 @@ private:
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
-    bool isImageQualityChange_ = false;
     PixelFormat externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    // Flag indicating whether the image needs to be reloaded due to parameter changes.
+    bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
