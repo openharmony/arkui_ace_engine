@@ -1665,9 +1665,9 @@ HWTEST_F(OverlayTestNg, DialogTest002, TestSize.Level1)
      * @tc.steps: step3. call RemoveOverlayInSubwindow.
      * @tc.expected: remove successfully.
      */
-    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
 }
 
 /**
@@ -1747,8 +1747,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
      * @tc.expected: remove lastChild successfully
      */
-    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
@@ -1756,12 +1756,12 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      */
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 
 /**

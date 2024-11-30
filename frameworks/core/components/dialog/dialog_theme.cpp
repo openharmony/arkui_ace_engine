@@ -61,6 +61,10 @@ void DialogTheme::Builder::ParsePattern(
     theme->mutiButtonPaddingEnd_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_end", 16.0_vp);
     theme->mutiButtonPaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_horizontal", 8.0_vp);
     theme->mutiButtonPaddingVertical_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
+    theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
+        dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
+        dialogPattern->GetAttr<Dimension>("dialog_padding_actions_right", 16.0_vp),
+        dialogPattern->GetAttr<Dimension>("dialog_padding_actions_bottom", 16.0_vp));
     theme->multipleDialogDisplay_ = dialogPattern->GetAttr<std::string>("multiple_dialog_display", "stack");
     theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
         dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
@@ -201,5 +205,7 @@ void DialogTheme::Builder::ParseNewPattern(
         dialogPattern->GetAttr<int>("dialog_scroll_flex_align", DEFAULT_DIALOG_SCROLL_FLEX_ALIGN));
     theme->columnMeasureType_ = static_cast<NG::MeasureType>(
         dialogPattern->GetAttr<int>("dialog_column_measure_type", DEFAULT_DIALOG_COLUMN_MEASURE_TYPE));
+    theme->buttonBottomTopMargin_ = dialogPattern->GetAttr<Dimension>("button_bottom_top_margin", 10.0_vp);
+    theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
 }
 } // namespace OHOS::Ace

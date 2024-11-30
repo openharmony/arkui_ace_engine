@@ -43,6 +43,7 @@ constexpr uint32_t DELAY_TIME = 2000;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr Dimension DIALOG_HEIGHT = 348.0_vp;
 constexpr Dimension DIALOG_WIDTH = 336.0_vp;
+constexpr double DISABLE_ALPHA = 0.4;
 } // namespace
 void CalendarPickerPattern::OnModifyDone()
 {
@@ -54,6 +55,7 @@ void CalendarPickerPattern::OnModifyDone()
     InitClickEvent();
     InitOnKeyEvent();
     InitOnHoverEvent();
+    HandleEnable();
     FlushTextStyle();
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -1045,6 +1047,19 @@ void CalendarPickerPattern::HandleSubButtonClick()
     }
     SetDate(dateObj.ToString(true));
     FireChangeEvents(dateObj.ToString(true));
+}
+
+void CalendarPickerPattern::HandleEnable()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : DISABLE_ALPHA * originalOpacity);
 }
 
 OffsetF CalendarPickerPattern::CalculateDialogOffset()

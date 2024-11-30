@@ -36,7 +36,8 @@ constexpr int32_t ARG_GROUP_LENGTH = 3;
 bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
 {
     return !ArkTSUtils::ParseJsDimensionVpNG(vm, value, valueDim, false) || LessNotEqual(valueDim.Value(), 0.0f) ||
-           (valueDim.Unit() != DimensionUnit::PX && valueDim.Unit() != DimensionUnit::VP);
+        (valueDim.Unit() != DimensionUnit::PX && valueDim.Unit() != DimensionUnit::VP &&
+        valueDim.Unit() != DimensionUnit::LPX && valueDim.Unit() != DimensionUnit::FP);
 }
 
 void PopulateValues(const CalcDimension& dividerStrokeWidth, const CalcDimension& dividerStartMargin,
@@ -421,7 +422,12 @@ ArkUINativeModuleValue TextPickerBridge::ResetDivider(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDivider(nativeNode);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    if (valueArg->IsNull()) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDividerNull(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDivider(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

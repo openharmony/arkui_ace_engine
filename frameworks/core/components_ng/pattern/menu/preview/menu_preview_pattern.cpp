@@ -146,14 +146,31 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     context->SetClipToBounds(true);
 
     ShowBorderRadiusAndShadowAnimation(context, host, isShowHoverImage_);
-    if (!hasPreviewTransitionEffect_) {
-        auto menuWrapper = GetMenuWrapper();
-        auto menuPattern = GetMenuPattern(menuWrapper);
-        DragAnimationHelper::UpdateGatherNodeToTop();
-        ShowScaleAnimation(context, menuTheme, menuPattern);
-    }
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    DragAnimationHelper::UpdateGatherNodeToTop();
+    UpdateShowScale(context, menuTheme, menuPattern);
     isFirstShow_ = false;
     return false;
+}
+
+void MenuPreviewPattern::UpdateShowScale(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern)
+{
+    if (hasPreviewTransitionEffect_) {
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(menuTheme);
+        auto scaleAfter { -1.0f };
+        if (menuPattern != nullptr) {
+            scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+        }
+        auto previewAfterAnimationScale =
+            LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+
+        context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+    } else {
+        ShowScaleAnimation(context, menuTheme, menuPattern);
+    }
 }
 
 RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const

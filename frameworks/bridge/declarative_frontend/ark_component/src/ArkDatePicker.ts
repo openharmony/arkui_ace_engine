@@ -19,7 +19,7 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     super(nativePtr, classType);
   }
   lunar(value: boolean): DatePickerAttribute {
-    modifier(this._modifiers, DatePickerLunarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
     return this;
   }
   disappearTextStyle(value: PickerTextStyle): DatePickerAttribute {
@@ -49,7 +49,7 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
   }
 }
 
-class DatePickerLunarModifier extends Modifier<boolean> {
+class DatePickerLunarModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('lunar');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {

@@ -179,7 +179,7 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto rootWidth = wrapperRect_.Width();
     if (IsSystemTopMost()) {
         auto windowSize = GetSystemTopMostSubwindowSize();
-        rootWidth = static_cast<double>(windowSize.Height());
+        rootWidth = static_cast<double>(windowSize.Width());
     }
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
@@ -237,7 +237,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
     auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
     if (showMode == ToastShowMode::TOP_MOST && (offsetY.Value() + textHeight > deviceHeight - keyboardOffset)) {
-        offsetY = Dimension(deviceHeight - keyboardOffset - defaultBottom_.ConvertToPx() -textHeight);
+        offsetY = Dimension(deviceHeight - keyboardOffset - defaultBottom_.ConvertToPx() - textHeight);
     }
     TAG_LOGD(AceLogTag::ACE_OVERLAY,
         "toast device height: %{public}.2f, keyboardOffset: %{public}d, "
@@ -323,9 +323,10 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitWidth = Dimension(GetTextMaxWidth());
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
-            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
+            CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
 
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
@@ -474,7 +475,7 @@ void ToastPattern::DumpInfo()
 double ToastPattern::GetTextMaxHeight()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
     double deviceHeight = 0.0;
     if (IsSystemTopMost()) {
         auto windowSize = GetSystemTopMostSubwindowSize();
@@ -511,7 +512,7 @@ double ToastPattern::GetTextMaxHeight()
 double ToastPattern::GetTextMaxWidth()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
     double deviceWidth = 0.0;
     if (IsSystemTopMost()) {
         auto windowSize = GetSystemTopMostSubwindowSize();
@@ -533,7 +534,7 @@ double ToastPattern::GetTextMaxWidth()
         deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
     }
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
-    CHECK_NULL_RETURN(toastTheme, 0.0);
+    CHECK_NULL_RETURN(toastTheme, 0.0f);
     auto marging = toastTheme->GetMarging();
     auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
     auto maxLimitWidth = toastTheme->GetMaxWidth();
@@ -555,7 +556,7 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
+    auto paragraph = textLayoutAlgorithm->GetParagraph();
     CHECK_NULL_RETURN(paragraph, 0);
     auto paragHeight = paragraph->GetHeight();
     auto paragLineCount = paragraph->GetLineCount();

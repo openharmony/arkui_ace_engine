@@ -281,20 +281,12 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     napi_get_named_property(env, shadowNApi, "color", &colorApi);
     napi_get_named_property(env, shadowNApi, "type", &typeApi);
     napi_get_named_property(env, shadowNApi, "fill", &fillApi);
-    ResourceInfo recv;
-    double radiusValue = 0.0;
-    if (ParseResourceParam(env, radiusApi, recv)) {
-        CalcDimension radius;
-        if (ParseResource(recv, radius)) {
-            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
-        }
-    } else {
-        napi_get_value_double(env, radiusApi, &radiusValue);
-        if (LessNotEqual(radiusValue, 0.0)) {
-            radiusValue = 0.0;
-        }
+    double radius = 0.0;
+    napi_get_value_double(env, radiusApi, &radius);
+        if (LessNotEqual(radius, 0.0)) {
+            radius = 0.0;
     }
-    shadowProps.SetBlurRadius(radiusValue);
+    shadowProps.SetBlurRadius(radius);
     Color color;
     ShadowColorStrategy shadowColorStrategy;
     if (ParseShadowColorStrategy(env, colorApi, shadowColorStrategy)) {
@@ -326,7 +318,6 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
     Shadow shadowProps;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, shadowNApi, &valueType);
-    GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     if (valueType == napi_number) {
         int32_t num = 0;
         napi_get_value_int32(env, shadowNApi, &num);
@@ -365,6 +356,8 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         }
         GetToastObjectShadow(env, shadowNApi, shadowProps);
         isTypeStyleShadow = false;
+    } else {
+        GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     }
     shadow = shadowProps;
 }
