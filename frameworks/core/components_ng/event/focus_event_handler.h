@@ -125,7 +125,7 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
 
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
-    bool forceProcessOnKeyEventInternal_ { false }; // extension use only
+    bool isNodeNeedKey_ { false }; // extension use only
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 
 private:

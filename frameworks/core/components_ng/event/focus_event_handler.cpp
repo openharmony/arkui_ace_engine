@@ -217,11 +217,13 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     CHECK_NULL_RETURN(pipeline, false);
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
-        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG)
-        && (!IsCurrentFocus() || forceProcessOnKeyEventInternal_)) {
-        isBypassInner = false;
-        forceProcessOnKeyEventInternal_ = false;
+    if (isNodeNeedKey_) {
+        retInternal =  ProcessOnKeyEventInternal(keyEvent);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+        return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);

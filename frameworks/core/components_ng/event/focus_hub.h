@@ -427,10 +427,6 @@ public:
     bool HasBackwardFocusMovementInChildren();
     bool HasForwardFocusMovementInChildren();
     void ClearFocusMovementFlagsInChildren();
-    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
-    {
-        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
-    }
 
     Dimension GetFocusPadding() const
     {
@@ -853,6 +849,10 @@ public:
         return enableDirectionalKeyFocus_;
     }
 
+    void SetIsNodeNeedKey(bool isNodeNeedKey)
+    {
+        isNodeNeedKey_ = isNodeNeedKey;
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
