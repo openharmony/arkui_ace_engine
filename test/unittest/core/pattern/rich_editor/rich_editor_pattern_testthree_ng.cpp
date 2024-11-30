@@ -1087,7 +1087,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->content = " test";
     spanItem->rangeStart = 0;
-    spanItem->position = 4;
+    spanItem->position = 5;
     richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
