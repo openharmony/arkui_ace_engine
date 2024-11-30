@@ -1908,7 +1908,7 @@ bool RichEditorPattern::SymbolSpanUpdateStyle(
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, range=[%{public}d,%{public}d]", start, end);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, range=[%{public}d,%{public}d], %{public}s", start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "textStyle=%{public}s, imageStyle=%{public}s",
         textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetHost();
