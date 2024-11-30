@@ -104,12 +104,12 @@ struct NativeCustomDialogOptions {
     CJEdge borderWidth;
     NativeEdgeColor borderColor;
     NativeEdgeStyles borderEdgeStyle;
-    uint32_t widthValue;
-    double widthUnit;
-    uint32_t heightValue;
-    double heightUnit;
-    int32_t shadowStyle;
+    double widthValue;
+    uint32_t widthUnit;
+    double heightValue;
+    uint32_t heightUnit;
     NativeShadowOptions shadowOption;
+    int32_t shadowStyle;
     int32_t backgroundBlurStyle;
 };
 
@@ -123,8 +123,8 @@ struct NativeShowToastOptions {
     uint32_t backgroundColor;
     uint32_t textColor;
     int32_t backgroundBlurStyle;
-    int32_t shadowStyle;
     NativeShadowOptions shadowOption;
+    int32_t shadowStyle;
     bool enableHoverMode;
     int32_t hoverModeArea;
 };
