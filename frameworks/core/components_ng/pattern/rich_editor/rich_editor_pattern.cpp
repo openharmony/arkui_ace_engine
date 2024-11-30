@@ -4585,12 +4585,12 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ERROR_BAD_PARAMETERS);
 
-    if (IsEnPreview()) {
-        if (SetPreviewTextEn(previewTextValue, range)) {
+    if (!IsPreviewTextInputting()) {
+        if (!InitPreviewText(previewTextValue, range)) {
             return ERROR_BAD_PARAMETERS;
         }
     } else {
-        if (!SetPreviewTextCn(previewTextValue, range)) {
+        if (!UpdatePreviewText(previewTextValue, range)) {
             return ERROR_BAD_PARAMETERS;
         }
     }
@@ -4599,37 +4599,10 @@ int32_t RichEditorPattern::SetPreviewText(const std::string& previewTextValue, c
     return NO_ERRORS;
 }
 
-bool RichEditorPattern::IsEnPreview()
-{
-    // zh-cn previewTextStyle is UNDERLINE, while en previewTextStyle is NORMAL.
-    return GetPreviewTextStyle() == PreviewTextStyle::NORMAL;
-}
-
-bool RichEditorPattern::SetPreviewTextCn(const std::string& previewTextValue, const PreviewRange& range)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewTextCn");
-    if (!IsPreviewTextInputting()) {
-        return InitPreviewText(previewTextValue, range);
-    } else {
-        return UpdatePreviewText(previewTextValue, range);
-    }
-}
-
-bool RichEditorPattern::SetPreviewTextEn(const std::string& previewTextValue, const PreviewRange& range)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewTextEn");
-    if (range.start != -1 || range.end != -1) {
-        return ReplaceText(previewTextValue, range);
-    } else {
-        return AppendText(previewTextValue, range);
-    }
-}
-
 bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, const PreviewRange& range)
 {
     if (range.start != -1 || range.end != -1) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
-        return false;
+        return ReplaceText(previewTextValue, range);
     }
     auto& record = previewTextRecord_;
     record.needReplacePreviewText = true;
@@ -4661,20 +4634,6 @@ bool RichEditorPattern::ReplaceText(const std::string& previewTextValue, const P
     previewTextRecord_.endOffset = range.end;
     ProcessInsertValue(previewTextValue, OperationType::IME, false);
     previewTextRecord_.needReplaceText = false;
-    return true;
-}
-
-bool RichEditorPattern::AppendText(const std::string& previewTextValue, const PreviewRange& range)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AppendText");
-    if (range.start != -1 || range.end != -1) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
-        return false;
-    }
-    previewTextRecord_.replacedRange = range;
-    previewTextRecord_.startOffset = range.start;
-    previewTextRecord_.endOffset = range.end;
-    ProcessInsertValue(previewTextValue, OperationType::IME, false);
     return true;
 }
 

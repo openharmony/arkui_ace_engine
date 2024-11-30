@@ -1325,11 +1325,8 @@ private:
     void ClearOnFocusTextField();
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    bool SetPreviewTextCn(const std::string& previewTextValue, const PreviewRange& range);
-    bool SetPreviewTextEn(const std::string& previewTextValue, const PreviewRange& range);
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
-    bool AppendText(const std::string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
 
