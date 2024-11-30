@@ -7408,7 +7408,17 @@ void RichEditorPattern::UpdateParentOffsetAndOverlay()
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
     CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
     parentGlobalOffset_ = parentGlobalOffset;
+    OnParentOffsetChange();
     selectOverlay_->UpdateSelectOverlayOnAreaChanged();
+}
+
+
+void RichEditorPattern::OnParentOffsetChange()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    IF_PRESENT(overlayManager, CloseAIEntityMenu(frameId_));
 }
 
 void RichEditorPattern::CloseSelectionMenu()
