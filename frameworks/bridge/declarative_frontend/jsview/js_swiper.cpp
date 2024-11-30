@@ -1269,6 +1269,11 @@ void JSSwiperController::OldPreloadItems(const JSCallbackInfo& args)
 
 void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 {
+    if (!controller_) {
+        JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
+        return;
+    }
+
     ContainerScope scope(instanceId_);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
@@ -1278,11 +1283,6 @@ void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
     asyncContext->env = env;
     napi_value promise = nullptr;
     napi_create_promise(env, &asyncContext->deferred, &promise);
-    if (!controller_) {
-        ReturnPromise(args, promise);
-        return;
-    }
-
     ScopeRAII scopeRaii(env);
     std::set<int32_t> indexSet;
     if (args.Length() > 0 && args[0]->IsArray()) {
@@ -1306,7 +1306,7 @@ void JSSwiperController::NewPreloadItems(const JSCallbackInfo& args)
 
 void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SEVENTEEN) && args.Length() == 1) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && args.Length() == 1) {
         NewPreloadItems(args);
         return;
     }

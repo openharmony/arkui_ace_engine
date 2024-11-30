@@ -1234,6 +1234,20 @@ class ArkDisplayCount {
   }
 }
 
+class ArkSwiperCachedCount {
+  value: number;
+  isShown: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.isShown = undefined;
+  }
+
+  isEqual(another: ArkSwiperCachedCount): boolean {
+    return this.value === another.value && this.isShown === another.isShown;
+  }
+}
+
 class ArkGridEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;

@@ -16479,6 +16479,15 @@ class ArkDisplayCount {
     return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
   }
 }
+class ArkSwiperCachedCount {
+  constructor() {
+    this.value = undefined;
+    this.isShown = undefined;
+  }
+  isEqual(another) {
+    return this.value === another.value && this.isShown === another.isShown;
+  }
+}
 class ArkGridEdgeEffect {
   constructor() {
     this.value = undefined;
@@ -28535,8 +28544,11 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
+  cachedCount(value, isShown) {
+    let arkCachedCount = new ArkSwiperCachedCount();
+    arkCachedCount.value = value;
+    arkCachedCount.isShown = isShown;
+    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, arkCachedCount);
     return this;
   }
   displayCount(value, swipeByGroup) {
@@ -28937,13 +28949,16 @@ class SwiperCachedCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().swiper.resetSwiperCachedCount(node);
+      getUINativeModule().swiper.resetSwiperIsShown(node);
     }
     else {
-      getUINativeModule().swiper.setSwiperCachedCount(node, this.value);
+      getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
+      getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
   }
 }
 SwiperCachedCountModifier.identity = Symbol('swiperCachedCount');
