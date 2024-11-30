@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -1013,11 +1016,7 @@ void SideBarContainerPattern::HandleDragStart()
         return;
     }
     isInDividerDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+    SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1085,11 +1084,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 void SideBarContainerPattern::HandleDragEnd()
 {
     isInDividerDrag_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    SetMouseStyle(MouseFormat::DEFAULT);
     if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
@@ -1129,8 +1124,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
     auto defaultRect = RectF();
@@ -1143,14 +1136,7 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider is out of region.");
-    MouseFormat format = MouseFormat::DEFAULT;
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
-    }
+    SetMouseStyle(MouseFormat::DEFAULT);
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1171,14 +1157,8 @@ void SideBarContainerPattern::OnHover(bool isHover)
     isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
+    if (sideBarStatus_ == SideBarStatus::SHOW) {
+        SetMouseStyle(format);
     }
 }
 
@@ -1381,5 +1361,21 @@ void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>&
         imgNode->MarkModifyDone();
     };
     eventHub->SetOnError(errorCallback);
+}
+
+void SideBarContainerPattern::SetMouseStyle(MouseFormat format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNodeId = host->GetId();
+    int32_t windowId = static_cast<int32_t>(pipeline->GetFocusWindowId());
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = static_cast<int32_t>(WindowSceneHelper::GetFocusSystemWindowId(host));
+#endif
+    pipeline->SetMouseStyleHoldNode(frameNodeId);
+    pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
+    pipeline->FreeMouseStyleHoldNode(frameNodeId);
 }
 } // namespace OHOS::Ace::NG
