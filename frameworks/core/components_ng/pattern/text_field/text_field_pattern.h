@@ -1815,6 +1815,7 @@ private:
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
+    void ResetFirstClickAfterGetFocus();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2005,7 +2006,8 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
     std::optional<float> maxFontSizeScale_;
-    std::optional<bool> hasFocusBeforeTouchDown_;
+    bool firstClickAfterLosingFocus_ = true;
+    CancelableCallback<void()> firstClickResetTask_;
 };
 } // namespace OHOS::Ace::NG
 
