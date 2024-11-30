@@ -1916,8 +1916,8 @@ void SheetPresentationPattern::ClipSheetNode()
     BorderRadiusProperty borderRadius(sheetTheme->GetSheetRadius());
     CalculateSheetRadius(borderRadius);
     if (IsSheetBottom()) {
-        borderRadius.radiusBottomLeft = 0.0_vp;
-        borderRadius.radiusBottomRight = 0.0_vp;
+        borderRadius.radiusBottomLeft = 1.0_px;
+        borderRadius.radiusBottomRight = 1.0_px;
     }
     renderContext->UpdateBorderRadius(borderRadius);
     if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
