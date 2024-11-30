@@ -1067,6 +1067,16 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
     spanNode->UpdateLineHeight(textStyle.GetLineHeight());
     spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
     spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
+    UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
+}
+
+void RichEditorPattern::UpdateTextBackgroundStyle(
+    RefPtr<SpanNode>& spanNode, const std::optional<TextBackgroundStyle>& style)
+{
+    CHECK_NULL_VOID(style.has_value());
+    TextBackgroundStyle backgroundStyle = style.value();
+    backgroundStyle.groupId = ElementRegister::GetInstance()->MakeUniqueId();
+    spanNode->UpdateTextBackgroundFromParent(backgroundStyle);
 }
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
@@ -1462,6 +1472,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
+    UpdateTextBackgroundStyle(target, source->GetTextBackgroundStyle());
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -1794,6 +1805,9 @@ void RichEditorPattern::UpdateTextStyle(
     UpdateDecoration(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextShadows.has_value()) {
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
+    }
+    if (updateSpanStyle.updateTextBackgroundStyle.has_value()) {
+        UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -3777,6 +3791,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
         textStyle.lineBreakStrategy =
             static_cast<int32_t>(spanItem->textLineStyle->GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY));
     }
+    textStyle.textBackgroundStyle = spanItem->backgroundStyle;
     return textStyle;
 }
 
@@ -3838,8 +3853,8 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
             spanEnd += static_cast<int32_t>(placeholderGains);
         }
         newSpanItem->interval = {spanStart, spanEnd};
-        newSpanItem->position = spanStart;
-        newSpanItem->rangeStart = spanEnd;
+        newSpanItem->position = spanEnd;
+        newSpanItem->rangeStart = spanStart;
         newSpanItem->textLineStyle->ResetLeadingMargin();
         text.append(newSpanItem->content);
         subSpans.emplace_back(newSpanItem);
@@ -3899,8 +3914,8 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
             CHECK_NULL_CONTINUE(newSpanItem);
             newSpanItem->spanItemType = spanItem->spanItemType;
             newSpanItem->interval = {spanStart, spanEnd};
-            newSpanItem->position = spanStart;
-            newSpanItem->rangeStart = spanEnd;
+            newSpanItem->position = spanEnd;
+            newSpanItem->rangeStart = spanStart;
             newSpanItem->content = StringUtils::ToString(
                 StringUtils::ToWstring(spanItem->content)
                     .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
@@ -5008,6 +5023,7 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
     IF_TRUE(updateSpanStyle.updateTextDecoration, ret.SetTextDecoration(textStyle.GetTextDecoration()));
     IF_TRUE(updateSpanStyle.updateTextDecorationColor, ret.SetTextDecorationColor(textStyle.GetTextDecorationColor()));
     IF_TRUE(updateSpanStyle.updateTextDecorationStyle, ret.SetTextDecorationStyle(textStyle.GetTextDecorationStyle()));
+    IF_TRUE(updateSpanStyle.updateTextBackgroundStyle, ret.SetTextBackgroundStyle(textStyle.GetTextBackgroundStyle()));
     return ret;
 }
 
@@ -9563,6 +9579,7 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     textStyleResult.lineHeight = textStyle.GetLineHeight().ConvertToVp();
     textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
     textStyleResult.textShadows = textStyle.GetTextShadows();
+    textStyleResult.textBackgroundStyle = textStyle.GetTextBackgroundStyle();
     retInfo.SetTextStyle(textStyleResult);
     retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
     retInfo.SetLetterspacing(textStyle.GetLetterSpacing().ConvertToVp());
