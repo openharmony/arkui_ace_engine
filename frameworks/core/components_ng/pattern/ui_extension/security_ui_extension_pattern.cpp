@@ -58,6 +58,76 @@ constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_NAME[] = "Prohibit_Nesting_UIExtensi
 constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in uIExtensionAbility";
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
+
+class SecurityUIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
+public:
+    SecurityUIExtensionAccessibilityChildTreeCallback(const WeakPtr<SecurityUIExtensionPattern> &weakPattern, int64_t accessibilityId)
+        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
+    {}
+
+    ~SecurityUIExtensionAccessibilityChildTreeCallback() override = default;
+
+    bool OnRegister(uint32_t windowId, int32_t treeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (isReg_) {
+            return true;
+        }
+        pattern->OnAccessibilityChildTreeRegister(windowId, treeId, GetAccessibilityId());
+        isReg_ = true;
+        return true;
+    }
+
+    bool OnDeregister() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (!isReg_) {
+            return true;
+        }
+        pattern->OnAccessibilityChildTreeDeregister();
+        isReg_ = false;
+        return true;
+    }
+
+    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
+        return true;
+    }
+
+    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        pattern->OnAccessibilityDumpChildInfo(params, info);
+        return true;
+    }
+
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
+private:
+    bool isReg_ = false;
+    WeakPtr<SecurityUIExtensionPattern> weakPattern_;
+};
 }
 
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
@@ -711,5 +781,74 @@ const char* SecurityUIExtensionPattern::ToString(AbilityState state)
         default:
             return "NONE";
     }
+}
+
+void SecurityUIExtensionPattern::InitializeAccessibility()
+{
+    if (accessibilityChildTreeCallback_ != nullptr) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    accessibilityChildTreeCallback_ = std::make_shared<SecurityUIExtensionAccessibilityChildTreeCallback>(
+        WeakClaim(this), accessibilityId);
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
+    }
+    UIEXT_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    UIEXT_LOGI("treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister()
+{
+    UIEXT_LOGI("deregister accessibility child tree");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeDeregister();
+}
+
+void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
+}
+
+void SecurityUIExtensionPattern::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    UIEXT_LOGI("dump accessibility child info");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
 }
 } // namespace OHOS::Ace::NG

@@ -104,7 +104,13 @@ public:
     void DispatchFollowHostDensity(bool densityDpi);
     void OnDpiConfigurationUpdate() override;
 
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    void OnAccessibilityChildTreeDeregister();
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+
 private:
+    void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
@@ -136,6 +142,7 @@ private:
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     std::string uiExtensionType_;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
 
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onAsyncOnCallbackList_;
