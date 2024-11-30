@@ -61,6 +61,7 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
+#include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3725,6 +3726,15 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
+}
+
+void RosenRenderContext::FlushKitContentModifier(const RefPtr<AceKit::Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+
+    auto modifierAdapter = ConvertKitContentModifier(modifier);
+    rsNode_->AddModifier(modifierAdapter);
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)

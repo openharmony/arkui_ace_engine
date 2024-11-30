@@ -54,6 +54,10 @@ enum class Gravity;
 class BrightnessBlender;
 }
 
+namespace OHOS::AceKit {
+class Modifier;
+}
+
 namespace OHOS::Ace::NG {
 
 typedef enum {
@@ -104,6 +108,7 @@ public:
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
     virtual void FlushContentModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushKitContentModifier(const RefPtr<AceKit::Modifier>& modifier) {}
     virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_ACE_TYPE_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_ACE_TYPE_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H
 
 #include "interfaces/inner_api/ace_kit/include/base/ace_type.h"
+#include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_ACE_TYPE_H
+namespace OHOS::AceKit {
+class NodePaintMethod : public Ace::AceType {
+    DECLARE_ACE_TYPE(NodePaintMethod, Ace::AceType);
+
+public:
+    virtual Ace::RefPtr<Modifier> GetContentModifier() = 0;
+};
+} // namespace OHOS::AceKit
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H

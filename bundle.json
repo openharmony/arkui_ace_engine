@@ -148,6 +148,28 @@
                 },
                 {
                     "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/",
+                        "header_files": [
+                            "base/ace_type.h",
+                            "base/ref_counter.h",
+                            "base/referenced.h",
+                            "event/event_hub.h",
+                            "event/gesture_event.h",
+                            "view/draw/content_modifier.h",
+                            "view/draw/modifier.h",
+                            "view/draw/node_paint_method.h",
+                            "view/layout/layout_algorithm.h",
+                            "view/layout/box_layout_algorithm.h",
+                            "view/frame_node.h",
+                            "view/pattern.h",
+                            "view_factory/abstract_view_factory.h",
+                            "view_stack/view_stack_processor.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit:ace_kit"
+                },
+                {
+                    "header": {
                         "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
                         "header_files": [
                             "ace_forward_compatibility.h",

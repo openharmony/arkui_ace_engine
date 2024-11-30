@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "interfaces/inner_api/ace_kit/include/view/layout/layout_algorithm.h"
+
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
@@ -90,6 +92,9 @@ public:
         const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure = false, bool skipLayout = false)
         : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
     {}
+    explicit LayoutAlgorithmWrapper(const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
+        : absLayoutAlgorithm_(layoutAlgorithm)
+    {}
     ~LayoutAlgorithmWrapper() override = default;
 
     void OnReset() override
@@ -103,6 +108,9 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->MeasureContent(contentConstraint);
+            }
             return std::nullopt;
         }
         return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
@@ -111,6 +119,9 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->Measure();
+            }
             return;
         }
         layoutAlgorithm_->Measure(layoutWrapper);
@@ -121,6 +132,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->Layout();
+            }
             return;
         }
         layoutAlgorithm_->Layout(layoutWrapper);
@@ -199,6 +213,7 @@ private:
     bool percentHeight_ = false;
     bool percentWidth_ = false;
     uint64_t frameId = UITaskScheduler::GetFrameId();
+    RefPtr<AceKit::LayoutAlgorithm> absLayoutAlgorithm_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);
 };

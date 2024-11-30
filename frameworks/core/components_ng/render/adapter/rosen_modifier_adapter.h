@@ -25,6 +25,8 @@
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_modifier.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "interfaces/inner_api/ace_kit/include/view/draw/content_modifier.h"
+#include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -57,6 +59,9 @@ public:
     explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
         : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
     {}
+    explicit ContentModifierAdapter(const RefPtr<AceKit::Modifier>& modifier)
+        : kitModifier_(AceType::DynamicCast<AceKit::ContentModifier>(modifier))
+    {}
     ~ContentModifierAdapter() override = default;
 
     void Draw(RSDrawingContext& context) const override;
@@ -65,11 +70,13 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
+    RefPtr<AceKit::ContentModifier> kitModifier_ = nullptr;
     bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<AceKit::Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier);

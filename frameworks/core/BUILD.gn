@@ -56,7 +56,7 @@ template("ace_core_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     platform = invoker.platform
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
 
     if (ace_engine_feature_enable_split_mode &&
         defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
@@ -880,7 +880,7 @@ template("ace_core_ng_source_set") {
       # text
       "text/text_emoji_processor.cpp",
     ]
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
     if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
