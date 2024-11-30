@@ -8983,10 +8983,6 @@ RectF RichEditorPattern::GetSelectArea()
         auto richEditorOverlay = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         CHECK_NULL_RETURN(richEditorOverlay, rect);
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
-        if (isShowPlaceholder_) {
-            auto [offset, preferredHeight] = CalculateEmptyValueCaretRect();
-            caretOffset = offset;
-        }
         auto caretWidth = Dimension(1.5f, DimensionUnit::VP).ConvertToPx();
         auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
         return selectRect.IntersectRectT(contentRect);
