@@ -3574,7 +3574,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     get() {
         
         if (!this.source_) {
-            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source_ is undefined: get value is undefined.`);
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source is undefined: get value is undefined.`);
             return undefined;
         }
         this.notifyPropertyRead();
@@ -3583,7 +3583,7 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (!this.source_) {
-            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source_ is undefined: set new value ignoring.`);
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source is undefined: set new value ignoring.`);
             return;
         }
         if (this.source_.get() === newValue) {
