@@ -157,11 +157,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
     IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
-    if (isFirst) {
-        pattern->textSelector_.firstHandle.SetOffset(localOffset);
-    } else {
-        pattern->textSelector_.secondHandle.SetOffset(localOffset);
-    }
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirst,
