@@ -850,4 +850,88 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressRegisterVisibleAreaChangeTest004,
     loadingProgressPattern->StopAnimation();
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
 }
+
+/**
+ * @tc.name: LoadingProgressStartAnimationTest001
+ * @tc.desc: Test LoadingProgress enableLoading property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set enableLoading property true.
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    modelNg.SetEnableLoading(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_TRUE(paintProperty->GetEnableLoading().value());
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+     * @tc.steps: step2. set window hide and start animation.
+     */
+    loadingProgressPattern->isVisibleArea_ = true;
+    loadingProgressPattern->OnWindowHide();
+    loadingProgressPattern->StartAnimation();
+    EXPECT_TRUE(loadingProgressPattern->enableLoading_);
+    EXPECT_FALSE(loadingProgressPattern->isShow_);
+}
+
+/**
+ * @tc.name: LoadingProgressStartAnimationTest002
+ * @tc.desc: Test LoadingProgress enableLoading property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set enableLoading property false.
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    modelNg.SetEnableLoading(false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_FALSE(paintProperty->GetEnableLoading().value());
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+     * @tc.steps: step2. set window show and start animation.
+     */
+    loadingProgressPattern->isVisibleArea_ = true;
+    loadingProgressPattern->OnWindowShow();
+    loadingProgressPattern->StartAnimation();
+    EXPECT_FALSE(loadingProgressPattern->enableLoading_);
+    EXPECT_TRUE(loadingProgressPattern->isShow_);
+}
 } // namespace OHOS::Ace::NG
