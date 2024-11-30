@@ -143,6 +143,7 @@ public:
     virtual void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) {}
     virtual void SetAnimateMode(TabAnimateMode mode) {}
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
+    virtual void SetPageFlipMode(int32_t pageFlipMode) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;
