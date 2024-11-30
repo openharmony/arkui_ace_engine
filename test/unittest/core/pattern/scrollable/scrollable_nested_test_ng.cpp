@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "list_nested_test_ng.h"
+#include "scrollable_nested_test_ng.h"
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #define protected public
 #define private public
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
@@ -35,12 +39,14 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+    constexpr float WINDOW_WIDTH = 720.f;
+    constexpr float WINDOW_HEIGHT = 1280.f;
     constexpr float SCROLLABLE_WIDTH = 240.f;
     constexpr float SCROLLABLE_HEIGHT = 400.f;
     constexpr float SCROLL_HEAD_HEIGHT = 200.f;
     constexpr float LIST_ITEM_HEIGHT = 600.f;
 }
-void ListNestedTestNg::SetUpTestSuite()
+void ScrollableNestedTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
@@ -48,21 +54,21 @@ void ListNestedTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
-void ListNestedTestNg::TearDownTestSuite()
+void ScrollableNestedTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
 
-void ListNestedTestNg::SetUp()
+void ScrollableNestedTestNg::SetUp()
 {
 }
 
-void ListNestedTestNg::TearDown()
+void ScrollableNestedTestNg::TearDown()
 {
 }
 
-RefPtr<Scrollable> ListNestedTestNg::GetScrollable(RefPtr<FrameNode> node)
+RefPtr<Scrollable> ScrollableNestedTestNg::GetScrollable(RefPtr<FrameNode> node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto pattern = node->GetPattern<ScrollablePattern>();
@@ -71,7 +77,7 @@ RefPtr<Scrollable> ListNestedTestNg::GetScrollable(RefPtr<FrameNode> node)
     return pattern->scrollableEvent_->scrollable_;
 }
 
-void ListNestedTestNg::DragStart(RefPtr<Scrollable> scrollable)
+void ScrollableNestedTestNg::DragStart(RefPtr<Scrollable> scrollable)
 {
     CHECK_NULL_VOID(scrollable);
     scrollable->HandleTouchDown();
@@ -81,7 +87,7 @@ void ListNestedTestNg::DragStart(RefPtr<Scrollable> scrollable)
     (*(scrollable->panRecognizerNG_->onActionStart_))(info);
 }
 
-void ListNestedTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offset)
+void ScrollableNestedTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offset)
 {
     CHECK_NULL_VOID(scrollable);
     CHECK_NULL_VOID(scrollable->panRecognizerNG_);
@@ -91,7 +97,7 @@ void ListNestedTestNg::DragUpdate(RefPtr<Scrollable> scrollable, float offset)
     (*(scrollable->panRecognizerNG_->onActionUpdate_))(info);
 }
 
-void ListNestedTestNg::DragEnd(RefPtr<Scrollable> scrollable, float velocity)
+void ScrollableNestedTestNg::DragEnd(RefPtr<Scrollable> scrollable, float velocity)
 {
     CHECK_NULL_VOID(scrollable);
     CHECK_NULL_VOID(scrollable->panRecognizerNG_);
@@ -139,7 +145,7 @@ RefPtr<FrameNode> CreatScrollNestedList(EdgeEffect scrollEdgeEffect, EdgeEffect 
  * @tc.desc: List scroll to edge, OnScrollFrameBegin return 0, not stop fling animation
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest001, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create List and set SetOnScrollFrameBegin,
@@ -213,7 +219,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest001, TestSize.Level1)
  * @tc.desc: Refresh nested List, List scroll to edge, OnScrollFrameBegin return 0, not stop fling animation
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest002, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create List and set SetOnScrollFrameBegin,
@@ -293,7 +299,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest002, TestSize.Level1)
  * @tc.desc: Scroll nested List
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest003, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Scroll nested List, edge effect is none
@@ -359,7 +365,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest003, TestSize.Level1)
  * @tc.desc: Scroll nested List
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest004, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Scroll nested List, edge effect is none
@@ -436,7 +442,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest004, TestSize.Level1)
  * @tc.desc: Scroll nested List
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest005, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Scroll nested List, edge effect is none
@@ -513,7 +519,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest005, TestSize.Level1)
  * @tc.desc: Swiper nested List
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest006, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Scroll nested List, edge effect is none
@@ -579,7 +585,7 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest006, TestSize.Level1)
  * @tc.desc: Scroll nested List
  * @tc.type: FUNC
  */
-HWTEST_F(ListNestedTestNg, NestedScrollTest007, TestSize.Level1)
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Scroll nested List, edge effect is none
@@ -617,5 +623,69 @@ HWTEST_F(ListNestedTestNg, NestedScrollTest007, TestSize.Level1)
     FlushLayoutTask(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: SheetNestedScroll001
+ * @tc.desc: Sheet nested Scroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, SheetNestedScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SheetTheme>()));
+    int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t minPlatformVersion = MockPipelineContext::GetCurrentContext()->GetMinPlatformVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWELVE);
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
+
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ViewAbstract::SetHeight(AceType::RawPtr(builder), CalcLength(WINDOW_HEIGHT + 200));
+    ViewAbstract::SetWidth(AceType::RawPtr(builder), CalcLength(WINDOW_WIDTH));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollPattern = GetChildPattern<ScrollPattern>(sheetNode, 1);
+    ASSERT_NE(scrollPattern, nullptr);
+    FlushLayoutTask(sheetNode, true);
+
+    /**
+     * @tc.steps: step2. Scroll 100
+     * @tc.expected: Scroll offset is 100
+     */
+    auto scrollable = GetScrollable(GetChildFrameNode(sheetNode, 1));
+    DragStart(scrollable);
+    DragUpdate(scrollable, -100);
+    FlushLayoutTask(sheetNode, true);
+    EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 100);
+    
+    /**
+     * @tc.steps: step3. Scroll -200
+     * @tc.expected: Scroll offset is 0, Sheet offset is 100
+     */
+    DragUpdate(scrollable, 200);
+    FlushLayoutTask(sheetNode, true);
+    EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 0);
+    EXPECT_FLOAT_EQ(sheetPattern->currentOffset_, 100);
+
+    /**
+     * @tc.steps: step3. Scroll 100
+     * @tc.expected: Scroll offset is 0, Sheet offset is 100
+     */
+    DragUpdate(scrollable, -100);
+    FlushLayoutTask(sheetNode, true);
+    EXPECT_FLOAT_EQ(scrollPattern->GetTotalOffset(), 0);
+    EXPECT_FLOAT_EQ(sheetPattern->currentOffset_, 0);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
 }
 } // namespace OHOS::Ace::NG
