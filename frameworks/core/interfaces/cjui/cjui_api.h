@@ -2058,6 +2058,8 @@ struct CJUIToggleModifier {
 struct CJUINavigationModifier {
     void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
+    void (*setEnableModeChangeAnimation)(ArkUINodeHandle node, ArkUI_Bool isEnable);
+    void (*resetEnableModeChangeAnimation)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
     void (*setTitleMode)(ArkUINodeHandle node, ArkUI_Int32 value);

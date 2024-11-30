@@ -388,7 +388,9 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
-    bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    bool enableModeChangeAnimation = navigationLayoutProperty->GetEnableModeChangeAnimation().value_or(true);
+    bool doModeSwitchAnimationInAnotherTask =
+        enableModeChangeAnimation && modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);

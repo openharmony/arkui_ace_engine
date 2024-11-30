@@ -276,6 +276,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
+    JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -362,6 +363,18 @@ void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
         isAnimated = info[1]->ToBoolean();
     }
     NavigationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
+}
+
+void JSNavigation::SetEnableModeChangeAnimation(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NavigationModel::GetInstance()->SetEnableModeChangeAnimation(info[0]->ToBoolean());
+        return;
+    }
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimation(true);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)

@@ -20844,6 +20844,7 @@ class ArkNavDestinationComponent extends ArkComponent {
     return this;
   }
 }
+
 class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -21636,6 +21637,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
+  enableModeChangeAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableModeChangeAnimationModifier.identity,
+      EnableModeChangeAnimationModifier, value);
+    return this;
+  }
   hideTitleBar(isHide, animated) {
     let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
     if (!isUndefined(isHide) && !isNull(isHide)) {
@@ -21908,6 +21914,21 @@ class HideToolBarModifier extends ModifierWithKey {
   }
 }
 HideToolBarModifier.identity = Symbol('hideToolBar');
+
+class EnableModeChangeAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableModeChangeAnimation(node);
+    } else {
+      getUINativeModule().navigation.setEnableModeChangeAnimation(node, this.value);
+    }
+  }
+}
+EnableModeChangeAnimationModifier.identity = Symbol('enableModeChangeAnimation');
+
 class TitleModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

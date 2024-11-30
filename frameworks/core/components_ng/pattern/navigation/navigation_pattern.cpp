@@ -304,7 +304,7 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     BuildDragBar();
 
-    auto layoutProperty = hostNode->GetLayoutProperty();
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
@@ -326,7 +326,8 @@ void NavigationPattern::OnModifyDone()
         dividerNode->MarkModifyDone();
     }
 
-    if (GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
+    bool enableModeChangeAnimation = layoutProperty->GetEnableModeChangeAnimation().value_or(true);
+    if (enableModeChangeAnimation && GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
         DoNavbarHideAnimation(hostNode);
     }
 
