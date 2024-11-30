@@ -145,13 +145,13 @@ RefPtr<TokenTheme> TokenThemeStorage::ObtainSystemTheme()
 RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode)
 {
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, tokenTheme);
+    CHECK_NULL_RETURN(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, tokenTheme);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, tokenTheme);
+    CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, tokenTheme);
+    CHECK_NULL_RETURN(themeConstants, nullptr);
 
     auto themeId = colorMode == ColorMode::DARK ?
         TokenThemeStorage::SYSTEM_THEME_DARK_ID : TokenThemeStorage::SYSTEM_THEME_LIGHT_ID;
