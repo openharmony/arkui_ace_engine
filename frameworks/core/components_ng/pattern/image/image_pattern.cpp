@@ -533,6 +533,18 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
+void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
+    {
+        switch (externalDecodeFormat) {
+            case PixelFormat::NV21:
+            case PixelFormat::RGBA_8888:
+                externalDecodeFormat_ = externalDecodeFormat;
+                break;
+            default:
+                externalDecodeFormat_ = PixelFormat::UNKNOWN;
+        }
+    }
+
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
     // if layout size has not decided yet, resize target can not be calculated
@@ -559,14 +571,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
+        loadingCtx_->SetImageDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
+        altLoadingCtx_->SetImageDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }

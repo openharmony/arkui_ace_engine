@@ -164,10 +164,14 @@ public:
     void UpdateGestureRowVisible();
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     virtual void SetContainerModalTitleHeight(int32_t height);
+    virtual void SetContainerButtonStyle(uint32_t buttonSize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode) {};
     int32_t GetContainerModalTitleHeight();
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    virtual void CallContainerModalNative(const std::string& name, const std::string& value) {};
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {};
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
     void GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal);
     void CallButtonsRectChange();

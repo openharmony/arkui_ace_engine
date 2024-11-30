@@ -18,13 +18,14 @@
 
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
+#include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace::NG {
-class SecurityUIExtensionPattern : public PlatformPattern {
-    DECLARE_ACE_TYPE(SecurityUIExtensionPattern, PlatformPattern);
+class SecurityUIExtensionPattern : public PlatformPattern, public PlatformAccessibilityBase {
+    DECLARE_ACE_TYPE(SecurityUIExtensionPattern, PlatformPattern, PlatformAccessibilityBase);
 
 public:
     SecurityUIExtensionPattern();
@@ -104,10 +105,11 @@ public:
     void DispatchFollowHostDensity(bool densityDpi);
     void OnDpiConfigurationUpdate() override;
 
-    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
-    void OnAccessibilityChildTreeDeregister();
-    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
-    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
+    void OnAccessibilityChildTreeDeregister() const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const override;
+    void OnAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) const override;
 
 private:
     void InitializeAccessibility();
@@ -117,6 +119,7 @@ private:
     void DispatchFocusActiveEvent(bool isFocusActive) override;
     void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
+    void ResetAccessibilityChildTreeCallback();
 
     enum class AbilityState {
         NONE = 0,

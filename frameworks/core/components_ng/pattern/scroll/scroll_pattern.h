@@ -61,6 +61,8 @@ public:
         return layoutAlgorithm;
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     OPINC_TYPE_E OpIncType() override

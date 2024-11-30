@@ -32,7 +32,7 @@ DragDropGlobalController& DragDropGlobalController::GetInstance()
 
 void DragDropGlobalController::UpdateMenuShowingStatus(bool isShowing)
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     isContextMenuShowing_ = isShowing;
 }
 
@@ -45,7 +45,7 @@ bool DragDropGlobalController::IsMenuShowing() const
 void DragDropGlobalController::UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,
     const DragDropInitiatingStatus& dragStatus)
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     CHECK_NULL_VOID(frameNode);
     if (dragStatus == DragDropInitiatingStatus::MOVING) {
         currentDragNode_ = frameNode;
@@ -60,7 +60,7 @@ bool DragDropGlobalController::IsInMoving() const
 
 void DragDropGlobalController::ResetDragDropInitiatingStatus()
 {
-    std::shared_lock<std::shared_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     currentDragNode_ = nullptr;
 }
 

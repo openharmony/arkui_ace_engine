@@ -4237,9 +4237,9 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     layoutProperty->UpdateSheetStyle(sheetLayoutAlgorithm->sheetStyle_);
     auto maxSize = SizeF(10.0f, 10.0f);
     sheetLayoutAlgorithm->Measure(AceType::RawPtr(sheetNode));
-    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize, AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetType_ = SHEET_POPUP;
-    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize);
+    sheetLayoutAlgorithm->GetHeightByScreenSizeType(maxSize, AceType::RawPtr(sheetNode));
     EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 320);
 }
 
@@ -4273,17 +4273,17 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
      * @tc.steps: step2. set sheetStyle_.height and sheetStyle_.width.
      * @tc.expected: height and width value are equal expected value.
      */
-    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
     sheetLayoutAlgorithm->sheetStyle_.height = 2.5_pct;
-    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.height = 2.5_px;
-    sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     sheetLayoutAlgorithm->sheetStyle_.height = 0.0_px;
-    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    auto height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx());
     sheetLayoutAlgorithm->sheetStyle_.height = -1.0_px;
-    height = sheetLayoutAlgorithm->GetHeightBySheetStyle();
+    height = sheetLayoutAlgorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     EXPECT_EQ(height, SHEET_BIG_WINDOW_HEIGHT.ConvertToPx());
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;

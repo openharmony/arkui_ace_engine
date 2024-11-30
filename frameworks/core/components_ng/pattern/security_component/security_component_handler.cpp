@@ -617,6 +617,8 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
+    uint64_t displayId = container->GetDisplayId();
+    buttonInfo.displayId_ = displayId;
     return true;
 }
 

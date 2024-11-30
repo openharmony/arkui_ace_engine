@@ -491,6 +491,9 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
+void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+    uint32_t closeButtonRightMargin, int32_t isDarkMode) {}
+
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}

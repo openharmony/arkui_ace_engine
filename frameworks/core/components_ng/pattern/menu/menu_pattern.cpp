@@ -394,8 +394,6 @@ void MenuPattern::UpdateSelectIndex(int32_t index)
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
-    RecordItemsAndGroups();
-
     // determine menu type based on sibling menu count
     auto count = FindSiblingMenuCount();
     if (count > 0) {
@@ -1360,7 +1358,15 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, bool isNe
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_RETURN(menuItemPattern, menuItemInfo);
         if (menuItem->GetId() == menuItemPattern->GetClickMenuItemId()) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, menuItemInfo);
+            auto pipeline = host->GetContextWithCheck();
+            CHECK_NULL_RETURN(pipeline, menuItemInfo);
+            auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL;
             auto offset = menuItem->GetPaintRectOffset();
+            if (isContainerModal) {
+                offset -= OffsetF(0.0f, static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()));
+            }
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
             auto menuItemFrameSize = menuItem->GetGeometryNode()->GetFrameSize();
             menuItemInfo.endOffset = menuItemInfo.originOffset + OffsetF(0.0f, menuItemFrameSize.Height());

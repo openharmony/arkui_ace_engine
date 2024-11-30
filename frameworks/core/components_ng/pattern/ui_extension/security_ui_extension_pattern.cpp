@@ -58,76 +58,6 @@ constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_NAME[] = "Prohibit_Nesting_UIExtensi
 constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in uIExtensionAbility";
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
-
-class SecurityUIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
-public:
-    SecurityUIExtensionAccessibilityChildTreeCallback(const WeakPtr<SecurityUIExtensionPattern> &weakPattern, int64_t accessibilityId)
-        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
-    {}
-
-    ~SecurityUIExtensionAccessibilityChildTreeCallback() override = default;
-
-    bool OnRegister(uint32_t windowId, int32_t treeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (isReg_) {
-            return true;
-        }
-        pattern->OnAccessibilityChildTreeRegister(windowId, treeId, GetAccessibilityId());
-        isReg_ = true;
-        return true;
-    }
-
-    bool OnDeregister() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        if (!isReg_) {
-            return true;
-        }
-        pattern->OnAccessibilityChildTreeDeregister();
-        isReg_ = false;
-        return true;
-    }
-
-    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-        return true;
-    }
-
-    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return false;
-        }
-        pattern->OnAccessibilityDumpChildInfo(params, info);
-        return true;
-    }
-
-    void OnClearRegisterFlag() override
-    {
-        auto pattern = weakPattern_.Upgrade();
-        if (pattern == nullptr) {
-            return;
-        }
-        isReg_ = false;
-    }
-
-private:
-    bool isReg_ = false;
-    WeakPtr<SecurityUIExtensionPattern> weakPattern_;
-};
 }
 
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
@@ -260,15 +190,23 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
-        if (sessionWrapper_->GetWant()->IsEquals(want)) {
+        auto sessionWant = sessionWrapper_->GetWant();
+        if (sessionWant == nullptr) {
+            PLATFORM_LOGW("The sessionWrapper want is nulllptr.");
             return;
         }
-        PLATFORM_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
+        if (sessionWant->IsEquals(want)) {
+            return;
+        }
+        PLATFORM_LOGI("The old want bundle = %{public}s, ability = %{public}s",
+            sessionWant->GetElement().GetBundleName().c_str(), sessionWant->GetElement().GetAbilityName().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
+        // reset callback, in order to register childtree call back again when onConnect to new ability
+        ResetAccessibilityChildTreeCallback();
     }
 
     MountPlaceholderNode();
@@ -789,7 +727,9 @@ void SecurityUIExtensionPattern::InitializeAccessibility()
         return;
     }
     ContainerScope scope(instanceId_);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto ngPipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -798,7 +738,7 @@ void SecurityUIExtensionPattern::InitializeAccessibility()
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     int64_t accessibilityId = frameNode->GetAccessibilityId();
-    accessibilityChildTreeCallback_ = std::make_shared<SecurityUIExtensionAccessibilityChildTreeCallback>(
+    accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto realHostWindowId = ngPipeline->GetRealHostWindowId();
@@ -811,7 +751,8 @@ void SecurityUIExtensionPattern::InitializeAccessibility()
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
 
-void SecurityUIExtensionPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId) const
 {
     UIEXT_LOGI("treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
     if (sessionWrapper_ == nullptr) {
@@ -821,7 +762,7 @@ void SecurityUIExtensionPattern::OnAccessibilityChildTreeRegister(uint32_t windo
     sessionWrapper_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
-void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister()
+void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister() const
 {
     UIEXT_LOGI("deregister accessibility child tree");
     if (sessionWrapper_ == nullptr) {
@@ -831,7 +772,7 @@ void SecurityUIExtensionPattern::OnAccessibilityChildTreeDeregister()
     sessionWrapper_->TransferAccessibilityChildTreeDeregister();
 }
 
-void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
+void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
@@ -842,7 +783,7 @@ void SecurityUIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindow
 }
 
 void SecurityUIExtensionPattern::OnAccessibilityDumpChildInfo(
-    const std::vector<std::string>& params, std::vector<std::string>& info)
+    const std::vector<std::string>& params, std::vector<std::string>& info) const
 {
     UIEXT_LOGI("dump accessibility child info");
     if (sessionWrapper_ == nullptr) {
@@ -850,5 +791,21 @@ void SecurityUIExtensionPattern::OnAccessibilityDumpChildInfo(
         return;
     }
     sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
+void SecurityUIExtensionPattern::ResetAccessibilityChildTreeCallback()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_.reset();
+    accessibilityChildTreeCallback_ = nullptr;
 }
 } // namespace OHOS::Ace::NG
