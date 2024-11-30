@@ -713,6 +713,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     lastVsyncTime_ = context->GetVsyncTime();
+    MarkNeedFlushAnimationStartTime();
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
@@ -1095,6 +1096,7 @@ void Scrollable::SetSlipFactor(double SlipFactor)
 void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
 {
     if (!isSnapScrollAnimationStop_) {
+        MarkNeedFlushAnimationStartTime();
         AnimationOption option;
         option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
         auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
