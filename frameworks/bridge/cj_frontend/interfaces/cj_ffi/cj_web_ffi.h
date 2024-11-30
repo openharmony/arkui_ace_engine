@@ -31,6 +31,7 @@ struct FfiWebEvent;
 using VectorScriptItemHandle = void*;
 using VectorExpandedMenuItemOptionsHandle = void*;
 using VectorTextMenuItemHandle = void*;
+using VectorHeaderHandle = void*;
 
 extern "C" {
 struct CPermissionRequestResult {
@@ -88,6 +89,19 @@ struct FfiAdsBlockedDetails {
     VectorStringHandle adsBlocked;
 };
 
+struct FfiOnDownloadStartEvent {
+    const char* url;
+    const char* userAgent;
+    const char* contentDisposition;
+    const char* mimeType;
+    int64_t contentLength;
+};
+
+struct FfiHeader {
+    ExternalString key;
+    ExternalString value;
+};
+
 typedef void (*RequestResultCallback)(void*, CArrString, void*);
 
 CJ_EXPORT void FfiOHOSAceFrameworkWebHandleCancel(void* result);
@@ -113,7 +127,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebForceDarkAccess(bool access);
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnAlert(bool (*callback)(FfiWebEvent event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageStart(void (*callback)(const char* url));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url));
-CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event));
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(void* event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
     VectorInt64Handle funcList, const char* name, VectorStringHandle methodList, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb);
@@ -164,5 +178,36 @@ CJ_EXPORT void FfiWebSelectionMenuOptions(VectorExpandedMenuItemOptionsHandle ha
 CJ_EXPORT void FfiWebOnAdsBlocked(void (*callback)(FfiAdsBlockedDetails details));
 CJ_EXPORT void FfiWebKeyboardAvoidMode(int32_t mode);
 CJ_EXPORT void FfiWebEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
+CJ_EXPORT void FfiWebOnBeforeUnload(bool (*callback)(FfiWebEvent envent));
+CJ_EXPORT void FfiWebOnConfirm(bool (*callback)(FfiWebEvent event));
+CJ_EXPORT void FfiWebOnPrompt(bool (*callback)(FfiWebEvent event));
+CJ_EXPORT void FfiWebOnConsole(bool (*callback)(void* event));
+CJ_EXPORT int32_t FfiWebConsoleGetLineNumber(void* msg);
+CJ_EXPORT ExternalString FfiWebConsoleGetMessage(void* msg);
+CJ_EXPORT int32_t FfiWebConsoleGetMessageLevel(void* msg);
+CJ_EXPORT ExternalString FfiWebConsoleGetSourceId(void* msg);
+CJ_EXPORT void FfiWebFreeConsoleMessage(void* msg);
+CJ_EXPORT void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent event));
+CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(void* request, void* error));
+CJ_EXPORT ExternalString FfiWebGetErrorInfo(void* error);
+CJ_EXPORT int32_t FfiWebGetErrorCode(void* error);
+CJ_EXPORT void FfiWebFreeResourceError(void* error);
+CJ_EXPORT VectorHeaderHandle FfiVectorHeaderCreate(int64_t size);
+CJ_EXPORT FfiHeader FfiVectorHeaderGet(int64_t index, VectorHeaderHandle handle);
+CJ_EXPORT int64_t FfiVectorHeaderSize(VectorHeaderHandle handle);
+CJ_EXPORT void FfiVectorHeaderDelete(VectorHeaderHandle handle);
+CJ_EXPORT VectorHeaderHandle FfiWebGetRequestHeader(void* ptr);
+CJ_EXPORT ExternalString FfiWebGetRequestUrl(void* ptr);
+CJ_EXPORT bool FfiWebIsMainFrame(void* ptr);
+CJ_EXPORT bool FfiWebIsRedirect(void* ptr);
+CJ_EXPORT bool FfiWebIsRequestGesture(void* ptr);
+CJ_EXPORT ExternalString FfiWebGetRequestMethod(void* ptr);
+CJ_EXPORT void FfiWebFreeResourceRequest(void* ptr);
+CJ_EXPORT ExternalString FfiWebGetReasonMessage(void* prt);
+CJ_EXPORT int32_t FfiWebGetResponseCode(void* ptr);
+CJ_EXPORT ExternalString FfiWebGetResponseData(void* ptr);
+CJ_EXPORT ExternalString FfiWebGetResponseEncoding(void* ptr);
+CJ_EXPORT VectorHeaderHandle FfiWebGetResponseHeader(void* ptr);
+CJ_EXPORT void FfiWebFreeResourceResponse(void* ptr);
 };
 #endif // OHOS_ACE_FRAMEWORK_CJ_WEB_H

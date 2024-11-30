@@ -16,10 +16,10 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textfield_ffi.h"
 
 #include "cj_lambda.h"
+#include "securec.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "securec.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -40,110 +40,6 @@ const std::function<void(std::string)> FormatCharFunction(void (*callback)(const
 {
     const std::function<void(std::string)> result = [lambda = CJLambda::Create(callback)](
                                                         const std::string& value) -> void { lambda(value.c_str()); };
-    return result;
-}
-
-struct MenuActions {
-    std::function<void(const std::string&)> copy = [](const std::string&) {};
-    std::function<void(const std::string&)> selectAll = [](const std::string&) {};
-    std::function<void(const std::string&)> cut = [](const std::string&) {};
-    std::function<void(const std::string&)> paste = [](const std::string&) {};
-    std::function<void(const std::string&)> aiWrite = [](const std::string&) {};
-};
-
-void HandleDefaultActions(const std::string& id,
-    const std::function<void(const std::string&)>& action,
-    MenuActions& actions)
-{
-    if (id == "OH_DEFAULT_COPY") {
-        actions.copy = action;
-    } else if (id == "OH_DEFAULT_SELECT_ALL") {
-        actions.selectAll = action;
-    } else if (id == "OH_DEFAULT_CUT") {
-        actions.cut = action;
-    } else if (id == "OH_DEFAULT_PASTE") {
-        actions.paste = action;
-    } else if (id == "OH_DEFAULT_AI_WRITE") {
-        actions.aiWrite = action;
-    }
-}
-
-FfiTextFieldMenuItem ConvertToFfiMenuItem(const NG::MenuItemParam& menuItem)
-{
-    FfiTextFieldMenuItem result;
-    result.content = menuItem.menuOptionsParam.content.has_value() ?
-        const_cast<char*>(menuItem.menuOptionsParam.content.value().c_str()) : nullptr;
-    result.icon = menuItem.menuOptionsParam.icon.has_value() ?
-        const_cast<char*>(menuItem.menuOptionsParam.icon.value().c_str()) : nullptr;
-    result.id = const_cast<char*>(menuItem.menuOptionsParam.id.c_str());
-    return result;
-}
-
-NG::MenuOptionsParam ConvertToMenuOptionsParam(const FfiTextFieldMenuItem& menuItem, const MenuActions& actions)
-{
-    NG::MenuOptionsParam result;
-    result.content = menuItem.content ? std::make_optional<std::string>(menuItem.content) : std::nullopt;
-    result.icon = menuItem.icon ? std::make_optional<std::string>(menuItem.icon) : std::nullopt;
-    result.id = menuItem.id;
-
-    if (result.id == "OH_DEFAULT_COPY") {
-        result.action = actions.copy;
-    } else if (result.id == "OH_DEFAULT_SELECT_ALL") {
-        result.action = actions.selectAll;
-    } else if (result.id == "OH_DEFAULT_CUT") {
-        result.action = actions.cut;
-    } else if (result.id == "OH_DEFAULT_PASTE") {
-        result.action = actions.paste;
-    } else if (result.id == "OH_DEFAULT_AI_WRITE") {
-        result.action = actions.aiWrite;
-    } else {
-        result.action = [](const std::string& arg) {};
-    }
-    return result;
-}
-
-std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> TextFieldCreatMenu(
-    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem))
-{
-    return [ffiOnAction = CJLambda::Create(callbackOnCreateMenu)](
-        const std::vector<NG::MenuItemParam>& menuItem) -> std::vector<NG::MenuOptionsParam> {
-        MenuActions actions;
-        std::vector<FfiTextFieldMenuItem> arr;
-        arr.resize(menuItem.size());
-        for (size_t i = 0; i < menuItem.size(); ++i) {
-            arr[i] = ConvertToFfiMenuItem(menuItem[i]);
-            HandleDefaultActions(menuItem[i].menuOptionsParam.id,
-                menuItem[i].menuOptionsParam.action,
-                actions);
-        }
-        VectorTextFieldMenuItemHandle vectorHandle = &arr;
-        auto newHandle = ffiOnAction(vectorHandle);
-        auto newTextFieldMenuItem = *reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(newHandle);
-
-        std::vector<NG::MenuOptionsParam> result;
-        result.resize(newTextFieldMenuItem.size());
-        for (size_t i = 0; i < newTextFieldMenuItem.size(); ++i) {
-            result[i] = ConvertToMenuOptionsParam(newTextFieldMenuItem[i], actions);
-        }
-        return result;
-    };
-}
-
-std::function<bool(const NG::MenuItemParam& menuItemParam)> TextFieldMenuClick(
-    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
-{
-    std::function<bool(const NG::MenuItemParam& menuItemParam)> result =
-        [ffiOnAction = CJLambda::Create(callbackOnMenuItemClick)](const NG::MenuItemParam& menuItemParam) -> bool {
-        auto menuItem =
-            FfiTextFieldMenuItem { menuItemParam.menuOptionsParam.content.has_value()
-                                  ? const_cast<char*>(menuItemParam.menuOptionsParam.content.value().c_str())
-                                  : nullptr,
-                menuItemParam.menuOptionsParam.icon.has_value()
-                    ? const_cast<char*>(menuItemParam.menuOptionsParam.icon.value().c_str())
-                    : nullptr,
-                const_cast<char*>(menuItemParam.menuOptionsParam.id.c_str()) };
-        return ffiOnAction(menuItem, menuItemParam.start, menuItemParam.end);
-    };
     return result;
 }
 
@@ -821,8 +717,7 @@ void FfiOHOSAceFrameworkTextFieldOnChangePreviewText(
 void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t value, CJSubmitEvent))
 {
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto task = [func = CJLambda::Create(callback), node = targetNode](
-                int32_t key, NG::TextFieldCommonEvent& event) {
+    auto task = [func = CJLambda::Create(callback), node = targetNode](int32_t key, NG::TextFieldCommonEvent& event) {
         PipelineContext::SetCallBackNode(node);
         auto submitEvent = std::make_unique<CJSubmitEvent>();
         std::string text = event.GetText();
@@ -845,49 +740,11 @@ void FfiOHOSAceFrameworkTextFieldOnSubmitWithEvent(bool (*callback)(int32_t valu
     TextFieldModel::GetInstance()->SetOnSubmit(task);
 }
 
-void FfiOHOSAceFrameworkTextFieldEditMenuOptions(
-    VectorTextFieldMenuItemHandle (*callbackOnCreateMenu)(VectorTextFieldMenuItemHandle vecTextFieldMenuItem),
-    bool (*callbackOnMenuItemClick)(FfiTextFieldMenuItem textFieldMenuItem, int32_t start, int32_t end))
+void FfiOHOSAceFrameworkTextFieldEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
 {
-    auto onCreateMenu = [func = TextFieldCreatMenu(callbackOnCreateMenu)](
-                            const std::vector<NG::MenuItemParam>& val) -> std::vector<NG::MenuOptionsParam> {
-        return func(val);
-    };
-    auto onMenuItemClick = [func = TextFieldMenuClick(callbackOnMenuItemClick)](
-                               const NG::MenuItemParam& val) -> bool { return func(val); };
-    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenu), std::move(onMenuItemClick));
-}
-
-VectorTextFieldMenuItemHandle FfiCJCreateVectorFfiTextFieldMenuItem(int64_t size)
-{
-    LOGI("Create FfiTextFieldMenuItem Vector");
-    return new std::vector<FfiTextFieldMenuItem>(size);
-}
-
-void FfiCJVectorFfiTextFieldMenuItemDelete(VectorTextFieldMenuItemHandle vec)
-{
-    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
-    delete actualVec;
-}
-
-void FfiCJVectorFfiTextFieldMenuItemSetElement(VectorTextFieldMenuItemHandle vec,
-    int64_t index, FfiTextFieldMenuItem textFieldMenuItem)
-{
-    LOGI("FfiTextFieldMenuItem Vector Set Element");
-    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
-    (*actualVec)[index] = textFieldMenuItem;
-    LOGI("FfiTextFieldMenuItem Vector Set Element Success");
-}
-
-FfiTextFieldMenuItem FfiCJVectorFfiTextFieldMenuItemGetElement(VectorTextFieldMenuItemHandle vec, int64_t index)
-{
-    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
-    return (*actualVec)[index];
-}
-
-int64_t FfiCJVectorFfiTextFieldMenuItemGetSize(VectorTextFieldMenuItemHandle vec)
-{
-    auto actualVec = reinterpret_cast<std::vector<FfiTextFieldMenuItem>*>(vec);
-    return (*actualVec).size();
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 }
