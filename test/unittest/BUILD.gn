@@ -26,6 +26,7 @@ group("unittest") {
       "base:base_unittest",
       "bridge:bridge_unittest",
       "core:core_unittest",
+      "frameworks:frameworks_unittest",
       "interfaces:interfaces_unittest",
     ]
   }
@@ -197,6 +198,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
+    "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -858,11 +860,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_accessibility_property.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/option/option_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/group_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
@@ -922,6 +919,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/one_step_drag_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_base_controller.cpp",

@@ -211,7 +211,6 @@ var ImageFit;
   ImageFit[ImageFit["BOTTOM_START"] = 13] = "BOTTOM_START";
   ImageFit[ImageFit["BOTTOM"] = 14] = "BOTTOM";
   ImageFit[ImageFit["BOTTOM_END"] = 15] = "BOTTOM_END";
-  ImageFit[ImageFit["MATRIX"] = 17] = "MATRIX";
 })(ImageFit || (ImageFit = {}));
 
 var DynamicRangeMode ;

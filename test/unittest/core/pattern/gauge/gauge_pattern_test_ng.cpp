@@ -1646,4 +1646,200 @@ HWTEST_F(GaugePatternTestNg, GaugePatternTest088, TestSize.Level1)
     gaugePattern->SetBuilderFunc(node);
     gaugePattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: GaugePatternTest089
+ * @tc.desc: Test InitTitleContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest089, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    gaugePattern->titleChildId_ = std::nullopt;
+    /**
+     * @tc.cases: case1 no child.
+     */
+    gaugePattern->InitTitleContent();
+    EXPECT_FALSE(host->TotalChildCount() > 0);
+    
+    /**
+     * @tc.cases: case2 one child.
+     */
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::GAUGE_DESCRIPTION_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    frameNode->AddChild(textNode);
+    gaugePattern->InitTitleContent();
+    EXPECT_TRUE(host->TotalChildCount() > 0);
+}
+
+/**
+ * @tc.name: GaugePatternTest090
+ * @tc.desc: Test InitTitleContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest090, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    gaugePattern->titleChildId_ = std::nullopt;
+
+    /**
+     * @tc.cases: case2 one child is minValue.
+     */
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    gaugePattern->minValueTextId_ = valueTextId;
+    frameNode->AddChild(textNode);
+    gaugePattern->InitTitleContent();
+    EXPECT_TRUE(host->TotalChildCount() > 0);
+}
+
+/**
+ * @tc.name: GaugePatternTest091
+ * @tc.desc: Test InitTitleContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest091, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    gaugePattern->titleChildId_ = std::nullopt;
+
+    /**
+     * @tc.cases: case2 one child is maxValue.
+     */
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    gaugePattern->maxValueTextId_ = valueTextId;
+    frameNode->AddChild(textNode);
+    gaugePattern->InitTitleContent();
+    EXPECT_TRUE(host->TotalChildCount() > 0);
+}
+
+/**
+ * @tc.name: GaugePatternTest092
+ * @tc.desc: Test InitTitleContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest092, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    gaugePattern->titleChildId_ = std::nullopt;
+
+    /**
+     * @tc.cases: case2 one child is maxValue and minValue has value.
+     */
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    gaugePattern->minValueTextId_ = valueTextId;
+    gaugePattern->maxValueTextId_ = valueTextId;
+    frameNode->AddChild(textNode);
+    gaugePattern->InitTitleContent();
+    EXPECT_TRUE(host->TotalChildCount() > 0);
+}
+
+/**
+ * @tc.name: GaugePatternTest093
+ * @tc.desc: Test FireBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest093, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    
+    /**
+     * @tc.cases: case1 makeFunc is null.
+     */
+    gaugePattern->makeFunc_ = std::nullopt;
+    gaugePattern->FireBuilder();
+    EXPECT_FALSE(host->TotalChildCount() > 0);
+}
+
+/**
+ * @tc.name: GaugePatternTest094
+ * @tc.desc: Test FireBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugePatternTest094, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    g_testValue = 100.0f;
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto host = gaugePattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    
+    /**
+     * @tc.cases: makeFunc is not null.
+     */
+    auto node = [](GaugeConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(MIN, config.min_);
+        EXPECT_EQ(MAX, config.max_);
+        return nullptr;
+    };
+    gaugePattern->makeFunc_ = node;
+    gaugePattern->FireBuilder();
+    EXPECT_FALSE(host->TotalChildCount() > 0);
+}
 } // namespace OHOS::Ace::NG

@@ -197,7 +197,8 @@ void TextLayoutAlgorithm::CheckNeedReCreateParagraph(
         textPattern->IsDragging() || textLayoutProperty->GetAdaptMaxFontSize().has_value() ||
         textLayoutProperty->GetAdaptMinFontSize().has_value() ||
         textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST) !=
-            TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+            TextHeightAdaptivePolicy::MAX_LINES_FIRST ||
+        textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE;
 }
 
 void TextLayoutAlgorithm::ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty)
@@ -217,7 +218,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto textForAI = pattern->GetTextForAI();
-    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    auto wTextForAI = UtfUtils::Str8ToStr16(textForAI);
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     DragSpanPosition dragSpanPosition;
@@ -252,17 +253,17 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(
     }
 }
 
-void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
+void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::u16string wTextForAI,
     const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph)
 {
     int32_t dragStart = dragSpanPosition.dragStart;
     int32_t dragEnd = dragSpanPosition.dragEnd;
     int32_t spanStart = dragSpanPosition.spanStart;
     int32_t spanEnd = dragSpanPosition.spanEnd;
-    std::vector<std::string> contents = {};
-    std::string firstParagraph = "";
-    std::string secondParagraph = "";
-    std::string thirdParagraph = "";
+    std::vector<std::u16string> contents = {};
+    std::u16string firstParagraph = u"";
+    std::u16string secondParagraph = u"";
+    std::u16string thirdParagraph = u"";
     if (dragStart > spanEnd || dragEnd < spanStart || !isDragging) {
         firstParagraph = StringOutBoundProtection(spanStart, spanEnd - spanStart, wTextForAI);
     } else if (spanStart <= dragStart && spanEnd >= dragStart && spanEnd <= dragEnd) {
@@ -282,13 +283,14 @@ void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosi
     CreateParagraphDrag(textStyle, contents, paragraph);
 }
 
-std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI)
+std::u16string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int32_t length,
+    std::u16string wTextForAI)
 {
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     if (position >= 0 && position < wTextForAILength && length >= 0 && length <= wTextForAILength - position) {
-        return StringUtils::ToString(wTextForAI.substr(position, length));
+        return wTextForAI.substr(position, length);
     }
-    return "";
+    return u"";
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(
@@ -366,7 +368,7 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
 }
 
 void TextLayoutAlgorithm::CreateParagraphDrag(
-    const TextStyle& textStyle, const std::vector<std::string>& contents, const RefPtr<Paragraph>& paragraph)
+    const TextStyle& textStyle, const std::vector<std::u16string>& contents, const RefPtr<Paragraph>& paragraph)
 {
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
@@ -377,14 +379,14 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
 
     CHECK_NULL_VOID(paragraph);
     for (size_t i = 0; i < contents.size(); i++) {
-        std::string splitStr = contents[i];
+        std::u16string splitStr = contents[i];
         if (splitStr.empty()) {
             continue;
         }
         auto& style = textStyles[i];
         paragraph->PushStyle(style);
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
-        paragraph->AddText(StringUtils::Str8ToStr16(splitStr));
+        paragraph->AddText(splitStr);
         paragraph->PopStyle();
     }
 }

@@ -303,7 +303,8 @@ void SecuritySessionWrapperImpl::InitAllCallback()
 /*********************** Begin: About session ************************************/
 void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
-    PLATFORM_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    PLATFORM_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);

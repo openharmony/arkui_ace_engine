@@ -4030,6 +4030,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
+        // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
+        this.__isBlockRecycleOrReuse__ = false;
         // Set of elements for delayed update
         this.elmtIdsDelayedUpdate_ = new Set();
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
@@ -4048,6 +4050,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         }
         this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
         this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
+        
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {

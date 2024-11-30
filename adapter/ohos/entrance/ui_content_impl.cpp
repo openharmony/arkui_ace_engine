@@ -94,6 +94,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/image/image_file_cache.h"
@@ -3346,10 +3347,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
         "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
-        "isAllowAddChildBelowModalUec=%{public}d",
+        "isAllowAddChildBelowModalUec=%{public}d, prohibitedRemoveByNavigation=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
         config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
-        config.isAllowAddChildBelowModalUec);
+        config.isAllowAddChildBelowModalUec, config.prohibitedRemoveByNavigation);
     return sessionId;
 }
 
@@ -3735,6 +3736,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
             CHECK_NULL_VOID(targetNode);
             auto popupParam = UICONTENT_IMPL_PTR(content)->CreateCustomPopupParam(false, config);
+            popupParam->SetBlockEvent(false);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
             UICONTENT_IMPL_PTR(content)->customPopupConfigMap_.erase(nodeId);
             UICONTENT_IMPL_PTR(content)->popupUIExtensionRecords_.erase(nodeId);
@@ -3818,6 +3820,23 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     } else {
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
     }
+}
+
+void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, buttonStyle]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetContainerButtonStyle(buttonStyle.buttonBackgroundSize,
+                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
+        },
+        TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
@@ -4069,5 +4088,27 @@ bool UIContentImpl::GetContainerControlButtonVisible()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->GetContainerControlButtonVisible();
+}
+
+void UIContentImpl::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [name, value, instanceId = instanceId_]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineBase);
+        CHECK_NULL_VOID(pipeline);
+        NG::ContainerModalViewEnhance::OnContainerModalEvent(pipeline, name, value);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOnContainerModalEvent");
+    }
 }
 } // namespace OHOS::Ace

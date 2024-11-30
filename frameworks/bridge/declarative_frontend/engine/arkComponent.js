@@ -6841,22 +6841,6 @@ class ImageObjectFitModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('imageObjectFit');
-class ImageMatrixModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().image.resetImageMatrix(node);
-    } else {
-      getUINativeModule().image.setImageMatrix(node, this.value.matrix4x4);
-    }
-  }
-  checkObjectDiff() {
-    return !deepCompareArrays(this.stageValue.matrix4x4, this.value.matrix4x4);
-  }
-}
-ImageMatrixModifier.identity = Symbol('imageMatrix');
 class ImageBorderRadiusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7310,10 +7294,6 @@ class ArkImageComponent extends ArkComponent {
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, ImageObjectFitModifier.identity, ImageObjectFitModifier, value);
-    return this;
-  }
-  imageMatrix(value) {
-    modifierWithKey(this._modifiersWithKeys, ImageMatrixModifier.identity, ImageMatrixModifier, value);
     return this;
   }
   objectRepeat(value) {
@@ -26255,6 +26235,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
+  hdrBrightness(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -26666,6 +26650,23 @@ class XComponentEnableSecureModifier extends ModifierWithKey {
   }
 }
 XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
+class XComponentHdrBrightnessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetHdrBrightness(node);
+    }
+    else {
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+XComponentHdrBrightnessModifier.identity = Symbol('xComponentHdrBrightness');
 class XComponentRenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

@@ -29,10 +29,6 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/option/option_accessibility_property.h"
-#include "core/components_ng/pattern/option/option_layout_algorithm.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
 

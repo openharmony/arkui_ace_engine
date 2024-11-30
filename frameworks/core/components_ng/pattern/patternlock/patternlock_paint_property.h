@@ -44,6 +44,8 @@ public:
         paintProperty->propActiveCircleColor_ = CloneActiveCircleColor();
         paintProperty->propActiveCircleRadius_ = CloneActiveCircleRadius();
         paintProperty->propEnableWaveEffect_ = CloneEnableWaveEffect();
+        paintProperty->propEnableForeground_ = CloneEnableForeground();
+        paintProperty->propSkipUnselectedPoint_ = CloneSkipUnselectedPoint();
         return paintProperty;
     }
 
@@ -60,6 +62,8 @@ public:
         ResetActiveCircleColor();
         ResetActiveCircleRadius();
         ResetEnableWaveEffect();
+        ResetEnableForeground();
+        ResetSkipUnselectedPoint();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -91,6 +95,8 @@ public:
         json->PutExtAttr("activeCircleRadius",
             GetActiveCircleRadius().value_or(Dimension(0.0f, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("enableWaveEffect", GetEnableWaveEffect().value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("enableForeground", GetEnableForeground().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("skipUnselectedPoint", GetSkipUnselectedPoint().value_or(false) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CircleRadius, Dimension, PROPERTY_UPDATE_RENDER);
@@ -103,6 +109,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveCircleColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ActiveCircleRadius, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableWaveEffect, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableForeground, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SkipUnselectedPoint, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,6 @@ ace_unittest("event_manager_test_ng") {
   flutter_skia = true
   render = true
   sources = [
-    "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",

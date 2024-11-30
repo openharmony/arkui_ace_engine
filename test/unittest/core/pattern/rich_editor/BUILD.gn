@@ -18,6 +18,7 @@ ace_unittest("rich_editor_test_ng") {
   sources = [
     "paragraph_manager_test_ng.cpp",
     "rich_editor_accessibility_test_ng.cpp",
+    "rich_editor_add_span_test_ng.cpp",
     "rich_editor_base_test_ng.cpp",
     "rich_editor_base_testone_ng.cpp",
     "rich_editor_base_testtwo_ng.cpp",
@@ -31,6 +32,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_edit_testone_ng.cpp",
     "rich_editor_keyboard_shortcut_test_ng.cpp",
     "rich_editor_overlay_test_ng.cpp",
+    "rich_editor_paragraph_mgr_test_ng.cpp",
     "rich_editor_pattern_test_ng.cpp",
     "rich_editor_pattern_testfive_ng.cpp",
     "rich_editor_pattern_testfour_ng.cpp",

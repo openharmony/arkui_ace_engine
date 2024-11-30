@@ -76,7 +76,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected extraInfo_: ExtraInfo = undefined;
 
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
-  private __isBlockRecycleOrReuse__: boolean = false;
+  protected __isBlockRecycleOrReuse__: boolean = false;
 
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();

@@ -243,7 +243,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 0), GetChildX(frameNode_, 4));
 
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + COL_GAP);
-    EXPECT_EQ(GetChildY(frameNode_, 4), ITEM_HEIGHT + ROW_GAP);
+    EXPECT_EQ(GetChildY(frameNode_, 4), ITEM_MAIN_SIZE + ROW_GAP);
 }
 
 /**
@@ -286,10 +286,10 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 0fr 0fr 1fr");
     CreateFixedItems(10);
     CreateDone();
-    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
-    EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
-    EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildWidth(frameNode_, 2), 0);
+    EXPECT_GT(GetChildWidth(frameNode_, 3), 0);
 }
 
 /**
@@ -381,7 +381,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), GetChildY(frameNode_, 4));
 
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + ROW_GAP);
-    EXPECT_EQ(GetChildX(frameNode_, 4), ITEM_WIDTH + COL_GAP);
+    EXPECT_EQ(GetChildX(frameNode_, 4), ITEM_MAIN_SIZE + COL_GAP);
 }
 
 /**
@@ -424,10 +424,10 @@ HWTEST_F(GridAttrTestNg, RowsTemplate003, TestSize.Level1)
     model.SetRowsTemplate("1fr 0fr 0fr 1fr");
     CreateFixedItems(10);
     CreateDone();
-    EXPECT_GT(GetChildHeight(frameNode_, 0), 0.f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 1), 0.f);
-    EXPECT_EQ(GetChildHeight(frameNode_, 2), 0.f);
-    EXPECT_GT(GetChildHeight(frameNode_, 3), 0.f);
+    EXPECT_GT(GetChildHeight(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildHeight(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildHeight(frameNode_, 2), 0);
+    EXPECT_GT(GetChildHeight(frameNode_, 3), 0);
 }
 
 /**
@@ -510,7 +510,7 @@ HWTEST_F(GridAttrTestNg, ColumnsRows001, TestSize.Level1)
     CreateGridItems(20);
     CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), 4);
-    EXPECT_TRUE(IsEqual(GetChildSize(frameNode_, 0), SizeF(ITEM_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(GetChildSize(frameNode_, 0), SizeF(60.0f, ITEM_MAIN_SIZE)));
 }
 
 /**
@@ -522,12 +522,12 @@ HWTEST_F(GridAttrTestNg, ColumnsRows001, TestSize.Level1)
 HWTEST_F(GridAttrTestNg, LayoutDirection001, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set LayoutDirection ROW, set minCount maxCount, setgap
+     * @tc.cases: Set LayoutDirection ROW, set minCount maxCount, set Gap
      * @tc.expected: Axis is VERTICAL, has three cols, has gap
      */
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(2);
     model.SetMaxCount(4);
     model.SetColumnsGap(Dimension(COL_GAP));
@@ -535,10 +535,10 @@ HWTEST_F(GridAttrTestNg, LayoutDirection001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
-    EXPECT_EQ(pattern_->GetCrossCount(), 3);
+    EXPECT_EQ(pattern_->GetCrossCount(), 2);
 
-    EXPECT_EQ(GetChildX(frameNode_, 1), ITEM_WIDTH + COL_GAP);
-    EXPECT_EQ(GetChildY(frameNode_, 4), ITEM_HEIGHT + ROW_GAP);
+    EXPECT_EQ(GetChildX(frameNode_, 1), ITEM_MAIN_SIZE + COL_GAP);
+    EXPECT_EQ(GetChildY(frameNode_, 3), ITEM_MAIN_SIZE + ROW_GAP);
 }
 
 /**
@@ -557,10 +557,10 @@ HWTEST_F(GridAttrTestNg, LayoutDirection002, TestSize.Level1)
     float itemWidth = GRID_WIDTH / minCount + 100.f; // greater than half of GRID_WIDTH
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
-    model.SetCellLength(ITEM_HEIGHT);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(minCount);
     model.SetMaxCount(4);
-    CreateGridItems(10, itemWidth, ITEM_HEIGHT);
+    CreateGridItems(10, itemWidth, ITEM_MAIN_SIZE);
     CreateDone();
     EXPECT_EQ(pattern_->GetCrossCount(), minCount);
     EXPECT_GT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
@@ -579,13 +579,13 @@ HWTEST_F(GridAttrTestNg, LayoutDirection003, TestSize.Level1)
      * @tc.expected: Has maxCount rows, gridItem from top to bottom
      */
     float maxCount = 4;
-    float itemHeight = GRID_HEIGHT / maxCount - 100.f; // less than quarter of GRID_HEIGHT
+    float itemHeight = GRID_HEIGHT / maxCount - 50.0f; // less than quarter of GRID_HEIGHT
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN);
-    model.SetCellLength(ITEM_WIDTH);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(2);
     model.SetMaxCount(maxCount);
-    CreateGridItems(10, ITEM_WIDTH, itemHeight);
+    CreateGridItems(10, ITEM_MAIN_SIZE, itemHeight);
     CreateDone();
     EXPECT_LT(GetChildY(frameNode_, 0), GetChildY(frameNode_, 1));
     EXPECT_LT(GetChildY(frameNode_, 1), GetChildY(frameNode_, 2));
@@ -607,7 +607,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection004, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
-    model.SetCellLength(ITEM_WIDTH);
+    model.SetCellLength(ITEM_MAIN_SIZE);
     model.SetMinCount(2);
     model.SetMaxCount(4);
     CreateFixedItems(10);
@@ -637,16 +637,17 @@ HWTEST_F(GridAttrTestNg, BigItem001, TestSize.Level1)
     CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone();
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH, ITEM_HEIGHT, ITEM_WIDTH * 2, ITEM_HEIGHT * 2)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, 0.f, ITEM_WIDTH * 3, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 3, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
+    float itemWidth = 60.0f;
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(itemWidth, ITEM_MAIN_SIZE, itemWidth * 2, ITEM_MAIN_SIZE * 2)));
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0, 0, itemWidth * 3, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(2, RectF(itemWidth * 3, 0, itemWidth, ITEM_MAIN_SIZE * 3)));
 
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(0, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF(0, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(6, RectF(ITEM_WIDTH, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(7, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(8, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(VerifyBigItemRect(3, RectF(0, ITEM_MAIN_SIZE, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0, ITEM_MAIN_SIZE * 2, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(5, RectF(0, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(6, RectF(itemWidth, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(7, RectF(itemWidth * 2, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(8, RectF(itemWidth * 3, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(VerifyBigItemRect(9, RectF()));
 }
 
@@ -661,21 +662,22 @@ HWTEST_F(GridAttrTestNg, BigItem002, TestSize.Level1)
      * @tc.cases: Only set RowsTemplate, create big items
      * @tc.expected: Big items have bigger size
      */
+    float itemWidth = 60.0f;
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateBigRowItem(1, 2);
     CreateBigRowItem(0, 2);
     CreateBigRowItem(2, 3);
-    CreateFixedItems(7);
+    CreateFixedWidthItems(7, itemWidth);
     CreateDone();
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT * 2)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH, 0.f, ITEM_WIDTH, ITEM_HEIGHT * 3)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT * 2)));
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0, ITEM_MAIN_SIZE, itemWidth, ITEM_MAIN_SIZE * 2)));
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(itemWidth, 0, itemWidth, ITEM_MAIN_SIZE * 3)));
+    EXPECT_TRUE(VerifyBigItemRect(2, RectF(itemWidth * 2, ITEM_MAIN_SIZE * 2, itemWidth, ITEM_MAIN_SIZE * 2)));
 
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH * 3, 0, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(6, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(VerifyBigItemRect(3, RectF(itemWidth * 3, 0, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(4, RectF(itemWidth * 3, ITEM_MAIN_SIZE, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(5, RectF(itemWidth * 3, ITEM_MAIN_SIZE * 2, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(6, RectF(itemWidth * 3, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(VerifyBigItemRect(7, RectF()));
     EXPECT_TRUE(VerifyBigItemRect(8, RectF()));
     EXPECT_TRUE(VerifyBigItemRect(9, RectF()));
@@ -699,15 +701,16 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
     CreateBigColItem(2, 1);
     CreateFixedItems(7);
     CreateDone();
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH * 3, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
+    float itemWidth = 60.0f;
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(itemWidth * 2, 0, itemWidth * 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0, ITEM_MAIN_SIZE, itemWidth * 3, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(2, RectF(itemWidth * 2, ITEM_MAIN_SIZE * 2, itemWidth, ITEM_MAIN_SIZE)));
 
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF(ITEM_WIDTH, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(6, RectF(ITEM_WIDTH * 2, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(7, RectF(ITEM_WIDTH * 3, ITEM_HEIGHT * 3, ITEM_WIDTH, ITEM_HEIGHT)));
+    EXPECT_TRUE(VerifyBigItemRect(3, RectF(itemWidth * 3, ITEM_MAIN_SIZE * 2, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(5, RectF(itemWidth, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(6, RectF(itemWidth * 2, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(VerifyBigItemRect(7, RectF(itemWidth * 3, ITEM_MAIN_SIZE * 3, itemWidth, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(VerifyBigItemRect(8, RectF()));
     EXPECT_TRUE(VerifyBigItemRect(9, RectF()));
 }
@@ -728,8 +731,9 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     CreateBigColItem(2, 3);
     CreateFixedItems(7);
     CreateDone();
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)));        // normal item
+    float itemWidth = 60.0f;
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(itemWidth * 2, 0, itemWidth * 2, ITEM_MAIN_SIZE))); // big item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0, ITEM_MAIN_SIZE, itemWidth, ITEM_MAIN_SIZE)));    // normal item
 
     /**
      * @tc.steps: step2. Change colStart and colEnd
@@ -740,8 +744,8 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
     itemLayoutProperty->UpdateColumnEnd(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // update items
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));        // big item
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH, ITEM_HEIGHT))); // normal item
+    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0, 0, itemWidth * 2, ITEM_MAIN_SIZE)));         // big item
+    EXPECT_TRUE(VerifyBigItemRect(1, RectF(itemWidth * 2, 0, itemWidth, ITEM_MAIN_SIZE))); // normal item
 }
 
 /**
@@ -788,8 +792,8 @@ HWTEST_F(GridAttrTestNg, Gap001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
     CreateDone();
-    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
-    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0);
 }
 
 /**
@@ -832,8 +836,8 @@ HWTEST_F(GridAttrTestNg, Gap003, TestSize.Level1)
     model.SetRowsGap(Dimension(-1));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
     CreateDone();
-    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
-    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0);
 }
 
 /**
@@ -854,8 +858,8 @@ HWTEST_F(GridAttrTestNg, Gap004, TestSize.Level1)
     model.SetRowsGap(Dimension(GRID_HEIGHT / 3 + 1));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
     CreateDone();
-    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
-    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), 0);
 }
 
 /**
@@ -876,7 +880,7 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
     CreateFixedItems(16);
     CreateDone();
     EXPECT_TRUE(layoutProperty_->IsConfiguredScrollable());
-    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), GRID_HEIGHT / 3);
 }
 

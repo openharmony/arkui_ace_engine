@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "base/utils/string_utils.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -362,8 +363,8 @@ RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpa
 
 void SpanString::ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end)
 {
-    auto text = GetWideString();
-    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+    auto text = GetU16string();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
         start, end-start, text, true);
     int startIndex = range.startIndex;
     int endIndex = range.endIndex;
@@ -616,6 +617,11 @@ const std::string& SpanString::GetString() const
 std::wstring SpanString::GetWideString()
 {
     return StringUtils::ToWstring(text_);
+}
+
+std::u16string SpanString::GetU16string()
+{
+    return StringUtils::Str8ToStr16(text_);
 }
 
 int32_t SpanString::GetLength() const

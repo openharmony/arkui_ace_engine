@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -304,6 +303,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
+        CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -855,7 +855,7 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(theme);
     if (isOptionPattern_) {
         SetBgBlendColor(isHover ? theme->GetHoverColor() : Color::TRANSPARENT);
-        auto props = GetPaintProperty<OptionPaintProperty>();
+        auto props = GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateHover(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1869,7 +1869,7 @@ void MenuItemPattern::UpdateNextNodeDivider(bool needDivider)
             LOGW("next optionNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
             return;
         }
-        auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<OptionPaintProperty>();
+        auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateNeedDivider(needDivider);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1895,12 +1895,12 @@ void MenuItemPattern::UpdateIcon(const std::string& src, const std::function<voi
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(row);
     if (symbolIcon && (!icon_ || icon_->GetTag() != V2::SYMBOL_ETS_TAG)) {
-        icon_ = OptionView::CreateSymbol(symbolIcon, row, icon_);
+        icon_ = MenuView::CreateSymbol(symbolIcon, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } else if (symbolIcon == nullptr && !src.empty() && (!icon_ || icon_->GetTag() != V2::IMAGE_ETS_TAG)) {
-        icon_ = OptionView::CreateIcon(src, row, icon_);
+        icon_ = MenuView::CreateIcon(src, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -1980,7 +1980,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     float finalWidth = MIN_OPTION_WIDTH.ConvertToPx();
     
     if (IsWidthModifiedBySelect()) {
-        auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        auto optionPatintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
         auto selectmodifiedwidth = optionPatintProperty->GetSelectModifiedWidth();
         finalWidth = selectmodifiedwidth.value();
@@ -2035,7 +2035,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto props = GetPaintProperty<OptionPaintProperty>();
+    auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
     const auto& touches = info.GetTouches();
     CHECK_EQUAL_VOID(touches.empty(), true);
@@ -2075,7 +2075,7 @@ bool MenuItemPattern::OnSelectProcess()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto hub = host->GetEventHub<OptionEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
@@ -2135,7 +2135,7 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
-    auto eventHub = host->GetEventHub<OptionEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {

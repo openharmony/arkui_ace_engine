@@ -40,7 +40,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -243,7 +242,7 @@ void SelectPattern::UpdateOptionsWidth(float selectWidth)
         auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
     }
@@ -403,7 +402,7 @@ void SelectPattern::CreateSelectedCallback()
         RecordChange(host, index, value);
     };
     for (auto&& option : options_) {
-        auto hub = option->GetEventHub<OptionEventHub>();
+        auto hub = option->GetEventHub<MenuItemEventHub>();
         // no std::move, need to set multiple options
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
@@ -827,7 +826,7 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
             CHECK_NULL_VOID(lastSelectedNode);
-            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<OptionPaintProperty>();
+            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
             CHECK_NULL_VOID(lastSelectedPros);
             lastSelectedPros->UpdateNeedDivider(true);
         }
@@ -877,7 +876,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
-    auto newSelectedPros = newSelectedNode->GetPaintProperty<OptionPaintProperty>();
+    auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
 }
@@ -973,7 +972,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
@@ -1053,7 +1052,7 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
     if (options_.empty()) {
         json->PutExtAttr("divider", "", filter);
     } else {
-        auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+        auto props = options_[0]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         auto divider = JsonUtil::Create(true);
         if (props->HasDivider()) {
@@ -1317,7 +1316,7 @@ void SelectPattern::SetOptionWidth(const Dimension& value)
         auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         optionPattern->SetIsWidthModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options_[i]->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
         optionPaintProperty->UpdateSelectModifiedWidth(optionWidth);
     }
@@ -1454,7 +1453,7 @@ ControlSize SelectPattern::GetControlSize()
 void SelectPattern::SetDivider(const SelectDivider& divider)
 {
     for (auto&& option : options_) {
-        auto props = option->GetPaintProperty<OptionPaintProperty>();
+        auto props = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateDivider(divider);
     }

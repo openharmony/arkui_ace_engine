@@ -9599,7 +9599,6 @@ const ArkUI_AttributeItem* GetLineSpacing(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_TEXT) {
         g_numberValues[NUM_0].f32 =
             fullImpl->getNodeModifiers()->getTextModifier()->getTextLineSpacing(node->uiNodeHandle);
-        g_numberValues[NUM_0].i32 = static_cast<int32_t>(node->lengthMetricUnit);
         g_attributeItem.size = REQUIRED_ONE_PARAM;
     }
     return &g_attributeItem;

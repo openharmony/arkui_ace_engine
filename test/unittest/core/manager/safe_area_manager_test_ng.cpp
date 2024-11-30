@@ -135,7 +135,7 @@ void SafeAreaManagerTest::CommonExpectEQ(const Rect& s1, const Rect& s2)
  */
 HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
 {
-    EXPECT_EQ(safeAreaManager_->IsIgnoreAsfeArea(), false);
+    EXPECT_EQ(safeAreaManager_->IsIgnoreSafeArea(), false);
     EXPECT_EQ(safeAreaManager_->IsFullScreen(), false);
     EXPECT_EQ(safeAreaManager_->IsNeedAvoidWindow(), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);

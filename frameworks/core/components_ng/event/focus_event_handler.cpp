@@ -139,13 +139,17 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     switch (intension) {
         case FocusIntension::SELECT:
         case FocusIntension::SPACE:
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+                !pipeline->GetIsFocusActive()) {
+                break;
+            }
             ret = OnClick(event);
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
                 GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
-        default:
-            return ret;
+        default:;
     }
+    return ret;
 }
 
 bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)

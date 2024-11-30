@@ -18,6 +18,7 @@
 
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
+#include "movingphoto_utils.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +44,7 @@ public:
     void RepeatPlay(bool isRepeatPlay);
     void EnableAnalyzer(bool enabled);
     void SetImageAIOptions(void* options);
+    void SetMovingPhotoFormat(MovingPhotoFormat format);
 
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;

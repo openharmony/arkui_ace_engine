@@ -881,7 +881,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__)) {
+          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
             child.aboutToRecycleInternal();
           }
         } else {

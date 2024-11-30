@@ -1494,6 +1494,8 @@ export class ComposeListItem extends ViewPU {
         this.focusOutlineColor = e10.colors.interactiveFocus;
     }
     onPropChange() {
+        this.containerDirection = this.decideContainerDirection();
+        this.contentItemDirection = this.decideContentItemDirection();
         if (this.contentItem === undefined) {
             if (this.operateItem?.image !== undefined ||
                 this.operateItem?.icon !== undefined ||

@@ -33,6 +33,7 @@ using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
 using WindowGetStartMoveFlagCallback = std::function<uint32_t(void)>;
 using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
+using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -144,6 +145,18 @@ public:
     void SetPerformBackCallback(WindowCallback&& callback)
     {
         windowPerformBackCallback_ = callback;
+    }
+
+    void SetWindowCallNativeCallback(WindowCallNativeCallback&& callback)
+    {
+        callNativeCallback_ = std::move(callback);
+    }
+
+    void FireWindowCallNativeCallback(const std::string& name, const std::string& value)
+    {
+        if (callNativeCallback_) {
+            callNativeCallback_(name, value);
+        }
     }
 
     void WindowMinimize() const
@@ -294,6 +307,7 @@ private:
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
+    WindowCallNativeCallback callNativeCallback_;
 };
 
 } // namespace OHOS::Ace

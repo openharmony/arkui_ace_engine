@@ -406,11 +406,6 @@ void ImageModelNG::SetImageFit(ImageFit value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
-void ImageModelNG::SetImageMatrix(const Matrix4 &value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value);
-}
-
 void ImageModelNG::SetMatchTextDirection(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
@@ -693,11 +688,6 @@ void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
 void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode, frameNode);
-}
-
-void ImageModelNG::SetImageMatrix(FrameNode *frameNode, const Matrix4 &value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
 }
 
 void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)
