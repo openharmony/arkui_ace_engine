@@ -857,7 +857,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
         auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
-        currentDelta_ = currentDelta_ * friction;
+        offset = offset * friction;
+        currentDelta_ = lastDelta - offset;
     }
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
