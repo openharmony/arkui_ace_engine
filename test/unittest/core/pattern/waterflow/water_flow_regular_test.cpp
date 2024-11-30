@@ -407,6 +407,7 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 17), 200.0f);
     EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(info->startIndex_, 36);
     EXPECT_EQ(info->endIndex_, 49);
@@ -547,6 +548,7 @@ HWTEST_F(WaterFlowTestNg, Jump002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateWaterFlowItems(100);
     CreateDone();
+    pattern_->isAnimationStop_ = false; // to disable skipping
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
@@ -591,6 +593,7 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
     CreateWaterFlowItems(100);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
