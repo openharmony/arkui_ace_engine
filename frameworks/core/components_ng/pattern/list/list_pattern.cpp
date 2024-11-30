@@ -86,9 +86,6 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
-    if (IsNeedInitClickEventRecorder()) {
-        Pattern::InitClickEventRecorder();
-    }
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);

@@ -127,6 +127,13 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
 
+void SpanItem::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    if (!content.empty()) {
+        json->Put(TreeKey::CONTENT, content.c_str());
+    }
+}
+
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);

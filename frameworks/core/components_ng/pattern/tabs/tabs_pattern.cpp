@@ -145,6 +145,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
             .SetType(tabsNode->GetTag())
             .SetIndex(index)
             .SetText(tabBarText)
+            .SetHost(tabsNode)
             .SetDescription(tabsNode->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
         if (!inspectorId.empty()) {

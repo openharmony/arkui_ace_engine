@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -637,6 +638,17 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
     AnimateToInner(info, true);
 }
 
+void RecordAnimationFinished(int32_t count)
+{
+    if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
+            .SetEventType(Recorder::EventType::ANIMATION_FINISHED)
+            .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+}
+
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
     ContainerScope scope(Container::CurrentIdSafelyWithCheck());
@@ -682,6 +694,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
+            RecordAnimationFinished(count.value_or(1));
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -695,7 +708,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
-        onFinishEvent = [traceStreamPtr]() {
+        onFinishEvent = [traceStreamPtr, count]() {
+            RecordAnimationFinished(count.value_or(1));
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }

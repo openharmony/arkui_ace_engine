@@ -23,6 +23,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
@@ -2542,6 +2543,7 @@ void ScrollablePattern::FireOnScrollStart()
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop());
     }
+    RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
@@ -2704,6 +2706,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         return;
     }
     auto pipeline = host->GetContext();
+    RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
@@ -2747,6 +2750,31 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
+}
+
+void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
+{
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_SCROLL)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = GetTotalOffset();
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventCategory(Recorder::EventCategory::CATEGORY_SCROLL)
+        .SetEventType(eventType)
+        .SetId(host->GetInspectorIdValue(""))
+        .SetType(host->GetHostTag())
+        .SetHost(host)
+        .SetExtra(Recorder::KEY_CURRENT_OFFSET, std::to_string(offset))
+        .SetDescription(host->GetAutoEventParamValue(""));
+    if (eventType == Recorder::EventType::SCROLL_START) {
+        scrollStartOffset_ = GetTotalOffset();
+    } else if (eventType == Recorder::EventType::SCROLL_STOP) {
+        auto distance = offset - scrollStartOffset_;
+        builder.SetExtra(Recorder::KEY_DISTANCE, std::to_string(distance));
+    }
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 float ScrollablePattern::FireOnWillScroll(float offset) const

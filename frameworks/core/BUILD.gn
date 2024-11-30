@@ -272,6 +272,7 @@ template("ace_core_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
@@ -866,6 +867,7 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text

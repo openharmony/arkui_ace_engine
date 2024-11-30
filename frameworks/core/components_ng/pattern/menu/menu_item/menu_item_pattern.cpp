@@ -244,7 +244,8 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetType(host->GetTag())
         .SetChecked(isSelected_)
         .SetText(content)
-        .SetDescription(host->GetAutoEventParamValue(""));
+        .SetDescription(host->GetAutoEventParamValue(""))
+        .SetHost(host);
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
 }

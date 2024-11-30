@@ -106,6 +106,8 @@ public:
 
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

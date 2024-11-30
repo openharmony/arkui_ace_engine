@@ -88,6 +88,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/modal_ui_extension.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/xcollie/xcollieInterface.h"
@@ -2365,6 +2366,9 @@ bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: OnBackPressed called", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(Recorder::EventType::BACK_PRESSED);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {

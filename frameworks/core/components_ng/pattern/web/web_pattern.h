@@ -28,6 +28,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/common/recorder/web_event_recorder.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -106,8 +107,11 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
-class WebPattern : public NestableScrollContainer, public TextBase, public Magnifier {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier);
+class WebPattern : public NestableScrollContainer,
+                   public TextBase,
+                   public Magnifier,
+                   public Recorder::WebEventRecorder {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -709,6 +713,8 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void RecordWebEvent(bool isInit = false) override;
+    void GetPageContentAsync(const std::string& jsCode);
 
     bool IsPreviewImageNodeExist() const
     {

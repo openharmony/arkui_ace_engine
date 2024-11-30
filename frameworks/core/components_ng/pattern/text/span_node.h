@@ -233,6 +233,7 @@ public:
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
@@ -487,6 +488,11 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         spanItem_->ToJsonValue(json, filter);
+    }
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        spanItem_->ToTreeJson(json, config);
     }
 
     void RequestTextFlushDirty();

@@ -965,7 +965,6 @@ void TextPattern::HandleClickOnTextAndSpan(GestureEvent& info)
         target.area.SetHeight(Dimension(0.0f));
         spanClickinfo.SetTarget(target);
         span->onClick(spanClickinfo);
-        RecordSpanClickEvent(span);
     } else {
         ActTextOnClick(info);
     }
@@ -976,31 +975,6 @@ void TextPattern::ActTextOnClick(GestureEvent& info)
     if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
-        RecordClickEvent();
-    }
-}
-
-void TextPattern::RecordClickEvent()
-{
-    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(host->GetInspectorIdValue(""))
-            .SetType(host->GetTag())
-            .SetText(text)
-            .SetDescription(host->GetAutoEventParamValue(""));
-        Recorder::EventRecorder::Get().OnClick(std::move(builder));
-    }
-}
-
-void TextPattern::RecordSpanClickEvent(const RefPtr<SpanItem>& span)
-{
-    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-        Recorder::EventParamsBuilder builder;
-        builder.SetId(span->inspectId).SetText(UtfUtils::Str16ToStr8(span->content)).SetDescription(span->description);
-        Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
 }
 
@@ -2953,6 +2927,14 @@ std::string TextPattern::GetFontInJson() const
                    textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
     jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
     return jsonValue->ToString();
+}
+
+void TextPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    if (!json->Contains(TreeKey::CONTENT) && !textForDisplay_.empty()) {
+        json->Put(TreeKey::CONTENT, textForDisplay_.c_str());
+    }
 }
 
 void TextPattern::OnAfterModifyDone()

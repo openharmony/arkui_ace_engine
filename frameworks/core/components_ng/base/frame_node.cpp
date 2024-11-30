@@ -1163,6 +1163,33 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
 }
 
+void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    if (layoutProperty_) {
+        layoutProperty_->ToTreeJson(json, config);
+    } else {
+        LayoutProperty lp;
+        lp.ToTreeJson(json, config);
+    }
+    if (paintProperty_) {
+        paintProperty_->ToTreeJson(json, config);
+    }
+    if (pattern_) {
+        pattern_->ToTreeJson(json, config);
+    }
+    auto id = propInspectorId_.value_or("");
+    if (!id.empty()) {
+        json->Put(TreeKey::ID, id.c_str());
+    }
+    if (!config.contentOnly) {
+        auto eventHub = GetOrCreateGestureEventHub();
+        if (eventHub) {
+            json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
+            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
+        }
+    }
+}
+
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     if (renderContext_) {

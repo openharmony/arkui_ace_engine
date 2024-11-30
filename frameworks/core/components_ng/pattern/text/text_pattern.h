@@ -777,9 +777,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     void HandleClickOnTextAndSpan(GestureEvent& info);
-    void RecordClickEvent();
     void ActTextOnClick(GestureEvent& info);
-    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
@@ -939,6 +937,7 @@ private:
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);

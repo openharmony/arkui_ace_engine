@@ -454,6 +454,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/common/recorder/event_controller.cpp",
     "$ace_root/frameworks/core/common/recorder/event_recorder.cpp",
     "$ace_root/frameworks/core/common/recorder/exposure_processor.cpp",
+    "$ace_root/frameworks/core/common/recorder/inspector_tree_collector.cpp",
     "$ace_root/frameworks/core/common/recorder/node_data_cache.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",

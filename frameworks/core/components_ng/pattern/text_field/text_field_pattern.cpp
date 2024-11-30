@@ -53,6 +53,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -3188,7 +3189,35 @@ void TextFieldPattern::AddTextFireOnChange()
         }
         layoutProperty->UpdatePreviewText(previewText);
         eventHub->FireOnChange(pattern->GetBodyTextValue(), previewText);
+
+        pattern->RecordTextInputEvent();
     });
+}
+
+void TextFieldPattern::RecordTextInputEvent()
+{
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_TEXT_INPUT)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    auto isPwdType = inputType == TextInputType::VISIBLE_PASSWORD || inputType == TextInputType::NUMBER_PASSWORD ||
+                     inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
+    if (isPwdType) {
+        return;
+    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventCategory(Recorder::EventCategory::CATEGORY_TEXT_INPUT)
+        .SetEventType(Recorder::EventType::TEXT_INPUT)
+        .SetId(host->GetInspectorId().value_or(""))
+        .SetType(host->GetTag())
+        .SetText(UtfUtils::Str16ToStr8(GetBodyTextValue()))
+        .SetDescription(host->GetAutoEventParamValue(""))
+        .SetHost(host);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void TextFieldPattern::FilterInitializeText()
@@ -5077,6 +5106,7 @@ void TextFieldPattern::RecordSubmitEvent() const
     builder.SetId(inspectorId)
         .SetType(host->GetTag())
         .SetEventType(Recorder::EventType::SEARCH_SUBMIT)
+        .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     if (!isPwdType) {
         builder.SetText(contentController_->GetTextValue());
@@ -6749,6 +6779,13 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
+}
+
+void TextFieldPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    json->Put(TreeKey::CONTENT, contentController_->GetTextValue().c_str());
+    json->Put(TreeKey::PLACEHOLDER, GetPlaceHolder().c_str());
 }
 
 void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

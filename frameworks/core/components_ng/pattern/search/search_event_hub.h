@@ -50,8 +50,10 @@ public:
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
             if (host) {
-                auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
+                builder.SetId(host->GetInspectorIdValue(""))
+                    .SetType(host->GetHostTag())
+                    .SetDescription(host->GetAutoEventParamValue(""))
+                    .SetHost(host);
             }
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(UtfUtils::Str16ToStr8(value));
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
