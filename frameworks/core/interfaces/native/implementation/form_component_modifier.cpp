@@ -26,6 +26,10 @@ struct LiteralDimension {
     Dimension width;
     Dimension height;
 };
+struct FormCallbackInfo {
+    int id;
+    std::string idString;
+}
 namespace {
 const auto FORM_DIMENSION_DIMENSION_1_2 = 1;
 const auto FORM_DIMENSION_DIMENSION_2_2 = 2;
@@ -67,6 +71,19 @@ void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
         case ARK_VISIBILITY_NONE: dst = VisibleType::GONE; break;
         default: LOGE("Unexpected enum value in Ark_Visibility: %{public}d", src);
     }
+}
+template<>
+FormCallbackInfo Convert(const Ark_FormCallbackInfo& src)
+{
+    FormCallbackInfo dst;
+    dst.id = Converter::Convert<int>(src.id);
+    dst.idString = Converter::Convert<std::string>(src.idString);
+    return dst;
+}
+void AssignArkValue(Ark_FormCallbackInfo& dst, const FormCallbackInfo& src)
+{
+    dst.id = Converter::ArkValue<Ark_NUmber>(src.id);
+    dst.idString = Converter::ArkValue<Ark_String>(src.idString);
 }
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
@@ -140,11 +157,53 @@ void VisibilityImpl(Ark_NativePointer node,
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // #ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetOnAcquired(frameNode, convValue);
+
+
+
+
+//==================================
+   auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onBreakpointChange = [arkCallback = CallbackHelper(*value)](const std::string& breakpoint) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_String>(breakpoint));
+    };
+    GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(onBreakpointChange));
+
+    void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) override;
+
+//====================================================
+
+    auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+        CHECK_NULL_VOID(event);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
+        auto selectedStr = eventInfo->GetSelectedStr();
+        auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
+
+        auto year = DATE_MIN.GetYear();
+        auto month = DATE_MIN.GetMonth();
+        auto day = DATE_MIN.GetDay();
+        if (g_checkValidDateValues(sourceJson)) {
+            year = sourceJson->GetValue(YEAR)->GetInt();
+            month = sourceJson->GetValue(MONTH)->GetInt();
+            day = sourceJson->GetValue(DAY)->GetInt();
+        }
+        auto pickerDate = PickerDate(year, month, day);
+        auto result = Converter::ArkValue<Ark_Date>(pickerDate);
+        arkCallback.Invoke(result);
+    };
+    FormModelNG::SetOnAcquired(frameNode, std::move(onChange));
+   
+   
+ 
+    
+
+    // #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const Callback_Literal_Number_errcode_String_msg_Void* value)

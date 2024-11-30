@@ -52,6 +52,7 @@ public:
     static void SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
     int32_t RequestPublishFormWithSnapshot(const AAFwk::Want& want,
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg) override;
+    static void SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

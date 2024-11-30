@@ -82,4 +82,12 @@ void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleN
 }
 
 void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
+
+void FormModelNG::SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAcquired(std::move(onAcquired));
+}
 } // namespace OHOS::Ace::NG
