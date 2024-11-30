@@ -998,17 +998,15 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         func->Execute();
     };
     NG::SelectMenuParam menuParam;
-    int32_t requiredParamCount = 3;
+    const int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
         JSRef<JSObject> menuOptions = info[requiredParamCount];
         JSText::ParseMenuParam(info, menuOptions, menuParam);
         auto menuType = menuOptions->GetProperty("menuType");
         bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
-        bool bindImagePreviewMenu = isPreviewMenu
-            && responseType == NG::TextResponseType::LONG_PRESS
-            && editorType == NG::TextSpanType::IMAGE;
+        bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
         if (bindImagePreviewMenu) {
-            RichEditorModel::GetInstance()->SetImagePreviewMenuParam(buildFunc, menuParam);
+            RichEditorModel::GetInstance()->SetPreviewMenuParam(editorType, buildFunc, menuParam);
             return;
         }
     }
@@ -1252,7 +1250,7 @@ void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(2);
         JSRef<JSObject> object = objectTemplate->NewInstance();
-        object->SetProperty<std::string>("text", event.GetText());
+        object->SetProperty<std::u16string>("text", event.GetText());
         object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
         object->Wrap<NG::TextFieldCommonEvent>(&event);
         JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));

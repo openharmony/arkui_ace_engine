@@ -14,6 +14,11 @@
  */
 
 const __MovingPhotoView__ = requireInternal("multimedia.movingphotoview");
+var PixelMapFormat;
+(function (PixelMapFormat) {
+    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 0] = "RGBA_8888";
+    PixelMapFormat[PixelMapFormat["NV21"] = 1] = "NV21";
+})(PixelMapFormat || (PixelMapFormat = {}));
 
 class MovingPhotoView extends JSViewAbstract {
     static create(value) {
@@ -104,4 +109,5 @@ class MovingPhotoView extends JSViewAbstract {
 export default {
     MovingPhotoView,
     MovingPhotoViewController: __MovingPhotoView__.MovingPhotoViewController,
+    PixelMapFormat,
 };

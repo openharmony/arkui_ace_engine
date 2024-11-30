@@ -700,53 +700,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateImagePreviewParam001
- * @tc.desc: test UpdateImagePreviewParam
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, UpdateImagePreviewParam001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::function<void()> menuBuilder;
-    SelectMenuParam selectMenuParam;
-    richEditorPattern->oneStepDragParam_ =
-        std::make_shared<RichEditorPattern::OneStepDragParam>(menuBuilder, selectMenuParam);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    WeakPtr<ImageSpanNode> weakImageSpanNode(imageSpanNode);
-    WeakPtr<ImageSpanNode> anotherWeakImageSpanNode(imageSpanNode);
-    richEditorPattern->dirtyImageNodes.push(weakImageSpanNode);
-    richEditorPattern->dirtyImageNodes.push(anotherWeakImageSpanNode);
-    richEditorPattern->UpdateImagePreviewParam();
-    EXPECT_TRUE(richEditorPattern->dirtyImageNodes.empty());
-}
-
-/**
- * @tc.name: UpdateImagePreviewParam002
- * @tc.desc: test UpdateImagePreviewParam
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, UpdateImagePreviewParam002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::function<void()> menuBuilder;
-    SelectMenuParam selectMenuParam;
-    richEditorPattern->oneStepDragParam_ =
-        std::make_shared<RichEditorPattern::OneStepDragParam>(menuBuilder, selectMenuParam);
-    while (!richEditorPattern->dirtyImageNodes.empty()) {
-        richEditorPattern->dirtyImageNodes.pop();
-    }
-    richEditorPattern->UpdateImagePreviewParam();
-    EXPECT_TRUE(richEditorPattern->dirtyImageNodes.empty());
-}
-
-/**
  * @tc.name: HandleOnDragInsertStyledString001
  * @tc.desc: test HandleOnDragInsertStyledString
  * @tc.type: FUNC
@@ -1197,48 +1150,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, ShowHandles001, TestSize.Level1)
     auto selResult = info.GetSelection().resultObjects;
     richEditorPattern->ShowHandles(false);
     EXPECT_NE(selResult.size(), 1);
-}
-
-/**
- * @tc.name: EnableImageDrag001  
- * @tc.desc: Test EnableImageDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, EnableImageDrag001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(
-        V2::SPAN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    std::function<void()> test;
-    SelectMenuParam selectMenuParam;
-    richEditorPattern->oneStepDragParam_ = std::make_shared<RichEditorPattern::OneStepDragParam>(test, selectMenuParam);
-    richEditorPattern->EnableImageDrag(imageNode, true);
-    EXPECT_TRUE(imageNode->userSet_);
-}
-
-/**
- * @tc.name: SetImageSelfResponseEvent001
- * @tc.desc: Test SetImageSelfResponseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, SetImageSelfResponseEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::function<void()> test;
-    SelectMenuParam selectMenuParam;
-    richEditorPattern->oneStepDragParam_ = std::make_shared<RichEditorPattern::OneStepDragParam>(test, selectMenuParam);
-    richEditorPattern->SetImageSelfResponseEvent(false);
-    EXPECT_FALSE(richEditorPattern->isImageSelfResponseEvent_);
 }
 
 /**
@@ -1698,5 +1609,51 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     Offset point(10, 10);
     thumbnailCallback(point);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: HandleClickSelection001
+ * @tc.desc: test HandleClickSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, HandleClickSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->selectOverlay_->bindManager_.Reset();
+    OHOS::Ace::GestureEvent info;
+    EXPECT_TRUE(richEditorPattern->HandleClickSelection(info));
+}
+
+/**
+ * @tc.name: RepeatClickCaret001
+ * @tc.desc: test RepeatClickCaret
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretTwinkling_ = true;
+    Offset offset;
+    RectF lastCaretRect;
+    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, 1, lastCaretRect));
+}
+
+/**
+ * @tc.name: CloseSystemMenu001
+ * @tc.desc: test CloseSystemMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFiveNg, CloseSystemMenu001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->selectOverlay_->bindManager_.Reset();
+    richEditorPattern->CloseSystemMenu();
+    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 } // namespace OHOS::Ace::NG

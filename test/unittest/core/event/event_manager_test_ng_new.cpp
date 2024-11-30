@@ -1334,20 +1334,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest071, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventManagerTest072
- * @tc.desc: Test UpdateHoverNode
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest072, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
-    EXPECT_FALSE(eventManager->IsSkipEventNode(pageNode));
-}
-/**
  * @tc.name: EventManagerTest073
  * @tc.desc: Test AddKeyboardShortcutNode
  * @tc.type: FUNC

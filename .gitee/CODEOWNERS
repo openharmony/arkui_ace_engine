@@ -48,7 +48,7 @@ adapter/ohos/entrance/ace_viewport_config.h @arkuiframework
 adapter/ohos/entrance/BUILD.gn @arkui_architecture
 adapter/ohos/entrance/capability_registry.cpp @arkuiframework
 adapter/ohos/entrance/capability_registry.h @arkuiframework
-adapter/ohos/entrance/cj_utils/
+adapter/ohos/entrance/cj_utils/ @arkui_cj
 adapter/ohos/entrance/data_ability_helper_standard.cpp @arkuiframework
 adapter/ohos/entrance/data_ability_helper_standard.h @arkuiframework
 adapter/ohos/entrance/dialog_container.cpp @arkuipopupwindow
@@ -289,7 +289,7 @@ frameworks/base/window/foldable_window.h @arkuipopupwindow
 [Frameworks Bridge]
 frameworks/bridge/BUILD.gn @arkui_architecture
 frameworks/bridge/card_frontend/ @arkuiframework
-frameworks/bridge/cj_frontend/
+frameworks/bridge/cj_frontend/ @arkui_cj
 frameworks/bridge/codec/ @arkuiframework
 frameworks/bridge/common/accessibility/ @arkuiabilitygroup
 frameworks/bridge/common/BUILD.gn @arkui_architecture
@@ -1617,7 +1617,6 @@ frameworks/bridge/plugin_frontend/plugin_frontend.h @arkuilayout
 frameworks/bridge/test/BUILD.gn @arkui_architecture
 frameworks/bridge/test/unittest/common/pluginadapter/BUILD.gn  @arkuilayout
 frameworks/bridge/test/unittest/common/pluginadapter/plugin_adapter_test.cpp @arkuilayout
-frameworks/bridge/cj_frontend @arkui_cj
 
 [Frameworks Core Old Abilities]
 frameworks/core/accessibility/ @arkuiabilitygroup
@@ -3097,6 +3096,8 @@ test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
+test/unittest/core/pattern/test_ng.cpp @arkuiscroll
+test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkuiframework
 test/unittest/core/property/ @chenjiafeng-openharmony
 test/unittest/core/render/ @arkuiframework

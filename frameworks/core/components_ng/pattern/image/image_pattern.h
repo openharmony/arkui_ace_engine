@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/offset.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
@@ -386,6 +387,15 @@ public:
         renderedImageInfo_ = renderedImageInfo;
     }
 
+    // Sets the decoding format for the external domain.
+    // Note: Only NV21 and RGBA_8888 format is supported at this time.
+    void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
+
+    PixelFormat GetExternalDecodeFormat()
+    {
+        return externalDecodeFormat_;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -541,6 +551,7 @@ private:
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
+    PixelFormat externalDecodeFormat_ = PixelFormat::UNKNOWN;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;

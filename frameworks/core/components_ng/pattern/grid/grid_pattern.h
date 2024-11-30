@@ -53,6 +53,8 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -92,21 +94,7 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
-    {
-        auto property = GetLayoutProperty<GridLayoutProperty>();
-        if (!property) {
-            return ScopeFocusAlgorithm();
-        }
-        return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
-            [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
-                auto grid = wp.Upgrade();
-                if (grid) {
-                    nextFocusNode = grid->GetNextFocusNode(step, currFocusNode);
-                }
-            });
-    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode) override;
 
@@ -285,6 +273,7 @@ private:
     SizeF GetContentSize() const;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    WeakPtr<FocusHub> GetNextFocusSimplified(FocusStep step, const RefPtr<FocusHub>& current); // focus algo rewritten
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     std::pair<int32_t, int32_t> GetNextIndexByStep(
         int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);

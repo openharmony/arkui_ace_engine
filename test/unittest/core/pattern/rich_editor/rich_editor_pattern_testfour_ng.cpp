@@ -93,6 +93,40 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress001, TestSize.
 }
 
 /**
+ * @tc.name: HandleDoubleClickOrLongPress001
+ * @tc.desc: test HandleDoubleClickOrLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    GestureEvent info;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    PositionWithAffinity defaultPositionWithAffinity(2, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+}
+
+/**
  * @tc.name: HandleMenuCallbackOnSelectAll001
  * @tc.desc: test HandleMenuCallbackOnSelectAll
  * @tc.type: FUNC

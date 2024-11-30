@@ -3179,7 +3179,7 @@ class ArkComponent {
         if (this.nativePtr === undefined) {
           return;
         }
-        if (this.nativePtr !== -1) {
+        if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
         value.applyStageImmediately(this.nativePtr, this);
@@ -26235,6 +26235,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
+  hdrBrightness(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -26646,6 +26650,23 @@ class XComponentEnableSecureModifier extends ModifierWithKey {
   }
 }
 XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
+class XComponentHdrBrightnessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetHdrBrightness(node);
+    }
+    else {
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+XComponentHdrBrightnessModifier.identity = Symbol('xComponentHdrBrightness');
 class XComponentRenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

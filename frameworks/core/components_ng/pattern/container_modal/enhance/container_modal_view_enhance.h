@@ -24,6 +24,8 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewEnhance : public ContainerModalView {
 public:
+    static void OnContainerModalEvent(
+        RefPtr<PipelineContext> pipelineContext, const std::string& name, const std::string& value);
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
     static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);
     static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);

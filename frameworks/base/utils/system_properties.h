@@ -606,6 +606,8 @@ public:
 
     static double GetSrollableFriction();
 
+    static double GetScrollableDistance();
+
     static bool IsNeedResampleTouchPoints();
 
     static bool IsNeedSymbol();

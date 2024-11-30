@@ -56,7 +56,7 @@ void SwiperCommonTestNg::OnKeyEvent(KeyCode keyCode, KeyAction keyAction)
 {
     auto focusHub = frameNode_->GetFocusHub();
     focusHub->ProcessOnKeyEventInternal(KeyEvent(keyCode, keyAction));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -485,6 +485,7 @@ HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
 {
     CreateDefaultSwiper();
+    GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
      * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_LEFT
@@ -492,6 +493,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_RIGHT
@@ -499,6 +501,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 
 /**
@@ -512,6 +515,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent002, TestSize.Level1)
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
+    GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
 
     /**
      * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_UP
@@ -519,6 +523,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent002, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_DOWN
@@ -526,6 +531,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent002, TestSize.Level1)
      */
     OnKeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 
 /**
@@ -543,6 +549,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
     CreateSwiperItems();
     CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
+    pattern_->isVisibleArea_ = false;
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
@@ -593,6 +600,7 @@ HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
     CreateSwiperItems();
     CreateSwiperDone();
     GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
+    pattern_->isVisibleArea_ = false;
 
     /**
      * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_UP

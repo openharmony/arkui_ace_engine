@@ -211,7 +211,7 @@ public:
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
     KeyBoardAvoidMode GetKeyBoardAvoidMode();
-    bool IsIgnoreAsfeArea()
+    bool IsIgnoreSafeArea()
     {
         return ignoreSafeArea_;
     }

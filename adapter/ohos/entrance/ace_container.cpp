@@ -2365,7 +2365,9 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> void {
             return window->PerformBack();
         });
-
+    windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
+        window->OnContainerModalEvent(name, value);
+    });
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);

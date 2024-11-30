@@ -421,6 +421,7 @@ class ContentItemStruct extends ViewPU {
                 justifyContent: FlexAlign.Start,
                 alignItems: this.isColumnDirection() ? ItemAlign.Start : ItemAlign.Center,
             });
+            Flex.height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.margin({
                 end: this.isParentColumnDirection() ?
                 LengthMetrics.vp(0) :
@@ -1493,6 +1494,8 @@ export class ComposeListItem extends ViewPU {
         this.focusOutlineColor = e10.colors.interactiveFocus;
     }
     onPropChange() {
+        this.containerDirection = this.decideContainerDirection();
+        this.contentItemDirection = this.decideContentItemDirection();
         if (this.contentItem === undefined) {
             if (this.operateItem?.image !== undefined ||
                 this.operateItem?.icon !== undefined ||
@@ -1684,6 +1687,7 @@ export class ComposeListItem extends ViewPU {
         }, Stack);
         this.observeComponentCreation2((s9, t9) => {
             Flex.create(this.getFlexOptions());
+            Flex.height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.constraintSize({
                 minHeight: this.itemHeight
             });

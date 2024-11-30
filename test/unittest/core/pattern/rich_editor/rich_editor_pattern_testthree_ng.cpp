@@ -27,6 +27,7 @@ constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
 constexpr int32_t CALCLINEEND_POSITION = 0;
 constexpr int32_t PERFORM_ACTION = 1;
+constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 } // namespace
 
 class RichEditorPatternTestThreeNg : public RichEditorCommonTestNg {
@@ -1064,7 +1065,11 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
-    richEditorPattern->textForDisplay_ = "test";
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = "test";
+    spanItem->rangeStart = 0;
+    spanItem->position = 4;
+    richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
 }
@@ -1079,7 +1084,11 @@ HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     size_t index = 0;
-    richEditorPattern->textForDisplay_ = " test";
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = " test";
+    spanItem->rangeStart = 0;
+    spanItem->position = 5;
+    richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
 }
@@ -1587,5 +1596,170 @@ HWTEST_F(RichEditorPatternTestThreeNg, SetTypingStyle001, TestSize.Level0)
     auto layout = richEditorNode_->layoutProperty_;
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
     EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
+}
+
+/**
+ * @tc.name: SetResultObjectText001
+ * @tc.desc: test SetResultObjectText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, SetResultObjectText001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ResultObject resultObject;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    EXPECT_NE(spanItem, nullptr);
+    spanItem->content = "test";
+    richEditorPattern->previewTextRecord_.previewContent = "text";
+    richEditorPattern->SetResultObjectText(resultObject, spanItem);
+    EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->SetResultObjectText(resultObject, spanItem);
+    EXPECT_EQ(resultObject.previewText, richEditorPattern->previewTextRecord_.previewContent);
+}
+
+/**
+ * @tc.name: CalcMoveUpPos001
+ * @tc.desc: test CalcMoveUpPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CalcMoveUpPos001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1.0;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPosition = richEditorPattern->CalcMoveUpPos(leadingMarginOffset);
+    EXPECT_EQ(caretPosition, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: CalcMoveDownPos001
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CalcMoveDownPos001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1;
+    richEditorPattern->caretPosition_ = 0;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPositionEnd = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(caretPositionEnd, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: CalcMoveDownPos002
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, CalcMoveDownPos002, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    CaretOffsetInfo caretInfo = richEditorPattern->GetCaretOffsetInfoByPosition();
+    float leadingMarginOffset = 1;
+    richEditorPattern->caretPosition_ = 1;
+    OffsetF offset = { 20, 20 };
+    float height = 10;
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    overlayMod->SetCaretOffsetAndHeight(offset, height);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
+    auto minDet =
+        richEditorPattern->paragraphs_.minParagraphFontSize.value_or(richEditorPattern->GetTextThemeFontSize());
+    float textOffsetY = richEditorPattern->richTextRect_.GetY() + (minDet / 2.0);
+    float textOffsetDownY = caretInfo.caretOffsetLine.GetY() + caretInfo.caretHeightLine - textOffsetY;
+    Offset textOffset = Offset(caretOffsetOverlay.GetX() - richEditorPattern->richTextRect_.GetX(), textOffsetDownY);
+    auto caretPositionEnd = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(caretPositionEnd, richEditorPattern->paragraphs_.GetIndex(textOffset));
+}
+
+/**
+ * @tc.name: GetParagraphEndPosition001
+ * @tc.desc: test GetParagraphEndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, GetParagraphEndPosition001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t caretPosition = 10;
+    AddSpan(EXCEPT_VALUE);
+    auto iter = richEditorPattern->spans_.cbegin();
+    auto span = *iter;
+    ASSERT_NE(span, nullptr);
+    auto content = StringUtils::ToWstring(span->content);
+    int32_t position = span->position - static_cast<int32_t>(content.length());
+    richEditorPattern->GetParagraphEndPosition(caretPosition);
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(content.length()));
+    caretPosition = 1;
+    richEditorPattern->GetParagraphEndPosition(caretPosition);
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(content.length()));
+}
+
+/**
+ * @tc.name: HandleFocusEvent
+ * @tc.desc: test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleFocusEvent, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isOnlyRequestFocus_ = true;
+    richEditorPattern->HandleFocusEvent();
+    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
+}
+
+/**
+ * @tc.name: HandleDraggableFlag
+ * @tc.desc: test HandleDraggableFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, HandleDraggableFlag, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    richEditorPattern->HandleDraggableFlag(false);
+    EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
+}
+
+/**
+ * @tc.name: DeleteValueSetSymbolSpan001
+ * @tc.desc: test DeleteValueSetSymbolSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetSymbolSpan001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    EXPECT_NE(spanItem, nullptr);
+    RichEditorAbstractSpanResult spanResult;
+    auto result = richEditorPattern->DeleteValueSetSymbolSpan(spanItem, spanResult);
+    EXPECT_TRUE(result == SYMBOL_SPAN_LENGTH);
 }
 } // namespace OHOS::Ace::NG

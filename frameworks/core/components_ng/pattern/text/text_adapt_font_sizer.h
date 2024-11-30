@@ -48,8 +48,8 @@ public:
     template<typename T>
     bool AdaptMinFontSize(TextStyle& textStyle, T& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::u16string& content,
+        const Dimension& stepUnit, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
     {
         return false;
     }

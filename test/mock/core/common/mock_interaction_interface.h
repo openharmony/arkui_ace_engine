@@ -69,6 +69,8 @@ public:
 
     MOCK_METHOD(int32_t, UnRegisterCoordinationListener, (), (override));
 
+    MOCK_METHOD(int32_t, SetDraggableState, (bool state), (override));
+
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;

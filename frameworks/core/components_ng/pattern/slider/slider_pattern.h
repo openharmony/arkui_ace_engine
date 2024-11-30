@@ -236,6 +236,7 @@ private:
     void UpdateToValidValue();
     void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
+    bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();

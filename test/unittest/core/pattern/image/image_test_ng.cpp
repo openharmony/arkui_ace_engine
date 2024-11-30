@@ -1914,6 +1914,7 @@ HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level1)
     image.ResetImage();
     EXPECT_EQ(imagePattern->needLoadAlt_, true);
 }
+
  /* @tc.name: TestSetBorderRadius001
  * @tc.desc: Test SetBorderRadius
  * @tc.type: FUNC
@@ -1928,7 +1929,6 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level1)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.isImageSpan = true;
     imageModel.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1948,9 +1948,10 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level1)
      */
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), Dimension(RADIUS_DEFAULT));
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), Dimension(RADIUS_DEFAULT));
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopStart.value(), Dimension(RADIUS_DEFAULT));
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopEnd.value(), Dimension(RADIUS_DEFAULT));
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), Dimension(RADIUS_DEFAULT));
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), Dimension(RADIUS_DEFAULT));
 }
+
 /**
  * @tc.name: TestSetBorderRadius002
  * @tc.desc: Test SetBorderRadius
@@ -1966,7 +1967,6 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level1)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.isImageSpan = true;
     imageModel.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1989,8 +1989,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level1)
      */
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopStart.value(), bottomLeft);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopEnd.value(), bottomRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
 }
 
 /**
@@ -2008,7 +2008,6 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.isImageSpan = true;
     imageModel.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2020,10 +2019,10 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
     /**
      * @tc.steps: step2. set image border radius
      */
-    auto topLeft = Dimension(RADIUS_DEFAULT);
-    auto topRight = Dimension(RADIUS_DEFAULT);
-    auto bottomLeft = Dimension(30.0);
-    auto bottomRight = Dimension(30.0);
+    auto topLeft = Dimension(40.0);
+    auto topRight = Dimension(40.0);
+    auto bottomLeft = Dimension(RADIUS_DEFAULT);
+    auto bottomRight = Dimension(RADIUS_DEFAULT);
     imageModel.SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
 
     /**
@@ -2031,8 +2030,8 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
      */
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopStart.value(), bottomLeft);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopEnd.value(), bottomRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
 }
 /**
  * @tc.name: TestSetBorderRadius003
@@ -2049,7 +2048,6 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
     ImageInfoConfig imageInfoConfig;
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
-    imageInfoConfig.isImageSpan = true;
     imageModel.Create(imageInfoConfig, pixMap);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -2078,7 +2076,7 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
      */
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
     EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopStart.value(), bottomLeft);
-    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopEnd.value(), bottomRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
 }
 } // namespace OHOS::Ace::NG

@@ -1390,6 +1390,13 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
     return result;
 }
 
+bool WebDelegate::IsCurrentFocus()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->IsCurrentFocus();
+}
+
 void WebDelegate::SearchAllAsync(const std::string& searchStr)
 {
     auto context = context_.Upgrade();
@@ -7368,5 +7375,15 @@ void WebDelegate::SetTransformHint(uint32_t rotation)
     if (nweb_) {
         nweb_->SetTransformHint(rotation);
     }
+}
+
+void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->ScaleGestureChangeV2(type, scale, originScale, centerX, centerY);
+    }
+#endif
 }
 } // namespace OHOS::Ace

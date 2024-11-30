@@ -303,8 +303,8 @@ abstract class ViewPU extends PUV2ViewBase
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
-      this.isActive_ = active;
-      if (this.isActive_) {
+      this.setActiveCount(active);
+      if (this.isViewActive()) {
         this.onActiveInternal();
       } else {
         this.onInactiveInternal();
@@ -320,7 +320,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private onActiveInternal(): void {
-    if (!this.isActive_) {
+    if (!this.isViewActive()) {
       return;
     }
 
@@ -332,7 +332,7 @@ abstract class ViewPU extends PUV2ViewBase
 
 
   private onInactiveInternal(): void {
-    if (this.isActive_) {
+    if (this.isViewActive()) {
       return;
     }
 
@@ -881,7 +881,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__)) {
+          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
             child.aboutToRecycleInternal();
           }
         } else {

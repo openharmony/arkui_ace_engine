@@ -178,7 +178,7 @@ HWTEST_F(TextFieldPatternTestThree, SetPreviewTextOperation001, TestSize.Level0)
     EXPECT_TRUE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 
-    pattern_->InitEditingValueText("");
+    pattern_->InitEditingValueText(u"");
     EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
@@ -552,7 +552,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
     auto contentController = pattern_->GetTextContentController();
-    auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
+    auto sentenceContent = StringUtils::Str16ToStr8(contentController->GetSelectedValue(0, spanStr->GetLength()));
     ASSERT_EQ(sentenceContent, spanStr->GetString());
 }
 

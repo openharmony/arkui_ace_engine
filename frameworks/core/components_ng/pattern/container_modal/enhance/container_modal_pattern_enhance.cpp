@@ -239,10 +239,12 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
         pattern->SetTapGestureEvent(customTitleRow);
         pattern->SetTapGestureEvent(gestureRow);
+        pattern->SetTapGestureEvent(floatingTitleRow);
         AddPanEvent(customTitleRow);
         AddPanEvent(gestureRow);
         EventHubOnModifyDone(customTitleRow);
         EventHubOnModifyDone(gestureRow);
+        EventHubOnModifyDone(floatingTitleRow);
     }
     
     UpdateGestureRowVisible();
@@ -337,6 +339,19 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_VISIBILITY, hideMaximize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MINIMIZE_VISIBILITY, hideMinimize);
     controlButtonsNode->FireCustomCallback(EVENT_NAME_CLOSE_VISIBILITY, hideClose);
+}
+
+void ContainerModalPatternEnhance::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+    uint32_t closeButtonRightMargin, int32_t colorMode)
+{
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE, std::to_string(spacingBetweenButtons));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
+        std::to_string(closeButtonRightMargin));
+    CallButtonsRectChange();
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -817,6 +832,22 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     }
 }
 
+void ContainerModalPatternEnhance::CallContainerModalNative(const std::string& name, const std::string& value)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallContainerModalNative name = %{public}s , value = %{public}s", name.c_str(),
+        value.c_str());
+    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    CHECK_NULL_VOID(windowManager);
+    windowManager->FireWindowCallNativeCallback(name, value);
+}
+
+void ContainerModalPatternEnhance::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    auto controlButtonsNode = GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(name, value);
+}
+
 CalcLength ContainerModalPatternEnhance::GetControlButtonRowWidth()
 {
     auto buttonRow = GetButtonRowByInspectorId();
@@ -833,6 +864,15 @@ bool ContainerModalPatternEnhance::GetContainerModalButtonsRect(RectF& container
     containerModal = columnRect;
     if (columnRect.Width() == 0) {
         TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    auto controlButtonsNode = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonsNode, false);
+    auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonsLayoutProperty, false);
+    if (controlButtonsLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttonRow are hidden");
         return false;
     }
 

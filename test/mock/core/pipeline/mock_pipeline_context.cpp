@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
 
@@ -99,7 +98,8 @@ public:
     MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
-        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override {}
+        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
+    {}
     void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override {}
     void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override
@@ -136,7 +136,6 @@ static Rect windowRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
-uint64_t UITaskScheduler::frameId_ = 0;
 
 // mock_pipeline_context =======================================================
 void MockPipelineContext::SetUp()
@@ -187,9 +186,7 @@ float PipelineContext::GetCurrentRootWidth()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
 }
 
-void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener)
-{
-}
+void PipelineContext::RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener) {}
 
 float PipelineContext::GetCurrentRootHeight()
 {
@@ -411,7 +408,19 @@ void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
 
-void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation) {}
+void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
+{
+    if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        return;
+    }
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& dirtyNode : dirtyPropertyNodes) {
+        dirtyNode->ProcessPropertyDiff();
+    }
+    taskScheduler_->FlushTask();
+    taskScheduler_->FlushAfterRenderTask();
+}
 
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask() {}
 
@@ -441,8 +450,8 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
-    const bool supportAvoidance, bool forceChange)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
@@ -481,6 +490,9 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
+
+void PipelineContext::SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+    uint32_t closeButtonRightMargin, int32_t isDarkMode) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -533,11 +545,6 @@ void PipelineContext::RemoveScheduleTask(uint32_t id) {}
 
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
-{
-    return false;
-}
-
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
     return false;
@@ -566,18 +573,21 @@ void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
 
-// core/pipeline_ng/pipeline_context.h depends on the specific impl
-void UITaskScheduler::FlushTaskWithCheck(bool triggeredByImplicitAnimation) {}
-
-UITaskScheduler::UITaskScheduler() {}
-
-UITaskScheduler::~UITaskScheduler() = default;
-
-void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddDirtyLayoutNode(dirty);
+    }
+}
 
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode) {}
 
-void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
+void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
+{
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddDirtyRenderNode(dirty);
+    }
+}
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 {
@@ -591,7 +601,9 @@ void PipelineContext::AddPredictTask(PredictTask&& task)
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
-    if (task) {
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
+    } else if (task) {
         task();
     }
 }
@@ -609,7 +621,9 @@ void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
-    if (task) {
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        taskScheduler_->AddAfterRenderTask(std::move(task));
+    } else if (task) {
         task();
     }
 }
@@ -902,8 +916,8 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
-    const bool supportAvoidance, bool forceChange)
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
+    bool forceChange)
 {}
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
@@ -1090,9 +1104,7 @@ void SetBoolStatus(bool value)
     g_setBoolStatus = value;
 }
 
-void NG::PipelineContext::DumpUIExt() const
-{
-}
+void NG::PipelineContext::DumpUIExt() const {}
 
 void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
 
@@ -1110,7 +1122,7 @@ bool NG::PipelineContext::GetContainerCustomTitleVisible()
     return false;
 }
 
-bool NG::PipelineContext::GetContainerControlButtonVisible() 
+bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }

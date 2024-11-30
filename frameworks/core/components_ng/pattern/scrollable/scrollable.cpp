@@ -133,8 +133,12 @@ void Scrollable::InitPanRecognizerNG()
 {
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    double distance = SystemProperties::GetScrollableDistance();
+    if (LessOrEqual(distance, 0.0)) {
+        distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    }
     panRecognizerNG_ =
-        AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+        AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distance);
     panRecognizerNG_->SetIsAllowMouse(false);
     SetOnActionStart();
     SetOnActionUpdate();
@@ -795,7 +799,7 @@ void Scrollable::ProcessListSnapMotion(double position)
         }
     }
     currentPos_ = position;
-    if (outBoundaryCallback_ && outBoundaryCallback_() && state_ == AnimationState::SNAP) {
+    if (canOverScroll_ && state_ == AnimationState::SNAP) {
         scrollPause_ = true;
         skipRestartSpring_ = true;
         MarkNeedFlushAnimationStartTime();

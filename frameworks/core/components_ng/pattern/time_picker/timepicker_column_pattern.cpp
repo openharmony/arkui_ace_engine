@@ -471,7 +471,8 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
-    for (uint32_t index = 0; index < showOptionCount; index++) {
+    auto actualOptionCount = showOptionCount < child.size() ? showOptionCount : child.size();
+    for (uint32_t index = 0; index < actualOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);

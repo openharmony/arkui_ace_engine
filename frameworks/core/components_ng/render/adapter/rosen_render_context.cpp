@@ -4907,6 +4907,14 @@ void RosenRenderContext::SetSecurityLayer(bool isSecure)
     rsSurfaceNode->SetSecurityLayer(isSecure);
 }
 
+void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHDRBrightness(hdrBrightness);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);

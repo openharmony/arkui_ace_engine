@@ -712,6 +712,8 @@ public:
     void BeforeCreateLayoutWrapper() override;
     bool isHalfFoldStatus_ = false;
 
+    void RecordItemsAndGroups();
+
     const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
     {
         return itemsAndGroups_;
@@ -723,8 +725,6 @@ private:
     uint32_t FindSiblingMenuCount();
     void ApplyDesktopMenuTheme();
     void ApplyMultiMenuTheme();
-
-    void RecordItemsAndGroups();
 
     // Record menu's items and groups at first level,
     // use for group header and footer padding

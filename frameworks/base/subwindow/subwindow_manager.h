@@ -20,6 +20,7 @@
 #include <set>
 #include <unordered_map>
 #include <array>
+#include <functional>
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
@@ -31,7 +32,33 @@
 
 namespace OHOS::Ace {
 
+struct SubwindowKey {
+    int32_t instanceId;
+    uint64_t displayId;
+
+    bool operator==(const SubwindowKey& other) const
+    {
+        return other.instanceId == instanceId && other.displayId == displayId;
+    }
+
+    std::string ToString() const
+    {
+        auto json = JsonUtil::Create(true);
+        json->Put("instanceId", instanceId);
+        json->Put("displayId", (double)displayId);
+        return json->ToString();
+    }
+};
+
+struct SubwindowKeyHashFunc {
+    std::size_t operator()(const SubwindowKey& key) const
+    {
+        return ((std::hash<uint64_t>()(key.instanceId) ^ (std::hash<uint64_t>()(key.displayId) << 1)) >> 1);
+    }
+};
+
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
+using SubwindowMixMap = std::unordered_map<SubwindowKey, RefPtr<Subwindow>, SubwindowKeyHashFunc>;
 
 class ACE_EXPORT SubwindowManager final : public NonCopyable {
 public:
@@ -148,6 +175,7 @@ private:
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
+    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -159,18 +187,18 @@ private:
 
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
-    SubwindowMap subwindowMap_;
+    SubwindowMixMap subwindowMap_;
     static thread_local RefPtr<Subwindow> currentSubwindow_;
 
     std::mutex toastMutex_;
-    SubwindowMap toastWindowMap_;
+    SubwindowMixMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
     std::mutex systemToastMutex_;
-    SubwindowMap systemToastWindowMap_;
+    SubwindowMixMap systemToastWindowMap_;
     Rect uiExtensionWindowRect_;
 };
 

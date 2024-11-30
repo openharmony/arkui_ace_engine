@@ -62,6 +62,7 @@ public:
     {
         CHECK_NULL_VOID(radioModifier_);
         auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         bool checked = false;
         if (paintProperty->HasRadioCheck()) {
             checked = paintProperty->GetRadioCheckValue();

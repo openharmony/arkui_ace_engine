@@ -32,7 +32,7 @@ HWTEST_F(GridLayoutRangeTest, SolveForward001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo2());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -109,7 +109,7 @@ HWTEST_F(GridLayoutRangeTest, CheckMultiRow001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(option);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -154,7 +154,7 @@ HWTEST_F(GridLayoutRangeTest, SolveBackward001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(option);
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -200,7 +200,7 @@ HWTEST_F(GridLayoutRangeTest, SolveBackward002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo10());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -244,7 +244,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo12());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -279,7 +279,7 @@ HWTEST_F(GridLayoutRangeTest, SolveOverScroll002, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo12());
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -315,14 +315,14 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 10.0f });
-    constexpr float itemHeight = 500.0f;
+    constexpr float itemHeight = 250.0f;
     CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
     CreateFixedHeightItems(1, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
     CreateFixedHeightItems(19, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(88, false);
@@ -347,14 +347,14 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 10.0f });
-    constexpr float itemHeight = 300.0f;
+    constexpr float itemHeight = 150.0f;
     CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
     CreateFixedHeightItems(1, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 2 + 10.0f);
     CreateFixedHeightItems(19, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 6 + 50.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     const auto& info = pattern_->info_;
 
     pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
@@ -364,7 +364,7 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
     for (int i = info.startIndex_; i <= info.endIndex_; ++i) {
         EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
     }
-    EXPECT_EQ(GetChildY(frameNode_, 22), -525.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 22), -275.0f);
 }
 
 /**
@@ -377,7 +377,7 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions({});
-    CreateDone(frameNode_);
+    CreateDone();
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
@@ -408,7 +408,7 @@ HWTEST_F(GridLayoutRangeTest, Horizontal001, TestSize.Level1)
     CreateFixedWidthItems(1, 300.0f);
     CreateFixedWidthItems(20, 605.0f);
     CreateFixedWidthItems(8, 300.0f);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     UpdateCurrentOffset(FLT_MAX);
@@ -432,12 +432,12 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 790.0f;
+    constexpr float itemHeight = 390;
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(7, itemHeight);
-    CreateFixedHeightItems(1, 200.0f);
-    CreateDone(frameNode_);
+    CreateFixedHeightItems(1, 100);
+    CreateDone();
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -479,11 +479,11 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 300.0f;
+    constexpr float itemHeight = 150.0f;
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -497,7 +497,7 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     for (int i = 85; i <= 93; ++i) {
         EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
     }
-    EXPECT_EQ(GetChildY(frameNode_, 91), 520.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 91), 270.0f);
 }
 
 /**
@@ -512,11 +512,11 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 790.0f;
+    constexpr float itemHeight = 390.0f;
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(23, true);
     EXPECT_EQ(pattern_->targetIndex_, 23);
     FlushLayoutTask(frameNode_);
@@ -533,7 +533,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
         }
         EXPECT_TRUE(found);
     }
-    EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 11350.0f);
+    EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 5750.0f);
 }
 
 /**
@@ -548,11 +548,11 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 300.0f;
+    constexpr float itemHeight = 150.0f;
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -585,13 +585,13 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
  */
 HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
 {
-    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 100; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetLayoutOptions({});
     model.SetCachedCount(2); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
     EXPECT_EQ(frameNode_->GetChildren().size(), 1);
     const auto& info = pattern_->info_;
@@ -608,7 +608,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
         EXPECT_EQ(GetChildWidth(frameNode_, i), itemWidth);
-        EXPECT_EQ(GetChildHeight(frameNode_, i), 200.0f);
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100);
     }
 
     // re-layout to trigger cache item layout
@@ -620,12 +620,12 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 16), itemWidth + 10.0f);
     EXPECT_EQ(GetChildX(frameNode_, 17), (itemWidth + 10.0f) * 2);
-    EXPECT_EQ(GetChildY(frameNode_, 12), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 13), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 14), 840.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 15), 1050.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), 1050.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 17), 1050.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 440.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 440.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 440.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 550.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 550.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), 550.0f);
     pattern_->ScrollToIndex(49);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
@@ -646,19 +646,19 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
 {
     GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) {
         if (idx == 0 || idx == 2) {
-            return 410.0f;
+            return 210.0f;
         }
         if (idx == 22) {
-            return 1250.0f;
+            return 650.0f;
         }
-        return 200.0f;
+        return 100.0f;
     });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetCachedCount(3); // 2 lines
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollToIndex(20, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     const auto& info = pattern_->info_;
@@ -671,17 +671,17 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     }
     CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    EXPECT_EQ(GetChildHeight(frameNode_, 22), 1250.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 22), 650.0f);
 
     // re-layout to trigger cache item layout
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 8), -240.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 7), -240.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 6), -240.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 22), 810.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 23), 1020.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 24), 1230.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 8), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 6), -140.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 22), 410.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 23), 520.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 24), 630.0f);
 }
 
 /**
@@ -693,16 +693,16 @@ HWTEST_F(GridLayoutRangeTest, Cache003, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetRowsGap(Dimension(10));
+    model.SetRowsGap(Dimension(5));
     model.SetCachedCount(1);
     model.SetLayoutOptions({});
-    CreateLazyForEachItems(50, [](uint32_t idx) { return 100.0f; });
+    CreateLazyForEachItems(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
     frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 23);
-    UpdateCurrentOffset(-400.0f);
+    UpdateCurrentOffset(-200.0f);
     EXPECT_EQ(pattern_->info_.startIndex_, 9);
     EXPECT_EQ(pattern_->info_.endIndex_, 32);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
@@ -710,7 +710,7 @@ HWTEST_F(GridLayoutRangeTest, Cache003, TestSize.Level1)
     EXPECT_FALSE(GetItem(5, true));
     EXPECT_EQ(GetItem(7, true)->GetLayoutProperty()->GetPropertyChangeFlag(), 0);
 
-    UpdateCurrentOffset(110.0f);
+    UpdateCurrentOffset(60.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(pattern_->info_.startIndex_, 6);
     ASSERT_TRUE(GetItem(5, true));
@@ -736,19 +736,19 @@ HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
     model.SetColumnsGap(Dimension { 10.0f });
     model.SetRowsGap(Dimension { 20.0f });
     model.SetEditable(true);
-    constexpr float itemHeight = 300.0f;
+    constexpr float itemHeight = 150.0f;
     CreateFixedHeightItems(22, itemHeight);
     CreateFixedHeightItems(1, itemHeight * 5 + 100.0f);
     CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
+    CreateDone();
 
     pattern_->ScrollToIndex(21, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 2)->IsActive());
-    EXPECT_EQ(GetChildY(frameNode_, 2), 640.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 24), 640.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 340.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 24), 340.0f);
     GestureEvent event;
-    event.SetGlobalPoint(Point(5.0f, 650.0f));
+    event.SetGlobalPoint(Point(5.0f, 350.0f));
     eventHub_->HandleOnItemDragStart(event);
     EXPECT_EQ(eventHub_->draggedIndex_, 24);
 }
@@ -782,14 +782,14 @@ HWTEST_F(GridLayoutRangeTest, ScrollEnabled001, TestSize.Level1)
  */
 HWTEST_F(GridLayoutRangeTest, Focus001, TestSize.Level1)
 {
-    auto model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    auto model = CreateRepeatGrid(50, [](uint32_t idx) { return 100; });
     model.SetColumnsTemplate("1fr 1fr 1fr");
     const auto options = GetOptionDemo14();
     model.SetLayoutOptions(options);
     model.SetCachedCount(1);
     CreateDone();
     for (int i = 0; i < 10; ++i) {
-        UpdateCurrentOffset(-200.0f);
+        UpdateCurrentOffset(-100);
         for (int i = pattern_->info_.startIndex_; i <= pattern_->info_.endIndex_; ++i) {
             bool hasInfo = GetChildPattern<GridItemPattern>(frameNode_, i)->GetIrregularItemInfo().has_value();
             if (options.irregularIndexes.count(i)) {
@@ -798,6 +798,50 @@ HWTEST_F(GridLayoutRangeTest, Focus001, TestSize.Level1)
                 EXPECT_FALSE(hasInfo);
             }
         }
+    }
+}
+
+/**
+ * @tc.name: Focus002
+ * @tc.desc: Test Grid changing focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
+{
+    auto model = CreateRepeatGrid(50, [](uint32_t idx) {
+        if (idx == 0 || idx == 2) {
+            return 400.0f;
+        }
+        if (idx == 22) {
+            return 1200.0f;
+        }
+        return 200.0f;
+    });
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    const auto options = GetOptionDemo14();
+    model.SetLayoutOptions(options);
+    model.SetCachedCount(1);
+    CreateDone();
+    frameNode_->AttachToMainTree(false, PipelineContext::GetCurrentContextPtrSafely());
+
+    auto algo = pattern_->GetScopeFocusAlgorithm();
+    auto curFocus = GetChildFocusHub(frameNode_, 0);
+    EXPECT_TRUE(curFocus->IsFocusable());
+    for (int i = 1; i < 50; ++i) {
+        WeakPtr<FocusHub> next;
+        algo.getNextFocusNode(FocusStep::TAB, curFocus, next);
+        ASSERT_TRUE(next.Upgrade());
+        EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
+        EXPECT_EQ(pattern_->focusIndex_, i);
+        curFocus = next.Upgrade();
+    }
+    for (int i = 48; i >= 0; --i) {
+        WeakPtr<FocusHub> next;
+        algo.getNextFocusNode(FocusStep::SHIFT_TAB, curFocus, next);
+        ASSERT_TRUE(next.Upgrade());
+        EXPECT_EQ(i, frameNode_->GetChildTrueIndex(next.Upgrade()->GetFrameNode()));
+        EXPECT_EQ(pattern_->focusIndex_, i);
+        curFocus = next.Upgrade();
     }
 }
 } // namespace OHOS::Ace::NG

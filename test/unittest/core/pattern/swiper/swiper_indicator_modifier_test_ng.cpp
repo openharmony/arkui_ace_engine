@@ -1026,7 +1026,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
@@ -1061,7 +1061,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();

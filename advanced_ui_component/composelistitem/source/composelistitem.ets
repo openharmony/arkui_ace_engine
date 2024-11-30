@@ -251,6 +251,7 @@ struct ContentItemStruct {
       this.createIcon()
       this.createText()
     }
+    .height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined)
     .margin({
       end: this.isParentColumnDirection() ?
       LengthMetrics.vp(0) :
@@ -709,6 +710,8 @@ export struct ComposeListItem {
   }
 
   onPropChange() {
+    this.containerDirection = this.decideContainerDirection();
+    this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
         this.operateItem?.icon !== undefined ||
@@ -943,6 +946,7 @@ export struct ComposeListItem {
             }).padding({start: this.getOperateOffset()});
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })

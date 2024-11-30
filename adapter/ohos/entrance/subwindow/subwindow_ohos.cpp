@@ -218,7 +218,10 @@ bool SubwindowOhos::InitContainer()
             windowOption->SetParentId(parentWindowId);
             isAppSubwindow = true;
         }
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        auto displayId = parentContainer->GetCurrentDisplayId();
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
         if (!defaultDisplay) {
             TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager GetDefaultDisplay failed");
             return false;
@@ -226,9 +229,6 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
-        auto displayId = parentWindow->GetDisplayId();
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-            "The display id obtained from parent window is %{public}u", (uint32_t)displayId);
         windowOption->SetDisplayId(displayId);
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext());
@@ -390,9 +390,10 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
 
 void SubwindowOhos::ResizeWindow()
 {
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_VOID(defaultDisplay);
     CHECK_NULL_VOID(window_);
+    auto displayId = window_->GetDisplayId();
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    CHECK_NULL_VOID(defaultDisplay);
     auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
@@ -1973,5 +1974,13 @@ void SubwindowOhos::DestroyWindow()
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to destroy the dialog subwindow.");
         return;
     }
+}
+
+uint64_t SubwindowOhos::GetDisplayId()
+{
+    if (window_) {
+        return window_->GetDisplayId();
+    }
+    return 0;
 }
 } // namespace OHOS::Ace

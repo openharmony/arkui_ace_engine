@@ -285,7 +285,7 @@ HWTEST_F(TabsEventTestNg, HandleClick001, TestSize.Level1)
     info.SetSourceDevice(SourceType::KEYBOARD);
     tabBarPattern_->HandleClick(info.GetSourceDevice(), 1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -731,7 +731,7 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest003, TestSize.Level1)
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     model.Pop();
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. callback.
@@ -804,7 +804,7 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest004, TestSize.Level1)
      */
     swiperController_->SwipeTo(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isShow, 2);
 
     /**
@@ -813,7 +813,7 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest004, TestSize.Level1)
      */
     swiperController_->SwipeTo(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isShow, 8);
 }
 
@@ -859,7 +859,7 @@ HWTEST_F(TabsEventTestNg, SetOnContentWillChangeTest005, TestSize.Level1)
      */
     swiperController_->SwipeTo(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(isShow, 9);
 }
 
@@ -1330,7 +1330,7 @@ HWTEST_F(TabsEventTestNg, SetOnIndexChangeEvent003, TestSize.Level1)
     CreateTabsDone(model);
 
     tabBarPattern_->SetMaskAnimationExecuted(true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
 
     HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
@@ -1419,7 +1419,7 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent003, TestSize.Level1)
      * @tc.expected: Event was not triggered
      */
     tabBarPattern_->SetMaskAnimationExecuted(true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->IsMaskAnimationExecuted());
 
     SwipeToWithoutAnimation(1);
@@ -1454,7 +1454,7 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
     UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(func);
 
     swiperController_->SwipeTo(1);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(nullptr);
 }
 } // namespace OHOS::Ace::NG

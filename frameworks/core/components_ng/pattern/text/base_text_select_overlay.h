@@ -270,6 +270,8 @@ public:
     }
     bool IsHiddenHandle();
 
+    bool IsHandleVisible(bool isFirst);
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);

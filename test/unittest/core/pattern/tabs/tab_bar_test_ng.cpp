@@ -419,7 +419,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->UpdateIndicator(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 }
 

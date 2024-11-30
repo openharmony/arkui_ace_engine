@@ -173,7 +173,6 @@ public:
 #endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override;
     bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // ReDispatch KeyEvent from Web process.
@@ -488,7 +487,7 @@ public:
 
     bool IsTabJustTriggerOnKeyEvent() const
     {
-        return isTabJustTriggerOnKeyEvent_;
+        return eventManager_->IsTabJustTriggerOnKeyEvent();
     }
 
     bool GetOnShow() const override
@@ -790,11 +789,12 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
+    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t isDarkMode) override;
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
 
     const SerializedGesture& GetSerializedGesture() const override;
@@ -1062,12 +1062,6 @@ private:
 
     void InspectDrew();
 
-    bool TriggerKeyEventDispatch(const KeyEvent& event);
-
-    bool DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView);
-
-    bool IsSkipShortcutAndFocusMove();
-
     void FlushBuildFinishCallbacks();
 
     void DumpPipelineInfo() const;
@@ -1112,6 +1106,9 @@ private:
         {
             if (!nodeLeft || !nodeRight) {
                 return false;
+            }
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+                return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1204,7 +1201,6 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
-    bool isTabJustTriggerOnKeyEvent_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;

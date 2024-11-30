@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "base/utils/utf_helper.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -116,43 +118,38 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     return true;
 }
 
-void ProcessStringUnpairedSurrogates(std::optional<std::string>& value)
+void HandleTextFieldInvalidUTF16(std::optional<std::u16string>& str)
 {
-    if (!value.has_value()) {
-        return;
+    if (str.has_value()) {
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(str.value().data()), str.value().length(), 0);
     }
-    std::u16string temp = StringUtils::Str8ToStr16(value.value());
-    std::string result(value.value().c_str());
-    if (temp.length() == 0 && result.length() != 0) {
-        result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(result);
-    }
-    value = result;
 }
+
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    JsEventCallback<void(const std::string&)> onChangeEvent(
+    JsEventCallback<void(const std::u16string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
-    std::optional<std::string> placeholderSrc;
-    std::optional<std::string> value;
+    std::optional<std::u16string> placeholderSrc;
+    std::optional<std::u16string> value;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
-        std::string placeholder;
+        std::u16string placeholder;
         if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
             placeholderSrc = placeholder;
         }
-        std::string text;
+        std::u16string text;
         JSRef<JSVal> textValue = paramObject->GetProperty("text");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
@@ -160,7 +157,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
-            value = "";
+            value = u"";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -169,7 +166,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
                 value = text;
             }
             if (textValue->IsUndefined()) {
-                value = "";
+                value = u"";
             }
         }
         auto controllerObj = paramObject->GetProperty("controller");
@@ -177,9 +174,8 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-
-    ProcessStringUnpairedSurrogates(placeholderSrc);
-    ProcessStringUnpairedSurrogates(value);
+    HandleTextFieldInvalidUTF16(placeholderSrc);
+    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -193,18 +189,18 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 
 void JSTextField::CreateTextArea(const JSCallbackInfo& info)
 {
-    std::optional<std::string> placeholderSrc;
-    std::optional<std::string> value;
+    std::optional<std::u16string> placeholderSrc;
+    std::optional<std::u16string> value;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(jsValue);
-        std::string placeholder;
+        std::u16string placeholder;
         if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
             placeholderSrc = placeholder;
         }
-        std::string text;
+        std::u16string text;
         JSRef<JSVal> textValue = paramObject->GetProperty("text");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
@@ -220,7 +216,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
                 value = text;
             }
             if (textValue->IsUndefined()) {
-                value = "";
+                value = u"";
             }
         }
         auto controllerObj = paramObject->GetProperty("controller");
@@ -228,9 +224,8 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-
-    ProcessStringUnpairedSurrogates(placeholderSrc);
-    ProcessStringUnpairedSurrogates(value);
+    HandleTextFieldInvalidUTF16(placeholderSrc);
+    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -636,7 +631,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                            const std::string& info) {
+                            const std::u16string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(info);
@@ -1053,7 +1048,7 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(2);
         JSRef<JSObject> object = objectTemplate->NewInstance();
-        object->SetProperty<std::string>("text", event.GetText());
+        object->SetProperty<std::u16string>("text", event.GetText());
         object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
         object->Wrap<NG::TextFieldCommonEvent>(&event);
         JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
@@ -1087,7 +1082,7 @@ JSRef<JSVal> JSTextField::CreateJsOnChangeObj(const PreviewText& previewText)
 {
     JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
     previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
-    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    previewTextObj->SetProperty<std::u16string>("value", previewText.value);
     return JSRef<JSVal>::Cast(previewTextObj);
 }
 
@@ -1098,7 +1093,7 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
     auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
         JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::string& val, PreviewText& previewText) {
+        const std::u16string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
         func->Execute(val, previewText);
@@ -1134,7 +1129,7 @@ void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
@@ -1142,7 +1137,7 @@ void JSTextField::SetOnCut(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
@@ -1164,7 +1159,7 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JSRef<JSFunc>::Cast(jsValue), CreateJSTextCommonEvent);
 
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
-        const std::string& val, NG::TextCommonEvent& info) {
+        const std::u16string& val, NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
@@ -1357,7 +1352,7 @@ void JSTextField::SetShowError(const JSCallbackInfo& info)
     auto jsValue = info[0];
     if (Container::IsCurrentUseNewPipeline()) {
         bool isVisible = false;
-        std::string errorText;
+        std::u16string errorText;
         if (ParseJsString(jsValue, errorText)) {
             isVisible = true;
         }
@@ -1806,11 +1801,11 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
-        auto tmpInfo = info[0];
-        int32_t overflow = 0;
         if (info.Length() < 1) {
             break;
         }
+        auto tmpInfo = info[0];
+        int32_t overflow = 0;
         if (tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsNumber()) {
             overflow = DEFAULT_OVERFLOW;
         } else if (tmpInfo->IsNumber()) {
@@ -1838,7 +1833,7 @@ JSRef<JSVal> JSTextField::CreateJsAboutToIMEInputObj(const InsertValueInfo& inse
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
-    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("insertValue", insertValue.insertValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -1865,7 +1860,7 @@ JSRef<JSVal> JSTextField::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteVa
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
     aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
-    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("deleteValue", deleteValueInfo.deleteValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 

@@ -190,10 +190,6 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    virtual bool OnKeyEvent(const KeyEvent& event) = 0;
-
-    // Called by container when key event received.
-    // if return false, then this event needs platform to handle it.
     virtual bool OnNonPointerEvent(const NonPointerEvent& event) = 0;
 
     // Called by view when mouse event received.
@@ -389,6 +385,9 @@ public:
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
+
+    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode){};
 
     virtual void EnableContainerModalGesture(bool isEnable) {}
 
