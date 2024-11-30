@@ -40,11 +40,6 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     DetachRenderContext();
 }
 
-void CanvasPattern::OnDetachFromMainTree()
-{
-    DetachRenderContext();
-}
-
 void CanvasPattern::AttachRenderContext()
 {
     if (!isAttached_) {
