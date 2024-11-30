@@ -372,6 +372,9 @@ void CalendarDialogPattern::InitOnTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->HandleEntryNodeTouchEvent(true, info.GetTouches().front().GetGlobalLocation());
             if (!pattern->isFocused_) {
