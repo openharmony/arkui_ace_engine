@@ -178,6 +178,9 @@ void ToggleButtonPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             buttonPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }
