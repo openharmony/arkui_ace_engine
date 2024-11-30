@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import os
-import sys
 import time
 import json
 import stat
@@ -82,22 +81,17 @@ def run_single_test(tests_path, test_suite_name):
         print("TestSuite {} did not compile successfully.".format(test_suite_name))
 
 
-def run_tests_parallel(test_directory, path, output):
+def run_tests_parallel(test_directory):
     """
     Run all gtest test binaries in parallel.
     """
     test_binaries = []
-    search_dir = os.path.join(test_directory, path) if path else test_directory
-    for root, _, files in os.walk(search_dir):
+    for root, _, files in os.walk(test_directory):
         for file in files:
             test_suite_path = os.path.join(root, file)
             name, ext = os.path.splitext(file)
             if ext == "":
                 test_binaries.append(test_suite_path)
-    for test_binary in test_binaries:
-        xml_file_path = "{}.xml".format(test_binary)
-        if os.path.exists(xml_file_path):
-            os.remove(xml_file_path)
     start = time.time()
     with multiprocessing.Pool(processes=64) as pool:
         pool.map(run_command, iter(test_binaries))
@@ -107,7 +101,6 @@ def run_tests_parallel(test_directory, path, output):
         "execute_time": 0,
         "total_execute_tests": 0,
         "failed_tests_count": 0,
-        "crashed_tests_count": 0,
         "unavailable": [],
         "failed": []
     }
@@ -126,30 +119,23 @@ def run_tests_parallel(test_directory, path, output):
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
-    test_result['crashed_tests_count'] = len(test_result["unavailable"])
-    json_file_path = output if output else os.path.join(test_directory, "test_result.json")
+    json_file_path = os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
     mode = stat.S_IRUSR | stat.S_IWUSR
     with os.fdopen(os.open(json_file_path, flags, mode), 'w') as json_file:
         json.dump(test_result, json_file, indent=2)
 
-    print("The test results have been generated, path is {}".format(os.path.abspath(json_file_path)))
-    return failed_tests_count + len(test_result["unavailable"])
+    print("The test results have been generated, path is {}".format(json_file_path))
 
 
-def get_tests_out_path(debug):
+def get_tests_out_path():
     """
     Obtain the output directory of test cases
     """
-    base_path = os.path.dirname(os.path.realpath(__file__))
+    code_path = os.getcwd()
     for _ in range(6):
-        base_path = os.path.dirname(base_path)
-    code_path = os.path.join(base_path, "out/rk3568/clang_x64")
-    if debug:
-        code_path = os.path.join(code_path, "exe.unstripped/clang_x64")
-        os.environ["ASAN_SYMBOLIZER_PATH"] = os.path.join(base_path,
-            "prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-symbolizer")
-    code_path = os.path.join(code_path, "tests/unittest/ace_engine")
+        code_path = os.path.dirname(code_path)
+    code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
     return code_path
 
 
@@ -159,18 +145,15 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
-    parser.add_argument("-p", "--path", type=str, default=None)
-    parser.add_argument("-o", "--output", type=str, default=None)
-    parser.add_argument("-d", "--debug", action='store_true')
+    tests_out_path = get_tests_out_path()
     args = parser.parse_args()
-    tests_out_path = get_tests_out_path(args.debug)
     targets = args.target
     if targets is not None:
         for target in targets:
             run_single_test(tests_out_path, target)
     else:
-        return run_tests_parallel(tests_out_path, args.path, args.output)
+        run_tests_parallel(tests_out_path)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
