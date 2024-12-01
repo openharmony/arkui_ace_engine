@@ -2953,21 +2953,22 @@ class CustomDialogController extends NativeCustomDialogController {
  */
 class Utils {
     static getApiVersion() {
-        return typeof ViewStackProcessor["getApiVersion"] === "function"
-            ? ViewStackProcessor["getApiVersion"]()
-            : undefined;
+        if (Utils.currentAppApiVersion <= 0) {
+            Utils.currentAppApiVersion = typeof ViewStackProcessor.getApiVersion === 'function'
+                ? ViewStackProcessor.getApiVersion() : -1;
+        }
+        return Utils.currentAppApiVersion;
     }
     static isApiVersionEQAbove(target) {
         let version = Utils.getApiVersion();
-        if (version == null) {
+        if (version <= 0) {
+            stateMgmtConsole.error(`get api version error in isApiVersionEQAbove, version:${version}`);
             return false;
         }
-        if (typeof version === "number") {
-            version = version % 1000;
-        }
-        return version >= target;
+        return version % 1000 >= target;
     }
 }
+Utils.currentAppApiVersion = -1;
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4020,9 +4021,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.elmtId2Repeat_ = new Map();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
-        // flag if active of inActive
+        // greater than 0 means the node is active, otherwise node is inactive.
         // inActive means updates are delayed
-        this.isActive_ = true;
+        this.activeCount_ = 1;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
         this.isDeleting_ = false;
         this.isCompFreezeAllowed_ = false;
@@ -4141,6 +4142,20 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     isCompFreezeAllowed() {
         return this.isCompFreezeAllowed_;
     }
+    setActiveCount(active) {
+        // When the child node supports the Component freezing, the root node will definitely recurse to the child node. 
+        // From API16, to prevent child node mistakenly activated by the parent node, reference counting is used to control node status.
+        // active + 1 means count +1， inactive -1 means count -1, Expect no more than 1 
+        if (Utils.isApiVersionEQAbove(16)) {
+            this.activeCount_ += active ? 1 : -1;
+        }
+        else {
+            this.activeCount_ = active ? 1 : 0;
+        }
+        if (this.activeCount_ > 1) {
+            stateMgmtConsole.warn(`${this.debugInfo__()} activeCount_ error:${this.activeCount_}`);
+        }
+    }
     getChildViewV2ForElmtId(elmtId) {
         const optComp = this.childrenWeakrefMap_.get(elmtId);
         return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ?
@@ -4179,7 +4194,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         
     }
     isViewActive() {
-        return this.isActive_;
+        return this.activeCount_ > 0;
     }
     dumpReport() {
         stateMgmtConsole.warn(`Printing profiler information`);
@@ -6578,8 +6593,8 @@ class ViewPU extends PUV2ViewBase {
     setActiveInternal(active) {
         
         if (this.isCompFreezeAllowed()) {
-            this.isActive_ = active;
-            if (this.isActive_) {
+            this.setActiveCount(active);
+            if (this.isViewActive()) {
                 this.onActiveInternal();
             }
             else {
@@ -6595,7 +6610,7 @@ class ViewPU extends PUV2ViewBase {
         
     }
     onActiveInternal() {
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             return;
         }
         
@@ -6604,7 +6619,7 @@ class ViewPU extends PUV2ViewBase {
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
     onInactiveInternal() {
-        if (this.isActive_) {
+        if (this.isViewActive()) {
             return;
         }
         
@@ -9385,7 +9400,7 @@ class ViewV2 extends PUV2ViewBase {
             return;
         }
         
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -9487,12 +9502,12 @@ class ViewV2 extends PUV2ViewBase {
         
         this.computedIdsDelayedUpdate.add(watchId);
     }
-    setActiveInternal(newState) {
+    setActiveInternal(active) {
         
         if (this.isCompFreezeAllowed()) {
             
-            this.isActive_ = newState;
-            if (this.isActive_) {
+            this.setActiveCount(active);
+            if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
             }
@@ -9503,7 +9518,7 @@ class ViewV2 extends PUV2ViewBase {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView = child.deref();
             if (childView) {
-                childView.setActiveInternal(newState);
+                childView.setActiveInternal(active);
             }
         }
         
