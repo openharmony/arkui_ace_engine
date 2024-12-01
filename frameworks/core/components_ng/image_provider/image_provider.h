@@ -54,7 +54,7 @@ struct ImageDecoderOptions {
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality = AIImageQuality::NONE;
     bool isHdrDecoderNeed = false;
-    PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN;
+    PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN;
     ImageDfxConfig imageDfxConfig;
 };
 
