@@ -19,7 +19,8 @@
 #include "modifiers_test_utils.h"
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
-
+#include "core/components_ng/pattern/form/form_event_hub.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +44,8 @@ const auto ATTRIBUTE_DIMENSION_NAME = "dimension";
 const auto ATTRIBUTE_DIMENSION_DEFAULT_VALUE = "-1";
 const auto ATTRIBUTE_VISIBILITY_NAME = "visibility";
 const auto ATTRIBUTE_VISIBILITY_DEFAULT_VALUE = "Visibility.Visible";
+const auto FORM_COMPONENT_ID_KEY = "id";
+const auto FORM_COMPONENT_ID_STRING_KEY = "idString";
 
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
     { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
@@ -77,6 +80,27 @@ std::vector<std::tuple<std::string, Ark_Visibility>> testFixtureEnumFormVisibili
     { "-1", static_cast<Ark_Visibility>(-1) },
     { "INT_MAX", static_cast<Ark_Visibility>(INT_MAX) },
 };
+
+std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormIngoCallbackTestValues = {
+    { 1, 1, "1" },
+    { -1, -1, "-1" },
+    { 151, 151, "151" },
+    { -1050, -1, "-1050" },
+    { 2147483647, 2147483647, "2147483647" },
+    { 4294967295, -1, "4294967295" },
+    { 141733920767, -1, "141733920767" },
+    { 9007199254740992, -1, "9007199254740992" },
+    { 19007199254740992, -1, "19007199254740992" },
+    { 9223372036854775807, -1, "9223372036854775807" },
+};
+
+std::string ToJson(const int64_t& id)
+{
+    auto json = JsonUtil::Create(true);
+    json->Put(FORM_COMPONENT_ID_KEY, std::to_string(id).c_str());
+    json->Put(FORM_COMPONENT_ID_STRING_KEY, std::to_string(id).c_str());
+    return json->ToString();
+}
 } // namespace
 class FormComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIFormComponentModifier,
     &GENERATED_ArkUINodeModifiers::getFormComponentModifier, GENERATED_ARKUI_FORM_COMPONENT> {
@@ -385,5 +409,137 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
     for (auto& [input, value] : testFixtureEnumFormVisibilityInvalidValues) {
         checkValue(input, value);
     }
+}
+
+/*
+ * @tc.name: setOnAcquiredTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnAcquired, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+
+       std::pair<uint32_t, std::string> info; 
+       
+       
+       // test!!!
+       std::printf("callback: opt: %d\n", formInfo.has_value());
+       // test!!!
+
+       
+       info.first =  Converter::Convert<uint32_t>(parameter.id);
+       info.second = Converter::Convert<std::string>(parameter.idString);
+       formInfo = info;
+
+
+       // test!!!
+       std::printf("callback: 2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+
+    
+    };
+    Callback_FormCallbackInfo_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onAcquired
+    };
+
+
+    // test!!!
+    std::printf("test: \n");
+    // test!!!
+
+
+    modifier_->setOnAcquired(node_, &func);
+    
+    // test!!!
+    std::printf("test: 2\n");
+    // test!!!
+
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormIngoCallbackTestValues) {
+        formInfo = std::nullopt;
+
+        auto testValue = ToJson(actual);
+
+        // test!!!
+        std::printf("test: 3 testValue: %s\n", testValue.c_str());
+        // test!!!
+
+        eventHub->FireOnAcquired(testValue);
+
+       // test!!!
+       std::printf("test: 4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
+
+    }
+// for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+//         DatePickerChangeEvent event(testValue.first.ToString(true));
+//         eventHub->FireChangeEvent(&event);
+
+//         EXPECT_TRUE(selectedDate.has_value());
+//         EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
+//         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
+//         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
+//     };
+
+// //========================
+// void (*call)(const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter);
+// void FireOnAcquired(const std::string& param) const
+// //========================
+//     static std::optional<PickerDate> selectedDate = std::nullopt;
+//     auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
+//         selectedDate = Converter::OptConvert<PickerDate>(parameter);
+//     };
+//     Callback_Date_Void func = {
+//         .resource = Ark_CallbackResource {
+//             .resourceId = frameNode->GetId(),
+//             .hold = nullptr,
+//             .release = nullptr,
+//         },
+//         .call = onDateChange
+//     };
+
+//     modifier_->setOnDateChange(node_, &func);
+
+//     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+//         DatePickerChangeEvent event(testValue.first.ToString(true));
+//         eventHub->FireChangeEvent(&event);
+
+//         EXPECT_TRUE(selectedDate.has_value());
+//         EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
+//         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
+//         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
+//     };
+}
+
+/*
+ * @tc.name: emptyTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, emptyTest, TestSize.Level1)
+{
+    std::printf("\n\n\n\n\n");
+    char *p = nullptr;
+    char s = p[2];
+    p[20] = s;
+    
 }
 } // namespace OHOS::Ace::NG
