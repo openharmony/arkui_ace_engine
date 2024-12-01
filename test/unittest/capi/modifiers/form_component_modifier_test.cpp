@@ -44,8 +44,10 @@ const auto ATTRIBUTE_DIMENSION_NAME = "dimension";
 const auto ATTRIBUTE_DIMENSION_DEFAULT_VALUE = "-1";
 const auto ATTRIBUTE_VISIBILITY_NAME = "visibility";
 const auto ATTRIBUTE_VISIBILITY_DEFAULT_VALUE = "Visibility.Visible";
-const auto FORM_COMPONENT_ID_KEY = "id";
-const auto FORM_COMPONENT_ID_STRING_KEY = "idString";
+const auto FORM_ON_ACQUIRED_ID_KEY = "id";
+const auto FORM_ON_ACQUIRED_ID_STRING_KEY = "idString";
+const auto FORM_ON_ERROR_CODE_KEY = "errcode";
+const auto FORM_ON_ERROR_MSG_KEY = "msg";
 
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
     { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
@@ -81,7 +83,7 @@ std::vector<std::tuple<std::string, Ark_Visibility>> testFixtureEnumFormVisibili
     { "INT_MAX", static_cast<Ark_Visibility>(INT_MAX) },
 };
 
-std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormIngoCallbackTestValues = {
+std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormOnAcquiredCallbackTestValues = {
     { 1, 1, "1" },
     { -1, -1, "-1" },
     { 151, 151, "151" },
@@ -94,11 +96,37 @@ std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormIngoCallb
     { 9223372036854775807, -1, "9223372036854775807" },
 };
 
+std::vector<std::tuple<std::int64_t, std::string, std::int32_t>> testFixtureFormOnErrorCallbackTestValues = {
+    { 1, "error message 100", 1 },
+    { -1, "error another 200", -1 },
+    { 151, "error message -100", 151 },
+    { -1050, "error invalid code -200", -1050 },
+    { 2147483647, "error message 2147483647", 2147483647 },
+    { -2147483648, "error message -2147483647", -2147483648 },
+    { 4294967295, "error message  4294967295", -1 },
+    { -4294967295, "error message  -4294967295", -1 },
+    { 141733920767, "error message 141733920767", -1 },
+    { -141733920767, "error message -141733920767", -1 },
+    { 9007199254740992, "error message 9007199254740992", -1 },
+    { -9007199254740992, "error message -9007199254740992", -1 },
+    { 19007199254740992, "error message 19007199254740992", -1 },
+    { -19007199254740992, "error message -19007199254740992", -1 },
+    { 9223372036854775807, "error message 9223372036854775807", -1 },
+    { -9223372036854775807, "error message -9223372036854775807", -1 },
+};
+
 std::string ToJson(const int64_t& id)
 {
     auto json = JsonUtil::Create(true);
-    json->Put(FORM_COMPONENT_ID_KEY, std::to_string(id).c_str());
-    json->Put(FORM_COMPONENT_ID_STRING_KEY, std::to_string(id).c_str());
+    json->Put(FORM_ON_ACQUIRED_ID_KEY, std::to_string(id).c_str());
+    json->Put(FORM_ON_ACQUIRED_ID_STRING_KEY, std::to_string(id).c_str());
+    return json->ToString();
+}
+
+std::string ToJson(const int64_t& code, const std::string& msg){
+    auto json = JsonUtil::Create(true);
+    json->Put(FORM_ON_ERROR_CODE_KEY, std::to_string(code).c_str());
+    json->Put(FORM_ON_ERROR_MSG_KEY, msg.c_str());
     return json->ToString();
 }
 } // namespace
@@ -469,7 +497,7 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
     std::printf("test: 2\n");
     // test!!!
 
-    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormIngoCallbackTestValues) {
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
         formInfo = std::nullopt;
 
         auto testValue = ToJson(actual);
@@ -489,45 +517,90 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
         EXPECT_EQ(formInfo->second, expectedStr);
 
     }
-// for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
-//         DatePickerChangeEvent event(testValue.first.ToString(true));
-//         eventHub->FireChangeEvent(&event);
-
-//         EXPECT_TRUE(selectedDate.has_value());
-//         EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
-//         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
-//         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
-//     };
-
-// //========================
-// void (*call)(const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter);
-// void FireOnAcquired(const std::string& param) const
-// //========================
-//     static std::optional<PickerDate> selectedDate = std::nullopt;
-//     auto onDateChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
-//         selectedDate = Converter::OptConvert<PickerDate>(parameter);
-//     };
-//     Callback_Date_Void func = {
-//         .resource = Ark_CallbackResource {
-//             .resourceId = frameNode->GetId(),
-//             .hold = nullptr,
-//             .release = nullptr,
-//         },
-//         .call = onDateChange
-//     };
-
-//     modifier_->setOnDateChange(node_, &func);
-
-//     for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
-//         DatePickerChangeEvent event(testValue.first.ToString(true));
-//         eventHub->FireChangeEvent(&event);
-
-//         EXPECT_TRUE(selectedDate.has_value());
-//         EXPECT_EQ(selectedDate->GetYear(), testValue.second.GetYear());
-//         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
-//         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
-//     };
 }
+
+
+/*
+ * @tc.name: setOnErrorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnError, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
+    auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
+
+       std::pair<int32_t, std::string> info; 
+       
+       
+       // test!!!
+       std::printf("callback: e opt: %d\n", formInfo.has_value());
+       // test!!!
+
+       
+       info.first =  Converter::Convert<int32_t>(parameter.errcode);
+       info.second = Converter::Convert<std::string>(parameter.msg);
+       formInfo = info;
+
+
+       // test!!!
+       std::printf("callback: e2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+
+    
+    };
+    Callback_Literal_Number_errcode_String_msg_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onError
+    };
+
+
+    // test!!!
+    std::printf("test: e \n");
+    // test!!!
+
+
+    modifier_->setOnError(node_, &func);
+    
+    // test!!!
+    std::printf("test: e2\n");
+    // test!!!
+
+    for (const auto& [code, msg, expected] : testFixtureFormOnErrorCallbackTestValues) {
+        formInfo = std::nullopt;
+
+        auto testValue = ToJson(code, msg);
+
+        // test!!!
+        std::printf("test: e3 testValue: %s\n", testValue.c_str());
+        // test!!!
+
+        eventHub->FireOnError(testValue);
+
+       // test!!!
+       std::printf("test: e4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+       EXPECT_TRUE(formInfo.has_value());
+       EXPECT_EQ(formInfo->first, expected);
+       EXPECT_EQ(formInfo->second, msg);
+    }
+}
+
+
+
 
 /*
  * @tc.name: emptyTest

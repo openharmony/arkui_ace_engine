@@ -38,11 +38,16 @@ const auto FORM_DIMENSION_DIMENSION_1_1 = 6;
 const auto FORM_DIMENSION_DIMENSION_6_4 = 7;
 const auto FORM_COMPONENT_ID_KEY = "id";
 const auto FORM_COMPONENT_ID_STRING_KEY = "idString";
-const uint32_t FORM_COMPONENT_ID_INVALID = -1;
-const std::string FORM_COMPONENT_ID_STRING_INVALID = "-1";
-const uint32_t MIN_NUMBER_OF_ARK = 0;
-const uint32_t MAX_NUMBER_OF_ARK = 0xFFFFFFFF;
-// const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
+const uint32_t FORM_ON_ACQUIRED_ID_INVALID = -1;
+const std::string FORM_ON_ACQUIRED_ID_STRING_INVALID = "-1";
+const uint32_t MIN_UNSIGNED_NUMBER_OF_ARK = 0;
+const uint32_t MAX_UNSIGNED_NUMBER_OF_ARK = UINT_MAX;
+const auto FORM_ON_ERROR_CODE_KEY = "errcode";
+const auto FORM_ON_ERROR_MSG_KEY = "msg";
+const int32_t FORM_ON_ERROR_CODE_INVALID = -1;
+const std::string FORM_EMPTY_STRING = "";
+const int32_t MIN_SIGNED_NUMBER_OF_ARK = INT_MIN;
+const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
 } // namespace
 namespace Converter {
 template<>
@@ -158,15 +163,9 @@ void OnAcquiredImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-
-    // test!!!
-    std::printf("modifier: \n");
-    // test!!!
-
-
     auto onAcquired = [arkCallback = CallbackHelper(*value)](const std::string& param) {
-        uint32_t id = FORM_COMPONENT_ID_INVALID;
-        std::string idString = FORM_COMPONENT_ID_STRING_INVALID;
+        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+        std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         
         
         // test!!!
@@ -178,27 +177,27 @@ void OnAcquiredImpl(Ark_NativePointer node,
 
         if (sourceJson && !sourceJson->IsNull()) {
             char *endptr;
-            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_COMPONENT_ID_STRING_INVALID);
-            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_COMPONENT_ID_STRING_INVALID);
-            int64_t result = strtoul(jsonId.c_str(), &endptr, 10);
+            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
             
             
             // test!!!
-            std::printf("modifier: 3 %s  result %ld max: %ld\n", param.c_str(), result, static_cast<int64_t>(MAX_NUMBER_OF_ARK));
+            std::printf("modifier: 3 %s  result %ld max: %ld\n", param.c_str(), result,
+                static_cast<int64_t>(MAX_UNSIGNED_NUMBER_OF_ARK));
+            std::printf("modifier: 4 <> %d <>%d\n",
+                (result >= MIN_UNSIGNED_NUMBER_OF_ARK && result <= MAX_UNSIGNED_NUMBER_OF_ARK),
+                (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK));
             // test!!!
 
-            // test!!!
-            std::printf("modifier: 32 <> %d <>%d\n", (result >= MIN_NUMBER_OF_ARK && result <= MAX_NUMBER_OF_ARK), (*endptr == '\0' && result >= MIN_NUMBER_OF_ARK && result < MAX_NUMBER_OF_ARK));
-            // test!!!
 
-
-            if (*endptr == '\0' && result >= MIN_NUMBER_OF_ARK && result < MAX_NUMBER_OF_ARK) {
+            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
                  id = static_cast<uint32_t>(result);   
             }
             
            
             // test!!!
-            std::printf("modifier: 33 %s  id: %d idString: %s\n", param.c_str(), id, idString.c_str());
+            std::printf("modifier: 5 %s  id: %d idString: %s\n", param.c_str(), id, idString.c_str());
             // test!!!
     
     
@@ -207,105 +206,9 @@ void OnAcquiredImpl(Ark_NativePointer node,
             .id = Converter::ArkValue<Ark_Number>(id),
             .idString = Converter::ArkValue<Ark_String>(idString)
         };
-    
-    
-        // test!!!
-        std::printf("modifier: 4\n");
-        // test!!!
-    
-    
         arkCallback.Invoke(parameter);
-    
-    
-        // test!!!
-        std::printf("modifier: 5\n");
-        // test!!!
-    
-    
     };
-    
-
-    // test!!!
-    std::printf("modifier: 6\n");
-    // test!!!
-    
-
     FormModelNG::SetOnAcquired(frameNode, std::move(onAcquired));
-    
-    
-    // test!!!
-     std::printf("modifier: 7\n");
-    // test!!!
-    
-
-
-// //======================================
-//     uint32_t = stoul()
-
-// //======================================
-//     auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
-//     auto id = sourceJson->GetValue(FORM_COMPONENT_ID_KEY);
-//     auto month = sourceJson->GetValue(FORM_COMPONENT_ID_STRING_KEY);
-
-
-//         auto year = DATE_MIN.GetYear();
-//         auto month = DATE_MIN.GetMonth();
-//         auto day = DATE_MIN.GetDay();
-//         if (g_checkValidDateValues(sourceJson)) {
-//             year = sourceJson->GetValue(YEAR)->GetInt();
-//             month = sourceJson->GetValue(MONTH)->GetInt();
-//             day = sourceJson->GetValue(DAY)->GetInt();
-
-//     //===================================
-//     auto host = GetHost();
-//     CHECK_NULL_VOID(host);
-//     auto eventHub = host->GetEventHub<FormEventHub>();
-//     CHECK_NULL_VOID(eventHub);
-//     int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
-//     auto json = JsonUtil::Create(true);
-//     json->Put("id", std::to_string(onAcquireFormId).c_str());
-//     json->Put("idString", std::to_string(id).c_str());
-//     eventHub->FireOnAcquired(json->ToString());
-
-//     //==================================
-//     void FormModelNG::SetOnAcquired(std::function<void(const std::string&)>&& onAcquired)
-// //==================================
-//    auto frameNode = reinterpret_cast<FrameNode *>(node);
-//     CHECK_NULL_VOID(frameNode);
-//     CHECK_NULL_VOID(value);
-//     auto onBreakpointChange = [arkCallback = CallbackHelper(*value)](const std::string& breakpoint) {
-//         arkCallback.Invoke(Converter::ArkValue<Ark_String>(breakpoint));
-//     };
-//     GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(onBreakpointChange));
-
-//     void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) override;
-
-// //====================================================
-
-//     auto onChange = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
-//         CHECK_NULL_VOID(event);
-//         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-//         CHECK_NULL_VOID(eventInfo);
-//         auto selectedStr = eventInfo->GetSelectedStr();
-//         auto sourceJson = JsonUtil::ParseJsonString(selectedStr);
-
-//         auto year = DATE_MIN.GetYear();
-//         auto month = DATE_MIN.GetMonth();
-//         auto day = DATE_MIN.GetDay();
-//         if (g_checkValidDateValues(sourceJson)) {
-//             year = sourceJson->GetValue(YEAR)->GetInt();
-//             month = sourceJson->GetValue(MONTH)->GetInt();
-//             day = sourceJson->GetValue(DAY)->GetInt();
-//         }
-//         auto pickerDate = PickerDate(year, month, day);
-//         auto result = Converter::ArkValue<Ark_Date>(pickerDate);
-//         arkCallback.Invoke(result);
-//     };
-//     FormModelNG::SetOnAcquired(frameNode, std::move(onChange));
-   
-   
- 
-    
 
 // #endif
 }
@@ -315,8 +218,65 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetOnError(frameNode, convValue);
+
+        // test!!!
+        std::printf("modifier: e\n");
+        // test!!!
+    
+    auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        int32_t code = FORM_ON_ERROR_CODE_INVALID;
+        std::string msg = FORM_EMPTY_STRING;
+        
+        
+        // test!!!
+        std::printf("modifier: e2 %s\n", param.c_str());
+        // test!!!
+    
+
+        auto sourceJson = JsonUtil::ParseJsonString(param);
+
+        if (sourceJson && !sourceJson->IsNull()) {
+            char *endptr;
+            auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
+            msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
+            int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
+            
+            
+            // test!!!
+            std::printf("modifier: e3 %s result %ld jsonCode: %s msg: %s\n", param.c_str(), result, jsonCode.c_str(), msg.c_str());
+            std::printf("modifier: e4 <> %d\n", (result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK));
+            // test!!!
+
+
+            if (*endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK) {
+                code = static_cast<int32_t>(result);   
+            }
+            
+           
+            // test!!!
+            std::printf("modifier: e5 %s  code: %d msg: %s\n", param.c_str(), code, msg.c_str());
+            // test!!!
+    
+    
+        }
+        Ark_Literal_Number_errcode_String_msg parameter = {
+            .errcode = Converter::ArkValue<Ark_Number>(code),
+            .msg = Converter::ArkValue<Ark_String>(msg)
+        };
+        arkCallback.Invoke(parameter);
+    };
+    FormModelNG::SetOnError(frameNode, std::move(onError));
+
+
+// //=================================
+// void (*call)(const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg info);
+// void FormModelNG::SetOnError(std::function<void(const std::string&)>&& onError)
+
+// //=================================
+  
+  
+
+
 }
 void OnRouterImpl(Ark_NativePointer node,
                   const Callback_Any_Void* value)
