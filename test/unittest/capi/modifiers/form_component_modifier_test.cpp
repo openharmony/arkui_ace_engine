@@ -125,7 +125,8 @@ std::string ToJson(const int64_t& id)
     return json->ToString();
 }
 
-std::string ToJson(const int64_t& code, const std::string& msg){
+std::string ToJson(const int64_t& code, const std::string& msg)
+{
     auto json = JsonUtil::Create(true);
     json->Put(FORM_ON_ERROR_CODE_KEY, std::to_string(code).c_str());
     json->Put(FORM_ON_ERROR_MSG_KEY, msg.c_str());
@@ -475,7 +476,6 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
         formInfo = std::nullopt;
         auto testValue = ToJson(actual);
         eventHub->FireOnAcquired(testValue);
-
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
         EXPECT_EQ(formInfo->second, expectedStr);
@@ -495,7 +495,6 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
-
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
         std::pair<int32_t, std::string> info;
@@ -557,7 +556,6 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
         formInfo = std::nullopt;
         auto testValue = ToJson(actual);
         eventHub->FireOnUninstall(testValue);
-
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
         EXPECT_EQ(formInfo->second, expectedStr);

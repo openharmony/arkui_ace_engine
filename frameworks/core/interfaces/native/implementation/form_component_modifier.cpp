@@ -167,7 +167,6 @@ void OnAcquiredImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
                 id = static_cast<uint32_t>(result);
             }
@@ -191,14 +190,12 @@ void OnErrorImpl(Ark_NativePointer node,
     auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         int32_t code = FORM_ON_ERROR_CODE_INVALID;
         std::string msg = FORM_EMPTY_STRING;
-
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr;
             auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
             msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
             int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
-
             if (*endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK) {
                 code = static_cast<int32_t>(result);
             }
@@ -234,14 +231,12 @@ void OnUninstallImpl(Ark_NativePointer node,
     auto onUninstall = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
-
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
             char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
                 id = static_cast<uint32_t>(result);
             }
