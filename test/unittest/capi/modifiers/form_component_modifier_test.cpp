@@ -458,7 +458,7 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
         std::pair<uint32_t, std::string> info;
-        info.first =  Converter::Convert<uint32_t>(parameter.id);
+        info.first = Converter::Convert<uint32_t>(parameter.id);
         info.second = Converter::Convert<std::string>(parameter.idString);
         formInfo = info;
     };
@@ -499,7 +499,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
         std::pair<int32_t, std::string> info;
-        info.first =  Converter::Convert<int32_t>(parameter.errcode);
+        info.first = Converter::Convert<int32_t>(parameter.errcode);
         info.second = Converter::Convert<std::string>(parameter.msg);
         formInfo = info;
     };
@@ -540,7 +540,7 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
         std::pair<uint32_t, std::string> info;
-        info.first =  Converter::Convert<uint32_t>(parameter.id);
+        info.first = Converter::Convert<uint32_t>(parameter.id);
         info.second = Converter::Convert<std::string>(parameter.idString);
         formInfo = info;
     };
@@ -561,7 +561,6 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
         EXPECT_EQ(formInfo->second, expectedStr);
-
     }
 }
 
@@ -582,8 +581,8 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     static constexpr int32_t contextId = 123;
     static std::optional<bool> formInfo = std::nullopt;
     auto onLoad = [](const Ark_Int32 resourceId) {
-    formInfo = true;
-       EXPECT_EQ(resourceId, contextId);
+        formInfo = true;
+        EXPECT_EQ(resourceId, contextId);
     };
     Callback_Void func = {
         .resource = Ark_CallbackResource {

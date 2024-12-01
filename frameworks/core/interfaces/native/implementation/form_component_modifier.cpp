@@ -163,7 +163,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
-            char *endptr;
+            char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
@@ -174,8 +174,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
         }
         Ark_FormCallbackInfo parameter = {
             .id = Converter::ArkValue<Ark_Number>(id),
-            .idString = Converter::ArkValue<Ark_String>(idString)
-        };
+            .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
     FormModelNG::SetOnAcquired(frameNode, std::move(onAcquired));
@@ -185,7 +184,7 @@ void OnErrorImpl(Ark_NativePointer node,
                  const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -195,7 +194,7 @@ void OnErrorImpl(Ark_NativePointer node,
 
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
-            char *endptr;
+            char* endptr;
             auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
             msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
             int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
@@ -217,7 +216,7 @@ void OnRouterImpl(Ark_NativePointer node,
                   const Callback_Any_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - CustomObject is not supported "
@@ -228,7 +227,7 @@ void OnUninstallImpl(Ark_NativePointer node,
                      const Callback_FormCallbackInfo_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -238,7 +237,7 @@ void OnUninstallImpl(Ark_NativePointer node,
 
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
-            char *endptr;
+            char* endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
@@ -260,7 +259,7 @@ void OnLoadImpl(Ark_NativePointer node,
                 const Callback_Void* value)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onLoad = [arkCallback = CallbackHelper(*value)](const std::string& param) {
