@@ -457,18 +457,10 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
 
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-
-       std::pair<uint32_t, std::string> info; 
-       
-       
-       // test!!!
-       std::printf("callback: opt: %d\n", formInfo.has_value());
-       // test!!!
-
-       
-       info.first =  Converter::Convert<uint32_t>(parameter.id);
-       info.second = Converter::Convert<std::string>(parameter.idString);
-       formInfo = info;
+    std::pair<uint32_t, std::string> info;
+    info.first =  Converter::Convert<uint32_t>(parameter.id);
+    info.second = Converter::Convert<std::string>(parameter.idString);
+    formInfo = info;
 
 
        // test!!!
@@ -476,7 +468,6 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
        // test!!!
 
 
-    
     };
     Callback_FormCallbackInfo_Void func = {
         .resource = Ark_CallbackResource {
@@ -486,33 +477,11 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
         },
         .call = onAcquired
     };
-
-
-    // test!!!
-    std::printf("test: \n");
-    // test!!!
-
-
     modifier_->setOnAcquired(node_, &func);
-    
-    // test!!!
-    std::printf("test: 2\n");
-    // test!!!
-
     for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
         formInfo = std::nullopt;
-
         auto testValue = ToJson(actual);
-
-        // test!!!
-        std::printf("test: 3 testValue: %s\n", testValue.c_str());
-        // test!!!
-
         eventHub->FireOnAcquired(testValue);
-
-       // test!!!
-       std::printf("test: 4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
 
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
@@ -520,7 +489,6 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
 
     }
 }
-
 
 /*
  * @tc.name: setOnErrorTest
@@ -539,17 +507,10 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
 
-       std::pair<int32_t, std::string> info; 
-       
-       
-       // test!!!
-       std::printf("callback: e opt: %d\n", formInfo.has_value());
-       // test!!!
-
-       
+       std::pair<int32_t, std::string> info;
        info.first =  Converter::Convert<int32_t>(parameter.errcode);
        info.second = Converter::Convert<std::string>(parameter.msg);
-       formInfo = info;
+       formInfo =    info;
 
 
        // test!!!
@@ -557,7 +518,6 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
        // test!!!
 
 
-    
     };
     Callback_Literal_Number_errcode_String_msg_Void func = {
         .resource = Ark_CallbackResource {
@@ -567,33 +527,11 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
         },
         .call = onError
     };
-
-
-    // test!!!
-    std::printf("test: e \n");
-    // test!!!
-
-
     modifier_->setOnError(node_, &func);
-    
-    // test!!!
-    std::printf("test: e2\n");
-    // test!!!
-
     for (const auto& [code, msg, expected] : testFixtureFormOnErrorCallbackTestValues) {
         formInfo = std::nullopt;
-
         auto testValue = ToJson(code, msg);
-
-        // test!!!
-        std::printf("test: e3 testValue: %s\n", testValue.c_str());
-        // test!!!
-
         eventHub->FireOnError(testValue);
-
-       // test!!!
-       std::printf("test: e4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
 
        EXPECT_TRUE(formInfo.has_value());
        EXPECT_EQ(formInfo->first, expected);
@@ -617,15 +555,7 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
 
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-
-       std::pair<uint32_t, std::string> info; 
-       
-       
-       // test!!!
-       std::printf("callback: u opt: %d\n", formInfo.has_value());
-       // test!!!
-
-       
+       std::pair<uint32_t, std::string> info;
        info.first =  Converter::Convert<uint32_t>(parameter.id);
        info.second = Converter::Convert<std::string>(parameter.idString);
        formInfo = info;
@@ -636,7 +566,6 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
        // test!!!
 
 
-    
     };
     Callback_FormCallbackInfo_Void func = {
         .resource = Ark_CallbackResource {
@@ -646,33 +575,11 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
         },
         .call = onUninstall
     };
-
-
-    // test!!!
-    std::printf("test: u\n");
-    // test!!!
-
-
     modifier_->setOnUninstall(node_, &func);
-    
-    // test!!!
-    std::printf("test: u2\n");
-    // test!!!
-
     for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
         formInfo = std::nullopt;
-
         auto testValue = ToJson(actual);
-
-        // test!!!
-        std::printf("test: u3 testValue: %s\n", testValue.c_str());
-        // test!!!
-
         eventHub->FireOnUninstall(testValue);
-
-       // test!!!
-       std::printf("test: u4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
 
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
@@ -698,20 +605,15 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     static constexpr int32_t contextId = 123;
     static std::optional<bool> formInfo = std::nullopt;
     auto onLoad = [](const Ark_Int32 resourceId) {
+    formInfo = true;
 
-       // test!!!
-       std::printf("callback: l opt: %d\n", formInfo.has_value());
-       // test!!!
-       
-       formInfo = true;
 
        // test!!!
        std::printf("callback: l2 value: %d resourceId: %d opt %d\n", *formInfo, resourceId, formInfo.has_value());
        // test!!!
 
-       EXPECT_EQ(resourceId, contextId);
 
-    
+       EXPECT_EQ(resourceId, contextId);
     };
     Callback_Void func = {
         .resource = Ark_CallbackResource {
@@ -721,30 +623,9 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
         },
         .call = onLoad
     };
-
-
-    // test!!!
-    std::printf("test: l\n");
-    // test!!!
-
-
     modifier_->setOnLoad(node_, &func);
-    
-    // test!!!
-    std::printf("test: l2\n");
-    // test!!!
-
     formInfo = std::nullopt;
-    // test!!!
-    std::printf("test: l3 opt: %d\n", formInfo.has_value());
-    // test!!!
-
     eventHub->FireOnLoad(FORM_EMPTY_STRING);
-
-    // test!!!
-    std::printf("test: l4 formInfo: %d opt %d\n", *formInfo, formInfo.has_value());
-    // test!!!
-
     EXPECT_TRUE(formInfo.has_value());
     EXPECT_TRUE(*formInfo);
 }

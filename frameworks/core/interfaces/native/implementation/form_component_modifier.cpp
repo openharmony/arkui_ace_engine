@@ -22,7 +22,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 #include "core/components/common/layout/constants.h"
-
 namespace OHOS::Ace::NG {
 struct LiteralDimension {
     Dimension width;
@@ -154,11 +153,7 @@ void VisibilityImpl(Ark_NativePointer node,
 void OnAcquiredImpl(Ark_NativePointer node,
                     const Callback_FormCallbackInfo_Void* value)
 {
-
-
-// #ifdef FORM_SUPPORTED
-    
-    
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
@@ -166,41 +161,16 @@ void OnAcquiredImpl(Ark_NativePointer node,
     auto onAcquired = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
-        
-        
-        // test!!!
-        std::printf("modifier: 2 %s\n", param.c_str());
-        // test!!!
-    
-
         auto sourceJson = JsonUtil::ParseJsonString(param);
-
         if (sourceJson && !sourceJson->IsNull()) {
             char *endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            
-            
-            // test!!!
-            std::printf("modifier: 3 %s  result %ld max: %ld\n", param.c_str(), result,
-                static_cast<int64_t>(MAX_UNSIGNED_NUMBER_OF_ARK));
-            std::printf("modifier: 4 <> %d <>%d\n",
-                (result >= MIN_UNSIGNED_NUMBER_OF_ARK && result <= MAX_UNSIGNED_NUMBER_OF_ARK),
-                (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK));
-            // test!!!
-
 
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                 id = static_cast<uint32_t>(result);   
+                 id = static_cast<uint32_t>(result);
             }
-            
-           
-            // test!!!
-            std::printf("modifier: 5 %s  id: %d idString: %s\n", param.c_str(), id, idString.c_str());
-            // test!!!
-    
-    
         }
         Ark_FormCallbackInfo parameter = {
             .id = Converter::ArkValue<Ark_Number>(id),
@@ -209,55 +179,30 @@ void OnAcquiredImpl(Ark_NativePointer node,
         arkCallback.Invoke(parameter);
     };
     FormModelNG::SetOnAcquired(frameNode, std::move(onAcquired));
-
-// #endif
+#endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const Callback_Literal_Number_errcode_String_msg_Void* value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-        // test!!!
-        std::printf("modifier: e\n");
-        // test!!!
-    
     auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         int32_t code = FORM_ON_ERROR_CODE_INVALID;
         std::string msg = FORM_EMPTY_STRING;
-        
-        
-        // test!!!
-        std::printf("modifier: e2 %s\n", param.c_str());
-        // test!!!
-    
 
         auto sourceJson = JsonUtil::ParseJsonString(param);
-
         if (sourceJson && !sourceJson->IsNull()) {
             char *endptr;
             auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
             msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
             int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
-            
-            
-            // test!!!
-            std::printf("modifier: e3 %s result %ld jsonCode: %s msg: %s\n", param.c_str(), result, jsonCode.c_str(), msg.c_str());
-            std::printf("modifier: e4 <> %d\n", (result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK));
-            // test!!!
-
 
             if (*endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK) {
-                code = static_cast<int32_t>(result);   
+                code = static_cast<int32_t>(result);
             }
-            
-           
-            // test!!!
-            std::printf("modifier: e5 %s  code: %d msg: %s\n", param.c_str(), code, msg.c_str());
-            // test!!!
-    
-    
         }
         Ark_Literal_Number_errcode_String_msg parameter = {
             .errcode = Converter::ArkValue<Ark_Number>(code),
@@ -266,74 +211,41 @@ void OnErrorImpl(Ark_NativePointer node,
         arkCallback.Invoke(parameter);
     };
     FormModelNG::SetOnError(frameNode, std::move(onError));
-
-
-// //=================================
-// void (*call)(const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg info);
-// void FormModelNG::SetOnError(std::function<void(const std::string&)>&& onError)
-
-// //=================================
-  
-  
-
-
+#endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
                   const Callback_Any_Void* value)
 {
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - CustomObject is not supported "
         "the type Callback_Any_Void includes Ark_CustomObject.");
+#endif // FORM_SUPPORTED
 }
 void OnUninstallImpl(Ark_NativePointer node,
                      const Callback_FormCallbackInfo_Void* value)
 {
-// #ifdef FORM_SUPPORTED
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    
 
     auto onUninstall = [arkCallback = CallbackHelper(*value)](const std::string& param) {
         uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
-        
-        
-        // test!!!
-        std::printf("modifier: u2 %s\n", param.c_str());
-        // test!!!
-    
 
         auto sourceJson = JsonUtil::ParseJsonString(param);
-
         if (sourceJson && !sourceJson->IsNull()) {
             char *endptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            
-            
-            // test!!!
-            std::printf("modifier: u3 %s  result %ld max: %ld\n", param.c_str(), result,
-                static_cast<int64_t>(MAX_UNSIGNED_NUMBER_OF_ARK));
-            std::printf("modifier: u4 <> %d <>%d\n",
-                (result >= MIN_UNSIGNED_NUMBER_OF_ARK && result <= MAX_UNSIGNED_NUMBER_OF_ARK),
-                (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK));
-            // test!!!
-
 
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                 id = static_cast<uint32_t>(result);   
+                 id = static_cast<uint32_t>(result);
             }
-            
-           
-            // test!!!
-            std::printf("modifier: u5 %s  id: %d idString: %s\n", param.c_str(), id, idString.c_str());
-            // test!!!
-    
-    
         }
         Ark_FormCallbackInfo parameter = {
             .id = Converter::ArkValue<Ark_Number>(id),
@@ -342,15 +254,12 @@ void OnUninstallImpl(Ark_NativePointer node,
         arkCallback.Invoke(parameter);
     };
     FormModelNG::SetOnUninstall(frameNode, std::move(onUninstall));
-
-// #endif
-
+#endif // FORM_SUPPORTED
 }
 void OnLoadImpl(Ark_NativePointer node,
                 const Callback_Void* value)
 {
-// #ifdef FORM_SUPPORTED
-
+#ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
@@ -358,8 +267,7 @@ void OnLoadImpl(Ark_NativePointer node,
         arkCallback.Invoke();
     };
     FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
-
-// #endif    
+#endif // FORM_SUPPORTED
 }
 } // FormComponentAttributeModifier
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()
