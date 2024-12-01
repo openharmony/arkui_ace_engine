@@ -290,20 +290,76 @@ void OnRouterImpl(Ark_NativePointer node,
 void OnUninstallImpl(Ark_NativePointer node,
                      const Callback_FormCallbackInfo_Void* value)
 {
+// #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetOnUninstall(frameNode, convValue);
+    
+
+    auto onUninstall = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+        std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
+        
+        
+        // test!!!
+        std::printf("modifier: u2 %s\n", param.c_str());
+        // test!!!
+    
+
+        auto sourceJson = JsonUtil::ParseJsonString(param);
+
+        if (sourceJson && !sourceJson->IsNull()) {
+            char *endptr;
+            auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
+            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            
+            
+            // test!!!
+            std::printf("modifier: u3 %s  result %ld max: %ld\n", param.c_str(), result,
+                static_cast<int64_t>(MAX_UNSIGNED_NUMBER_OF_ARK));
+            std::printf("modifier: u4 <> %d <>%d\n",
+                (result >= MIN_UNSIGNED_NUMBER_OF_ARK && result <= MAX_UNSIGNED_NUMBER_OF_ARK),
+                (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK));
+            // test!!!
+
+
+            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
+                 id = static_cast<uint32_t>(result);   
+            }
+            
+           
+            // test!!!
+            std::printf("modifier: u5 %s  id: %d idString: %s\n", param.c_str(), id, idString.c_str());
+            // test!!!
+    
+    
+        }
+        Ark_FormCallbackInfo parameter = {
+            .id = Converter::ArkValue<Ark_Number>(id),
+            .idString = Converter::ArkValue<Ark_String>(idString)
+        };
+        arkCallback.Invoke(parameter);
+    };
+    FormModelNG::SetOnUninstall(frameNode, std::move(onUninstall));
+
+// #endif
+
 }
 void OnLoadImpl(Ark_NativePointer node,
                 const Callback_Void* value)
 {
+// #ifdef FORM_SUPPORTED
+
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //FormComponentModelNG::SetOnLoad(frameNode, convValue);
+    auto onLoad = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+        arkCallback.Invoke();
+    };
+    FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
+
+// #endif    
 }
 } // FormComponentAttributeModifier
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()

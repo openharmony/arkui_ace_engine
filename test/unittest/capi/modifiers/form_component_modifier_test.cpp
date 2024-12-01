@@ -48,6 +48,8 @@ const auto FORM_ON_ACQUIRED_ID_KEY = "id";
 const auto FORM_ON_ACQUIRED_ID_STRING_KEY = "idString";
 const auto FORM_ON_ERROR_CODE_KEY = "errcode";
 const auto FORM_ON_ERROR_MSG_KEY = "msg";
+const auto FORM_EMPTY_STRING = "";
+
 
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
     { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
@@ -599,20 +601,151 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
     }
 }
 
-
-
-
 /*
- * @tc.name: emptyTest
+ * @tc.name: setOnUninstallTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, emptyTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
 {
-    std::printf("\n\n\n\n\n");
-    char *p = nullptr;
-    char s = p[2];
-    p[20] = s;
+    ASSERT_NE(modifier_->setOnUninstall, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+
+       std::pair<uint32_t, std::string> info; 
+       
+       
+       // test!!!
+       std::printf("callback: u opt: %d\n", formInfo.has_value());
+       // test!!!
+
+       
+       info.first =  Converter::Convert<uint32_t>(parameter.id);
+       info.second = Converter::Convert<std::string>(parameter.idString);
+       formInfo = info;
+
+
+       // test!!!
+       std::printf("callback: u2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+
     
+    };
+    Callback_FormCallbackInfo_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onUninstall
+    };
+
+
+    // test!!!
+    std::printf("test: u\n");
+    // test!!!
+
+
+    modifier_->setOnUninstall(node_, &func);
+    
+    // test!!!
+    std::printf("test: u2\n");
+    // test!!!
+
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
+        formInfo = std::nullopt;
+
+        auto testValue = ToJson(actual);
+
+        // test!!!
+        std::printf("test: u3 testValue: %s\n", testValue.c_str());
+        // test!!!
+
+        eventHub->FireOnUninstall(testValue);
+
+       // test!!!
+       std::printf("test: u4 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
+       // test!!!
+
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
+
+    }
+}
+
+/*
+ * @tc.name: setOnLoadTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnLoad, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static std::optional<bool> formInfo = std::nullopt;
+    auto onLoad = [](const Ark_Int32 resourceId) {
+
+       // test!!!
+       std::printf("callback: l opt: %d\n", formInfo.has_value());
+       // test!!!
+       
+       formInfo = true;
+
+       // test!!!
+       std::printf("callback: l2 value: %d resourceId: %d opt %d\n", *formInfo, resourceId, formInfo.has_value());
+       // test!!!
+
+       EXPECT_EQ(resourceId, contextId);
+
+    
+    };
+    Callback_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = contextId,
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onLoad
+    };
+
+
+    // test!!!
+    std::printf("test: l\n");
+    // test!!!
+
+
+    modifier_->setOnLoad(node_, &func);
+    
+    // test!!!
+    std::printf("test: l2\n");
+    // test!!!
+
+    formInfo = std::nullopt;
+    // test!!!
+    std::printf("test: l3 opt: %d\n", formInfo.has_value());
+    // test!!!
+
+    eventHub->FireOnLoad(FORM_EMPTY_STRING);
+
+    // test!!!
+    std::printf("test: l4 formInfo: %d opt %d\n", *formInfo, formInfo.has_value());
+    // test!!!
+
+    EXPECT_TRUE(formInfo.has_value());
+    EXPECT_TRUE(*formInfo);
 }
 } // namespace OHOS::Ace::NG
