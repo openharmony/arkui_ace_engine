@@ -576,13 +576,13 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         loadingCtx_->SetImageQuality(GetImageQuality());
-        loadingCtx_->SetImageDecodeFormat(GetExternalDecodeFormat());
+        loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
-        altLoadingCtx_->SetImageDecodeFormat(GetExternalDecodeFormat());
+        altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }

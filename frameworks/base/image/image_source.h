@@ -38,10 +38,10 @@ public:
     virtual std::string GetProperty(const std::string& key) = 0;
 
     virtual RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE,
-        bool isHdrDecoderNeed = false, PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN) = 0;
+        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size,
         AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false,
-        PixelFormat imageDecodeFormat = PixelFormat::UNKNOWN) = 0;
+        PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;
