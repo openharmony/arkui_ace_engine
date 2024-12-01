@@ -918,6 +918,9 @@ void MenuLayoutAlgorithm::CheckPreviewSize(
         CHECK_NULL_VOID(menuWrapperPattern);
         auto constraint = menuWrapperPattern->GetChildLayoutConstraint();
         CHECK_NULL_VOID(constraint.maxSize.IsPositive() && constraint.percentReference.IsPositive());
+        auto layoutProperty = previewLayoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         previewLayoutWrapper->Measure(constraint);
         menuPattern->SetPreviewIdealSize(previewGeometryNode->GetMarginFrameSize());
     }
@@ -1588,15 +1591,16 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto useLastPosition = lastPosition_.has_value() && holdEmbeddedMenuPosition_;
         if (useLastPosition) {
             menuPosition = lastPosition_.value();
-            auto lastArrowPlacement = menuPattern->GetLastArrowPlacement();
-            if (lastArrowPlacement.has_value()) {
-                arrowPlacement_ = lastArrowPlacement.value();
+            auto lastPlacement = menuPattern->GetLastPlacement();
+            if (lastPlacement.has_value()) {
+                placement_ = lastPlacement.value();
+                arrowPlacement_ = lastPlacement.value();
             }
         } else {
             menuPosition = MenuLayoutAvoidAlgorithm(menuProp, menuPattern, size, didNeedArrow, layoutWrapper);
         }
         menuPattern->UpdateLastPosition(menuPosition);
-        menuPattern->UpdateLastArrowPlacement(arrowPlacement_);
+        menuPattern->UpdateLastPlacement(placement_);
         CalculateChildOffset(didNeedArrow);
         OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
         TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPositionWithArrow.ToString().c_str());
@@ -2053,10 +2057,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     if (lastPosition_.has_value() && holdEmbeddedMenuPosition_) {
-        auto spaceToBottom = static_cast<float>(wrapperRect_.Bottom()) - lastPosition_.value().GetY();
-        if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-            spaceToBottom -= param_.bottomSecurity;
-        }
+        auto spaceToBottom = GetMenuMaxBottom(menuPattern) - lastPosition_.value().GetY();
         maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -2069,6 +2070,21 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         }
     }
     constraint.maxSize.SetHeight(maxSpaceHeight);
+}
+
+float MenuLayoutAlgorithm::GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern)
+{
+    auto bottom = wrapperRect_.Bottom();
+    CHECK_NULL_RETURN(menuPattern, bottom);
+    if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
+        auto isTopMenuBottomPreview =
+            placement == Placement::TOP || placement == Placement::TOP_LEFT || placement == Placement::TOP_RIGHT;
+        auto previewTopSpace = bottom - previewSize_.Height() * previewScale_ - targetSecurity_;
+        return std::max<float>(0.0f, (isTopMenuBottomPreview ? previewTopSpace : bottom) - param_.bottomSecurity);
+    }
+
+    return bottom;
 }
 
 LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
