@@ -3085,6 +3085,12 @@ void TextFieldPattern::FilterInitializeText()
     if (HasInputOperation()) {
         return;
     }
+    if (HasFocus()) {
+        UpdateShowCountBorderStyle();
+        if (showCountBorderStyle_) {
+            HandleCountStyle();
+        }
+    }
     if (!contentController_->IsEmpty()) {
         contentController_->FilterValue();
     }
