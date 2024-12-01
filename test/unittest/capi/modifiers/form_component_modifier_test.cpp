@@ -457,17 +457,10 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
 
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-    std::pair<uint32_t, std::string> info;
-    info.first =  Converter::Convert<uint32_t>(parameter.id);
-    info.second = Converter::Convert<std::string>(parameter.idString);
-    formInfo = info;
-
-
-       // test!!!
-       std::printf("callback: 2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
-
-
+        std::pair<uint32_t, std::string> info;
+        info.first =  Converter::Convert<uint32_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
     };
     Callback_FormCallbackInfo_Void func = {
         .resource = Ark_CallbackResource {
@@ -486,7 +479,6 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
         EXPECT_TRUE(formInfo.has_value());
         EXPECT_EQ(formInfo->first, expectedNum);
         EXPECT_EQ(formInfo->second, expectedStr);
-
     }
 }
 
@@ -506,18 +498,10 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
 
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
     auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
-
-       std::pair<int32_t, std::string> info;
-       info.first =  Converter::Convert<int32_t>(parameter.errcode);
-       info.second = Converter::Convert<std::string>(parameter.msg);
-       formInfo =    info;
-
-
-       // test!!!
-       std::printf("callback: e2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
-
-
+        std::pair<int32_t, std::string> info;
+        info.first =  Converter::Convert<int32_t>(parameter.errcode);
+        info.second = Converter::Convert<std::string>(parameter.msg);
+        formInfo = info;
     };
     Callback_Literal_Number_errcode_String_msg_Void func = {
         .resource = Ark_CallbackResource {
@@ -533,9 +517,9 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
         auto testValue = ToJson(code, msg);
         eventHub->FireOnError(testValue);
 
-       EXPECT_TRUE(formInfo.has_value());
-       EXPECT_EQ(formInfo->first, expected);
-       EXPECT_EQ(formInfo->second, msg);
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expected);
+        EXPECT_EQ(formInfo->second, msg);
     }
 }
 
@@ -555,17 +539,10 @@ HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
 
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-       std::pair<uint32_t, std::string> info;
-       info.first =  Converter::Convert<uint32_t>(parameter.id);
-       info.second = Converter::Convert<std::string>(parameter.idString);
-       formInfo = info;
-
-
-       // test!!!
-       std::printf("callback: u2 first: %d second: %s opt %d\n", formInfo->first, formInfo->second.c_str(), formInfo.has_value());
-       // test!!!
-
-
+        std::pair<uint32_t, std::string> info;
+        info.first =  Converter::Convert<uint32_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
     };
     Callback_FormCallbackInfo_Void func = {
         .resource = Ark_CallbackResource {
@@ -606,13 +583,6 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     static std::optional<bool> formInfo = std::nullopt;
     auto onLoad = [](const Ark_Int32 resourceId) {
     formInfo = true;
-
-
-       // test!!!
-       std::printf("callback: l2 value: %d resourceId: %d opt %d\n", *formInfo, resourceId, formInfo.has_value());
-       // test!!!
-
-
        EXPECT_EQ(resourceId, contextId);
     };
     Callback_Void func = {

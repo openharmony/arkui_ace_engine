@@ -169,7 +169,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
 
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                 id = static_cast<uint32_t>(result);
+                id = static_cast<uint32_t>(result);
             }
         }
         Ark_FormCallbackInfo parameter = {
@@ -244,7 +244,7 @@ void OnUninstallImpl(Ark_NativePointer node,
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
 
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                 id = static_cast<uint32_t>(result);
+                id = static_cast<uint32_t>(result);
             }
         }
         Ark_FormCallbackInfo parameter = {
