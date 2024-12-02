@@ -21,6 +21,7 @@
 #define protected public
 
 #include "include/core/SkStream.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/memory/ace_type.h"
@@ -315,6 +316,14 @@ public:
     RefPtr<SvgDom> ParseFeGaussianblur(const std::string& svgLabel);
     static RefPtr<SvgDom> ParseEllipse(const std::string& svgLabel);
     void CallBack(Testing::MockCanvas& rSCanvas);
+    static void SetUpTestSuite()
+    {
+        MockContainer::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::TearDown();
+    }
 };
 
 RefPtr<SvgDom> ParseTestTwoNg::ParseRect(const std::string& svgLabel)
@@ -647,8 +656,8 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
     auto svgCircle = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
     EXPECT_NE(svgCircle, nullptr);
 
-    Gradient gradient;
-    LinearGradient linearGradientLocal;
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::LinearGradient linearGradientLocal;
     linearGradientLocal.x1 = Dimension(1.0);
     linearGradientLocal.x2 = Dimension(1.0);
     linearGradientLocal.y1 = Dimension(1.0);
@@ -666,7 +675,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
     linearGradientInfo = gradient.GetLinearGradientInfo();
     EXPECT_EQ(linearGradientInfo.x1, 0.0);
 
-    RadialGradient radialGradientLocal;
+    OHOS::Ace::RadialGradient radialGradientLocal;
     radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
     radialGradientLocal.radialCenterX = AnimatableDimension(1);
     radialGradientLocal.radialCenterY = AnimatableDimension(1);
@@ -695,7 +704,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest001, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
 {
-    std::function func = [&](Gradient &gradient) {
+    std::function func = [&](OHOS::Ace::Gradient &gradient) {
         auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
         EXPECT_NE(svgStream, nullptr);
         ImageSourceInfo src;
@@ -707,7 +716,7 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
 
         auto viewPort = Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT);
         auto baseAttr = svgCircle->GetBaseAttributes();
-        gradient.SetType(GradientType::LINEAR);
+        gradient.SetType(OHOS::Ace::GradientType::LINEAR);
         svgCircle->fillState_.SetGradient(gradient);
         baseAttr.fillState.SetGradient(gradient);
         baseAttr.strokeState.SetGradient(gradient);
@@ -717,14 +726,14 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
         svgCircle->UpdateFillGradient(viewPort);
         svgCircle->UpdateStrokeGradient(viewPort);
 
-        RadialGradient radialGradientLocal;
+        OHOS::Ace::RadialGradient radialGradientLocal;
         radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
         radialGradientLocal.radialCenterX = AnimatableDimension(1);
         radialGradientLocal.radialCenterY = AnimatableDimension(1);
         radialGradientLocal.fRadialCenterX = Dimension(1);
         radialGradientLocal.fRadialCenterY = Dimension(1);
         gradient.SetRadialGradient(radialGradientLocal);
-        gradient.SetType(GradientType::RADIAL);
+        gradient.SetType(OHOS::Ace::GradientType::RADIAL);
         svgCircle->fillState_.SetGradient(gradient);
         baseAttr.fillState.SetGradient(gradient);
         baseAttr.strokeState.SetGradient(gradient);
@@ -734,9 +743,9 @@ HWTEST_F(ParseTestTwoNg, ParseGradientTest002, TestSize.Level1)
         svgCircle->UpdateFillGradient(viewPort);
         svgCircle->UpdateStrokeGradient(viewPort);
     };
-    Gradient gradient;
+    OHOS::Ace::Gradient gradient;
     func(gradient);
-    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(OHOS::Ace::GradientColor(Color::RED));
     func(gradient);
 }
 
@@ -852,5 +861,246 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest003, TestSize.Level1)
     EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, 1.0), 0.0);
 
     EXPECT_EQ(svgNode->GetRootViewBox(), Rect());
+}
+
+/**
+ * @tc.name: ParseAnimation001
+ * @tc.desc: Test SvgAnimation SetAttr Method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation001, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::MOTION);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    svgAnimation->SetAttr("begin", "1000ms");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetBegin(), 1000);
+
+    svgAnimation->SetAttr("dur", "indefinite");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetDur(), 0);
+
+    svgAnimation->SetAttr("repeatcount", "indefinite");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetRepeatCount(), -1);
+
+    svgAnimation->SetAttr("keytimes", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyTimes().size(), 0);
+
+    svgAnimation->SetAttr("keysplines", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeySplines().size(), 0);
+
+    svgAnimation->SetAttr("keysplines", "0.25;0.1;0.25;1");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeySplines().size(), 4);
+
+    svgAnimation->SetAttr("keypoints", "");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyPoints().size(), 0);
+
+    svgAnimation->SetAttr("keypoints", "0;0.4;1");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetKeyPoints().size(), 3);
+}
+
+/**
+ * @tc.name: ParseAnimation002
+ * @tc.desc: Test SvgAnimation CreatePropertyAnimation Method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation002, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::TRANSFORM);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    svgAnimation->SetAttr("begin", "1000ms");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetBegin(), 1000);
+
+    std::function<void(double)> callback = [](double x) -> void { x = 0; };
+    const double value = 0;
+    svgAnimation->values_ = { "1" };
+    svgAnimation->CreatePropertyAnimation<double>(value, std::move(callback));
+    EXPECT_NE(svgAnimation->animator_, nullptr);
+    svgAnimation->animator_->Finish();
+    EXPECT_EQ(svgAnimation->animator_->IsStopped(), true);
+
+    svgAnimation->CreatePropertyAnimation<double>(value, std::move(callback));
+    EXPECT_EQ(svgAnimation->animator_->IsStopped(), false);
+}
+
+/**
+ * @tc.name: ParseAnimation003
+ * @tc.desc: Create Animation SetAttr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseAnimation003, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::MOTION);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    /* *
+     * @tc.steps: step1. call SetAttr
+     * @tc.expected: Attribute set successfully
+     */
+    svgAnimation->SetAttr("attributeName", "fill");
+    svgAnimation->UpdateAttr();
+    auto svg = SvgSvg::Create();
+    EXPECT_NE(svg, nullptr);
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "fill");
+
+    svgAnimation->SetAttr("calcmode", "paced");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetCalcMode(), CalcMode::PACED);
+
+    svgAnimation->SetAttr("from", "blue");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetFrom(), "blue");
+
+    svgAnimation->SetAttr("to", "red");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetTo(), "red");
+
+    svgAnimation->SetAttr("path", "M0 0 L100 100");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetPath(), "M0 0 L100 100");
+
+    svgAnimation->SetAttr("rotate", "45");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetRotate(), "45");
+}
+
+/**
+ * @tc.name: ParseNodeTest004
+ * @tc.desc: SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create svg node
+     */
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+
+    /* *
+     * @tc.steps: step2. set strokeLinecap
+     * @tc.expected: The property is set successfully
+     */
+    svgNode->SetAttr("strokeLinecap", "butt");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineCap(), LineCapStyle::BUTT);
+
+    /* *
+     * @tc.steps: step3. set strokeLinejoin
+     * @tc.expected: The property is set successfully
+     */
+    svgNode->SetAttr("strokeLinejoin", "miter");
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineJoin(), LineJoinStyle::MITER);
+
+    /* *
+     * @tc.steps: step4. set fill
+     * @tc.expected: The property is set successfully
+     */
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    svgNode->SetAttr("fill", "#003153");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetColor().GetValue(), 0xFF003153);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseStopTest001
+ * @tc.desc: parse stop label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    /* *
+     * @tc.steps: step1. create svgStop node
+     */
+    auto svgNode = SvgStop::Create();
+    auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
+
+    /* *
+     * @tc.steps: step2. parse stop-color
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgba(0,49,83,255)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgb(0,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    /* *
+     * @tc.steps: step3. parse stopcolor
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "rgb(49,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF313153);
+
+    /* *
+     * @tc.steps: step4. parse stopOpacity
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "1.0");
+    EXPECT_FALSE(GreatOrEqual(svgStop->stopAttr_.gradientColor.GetOpacity(), 1.0));
+
+    /* *
+     * @tc.steps: step5. parse properties that do not belong to SvgStop
+     * @tc.expected: The property is parse unsuccessfully
+     */
+    bool parseResult = svgStop->ParseAndSetSpecializedAttr("strokeLinecap", "butt");
+    EXPECT_FALSE(parseResult);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseFeTest001
+ * @tc.desc: parse fe label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create fe node
+     */
+    auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
+
+    svgFe->ParseAndSetSpecializedAttr("color-interpolation-filters", "auto");
+    EXPECT_EQ(svgFe->feAttr_.colorInterpolationType, SvgColorInterpolationType::AUTO);
+
+    svgFe->ParseAndSetSpecializedAttr("color-interpolation-filters", "SRGB");
+    EXPECT_EQ(svgFe->feAttr_.colorInterpolationType, SvgColorInterpolationType::AUTO);
+
+    svgFe->ParseAndSetSpecializedAttr("height", "1px");
+    EXPECT_EQ(svgFe->feAttr_.height, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("width", "1px");
+    EXPECT_EQ(svgFe->feAttr_.width, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("x", "1px");
+    EXPECT_EQ(svgFe->feAttr_.x, 1.0_px);
+
+    svgFe->ParseAndSetSpecializedAttr("y", "1px");
+    EXPECT_EQ(svgFe->feAttr_.y, 1.0_px);
+
+    bool parseResult = svgFe->ParseAndSetSpecializedAttr("strokeLinecap", "butt");
+    EXPECT_FALSE(parseResult);
+
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
+    EXPECT_EQ(svgFe->effectFilterArea_.Top(), 0.0f);
+    EXPECT_EQ(svgFe->effectFilterArea_.Left(), 0.0f);
 }
 } // namespace OHOS::Ace::NG
