@@ -738,6 +738,11 @@ public:
         return bindMenuStatus_;
     }
 
+    bool WillRecreateGesture() const
+    {
+        return recreateGesture_;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
