@@ -1193,4 +1193,14 @@ void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src)
         default: LOGE("Unexpected enum value in Ark_ChainStyle: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src)
+{
+    switch (src) {
+        case ARK_NAV_DESTINATION_MODE_STANDARD: dst = NavDestinationMode::STANDARD; break;
+        case ARK_NAV_DESTINATION_MODE_DIALOG: dst = NavDestinationMode::DIALOG; break;
+        default: LOGE("Unexpected enum value in Ark_NavDestinationMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
