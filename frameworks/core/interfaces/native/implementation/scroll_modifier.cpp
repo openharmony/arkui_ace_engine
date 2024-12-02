@@ -26,7 +26,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-#include "core/interfaces/arkoala/utility/callback_helper.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -153,16 +153,8 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto call = [arkCallback = CallbackHelper(*value)](ScrollEdge edgeIn) {
-        /*
         auto edge = Converter::ArkValue<Ark_Edge>(edgeIn);
-        // need a data check
-        Ark_Edge badEdge = static_cast<Ark_Edge>(-1);
-        if (badEdge == edge) {
-            edge = Ark_Edge::ARK_EDGE_TOP;
-        }
-        */
-        auto edge = ValidateArkEnum<Ark_Edge>(Converter::ArkValue<Ark_Edge>(edgeIn));
-        arkCallback.Invoke(edge.value_or(Ark_Edge::ARK_EDGE_TOP));
+        arkCallback.Invoke(edge);
     };
     ScrollModelNG::SetOnScrollEdge(frameNode, call);
 }
