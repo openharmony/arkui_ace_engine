@@ -66,6 +66,21 @@ public:
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void UpdateWant(FrameNode* frameNode, const AAFwk::Want& want, bool isTransferringCaller, bool densityDpi);
+    static void SetOnError(FrameNode* frameNode,
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
+    static void SetOnReceive(FrameNode* frameNode,
+        std::function<void(const AAFwk::WantParams&)>&& onReceive,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
+    static void SetOnRelease(FrameNode* frameNode, std::function<void(int32_t)>&& onRelease);
+    static void SetOnRemoteReady(FrameNode* frameNode,
+        std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady);
+    static void SetOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
+    static void SetOnTerminated(FrameNode* frameNode,
+        std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);
 };

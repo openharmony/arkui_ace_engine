@@ -17,6 +17,60 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "want.h"
+#endif //WINDOW_SCENE_SUPPORTED
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+#ifdef WINDOW_SCENE_SUPPORTED
+AAFwk::Want CreateWant(const Ark_Want* want)
+{
+    AAFwk::Want aaFwkWant;
+    CHECK_NULL_RETURN(want, aaFwkWant);
+    auto bundleName = Converter::OptConvert<std::string>(want->bundleName);
+    auto abilityName = Converter::OptConvert<std::string>(want->abilityName);
+    auto deviceId = Converter::OptConvert<std::string>(want->deviceId);
+    auto moduleName = Converter::OptConvert<std::string>(want->moduleName);
+    aaFwkWant.SetElementName(
+        deviceId.value_or(""), bundleName.value_or(""), abilityName.value_or(""), moduleName.value_or(""));
+    auto uri = Converter::OptConvert<std::string>(want->uri);
+    if (uri) {
+        aaFwkWant.SetUri(uri.value());
+    }
+    auto type = Converter::OptConvert<std::string>(want->type);
+    if (type) {
+       aaFwkWant.SetType(type.value());
+    }
+    auto flags = Converter::OptConvert<int32_t>(want->flags);
+    if (flags) {
+        aaFwkWant.SetFlags(flags.value());
+    }
+    auto action = Converter::OptConvert<std::string>(want->action);
+    if (action) {
+        aaFwkWant.SetAction(action.value());
+    }
+    LOGE("CreateWant - 'want->parameters' is not supported");
+    auto entitiesArray = Converter::OptConvert<Array_String>(want->entities);
+    if (entitiesArray) {
+        auto entities = Converter::Convert<std::vector<std::string>>(entitiesArray.value());
+        aaFwkWant.SetEntities(entities);
+    }
+    return aaFwkWant;
+}
+#endif //WINDOW_SCENE_SUPPORTED
+}
+}
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef WINDOW_SCENE_SUPPORTED
+const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
+#endif //WINDOW_SCENE_SUPPORTED
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionComponentModifier {
 Ark_NativePointer ConstructImpl()
@@ -31,9 +85,28 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(want);
-    //auto convValue = Converter::OptConvert<type>(want); // for enums
-    //UIExtensionComponentModelNG::SetSetUIExtensionComponentOptions(frameNode, convValue);
+    CHECK_NULL_VOID(want);   
+    bool isTransferringCaller = false;
+    bool densityDpi = false;
+    auto extensionOptionOpt = Converter::OptConvert<Ark_UIExtensionOptions>(*options);
+    if (extensionOptionOpt) {
+        auto extensionOption = extensionOptionOpt.value();
+        LOGE("UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl - "
+            "'UIExtensionOptions::areaChangePlaceholder' is not supported");
+        LOGE("UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl - "
+            "'UIExtensionOptions::placeholder' is not supported");
+        auto isTransferringCallerOpt = Converter::OptConvert<bool>(extensionOption.isTransferringCaller);
+        if (isTransferringCallerOpt) {
+            isTransferringCaller = isTransferringCallerOpt.value();
+        }
+        auto dpiFollowStrategy = Converter::OptConvert<Ark_DpiFollowStrategy>(extensionOption.dpiFollowStrategy);
+        if (dpiFollowStrategy) {
+            densityDpi = (dpiFollowStrategy.value() == ARK_DPI_FOLLOW_STRATEGY_FOLLOW_HOST_DPI) ? true : false;
+        }
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    UIExtensionModelNG::UpdateWant(frameNode, CreateWant(want), isTransferringCaller, densityDpi);
+#endif //WINDOW_SCENE_SUPPORTED    
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
@@ -43,8 +116,19 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto onRemoteReady =
+        [arkCallback = CallbackHelper(*value)](const RefPtr<UIExtensionProxy>& proxy) {
+            auto accessor = GetUIExtensionProxyAccessor();
+            CHECK_NULL_VOID(accessor && accessor->ctor);
+            auto peer = (*accessor->ctor)();
+            CHECK_NULL_VOID(peer);
+            arkCallback.Invoke(Ark_Materialized{ .ptr = peer });
+            auto finalyzer = reinterpret_cast<void (*)(UIExtensionProxyPeer *)>(accessor->getFinalizer());
+            finalyzer(peer);
+        };
+    UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+#endif //WINDOW_SCENE_SUPPORTED    
 }
 void OnReceiveImpl(Ark_NativePointer node,
                    const Ark_CustomObject* value)
@@ -52,8 +136,7 @@ void OnReceiveImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnReceive(frameNode, convValue);
+    LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
 void OnResultImpl(Ark_NativePointer node,
                   const Callback_Literal_Number_code_Want_want_Void* value)
@@ -61,8 +144,40 @@ void OnResultImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnResult(frameNode, convValue);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto onResult =
+        [arkCallback = CallbackHelper(*value)](int32_t code, const AAFwk::Want& want) {
+            Ark_Want arkWant;
+            auto bundleName = want.GetBundle();
+            arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
+            LOGE("UIExtensionComponentInterfaceModifier::OnResultImpl - "
+                "Ark_Want::abilityName is not supported");
+            auto deviceId = want.GetDeviceId();
+            arkWant.deviceId = Converter::ArkValue<Opt_String>(deviceId);
+            auto uri = want.GetUriString();
+            arkWant.uri = Converter::ArkValue<Opt_String>(uri);
+            auto type = want.GetType();
+            arkWant.type = Converter::ArkValue<Opt_String>(type);
+            auto flags = static_cast<int32_t>(want.GetFlags());
+            arkWant.flags = Converter::ArkValue<Opt_Number>(flags);
+            auto action = want.GetAction();
+            arkWant.action = Converter::ArkValue<Opt_String>(action);
+            LOGE("UIExtensionComponentInterfaceModifier::OnResultImpl - "
+                "Ark_Want::parameters is not supported");
+            auto entities = want.GetEntities();
+            Converter::ArkArrayHolder<Array_String> stringHolder(entities);
+            Array_String stringArrayValues = stringHolder.ArkValue();
+            arkWant.entities = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
+            auto moduleName = want.GetModuleName();
+            arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
+            
+            Ark_Literal_Number_code_Want_want parameter;
+            parameter.code = Converter::ArkValue<Ark_Number>(code);
+            parameter.want = Converter::ArkValue<Opt_Want>(arkWant);
+            arkCallback.Invoke(parameter);
+        };
+    UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
+#endif //WINDOW_SCENE_SUPPORTED 
 }
 void OnReleaseImpl(Ark_NativePointer node,
                    const Callback_Number_Void* value)
@@ -70,8 +185,14 @@ void OnReleaseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnRelease(frameNode, convValue);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto onRelease =
+        [arkCallback = CallbackHelper(*value)](int32_t index) {
+            Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+            arkCallback.Invoke(arkIndex);
+        };
+    UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
+#endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
                  const Ark_CustomObject* value)
@@ -79,8 +200,7 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnError(frameNode, convValue);
+    LOGE("UIExtensionComponentInterfaceModifier::OnErrorImpl - is not supported");
 }
 void OnTerminatedImpl(Ark_NativePointer node,
                       const Callback_TerminationInfo_Void* value)
@@ -88,8 +208,41 @@ void OnTerminatedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //UIExtensionComponentModelNG::SetOnTerminated(frameNode, convValue);
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto onTerminated =
+        [arkCallback = CallbackHelper(*value)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
+            auto want = wantWrape->GetWant();
+            Ark_Want arkWant;
+            auto bundleName = want.GetBundle();
+            arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
+            LOGE("UIExtensionComponentInterfaceModifier::OnTerminatedImpl - "
+                "Ark_Want::abilityName is not supported");
+            auto deviceId = want.GetDeviceId();
+            arkWant.deviceId = Converter::ArkValue<Opt_String>(deviceId);
+            auto uri = want.GetUriString();
+            arkWant.uri = Converter::ArkValue<Opt_String>(uri);
+            auto type = want.GetType();
+            arkWant.type = Converter::ArkValue<Opt_String>(type);
+            auto flags = static_cast<int32_t>(want.GetFlags());
+            arkWant.flags = Converter::ArkValue<Opt_Number>(flags);
+            auto action = want.GetAction();
+            arkWant.action = Converter::ArkValue<Opt_String>(action);
+            LOGE("UIExtensionComponentInterfaceModifier::OnTerminatedImpl - "
+                "Ark_Want::parameters is not supported");
+            auto entities = want.GetEntities();
+            Converter::ArkArrayHolder<Array_String> stringHolder(entities);
+            Array_String stringArrayValues = stringHolder.ArkValue();
+            arkWant.entities = Converter::ArkValue<Opt_Array_String>(stringArrayValues);
+            auto moduleName = want.GetModuleName();
+            arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
+
+            Ark_TerminationInfo terminatedInfo;
+            terminatedInfo.code = Converter::ArkValue<Ark_Number>(code);
+            terminatedInfo.want = Converter::ArkValue<Opt_Want>(arkWant);
+            arkCallback.Invoke(terminatedInfo);
+        };
+    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+#endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentAttributeModifier
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()

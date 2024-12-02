@@ -99,6 +99,7 @@ public:
     }
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
+    void UpdateSessionWraper(bool isTransferringCaller);
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -145,6 +146,7 @@ public:
     void NotifyBackground();
     void NotifyDestroy();
     int32_t GetInstanceId() const;
+    bool GetIsTransferringCaller();
     int32_t GetSessionId() const;
     int32_t GetNodeId() const;
     int32_t GetUiExtensionId() override;
