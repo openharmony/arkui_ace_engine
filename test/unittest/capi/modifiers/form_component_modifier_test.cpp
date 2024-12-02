@@ -447,7 +447,7 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnAcquired, nullptr);
 
@@ -487,7 +487,7 @@ HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnError, nullptr);
 
@@ -527,7 +527,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnUninstall, nullptr);
 

@@ -176,7 +176,8 @@ void OnAcquiredImpl(Ark_NativePointer node,
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnAcquired(frameNode, std::move(onAcquired));
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
+        "for implementation of int64_t functionality.");
 #endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -206,7 +207,8 @@ void OnErrorImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnError(frameNode, std::move(onError));
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
+        "for implementation of int64_t functionality.");
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
@@ -247,7 +249,8 @@ void OnUninstallImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnUninstall(frameNode, std::move(onUninstall));
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
+        "for implementation of int64_t functionality.");
 #endif // FORM_SUPPORTED
 }
 void OnLoadImpl(Ark_NativePointer node,
