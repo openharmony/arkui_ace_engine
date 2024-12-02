@@ -725,7 +725,15 @@ RefPtr<PopupParam> ServiceCollaborationAceCallback::GetPopupParam(bool isShow, S
     popupParam->SetUseCustomComponent(true);
     popupParam->SetBackgroundColor(Color::WHITE);
     popupParam->SetTargetSpace(Dimension(static_cast<float>(TARGET_SPACE), DimensionUnit::VP));
-    popupParam->SetOnStateChange(std::move(onStateChange));
+    popupParam->SetOnStateChange(
+        [weakHelper = WeakClaim(this), onStateChange](const std::string& isShow) {
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(helper);
+        bool show = JsonUtil::ParseJsonString(isShow)->GetBool("isVisible");
+        if (!show && !helper->isMultiImage_) {
+            onStateChange(isShow);
+        }
+    });
     Shadow shadow;
     auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
@@ -767,9 +775,10 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         return 0;
     }
     if (code == MULTI_PHOTO_SENDING_BACK) {
-        auto popupParam = GetPopupParam(true, onStateChange_);
-        auto row = CreateCustomPopUpNode(category, "");
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        if (!isMultiImage_) {
+            isMultiImage_ = true;
+            RemovePopupNode();
+        }
         return 0;
     }
     if (code == REMOTE_CANCEL) {
@@ -777,6 +786,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         info_ = nullptr;
         return 0;
     }
+    isMultiImage_ = false;
     RemovePopupNode();
     auto toastPipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(toastPipeline, -1);
@@ -851,6 +861,7 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
             callback->RemovePopupNode();
             callback->isTransmit_ = false;
             callback->info_ = nullptr;
+            callback->isMultiImage_ = false;
         }
     });
     auto taskExecutor = context->GetTaskExecutor();
