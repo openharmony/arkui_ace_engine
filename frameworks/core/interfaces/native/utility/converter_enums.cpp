@@ -935,6 +935,19 @@ void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src)
 }
 
 template<>
+void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src)
+{
+    dst = XComponentType::UNKNOWN;
+    switch (src) {
+        case ARK_XCOMPONENT_TYPE_SURFACE: dst = XComponentType::SURFACE; break;
+        case ARK_XCOMPONENT_TYPE_COMPONENT: dst = XComponentType::COMPONENT; break;
+        case ARK_XCOMPONENT_TYPE_TEXTURE: dst = XComponentType::TEXTURE; break;
+        case ARK_XCOMPONENT_TYPE_NODE: dst = XComponentType::NODE; break;
+        default: LOGE("Unexpected enum value in Ark_XComponentType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src)
 {
     switch (src) {

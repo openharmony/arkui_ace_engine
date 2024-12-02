@@ -324,7 +324,13 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
+#ifdef XCOMPONENT_SUPPORTED
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif //XCOMPONENT_SUPPORTED
 }
 
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
