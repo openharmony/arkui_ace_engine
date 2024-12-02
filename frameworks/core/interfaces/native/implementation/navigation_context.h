@@ -35,6 +35,9 @@ public:
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
 
+using NavDestBuildCallback = CallbackHelper<Callback_String_Unknown_Void>;
+
+
 enum class LaunchMode {
     STANDARD = 0,
     MOVE_TO_TOP_SINGLETON = 1,
@@ -171,7 +174,6 @@ protected:
     const PathInfo* GetPathInfo(size_t index) const;
 };
 
-
 // this repeats the functionality of JSNavigationStack, interacts with PathStack
 class NavigationStack : public ::OHOS::Ace::NG::NavigationStack, public PathStack {
     DECLARE_ACE_TYPE(NavigationStack, ::OHOS::Ace::NG::NavigationStack);
@@ -192,7 +194,7 @@ public:
     void SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj);
     const RefPtr<PathStack>& GetDataSourceObj();
 
-    // void SetNavDestBuilderFunc(const JSRef<JSFunc>& navDestBuilderFunc);
+    void SetNavDestBuilderFunc(const NavDestBuildCallback& navDestBuilderFunc);
 
     bool IsEmpty() override;
     void Pop() override;
@@ -239,7 +241,7 @@ public:
     int32_t GetRecoveredDestinationMode(int32_t index) override;
 protected:
     RefPtr<PathStack> dataSourceObj_;
-    // JSRef<JSFunc> navDestBuilderFunc_;
+    NavDestBuildCallback navDestBuilderFunc_;
     // std::function<void()> onStateChangedCallback_;
 
 private:
@@ -253,16 +255,17 @@ private:
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
     // JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
-    bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;
     // static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
     //     std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
-    // int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
-    //     RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
-    // bool LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node,
-    //     RefPtr<NG::NavDestinationGroupNode>& desNode);
-    bool GetFlagByIndex(int32_t index) const;
+    int LoadDestination(const std::string& name, const ParamType& param, const WeakPtr<NG::UINode>& customNode,
+        RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
+    bool LoadDestinationByBuilder(const std::string& name, const ParamType& param, RefPtr<NG::UINode>& node,
+        RefPtr<NG::NavDestinationGroupNode>& desNode);
+    bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
+
+    // bool GetFlagByIndex(int32_t index) const;
     // bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
     bool GetNeedUpdatePathInfo(int32_t index);

@@ -352,8 +352,12 @@ void NavDestinationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavigationModelNG::SetNavDestination(frameNode, convValue);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto stack = pattern->GetNavigationStack();
+    auto navContextStack = AceType::DynamicCast<Nav::NavigationStack>(stack);
+    CHECK_NULL_VOID(navContextStack);
+    navContextStack->SetNavDestBuilderFunc(CallbackHelper<Callback_String_Unknown_Void>(*value));
 }
 void CustomNavContentTransitionImpl(Ark_NativePointer node,
                                     const Type_NavigationAttribute_customNavContentTransition_delegate* value)

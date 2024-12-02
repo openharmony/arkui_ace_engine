@@ -56,6 +56,10 @@ public:
             (*callback_.call)(callback_.resource.resourceId, std::forward<Params>(args)...);
         }
     }
+
+    bool IsValid() {
+        return callback_.call != nullptr;
+    }
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},
