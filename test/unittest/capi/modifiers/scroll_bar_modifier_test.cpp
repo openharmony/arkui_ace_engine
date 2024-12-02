@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
-#include "core/interfaces/native/implementation/scroller_peer_impl.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
@@ -111,7 +110,7 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, Test
     auto peer = reinterpret_cast<ScrollerPeer*>(options.value.scroller.ptr);
     ASSERT_NE(peer, nullptr);
     EXPECT_EQ(peer->GetScrollBarProxy(), proxy);
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = AceType::DynamicCast<NG::ScrollBarPattern>(frameNode->GetPattern());
     ASSERT_NE(pattern, nullptr);
