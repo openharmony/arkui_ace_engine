@@ -54,7 +54,7 @@
         "Ark_TextContentStyle": "TextContentStyle",
         "Ark_TextDecorationStyle": "TextDecorationStyle",
         "Ark_TextDecorationType": "TextDecoration",
-        "Ark_TextDeleteDirection": "TextDeleteDirection"
+        "Ark_TextDeleteDirection": "TextDeleteDirection",
     },
     "fixtures": [
         {
@@ -360,6 +360,20 @@
             "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct"],
         },
         {
+            "name": "LengthPosNonPct",
+            "type": "Ark_Length",
+            "validValues": [
+                ["123.0_vp", "123.00vp"],
+                ["1.23_vp", "1.23vp"],
+                ["123.0_fp", "123.00fp"],
+                ["1.23_fp", "1.23fp"],
+                ["123.0_px", "123.00px"],
+                ["1.23_px", "1.23px"],
+            ],
+            "invalidValues": ["-1", "-2.f", "-2.3_vp", "-4.5_fp", "-5.6_px", "0.5_pct", "0.0_pct", "-0.8_pct",
+                "0.0_vp", "0.0_fp", "0.0_px"],
+        },
+        {
             "name": "LengthNonPct",
             "type": "Ark_Length",
             "validValues": [
@@ -517,6 +531,33 @@
                 ["\"-123lpx\"", "-123"],
                 ["\"0lpx\"", "0"],
             ],
+        },
+        {
+            "name": "CopyOptions",
+            "type": "Ark_CopyOptions",
+            "validValues": [
+                ["ARK_COPY_OPTIONS_NONE", "CopyOptions.None"],
+                ["ARK_COPY_OPTIONS_IN_APP", "CopyOptions.InApp"],
+                ["ARK_COPY_OPTIONS_LOCAL_DEVICE", "CopyOptions.Local"],
+                ["ARK_COPY_OPTIONS_CROSS_DEVICE", "CopyOptions.Distributed"],
+            ],
+            "invalidValues": [
+                "static_cast<Ark_CopyOptions>(-1)",
+                "static_cast<Ark_CopyOptions>(INT_MAX)"
+            ]
+        },
+        {
+            "name": "DummyColoringStrategy",
+            "type": "Ark_ColoringStrategy",
+            "validValues": []
+        },
+        {
+            "name": "ShadowType",
+            "type": "Ark_ShadowType",
+            "validValues": [
+                ["ARK_SHADOW_TYPE_COLOR", "0"],
+                ["ARK_SHADOW_TYPE_BLUR", "1"],
+            ]
         },
         {
             "name": "DimensionsNumNonNeg",
@@ -3058,6 +3099,11 @@
                     "fixtures": ["BaselineOffsetNum", "BaselineOffsetStr"]
                 },
                 {
+                    "name": "copyOption",
+                    "default": "CopyOptions.None",
+                    "fixtures": ["CopyOptions"]
+                },
+                {
                     "name": "decoration",
                     "type": "DecorationStyleInterface",
                     "attributes": [
@@ -3092,6 +3138,31 @@
                     "default": "true",
                 },
                 {
+                    "name": "font",
+                    "arguments": ["^font", "^",],
+                    "attributes": [
+                        {
+                            "name": "size",
+                            "default": "16.00fp",
+                            "fixtures": ["LengthPosNonPct"],
+                        },
+                        {
+                            "name": "weight",
+                            "default": "FontWeight.Normal",
+                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                        },
+                        {
+                            "name": "family",
+                            "default": "Harmony\"\"OS Sans",
+                            "type": "FontFamily",
+                        },
+                        {
+                            "name": "style",
+                            "default": "FontStyle.Normal",
+                        },
+                    ]
+                },
+                {
                     "name": "fontColor",
                     "default": "#FF000000"
                 },
@@ -3099,6 +3170,11 @@
                     "name": "fontFamily",
                     "default": "Harmony\"\"OS Sans",
                     "type": "FontFamily"
+                },
+                {
+                    "name": "fontFeature",
+                    "default": "",
+                    "fixtures": ["FontFeature"]
                 },
                 {
                     "name": "fontSize",
@@ -3138,6 +3214,11 @@
                 {
                     "name": "lineHeight",
                     "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
+                },
+                {
+                    "name": "lineSpacing",
+                    "default": "0.00vp",
+                    "fixtures": ["LengthMetricsNonNeg"]
                 },
                 {
                     "name": "maxLines",
@@ -3183,6 +3264,38 @@
                     "fixtures": ["TextSelectableMode"]
                 },
                 {
+                    "name": "textShadow",
+                    "attributes": [
+                        {
+                            "name": "radius",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowRadiusNumber", "ShadowRadiusRes"]
+                        },
+                        {
+                            "name": "type",
+                            "default": "0",
+                            "fixtures": ["ShadowType"]
+                        },
+                        {
+                            "name": "color",
+                            "default": "#FF000000",
+                            // Coloring strategy is not supported,
+                            // so empty fixture is used for Ark_ColoringStrategy type.
+                            "fixtures": ["ColorsStr", "ColorsRes", "ColorsEnum", "DummyColoringStrategy"]
+                        },
+                        {
+                            "name": "offsetX",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                        {
+                            "name": "offsetY",
+                            "default": "0.000000",
+                            "fixtures": ["ShadowOffsetNumber", "ShadowOffsetRes"]
+                        },
+                    ]
+                },
+                {
                     "name": "textOverflow",
                     "default": "TextOverflow.Clip",
                 },
@@ -3193,55 +3306,18 @@
                 },
             ],
             "disable": [
-                "setCopyOptionTestCopyOptionInvalidValues",
-                "setCopyOptionTestCopyOptionValidValues",
-                "setCopyOptionTestDefaultValues",
                 "setDataDetectorConfigTestDefaultValues",
                 "setDataDetectorConfigTestValidValues",
-                "setFont0TestDefaultValues",
-                "setFont0TestFontFamilyInvalidValues",
-                "setFont0TestFontFamilyValidValues",
-                "setFont0TestFontSizeInvalidValues",
-                "setFont0TestFontSizeValidValues",
-                "setFont0TestFontStyleInvalidValues",
-                "setFont0TestFontWeightInvalidValues",
-                "setFont0TestFontWeightValidValues",
-                "setFont1TestDefaultValues",
-                "setFont1TestFontFontValueFamilyInvalidValues",
-                "setFont1TestFontFontValueFamilyValidValues",
-                "setFont1TestFontFontValueSizeInvalidValues",
-                "setFont1TestFontFontValueSizeValidValues",
-                "setFont1TestFontFontValueStyleInvalidValues",
-                "setFont1TestFontFontValueStyleValidValues",
-                "setFont1TestFontFontValueWeightInvalidValues",
-                "setFont1TestFontFontValueWeightValidValues",
-                "setFont1TestFontOptionsEnableVariableFontWeightInvalidValues",
-                "setFont1TestFontOptionsEnableVariableFontWeightValidValues",
-                "setFontFeatureTestDefaultValues",
-                "setFontFeatureTestFontFeatureValidValues",
                 "setTextOptionsTestDefaultValues",
                 "setTextOptionsTestValidValues",
-                "setTextShadowTestDefaultValues",
-                "setTextShadowTestTextShadowShadowOptionsColorValidValues",
-                "setTextShadowTestTextShadowShadowOptionsColorInvalidValues",
-                "setTextShadowTestTextShadowShadowOptionsFillValidValues",
-                "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
-                "setTextShadowTestTextShadowShadowOptionsOffsetXValidValues",
-                "setTextShadowTestTextShadowShadowOptionsOffsetXInvalidValues",
-                "setTextShadowTestTextShadowShadowOptionsOffsetYValidValues",
-                "setTextShadowTestTextShadowShadowOptionsOffsetYInvalidValues",
-                "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
-                "setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues",
-                "setTextShadowTestTextShadowShadowOptionsTypeValidValues",
-                "setTextShadowTestTextShadowShadowOptionsTypeInvalidValues",
 
                 // Generated tests do not match json structure
+                "setFont1TestDefaultValues",
+                "setFont1TestOptionsEnableVariableFontWeightInvalidValues",
+                "setFont1TestOptionsEnableVariableFontWeightValidValues",
                 "setTextOverflowTestDefaultValues",
                 "setTextOverflowTestTextOverflowOverflowInvalidValues",
                 "setTextOverflowTestTextOverflowOverflowValidValues",
-
-                "setLineSpacingTestDefaultValues", // new attribute
-                "setLineSpacingTestValidValues", // new attribute
 
                 // Default value is not clear
                 "setLetterSpacingTestDefaultValues",
@@ -3263,6 +3339,11 @@
                 "setSelectionTestDefaultValues",
                 "setSelectionTestSelectionSelectionEndValidValues",
                 "setSelectionTestSelectionSelectionStartValidValues",
+
+                // Ark_ShadowOptions.fill attribute is not supported
+                "setTextShadowTestDefaultValues",
+                "setTextShadowTestTextShadowShadowOptionsFillValidValues",
+                "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
@@ -3777,10 +3858,6 @@
             "disable": [
                 "setTextTimerOptionsTestValidValues",
                 "setFontFamilyTestFontFamilyValidValues", // Incorrect resource processing
-                "setTextShadowTestDefaultValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowShadowOptionsTypeValidValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowShadowOptionsTypeInvalidValues", // Shadow type has incorrect value in json
-                "setTextShadowTestTextShadowShadowOptionsColorValidValues" // Shadow coloring strategy attribute is missed in json
             ],
             "attributes": [
                 {
@@ -3833,12 +3910,15 @@
                         },
                         {
                             "name": "type",
-                            "default": "ShadowType.Color"
+                            "default": "0",
+                            "fixtures": ["ShadowType"]
                         },
                         {
                             "name": "color",
                             "default": "#FF000000",
-                            "fixtures": ["ColorsStr", "ColorsRes", "ColorsEnum"]
+                            // Coloring strategy is not supported,
+                            // so empty fixture is used for Ark_ColoringStrategy type.
+                            "fixtures": ["ColorsStr", "ColorsRes", "ColorsEnum", "DummyColoringStrategy"]
                         },
                         {
                             "name": "offsetX",

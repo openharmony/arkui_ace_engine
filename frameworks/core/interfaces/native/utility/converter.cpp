@@ -496,6 +496,13 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+std::u16string Convert(const Ark_String& src)
+{
+    auto str8 =  Converter::Convert<std::string>(src);
+    return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
 std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 {
     return { Convert<Shadow>(src) };
@@ -698,12 +705,6 @@ template<>
 Ark_NativePointer Convert(const Ark_Materialized& src)
 {
     return src.ptr;
-}
-
-template<>
-ShadowType Convert(const Ark_ShadowType& src)
-{
-    return static_cast<ShadowType>(src);
 }
 
 template<>
@@ -958,6 +959,15 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
     double result;
     if (StringUtils::StringToDouble(value, result)) {
         dst = result;
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
+{
+    auto str8 = OptConvert<std::string>(src);
+    if (str8) {
+        dst = UtfUtils::Str8ToStr16(str8.value());
     }
 }
 

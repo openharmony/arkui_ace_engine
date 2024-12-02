@@ -90,12 +90,12 @@ public:
     void SetEnableHapticFeedback(bool state) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
-    static void InitText(FrameNode* frameNode, std::u16string& value);
+    static void InitText(FrameNode* frameNode, const std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>&);
     static void SetVariableFontWeight(FrameNode* frameNode, const std::optional<int32_t>& value);
-    static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
+    static void SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
@@ -114,13 +114,14 @@ public:
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
-    static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
-    static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
+    static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption);
+    static void SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value);
     static void SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBaselineOffset(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
+    static void SetFont(FrameNode* frameNode, const std::optional<Font>& value);
     static void SetWordBreak(FrameNode* frameNode, const std::optional<WordBreak>& value);
     static void SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& value);
     static void SetEllipsisMode(FrameNode* frameNode, const std::optional<EllipsisMode>& value);
