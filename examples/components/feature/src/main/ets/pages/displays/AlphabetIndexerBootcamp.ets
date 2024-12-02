@@ -87,7 +87,7 @@ export struct AlphabetIndexerBootcamp {
   @State enableAlphabetIndexerPopupBackgroundBlurStyle: boolean = false;
   @State alphabetIndexerPopupBackgroundBlurStyle: BlurStyle = BlurStyle.COMPONENT_REGULAR;
   @State enableAlphabetIndexerPopupTitleBackground: boolean = false;
-  @State alphabetIndexerPopupTitleBackground: ResourceColor = "#0c182431";
+  @State alphabetIndexerPopupTitleBackground: ResourceColor = '#0c182431';
   @State enableAlphabetIndexerEnableHapticFeedback: boolean = false;
   @State alphabetIndexerEnableHapticFeedback: boolean = true;
 
@@ -127,7 +127,8 @@ export struct AlphabetIndexerBootcamp {
         .popupPosition({x: this.alphabetIndexerPopupPositionX, y: this.alphabetIndexerPopupPositionY})
         .popupSelectedColor(this.alphabetIndexerPopupSelectedColor)
         .popupUnselectedColor(this.alphabetIndexerPopupUnselectedColor)
-        .popupItemFont({size: this.alphabetIndexerPopupItemFontSize, style: this.alphabetIndexerPopupItemFontStyle, weight: this.alphabetIndexerPopupItemFontWeight})
+        .popupItemFont({size: this.alphabetIndexerPopupItemFontSize, style: this.alphabetIndexerPopupItemFontStyle,
+          weight: this.alphabetIndexerPopupItemFontWeight})
         .popupItemBackgroundColor(this.alphabetIndexerPopupItemBackgroundColor)
         .autoCollapse(this.alphabetIndexerAutoCollapse)
         .popupItemBorderRadius(this.alphabetIndexerPopupItemBorderRadius)
