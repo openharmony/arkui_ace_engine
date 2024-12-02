@@ -166,11 +166,12 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
     TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        "FrameNode(%{public}s/%{public}d) notNeed SoftKeyboard, Keep:%{public}d, Need:%{public}d)",
         frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
+            inputMethod->RequestHideInput();
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
@@ -245,10 +246,11 @@ bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent
     CHECK_NULL_RETURN(keyEvent, false);
     if (!SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            SEC_PLD(, "KeyEvent Process to inject, eventInfo: id:%{public}d, "
             "keyEvent info: keyCode is %{public}d, "
-            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64),
+            SEC_PARAM(keyEvent->GetId(), keyEvent->GetKeyCode(),
+            keyEvent->GetKeyAction(), keyEvent->GetActionTime()));
     }
 
     auto container = Container::Current();

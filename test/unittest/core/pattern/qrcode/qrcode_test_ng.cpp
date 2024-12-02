@@ -62,6 +62,7 @@ const OptionalSize<float> PARENT_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const OptionalSize<float> SELF_IDEAL_SIZE_1(QR_CODE_WIDTH, QR_CODE_HEIGHT);
 const OptionalSize<float> SELF_IDEAL_SIZE_2(QR_CODE_HEIGHT, QR_CODE_WIDTH);
 const uint32_t QR_CODE_VALUE_MAX_LENGTH = 256;
+const uint32_t QR_CODE_VALUE_MAX_LENGTH_NEW = 512;
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
@@ -739,5 +740,89 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
     EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
     qrcodeModifier->SetQRCodeBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
     EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
+}
+
+/**
+ * @tc.name: QRCodeMaxLengthTest1
+ * @tc.desc: test modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeMaxLengthTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    std::string value = CREATE_VALUE;
+    for (uint32_t i = 0; i <= 600; i++) {
+        value.push_back('a');
+    }
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateValue(value);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: steps2. check the length of qrCodeValue
+     * @tc.expected: steps2. the the length of qrCodeValue is 512
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    auto qrcodeLength = qrCodeModifier->value_->Get().length();
+    EXPECT_EQ(qrcodeLength, QR_CODE_VALUE_MAX_LENGTH_NEW);
+}
+
+/**
+ * @tc.name: QRCodeMaxLengthTest2
+ * @tc.desc: test modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeMaxLengthTest2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodePaintMethod = AceType::DynamicCast<QRCodePaintMethod>(qrCodePattern->CreateNodePaintMethod());
+    ASSERT_NE(qrCodePaintMethod, nullptr);
+    std::string value = CREATE_VALUE;
+    for (uint32_t i = 0; i < 300; i++) {
+        value.push_back('a');
+    }
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    qrcodePaintProperty->UpdateValue(value);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    /**
+     * @tc.steps: steps2. check the length of qrCodeValue
+     * @tc.expected: steps2. the the length of qrCodeValue can over 256
+     */
+    qrCodePaintMethod->UpdateContentModifier(paintWrapper);
+    auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    auto qrcodeLength = qrCodeModifier->value_->Get().length();
+    EXPECT_EQ(qrcodeLength, 311);
 }
 } // namespace OHOS::Ace::NG

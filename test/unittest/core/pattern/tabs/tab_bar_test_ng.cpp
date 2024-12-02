@@ -405,7 +405,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern_->tabBarType_[0] = true;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::CUSTOM_BUILDER;
     tabBarPattern_->UpdateIndicator(0);
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
@@ -413,13 +413,13 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
-    tabBarPattern_->tabBarType_[0] = false;
+    tabBarPattern_->tabBarType_[0] = TabBarParamType::NORMAL;
     tabBarPattern_->UpdateIndicator(0);
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->UpdateIndicator(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 }
 
@@ -821,7 +821,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Le
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.

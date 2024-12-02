@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/components_ng/pattern/text/typed_text.h"
@@ -26,18 +27,42 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string DIGIT_WHITE_LIST = "[0-9]";
-const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
-const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
-const std::string EMAIL_WHITE_LIST = R"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
+const std::u16string DIGIT_WHITE_LIST = u"[0-9]";
+const std::u16string DIGIT_DECIMAL_WHITE_LIST = u"[0-9.]";
+const std::u16string PHONE_WHITE_LIST = uR"([0-9 \+\-\*\#\(\)])";
+const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t EMOJI_RANGE_LEFT = 150;
 constexpr static int32_t EMOJI_RANGE_RIGHT = 150;
+
+inline std::wstring ContentToWstring(const std::u16string& str)
+{
+    auto utf16Len = str.length();
+    std::unique_ptr<wchar_t[]> pBuf16 = std::make_unique<wchar_t[]>(utf16Len);
+    wchar_t *wBuf = pBuf16.get();
+    for (uint32_t i = 0; i < utf16Len; i++) {
+        wBuf[i] = static_cast<wchar_t>(str[i]);
+    }
+
+    return std::wstring(wBuf, utf16Len);
+}
+
+inline std::u16string ContentToU16string(const std::wstring& str)
+{
+    auto utf16Len = str.length();
+    std::unique_ptr<char16_t[]> pBuf16 = std::make_unique<char16_t[]>(utf16Len);
+    char16_t *buf16 = pBuf16.get();
+    for (uint32_t i = 0; i < utf16Len; i++) {
+        buf16[i] = static_cast<char16_t>(str[i]);
+    }
+
+    return std::u16string(buf16, utf16Len);
+}
 } // namespace
 
-std::string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::string& value)
+std::u16string ContentController::PreprocessString(int32_t startIndex, int32_t endIndex, const std::u16string& value)
 {
     auto tmp = value;
     auto pattern = pattern_.Upgrade();
@@ -54,57 +79,51 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     if (!hasInputFilter && property->GetTextInputType().has_value() &&
         (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
             property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
-        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? '.' : '@';
-        if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
-            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
-            tmp.erase(
-                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
+        char16_t specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? u'.' : u'@';
+        if (content_.find(specialChar) != std::u16string::npos && value.find(specialChar) != std::u16string::npos &&
+            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::u16string::npos) {
+            tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char16_t c) { return c == specialChar; }),
+                tmp.end());
         }
     }
     FilterValueType(tmp);
-    auto wideText = GetWideText();
-    auto wideTmp = StringUtils::ToWstring(tmp);
     auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
-    auto curLength = static_cast<uint32_t>(wideText.length());
-    auto addLength = static_cast<uint32_t>(wideTmp.length());
+    auto curLength = static_cast<uint32_t>(content_.length());
+    auto addLength = static_cast<uint32_t>(tmp.length());
     auto delLength = static_cast<uint32_t>(std::abs(endIndex - startIndex));
     addLength = std::min(addLength, maxLength - curLength + delLength);
-    wideTmp = TextEmojiProcessor::SubWstring(0, addLength, wideTmp); // clamp emoji
-    tmp = StringUtils::ToString(wideTmp);
+    tmp = TextEmojiProcessor::SubU16string(0, addLength, tmp); // clamp emoji
     return tmp;
 }
 
-bool ContentController::InsertValue(int32_t index, const std::string& value)
+bool ContentController::InsertValue(int32_t index, const std::u16string& value)
 {
     return ReplaceSelectedValue(index, index, value);
 }
 
-bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
+bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::u16string& value)
 {
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
-    auto wideText = GetWideText();
     auto str = content_;
-    content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
-               StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
+    content_ = content_.substr(0, startIndex) + tmp +
+               content_.substr(endIndex, static_cast<int32_t>(content_.length()) - endIndex);
     auto len = content_.length();
     FilterValue();
     insertValue_ = tmp;
     if (value.length() == 1 && content_.length() < len) {
         content_ = str;
-        insertValue_ = "";
+        insertValue_ = u"";
     }
     return !tmp.empty();
 }
 
-std::string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
+std::u16string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
 {
     FormatIndex(startIndex, endIndex);
-    auto wideText = GetWideText();
-    auto selectedValue = StringUtils::ToString(wideText.substr(startIndex, endIndex - startIndex));
+    auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
     if (selectedValue.empty()) {
-        selectedValue = StringUtils::ToString(
-            TextEmojiProcessor::SubWstring(startIndex, endIndex - startIndex, wideText));
+        selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
     }
     return selectedValue;
 }
@@ -113,12 +132,11 @@ void ContentController::FormatIndex(int32_t& startIndex, int32_t& endIndex)
 {
     startIndex = std::min(startIndex, endIndex);
     endIndex = std::max(startIndex, endIndex);
-    auto wideText = GetWideText();
-    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(wideText.length()));
-    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(wideText.length()));
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
 }
 
-void ContentController::FilterTextInputStyle(bool& textChanged, std::string& result)
+void ContentController::FilterTextInputStyle(bool& textChanged, std::u16string& result)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -184,7 +202,7 @@ bool ContentController::FilterValue()
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
-        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        textChanged |= FilterWithEvent(StringUtils::Str8ToStr16(property->GetInputFilter().value()), result);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             FilterTextInputStyle(textChanged, result);
         }
@@ -194,17 +212,16 @@ bool ContentController::FilterValue()
     }
     auto maxLength =
         property->HasMaxLength() ? property->GetMaxLengthValue(Infinity<uint32_t>()) : Infinity<uint32_t>();
-    auto textWidth = static_cast<int32_t>(GetWideText().length());
+    auto textWidth = static_cast<int32_t>(content_.length());
     if (GreatNotEqual(textWidth, maxLength)) {
         // clamp emoji
-        auto subWstring = TextEmojiProcessor::SubWstring(0, maxLength, GetWideText());
-        content_ = StringUtils::ToString(subWstring);
+        content_ = TextEmojiProcessor::SubU16string(0, maxLength, content_);
         return true;
     }
     return textChanged;
 }
 
-void ContentController::FilterValueType(std::string& value)
+void ContentController::FilterValueType(std::u16string& value)
 {
     bool textChanged = false;
     auto result = value;
@@ -218,7 +235,8 @@ void ContentController::FilterValueType(std::string& value)
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
-        textChanged = FilterWithEvent(property->GetInputFilter().value(), result) || textChanged;
+        textChanged = FilterWithEvent(StringUtils::Str8ToStr16(property->GetInputFilter().value()), result) ||
+            textChanged;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             FilterTextInputStyle(textChanged, result);
         }
@@ -228,9 +246,9 @@ void ContentController::FilterValueType(std::string& value)
     }
 }
 
-std::string ContentController::RemoveErrorTextFromValue(const std::string& value, const std::string& errorText)
+std::u16string ContentController::RemoveErrorTextFromValue(const std::u16string& value, const std::u16string& errorText)
 {
-    std::string result;
+    std::u16string result;
     int32_t valuePtr = 0;
     int32_t errorTextPtr = 0;
     auto valueSize = static_cast<int32_t>(value.length());
@@ -252,50 +270,50 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
     return result;
 }
 
-std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
+std::u16string ContentController::FilterWithRegex(const std::u16string& filter, std::u16string& result)
 {
     // convert wstring for processing unicode characters
-    std::wstring wFilter = StringUtils::ToWstring(filter);
-    std::wstring wResult = StringUtils::ToWstring(result);
+    std::wstring wFilter = ContentToWstring(filter);
+    std::wstring wResult = ContentToWstring(result);
     std::wregex wFilterRegex(wFilter);
     std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
-    std::string errorText = StringUtils::ToString(wErrorText);
+    std::u16string errorText = ContentToU16string(wErrorText);
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }
 
-bool ContentController::FilterWithEmail(std::string& result)
+bool ContentController::FilterWithEmail(std::u16string& result)
 {
     auto valueToUpdate = result;
     bool first = true;
     std::replace_if(
         result.begin(), result.end(),
-        [&first](const char c) {
-            if (c == '@' && !first) {
+        [&first](const char16_t c) {
+            if (c == u'@' && !first) {
                 return true;
             }
-            if (c == '@') {
+            if (c == u'@') {
                 first = false;
             }
             return false;
         },
-        ' ');
+        u' ');
 
     // remove the spaces
-    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    result.erase(std::remove(result.begin(), result.end(), u' '), result.end());
     return result != valueToUpdate;
 }
 
-bool ContentController::FilterWithAscii(std::string& result)
+bool ContentController::FilterWithAscii(std::u16string& result)
 {
     if (result.empty()) {
         return false;
     }
     auto valueToUpdate = result;
     bool textChange = true;
-    std::string errorText;
+    std::u16string errorText;
     result.clear();
-    for (char valuePtr : valueToUpdate) {
+    for (char16_t valuePtr : valueToUpdate) {
         if (isascii(valuePtr)) {
             result += valuePtr;
         } else {
@@ -305,32 +323,32 @@ bool ContentController::FilterWithAscii(std::string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
+        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16ToStr8(errorText).c_str());
     }
     return textChange;
 }
 
-bool ContentController::FilterWithDecimal(std::string& result)
+bool ContentController::FilterWithDecimal(std::u16string& result)
 {
     auto valueToUpdate = result;
     bool first = true;
     std::replace_if(
         result.begin(), result.end(),
-        [&first](const char c) {
-            if (c == '.' && !first) {
+        [&first](const char16_t c) {
+            if (c == u'.' && !first) {
                 return true;
             }
-            if (c == '.') {
+            if (c == u'.') {
                 first = false;
             }
             return false;
         },
-        ' ');
-    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+        u' ');
+    result.erase(std::remove(result.begin(), result.end(), u' '), result.end());
     return result != valueToUpdate;
 }
 
-bool ContentController::FilterWithEvent(const std::string& filter, std::string& result)
+bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16string& result)
 {
     auto errorValue = FilterWithRegex(filter, result);
     if (!errorValue.empty()) {
@@ -344,18 +362,17 @@ bool ContentController::FilterWithEvent(const std::string& filter, std::string& 
         eventHub->FireOnInputFilterError(errorValue);
         auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
         CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
-        textFieldAccessibilityProperty->SetErrorText(errorValue);
+        textFieldAccessibilityProperty->SetErrorText(UtfUtils::Str16ToStr8(errorValue));
     }
     return !errorValue.empty();
 }
 
 void ContentController::erase(int32_t startIndex, int32_t length)
 {
-    if (startIndex < 0 || startIndex >= static_cast<int32_t>(GetWideText().length())) {
+    if (startIndex < 0 || startIndex >= static_cast<int32_t>(content_.length())) {
         return;
     }
-    auto wideText = GetWideText().erase(startIndex, length);
-    content_ = StringUtils::ToString(wideText);
+    content_.erase(startIndex, length);
 }
 
 int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBackward)
@@ -364,13 +381,13 @@ int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBac
     if (length > 0 && result == 0) {
         // try delete whole emoji
         if (isBackward) {
-            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
-                startIndex - length, length, GetWideText(), true);
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
+                startIndex - length, length, content_, true);
             result = TextEmojiProcessor::Delete(range.endIndex,
                 length, content_, true);
         } else {
-            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
-                startIndex, length, GetWideText(), true);
+            TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
+                startIndex, length, content_, true);
             result = TextEmojiProcessor::Delete(range.startIndex,
                 length, content_, true);
         }
@@ -383,7 +400,7 @@ int32_t ContentController::GetDeleteLength(int32_t startIndex, int32_t length, b
     auto content = content_;
     return TextEmojiProcessor::Delete(startIndex, length, content, isBackward);
 }
- 
+
 bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 {
     int32_t startIndex = index - EMOJI_RANGE_LEFT;
@@ -393,14 +410,14 @@ bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
     return TextEmojiProcessor::IsIndexBeforeOrInEmoji(index, GetSelectedValue(startIndex, endIndex));
 }
 
-std::string ContentController::GetValueBeforeIndex(int32_t index)
+std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 {
-    return StringUtils::ToString(GetWideText().substr(0, index));
+    return content_.substr(0, index);
 }
 
-std::string ContentController::GetValueAfterIndex(int32_t index)
+std::u16string ContentController::GetValueAfterIndex(int32_t index)
 {
-    return StringUtils::ToString(GetWideText().substr(index, GetWideText().length() - index));
+    return content_.substr(index, content_.length() - index);
 }
 
 std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& startIndex)
@@ -409,7 +426,7 @@ std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& st
     int32_t endIndex = index + AI_TEXT_RANGE_RIGHT;
     FormatIndex(startIndex, endIndex);
     index = index - startIndex;
-    return GetSelectedValue(startIndex, endIndex);
+    return UtfUtils::Str16ToStr8(GetSelectedValue(startIndex, endIndex));
 }
 
 } // namespace OHOS::Ace::NG

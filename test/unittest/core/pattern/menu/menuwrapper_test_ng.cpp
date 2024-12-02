@@ -118,7 +118,13 @@ void MenuWrapperTestNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
+        if (type == MenuTheme::TypeId()) {
+            return menuTheme_;
+        }
+        return AceType::MakeRefPtr<SelectTheme>();
+    });
 }
 
 void MenuWrapperTestNg::TearDown()
@@ -1750,5 +1756,91 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg036, TestSize.Level1)
     wrapperPattern->menuStatus_ = MenuStatus::HIDE;
     wrapperPattern->SetHotAreas(layoutWrapper);
     EXPECT_TRUE(wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM);
+}
+
+/**
+ * @tc.name: MenuWrapperPaintMethodTestNg001
+ * @tc.desc: test overlay draw function
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto paintMethod = wrapperPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintProperty = wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>();
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    auto function = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    RSCanvas canvas;
+    function(canvas);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    function(canvas);
+    wrapperNode->context_ = PipelineContext::GetCurrentContext().GetRawPtr();
+    auto pipline = wrapperNode->GetContext();
+    ASSERT_NE(pipline, nullptr);
+    auto menuTheme = pipline->GetTheme<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->doubleBorderEnable_ = true;
+    function(canvas);
+    EXPECT_NE(wrapperPattern->GetMenuStatus(), MenuStatus::SHOW);
+}
+
+/**
+ * @tc.name: MenuWrapperPaintMethodTestNg002
+ * @tc.desc: test PaintDoubleBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<MenuWrapperPaintMethod>(wrapperPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintProperty = wrapperPattern->GetPaintProperty<MenuWrapperPaintProperty>();
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(wrapperNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas canvas;
+    wrapperPattern->SetMenuStatus(MenuStatus::SHOW);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MENU); });
+    menuNode->MountToParent(wrapperNode);
+    auto imageNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageNode->MountToParent(wrapperNode);
+    wrapperNode->children_.push_back(nullptr);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    MenuPathParams params;
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateMenuPathParams(params);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(6));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(6));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    params.didNeedArrow = true;
+    menuPattern->UpdateMenuPathParams(params);
+    paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    const std::list<Placement> placements = { Placement::LEFT, Placement::TOP, Placement::RIGHT, Placement::BOTTOM };
+    for (const auto& placement : placements) {
+        params.arrowPlacement = placement;
+        menuPattern->UpdateMenuPathParams(params);
+        paintMethod->PaintDoubleBorder(canvas, paintWrapper);
+    }
 }
 } // namespace OHOS::Ace::NG

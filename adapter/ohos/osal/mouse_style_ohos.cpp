@@ -93,7 +93,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     }
     MMI::PointerStyle style;
     style.id = MMIPointStyle;
-    TAG_LOGI(AceLogTag::ACE_MOUSE, "SetPointerStyle windowId=%{public}d style=%{public}d isUIExtension=%{public}d",
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "SetPointerStyle windowId=%{public}d style=%{public}d isUIExtension=%{public}d",
         windowId, static_cast<int32_t>(pointerStyle), isUIExtension);
     int32_t setResult = inputManager->SetPointerStyle(windowId, style, isUIExtension);
     if (setResult == -1) {

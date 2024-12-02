@@ -36,9 +36,8 @@ ohos_unittest("security_component_test_ng") {
     "$ace_root/test/unittest:ace_components_syntax",
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
-    "//third_party/googletest:gmock",
   ]
-
+  external_deps = [ "googletest:gmock" ]
   include_dirs = [ "./mock/" ]
 
   if (security_component_enable) {
@@ -48,7 +47,7 @@ ohos_unittest("security_component_test_ng") {
       "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
       "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     ]
-    external_deps = [
+    external_deps += [
       "ability_runtime:abilitykit_native",
       "c_utils:utils",
       "graphic_2d:librender_service_client",

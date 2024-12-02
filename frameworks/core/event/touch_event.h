@@ -55,7 +55,7 @@ struct TouchPoint final {
 /**
  * @brief TouchEvent contains the active change point and a list of all touch points.
  */
-struct TouchEvent final : public UIInputEvent {
+struct TouchEvent final : public PointerEvent {
     ~TouchEvent() = default;
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
@@ -93,7 +93,10 @@ struct TouchEvent final : public UIInputEvent {
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
 
-    TouchEvent() {}
+    TouchEvent()
+    {
+        eventType = UIInputEventType::TOUCH;
+    }
     TouchEvent& SetId(int32_t id);
     TouchEvent& SetX(float x);
     TouchEvent& SetY(float y);
@@ -259,12 +262,14 @@ using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
 struct StateRecord {
     std::string procedure;
+    std::string extraInfo;
     std::string state;
     std::string disposal;
     int64_t timestamp = 0;
 
-    StateRecord(const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp)
-        : procedure(procedure), state(state), disposal(disposal), timestamp(timestamp)
+    StateRecord(const std::string& procedure, const std::string& extraInfo, const std::string& state,
+        const std::string& disposal, int64_t timestamp) : procedure(procedure), extraInfo(extraInfo),
+        state(state), disposal(disposal), timestamp(timestamp)
     {}
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
     void Dump(std::unique_ptr<JsonValue>& json) const;
@@ -274,8 +279,8 @@ struct GestureSnapshot : public virtual AceType {
     DECLARE_ACE_TYPE(GestureSnapshot, AceType);
 
 public:
-    void AddProcedure(
-        const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp);
+    void AddProcedure(const std::string& procedure, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp);
     bool CheckNeedAddMove(const std::string& state, const std::string& disposal);
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
     static std::string TransTouchType(TouchType type);

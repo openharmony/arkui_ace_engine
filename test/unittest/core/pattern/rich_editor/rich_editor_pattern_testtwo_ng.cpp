@@ -495,6 +495,65 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove001, TestSize.Lev
 }
 
 /**
+ * @tc.name: UpdateSelectionByTouchMove002
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+    EXPECT_EQ(touchOffset.GetX(), richEditorPattern->magnifierController_->localOffset_.GetX());
+    EXPECT_EQ(touchOffset.GetY(), richEditorPattern->magnifierController_->localOffset_.GetY());
+    EXPECT_TRUE(richEditorPattern->magnifierController_->magnifierNodeExist_);
+}
+
+/**
+ * @tc.name: UpdateSelectionByTouchMove003
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->magnifierController_ = nullptr;
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    EXPECT_TRUE(richEditorPattern->isShowMenu_);
+}
+
+/**
+ * @tc.name: UpdateSelectionByTouchMove004
+ * @tc.desc: test UpdateSelectionByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->textSelector_.Update(0, 10);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
+    Offset touchOffset(20.0f, 20.0f);
+    richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
+    EXPECT_TRUE(richEditorPattern->isShowMenu_);
+}
+
+/**
  * @tc.name: GetSelectedMaxWidth001
  * @tc.desc: test GetSelectedMaxWidth
  * @tc.type: FUNC
@@ -1118,14 +1177,18 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
-    ASSERT_NE(imageSpanItem, nullptr);
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
 
-    imageSpanItem->spanItemType = SpanItemType::CustomSpan;
+    customSpanItem->spanItemType = SpanItemType::CustomSpan;
+    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    customSpanItem->SetCustomNode(builderNode);
     size_t index = 0;
     size_t textIndex = 0;
     size_t sum = 6;
-    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
+    richEditorPattern->ReplacePlaceholderWithRawSpans(customSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, sum);
 }
 

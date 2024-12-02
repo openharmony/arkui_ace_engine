@@ -86,7 +86,7 @@ enum class HoverEffectType : int32_t {
     UNKNOWN,
 };
 
-struct MouseEvent final : public UIInputEvent {
+struct MouseEvent final : public PointerEvent {
     int32_t id = 0;
     float z = 0.0f;
     float deltaX = 0.0f;
@@ -444,31 +444,7 @@ public:
         onMouseCallback_ = onMouseCallback;
     }
 
-    bool HandleMouseEvent(const MouseEvent& event)
-    {
-        if (!onMouseCallback_) {
-            return false;
-        }
-        MouseInfo info;
-        info.SetPointerEvent(event.pointerEvent);
-        info.SetButton(event.button);
-        info.SetAction(event.action);
-        info.SetPullAction(event.pullAction);
-        info.SetGlobalLocation(event.GetOffset());
-        Offset localLocation = Offset(
-            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
-        info.SetLocalLocation(localLocation);
-        info.SetScreenLocation(event.GetScreenOffset());
-        info.SetTimeStamp(event.time);
-        info.SetDeviceId(event.deviceId);
-        info.SetTargetDisplayId(event.targetDisplayId);
-        info.SetSourceDevice(event.sourceType);
-        info.SetSourceTool(event.sourceTool);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetPressedKeyCodes(event.pressedKeyCodes_);
-        onMouseCallback_(info);
-        return info.IsStopPropagation();
-    }
+    bool HandleMouseEvent(const MouseEvent& event);
 
     bool DispatchEvent(const TouchEvent& point) override
     {

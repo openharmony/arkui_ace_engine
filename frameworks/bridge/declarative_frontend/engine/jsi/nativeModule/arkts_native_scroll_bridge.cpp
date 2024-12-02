@@ -311,80 +311,6 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollBarWidth(ArkUIRuntimeCallInfo* r
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ScrollBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> effectArg = runtimeCallInfo->GetCallArgRef(1);    // 1: index of effect value
-    Local<JSValueRef> isEffectArg = runtimeCallInfo->GetCallArgRef(2);  // 2: index of isEffect value
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
-    if (!effectArg->IsUndefined() && !effectArg->IsNull()) {
-        effect = effectArg->Int32Value(vm);
-    }
-
-    if (effect != static_cast<int32_t>(EdgeEffect::SPRING) && effect != static_cast<int32_t>(EdgeEffect::NONE) &&
-        effect != static_cast<int32_t>(EdgeEffect::FADE)) {
-        effect = static_cast<int32_t>(EdgeEffect::NONE);
-    }
-
-    if (isEffectArg->IsUndefined() || isEffectArg->IsNull()) {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollEdgeEffect(nativeNode, effect, true);
-    } else {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
-            nativeNode, effect, isEffectArg->ToBoolean(vm)->Value());
-    }
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ScrollBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getScrollModifier()->resetScrollEdgeEffect(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ScrollBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> fadingEdgeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> fadingEdgeLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-
-    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
-
-    CalcDimension fadingEdgeLength = Dimension(32.0f, DimensionUnit::VP); // default value
-
-    if (fadingEdgeArg->IsUndefined() || fadingEdgeArg->IsNull()) {
-        GetArkUINodeModifiers()->getScrollModifier()->resetScrollFadingEdge(nativeNode);
-    } else {
-        bool fadingEdge = fadingEdgeArg->ToBoolean(vm)->Value();
-        if (!fadingEdgeLengthArg->IsUndefined() && !fadingEdgeLengthArg->IsNull() &&
-            fadingEdgeLengthArg->IsObject(vm)) {
-            ArkTSUtils::ParseJsLengthMetrics(vm, fadingEdgeLengthArg, fadingEdgeLength);
-        }
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollFadingEdge(
-            nativeNode, fadingEdge, fadingEdgeLength.Value(), static_cast<int32_t>(fadingEdgeLength.Unit()));
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-ArkUINativeModuleValue ScrollBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getScrollModifier()->resetScrollFadingEdge(nativeNode);
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ScrollBridge::SetEnablePaging(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -714,9 +640,9 @@ ArkUINativeModuleValue ScrollBridge::SetScrollOnDidScroll(ArkUIRuntimeCallInfo* 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
         panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+            vm, static_cast<double>(xOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
-            vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+            vm, static_cast<double>(yOffset.ConvertToVp()));
         panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
          // 3: Array length
         panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };

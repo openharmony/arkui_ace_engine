@@ -58,6 +58,7 @@ class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
+struct DecorButtonStyle;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -306,6 +307,8 @@ public:
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
+    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
+
     virtual int32_t GetContainerModalTitleHeight()
     {
         return -1;
@@ -457,6 +460,8 @@ public:
     {
         return false;
     }
+
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
 };
 
 } // namespace OHOS::Ace

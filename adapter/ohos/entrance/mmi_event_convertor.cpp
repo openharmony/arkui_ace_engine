@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 
 void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(pointerEvent);
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
@@ -151,6 +152,7 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_RETURN(pointerEvent, TouchEvent());
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
@@ -380,6 +382,27 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
     }
 }
 
+void GetNonPointerAxisEventAction(int32_t action, NG::NonPointerAxisEvent& event)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+            event.action = AxisAction::BEGIN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+            event.action = AxisAction::UPDATE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+            event.action = AxisAction::END;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = AxisAction::CANCEL;
+            break;
+        default:
+            event.action = AxisAction::NONE;
+            break;
+    }
+}
+
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
@@ -462,7 +485,46 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
 }
 
-void GetPointerEventAction(int32_t action, PointerEvent& event)
+void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::NonPointerAxisEvent& event)
+{
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        LOGE("get pointer: %{public}d item failed.", pointerID);
+        return;
+    }
+
+    event.id = item.GetPointerId();
+    event.absXValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_X);
+    event.absYValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_Y);
+    event.absZValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_Z);
+    event.absRzValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_RZ);
+    event.absHat0XValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT0X);
+    event.absHat0YValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_HAT0Y);
+    event.absBrakeValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_BRAKE);
+    event.absGasValue = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ABS_GAS);
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    GetNonPointerAxisEventAction(orgAction, event);
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, event);
+    event.sourceTool = GetSourceTool(item.GetToolType());
+    event.pointerEvent = pointerEvent;
+    event.originalId = item.GetOriginPointerId();
+    event.deviceId = pointerEvent->GetDeviceId();
+
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    event.time = time;
+    event.touchEventId = pointerEvent->GetId();
+    event.targetDisplayId = pointerEvent->GetTargetDisplayId();
+    event.pressedCodes.clear();
+    for (const auto& curCode : pointerEvent->GetPressedKeys()) {
+        event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
+    }
+}
+
+void GetPointerEventAction(int32_t action, DragPointerEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
@@ -518,7 +580,7 @@ bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return true;
 }
 
-void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, DragPointerEvent& event)
 {
     event.rawPointerEvent = pointerEvent;
     event.pointerEventId = pointerEvent->GetId();
@@ -566,9 +628,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {
             TAG_LOGD(AceLogTag::ACE_DRAG,
-                "action point info: id: %{public}d, pointerId: %{public}d, x: %{public}d, y: %{public}d, action: "
+                "action point info: id: %{public}d, pointerId: %{public}d, action: "
                 "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                pointerEvent->GetId(), actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(),
+                pointerEvent->GetId(), actionId, pointerEvent->GetPointerAction(),
                 item.GetPressure(), item.GetTiltX(), item.GetTiltY());
         }
         auto ids = pointerEvent->GetPointerIds();

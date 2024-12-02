@@ -50,7 +50,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     currentFrameNode->MountToParent(frameNode_);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(0.f, 0.f)));
 
     /**
@@ -58,7 +58,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
      */
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(SWIPER_WIDTH));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SWIPER_HEIGHT));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(SWIPER_WIDTH, SWIPER_HEIGHT)));
 
     /**
@@ -67,7 +67,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
      */
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(300.f, 500.f)));
 }
 
@@ -106,7 +106,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1000.0f), CalcLength(300.0f)));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 1000.0f);
     const float itemWidth2 = (1000.0f - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth2);
@@ -131,7 +131,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
     parent->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(300.0f)));
     frameNode_->MountToParent(parent);
 
-    FlushLayoutTask(parent);
+    FlushUITasks();
 
     ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
@@ -140,7 +140,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
     CheckItems(0, 3, 20.0f, itemWidth1);
 
     parent->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(800.0f), CalcLength(300.0f)));
-    FlushLayoutTask(parent);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 800.0f);
     const float itemWidth2 = (800.0f - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth2);
@@ -170,25 +170,28 @@ HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
     sibling->MountToParent(parent);
     parent->MarkModifyDone();
 
-    FlushLayoutTask(parent);
+    FlushUITasks();
     EXPECT_EQ(GetChildSize(frameNode_, 0).Width(), 400.0f);
     EXPECT_EQ(pattern_->itemPosition_.size(), 1);
 
     // ----currently doesn't work because Animation callbacks run synchronously
-    // WillRepeatedly([]() { FlushLayoutTask(parent) })
+    // WillRepeatedly([]() { FlushUITasks() })
 
     pattern_->ShowNext();
-    FlushLayoutTask(parent);
     EXPECT_EQ(pattern_->currentIndex_, 1);
-    EXPECT_EQ(pattern_->itemPosition_.at(1).startPos, 400.0f);
-    EXPECT_EQ(GetChildOffset(frameNode_, 1).GetX(), 400.0f);
+    EXPECT_EQ(pattern_->itemPosition_.at(1).startPos, 0);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -400);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildWidth(frameNode_, 2), 0);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
 
     // because FlushUITasks are not run, have to manually trigger offset update
     pattern_->UpdateCurrentOffset(-400.0f);
-    FlushLayoutTask(parent);
+    FlushUITasks();
     EXPECT_EQ(pattern_->itemPosition_.size(), 1);
-    EXPECT_EQ(GetChildOffset(frameNode_, 1).GetX(), 0.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -400);
+    EXPECT_EQ(GetChildX(frameNode_, 1), -400);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 0);
 }
 
 /**
@@ -252,7 +255,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
      */
     indicatorGeometryNode->SetFrameOffset(OffsetF(250.0f, 190.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(144.0f, 48.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
@@ -261,7 +264,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
      */
     indicatorGeometryNode->SetFrameOffset(OffsetF(15.0f, 240.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(625.0f, 48.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
@@ -269,7 +272,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
      * @tc.cases: case3. Axis is HORIZONTAL, arrow is in the switch, not show indicator.
      */
     layoutProperty_->UpdateShowIndicator(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
@@ -280,7 +283,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     layoutProperty_->UpdateShowIndicator(true);
     indicatorGeometryNode->SetFrameOffset(OffsetF(20.0f, 50.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(20.0f, 100.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 
@@ -289,7 +292,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
      */
     indicatorGeometryNode->SetFrameOffset(OffsetF(20.0f, 15.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(20.0f, 220.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 
@@ -297,7 +300,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
      * @tc.cases: case6. Axis is VERTICAL, arrow is in the switch, not show indicator.
      */
     layoutProperty_->UpdateShowIndicator(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
     EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 }
@@ -316,7 +319,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasure001, TestSize.Level1)
      * @tc.expected: Return button measure, SizeF(3.0f, 3.0f).
      */
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(leftArrowNode_->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
     EXPECT_EQ(rightArrowNode_->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
 }
@@ -1429,7 +1432,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure001, TestSize.Level1)
 {
     CreateWithArrow();
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step4. call Measure.
@@ -1437,12 +1440,12 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure001, TestSize.Level1)
      */
     auto swiperPatternAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(swiperPatternAlgorithm->mainSizeIsMeasured_);
 
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
     frameNode_->isConstraintNotChanged_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(frameNode_->isConstraintNotChanged_);
 }
 
@@ -1464,11 +1467,11 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout006, TestSize.Level1)
     layoutProperty_->UpdateShowIndicator(false);
     pattern_->leftButtonId_.reset();
     pattern_->rightButtonId_.reset();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     pattern_->leftButtonId_.emplace(1);
     pattern_->rightButtonId_.emplace(1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -1599,16 +1602,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
 {
     CreateWithArrow();
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto swiperPatternAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(swiperPatternAlgorithm->mainSizeIsMeasured_);
 
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
     frameNode_->isConstraintNotChanged_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(frameNode_->isConstraintNotChanged_);
 
     /**
@@ -1617,7 +1620,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
      */
     swiperPatternAlgorithm->totalItemCount_ = 0;
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(swiperPatternAlgorithm->totalItemCount_ == 0);
 
     /**
@@ -1627,7 +1630,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
     swiperPatternAlgorithm->totalItemCount_ = 10;
     swiperPatternAlgorithm->mainSizeIsMeasured_ = true;
     frameNode_->isConstraintNotChanged_ = true;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(swiperPatternAlgorithm->totalItemCount_ > 0);
 }
 

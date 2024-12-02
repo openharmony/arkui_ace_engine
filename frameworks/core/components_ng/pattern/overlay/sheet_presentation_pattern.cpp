@@ -28,6 +28,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -151,6 +152,11 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
             sheetTopSafeArea = 0.0f;
         }
     }
+    // if window titleBar hidden, avoid button area.
+    NG::RectF floatButtons;
+    if (GetWindowButtonRect(floatButtons)) {
+        sheetTopSafeArea = floatButtons.Height();
+    }
     return sheetTopSafeArea;
 }
 
@@ -177,18 +183,7 @@ void SheetPresentationPattern::InitPageHeight()
         IsPhoneInLandScape()) {
         sheetTopSafeArea_ = 0.0f;
     }
-    auto windowManager = pipelineContext->GetWindowManager();
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
-    auto sheetType = GetSheetType();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
-        sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM ||
-                sheetType == SheetType::SHEET_BOTTOM_OFFSET) &&
-               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        sheetTopSafeArea_ = GetBottomSafeArea();
-    }
+    sheetTopSafeArea_ = GetSheetTopSafeArea();
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
@@ -431,17 +426,12 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
     if (sheetStyle.borderWidth.has_value()) {
-        auto sheetRadius = sheetTheme->GetSheetRadius();
         auto borderWidth = sheetStyle.borderWidth.value();
-        BorderRadiusProperty borderRadius;
-        if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
-            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
-            borderRadius.SetRadius(sheetRadius);
-        } else {
-            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
+        bool bottomDimenInvalid = !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET);
+        if (bottomDimenInvalid) {
             borderWidth.bottomDimen = 0.0_vp;
         }
-        renderContext->UpdateBorderRadius(borderRadius);
         layoutProperty->UpdateBorderWidth(borderWidth);
         renderContext->UpdateBorderWidth(borderWidth);
     } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
@@ -716,6 +706,24 @@ void SheetPresentationPattern::InitialLayoutProps()
     InitSheetDetents();
 }
 
+bool SheetPresentationPattern::GetWindowButtonRect(NG::RectF& floatButtons)
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    NG::RectF floatContainerModal;
+    if (ContainerModalViewEnhance::GetContainerModalComponentRect(pipelineContext, floatContainerModal, floatButtons)) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "When hidden, floatButtons rect is %{public}s", floatButtons.ToString().c_str());
+        return true;
+    };
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Window title builder shown");
+    return false;
+}
+
 float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetStyle)
 {
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
@@ -817,6 +825,9 @@ float SheetPresentationPattern::GetSheetHeightChange()
     CHECK_NULL_RETURN(pipelineContext, .0f);
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
+    if (keyboardInsert.Length() == 0) {
+        return 0.f;
+    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     // inputH : Distance from input component's Caret to bottom of screen
     // = caret's offset + caret's height + 24vp
@@ -1644,9 +1655,9 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
-    auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
-    if (windowGlobalRect.Width() >= SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx() &&
-        windowGlobalRect.Width() <= SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsFoldable() && container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
 #else
     // when big fold expand
     if (IsFold() && !sheetTheme->IsOnlyBottom()) {
@@ -1671,7 +1682,12 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    double rootWidth = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+    }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -1911,24 +1927,27 @@ void SheetPresentationPattern::ClipSheetNode()
     CHECK_NULL_VOID(renderContext);
     ResetClipShape();
     auto sheetType = GetSheetType();
-    std::string clipPath;
     float half = 0.5f;
     if (sheetSize.Width() * half < sheetRadius.ConvertToPx()) {
         sheetRadius = Dimension(sheetSize.Width() * half);
     }
     if (sheetType == SheetType::SHEET_POPUP) {
-        clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
-    } else if (sheetType == SheetType::SHEET_CENTER) {
-        clipPath = GetCenterStyleSheetClipPath(sheetSize, sheetRadius);
-    } else {
-        clipPath = GetBottomStyleSheetClipPath(sheetSize, sheetRadius);
-    }
-    if (!sheetTheme->IsOuterBorderEnable() || sheetType == SheetType::SHEET_POPUP) {
         auto path = AceType::MakeRefPtr<Path>();
+        auto clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
         renderContext->UpdateClipShape(path);
+        return;
     }
+    BorderRadiusProperty borderRadius;
+    if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
+        borderRadius.SetRadius(sheetRadius);
+    }
+    if (IsSheetBottomStyle()) {
+        // set 1px for avoiding doudble radius black lines.
+        borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 1.0_px, 1.0_px);
+    }
+    renderContext->UpdateBorderRadius(borderRadius);
 }
 
 bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
@@ -2334,7 +2353,7 @@ void SheetPresentationPattern::FireOnHeightDidChange(float height)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
+    if (!IsSheetBottomStyle()) {
         OnHeightDidChange(centerHeight_);
     } else {
         OnHeightDidChange(height_);
@@ -2370,7 +2389,7 @@ void SheetPresentationPattern::FireOnWidthDidChange(RefPtr<FrameNode> sheetNode)
 void SheetPresentationPattern::FireOnTypeDidChange()
 {
     auto sheetType = sheetType_;
-    if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW) {
+    if (IsSheetBottomStyle() || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         sheetType = SheetType::SHEET_BOTTOM;
     }
     if (preType_ == sheetType) {
@@ -2535,7 +2554,8 @@ bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& 
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents) {
+    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
+        preStyle.sheetMode == sheetStyle.sheetMode) {
         return false;
     }
     return true;
@@ -2564,7 +2584,7 @@ float SheetPresentationPattern::GetBottomSafeArea()
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
         auto topAreaInWindow = GetTopAreaInWindow();
-        TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
+        TAG_LOGD(AceLogTag::ACE_SHEET, "rosen window sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
         return topAreaInWindow;
     } else {
         return safeAreaInsets.top_.Length();

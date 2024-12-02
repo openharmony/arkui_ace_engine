@@ -296,11 +296,14 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
+        int32_t startIndex = showCache ? start - cacheStart : start;
+        int32_t endIndex = showCache ? end + cacheEnd : end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
-            if ((start <= end && index >= start && index <= end) || (start > end && (index <= end || start <= index))) {
+            if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
+                (startIndex > endIndex && (index <= endIndex || startIndex <= index))) {
                 itor++;
             } else {
                 itor = partFrameNodeChildren_.erase(itor);
@@ -308,7 +311,8 @@ public:
         }
         auto guard = GetGuard();
         for (const auto& child : children_) {
-            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd);
+            child.node->DoSetActiveChildRange(
+                start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd, showCache);
         }
     }
 
@@ -600,7 +604,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
         node->UpdateLayoutPropertyFlag();
         node->SetActive();
         node->isLayoutDirtyMarked_ = true;
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = node->GetContext();
         if (pipeline) {
             pipeline->FlushUITaskWithSingleDirtyNode(node);
         }
@@ -677,7 +681,7 @@ void FrameNode::DumpSafeAreaInfo()
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
     DumpLog::GetInstance().AddDesc(std::string("ignoreSafeArea: ")
-                                       .append(std::to_string(manager->IsIgnoreAsfeArea()))
+                                       .append(std::to_string(manager->IsIgnoreSafeArea()))
                                        .append(std::string(", isNeedAvoidWindow: ").c_str())
                                        .append(std::to_string(manager->IsNeedAvoidWindow()))
                                        .append(std::string(", isFullScreen: ").c_str())
@@ -895,7 +899,7 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
             json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
         }
     }
-    if (NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
+    if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         json->Put("ZIndex: ", renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
     }
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
@@ -947,27 +951,20 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
         if (parentRect != defaultValue) {
             json->Put("ParentSelfAdjust", parentRect.ToString().c_str());
         }
-        CHECK_EQUAL_VOID(GetTag(), V2::PAGE_ETS_TAG);
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsIgnoreAsfeArea()) {
-            json->Put("IgnoreSafeArea", manager->IsIgnoreAsfeArea());
-        }
-        if (!manager->IsNeedAvoidWindow()) {
-            json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
-        }
-        if (!manager->IsFullScreen()) {
-            json->Put("IsFullScreen", manager->IsFullScreen());
-        }
-        if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
-        }
-        if (!pipeline->GetUseCutout()) {
-            json->Put("IsUseCutout", pipeline->GetUseCutout());
-        }
     }
+    CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->KeyboardSafeAreaEnabled()) {
+        json->Put("KeyboardInset: ", manager->GetKeyboardInset().ToString().c_str());
+    }
+    json->Put("IgnoreSafeArea", manager->IsIgnoreSafeArea());
+    json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
+    json->Put("IsFullScreen", manager->IsFullScreen());
+    json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
+    json->Put("IsUseCutout", pipeline->GetUseCutout());
 }
 
 void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
@@ -989,7 +986,7 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
     if (pattern_) {
-        DumpSimplifyInfo(json);
+        pattern_->DumpSimplifyInfo(json);
     }
     if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
@@ -1288,6 +1285,17 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     FireFontNDKCallback(configurationChange);
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+
+void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
+{
+    MarkDirtyNode(extraFlag);
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void FrameNode::FireColorNDKCallback()
@@ -2633,11 +2641,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is %{public}s in %{public}s, depth: %{public}d",
-            parentRevertPoint.ToString().c_str(), GetTag().c_str(), GetDepth());
-        for (const auto& rect : responseRegionList) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is %{public}s, point is %{public}s",
-                rect.ToString().c_str(), parentRevertPoint.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is " SEC_PLD(%{public}s) " in %{public}s, depth: %{public}d",
+            SEC_PARAM(parentRevertPoint.ToString().c_str()), GetTag().c_str(), GetDepth());
+        for ([[maybe_unused]] const auto& rect : responseRegionList) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is " SEC_PLD(%{public}s)
+                ", point is " SEC_PLD(%{public}s),
+                SEC_PARAM(rect.ToString().c_str()), SEC_PARAM(parentRevertPoint.ToString().c_str()));
         }
     }
     {
@@ -2686,15 +2695,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
         touchRes = GetOnChildTouchTestRet(touchInfos);
         if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
-            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
-                touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: "
+                "id = " SEC_PLD(%{public}s) ", strategy = %{public}d.",
+                SEC_PARAM(touchRes.id.c_str()), static_cast<int32_t>(touchRes.strategy));
             touchRes.strategy = TouchTestStrategy::DEFAULT;
         }
 
         auto childNode = GetDispatchFrameNode(touchRes);
         if (childNode != nullptr) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
-                childNode->GetInspectorId()->c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(%{public}s) " do TouchTest, parameter isDispatch is true.",
+                SEC_PARAM(childNode->GetInspectorId()->c_str()));
             auto hitResult = childNode->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
                 newComingTargets, touchId, responseLinkResult, true);
             if (touchRes.strategy == TouchTestStrategy::FORWARD ||
@@ -4173,6 +4183,7 @@ void FrameNode::Layout()
         AddNodeFlexLayouts();
         AddNodeLayoutTime(time);
     } else {
+        ACE_SCOPED_TRACE("SkipLayout [%s][self:%d]", GetTag().c_str(), GetId());
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
@@ -4495,12 +4506,7 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    if (showCached) {
-        frameProxy_->SetActiveChildRange(
-            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
-    } else {
-        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
-    }
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
 
 void FrameNode::SetActiveChildRange(
@@ -4642,8 +4648,12 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     SetActive(false);
 }
 
-void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+    }
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
@@ -5843,7 +5853,7 @@ void FrameNode::DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);
-    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreAsfeArea()).c_str());
+    json->Put("ignoreSafeArea", std::to_string(manager->IsIgnoreSafeArea()).c_str());
     json->Put("isNeedAvoidWindow", std::to_string(manager->IsNeedAvoidWindow()).c_str());
     json->Put("isFullScreen", std::to_string(manager->IsFullScreen()).c_str());
     json->Put("isKeyboardAvoidMode", std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())).c_str());
@@ -6024,9 +6034,12 @@ RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
     CHECK_NULL_RETURN(pageNode, nullptr);
     auto jsView = pageNode->GetChildAtIndex(0);
     CHECK_NULL_RETURN(jsView, nullptr);
-    auto rootNode = jsView->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    return rootNode;
+    if (jsView->GetTag() == V2::JS_VIEW_ETS_TAG) {
+        auto rootNode = jsView->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        return rootNode;
+    }
+    return jsView;
 }
 
 std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()

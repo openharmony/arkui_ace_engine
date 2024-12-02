@@ -52,15 +52,12 @@ public:
     ScrollablePaintProperty() = default;
     ~ScrollablePaintProperty() override = default;
 
-    RefPtr<PaintProperty> Clone() const override
-    {
-        auto paintProperty = MakeRefPtr<ScrollablePaintProperty>();
-        paintProperty->UpdatePaintProperty(this);
-        paintProperty->propScrollBarProperty_ = CloneScrollBarProperty();
-        paintProperty->propFadingEdgeProperty_ = CloneFadingEdgeProperty();
-        paintProperty->propContentClip_ = CloneContentClip();
-        return paintProperty;
-    }
+    RefPtr<PaintProperty> Clone() const override;
+
+    /**
+     * @brief copy paint props from @c src
+     */
+    void CloneProps(const ScrollablePaintProperty* src);
 
     void Reset() override
     {
@@ -83,8 +80,39 @@ public:
     Dimension GetBarWidth() const;
     Color GetBarColor() const;
 
+    /**
+     * @brief Return the default content clip mode.
+     */
+    virtual ContentClipMode GetDefaultContentClip() const
+    {
+        return ContentClipMode::CONTENT_ONLY;
+    }
+
 private:
+    std::string ContentClipToStr() const;
     std::string GetBarStateString() const;
+};
+
+class GridPaintProperty : public ScrollablePaintProperty {
+    DECLARE_ACE_TYPE(GridPaintProperty, ScrollablePaintProperty)
+public:
+    RefPtr<PaintProperty> Clone() const override;
+
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::BOUNDARY;
+    }
+};
+
+class ScrollPaintProperty : public ScrollablePaintProperty {
+    DECLARE_ACE_TYPE(ScrollPaintProperty, ScrollablePaintProperty)
+public:
+    RefPtr<PaintProperty> Clone() const override;
+
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::BOUNDARY;
+    }
 };
 } // namespace OHOS::Ace::NG
 

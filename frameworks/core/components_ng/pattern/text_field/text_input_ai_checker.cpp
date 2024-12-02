@@ -16,7 +16,7 @@
 
 using namespace OHOS::Ace::NG;
 namespace OHOS::Ace {
-bool InputAIChecker::NeedAIAnalysis(const std::string& content, const NG::CaretUpdateType targetType,
+bool InputAIChecker::NeedAIAnalysis(bool isEmpty, const NG::CaretUpdateType targetType,
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout)
 {
     if (targetType != CaretUpdateType::DOUBLE_CLICK) {
@@ -25,7 +25,7 @@ bool InputAIChecker::NeedAIAnalysis(const std::string& content, const NG::CaretU
     }
 
     // empty string check
-    if (content.empty()) {
+    if (isEmpty) {
         TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "NeedAIAnalysis content empty,return!");
         return false;
     }

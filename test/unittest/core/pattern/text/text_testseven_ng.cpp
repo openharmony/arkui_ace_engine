@@ -214,7 +214,8 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(5));
     EXPECT_EQ((*it)->textLineStyle->GetLineSpacing().value(), Dimension(6));
     EXPECT_EQ((*it)->textLineStyle->GetTextBaseline().value(), TextBaseline::BOTTOM);
-    EXPECT_EQ((*it)->textLineStyle->GetBaselineOffset().value(), Dimension(7));
+    // text's baselineOffset attribute is not span's baselineOffset attribute
+    EXPECT_FALSE((*it)->textLineStyle->HasBaselineOffset());
     EXPECT_EQ((*it)->textLineStyle->GetTextOverflow().value(), TextOverflow::CLIP);
     EXPECT_EQ((*it)->textLineStyle->GetTextAlign().value(), TextAlign::CENTER);
     EXPECT_EQ((*it)->textLineStyle->GetMaxLines().value(), 9);

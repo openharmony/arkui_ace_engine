@@ -113,10 +113,8 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
     }
 }
 
-void DragEventActuator::StartLongPressActionForWeb(bool isFloatImage)
+void DragEventActuator::StartLongPressActionForWeb()
 {
-    TAG_LOGW(AceLogTag::ACE_WEB, "StartLongPressActionForWeb isFloatImage:%{public}d", isFloatImage);
-    isFloatImage_ = isFloatImage;
     if (!isReceivedLongPress_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop not received long press action,"
             "don't start long press action for web");
@@ -166,7 +164,7 @@ bool DragEventActuator::IsGlobalStatusSuitableForDragging()
     return true;
 }
 
-bool DragEventActuator::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode)
+bool DragEventActuator::IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode) const
 {
     auto parent = frameNode;
     while (parent) {
@@ -237,6 +235,12 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
         actionStart_(gestureInfo);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        TouchEvent touchEvent;
+        eventManager->CleanRecognizersForDragBegin(touchEvent);
     }
 }
 
@@ -268,11 +272,140 @@ void DragEventActuator::HandleOnPanActionCancel()
     }
 }
 
+void DragEventActuator::InitDragDropStatusToIdle()
+{
+    isDragUserReject_ = false;
+    isThumbnailCallbackTriggered_ = false;
+}
+
+void DragEventActuator::GetThumbnailPixelMap(bool isSync)
+{
+    auto actuator = WeakClaim(this).Upgrade();
+    CHECK_NULL_VOID(actuator);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    if (dragPreviewInfo.inspectorId != "") {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through inspectorId.");
+        auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        gestureHub->SetPixelMap(previewPixelMap);
+        gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+        PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
+    } else if (dragPreviewInfo.pixelMap != nullptr) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through pixelMap.");
+        gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
+        gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
+        PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
+    } else if (dragPreviewInfo.customNode != nullptr) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
+        if (isSync) {
+            GetThumbnailPixelMapForCustomNodeSync();
+        } else {
+            GetThumbnailPixelMapForCustomNode();
+        }
+    } else {
+        GetThumbnailPixelMapAsync(gestureHub);
+    }
+    CHECK_NULL_VOID(longPressRecognizer_);
+    if (longPressRecognizer_ && longPressRecognizer_->GetGestureDisposal() != GestureDisposal::REJECT) {
+        if (!CreateGatherNode(actuator)) {
+            isOnBeforeLiftingAnimation_ = false;
+            return;
+        }
+        isOnBeforeLiftingAnimation_ = true;
+        DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
+        DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
+        SetResponseRegionFull();
+    } else {
+        isOnBeforeLiftingAnimation_ = false;
+    }
+}
+
+void DragEventActuator::GetThumbnailPixelMapForCustomNodeSync()
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    SnapshotParam param;
+    auto pixelMap = ComponentSnapshot::CreateSync(dragPreviewInfo.customNode, param);
+    CHECK_NULL_VOID(pixelMap);
+    auto previewPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    gestureHub->SetPixelMap(previewPixelMap);
+    gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+    PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
+#endif
+}
+
+void DragEventActuator::GetThumbnailPixelMapForCustomNode()
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak = WeakClaim(this)]
+        (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
+        ContainerScope scope(id);
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDragRemoveCustomNode");
+        if (pixelMap != nullptr) {
+            auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+            taskScheduler->PostTask(
+                [gestureHub, customPixelMap, weak]() {
+                    CHECK_NULL_VOID(gestureHub);
+                    gestureHub->SetPixelMap(customPixelMap);
+                    gestureHub->SetDragPreviewPixelMap(customPixelMap);
+                    auto actuator = weak.Upgrade();
+                    CHECK_NULL_VOID(actuator);
+                    actuator->PrepareFinalPixelMapForDragThroughTouch(customPixelMap, true);
+                },
+                TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
+        } else {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
+        }
+    };
+    SnapshotParam param;
+    param.delay = CREATE_PIXELMAP_TIME;
+    param.checkImageStatus = true;
+    param.options.waitUntilRenderFinished = true;
+    OHOS::Ace::NG::ComponentSnapshot::Create(
+        dragPreviewInfo.customNode, std::move(callback), true, param);
+    gestureHub->PrintBuilderNode(dragPreviewInfo.customNode);
+#endif
+}
+
+void DragEventActuator::TryTriggerThumbnailCallback()
+{
+    if (isThumbnailCallbackTriggered_) {
+        return;
+    }
+    GetThumbnailPixelMap(true);
+    isThumbnailCallbackTriggered_ = true;
+    return;
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {
     CHECK_NULL_VOID(userCallback_);
-    isDragUserReject_ = false;
+    InitDragDropStatusToIdle();
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
@@ -286,6 +419,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
+    dragDropManager->SetIsDisableDefaultDropAnimation(false);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -420,6 +554,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
+        DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -428,6 +563,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->ResetDragging();
         }
         dragDropManager->SetIsDragNodeNeedClean(false);
+        dragDropManager->SetIsDisableDefaultDropAnimation(true);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             auto overlayManager = pipelineContext->GetOverlayManager();
@@ -584,9 +720,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                     GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
+        InteractionInterface::GetInstance()->SetDraggableState(true);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        actuator->TryTriggerThumbnailCallback();
         if (actuator->userCallback_ && !actuator->isDragPrepareFinish_) {
             auto customLongPress = actuator->userCallback_->GetLongPressEventFunc();
             if (customLongPress) {
@@ -643,10 +781,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because drag action reject");
             return;
         }
-        actuator->isOnBeforeLiftingAnimation = false;
+        actuator->isOnBeforeLiftingAnimation_ = false;
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() ||
+            actuator->IsNotNeedShowPreviewForWeb(gestureHub->GetFrameNode())) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
             return;
         }
@@ -662,10 +801,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
                 actuator->SetEventColumn(actuator);
             }
-            return;
-        }
-        if (!actuator->isFloatImage_) {
-            actuator->isFloatImage_ = true;
             return;
         }
 
@@ -752,79 +887,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!longPressRecognizer_->HasThumbnailCallback() && isAllowedDrag) {
-        auto callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)](Offset point) {
+        auto callback = [weak = WeakClaim(this)](Offset point) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger 150ms timer Thumbnail callback.");
-            auto gestureHub = weakPtr.Upgrade();
-            CHECK_NULL_VOID(gestureHub);
-            auto frameNode = gestureHub->GetFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
             auto actuator = weak.Upgrade();
             CHECK_NULL_VOID(actuator);
-            auto dragPreviewInfo = frameNode->GetDragPreview();
-            if (dragPreviewInfo.inspectorId != "") {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through inspectorId.");
-                auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
-                gestureHub->SetPixelMap(previewPixelMap);
-                gestureHub->SetDragPreviewPixelMap(previewPixelMap);
-                actuator->PrepareFinalPixelMapForDragThroughTouch(previewPixelMap, false);
-            } else if (dragPreviewInfo.pixelMap != nullptr) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through pixelMap.");
-                gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
-                gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
-                actuator->PrepareFinalPixelMapForDragThroughTouch(dragPreviewInfo.pixelMap, false);
-            } else if (dragPreviewInfo.customNode != nullptr) {
-#if defined(PIXEL_MAP_SUPPORTED)
-                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
-                auto callback = [id = Container::CurrentId(), pipeline, gestureHub, weak]
-                    (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
-                    ContainerScope scope(id);
-                    if (pixelMap != nullptr) {
-                        auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-                        auto taskScheduler = pipeline->GetTaskExecutor();
-                        CHECK_NULL_VOID(taskScheduler);
-                        taskScheduler->PostTask(
-                            [gestureHub, customPixelMap, weak]() {
-                                CHECK_NULL_VOID(gestureHub);
-                                gestureHub->SetPixelMap(customPixelMap);
-                                gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                                auto actuator = weak.Upgrade();
-                                CHECK_NULL_VOID(actuator);
-                                actuator->PrepareFinalPixelMapForDragThroughTouch(customPixelMap, true);
-                            },
-                            TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
-                    } else {
-                        TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
-                        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
-                    }
-                };
-                SnapshotParam param;
-                param.delay = CREATE_PIXELMAP_TIME;
-                param.checkImageStatus = true;
-                param.options.waitUntilRenderFinished = true;
-                OHOS::Ace::NG::ComponentSnapshot::Create(
-                    dragPreviewInfo.customNode, std::move(callback), true, param);
-                gestureHub->PrintBuilderNode(dragPreviewInfo.customNode);
-#endif
-            } else {
-                actuator->GetThumbnailPixelMapAsync(gestureHub);
-            }
-            auto longPressRecognizer = actuator->longPressRecognizer_;
-            if (longPressRecognizer && longPressRecognizer->GetGestureDisposal() != GestureDisposal::REJECT) {
-                if (!CreateGatherNode(actuator)) {
-                    actuator->isOnBeforeLiftingAnimation = false;
-                    return;
-                }
-                actuator->isOnBeforeLiftingAnimation = true;
-                DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
-                DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
-                actuator->SetResponseRegionFull();
-            } else {
-                actuator->isOnBeforeLiftingAnimation = false;
-            }
+            actuator->GetThumbnailPixelMap(false);
+            actuator->SetIsThumbnailCallbackTriggered(true);
         };
-
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
@@ -1157,7 +1226,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(columnNode);
     }
-    FlushSyncGeometryNodeTasks();
+    if (!isDragPixelMap) {
+        FlushSyncGeometryNodeTasks();
+    }
 }
 
 /* Retrieves a preview PixelMap for a given drag event action.
@@ -1472,8 +1543,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     } else {
         manager->MountEventToRootNode(columnNode);
     }
-    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success. depth %{public}d, id %{public}d.",
-        columnNode->GetDepth(), columnNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragEvent set eventColumn success.");
 }
 
 void DragEventActuator::HideFilter()
@@ -1661,7 +1731,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->SetHasFilter(false);
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2001,7 +2070,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
         width = pixelMap->GetWidth();
         height = pixelMap->GetHeight();
     }
-    auto offset = GetFloatImageOffset(frameNode, pixelMap);
+    auto offset = frameNode->GetPositionToWindowWithTransform();
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     
@@ -2029,7 +2098,8 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
+    gatherNodeChildInfo = { imageNode, DragDropFuncWrapper::GetFrameNodeOffsetToScreen(frameNode),
+        width, height, width / 2.0f, height / 2.0f };
     return imageNode;
 }
 
@@ -2069,6 +2139,14 @@ void DragEventActuator::ResetNode(const RefPtr<FrameNode>& frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
+void DragEventActuator::InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+{
+    for (auto childInfo : gatherNodeChildrenInfo) {
+        auto imageNode = childInfo.imageNode.Upgrade();
+        DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, childInfo.offset);
     }
 }
 
@@ -2260,7 +2338,7 @@ void DragEventActuator::HandleTouchCancelEvent()
 
 void DragEventActuator::HandleTouchMoveEvent()
 {
-    if (longPressRecognizer_ && isOnBeforeLiftingAnimation &&
+    if (longPressRecognizer_ && isOnBeforeLiftingAnimation_ &&
         longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT) {
         SetGatherNode(nullptr);
         ClearGatherNodeChildrenInfo();
@@ -2269,7 +2347,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         manager->RemoveGatherNode();
-        isOnBeforeLiftingAnimation = false;
+        isOnBeforeLiftingAnimation_ = false;
         ResetResponseRegion();
     }
 }

@@ -210,7 +210,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
     CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
     CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
     CreateScrollBarChild();
-    CreateDone(stackNode_);
+    CreateDone();
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
     float controlDistance = pattern_->GetControlDistance();
@@ -335,7 +335,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag005, TestSize.Level1)
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
     FlushLayoutTask(stackNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -343,7 +343,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag005, TestSize.Level1)
      */
     HandleDragEnd(info);
     FlushLayoutTask(stackNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
 
@@ -869,7 +869,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
     CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
     CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
     CreateScrollBarChild();
-    CreateDone(stackNode_);
+    CreateDone();
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
     float controlDistance = pattern_->GetControlDistance();

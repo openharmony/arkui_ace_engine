@@ -310,6 +310,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
 
 RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
+    CHECK_NULL_RETURN(sheetNode, nullptr);
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto subtitleId = pattern->GetSubtitleId();

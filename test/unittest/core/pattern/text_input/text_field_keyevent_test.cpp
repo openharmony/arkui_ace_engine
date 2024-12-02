@@ -14,6 +14,7 @@
  */
 
 #include "text_input_base.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -344,8 +345,8 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent003, TestSize.Level1)
      * @tc.steps: step1. Initialize textInput and get focus
      */
     std::string expectStr = "fghij";
-    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onCopy = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
+    auto onPaste = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnCopy(onCopy);
         model.SetOnPaste(onPaste);
@@ -420,33 +421,22 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent004, TestSize.Level1)
 
 HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Initialize textInput
-     */
-    CreateTextField(DEFAULT_TEXT);
-
-    /**
-     * @tc.steps: step2. Create keyboard events
-     */
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_TAB;
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
     std::vector<KeyCode> presscodes = {};
-    event.pressedCodes = presscodes;
-
-    /**
-     * @tc.expected: shift + a to input
-     */
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_A);
-    event.code = KeyCode::KEY_A;
+    keyEvent.pressedCodes = presscodes;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_A);
+    keyEvent.code = KeyCode::KEY_A;
+    CreateTextField(DEFAULT_TEXT);
     pattern_->HandleSetSelection(5, 10, false);
     pattern_->isFocusedBeforeClick_ = false;
     GetFocus();
     pattern_->needToRequestKeyboardOnFocus_  = false;
     pattern_->needToRequestKeyboardInner_  = false;
-    auto ret = pattern_->OnKeyEvent(event);
+    auto ret = pattern_->OnKeyEvent(keyEvent);
     pattern_->CalcCounterBoundHeight();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(ret);
@@ -474,7 +464,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
         ACTION_COPY,
         ACTION_PASTE,
     };
-    auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto callback = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) {
         model.SetOnCut(callback); });
 
@@ -515,8 +505,8 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
      * @tc.steps: step1. Initialize textInput and get focus
      */
     std::string expectStr = "fghij";
-    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onCopy = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
+    auto onPaste = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnCopy(onCopy);
         model.SetOnPaste(onPaste);
@@ -612,7 +602,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
      */
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
         EXPECT_FALSE(commonEvent.keepEditable_);
-        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+        EXPECT_EQ(StringUtils::Str16ToStr8(commonEvent.text_), "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnSubmit(onSubmit);
@@ -636,7 +626,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
         commonEvent.SetKeepEditable(true);
         EXPECT_TRUE(commonEvent.keepEditable_);
-        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+        EXPECT_EQ(StringUtils::Str16ToStr8(commonEvent.text_), "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetInputStyle(DEFAULT_INPUT_STYLE);

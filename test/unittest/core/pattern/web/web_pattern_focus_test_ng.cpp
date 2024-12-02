@@ -578,31 +578,6 @@ HWTEST_F(WebPatternFocusTestNg, UnRegisterTextBlurCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitAiEngine
- * @tc.desc: InitAiEngine.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternFocusTestNg, InitAiEngine, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    MockPipelineContext::SetUp();
-    webPattern->InitAiEngine();
-    webPattern->InitAiEngine();
-    MockPipelineContext::TearDown();
-#endif
-}
-
-/**
  * @tc.name: InitializeAccessibility_001
  * @tc.desc: InitializeAccessibility.
  * @tc.type: FUNC

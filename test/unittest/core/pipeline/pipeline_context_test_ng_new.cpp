@@ -1081,21 +1081,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
     uint64_t nanoTimeStamp = 1234567890;
     bool isScreen = true;
     auto result =
-        ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(emptyHistory.begin(), emptyHistory.end()),
-            std::vector<UIInputEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+        ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+            std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
-    result = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<UIInputEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+    result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
     emptyHistory.clear();
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
-    result = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(emptyHistory.begin(), emptyHistory.end()),
-        std::vector<UIInputEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
+    result = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(emptyHistory.begin(), emptyHistory.end()),
+        std::vector<PointerEvent>(emptyCurrent.begin(), emptyCurrent.end()), nanoTimeStamp, isScreen);
     EXPECT_FLOAT_EQ(0.0f, result.x);
     EXPECT_FLOAT_EQ(0.0f, result.y);
 }
@@ -1118,15 +1118,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
-    auto resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), 30000000, true);
+    auto resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), 30000000, true);
 
     ASSERT_FLOAT_EQ(200.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(300.0f, resampledCoord.y);
 
     SystemProperties::debugEnabled_ = true;
-    resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), 2500, true);
+    resampledCoord = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), 2500, true);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.x);
     ASSERT_FLOAT_EQ(0.0f, resampledCoord.y);
 }
@@ -1976,31 +1976,31 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
     auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
 
-    std::vector<PointerEvent> history;
-    PointerEvent historyDrageEvent1;
+    std::vector<DragPointerEvent> history;
+    DragPointerEvent historyDrageEvent1;
     historyDrageEvent1.x = 200;
     historyDrageEvent1.y = 300;
     historyDrageEvent1.time = timeStampAce;
     history.push_back(historyDrageEvent1);
-    PointerEvent historyDrageEvent2;
+    DragPointerEvent historyDrageEvent2;
     historyDrageEvent2.x = 250;
     historyDrageEvent2.y = 350;
     historyDrageEvent2.time = timeStampTwo;
     history.push_back(historyDrageEvent2);
-    std::vector<PointerEvent> current;
-    PointerEvent currentDragEvent1;
+    std::vector<DragPointerEvent> current;
+    DragPointerEvent currentDragEvent1;
     currentDragEvent1.x = 300;
     currentDragEvent1.y = 400;
     currentDragEvent1.time = timeStampThree;
     current.push_back(currentDragEvent1);
-    PointerEvent currentDragEvent2;
+    DragPointerEvent currentDragEvent2;
     currentDragEvent2.x = 350;
     currentDragEvent2.y = 450;
     currentDragEvent2.time = timeStampFour;
     current.push_back(currentDragEvent2);
     uint64_t nanoTimeStamp = 3100;
 
-    PointerEvent resampledPointerEvent = context_->eventManager_->GetResamplePointerEvent(
+    DragPointerEvent resampledPointerEvent = context_->eventManager_->GetResamplePointerEvent(
         history, current, nanoTimeStamp);
     EXPECT_EQ(305, resampledPointerEvent.x);
     EXPECT_EQ(405, resampledPointerEvent.y);

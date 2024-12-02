@@ -38,11 +38,6 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     DetachRenderContext();
 }
 
-void CanvasPattern::OnDetachFromMainTree()
-{
-    DetachRenderContext();
-}
-
 void CanvasPattern::AttachRenderContext()
 {
     isAttached_ = true;
@@ -753,6 +748,7 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(gradientObj);
@@ -825,6 +821,7 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradientObj);

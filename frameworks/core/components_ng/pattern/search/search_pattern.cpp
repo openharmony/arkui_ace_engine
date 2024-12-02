@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -69,7 +70,7 @@ const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", 
     "Button__" };
 } // namespace
 
-void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t style)
+void SearchPattern::UpdateChangeEvent(const std::u16string& textValue, int16_t style)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -77,35 +78,12 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     CHECK_NULL_VOID(buttonHost);
     auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(imageHost);
-    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonRenderContext);
-    auto cancelImageRenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImageRenderContext);
-    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(cancelButtonEvent);
     if (style == ERROR) {
         auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         style = static_cast<int16_t>(layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT));
     }
-    if (IsEventEnabled(textValue, style)) {
-        cancelButtonRenderContext->UpdateOpacity(1.0);
-        cancelImageRenderContext->UpdateOpacity(1.0);
-        cancelButtonEvent->SetEnabled(true);
-    } else {
-        cancelButtonRenderContext->UpdateOpacity(0.0);
-        cancelImageRenderContext->UpdateOpacity(0.0);
-        cancelButtonEvent->SetEnabled(false);
-    }
-    if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
-        CHECK_NULL_VOID(imageEvent);
-        if (IsEventEnabled(textValue, style)) {
-            imageEvent->SetEnabled(true);
-        } else {
-            imageEvent->SetEnabled(false);
-        }
-    }
+    UpdateCancelButtonStatus(textValue, style);
     buttonHost->MarkModifyDone();
     imageHost->MarkModifyDone();
     buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -121,7 +99,46 @@ void SearchPattern::UpdateChangeEvent(const std::string& textValue, int16_t styl
     }
 }
 
-void SearchPattern::UpdateDisable(const std::string& textValue)
+void SearchPattern::UpdateCancelButtonStatus(const std::u16string& textValue, int16_t style)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonHost);
+    auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(imageHost);
+    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    auto cancelImageRenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImageRenderContext);
+    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(cancelButtonEvent);
+    auto buttonLayoutProperty = buttonHost->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto imageLayoutProperty = imageHost->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    bool isEventEnabled = IsEventEnabled(textValue, style);
+    if (isEventEnabled) {
+        cancelButtonRenderContext->UpdateOpacity(1.0);
+        cancelImageRenderContext->UpdateOpacity(1.0);
+        cancelButtonEvent->SetEnabled(true);
+        buttonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    } else {
+        cancelButtonRenderContext->UpdateOpacity(0.0);
+        cancelImageRenderContext->UpdateOpacity(0.0);
+        cancelButtonEvent->SetEnabled(false);
+        buttonLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        imageLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    }
+    if (imageHost->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
+        CHECK_NULL_VOID(imageEvent);
+        imageEvent->SetEnabled(isEventEnabled);
+    }
+}
+
+void SearchPattern::UpdateDisable(const std::u16string& textValue)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -147,7 +164,7 @@ void SearchPattern::UpdateDisable(const std::string& textValue)
     searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-bool SearchPattern::IsEventEnabled(const std::string& textValue, int16_t style)
+bool SearchPattern::IsEventEnabled(const std::u16string& textValue, int16_t style)
 {
     return (style == static_cast<int16_t>(CancelButtonStyle::CONSTANT)) ||
            ((style == static_cast<int16_t>(CancelButtonStyle::INPUT)) && !textValue.empty());
@@ -161,7 +178,7 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(textFieldFrameNode, true);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, true);
-    UpdateDisable(textFieldPattern->GetTextValue());
+    UpdateDisable(textFieldPattern->GetTextUtf16Value());
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     searchSize_ = geometryNode->GetContentSize();
@@ -467,7 +484,8 @@ void SearchPattern::InitTextFieldValueChangeEvent()
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->GetOnChange()) {
-        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value, PreviewText& previewText) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
+        (const std::u16string& value, PreviewText& previewText) {
             auto searchPattern = weak.Upgrade();
             searchPattern->UpdateChangeEvent(value);
         };
@@ -756,7 +774,7 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    auto text = textFieldPattern->GetTextValue();
+    auto text = textFieldPattern->GetTextUtf16Value();
     // Enter key type callback
     TextFieldCommonEvent event;
     searchEventHub->FireOnSubmit(text, event);
@@ -780,22 +798,22 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     CHECK_NULL_VOID(!textFieldPattern->IsHandleDragging());
     focusChoice_ = FocusChoice::SEARCH;
-    textFieldPattern->InitEditingValueText("");
+    textFieldPattern->InitEditingValueText(u"");
     textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    textFieldLayoutProperty->UpdateValue("");
+    textFieldLayoutProperty->UpdateValue(u"");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     PreviewText previewText {};
-    eventHub->FireOnChange("", previewText);
+    eventHub->FireOnChange(u"", previewText);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
-    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -844,7 +862,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 
     bool isAllTextSelected = textFieldPattern->IsSelectAll();
     bool isCaretVisible = textFieldPattern->GetCursorVisible();
-    bool isTextEmpty = textFieldPattern->GetTextValue().empty();
+    bool isTextEmpty = textFieldPattern->GetTextUtf16Value().empty();
     bool isOnlyTabPressed = event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB;
 
     auto parentHub = host->GetOrCreateFocusHub()->GetParentFocusHub();
@@ -861,7 +879,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 
     if (event.action != KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
+        if ((event.code == KeyCode::KEY_TAB ||
+            event.code == KeyCode::KEY_SHIFT_LEFT ||
+            event.code == KeyCode::KEY_SHIFT_RIGHT) &&
+            focusChoice_ == FocusChoice::SEARCH) {
             textFieldPattern->OnKeyEvent(event);
         }
         return false;
@@ -1005,7 +1026,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
 
     if (focusChoice_ == FocusChoice::SEARCH) {
         if (!recoverFlag) {
-            if (!textFieldPattern->GetTextValue().empty()) {
+            if (!textFieldPattern->GetTextUtf16Value().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
@@ -1374,7 +1395,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldPattern);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
-    json->PutExtAttr("placeholder", textFieldPattern->GetPlaceHolder().c_str(), filter);
+    json->PutExtAttr("placeholder", UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
     json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
     json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);
@@ -2033,7 +2054,7 @@ void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 {
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    UpdateChangeEvent(textFieldPattern->GetTextValue(), static_cast<int16_t>(style));
+    UpdateChangeEvent(textFieldPattern->GetTextUtf16Value(), static_cast<int16_t>(style));
 }
 
 void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
@@ -2194,7 +2215,7 @@ void SearchPattern::UpdateIconChangeEvent()
     CHECK_NULL_VOID(GetSearchNode());
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    UpdateChangeEvent(textFieldPattern->GetTextValue());
+    UpdateChangeEvent(textFieldPattern->GetTextUtf16Value());
 }
 
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)

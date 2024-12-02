@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -59,13 +60,14 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
+using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 
@@ -380,6 +382,11 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
+    virtual uint64_t GetDisplayId() const
+    {
+        return -1;
+    }
+
     virtual bool IsUseStageModel() const
     {
         return false;
@@ -617,6 +624,21 @@ public:
     {
         return Rect();
     }
+
+    virtual bool IsFloatingWindow() const
+    {
+        return false;
+    }
+
+    void SetCurrentDisplayId(uint64_t displayId)
+    {
+        currentDisplayId_ = displayId;
+    }
+
+    uint64_t GetCurrentDisplayId() const
+    {
+        return currentDisplayId_;
+    }
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
@@ -651,6 +673,7 @@ private:
     int32_t apiTargetVersion_ = 0;
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
+    uint64_t currentDisplayId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -229,10 +229,17 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 bool NetworkImageLoader::DownloadImage(
     DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
 {
-    return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
-                                                               src, Container::CurrentId(), nodeId)
-                : DownloadManager::GetInstance()->DownloadAsync(std::move(downloadCallback),
-                                                                src, Container::CurrentId(), nodeId);
+    // If the API version is greater or equal than 14, use the preload module to download the URL.
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
+                          std::move(downloadCallback), src, Container::CurrentId(), nodeId)
+                    : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
+                          std::move(downloadCallback), src, Container::CurrentId(), nodeId);
+    }
+    return sync ? DownloadManager::GetInstance()->DownloadSync(
+                      std::move(downloadCallback), src, Container::CurrentId(), nodeId)
+                : DownloadManager::GetInstance()->DownloadAsync(
+                      std::move(downloadCallback), src, Container::CurrentId(), nodeId);
 }
 
 #ifndef USE_ROSEN_DRAWING

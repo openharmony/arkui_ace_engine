@@ -334,6 +334,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     fillColor(value: ResourceColor): this;
     objectFit(value: ImageFit): this;
     objectRepeat(value: ImageRepeat): this;
+    orientation(value: ImageRotateOrientation): this;
     autoResize(value: boolean): this;
     renderMode(value: ImageRenderMode): this;
     interpolation(value: ImageInterpolation): this;
@@ -1718,6 +1719,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onLoad(callback: (event?: object) => void): this;
     onDestroy(event: () => void): this;
     enableSecure(value: boolean): this;
+    hdrBrightness(value: number): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

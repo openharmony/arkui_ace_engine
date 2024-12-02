@@ -123,21 +123,6 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
     return focusViewHub;
 }
 
-RefPtr<FocusHub> FocusView::GetFocusLeaf(const RefPtr<FocusHub>& focusHub)
-{
-    CHECK_NULL_RETURN(focusHub, nullptr);
-    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
-    CHECK_NULL_RETURN(lastFocusNode, focusHub);
-    auto nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
-    CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
-    while (nextFocusNode) {
-        lastFocusNode = nextFocusNode;
-        nextFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
-        CHECK_NULL_RETURN(nextFocusNode, lastFocusNode);
-    }
-    return lastFocusNode;
-}
-
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -276,7 +261,7 @@ std::pair<bool, bool> FocusView::HandleDefaultFocusNode(
 
 bool FocusView::RequestDefaultFocus()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focusView: %{public}s/%{public}d.", GetFrameName().c_str(),
         GetFrameId());
     auto focusViewHub = GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, false);
@@ -310,11 +295,11 @@ bool FocusView::RequestDefaultFocus()
         auto ret = viewRootScope->RequestFocusImmediatelyInner();
         // set neverShown_ false when request focus on focus view success
         neverShown_ &= !ret;
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on root scope: %{public}s/%{public}d return: %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }
-    auto lastViewFocusNode = GetFocusLeaf(focusViewHub);
+    auto lastViewFocusNode = focusViewHub->GetFocusLeaf();
     CHECK_NULL_RETURN(lastViewFocusNode, false);
     SetIsViewRootScopeFocused(false);
     bool ret = false;
@@ -326,7 +311,7 @@ bool FocusView::RequestDefaultFocus()
     }
     // set neverShown_ false when request focus on focus view success
     neverShown_ &= !ret;
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
 }
 

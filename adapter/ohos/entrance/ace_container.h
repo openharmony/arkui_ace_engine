@@ -281,6 +281,12 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
+    uint64_t GetDisplayId() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, -1);
+        return uiWindow_->GetDisplayId();
+    }
+
     Orientation GetOrientation() override
     {
         CHECK_NULL_RETURN(uiWindow_, Orientation::UNSPECIFIED);
@@ -712,6 +718,12 @@ public:
     }
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
+    bool IsFloatingWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
 
 private:
     virtual bool MaybeRelease() override;

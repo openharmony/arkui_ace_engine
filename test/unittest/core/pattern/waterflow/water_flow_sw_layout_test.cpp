@@ -553,7 +553,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
 
     pattern_->ScrollToIndex(2, true, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->finalPosition_, -2800.0f);
+    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -2850.0f);
     UpdateCurrentOffset(2800.0f + 101.0f);
     // should mark misaligned
     EXPECT_EQ(info_->startIndex_, 0);
@@ -593,7 +593,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     pattern_->ScrollToIndex(15, true, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->finalPosition_, -575.0f);
+    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -575.0f);
     UpdateCurrentOffset(550.0f);
 
     EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
@@ -1950,6 +1950,7 @@ HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
     UpdateCurrentOffset(-50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), -560.0f);
     EXPECT_EQ(GetChildY(frameNode_, 10), 1040.0f);
+    EXPECT_EQ(GetChildLayoutProperty<LayoutProperty>(frameNode_, 0)->GetPropertyChangeFlag(), 0);
 }
 
 /**

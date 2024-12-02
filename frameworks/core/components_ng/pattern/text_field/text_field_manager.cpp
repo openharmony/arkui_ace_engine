@@ -60,7 +60,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
-    if (GreatOrEqual(position.GetY(), rootHeight)) {
+    if (GreatOrEqual(position.GetY(), rootHeight) || LessOrEqual(position.GetY(), 0.0f)) {
         auto pattern = onFocusTextField_.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -72,9 +72,6 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
             }
             parent = parent->GetAncestorNodeOfFrame();
         }
-    }
-    if (LessOrEqual(position.GetY(), 0.0f)) {
-        return;
     }
     auto rootWidth = pipeline->GetRootWidth();
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {

@@ -24,16 +24,10 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 namespace OHOS::Ace {
-constexpr uint8_t KEYS_MAX_VALUE = 3;
 constexpr int32_t DUMP_START_NUMBER = 4;
 constexpr int32_t DUMP_LIMIT_SIZE = 500;
 constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
-enum CtrlKeysBit: uint8_t {
-    CTRL = 1,
-    SHIFT = 2,
-    ALT = 4,
-};
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
@@ -160,13 +154,12 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
     for (const auto& item : touchTestResultInfo) {
         resultInfo.append("{ ").append("tag: ").append(item.second.tag);
 #ifndef IS_RELEASE_VERSION
-        resultInfo.append(", inspectorId: ").append(item.second.inspectorId);
+        resultInfo.append(", inspectorId: ")
+            .append(item.second.inspectorId)
+            .append(", frameRect: ")
+            .append(item.second.frameRect);
 #endif
-        resultInfo.append(", frameRect: ")
-            .append(item.second.frameRect)
-            .append(", depth: ")
-            .append(std::to_string(item.second.depth))
-            .append(" };");
+        resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
@@ -175,14 +168,15 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         int32_t dumpCount = 0;
-        for (auto& item : dumpList) {
+        for ([[maybe_unused]] auto& item : dumpList) {
             dumpCount++;
             if (dumpCount > DUMP_LIMIT_SIZE) {
                 TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                     "EventTreeDumpInfo size is over limit, the following info is dropped!");
                 break;
             }
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+                SEC_PARAM(item.second.c_str()));
         }
         RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
     }
@@ -202,7 +196,8 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+                SEC_PARAM(item.second.c_str()));
         }
 #endif
         eventTree_.eventTreeList.clear();
@@ -521,8 +516,8 @@ void EventManager::CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32
 {
     for (const auto& result : currMouseTestResults_) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
-            "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: %{public}d", selectedNodeId,
-            result->GetNodeId());
+            "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: "
+            SEC_PLD(%{public}d) ".", selectedNodeId, SEC_PARAM(result->GetNodeId()));
         if (result->GetNodeId() == selectedNodeId) {
             isMousePressAtSelectedNode = true;
         }
@@ -539,8 +534,7 @@ void EventManager::GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std
             touchTestIds.emplace_back(eventTarget.value().id);
             if (eventTarget.value().id == std::to_string(selectedNodeId)) {
                 TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
-                    "HandleGlobalEventNG selectedNodeId: %{public}d eventTarget id is: %{public}s", selectedNodeId,
-                    eventTarget.value().id.c_str());
+                    "HandleGlobalEventNG selectedNodeId: %{public}d", selectedNodeId);
                 isMousePressAtSelectedNode = true;
             }
         }
@@ -563,10 +557,10 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
             ++iter;
             continue;
         }
-        for (const auto& rect : rectList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
-                point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
+        for ([[maybe_unused]] const auto& rect : rectList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, SEC_PLD(,
+                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]"),
+                SEC_PARAM(point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom()));
         }
         if (point.GetSourceType() == SourceType::TOUCH) {
             if (!rectCallback.touchCallback) {
@@ -774,6 +768,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch)
 {
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+        LogTouchTestRecognizerStates(point.id);
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {
             ft->SetFrameTraceLimit();
@@ -794,6 +789,50 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
     if (!point.isFalsified) {
         lastSourceTool_ = point.sourceTool;
     }
+}
+
+void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
+{
+    if (eventTree_.eventTreeList.size() == 0) {
+        return;
+    }
+    std::string log = "";
+    auto lastEventTree = eventTree_.eventTreeList.back();
+
+    std::map<int32_t, std::string> hitFrameNode;
+    std::list<NG::FrameNodeSnapshot> frameNodeSnapShots = lastEventTree.hitTestTree;
+    for (auto iter : frameNodeSnapShots) {
+        hitFrameNode[iter.nodeId] = iter.tag;
+    }
+
+    std::list<RefPtr<GestureSnapshot>> gestureSnapshots = lastEventTree.gestureTree[touchEventId];
+    for (auto gestureSnapshot : gestureSnapshots) {
+        if (gestureSnapshot->type.find("TouchEventActuator") != std::string::npos ||
+            gestureSnapshot->type.find("ExclusiveRecognizer") != std::string::npos ||
+            gestureSnapshot->type.find("ParallelRecognizer") != std::string::npos ||
+            gestureSnapshot->type.find("SequenceRecognizer") != std::string::npos) {
+            continue;
+        }
+        std::string gestureLog = "{";
+        gestureLog += "types: " + gestureSnapshot->type.substr(0, gestureSnapshot->type.find("Recognizer"));
+        gestureLog += ", node: " + hitFrameNode[gestureSnapshot->nodeId];
+
+        auto stateHistorys = gestureSnapshot->stateHistory;
+        for (auto stateHistory : stateHistorys) {
+            if (stateHistory.procedure.find("Down") != std::string::npos) {
+                gestureLog += ", prcd: Down";
+            } else {
+                gestureLog += ", prcd: Up";
+            }
+            gestureLog += ", state: " + stateHistory.state;
+            if (stateHistory.extraInfo != "") {
+                gestureLog += ", extraInfo: " + stateHistory.extraInfo;
+            }
+        }
+        gestureLog += "}";
+        log += gestureLog;
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)
@@ -865,13 +904,13 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
-            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent,
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent, "",
                 NG::TransRefereeState(recognizer->GetRefereeState()),
                 NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
         }
         if (!recognizer && !isStopTouchEvent && sendOnTouch) {
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
-            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+            eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
         }
     }
@@ -912,13 +951,13 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
             auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
             if (recognizer) {
                 entry->HandleMultiContainerEvent(point);
-                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point, "",
                     NG::TransRefereeState(recognizer->GetRefereeState()),
                     NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
             }
             if (!recognizer && !isStopTouchEvent) {
                 isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                     std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
             }
         }
@@ -976,70 +1015,6 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastSourceTool_ = event.sourceTool;
     return true;
-}
-
-bool EventManager::DispatchTabIndexEvent(
-    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode)
-{
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(mainNode, false);
-    if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Tab index focus system handled this event");
-        return true;
-    }
-    return false;
-}
-
-bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
-{
-    CHECK_NULL_RETURN(focusNode, false);
-    if (focusNode->HandleKeyEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
-        return true;
-    }
-    return false;
-}
-
-bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
-{
-    CHECK_NULL_RETURN(mainView, false);
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch tab index event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
-        event.action, mainView->GetTag().c_str(), mainView->GetId());
-    auto mainViewFocusHub = mainView->GetFocusHub();
-    CHECK_NULL_RETURN(mainViewFocusHub, false);
-    if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
-        return true;
-    }
-    return false;
-}
-
-bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
-{
-    if (!focusNode) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS,
-            "Cannot dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: nullptr",
-            event.code, event.action, event.isPreIme);
-        return false;
-    }
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: %{public}s/%{public}d.",
-        event.code, event.action, event.isPreIme, focusNode->GetTag().c_str(), focusNode->GetId());
-    isKeyConsumed_ = false;
-    auto focusNodeHub = focusNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusNodeHub, false);
-    if (focusNodeHub->HandleKeyEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
-        return true;
-    }
-    if (!isKeyConsumed_) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
-    }
-    return isKeyConsumed_;
 }
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
@@ -1151,24 +1126,27 @@ void EventManager::LogPrintMouseTest()
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
     } else {
         for (const auto& result : currMouseTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     if (lastHoverTestResults_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
     } else {
         for (const auto& result : lastHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     if (currHoverTestResults_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
     } else {
         for (const auto& result : currHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     auto lastNode = lastHoverNode_.Upgrade();
@@ -1204,7 +1182,8 @@ void EventManager::MouseTest(
 {
     ACE_FUNCTION_TRACE();
     TAG_LOGD(AceLogTag::ACE_MOUSE,
-        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
+        "Mouse test start. Event is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) "), "
+        "button: %{public}d, action: %{public}d", SEC_PARAM(event.x), SEC_PARAM(event.y),
         event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
@@ -1333,14 +1312,13 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
         }
         if (event.action == MouseAction::PRESS) {
             pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
-        } else if (event.action == MouseAction::RELEASE) {
-            DoSingleMouseActionRelease(event.button);
         }
     }
-    if (event.pullAction == MouseAction::PULL_UP) {
-        DoMouseActionRelease();
+    auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+    if (event.action == MouseAction::RELEASE) {
+        DoSingleMouseActionRelease(event.button);
     }
-    return DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
+    return result;
 }
 
 bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
@@ -1351,34 +1329,13 @@ bool EventManager::DispatchMouseEventInLessAPI13(const MouseEvent& event)
         DispatchMouseEventToPressResults(event, pressMouseTestResults_, handledResults, isStopPropagation);
         if (event.action == MouseAction::PRESS) {
             pressMouseTestResults_ = currMouseTestResults_;
-        } else if (event.action == MouseAction::RELEASE) {
-            DoMouseActionRelease();
         }
     }
-    if (event.pullAction == MouseAction::PULL_UP) {
+    auto result = DispatchMouseEventToCurResultsInLessAPI13(event, handledResults, isStopPropagation);
+    if (event.action == MouseAction::RELEASE) {
         DoMouseActionRelease();
     }
-    for (const auto& mouseTarget : currMouseTestResults_) {
-        if (!mouseTarget) {
-            continue;
-        }
-        if (!isStopPropagation) {
-            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
-            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
-            if (ret && mouseTarget->HandleMouseEvent(event)) {
-                return true;
-            }
-            continue;
-        }
-        if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
-            pressMouseTestResults_.end()) {
-            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
-            if (mouseTarget->HandleMouseEvent(event)) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return result;
 }
 
 void EventManager::DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
@@ -1415,6 +1372,32 @@ bool EventManager::DispatchMouseEventToCurResults(
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
             mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
+            // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+            if (mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool EventManager::DispatchMouseEventToCurResultsInLessAPI13(
+    const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation)
+{
+    for (const auto& mouseTarget : currMouseTestResults_) {
+        if (!mouseTarget) {
+            continue;
+        }
+        if (!isStopPropagation) {
+            auto ret = std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end();
+            // if pressMouseTestResults doesn't have any isStopPropagation, use default handledResults.
+            if (ret && mouseTarget->HandleMouseEvent(event)) {
+                return true;
+            }
+            continue;
+        }
+        if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+            pressMouseTestResults_.end()) {
             // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
             if (mouseTarget->HandleMouseEvent(event)) {
                 return true;
@@ -1625,434 +1608,12 @@ bool EventManager::DispatchRotationEvent(
     }
 }
 
-bool EventManager::IsSkipEventNode(const RefPtr<NG::FrameNode>& focusNode)
-{
-    CHECK_NULL_RETURN(focusNode, false);
-    auto curFrameName = focusNode ? focusNode->GetTag() : "NULL";
-    return curFrameName == V2::WEB_ETS_TAG;
-}
-
-void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
-{
-    auto frameNode = node.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto iter = keyboardShortcutNode_.begin();
-    while (iter != keyboardShortcutNode_.end()) {
-        auto keyboardShortcutNode = (*iter).Upgrade();
-        if (!keyboardShortcutNode) {
-            keyboardShortcutNode_.erase(iter++);
-            continue;
-        }
-        if (keyboardShortcutNode->GetId() == frameNode->GetId()) {
-            return;
-        }
-        ++iter;
-    }
-    keyboardShortcutNode_.emplace_back(node);
-}
-
-uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<ModifierKey>& keys)
-{
-    uint8_t keyValue = 0;
-    uint8_t ctrlTimes = 0;
-    uint8_t shiftTimes = 0;
-    uint8_t altTimes = 0;
-    if (keys.size() > KEYS_MAX_VALUE) {
-        return 0;
-    }
-    for (const auto& key : keys) {
-        switch (static_cast<uint8_t>(key)) {
-            case static_cast<uint8_t>(ModifierKey::CTRL): {
-                keyValue |= CtrlKeysBit::CTRL;
-                ++ctrlTimes;
-                break;
-            }
-            case static_cast<uint8_t>(ModifierKey::SHIFT): {
-                keyValue |= CtrlKeysBit::SHIFT;
-                ++shiftTimes;
-                break;
-            }
-            case static_cast<uint8_t>(ModifierKey::ALT): {
-                keyValue |= CtrlKeysBit::ALT;
-                ++altTimes;
-                break;
-            }
-            default:
-                keyValue |= 0;
-        }
-    }
-    if (ctrlTimes > 1 || shiftTimes > 1 || altTimes > 1) {
-        return 0;
-    }
-    return keyValue;
-}
-
-bool EventManager::IsSystemKeyboardShortcut(const KeyEvent& event)
-{
-    static std::optional<std::vector<HotKey>> systemHotKeys;
-    static std::mutex lock_;
-
-    if (!systemHotKeys) {
-        std::lock_guard<std::mutex> lockGuard(lock_);
-        std::vector<HotKey> initHotKeys;
-        if (!systemHotKeys && InputManager::GetSystemHotkeys(initHotKeys)) {
-            systemHotKeys.emplace(initHotKeys);
-        }
-    }
-    if (systemHotKeys.value().empty()) {
-        return false;
-    }
-
-    const auto& hotKeys = systemHotKeys.value();
-    std::string info;
-    for (const auto& hotKey : hotKeys) {
-        const auto [prekey, finalkey] = hotKey;
-        if (static_cast<int32_t>(event.code) != finalkey || (event.pressedCodes.size() != prekey.size() + 1)) {
-            continue;
-        }
-        bool matchPreKey = std::all_of(event.pressedCodes.begin(), event.pressedCodes.end(),
-            [&prekeySet = prekey, keycode = event.code](const KeyCode& item) {
-                return (item == keycode) ? true : prekeySet.count(static_cast<int32_t>(item)) != 0;
-            });
-        if (matchPreKey) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Match system hot key. Cannot trigger keyboard shortcut.");
-            return true;
-        }
-    }
-    return false;
-}
-
-bool EventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys)
-{
-    for (auto& weakNode : keyboardShortcutNode_) {
-        auto frameNode = weakNode.Upgrade();
-        if (!frameNode) {
-            continue;
-        }
-        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
-        if (!eventHub) {
-            continue;
-        }
-        auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
-        for (auto& keyboardShortcut : keyboardShortcuts) {
-            if (keyboardShortcut.value.find(value) != std::string::npos && keyboardShortcut.keys == keys) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void AddKeyboardShortcutSingleKey(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    uint8_t index = 0;
-    std::vector<KeyCode> keyCode1;
-    std::vector<KeyCode> keyCode2;
-    if (keys & CtrlKeysBit::CTRL) {
-        keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
-        keyCode2.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-        permutation.emplace_back(++index);
-    }
-    if (keys & CtrlKeysBit::SHIFT) {
-        keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-        keyCode2.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-        permutation.emplace_back(++index);
-    }
-    if (keys & CtrlKeysBit::ALT) {
-        keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
-        keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
-        permutation.emplace_back(++index);
-    }
-    keyCodes.emplace_back(keyCode1);
-    keyCodes.emplace_back(keyCode2);
-}
-
-void AddKeyboardShortcutDoubleKeysWithCtrlShift(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    uint8_t index = 0;
-    std::vector<KeyCode> keyCode1;
-    std::vector<KeyCode> keyCode2;
-    std::vector<KeyCode> keyCode3;
-    std::vector<KeyCode> keyCode4;
-
-    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode3.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    keyCode4.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    keyCode3.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCodes.emplace_back(keyCode1);
-    keyCodes.emplace_back(keyCode2);
-    keyCodes.emplace_back(keyCode3);
-    keyCodes.emplace_back(keyCode4);
-}
-
-void AddKeyboardShortcutDoubleKeysWithCtrlAlt(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    uint8_t index = 0;
-    std::vector<KeyCode> keyCode1;
-    std::vector<KeyCode> keyCode2;
-    std::vector<KeyCode> keyCode3;
-    std::vector<KeyCode> keyCode4;
-
-    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode3.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    keyCode4.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCodes.emplace_back(keyCode1);
-    keyCodes.emplace_back(keyCode2);
-    keyCodes.emplace_back(keyCode3);
-    keyCodes.emplace_back(keyCode4);
-}
-
-void AddKeyboardShortcutDoubleKeysWithShiftAlt(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    uint8_t index = 0;
-    std::vector<KeyCode> keyCode1;
-    std::vector<KeyCode> keyCode2;
-    std::vector<KeyCode> keyCode3;
-    std::vector<KeyCode> keyCode4;
-
-    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode3.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCodes.emplace_back(keyCode1);
-    keyCodes.emplace_back(keyCode2);
-    keyCodes.emplace_back(keyCode3);
-    keyCodes.emplace_back(keyCode4);
-}
-
-void AddKeyboardShortcutDoubleKeys(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT) {
-        AddKeyboardShortcutDoubleKeysWithCtrlShift(keys, keyCodes, permutation);
-    }
-    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT) {
-        AddKeyboardShortcutDoubleKeysWithCtrlAlt(keys, keyCodes, permutation);
-    }
-    if (keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        AddKeyboardShortcutDoubleKeysWithShiftAlt(keys, keyCodes, permutation);
-    }
-}
-
-void AddKeyboardShortcutTripleKeys(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    uint8_t index = 0;
-    std::vector<KeyCode> keyCode1;
-    std::vector<KeyCode> keyCode2;
-    std::vector<KeyCode> keyCode3;
-    std::vector<KeyCode> keyCode4;
-    std::vector<KeyCode> keyCode5;
-    std::vector<KeyCode> keyCode6;
-    std::vector<KeyCode> keyCode7;
-    std::vector<KeyCode> keyCode8;
-
-    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode3.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode4.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    keyCode5.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    keyCode6.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    keyCode7.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    keyCode8.emplace_back(KeyCode::KEY_CTRL_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode3.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    keyCode5.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode6.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    keyCode7.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    keyCode8.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    keyCode5.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode6.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    keyCode7.emplace_back(KeyCode::KEY_ALT_LEFT);
-    keyCode8.emplace_back(KeyCode::KEY_ALT_RIGHT);
-    permutation.emplace_back(++index);
-
-    keyCodes.emplace_back(keyCode1);
-    keyCodes.emplace_back(keyCode2);
-    keyCodes.emplace_back(keyCode3);
-    keyCodes.emplace_back(keyCode4);
-    keyCodes.emplace_back(keyCode5);
-    keyCodes.emplace_back(keyCode6);
-    keyCodes.emplace_back(keyCode7);
-    keyCodes.emplace_back(keyCode8);
-}
-
-void AddKeyboardShortcutKeys(
-    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
-{
-    // single FunctionKey
-    if (keys == 0) {
-        keyCodes.emplace_back(std::vector<KeyCode>());
-    }
-    // single key
-    if (keys == CtrlKeysBit::CTRL || keys == CtrlKeysBit::SHIFT ||
-        keys == CtrlKeysBit::ALT) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys single key");
-        AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
-    }
-    // double keys
-    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT ||
-        keys == CtrlKeysBit::CTRL + CtrlKeysBit::ALT ||
-        keys == CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys double keys");
-        AddKeyboardShortcutDoubleKeys(keys, keyCodes, permutation);
-    }
-    // triple keys
-    if (keys == CtrlKeysBit::CTRL + CtrlKeysBit::SHIFT + CtrlKeysBit::ALT) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AddKeyboardShortcutKeys triple keys");
-        AddKeyboardShortcutTripleKeys(keys, keyCodes, permutation);
-    }
-}
-
-bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
-    const WeakPtr<NG::FrameNode>& node, const RefPtr<NG::EventHub>& eventHub)
-{
-    CHECK_NULL_RETURN(eventHub, false);
-    for (auto& keyboardShortcut : keyboardShortcuts) {
-        if (keyboardShortcut.value.empty()) {
-            continue;
-        }
-
-        std::vector<std::vector<KeyCode>> keyCodes;
-        std::vector<uint8_t> permutation;
-        AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        if (event.IsFunctionKey() || event.IsEscapeKey()) {
-            if (event.ConvertInputCodeToString() != keyboardShortcut.value) {
-                continue;
-            }
-        } else if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
-            continue;
-        }
-        // Handle left and right the keys problem.
-        std::vector<uint8_t> perm;
-        for (auto& keyCode : keyCodes) {
-            perm.assign(permutation.begin(), permutation.end());
-            // Handle the keys order problem.
-            do {
-                keyCode.emplace_back(event.code);
-                if (!event.IsExactlyKey(keyCode)) {
-                    keyCode.pop_back();
-                    std::next_permutation(keyCode.begin(), keyCode.end());
-                    continue;
-                }
-
-                if (keyboardShortcut.onKeyboardShortcutAction) {
-                    keyboardShortcut.onKeyboardShortcutAction();
-                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut action done.");
-                    return true;
-                } else {
-                    auto gestureEventHub = eventHub->GetGestureEventHub();
-                    if (gestureEventHub && gestureEventHub->IsClickable()) {
-                        gestureEventHub->KeyBoardShortCutClick(event, node);
-                        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TriggerKeyboardShortcut click done.");
-                        return true;
-                    }
-                }
-                keyCode.pop_back();
-                std::next_permutation(keyCode.begin(), keyCode.end());
-            } while (std::next_permutation(perm.begin(), perm.end()));
-            perm.clear();
-        }
-        keyCodes.clear();
-        permutation.clear();
-    }
-    return false;
-}
-
-bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
-{
-    auto container = Container::GetContainer(instanceId_);
-    if (container && container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because in security UEC");
-        return false;
-    }
-    if (event.action != KeyAction::DOWN) {
-        return false;
-    }
-    if (keyboardShortcutNode_.empty() || IsSystemKeyboardShortcut(event)) {
-        return false;
-    }
-    for (auto& node : keyboardShortcutNode_) {
-        auto frameNode = node.Upgrade();
-        if (!frameNode || !(frameNode->IsActive())) {
-            continue;
-        }
-        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
-        if (!eventHub || !(eventHub->IsEnabled())) {
-            continue;
-        }
-
-        auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
-        if (TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void EventManager::DelKeyboardShortcutNode(int32_t nodeId)
-{
-    auto iter = keyboardShortcutNode_.begin();
-    while (iter != keyboardShortcutNode_.end()) {
-        auto frameNode = (*iter).Upgrade();
-        if (!frameNode) {
-            keyboardShortcutNode_.erase(iter++);
-            continue;
-        }
-        if (frameNode->GetId() == nodeId) {
-            keyboardShortcutNode_.erase(iter);
-            break;
-        }
-        ++iter;
-    }
-}
-
 void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     postEventTouchTestResults_.clear();
     mouseTestResults_.clear();
     axisTouchTestResults_.clear();
-    keyboardShortcutNode_.clear();
 }
 
 EventManager::EventManager()
@@ -2292,6 +1853,9 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     for (const auto& iter : downFingerIds_) {
         falsifyEvent.id = iter.first;
         falsifyEvent.pointers = lastTouchEvent_.pointers;
+        if (touchPoint.id != iter.first) {
+            falsifyEvent.history.clear();
+        }
         DispatchTouchEvent(falsifyEvent, sendOnTouch);
     }
 }
@@ -2299,10 +1863,10 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
 bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
     newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
     bool ret = false;
     if (newXy.x != 0 && newXy.y != 0) {
@@ -2319,11 +1883,11 @@ bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         ret = true;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
             "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
-            PRIu64 "", newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
+            PRIu64), SEC_PARAM(newTouchEvent.id, newTouchEvent.x, newTouchEvent.y,
             newTouchEvent.screenX, newTouchEvent.screenY,
-            static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
+            static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count())));
     }
     return ret;
 }
@@ -2355,10 +1919,10 @@ TouchEvent EventManager::GetLatestPoint(const std::vector<TouchEvent>& current, 
 MouseEvent EventManager::GetResampleMouseEvent(
     const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, uint64_t nanoTimeStamp)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, true);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    auto newScreenXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, true);
     MouseEvent newMouseEvent = GetMouseLatestPoint(current, nanoTimeStamp);
     if (newXy.x != 0 && newXy.y != 0) {
         newMouseEvent.x = newXy.x;
@@ -2370,11 +1934,11 @@ MouseEvent EventManager::GetResampleMouseEvent(
         newMouseEvent.history = current;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
             "Mouse Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
-            PRIu64 "", newMouseEvent.id, newMouseEvent.x, newMouseEvent.y,
+            PRIu64), SEC_PARAM(newMouseEvent.id, newMouseEvent.x, newMouseEvent.y,
             newMouseEvent.screenX, newMouseEvent.screenY,
-            static_cast<uint64_t>(newMouseEvent.time.time_since_epoch().count()));
+            static_cast<uint64_t>(newMouseEvent.time.time_since_epoch().count())));
     }
     return newMouseEvent;
 }
@@ -2403,12 +1967,12 @@ MouseEvent EventManager::GetMouseLatestPoint(const std::vector<MouseEvent>& curr
     return result;
 }
 
-PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
-    const std::vector<PointerEvent>& current, uint64_t nanoTimeStamp)
+DragPointerEvent EventManager::GetResamplePointerEvent(const std::vector<DragPointerEvent>& history,
+    const std::vector<DragPointerEvent>& current, uint64_t nanoTimeStamp)
 {
-    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<UIInputEvent>(history.begin(), history.end()),
-        std::vector<UIInputEvent>(current.begin(), current.end()), nanoTimeStamp, false);
-    PointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
+    auto newXy = ResampleAlgo::GetResampleCoord(std::vector<PointerEvent>(history.begin(), history.end()),
+        std::vector<PointerEvent>(current.begin(), current.end()), nanoTimeStamp, false);
+    DragPointerEvent newPointerEvent = GetPointerLatestPoint(current, nanoTimeStamp);
 
     if (newXy.x != 0 && newXy.y != 0) {
         newPointerEvent.x = newXy.x;
@@ -2420,10 +1984,10 @@ PointerEvent EventManager::GetResamplePointerEvent(const std::vector<PointerEven
     return newPointerEvent;
 }
 
-PointerEvent EventManager::GetPointerLatestPoint(const std::vector<PointerEvent>& current,
+DragPointerEvent EventManager::GetPointerLatestPoint(const std::vector<DragPointerEvent>& current,
     uint64_t nanoTimeStamp)
 {
-    PointerEvent result;
+    DragPointerEvent result;
     uint64_t gap = UINT64_MAX;
     for (auto iter = current.begin(); iter != current.end(); iter++) {
         uint64_t timeStamp = static_cast<uint64_t>(iter->time.time_since_epoch().count());
@@ -2486,4 +2050,13 @@ void EventManager::FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoi
     falsifyEvent.type = TouchType::HOVER_CANCEL;
     DispatchAccessibilityHoverEventNG(falsifyEvent);
 }
+
+bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
+{
+    if (event.eventType == UIInputEventType::KEY) {
+        return OnKeyEvent(static_cast<const KeyEvent&>(event));
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace

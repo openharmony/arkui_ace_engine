@@ -450,47 +450,6 @@ void FlexLayoutAlgorithm::FinalMeasureInWeightMode()
     }
 }
 
-int32_t FlexLayoutAlgorithm::GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, 0);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, 0);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_RETURN(pattern, 0);
-    int32_t childrenCount = 0;
-    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
-        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
-        CHECK_NULL_RETURN(linearPattern, 0);
-        childrenCount = linearPattern->GetFlexChildrenCount();
-    } else {
-        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
-        CHECK_NULL_RETURN(flexPattern, 0);
-        childrenCount = flexPattern->GetFlexChildrenCount();
-    }
-    return childrenCount;
-}
-
-void FlexLayoutAlgorithm::CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper)
-{
-    CHECK_NULL_VOID(childLayoutWrapper);
-    if (childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width() == 0.0f &&
-        childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height() == 0.0f) {
-        auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-        CHECK_NULL_VOID(childLayoutProperty);
-        const auto& calcConstraint = childLayoutProperty->GetCalcLayoutConstraint();
-        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
-            auto selfIdealSize = calcConstraint->selfIdealSize;
-            if (selfIdealSize->IsValid() && selfIdealSize->Width().has_value() && selfIdealSize->Height().has_value()) {
-                if (selfIdealSize->Height()->GetDimension().Value() == 0.0
-                    ) {
-                    return;
-                }
-            }
-        }
-        childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
 void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
     FlexItemProperties& flexItemProperties)
 {
@@ -514,7 +473,8 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, Fl
 {
     bool outOfDisplay = false;
     CHECK_NULL_VOID(layoutWrapper);
-    bool flexChildrenCountChangeFlag = GetChildrenCountFromPattern(layoutWrapper) != childrenCount_;
+    ApplyPatternOperation(layoutWrapper, FlexOperatorType::RESTORE_CHILDREN_COUNT);
+    bool flexChildrenCountChangeFlag = preChildrenCount_ != childrenCount_;
     auto iter = magicNodes_.rbegin();
     while (iter != magicNodes_.rend()) {
         auto childList = iter->second;
@@ -533,7 +493,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, Fl
         for (auto& child : childList) {
             const auto& childLayoutWrapper = child.layoutWrapper;
             if (flexChildrenCountChangeFlag) {
-                CheckIfMarkDirtyNullifiedNode(childLayoutWrapper);
+                childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
             }
             UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
             childLayoutWrapper->Measure(child.layoutConstraint);
@@ -978,15 +938,10 @@ void FlexLayoutAlgorithm::SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& 
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        finalMainAxisSize = std::max(mainAxisSizeMin, std::min(finalMainAxisSize, mainAxisSizeMax));
-        finalCrossAxisSize = std::max(crossAxisSizeMin, std::min(finalCrossAxisSize, crossAxisSizeMax));
-    } else {
-        finalMainAxisSize = std::clamp(
-            finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-        finalCrossAxisSize = std::clamp(finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
-            std::max(crossAxisSizeMin, crossAxisSizeMax));
-    }
+    finalMainAxisSize = std::clamp(
+        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finalCrossAxisSize = std::clamp(
+        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
@@ -1047,48 +1002,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SetFinalRealSize(layoutWrapper, realSize);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
-    UpdateMeasureResultToPattern(layoutWrapper);
-    UpdateChildrenCountToPattern(layoutWrapper);
+    ApplyPatternOperation(layoutWrapper, FlexOperatorType::UPDATE_MEASURE_RESULT, reinterpret_cast<uintptr_t>(this));
 }
 
-void FlexLayoutAlgorithm::UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    FlexMeasureResult measureResult { .allocatedSize = allocatedSize_, .validSizeCount = validSizeCount_ };
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
-        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
-        CHECK_NULL_VOID(linearPattern);
-        linearPattern->SetFlexMeasureResult(measureResult);
-    } else {
-        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
-        CHECK_NULL_VOID(flexPattern);
-        flexPattern->SetFlexMeasureResult(measureResult);
-    }
-}
-
-void FlexLayoutAlgorithm::UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
-        auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
-        CHECK_NULL_VOID(linearPattern);
-        linearPattern->SetFlexChildrenCount(childrenCount_);
-    } else {
-        auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
-        CHECK_NULL_VOID(flexPattern);
-        flexPattern->SetFlexChildrenCount(childrenCount_);
-    }
-}
-
-void FlexLayoutAlgorithm::RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper)
+void FlexLayoutAlgorithm::ApplyPatternOperation(
+    LayoutWrapper* layoutWrapper, FlexOperatorType operation, uintptr_t addr, FlexLayoutResult layoutResult)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
@@ -1099,14 +1017,19 @@ void FlexLayoutAlgorithm::RestoreMeasureResultFromPattern(LayoutWrapper* layoutW
     if (AceType::InstanceOf<LinearLayoutPattern>(pattern)) {
         auto linearPattern = DynamicCast<LinearLayoutPattern>(pattern);
         CHECK_NULL_VOID(linearPattern);
-        measureResult = linearPattern->GetFlexMeasureResult();
+        PatternOperator(linearPattern, operation, measureResult, layoutResult, addr);
     } else {
         auto flexPattern = DynamicCast<FlexLayoutPattern>(pattern);
         CHECK_NULL_VOID(flexPattern);
-        measureResult = flexPattern->GetFlexMeasureResult();
+        PatternOperator(flexPattern, operation, measureResult, layoutResult, addr);
     }
-    allocatedSize_ = measureResult.allocatedSize;
-    validSizeCount_ = measureResult.validSizeCount;
+
+    if (operation == FlexOperatorType::RESTORE_MEASURE_RESULT) {
+        allocatedSize_ = measureResult.allocatedSize;
+        validSizeCount_ = measureResult.validSizeCount;
+    } else if (operation == FlexOperatorType::RESTORE_CHILDREN_COUNT) {
+        preChildrenCount_ = measureResult.childrenCount;
+    }
 }
 
 void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
@@ -1148,7 +1071,7 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     if (!hasMeasured_) {
-        RestoreMeasureResultFromPattern(layoutWrapper);
+        ApplyPatternOperation(layoutWrapper, FlexOperatorType::RESTORE_MEASURE_RESULT);
     }
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -1184,6 +1107,8 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             child->Layout();
         }
     }
+    ApplyPatternOperation(layoutWrapper, FlexOperatorType::UPDATE_LAYOUT_RESULT, reinterpret_cast<uintptr_t>(this),
+        { .frontSpace = frontSpace, .betweenSpace = betweenSpace });
 }
 
 void FlexLayoutAlgorithm::CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const

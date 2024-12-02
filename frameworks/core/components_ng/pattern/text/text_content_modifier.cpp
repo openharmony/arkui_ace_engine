@@ -62,7 +62,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
-    return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 } // namespace
 
@@ -403,6 +403,9 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
+        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
     }
 
     if (!ifPaintObscuration_) {
@@ -1102,5 +1105,15 @@ int32_t TextContentModifier::GetDuration() const
     }
     return static_cast<int32_t>(
         textRaceWidth / DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx() * DEFAULT_MARQUEE_SCROLL_DELAY);
+}
+
+void TextContentModifier::ContentModifierDump()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    if (animatableTextColor_) {
+        dumpLog.AddDesc(
+            std::string("animatableTextColor: ").append(Color(animatableTextColor_->Get().GetValue()).ColorToString()));
+    }
+    dumpLog.AddDesc(std::string("onlyTextColorAnimation: ").append(std::to_string(onlyTextColorAnimation_)));
 }
 } // namespace OHOS::Ace::NG

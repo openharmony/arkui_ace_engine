@@ -64,6 +64,9 @@ declare_args() {
 
   # Enable aps framework support
   ace_engine_feature_enable_aps = false
+
+  # Enable wearable product support
+  ace_engine_feature_wearable = false
 }
 
 enable_dump_drawcmd = false
@@ -96,6 +99,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+c_utils_path = "//commonlibrary/c_utils/base/include"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
@@ -315,4 +319,8 @@ if (ace_engine_feature_enable_split_mode) {
 
 if (ace_engine_feature_enable_nav_split_mode) {
   ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
+}
+
+if (ace_engine_feature_wearable) {
+  ace_common_defines += [ "ARKUI_WEARABLE" ]
 }

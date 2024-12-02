@@ -45,6 +45,7 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -52,7 +53,6 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
-    EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
     ASSERT_TRUE(container);
@@ -312,6 +312,11 @@ RectF WaterFlowTestNg::GetLazyChildRect(int32_t itemIndex)
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
     auto waterFlowItem = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetChildAtIndex(itemIndex));
     return waterFlowItem->GetGeometryNode()->GetFrameRect();
+}
+
+RefPtr<FrameNode> WaterFlowTestNg::GetItem(int32_t index, bool isCache)
+{
+    return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(index, isCache));
 }
 
 /**
@@ -1798,11 +1803,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowSetFriction001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowPattern_distributed001, TestSize.Level1)
 {
-    WaterFlowModelNG waterFlowModelNG;
-    waterFlowModelNG.Create();
-    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
-    GetWaterFlow();
+    CreateWaterFlow();
+    CreateDone();
 
     // need dpi to be 1
     /**
@@ -2112,7 +2114,7 @@ HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     CreateWaterFlowItems(4);
-    CreateDone(colNode);
+    CreateDone();
 
     MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
     PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };

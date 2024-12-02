@@ -143,6 +143,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(imageLayoutProperty);
             auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            CHECK_NULL_VOID(imageInfo);
             imageInfo->SetFillColor(theme->GetEntryArrowColor());
             imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
             imageNode->MarkModifyDone();
@@ -603,7 +604,7 @@ bool CalendarPickerPattern::HandleBlurEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(textFrameNode, false);
     auto focusHub = textFrameNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->HandleKeyEvent(event);
+    return focusHub->HandleEvent(event);
 }
 
 bool CalendarPickerPattern::HandleYearKeyWaitingEvent(

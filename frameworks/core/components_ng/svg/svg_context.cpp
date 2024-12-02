@@ -15,11 +15,15 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
+#include <sys/time.h>
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+#ifdef __OHOS__
     constexpr int32_t MILLISECOND_DIVIDER = 1000;
+    constexpr int32_t TIME_LENGTH = 50;
+#endif
 }
 RefPtr<SvgNode> SvgContext::GetSvgNodeById(const std::string& id) const
 {
@@ -155,13 +159,17 @@ double SvgContext::NormalizeToPx(const Dimension& value)
 
 std::string SvgContext::GetCurrentTimeString()
 {
-    auto now = std::chrono::system_clock::now();
-    std::time_t nowTime = std::chrono::system_clock::to_time_t(now);
-    std::tm* now_time = std::localtime(&nowTime);
-    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-        now.time_since_epoch()) % MILLISECOND_DIVIDER;
-    std::ostringstream oss;
-    oss << std::put_time(now_time, "%Y-%m-%d %H:%M:%S:");
-    return oss.str().append(std::to_string(ms.count()));
+#ifdef __OHOS__
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    struct tm ptm = { 0 };
+    localtime_noenv_r(&tv.tv_sec, &ptm);
+    char timeStr[TIME_LENGTH] = { 0 };
+    size_t charsWritten = strftime(timeStr, TIME_LENGTH, "%Y-%m-%d %H:%M:%S:", &ptm);
+    if (charsWritten > 0) {
+        return std::string(timeStr).append(std::to_string(tv.tv_usec / MILLISECOND_DIVIDER));
+    }
+#endif
+    return "";
 }
 } // namespace OHOS::Ace::NG

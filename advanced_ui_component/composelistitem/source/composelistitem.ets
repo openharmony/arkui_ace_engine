@@ -251,6 +251,7 @@ struct ContentItemStruct {
       this.createIcon()
       this.createText()
     }
+    .height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined)
     .margin({
       end: this.isParentColumnDirection() ?
       LengthMetrics.vp(0) :
@@ -709,6 +710,8 @@ export struct ComposeListItem {
   }
 
   onPropChange() {
+    this.containerDirection = this.decideContainerDirection();
+    this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
         this.operateItem?.icon !== undefined ||
@@ -750,7 +753,7 @@ export struct ComposeListItem {
       let code = (paramError as BusinessError).code;
       let message = (paramError as BusinessError).message;
       hilog.error(0x3900, 'Ace',
-        `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
+        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
     }
   }
 
@@ -772,7 +775,7 @@ export struct ComposeListItem {
   }
 
   calculatedRightWidth(): string {
-    if (this.operateItem?.text) {
+    if (this.operateItem?.text || this.operateItem?.button) {
       return RIGHT_PART_WIDTH;
     }
     if (this.operateItem?.switch) {
@@ -943,6 +946,7 @@ export struct ComposeListItem {
             }).padding({start: this.getOperateOffset()});
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })

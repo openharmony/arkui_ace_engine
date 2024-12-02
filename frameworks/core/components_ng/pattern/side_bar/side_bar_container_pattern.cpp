@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -61,10 +64,8 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 constexpr static int32_t SIDE_BAR_INDEX = 2;
 constexpr static int32_t CONTENT_INDEX = 3;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH_SMALL = 24.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL = 24.0_vp;
+Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
@@ -157,7 +158,8 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
         return;
     }
 
-    UpdateControlButtonImageSize();
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -211,7 +213,14 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
 void SideBarContainerPattern::GetControlImageSize(Dimension& width, Dimension& height)
 {
-    UpdateControlButtonImageSize();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
+        DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
+    }
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
     width = controlImageWidth_;
     height = controlImageHeight_;
 }
@@ -946,7 +955,6 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    UpdateControlButtonInfo();
     return paddingProperty != nullptr;
 }
 
@@ -1008,11 +1016,7 @@ void SideBarContainerPattern::HandleDragStart()
         return;
     }
     isInDividerDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+    SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1080,11 +1084,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 void SideBarContainerPattern::HandleDragEnd()
 {
     isInDividerDrag_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    SetMouseStyle(MouseFormat::DEFAULT);
     if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
@@ -1124,8 +1124,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
     auto defaultRect = RectF();
@@ -1138,14 +1136,7 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider is out of region.");
-    MouseFormat format = MouseFormat::DEFAULT;
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
-    }
+    SetMouseStyle(MouseFormat::DEFAULT);
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1166,14 +1157,8 @@ void SideBarContainerPattern::OnHover(bool isHover)
     isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
+    if (sideBarStatus_ == SideBarStatus::SHOW) {
+        SetMouseStyle(format);
     }
 }
 
@@ -1348,36 +1333,6 @@ void SideBarContainerPattern::SetAccessibilityEvent()
     controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
 }
 
-void SideBarContainerPattern::UpdateControlButtonImageSize()
-{
-    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH_SMALL;
-        controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT_SMALL;
-    }
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
-
-    // check whether control image size is customed
-    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
-        SetControlButtonSizeCustom(true);
-    } else {
-        SetControlButtonSizeCustom(false);
-    }
-}
-
-void SideBarContainerPattern::UpdateControlButtonInfo()
-{
-    if (updateCallBack_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        updateCallBack_(host);
-    }
-}
-
 void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme,
     const RefPtr<FrameNode>& imgNode)
 {
@@ -1406,5 +1361,21 @@ void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>&
         imgNode->MarkModifyDone();
     };
     eventHub->SetOnError(errorCallback);
+}
+
+void SideBarContainerPattern::SetMouseStyle(MouseFormat format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNodeId = host->GetId();
+    int32_t windowId = static_cast<int32_t>(pipeline->GetFocusWindowId());
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = static_cast<int32_t>(WindowSceneHelper::GetFocusSystemWindowId(host));
+#endif
+    pipeline->SetMouseStyleHoldNode(frameNodeId);
+    pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
+    pipeline->FreeMouseStyleHoldNode(frameNodeId);
 }
 } // namespace OHOS::Ace::NG

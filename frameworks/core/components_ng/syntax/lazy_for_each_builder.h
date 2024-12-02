@@ -289,6 +289,12 @@ public:
 
     void GetAllItems(std::vector<UINode*>& items);
 
+    void SetShowCached(int32_t start, int32_t end)
+    {
+        startShowCached_ = start;
+        endShowCached_ = end;
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -300,7 +306,7 @@ protected:
     }
 
     virtual LazyForEachChild OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
+        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
     
     virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
         std::map<int32_t, LazyForEachChild>& cachedItems,
@@ -338,6 +344,8 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
+    int32_t startShowCached_ = 0;
+    int32_t endShowCached_ = 0;
     int32_t preBuildingIndex_ = -1;
     int32_t totalCountOfOriginalDataset_ = 0;
     int32_t historicalTotalCount_ = 0;

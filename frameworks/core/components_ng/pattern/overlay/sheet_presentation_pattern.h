@@ -332,6 +332,8 @@ public:
         ProcessColumnRect(height_);
     }
 
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
+
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
         DeviceType deviceType = SystemProperties::GetDeviceType();
@@ -646,12 +648,12 @@ public:
 
     bool IsSheetBottomStyle()
     {
+        // sheetType_ is invalid before onModifyDone
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-               sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
 
     // Nestable Scroll

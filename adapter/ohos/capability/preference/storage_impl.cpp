@@ -31,8 +31,6 @@ void StorageImpl::SetString(const std::string& key, const std::string& value)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "Set preference with key %{public}s, value %{public}s",
-        key.c_str(), value.c_str());
     pref->PutString(key, value);
     pref->Flush();
 }
@@ -41,7 +39,6 @@ std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_RETURN(pref, "");
-    LOGD("Get preference with key %{public}s", key.c_str());
     return pref->GetString(key, "");
 }
 
@@ -50,7 +47,6 @@ void StorageImpl::Clear()
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
     pref->Clear();
-    LOGD("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
     preferences_.erase(fileName_);
 }
@@ -59,7 +55,6 @@ void StorageImpl::Delete(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    LOGD("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();
 }

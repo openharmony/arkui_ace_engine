@@ -98,6 +98,9 @@ function isResource(variable) {
   return (variable === null || variable === void 0 ? void 0 : variable.bundleName) !== undefined;
 }
 function isResourceEqual(stageValue, value) {
+  if (Utils.isApiVersionEQAbove(14)) {
+    return false;
+  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&
@@ -3176,7 +3179,7 @@ class ArkComponent {
         if (this.nativePtr === undefined) {
           return;
         }
-        if (this.nativePtr !== -1) {
+        if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
         value.applyStageImmediately(this.nativePtr, this);
@@ -5086,7 +5089,7 @@ function valueToArkBorder(value){
       borderValue.arkRadius.topStart = value.radius?.topStart;
       borderValue.arkRadius.topEnd = value.radius?.topEnd;
       borderValue.arkRadius.bottomStart = value.radius?.bottomStart;
-      borderValue.arkRadius.bottomEnd = value.radius?.bottomEnd; 
+      borderValue.arkRadius.bottomEnd = value.radius?.bottomEnd;
       borderValue.arkRadius.topLeft = value.radius?.topLeft;
       borderValue.arkRadius.topRight = value.radius?.topRight;
       borderValue.arkRadius.bottomLeft = value.radius?.bottomLeft;
@@ -5829,6 +5832,45 @@ class ClipContentModifier extends ModifierWithKey {
 }
 ClipContentModifier.identity = Symbol('clipContent');
 
+class ScrollableFadingEdgeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetFadingEdge(node);
+    }
+    else {
+      getUINativeModule().scrollable.setFadingEdge(node, this.value.value, this.value.options?.fadingEdgeLength);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+ScrollableFadingEdgeModifier.identity = Symbol('scrollableFadingEdge');
+class EdgeEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a;
+    if (reset) {
+      getUINativeModule().scrollable.resetEdgeEffect(node);
+    }
+    else {
+      getUINativeModule().scrollable.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
+      void 0 ? void 0 : _a.alwaysEnabled);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+EdgeEffectModifier.identity = Symbol('edgeEffect');
+
 class OnReachStartModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5863,6 +5905,20 @@ class ArkScrollable extends ArkComponent {
   }
   clipContent(clip) {
     modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
+    return this;
+  }
+  edgeEffect(value, options) {
+    let effect = new ArkEdgeEffect();
+    effect.value = value;
+    effect.options = options;
+    modifierWithKey(this._modifiersWithKeys, EdgeEffectModifier.identity, EdgeEffectModifier, effect);
+    return this;
+  }
+  fadingEdge(value, options) {
+    let fadingEdge = new ArkFadingEdge();
+    fadingEdge.value = value;
+    fadingEdge.options = options;
+    modifierWithKey(this._modifiersWithKeys, ScrollableFadingEdgeModifier.identity, ScrollableFadingEdgeModifier, fadingEdge);
     return this;
   }
   onReachStart(event) {
@@ -5980,20 +6036,6 @@ class ArkGridComponent extends ArkScrollable {
   }
   onItemDrop(event) {
     throw new Error('Method not implemented.');
-  }
-  edgeEffect(value, options) {
-    let effect = new ArkGridEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, GridEdgeEffectModifier.identity, GridEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value, options) {
-    let fadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, GridFadingEdgeModifier.identity, GridFadingEdgeModifier, fadingEdge);
-    return this;
   }
   nestedScroll(value) {
     modifierWithKey(this._modifiersWithKeys, GridNestedScrollModifier.identity, GridNestedScrollModifier, value);
@@ -6232,45 +6274,6 @@ class GridMultiSelectableModifier extends ModifierWithKey {
   }
 }
 GridMultiSelectableModifier.identity = Symbol('gridMultiSelectable');
-class GridEdgeEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b;
-    if (reset) {
-      getUINativeModule().grid.resetEdgeEffect(node);
-    }
-    else {
-      getUINativeModule().grid.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-GridEdgeEffectModifier.identity = Symbol('gridEdgeEffect');
-class GridFadingEdgeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().grid.resetFadingEdge(node);
-    }
-    else {
-      getUINativeModule().grid.setFadingEdge(node, this.value.value, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-GridFadingEdgeModifier.identity = Symbol('gridFadingEdge');
 class GridNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7114,6 +7117,19 @@ class ImageDynamicRangeModeModifier extends ModifierWithKey {
   }
 }
 ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageRotateOrientationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetOrientation(node);
+    } else {
+      getUINativeModule().image.setOrientation(node, this.value);
+    }
+  }
+}
+ImageRotateOrientationModifier.identity = Symbol('imageOrientaion');
 class ImageEnhancedImageQualityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7290,6 +7306,10 @@ class ArkImageComponent extends ArkComponent {
   }
   renderMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageRenderModeModifier.identity, ImageRenderModeModifier, value);
+    return this;
+  }
+  orientation(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
     return this;
   }
   interpolation(value) {
@@ -12870,24 +12890,39 @@ class TextAreaBorderWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textArea.resetBorderWidth(node);
-    } else {
+    }
+    else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().textArea.setBorderWidth(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textArea.setBorderWidth(node, this.value.top, this.value.right,
-          this.value.bottom, this.value.left);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().textArea.setBorderWidth(node, this.value.top, this.value.end, this.value.bottom, this.value.start);
+        } else {
+          getUINativeModule().textArea.setBorderWidth(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&
         this.stageValue.bottom === this.value.bottom);
-    } else {
+    }
+    else {
       return true;
     }
   }
@@ -12900,26 +12935,40 @@ class TextAreaBorderColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textArea.resetBorderColor(node);
-    } else {
+    }
+    else {
       const valueType = typeof this.value;
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        getUINativeModule().textArea.setBorderColor(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textArea.setBorderColor(node, this.value.top,
-          this.value.right, this.value.bottom,
-          this.value.left);
+        getUINativeModule().textArea.setBorderColor(node, this.value, this.value, this.value, this.value, false);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().textArea.setBorderColor(node, this.value.top, this.value.end, this.value.bottom, this.value.start, true);
+        } else {
+          getUINativeModule().textArea.setBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left, false);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&
-        this.stageValue.bottom === his.value.bottom);
-    } else {
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
       return true;
     }
   }
@@ -12966,24 +13015,43 @@ class TextAreaBorderRadiusModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textArea.resetBorderRadius(node);
-    } else {
+    }
+    else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().textArea.setBorderRadius(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textArea.setBorderRadius(node, this.value.topLeft, this.value.topRight,
-          this.value.bottomLeft, this.value.bottomRight);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().textArea.setBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
+        } else {
+          getUINativeModule().textArea.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        return !(this.stageValue.topStart === this.value.topStart &&
+          this.stageValue.topEnd === this.value.topEnd &&
+          this.stageValue.bottomStart === this.value.bottomStart &&
+          this.stageValue.bottomEnd === this.value.bottomEnd);
+      }
       return !(this.stageValue.topLeft === this.value.topLeft &&
         this.stageValue.topRight === this.value.topRight &&
         this.stageValue.bottomLeft === this.value.bottomLeft &&
         this.stageValue.bottomRight === this.value.bottomRight);
-    } else {
+    }
+    else {
       return true;
     }
   }
@@ -13366,9 +13434,19 @@ class ArkTextAreaComponent extends ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, TextAreaPaddingModifier.identity, TextAreaPaddingModifier, arkValue);
     }
@@ -13427,9 +13505,19 @@ class ArkTextAreaComponent extends ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, arkValue);
     }
@@ -14513,24 +14601,39 @@ class TextInputBorderWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textInput.resetBorderWidth(node);
-    } else {
+    }
+    else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().textInput.setBorderWidth(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textInput.setBorderWidth(node, this.value.top, this.value.right,
-          this.value.bottom, this.value.left);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().textInput.setBorderWidth(node, this.value.top, this.value.end, this.value.bottom, this.value.start);
+        } else {
+          getUINativeModule().textInput.setBorderWidth(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&
         this.stageValue.bottom === this.value.bottom);
-    } else {
+    }
+    else {
       return true;
     }
   }
@@ -14543,25 +14646,40 @@ class TextInputBorderColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textInput.resetBorderColor(node);
-    } else {
+    }
+    else {
       const valueType = typeof this.value;
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        getUINativeModule().textInput.setBorderColor(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textInput.setBorderColor(node, this.value.top,
-          this.value.right, this.value.bottom, this.value.left);
+        getUINativeModule().textInput.setBorderColor(node, this.value, this.value, this.value, this.value, false);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().textInput.setBorderColor(node, this.value.top, this.value.end, this.value.bottom, this.value.start, true);
+        } else {
+          getUINativeModule().textInput.setBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left, false);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&
         this.stageValue.bottom === this.value.bottom);
-    } else {
+    }
+    else {
       return true;
     }
   }
@@ -14608,24 +14726,43 @@ class TextInputBorderRadiusModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().textInput.resetBorderRadius(node);
-    } else {
+    }
+    else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().textInput.setBorderRadius(node, this.value, this.value, this.value, this.value);
-      } else {
-        getUINativeModule().textInput.setBorderRadius(node, this.value.topLeft, this.value.topRight,
-          this.value.bottomLeft, this.value.bottomRight);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().textInput.setBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
+        } else {
+          getUINativeModule().textInput.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        return !(this.stageValue.topStart === this.value.topStart &&
+          this.stageValue.topEnd === this.value.topEnd &&
+          this.stageValue.bottomStart === this.value.bottomStart &&
+          this.stageValue.bottomEnd === this.value.bottomEnd);
+      }
       return !(this.stageValue.topLeft === this.value.topLeft &&
         this.stageValue.topRight === this.value.topRight &&
         this.stageValue.bottomLeft === this.value.bottomLeft &&
         this.stageValue.bottomRight === this.value.bottomRight);
-    } else {
+    }
+    else {
       return true;
     }
   }
@@ -15050,9 +15187,19 @@ class ArkTextInputComponent extends ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, TextInputPaddingModifier.identity, TextInputPaddingModifier, arkValue);
     }
@@ -15101,9 +15248,19 @@ class ArkTextInputComponent extends ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, TextInputMarginModifier.identity, TextInputMarginModifier, arkValue);
     }
@@ -15582,7 +15739,7 @@ class ArkSharedTransition {
     return (this.id === another.id) && (this.options === another.options);
   }
 }
-class ArkListEdgeEffect {
+class ArkEdgeEffect {
   constructor() {
     this.value = undefined;
     this.options = undefined;
@@ -15593,16 +15750,6 @@ class ArkListEdgeEffect {
   }
 }
 class ArkFadingEdge {
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another) {
-    return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
-class ArkScrollEdgeEffect {
   constructor() {
     this.value = undefined;
     this.options = undefined;
@@ -16261,16 +16408,6 @@ class ArkDisplayCount {
     return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
   }
 }
-class ArkGridEdgeEffect {
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another) {
-    return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
 
 class ArkPlaceholder {
   constructor() {
@@ -16283,16 +16420,6 @@ class ArkPlaceholder {
   }
 }
 
-class ArkWaterFlowEdgeEffect {
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another) {
-    return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
 class ArkScrollableCacheOptions {
   constructor(count, show) {
     this.count = count;
@@ -17422,44 +17549,6 @@ class ScrollScrollableModifier extends ModifierWithKey {
   }
 }
 ScrollScrollableModifier.identity = Symbol('scrollable');
-class ScrollEdgeEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a;
-    if (reset) {
-      getUINativeModule().scroll.resetEdgeEffect(node);
-    }
-    else {
-      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
-      void 0 ? void 0 : _a.alwaysEnabled);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-ScrollEdgeEffectModifier.identity = Symbol('edgeEffect');
-class ScrollFadingEdgeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().scroll.resetFadingEdge(node);
-    }
-    else {
-      getUINativeModule().scroll.setFadingEdge(node, this.value.value, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-ScrollFadingEdgeModifier.identity = Symbol('scrollFadingEdge');
 class ScrollScrollBarWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -17720,20 +17809,6 @@ class ArkScrollComponent extends ArkScrollable {
   }
   scrollBarWidth(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollScrollBarWidthModifier.identity, ScrollScrollBarWidthModifier, value);
-    return this;
-  }
-  edgeEffect(value, options) {
-    let effect = new ArkScrollEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, ScrollEdgeEffectModifier.identity, ScrollEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value, options) {
-    let fadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, ScrollFadingEdgeModifier.identity, ScrollFadingEdgeModifier, fadingEdge);
     return this;
   }
   onScrollFrameBegin(callback) {
@@ -26160,6 +26235,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
+  hdrBrightness(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -26571,6 +26650,23 @@ class XComponentEnableSecureModifier extends ModifierWithKey {
   }
 }
 XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
+class XComponentHdrBrightnessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetHdrBrightness(node);
+    }
+    else {
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
+  }
+}
+XComponentHdrBrightnessModifier.identity = Symbol('xComponentHdrBrightness');
 class XComponentRenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27304,26 +27400,6 @@ class ListStickyModifier extends ModifierWithKey {
   }
 }
 ListStickyModifier.identity = Symbol('listSticky');
-class ListEdgeEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a;
-    if (reset) {
-      getUINativeModule().list.resetListEdgeEffect(node);
-    }
-    else {
-      getUINativeModule().list.setListEdgeEffect(node, this.value.value, (_a = this.value.options) === null ||
-      _a === void 0 ? void 0 : _a.alwaysEnabled);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-ListEdgeEffectModifier.identity = Symbol('listEdgeEffect');
 class ListListDirectionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27675,24 +27751,6 @@ class ListOnScrollStopModifier extends ModifierWithKey {
   }
 }
 ListOnScrollStopModifier.identity = Symbol('listOnScrollStop');
-class ListFadingEdgeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().list.resetFadingEdge(node);
-    }
-    else {
-      getUINativeModule().list.setFadingEdge(node, this.value.value, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-ListFadingEdgeModifier.identity = Symbol('listFadingEdge');
 
 class ListChildrenMainSizeModifier extends ModifierWithKey {
   constructor(value) {
@@ -27818,13 +27876,6 @@ class ArkListComponent extends ArkScrollable {
   }
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
-    return this;
-  }
-  edgeEffect(value, options) {
-    let effect = new ArkListEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, ListEdgeEffectModifier.identity, ListEdgeEffectModifier, effect);
     return this;
   }
   contentStartOffset(value) {
@@ -27953,13 +28004,6 @@ class ArkListComponent extends ArkScrollable {
   }
   onScrollStop(event) {
     modifierWithKey(this._modifiersWithKeys, ListOnScrollStopModifier.identity, ListOnScrollStopModifier, event);
-    return this;
-  }
-  fadingEdge(value, options) {
-    let fadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, fadingEdge);
     return this;
   }
   childrenMainSize(value) {
@@ -29765,46 +29809,6 @@ class FrictionModifier extends ModifierWithKey {
 }
 FrictionModifier.identity = Symbol('friction');
 
-class WaterFlowEdgeEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b;
-    if (reset) {
-      getUINativeModule().waterFlow.resetEdgeEffect(node);
-    }
-    else {
-      getUINativeModule().waterFlow.setEdgeEffect(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
-      _b === void 0 ? void 0 : _b.alwaysEnabled);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-WaterFlowEdgeEffectModifier.identity = Symbol('waterFlowEdgeEffect');
-class WaterFlowFadingEdgeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().waterFlow.resetFadingEdge(node);
-    }
-    else {
-      getUINativeModule().waterFlow.setFadingEdge(node, this.value.value, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff() {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-WaterFlowFadingEdgeModifier.identity = Symbol('waterFlowFadingEdge');
-
 class WaterFlowScrollBarWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29967,20 +29971,6 @@ class ArkWaterFlowComponent extends ArkScrollable {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
-    return this;
-  }
-  edgeEffect(value, options) {
-    let effect = new ArkWaterFlowEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value, options) {
-    let fadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, WaterFlowFadingEdgeModifier.identity, WaterFlowFadingEdgeModifier, fadingEdge);
     return this;
   }
   scrollBarWidth(value) {

@@ -371,7 +371,9 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navigation, false);
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
+        CHECK_NULL_RETURN(navigationLayoutProperty, false);
         auto pattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+        CHECK_NULL_RETURN(pattern, false);
         auto stack = pattern->GetNavigationStack();
         CHECK_NULL_RETURN(stack, false);
         if (navigationLayoutProperty->GetHideNavBarValue(false) && stack->GetSize() <= 1) {
@@ -612,8 +614,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            CHECK_NULL_VOID(curNavDesNode);
-            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
+            if (curNavDesNode) {
+                navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
+            }
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -886,8 +889,9 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        CHECK_NULL_VOID(curNode);
-        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        if (curNode) {
+            navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        }
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();

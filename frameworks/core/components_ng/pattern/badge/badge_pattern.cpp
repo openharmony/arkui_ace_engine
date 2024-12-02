@@ -87,7 +87,7 @@ void BadgePattern::OnModifyDone()
         width.Reset();
     }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
-    textLayoutProperty->UpdateTextColor(badgeTextColor.value());
+    textLayoutProperty->UpdateTextColor(badgeTextColor.value_or(badgeTheme->GetBadgeTextColor()));
 
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
     if (badgeFontSize.has_value()) {
@@ -100,8 +100,9 @@ void BadgePattern::OnModifyDone()
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(width);
     textLayoutProperty->UpdateBorderWidth(borderWidth);
-    auto badgeColor = layoutProperty->GetBadgeColorValue();
+    auto badgeColor = layoutProperty->GetBadgeColorValue(badgeTheme->GetBadgeColor());
     auto textRenderContext = lastFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
     textRenderContext->SetVisible(badgeVisible);
     textRenderContext->UpdateBackgroundColor(badgeColor);
 

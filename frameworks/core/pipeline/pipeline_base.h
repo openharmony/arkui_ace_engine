@@ -190,7 +190,7 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    virtual bool OnKeyEvent(const KeyEvent& event) = 0;
+    virtual bool OnNonPointerEvent(const NonPointerEvent& event) = 0;
 
     // Called by view when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event) = 0;
@@ -214,7 +214,7 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.
@@ -385,6 +385,9 @@ public:
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
+
+    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode){};
 
     virtual void EnableContainerModalGesture(bool isEnable) {}
 
@@ -960,7 +963,7 @@ public:
 
     void OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode);
 
-    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double, bool)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
         static std::atomic<int32_t> pseudoId(-1); // -1 will not be conflict with real node ids.
@@ -975,11 +978,11 @@ public:
     {
         virtualKeyBoardCallback_.erase(nodeId);
     }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const
     {
         bool isConsume = false;
         for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
-            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard, isCustomKeyboard)) {
                 isConsume = true;
             }
         }

@@ -31,6 +31,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
@@ -46,7 +47,6 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
@@ -98,9 +98,11 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
-    "//third_party/googletest:gmock_main",
   ]
-  external_deps = [ "cJSON:cjson" ]
+  external_deps = [
+    "cJSON:cjson",
+    "googletest:gmock_main",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
@@ -110,6 +112,7 @@ ohos_unittest("image_file_cache_test_ng") {
 
   sources = [
     "$ace_root/frameworks/core/image/image_file_cache.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_packer.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
@@ -124,10 +127,177 @@ ohos_unittest("image_file_cache_test_ng") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
   ]
 
-  external_deps = [ "skia:skia_canvaskit" ]
+  external_deps = [
+    "googletest:gmock_main",
+    "skia:skia_canvaskit",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}
+
+ohos_unittest("image_cache_test") {
+  module_out_path = image_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/display/render_display.cpp",
+    "$ace_root/frameworks/core/components/page/page_element.cpp",
+    "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_single_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/scroll_bar_controller.cpp",
+    "$ace_root/frameworks/core/components/stack/render_stack.cpp",
+    "$ace_root/frameworks/core/components/stage/render_stage.cpp",
+    "$ace_root/frameworks/core/components/stage/stage_element.cpp",
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
+    "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
+    "$ace_root/frameworks/core/focus/focus_node.cpp",
+    "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
+    "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/image/test/mock/mock_image_loader.cpp",
+    "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
+    "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
+    "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
+    "image_cache_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+  part_name = ace_engine_part
+}
+
+ohos_unittest("ImageProviderTest") {
+  module_out_path = image_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
+    "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/display/render_display.cpp",
+    "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",
+    "$ace_root/frameworks/core/components/page/page_element.cpp",
+    "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_single_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/scroll_bar_controller.cpp",
+    "$ace_root/frameworks/core/components/stack/render_stack.cpp",
+    "$ace_root/frameworks/core/components/stage/render_stage.cpp",
+    "$ace_root/frameworks/core/components/stage/stage_element.cpp",
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/image/image_test_utils.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
+    "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
+    "$ace_root/frameworks/core/focus/focus_node.cpp",
+    "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
+    "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
+    "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
+    "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "image_provider_test.cpp",
+  ]
+
+  deps = [
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+
+  part_name = ace_engine_part
+}
+
+ohos_unittest("ImageCompressorTest") {
+  module_out_path = image_test_output_path
+  sources = [
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/display/render_display.cpp",
+    "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_compressor.cpp",
+    "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/frameworks/core/image/image_provider.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/test/mock/base/mock_ace_container.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "image_compressor_test.cpp",
+  ]
+
+  deps = [
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  defines = [ "ENABLE_OPENCL" ]
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "opencl-headers:libcl",
+  ]
+  part_name = ace_engine_part
 }

@@ -339,6 +339,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetOriginOffset(const OffsetF& offset)
     {
         originOffset_ = offset;
@@ -389,6 +394,26 @@ public:
     OffsetF GetPreviewOriginOffset() const
     {
         return previewOriginOffset_;
+    }
+
+    void SetPreviewRect(RectF rect)
+    {
+        previewRect_ = rect;
+    }
+
+    RectF GetPreviewRect() const
+    {
+        return previewRect_;
+    }
+
+    void SetPreviewIdealSize(SizeF size)
+    {
+        previewIdealSize_ = size;
+    }
+
+    SizeF GetPreviewIdealSize() const
+    {
+        return previewIdealSize_;
     }
 
     void SetHasLaid(bool hasLaid)
@@ -609,8 +634,12 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+    RefPtr<UINode> GetSyntaxNode(const RefPtr<UINode>& parent);
     RefPtr<UINode> GetForEachMenuItem(const RefPtr<UINode>& parent, bool next);
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
+    RefPtr<UINode> GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next);
+    void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
+    void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
@@ -649,6 +678,8 @@ private:
     OffsetF endOffset_;
     OffsetF disappearOffset_;
     OffsetF previewOriginOffset_;
+    RectF previewRect_;
+    SizeF previewIdealSize_;
     OffsetF statusOriginOffset_;
     std::optional<bool> enableFold_;
 
@@ -681,6 +712,8 @@ public:
     void BeforeCreateLayoutWrapper() override;
     bool isHalfFoldStatus_ = false;
 
+    void RecordItemsAndGroups();
+
     const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
     {
         return itemsAndGroups_;
@@ -692,8 +725,6 @@ private:
     uint32_t FindSiblingMenuCount();
     void ApplyDesktopMenuTheme();
     void ApplyMultiMenuTheme();
-
-    void RecordItemsAndGroups();
 
     // Record menu's items and groups at first level,
     // use for group header and footer padding

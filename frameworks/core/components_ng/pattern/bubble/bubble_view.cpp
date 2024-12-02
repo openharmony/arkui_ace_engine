@@ -387,6 +387,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
         auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateContent(primaryButton.value);
         textNode->MarkModifyDone();
         auto buttonEventHub = button->GetOrCreateGestureEventHub();
@@ -399,6 +400,7 @@ void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const R
         buttons.pop_front();
         auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
         auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateContent(secondaryButton.value);
         textNode->MarkModifyDone();
         auto buttonEventHub = button->GetOrCreateGestureEventHub();
@@ -425,12 +427,15 @@ void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& 
             if (child->GetTag() == V2::TEXT_ETS_TAG) { // API10
                 auto textNode = AceType::DynamicCast<FrameNode>(child);
                 auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
                 layoutProperty->UpdateContent(message);
                 UpdateTextProperties(param, layoutProperty);
                 textNode->MarkModifyDone();
             } else if (child->GetTag() == V2::SCROLL_ETS_TAG) {
                 auto textNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+                CHECK_NULL_VOID(textNode);
                 auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
                 layoutProperty->UpdateContent(message);
                 UpdateTextProperties(param, layoutProperty);
                 textNode->MarkModifyDone();
@@ -448,6 +453,7 @@ void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& 
         auto textNode = AceType::DynamicCast<FrameNode>(childNode);
         CHECK_NULL_VOID(textNode);
         auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateContent(message);
         UpdateTextProperties(param, layoutProperty);
         textNode->MarkModifyDone();
@@ -651,6 +657,7 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     // The buttons in popupNode can not get focus, if the textNode in the button is not focusable
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateContent(message);
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);

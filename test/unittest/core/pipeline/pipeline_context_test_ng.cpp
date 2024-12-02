@@ -76,6 +76,7 @@ void PipelineContextTestNg::SetUpTestSuite()
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    context_->fontManager_ = FontManager::Create();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -998,7 +999,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -1009,7 +1010,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1021,7 +1022,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1033,7 +1034,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -1054,11 +1055,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
     context_->ReDispatch(event);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
 
     event.isPreIme = 1;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 }
 
 /**
@@ -1421,8 +1422,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
 
     // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
-    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 },
-        { 200, 0, 0 } };
+    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
@@ -2032,6 +2032,55 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
      */
     context_->FlushDirtyPropertyNodes();
     EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg102
+ * @tc.desc: Test the MouseHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    context_->mouseEvents_.clear();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    ASSERT_EQ(context_->lastMouseEvent_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     */
+    MouseEvent event;
+    event.x = 12.345f;
+    event.y = 12.345f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 1);
+        EXPECT_EQ(mouseEvents.back().x, 12.345f);
+        EXPECT_EQ(mouseEvents.back().y, 12.345f);
+    }
+    context_->mouseEvents_.clear();
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     * @param: set lastMouseEvent_ is not null
+     */
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(event);
+    context_->lastMouseEvent_->action = MouseAction::MOVE;
+    event.x = 54.321f;
+    event.y = 54.321f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    ASSERT_NE(context_->lastMouseEvent_, nullptr);
+    ASSERT_NE(static_cast<int>(context_->lastMouseEvent_->action), 5);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 0);
+    }
+    context_->mouseEvents_.clear();
 }
 } // namespace NG
 } // namespace OHOS::Ace

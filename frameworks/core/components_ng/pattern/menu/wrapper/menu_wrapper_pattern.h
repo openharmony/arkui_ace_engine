@@ -222,6 +222,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetIsShowHoverImage(bool isShow)
     {
         isShowHoverImage_ = isShow;
@@ -431,12 +436,18 @@ public:
 
     int IncreaseEmbeddedSubMenuCount()
     {
+        ++embeddedSubMenuExpandTotalCount_;
         return ++embeddedSubMenuCount_;
     }
 
     int DecreaseEmbeddedSubMenuCount()
     {
         return --embeddedSubMenuCount_;
+    }
+
+    int GetEmbeddedSubMenuExpandTotalCount() const
+    {
+        return embeddedSubMenuExpandTotalCount_;
     }
 
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
@@ -506,6 +517,16 @@ public:
 
     void RequestPathRender();
 
+    void SetChildLayoutConstraint(LayoutConstraintF constraint)
+    {
+        childLayoutConstraint_ = constraint;
+    }
+
+    LayoutConstraintF GetChildLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -550,6 +571,8 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    int embeddedSubMenuExpandTotalCount_ = 0;
+    LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
     Placement menuPlacement_ = Placement::NONE;

@@ -335,18 +335,31 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
     const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset)
 {
+    if (boxes.empty()) {
+        return RectF();
+    }
     auto frontRect = boxes.front();
     auto backRect = boxes.back();
-    RectF res;
-    if (GreatNotEqual(backRect.Bottom(), frontRect.Bottom())) {
-        res.SetRect(contentRect.GetX() + paintOffset.GetX(), frontRect.GetY() + textRect.GetY() + paintOffset.GetY(),
-            contentRect.Width(), backRect.Bottom() - frontRect.Top());
-    } else {
-        res.SetRect(frontRect.GetX() + textRect.GetX() + paintOffset.GetX(),
-            frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), backRect.Right() - frontRect.Left(),
-            backRect.Bottom() - frontRect.Top());
+    float selectAreaRight = frontRect.Right();
+    float selectAreaLeft = frontRect.Left();
+    if (boxes.size() != 1) {
+        std::unordered_map<float, RectF> selectLineRect;
+        for (const auto& box : boxes) {
+            auto combineLineRect = box;
+            auto top = box.Top();
+            if (selectLineRect.find(top) == selectLineRect.end()) {
+                selectLineRect.insert({ top, combineLineRect });
+            } else {
+                combineLineRect = combineLineRect.CombineRectT(selectLineRect[top]);
+                selectLineRect.insert({ top, combineLineRect });
+            }
+            selectAreaRight = std::max(selectAreaRight, combineLineRect.Right());
+            selectAreaLeft = std::min(selectAreaLeft, combineLineRect.Left());
+        }
     }
-    return res;
+    return { selectAreaLeft + textRect.GetX() + paintOffset.GetX(),
+        frontRect.GetY() + textRect.GetY() + paintOffset.GetY(), selectAreaRight - selectAreaLeft,
+        backRect.Bottom() - frontRect.Top() };
 }
 
 void BaseTextSelectOverlay::SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect)
@@ -1164,14 +1177,20 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
-            contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (contentRect.IsIntersectWith(parentContentRect)) {
+                contentRect = contentRect.IntersectRectT(parentContentRect);
+            } else {
+                contentRect = parentContentRect;
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
     contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
-    UpdateClipHandleViewPort(contentRect);
+    if (Positive(contentRect.Width()) && Positive(contentRect.Height())) {
+        UpdateClipHandleViewPort(contentRect);
+    }
     rect = contentRect;
     return true;
 }
@@ -1387,5 +1406,23 @@ void BaseTextSelectOverlay::RemoveAvoidKeyboardCallback()
     auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManagerNg);
     textFieldManagerNg->RemoveAvoidKeyboardCallback(host->GetId());
+}
+
+bool BaseTextSelectOverlay::IsHiddenHandle()
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return overlayInfo->isSingleHandle && overlayManager->IsHiddenHandle();
+}
+
+bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto overlayInfo = overlayManager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, false);
+    return isFirst ? overlayInfo->firstHandle.isShow : overlayInfo->secondHandle.isShow;
 }
 } // namespace OHOS::Ace::NG

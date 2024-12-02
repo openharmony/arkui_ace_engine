@@ -30,7 +30,7 @@ constexpr int32_t INDEX_S = 1;
 constexpr int32_t INDEX_E = 2;
 } // namespace
 
-int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler)
+int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler)
 {
     int32_t resultCode = -1;
     taskScheduler->PostSyncTask(
@@ -66,7 +66,7 @@ int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, RefPtr<TaskExecutor
 }
 
 int32_t StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler, std::shared_ptr<IAceStylusCallback> callback)
+    const RefPtr<TaskExecutor>& taskScheduler, std::shared_ptr<IAceStylusCallback> callback)
 {
     std::string text = *static_cast<std::string*>(data);
     taskScheduler->PostTask(
@@ -92,7 +92,7 @@ int32_t StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
     return 0;
 }
 
-int32_t StylusDetectorCallBack::GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
+int32_t StylusDetectorCallBack::GetText(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler,
     std::shared_ptr<IAceStylusCallback> callback)
 {
     taskScheduler->PostTask(
@@ -122,7 +122,7 @@ int32_t StylusDetectorCallBack::GetText(int32_t nodeId, RefPtr<TaskExecutor> tas
     return 0;
 }
 
-int32_t StylusDetectorCallBack::Redo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler)
+int32_t StylusDetectorCallBack::Redo(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler)
 {
     taskScheduler->PostTask(
         [nodeId]() {
@@ -140,7 +140,7 @@ int32_t StylusDetectorCallBack::Redo(int32_t nodeId, RefPtr<TaskExecutor> taskSc
     return 0;
 }
 
-int32_t StylusDetectorCallBack::Undo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler)
+int32_t StylusDetectorCallBack::Undo(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler)
 {
     taskScheduler->PostTask(
         [nodeId]() {
@@ -159,7 +159,7 @@ int32_t StylusDetectorCallBack::Undo(int32_t nodeId, RefPtr<TaskExecutor> taskSc
 }
 
 int32_t StylusDetectorCallBack::DeleteText(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler)
+    const RefPtr<TaskExecutor>& taskScheduler)
 {
     int32_t resultCode = -1;
     StylusGestureRect *rectPtr = static_cast<StylusGestureRect*>(data);
@@ -172,7 +172,6 @@ int32_t StylusDetectorCallBack::DeleteText(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -195,7 +194,7 @@ int32_t StylusDetectorCallBack::DeleteText(int32_t nodeId, void* data,
 }
 
 int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler)
+    const RefPtr<TaskExecutor>& taskScheduler)
 {
     int32_t resultCode = -1;
     ChoiceTextOption *optionPtr = static_cast<ChoiceTextOption*>(data);
@@ -207,7 +206,6 @@ int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset startCenterGlobalOffset = Offset(rect.Left, rect.Top + rect.Height / 2);
             Offset endCenterGlobalOffset = Offset(rect.Left + rect.Width, rect.Top + rect.Height / 2);
@@ -240,7 +238,7 @@ int32_t StylusDetectorCallBack::ChoiceText(int32_t nodeId, void* data,
 }
 
 int32_t StylusDetectorCallBack::InsertSpace(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler)
+    const RefPtr<TaskExecutor>& taskScheduler)
 {
     int32_t resultCode = -1;
     StylusGestureRect *rectPtr = static_cast<StylusGestureRect*>(data);
@@ -253,7 +251,6 @@ int32_t StylusDetectorCallBack::InsertSpace(int32_t nodeId, void* data,
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
-            CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
             ContainerScope scope(frameNode->GetInstanceId());
             Offset centerGlobalOffset = Offset(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
@@ -270,7 +267,7 @@ int32_t StylusDetectorCallBack::InsertSpace(int32_t nodeId, void* data,
 }
 
 int32_t StylusDetectorCallBack::MoveCursor(int32_t nodeId, void* data,
-    RefPtr<TaskExecutor> taskScheduler)
+    const RefPtr<TaskExecutor>& taskScheduler)
 {
     int32_t resultCode = -1;
     MoveCursorOption *pointPtr = static_cast<MoveCursorOption*>(data);

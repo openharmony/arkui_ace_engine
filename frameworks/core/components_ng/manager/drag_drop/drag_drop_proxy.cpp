@@ -39,11 +39,12 @@ void DragDropProxy::OnDragStart(
 
     auto point = Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY());
-    auto pointerEvent = PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+    auto pointerEvent = DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
+    pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->OnDragStart(point, frameNode);
-    manager->OnDragMove(pointerEvent, extraInfo);
     manager->SetExtraInfo(extraInfo);
+    manager->OnDragMove(pointerEvent, extraInfo);
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
@@ -55,7 +56,7 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
     std::string extraInfo = manager->GetExtraInfo();
-    manager->OnDragMove(PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+    manager->OnDragMove(DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()), extraInfo);
 }
 
@@ -71,7 +72,7 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
         manager->OnTextDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     } else {
-        manager->OnDragEnd(PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+        manager->OnDragEnd(DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()), extraInfo);
     }
 }

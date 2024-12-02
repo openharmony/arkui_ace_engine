@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
@@ -28,6 +29,10 @@ namespace OHOS::Ace::NG {
 namespace {
 #ifdef SECURITY_COMPONENT_ENABLE
 const int32_t DELAY_RELEASE_MILLSEC = 10;
+static std::unordered_map<uint64_t, RefPtr<FrameNode>> g_scNodeMap;
+static std::vector<uint64_t> g_omittedNodeIndex;
+static uint64_t g_scIndex = 0;
+static std::mutex g_scMutex;
 #endif
 }
 SecurityComponentPattern::SecurityComponentPattern()
@@ -59,6 +64,37 @@ void SecurityComponentPattern::SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTe
     auto gestureHub = node->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(mode);
+}
+
+void SecurityComponentPattern::OnLanguageConfigurationUpdate()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetTextStyle().has_value()) {
+        auto textStyle = layoutProperty->GetTextStyle().value();
+        if (textStyle != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
+            auto pipeline = textNode->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+            CHECK_NULL_VOID(theme);
+
+            std::string text;
+            if (node->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+                text = theme->GetPasteDescriptions(textStyle);
+            } else if (node->GetTag() == V2::LOCATION_BUTTON_ETS_TAG) {
+                text = theme->GetLocationDescriptions(textStyle);
+            } else if (node->GetTag() == V2::SAVE_BUTTON_ETS_TAG) {
+                text = theme->GetSaveDescriptions(textStyle);
+            }
+
+            textLayoutProperty->UpdateContent(text);
+        }
+    }
 }
 
 bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
@@ -650,15 +686,30 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
     gestureEventHub->ActClick(jsonShrd);
 }
 
-void SecurityComponentPattern::DelayReleaseNode(RefPtr<FrameNode>& node)
+void SecurityComponentPattern::DelayReleaseNode(uint64_t index)
 {
     if (uiEventHandler_ == nullptr) {
         SC_LOG_WARN("UIEventHandler invalid");
         return;
     }
-    uiEventHandler_->PostTask(
-        [nodeInner = std::move(node)]() { return; },
-        DELAY_RELEASE_MILLSEC);
+    bool res = uiEventHandler_->PostTask([index] {
+        std::lock_guard<std::mutex> lock(g_scMutex);
+        g_scNodeMap.erase(index);
+        if (g_omittedNodeIndex.size() != 0) {
+            for (auto item : g_omittedNodeIndex) {
+                g_scNodeMap.erase(item);
+            }
+            g_omittedNodeIndex.clear();
+        }
+        SC_LOG_INFO("Security component frameNode cached size: %{public}zu, index: %{public}" PRId64,
+            g_scNodeMap.size(), index);
+        return;
+    },
+    DELAY_RELEASE_MILLSEC);
+    if (!res) {
+        SC_LOG_ERROR("Security component post task failed.");
+        g_omittedNodeIndex.push_back(index);
+    }
 }
 
 std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCloseFunc(
@@ -666,33 +717,51 @@ std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCl
 {
     return [weak = WeakClaim(this), weakContext = WeakPtr(pipeline),
         node = frameNode, taskName = taskName](int32_t result) mutable {
+        std::lock_guard<std::mutex> lock(g_scMutex);
+        g_scNodeMap[++g_scIndex] = std::move(node);
         auto pattern = weak.Upgrade();
         if (pattern == nullptr) {
             return -1;
         }
         auto context = weakContext.Upgrade();
         if (context == nullptr) {
-            pattern->DelayReleaseNode(node);
+            pattern->DelayReleaseNode(g_scIndex);
             return -1;
         }
         auto taskExecutor = context->GetTaskExecutor();
         if (taskExecutor == nullptr) {
-            pattern->DelayReleaseNode(node);
+            pattern->DelayReleaseNode(g_scIndex);
             return -1;
         }
-        taskExecutor->PostTask(
-            [weak, instanceId = context->GetInstanceId(), result, nodeInner = std::move(node)] {
+        bool res = taskExecutor->PostTask(
+            [weak, instanceId = context->GetInstanceId(), result, index = g_scIndex] {
+                ContainerScope scope(instanceId);
+                std::lock_guard<std::mutex> lock(g_scMutex);
+                SC_LOG_INFO("Security component frameNode cached size: %{public}zu, index: %{public}" PRId64,
+                    g_scNodeMap.size(), index);
+                if (g_omittedNodeIndex.size() != 0) {
+                    for (auto item : g_omittedNodeIndex) {
+                        g_scNodeMap.erase(item);
+                    }
+                    g_omittedNodeIndex.clear();
+                }
                 if (result == static_cast<int32_t>(SecurityComponentHandleResult::GRANT_CANCEL)) {
+                    g_scNodeMap.erase(index);
                     return;
                 }
-                ContainerScope scope(instanceId);
                 auto pattern = weak.Upgrade();
                 if (pattern == nullptr) {
+                    g_scNodeMap.erase(index);
                     return;
                 }
                 pattern->DoTriggerOnclick(result);
+                g_scNodeMap.erase(index);
             },
             TaskExecutor::TaskType::UI, taskName);
+        if (!res) {
+            SC_LOG_ERROR("Security component post task failed.");
+            g_omittedNodeIndex.push_back(g_scIndex);
+        }
         return 0;
     };
 }

@@ -57,6 +57,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/frontend.cpp",
+    "$ace_root/frameworks/core/common/key_event_manager.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
@@ -213,10 +214,7 @@ ohos_unittest("SvgAnimateTest") {
     ":config_animation_test",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
   if (!is_ohos_standard_system) {
     external_deps = [
@@ -232,6 +230,8 @@ ohos_unittest("SvgAnimateTest") {
   external_deps += [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 
   part_name = ace_engine_part

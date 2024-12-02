@@ -57,17 +57,9 @@ void LongPressRecognizer::OnAccepted()
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
     refereeState_ = RefereeState::SUCCEED;
-    if (onLongPress_ && !touchPoints_.empty()) {
-        TouchEvent trackPoint = touchPoints_.begin()->second;
-        PointF localPoint(trackPoint.GetOffset().GetX(), trackPoint.GetOffset().GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-            isPostEventResult_, trackPoint.postEventNodeId);
-        LongPressInfo info(trackPoint.id);
-        info.SetTimeStamp(time_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        onLongPress_(info);
+    if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
+        std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
+        time_ = TimeStamp(nanoseconds);
     }
 
     UpdateFingerListInfo();
@@ -111,7 +103,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -170,7 +162,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -223,7 +215,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
         event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;

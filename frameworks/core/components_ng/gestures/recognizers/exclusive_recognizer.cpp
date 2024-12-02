@@ -331,10 +331,10 @@ void ExclusiveRecognizer::DispatchEventToActiveRecognizers(const TouchEvent& poi
         auto node = activeRecognizer_->GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "ExclusiveRecognizer receive down event has activeRecognizer, type: %{public}s, refereeState: "
-            "%{public}d, node tag = %{public}s, id = %{public}s",
+            "%{public}d, node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
             AceType::TypeName(activeRecognizer_), activeRecognizer_->GetRefereeState(),
             node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
     }
     auto saveRecognizer = activeRecognizer_;
     activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
@@ -387,9 +387,8 @@ void ExclusiveRecognizer::DispatchEventToAllRecognizers(const TouchEvent& point)
                 auto node = recognizer->GetAttachedNode().Upgrade();
                 TAG_LOGI(AceLogTag::ACE_GESTURE,
                     "ExclusiveRecognizer receive down event has no activeRecognizer recognizer is not in id: "
-                    "%{public}d touchTestResult, node tag = %{public}s, id = %{public}s",
-                    point.id, node ? node->GetTag().c_str() : "null",
-                    node ? std::to_string(node->GetId()).c_str() : "invalid");
+                    "%{public}d touchTestResult, node tag = %{public}s",
+                    point.id, node ? node->GetTag().c_str() : "null");
             }
         }
     }

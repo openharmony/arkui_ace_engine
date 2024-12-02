@@ -232,9 +232,6 @@ abstract class ViewPU extends PUV2ViewBase
     // in case this ViewPU is currently frozen
     PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
-    // FIXME needed ?
-    MonitorV2.clearWatchesFromTarget(this);
-
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
@@ -855,7 +852,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
+          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
             child.aboutToReuseInternal();
           }
         } else {
@@ -884,7 +881,7 @@ abstract class ViewPU extends PUV2ViewBase
       const child = weakRefChild.deref();
       if (child) {
         if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
+          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
             child.aboutToRecycleInternal();
           }
         } else {

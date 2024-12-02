@@ -161,6 +161,7 @@ private:
     OffsetF GetLastChoosePointOffset();
     void CalculateCellCenter();
     OffsetF GetTouchOffsetToNode();
+    void InitSkipUnselectedPoint();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
@@ -180,6 +181,7 @@ private:
     int32_t fingerId_ = -1;
 
     mutable bool autoReset_ = true;
+    bool skipUnselectedPoint_ = false;
     Dimension circleRadius_;
 
     RefPtr<PatternLockModifier> patternLockModifier_;

@@ -267,33 +267,23 @@ public:
         return animationId_;
     }
 
-    void InitTransitionIn(const RefPtr<PageTransitionEffect>& effect);
+    void InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void InitTransitionOut(const RefPtr<PageTransitionEffect>& effect);
+    void InitTransitionOut(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void TransitionInFinish(const RefPtr<PageTransitionEffect>& effect);
+    void TransitionInFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect);
+    void TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void FinishOutPage(const int32_t animationId);
+    void FinishOutPage(const int32_t animationId, PageTransitionType type);
 
-    void FinishInPage(const int32_t animationId);
+    void FinishInPage(const int32_t animationId, PageTransitionType type);
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
 
-    void SetPageTransitionType(PageTransitionType type)
-    {
-        type_ = type;
-    }
-
-    PageTransitionType GetPageTransitionType() const
-    {
-        return type_;
-    }
-
     void ResetPageTransitionEffect();
 
-    void TriggerPageTransition(const std::function<void()>& onFinish);
+    void TriggerPageTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -337,9 +327,9 @@ protected:
     void UpdateExitPushEffect(RefPtr<PageTransitionEffect>& effect, float statusHeight);
 
     void UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
-        RefPtr<PageTransitionEffect>& effect, AnimationOption& option);
+        RefPtr<PageTransitionEffect>& effect, AnimationOption& option, PageTransitionType type);
 
-    void TriggerDefaultTransition(const std::function<void()>& onFinish);
+    void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
@@ -372,7 +362,7 @@ protected:
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
-    PageTransitionType type_ = PageTransitionType::NONE;
+    std::shared_ptr<AnimationUtils::Animation> currCustomAnimation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

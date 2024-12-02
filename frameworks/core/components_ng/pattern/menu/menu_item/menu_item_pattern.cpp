@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -44,6 +43,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+// default clicked & hover color for background blend when theme is null(value from SelectTheme)
+const Color DEFAULT_CLICKED_COLOR(0x19000000);
+const Color DEFAULT_HOVER_COLOR(0x0c000000);
 constexpr double VELOCITY = 0.0f;
 constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
@@ -196,7 +198,10 @@ void MenuItemPattern::OnModifyDone()
         }
         SetAccessibilityAction();
 
-        host->GetRenderContext()->SetClipToBounds(true);
+        auto renderContext = host->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetClipToBounds(true);
+        }
         if (!longPressEvent_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             InitLongPressEvent();
         }
@@ -298,6 +303,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
+        CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
     }
@@ -716,7 +722,6 @@ bool MenuItemPattern::OnClick()
         onChange(IsSelected());
         RecordChangeEvent();
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -747,7 +752,9 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         return;
     }
     // change menu item paint props on press
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         NotifyPressStatus(true);
@@ -797,15 +804,17 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
     // recognize gesture as click if touch up position is close to last touch down position
     if (touchType == TouchType::DOWN) {
-        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+        lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
-        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        auto touchUpOffset = touches.front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
@@ -846,7 +855,7 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(theme);
     if (isOptionPattern_) {
         SetBgBlendColor(isHover ? theme->GetHoverColor() : Color::TRANSPARENT);
-        auto props = GetPaintProperty<OptionPaintProperty>();
+        auto props = GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateHover(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1638,10 +1647,8 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
     CHECK_NULL_VOID(host);
     if (isSelected) {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     } else {
         eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
-        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 
@@ -1862,7 +1869,7 @@ void MenuItemPattern::UpdateNextNodeDivider(bool needDivider)
             LOGW("next optionNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
             return;
         }
-        auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<OptionPaintProperty>();
+        auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateNeedDivider(needDivider);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1888,12 +1895,12 @@ void MenuItemPattern::UpdateIcon(const std::string& src, const std::function<voi
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(row);
     if (symbolIcon && (!icon_ || icon_->GetTag() != V2::SYMBOL_ETS_TAG)) {
-        icon_ = OptionView::CreateSymbol(symbolIcon, row, icon_);
+        icon_ = MenuView::CreateSymbol(symbolIcon, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } else if (symbolIcon == nullptr && !src.empty() && (!icon_ || icon_->GetTag() != V2::IMAGE_ETS_TAG)) {
-        icon_ = OptionView::CreateIcon(src, row, icon_);
+        icon_ = MenuView::CreateIcon(src, row, icon_);
         row->MarkModifyDone();
         row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -1973,7 +1980,7 @@ float MenuItemPattern::GetSelectOptionWidth()
     float finalWidth = MIN_OPTION_WIDTH.ConvertToPx();
     
     if (IsWidthModifiedBySelect()) {
-        auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        auto optionPatintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_RETURN(optionPatintProperty, MIN_OPTION_WIDTH.ConvertToPx());
         auto selectmodifiedwidth = optionPatintProperty->GetSelectModifiedWidth();
         finalWidth = selectmodifiedwidth.value();
@@ -2028,9 +2035,11 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto props = GetPaintProperty<OptionPaintProperty>();
+    auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    const auto& touches = info.GetTouches();
+    CHECK_EQUAL_VOID(touches.empty(), true);
+    auto touchType = touches.front().GetTouchType();
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2038,7 +2047,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     // enter press status
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
-        SetBgBlendColor(theme->GetClickedColor());
+        SetBgBlendColor(theme ? theme->GetClickedColor() : DEFAULT_CLICKED_COLOR);
         PlayBgColorAnimation(false);
 
         props->UpdatePress(true);
@@ -2048,7 +2057,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         // leave press status
         if (IsHover()) {
-            SetBgBlendColor(theme->GetHoverColor());
+            SetBgBlendColor(theme ? theme->GetHoverColor() : DEFAULT_HOVER_COLOR);
         } else {
             SetBgBlendColor(Color::TRANSPARENT);
         }
@@ -2066,7 +2075,7 @@ bool MenuItemPattern::OnSelectProcess()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto hub = host->GetEventHub<OptionEventHub>();
+    auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto JsAction = hub->GetJsCallback();
     if (JsAction) {
@@ -2126,7 +2135,7 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
 
-    auto eventHub = host->GetEventHub<OptionEventHub>();
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     UpdateIconSrc();
     if (!eventHub->IsEnabled()) {

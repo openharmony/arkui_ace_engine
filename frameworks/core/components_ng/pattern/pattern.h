@@ -511,7 +511,7 @@ public:
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
-    virtual void HandleDragEvent(const PointerEvent& info) {};
+    virtual void HandleDragEvent(const DragPointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionConfigurationUpdate() {}

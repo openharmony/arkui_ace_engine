@@ -76,7 +76,6 @@ public:
     void SetSwipeByGroup(bool swipeByGroup) override;
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
-    void SetBindIndicator(bool bind) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -113,7 +112,6 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
     static void SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup);
-    static void SetBindIndicator(FrameNode* frameNode, bool bind);
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
     static int GetIndex(FrameNode* frameNode);

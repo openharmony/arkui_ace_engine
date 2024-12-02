@@ -60,6 +60,8 @@ enum class SessionType : int32_t {
     UI_EXTENSION_ABILITY = 1,
     CLOUD_CARD = 2,
     SECURITY_UI_EXTENSION_ABILITY = 3,
+    DYNAMIC_COMPONENT = 4,
+    ISOLATED_COMPONENT = 5,
 };
 
 enum class UIExtensionUsage : uint32_t {
@@ -107,7 +109,7 @@ public:
     // The lifecycle interface
     virtual void NotifyCreate() = 0;
     virtual void NotifyForeground() = 0;
-    virtual void NotifyBackground() = 0;
+    virtual void NotifyBackground(bool isHandleError = true) = 0;
     virtual void NotifyDestroy(bool isHandleError = true) = 0;
     virtual void NotifyConfigurationUpdate() = 0;
 

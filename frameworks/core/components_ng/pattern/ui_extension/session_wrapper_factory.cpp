@@ -25,6 +25,7 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
         return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller, sessionType);
     }
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "CreateSessionWrapper return nullptr");
     return nullptr;
 }
 
@@ -36,6 +37,7 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
             sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
             sessionCreateParam.isTransferringCaller, sessionType);
     }
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "CreateSessionWrapper return nullptr");
     return nullptr;
 }
 } // namespace OHOS::Ace::NG

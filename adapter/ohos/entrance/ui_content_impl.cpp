@@ -94,6 +94,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/image/image_file_cache.h"
@@ -121,6 +122,7 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
+constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -380,10 +382,6 @@ void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
     CHECK_NULL_VOID(safeAreaManager);
     uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-    if (avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == avoidAreas.end()) {
-        safeAreaManager->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
-            NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
-    }
     ParseAvoidAreasUpdate(context, avoidAreas, config);
     AvoidAreasUpdateOnUIExtension(context, avoidAreas);
 }
@@ -2106,10 +2104,16 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 {
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     auto& DMManager = Rosen::DisplayManager::GetInstance();
+    auto window = container->GetUIWindow(instanceId_);
+    int32_t displayId = 0;
+    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
+        displayId = window->GetDisplayId();
+        listenedDisplayId_ = displayId;
+    }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
-    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_);
+    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);
     Rosen::DMRect availableArea;
-    auto defaultDisplay = DMManager.GetDefaultDisplay();
+    auto defaultDisplay = DMManager.GetDisplayById(displayId);
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
         if (ret == Rosen::DMError::DM_OK) {
@@ -2235,7 +2239,7 @@ void UIContentImpl::UnregisterDisplayManagerCallback()
         foldDisplayModeListener_ = nullptr;
     }
     if (availableAreaChangedListener_) {
-        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_);
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
         availableAreaChangedListener_ = nullptr;
     }
 }
@@ -2534,6 +2538,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (window_ && window_->GetDisplayId() != DISPLAY_ID_INVALID) {
+        container->SetCurrentDisplayId(window_->GetDisplayId());
+    }
     if (container->IsSubContainer()) {
         auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
         SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
@@ -2598,9 +2605,6 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            if (container->IsUIExtensionWindow()) {
-                pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
-            }
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
@@ -2650,6 +2654,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
@@ -2657,6 +2664,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
             "ArkUIPromiseViewportConfig");
     } else {
+        if (container->IsUIExtensionWindow()) {
+            pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
+        }
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
@@ -3045,13 +3055,29 @@ void UIContentImpl::SetAppWindowTitle(const std::string& title)
 
 void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
+    std::lock_guard<std::mutex> lock(setAppWindowIconMutex_);
+    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
     ContainerScope scope(instanceId_);
-    LOGI("[%{public}s][%{public}s][%{public}d]: setAppIcon", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [container, pixelMap]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+    };
+
+    // Cancel the pending task
+    setAppWindowIconTask_.Cancel();
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        setAppWindowIconTask_ = SingleTaskExecutor::CancelableTask(std::move(task));
+        taskExecutor->PostTask(setAppWindowIconTask_,
+            TaskExecutor::TaskType::UI, "ArkUISetAppWindowIcon");
+    }
 }
 
 void UIContentImpl::UpdateFormData(const std::string& data)
@@ -3324,10 +3350,10 @@ int32_t UIContentImpl::CreateModalUIExtension(
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
         "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
-        "isAllowAddChildBelowModalUec=%{public}d",
+        "isAllowAddChildBelowModalUec=%{public}d, prohibitedRemoveByNavigation=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
         config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
-        config.isAllowAddChildBelowModalUec);
+        config.isAllowAddChildBelowModalUec, config.prohibitedRemoveByNavigation);
     return sessionId;
 }
 
@@ -3713,6 +3739,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
             CHECK_NULL_VOID(targetNode);
             auto popupParam = UICONTENT_IMPL_PTR(content)->CreateCustomPopupParam(false, config);
+            popupParam->SetBlockEvent(false);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
             UICONTENT_IMPL_PTR(content)->customPopupConfigMap_.erase(nodeId);
             UICONTENT_IMPL_PTR(content)->popupUIExtensionRecords_.erase(nodeId);
@@ -3796,6 +3823,23 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     } else {
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
     }
+}
+
+void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, buttonStyle]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetContainerButtonStyle(buttonStyle.buttonBackgroundSize,
+                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
+        },
+        TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
@@ -4047,5 +4091,27 @@ bool UIContentImpl::GetContainerControlButtonVisible()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->GetContainerControlButtonVisible();
+}
+
+void UIContentImpl::OnContainerModalEvent(const std::string& name, const std::string& value)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [name, value, instanceId = instanceId_]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineBase);
+        CHECK_NULL_VOID(pipeline);
+        NG::ContainerModalViewEnhance::OnContainerModalEvent(pipeline, name, value);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOnContainerModalEvent");
+    }
 }
 } // namespace OHOS::Ace

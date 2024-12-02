@@ -1764,7 +1764,7 @@ HWTEST_F(SelectOverlayManagerTestNg, MountNodeToRoot, TestSize.Level1)
      */
     auto content = SelectContentOverlayManager(root_);
     bool animation = true;
-    content.MountNodeToRoot(root_, animation);
+    content.MountNodeToRoot(root_, animation, NodeType::HANDLE);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
 

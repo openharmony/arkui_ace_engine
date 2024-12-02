@@ -96,6 +96,12 @@ class BuilderNode {
     updateConfiguration() {
         this._JSBuilderNode.updateConfiguration();
     }
+    onReuseWithBindObject(param) {
+        this._JSBuilderNode.onReuseWithBindObject(param);
+    }
+    onRecycleWithBindObject() {
+        this._JSBuilderNode.onRecycleWithBindObject();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -134,6 +140,16 @@ class JSBuilderNode extends BaseNode {
                 }
             } // if child
         });
+    }
+    onReuseWithBindObject(param) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        super.onReuseWithBindObject(param);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    onRecycleWithBindObject() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        super.onRecycleWithBindObject();
+        __JSScopeUtil__.restoreInstanceId();
     }
     getCardId() {
         return -1;
@@ -194,19 +210,26 @@ class JSBuilderNode extends BaseNode {
                 },
                 get: (target, property, receiver) => { return this.params_?.[property]; }
             });
-            this.nodePtr_ = super.create(builder.builder, this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
         else {
-            this.nodePtr_ = super.create(builder.builder, this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+            this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
         }
     }
     build(builder, params, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
         const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
+        this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
         this.params_ = params;
         this.updateFuncByElmtId.clear();
+        if (this.bindedViewOfBuilderNode) {
+            globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
+        }
         this.buildWithNestingBuilder(builder, supportLazyBuild);
+        if (this.bindedViewOfBuilderNode) {
+            globalThis.__viewPuStack__?.pop();
+        }
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -679,6 +702,17 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
     NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 };
+globalThis.__viewPuStack__ = new Array();
+globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent) {
+    if (globalThis.__viewPuStack__ === undefined || globalThis.__viewPuStack__.length === 0) {
+        return false;
+    }
+    const _BuilderNodeView = globalThis.__viewPuStack__?.pop();
+    if (_BuilderNodeView) {
+        globalThis.__viewPuStack__?.push(_BuilderNodeView);
+    }
+    return (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
+};
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -793,7 +827,9 @@ class FrameNode {
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nativeRef = nativeRef;
         this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
         if (this._nodeId === -1) {
             return;
         }
@@ -818,10 +854,11 @@ class FrameNode {
         return this.nodePtr_;
     }
     getValidNodePtr() {
-        if (this.nodePtr_) {
-            return this.nodePtr_;
-        } else {
+        const node = this.getNodePtr();
+        if (node === null) {
             throw Error('The FrameNode has been disposed!');
+        } else {
+            return node;
         }
     }
     dispose() {
@@ -861,11 +898,15 @@ class FrameNode {
     }
     convertToFrameNode(nodePtr, nodeId = -1) {
         if (nodeId === -1) {
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
             nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+            __JSScopeUtil__.restoreInstanceId();
         }
         if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
             let frameNode = new ProxyFrameNode(this.uiContext_);
             let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+            __JSScopeUtil__.restoreInstanceId();
             frameNode.setNodePtr(node);
             frameNode._nodeId = nodeId;
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -1027,8 +1068,10 @@ class FrameNode {
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getParent() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
         const nodeId = result?.nodeId;
+        __JSScopeUtil__.restoreInstanceId();
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
@@ -1039,7 +1082,9 @@ class FrameNode {
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getChildrenCount(isExpanded) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        __JSScopeUtil__.restoreInstanceId();
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
@@ -1129,7 +1174,9 @@ class FrameNode {
         return getUINativeModule().frameNode.isAttached(this.getNodePtr());
     }
     getInspectorInfo() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
         const inspectorInfo = JSON.parse(inspectorInfoStr);
         return inspectorInfo;
     }
@@ -1159,7 +1206,9 @@ class FrameNode {
         __JSScopeUtil__.restoreInstanceId();
     }
     layout(position) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+        __JSScopeUtil__.restoreInstanceId();
     }
     setNeedsLayout() {
         getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
@@ -1450,7 +1499,7 @@ const __creatorMap__ = new Map([
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
-    ['SymbolGlyph', (context)=> {
+    ['SymbolGlyph', (context) => {
             return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
                 return new ArkSymbolGlyphComponent(node, type);
             });
@@ -1852,7 +1901,8 @@ class RenderNode {
         this.nodePtr = this._nativeRef?.getNativeHandle();
         if (this.apiTargetVersion && this.apiTargetVersion < 12) {
             this.clipToFrame = false;
-        } else {
+        }
+        else {
             this.clipToFrame = true;
         }
     }
@@ -2422,6 +2472,12 @@ class ComponentContent extends Content {
     }
     recycle() {
         this.builderNode_.recycle();
+    }
+    onReuseWithBindObject(param) {
+        this.builderNode_.onReuseWithBindObject(param);
+    }
+    onRecycleWithBindObject() {
+        this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
         this.detachFromParent();

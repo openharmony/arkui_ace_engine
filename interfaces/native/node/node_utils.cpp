@@ -31,7 +31,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Int32* tempSize = new ArkUI_Int32[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, tempSize);
     size->width = tempSize[0];
@@ -44,7 +44,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOff
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     auto value = impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutPositionWithoutMargin(node->uiNodeHandle);
     localOffset->x = static_cast<int32_t>(value[0]);
     localOffset->y = static_cast<int32_t>(value[1]);
@@ -57,7 +57,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindow(node->uiNodeHandle, &tempOffset, false);
     globalOffset->x = tempOffset[0];
@@ -71,7 +71,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, &tempOffset, false);
     screenOffset->x = tempOffset[0];
@@ -85,7 +85,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToWindowWithTransform(
         node->uiNodeHandle, &tempOffset, false);
@@ -100,7 +100,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreenWithTransform(
         node->uiNodeHandle, &tempOffset, false);
@@ -116,7 +116,7 @@ int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->setSystemColorModeChangeEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onColorModeChange));
 
@@ -128,7 +128,7 @@ void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemColorModeChangeEvent(node->uiNodeHandle);
 }
 
@@ -138,7 +138,7 @@ int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->setSystemFontStyleChangeEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onFontStyleChange));
 
@@ -150,7 +150,7 @@ void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node)
     if (node == nullptr) {
         return;
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemFontStyleChangeEvent(node->uiNodeHandle);
 }
 
@@ -173,7 +173,7 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
         LOGF("AddCustomProperty input params name or value is nullptr");
         abort();
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
 }
 
@@ -186,7 +186,7 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
         LOGF("RemoveCustomProperty input params name is nullptr");
         abort();
     }
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);
 }
 
@@ -211,7 +211,7 @@ ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
     if (attachNode) {
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
     }
-    ArkUI_Node* arkUINode = new ArkUI_Node({ 0, node, false });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ -1, node, false });
     impl->getExtendedAPI()->setAttachNodePtr((arkUINode)->uiNodeHandle, reinterpret_cast<void*>(arkUINode));
     return reinterpret_cast<ArkUI_NodeHandle>(arkUINode);
 }
@@ -222,17 +222,16 @@ int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_Ac
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUINodeHandle* innerNodes = nullptr;
-    uint32_t totalSize = 0;
+    int32_t totalSize = 0;
     impl->getNodeModifiers()->getFrameNodeModifier()->getActiveChildrenInfo(
         head->uiNodeHandle, &innerNodes, &totalSize);
-    if (totalSize == 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
     *handle = new ArkUI_ActiveChildrenInfo({ .nodeList = nullptr, .nodeCount = totalSize });
     (*handle)->nodeCount = totalSize;
-    (*handle)->nodeList = new ArkUI_NodeHandle[totalSize] {};
-    for (uint32_t i = 0; i < totalSize; i++) {
-        ((*handle)->nodeList[i]) = GetArkUINode(innerNodes[i]);
+    if (totalSize > 0) {
+        (*handle)->nodeList = new ArkUI_NodeHandle[totalSize] {};
+        for (uint32_t i = 0; i < totalSize; i++) {
+            ((*handle)->nodeList[i]) = GetArkUINode(innerNodes[i]);
+        }
     }
     delete[] innerNodes;
     return 0;
@@ -270,7 +269,10 @@ bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node)
 int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
 {
     if (node == nullptr) {
-        return 0;
+        return -1;
+    }
+    if (node->type != -1) {
+        return node->type;
     }
 
     static const std::unordered_map<std::string, ArkUI_NodeType> nodeTypeMap = {
@@ -345,7 +347,7 @@ void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle)
 ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index)
 {
     CHECK_NULL_RETURN(handle, nullptr);
-    if (index < handle->nodeCount) {
+    if (index < handle->nodeCount && index >= 0) {
         return handle->nodeList[index];
     }
     return nullptr;

@@ -546,7 +546,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
 
     /**
      * @tc.steps: steps2. HandleTouchEvent
@@ -848,7 +848,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->UpdateScrollPosition(-BARITEM_SIZE / 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -BARITEM_SIZE / 2);
 
     /**
@@ -857,7 +857,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      */
     scrollable->UpdateScrollPosition(-BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 
@@ -867,7 +867,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      */
     scrollable->UpdateScrollPosition(BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 }
@@ -1001,7 +1001,7 @@ HWTEST_F(TabBarEventTestNg, HandleTouchEvent004, TestSize.Level1)
     auto actuator = eventHub->touchEventActuator_;
     auto events = actuator->touchEvents_;
     events.front()->callback_(info);
-    tabBarPattern_->tabBarType_ = { { 0, false }, { 1, true } };
+    tabBarPattern_->tabBarType_ = { { 0, TabBarParamType::NORMAL }, { 1, TabBarParamType::CUSTOM_BUILDER } };
     tabBarPattern_->HandleHoverEvent(true);
     MouseInfo mouseInfo;
     mouseInfo.SetAction(MouseAction::MOVE);

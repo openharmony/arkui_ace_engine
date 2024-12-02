@@ -545,7 +545,8 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false);
     virtual void DoSetActiveChildRange(
         const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
     {}
@@ -792,6 +793,14 @@ public:
         isCNode_ = createByCapi;
     }
 
+    virtual RefPtr<UINode> GetCurrentPageRootNode()
+    {
+        return nullptr;
+    }
+
+    virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
+    virtual void RemoveCustomProperty(const std::string& key) {}
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -883,7 +892,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
+    int32_t depth_ = 1;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;

@@ -100,6 +100,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
@@ -153,10 +154,10 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
+    "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "skia:skia_canvaskit",
@@ -205,6 +206,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
@@ -257,10 +259,10 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
+    "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "skia:skia_canvaskit",

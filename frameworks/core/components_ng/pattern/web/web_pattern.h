@@ -63,6 +63,8 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class WebAccessibilityChildTreeCallback;
+
 namespace {
 
 struct MouseClickInfo {
@@ -623,7 +625,7 @@ public:
         int32_t direction);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
-    void SetAccessibilityState(bool state);
+    void SetAccessibilityState(bool state, bool isDelayed = false);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
@@ -645,6 +647,7 @@ public:
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
+    bool IsCurrentFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
     {
         customKeyboardBuilder_ = customKeyboardBuilder;
@@ -686,6 +689,8 @@ public:
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
+    void DumpInfo() override;
+    float DumpGpuInfo();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
@@ -747,7 +752,7 @@ private:
     bool IsNeedResizeVisibleViewport();
     bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
-    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -865,6 +870,8 @@ private:
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
     void HandleScaleGestureChange(const GestureEvent& event);
+    void HandleScaleGestureStart(const GestureEvent& event);
+    void HandleScaleGestureEnd(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -1014,7 +1021,6 @@ private:
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
-    void InitAiEngine();
     void InitMagnifier();
     void ShowMagnifier(int centerOffsetX, int centerOffsetY);
     void HideMagnifier();
@@ -1171,7 +1177,7 @@ private:
     TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
-    std::unordered_map<int32_t, std::shared_ptr<AccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
+    std::unordered_map<int32_t, std::shared_ptr<WebAccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
@@ -1195,7 +1201,7 @@ private:
     OHOS::NWeb::CursorType cursor_type_ = OHOS::NWeb::CursorType::CT_NONE;
     float touchPointX = 0;
     float touchPointY = 0;
-    bool isAIEngineInit = false;
+    bool isUsingCustomKeyboardAvoid_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

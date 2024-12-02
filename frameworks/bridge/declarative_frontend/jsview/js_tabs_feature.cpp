@@ -41,7 +41,11 @@ BindInfoMap bindInfoMap_;
 
 void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        return;
+    }
+    auto touchType = touches.front().GetTouchType();
     if (touchType != TouchType::DOWN && touchType != TouchType::UP && touchType != TouchType::CANCEL) {
         return;
     }

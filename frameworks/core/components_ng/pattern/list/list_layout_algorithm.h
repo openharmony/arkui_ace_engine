@@ -424,7 +424,7 @@ protected:
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos);
     virtual int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos);
-    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
+    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
@@ -584,6 +584,7 @@ private:
     float laneGutter_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
     OffsetF paddingOffset_;
+    bool isLayouted_ = true;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 

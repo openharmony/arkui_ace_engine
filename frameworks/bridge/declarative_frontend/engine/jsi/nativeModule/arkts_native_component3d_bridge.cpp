@@ -30,7 +30,9 @@ ArkUINativeModuleValue Component3DBridge::SetShaderInputBuffer(ArkUIRuntimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), panda::JSValueRef::Undefined(vm));
 
     if (!secondArg->IsArray(vm)) {
         return panda::JSValueRef::Undefined(vm);

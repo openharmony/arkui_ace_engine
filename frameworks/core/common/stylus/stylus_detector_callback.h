@@ -26,18 +26,18 @@ class StylusDetectorCallBack : public OHOS::Ace::IStylusDetectorCallback {
 public:
     explicit StylusDetectorCallBack() = default;
     virtual ~StylusDetectorCallBack() = default;
-    static int32_t RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
-    static int32_t SetText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler,
+    static int32_t RequestFocus(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler);
+    static int32_t SetText(int32_t nodeId, void* data, const RefPtr<TaskExecutor>& taskScheduler,
         std::shared_ptr<IAceStylusCallback> callback);
-    static int32_t GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
+    static int32_t GetText(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler,
         std::shared_ptr<IAceStylusCallback> callback);
-    static int32_t DeleteText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-    static int32_t ChoiceText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-    static int32_t InsertSpace(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
-    static int32_t MoveCursor(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
+    static int32_t DeleteText(int32_t nodeId, void* data, const RefPtr<TaskExecutor>& taskScheduler);
+    static int32_t ChoiceText(int32_t nodeId, void* data, const RefPtr<TaskExecutor>& taskScheduler);
+    static int32_t InsertSpace(int32_t nodeId, void* data, const RefPtr<TaskExecutor>& taskScheduler);
+    static int32_t MoveCursor(int32_t nodeId, void* data, const RefPtr<TaskExecutor>& taskScheduler);
 
-    static int32_t Redo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
-    static int32_t Undo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
+    static int32_t Redo(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler);
+    static int32_t Undo(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler);
     int32_t OnDetector(
         const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback) override;
     bool OnDetectorSync(const CommandType& command) override;

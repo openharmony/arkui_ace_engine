@@ -15,6 +15,10 @@
 
 #include "core/event/mouse_event.h"
 
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/offset.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -104,5 +108,39 @@ AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(Touch
         case TouchType::UNKNOWN:
             return AccessibilityHoverAction::UNKNOWN;
     }
+}
+
+bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!onMouseCallback_) {
+        return false;
+    }
+    MouseInfo info;
+    info.SetPointerEvent(event.pointerEvent);
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetPullAction(event.pullAction);
+    info.SetGlobalLocation(event.GetOffset());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        NG::PointF localPoint(event.x, event.y);
+        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
+        info.SetLocalLocation(Offset(localX, localY));
+    } else {
+        Offset localLocation = Offset(
+            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
+        info.SetLocalLocation(localLocation);
+    }
+    info.SetScreenLocation(event.GetScreenOffset());
+    info.SetTimeStamp(event.time);
+    info.SetDeviceId(event.deviceId);
+    info.SetTargetDisplayId(event.targetDisplayId);
+    info.SetSourceDevice(event.sourceType);
+    info.SetSourceTool(event.sourceTool);
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetPressedKeyCodes(event.pressedKeyCodes_);
+    onMouseCallback_(info);
+    return info.IsStopPropagation();
 }
 } // namespace OHOS::Ace

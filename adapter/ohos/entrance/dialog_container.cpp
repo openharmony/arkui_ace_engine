@@ -110,7 +110,7 @@ void DialogContainer::InitializeKeyEventCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            [context, event, &result]() { result = context->OnNonPointerEvent(event); },
             TaskExecutor::TaskType::UI, "ArkUIDialogKeyEvent");
         return result;
     };
@@ -191,7 +191,7 @@ void DialogContainer::InitializeDragEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const PointerEvent& pointerEvent, const DragEventAction& action,
+                                    const DragPointerEvent& pointerEvent, const DragEventAction& action,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(

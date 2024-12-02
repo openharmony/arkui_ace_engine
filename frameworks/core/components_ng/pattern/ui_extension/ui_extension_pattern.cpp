@@ -228,7 +228,7 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
         return;
     }
     auto want = wantWrapOhos->GetWant();
-    want_ = want.ToString();
+    want_ = want.GetElement().GetBundleName().append(want.GetElement().GetAbilityName().c_str());
     UpdateWant(want);
 }
 
@@ -292,10 +292,16 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
-        if (sessionWrapper_->GetWant()->IsEquals(want)) {
+        auto sessionWant = sessionWrapper_->GetWant();
+        if (sessionWant == nullptr) {
+            UIEXT_LOGW("The sessionWrapper want is nulllptr.");
             return;
         }
-        UIEXT_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
+        if (sessionWant->IsEquals(want)) {
+            return;
+        }
+        UIEXT_LOGI("The old want bundle = %{public}s, ability = %{public}s",
+            sessionWant->GetElement().GetBundleName().c_str(), sessionWant->GetElement().GetAbilityName().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChildAtIndex(0);
@@ -540,9 +546,12 @@ void UIExtensionPattern::OnWindowShow()
 
 void UIExtensionPattern::OnWindowHide()
 {
-    UIEXT_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
+    UIEXT_LOGI("The window is being hidden and the component is %{public}s, state is '%{public}s.",
+        isVisible_ ? "visible" : "invisible", ToString(state_));
     if (isVisible_) {
         NotifyBackground();
+    } else if (state_ == AbilityState::FOREGROUND) {
+        NotifyBackground(false);
     }
 }
 
@@ -587,12 +596,12 @@ void UIExtensionPattern::NotifyForeground()
     }
 }
 
-void UIExtensionPattern::NotifyBackground()
+void UIExtensionPattern::NotifyBackground(bool isHandleError)
 {
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid() && state_ == AbilityState::FOREGROUND) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'BACKGROUND'.", ToString(state_));
         state_ = AbilityState::BACKGROUND;
-        sessionWrapper_->NotifyBackground();
+        sessionWrapper_->NotifyBackground(isHandleError);
     }
 }
 
@@ -834,7 +843,12 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    DispatchPointerEvent(newPointerEvent);
+    auto pointerAction = newPointerEvent->GetPointerAction();
+    if (!(pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
+        DispatchPointerEvent(newPointerEvent);
+    }
     if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();
@@ -946,7 +960,22 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     }
 }
 
-void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
+void UIExtensionPattern::SetEventProxyFlag(int32_t flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (flag != static_cast<int32_t>(EventProxyFlag::EVENT_NONE)
+        && platformEventProxy_ == nullptr) {
+        platformEventProxy_ = MakeRefPtr<PlatformEventProxy>();
+        platformEventProxy_->SetHostNode(host);
+    }
+
+    if (platformEventProxy_ != nullptr) {
+        platformEventProxy_->SetEventProxyFlag(flag);
+    }
+}
+
+void UIExtensionPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
@@ -1008,6 +1037,7 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     UIEXT_LOGI("OnRelease the state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
         ToString(state_), releaseCode);
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     if (onReleaseCallback_) {
         onReleaseCallback_(releaseCode);
     }
@@ -1033,6 +1063,7 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
     UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
         if (!IsShowPlaceholder()) {
@@ -1089,6 +1120,7 @@ void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<Wan
         onTerminatedCallback_(code, wantWrap);
     }
     state_ = AbilityState::DESTRUCTION;
+    SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
 }
 
 void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback)

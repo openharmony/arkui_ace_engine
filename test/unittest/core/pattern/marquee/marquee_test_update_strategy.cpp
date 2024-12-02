@@ -1437,9 +1437,8 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy019, TestSize.Lev
      */
     pattern->StartMarqueeAnimation();
     auto renderContext = frameChild1->GetRenderContext();
-    TranslateOptions temp = renderContext->GetTransformTranslate().value();
-    TranslateOptions result { 3.5f, 0.0f, 0.0f };
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    auto temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 
     /**
      * @tc.steps: step4. Call StartMarqueeAnimation again with isFormRender_ is true.
@@ -1447,8 +1446,8 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy019, TestSize.Lev
      */
     MockPipelineContext::GetCurrent()->SetIsFormRender(true);
     pattern->StartMarqueeAnimation();
-    temp = renderContext->GetTransformTranslate().value();
-    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+    temp = renderContext->GetShowingTranslateProperty().GetX();
+    EXPECT_EQ(temp, 0.0f);
 }
 
 /**

@@ -19,6 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_styles.h"
 
 namespace OHOS::Ace::NG {
@@ -97,11 +98,8 @@ private:
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
     void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
-    void UpdateMeasureResultToPattern(LayoutWrapper* layoutWrapper);
-    void RestoreMeasureResultFromPattern(LayoutWrapper* layoutWrapper);
-    void CheckIfMarkDirtyNullifiedNode(const RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void UpdateChildrenCountToPattern(LayoutWrapper* layoutWrapper);
-    int32_t GetChildrenCountFromPattern(LayoutWrapper* layoutWrapper);
+    void ApplyPatternOperation(LayoutWrapper* layoutWrapper, FlexOperatorType operation, uintptr_t addr = 0,
+        FlexLayoutResult layoutResult = {});
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
     void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
@@ -113,6 +111,28 @@ private:
     void SecondMeasureInGrowOrShrink();
     void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
         FlexItemProperties& flexItemProperties);
+
+    template<typename T>
+    void PatternOperator(T pattern, FlexOperatorType operation, FlexMeasureResult& measureResult,
+        FlexLayoutResult layoutResult, uintptr_t addr)
+    {
+        switch (operation) {
+            case FlexOperatorType::RESTORE_MEASURE_RESULT:
+            case FlexOperatorType::RESTORE_CHILDREN_COUNT:
+                measureResult = pattern->GetFlexMeasureResult();
+                break;
+            case FlexOperatorType::UPDATE_MEASURE_RESULT:
+                pattern->SetFlexMeasureResult(
+                    { .allocatedSize = allocatedSize_, .validSizeCount = validSizeCount_,
+                        .childrenCount = childrenCount_ }, addr);
+                break;
+            case FlexOperatorType::UPDATE_LAYOUT_RESULT:
+                pattern->SetFlexLayoutResult(layoutResult, addr);
+                break;
+            default:
+                break;
+        }
+    }
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;
@@ -139,6 +159,7 @@ private:
     bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
+    int32_t preChildrenCount_ = 0;
     int32_t childrenCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);

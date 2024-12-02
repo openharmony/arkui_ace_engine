@@ -559,7 +559,9 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
     if (closeToView) {
         MeasureToTarget(jumpIdx);
     }
-    Jump(jumpIdx, align, inView || closeToView);
+
+    const bool noSkip = inView || closeToView;
+    Jump(jumpIdx, align, noSkip);
     if (info_->extraOffset_) {
         info_->delta_ += *info_->extraOffset_;
     }
@@ -570,6 +572,10 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         ClearFront();
         ClearBack(mainLen_);
     }
+    if (noSkip) {
+        return;
+    }
+    info_->EstimateTotalOffset(info_->startIndex_, info_->StartIndex());
 }
 
 void WaterFlowLayoutSW::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
@@ -671,6 +677,10 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane) const
     }
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
+    if (cacheDeadline_) {
+        child->Layout();
+        child->SetActive(false);
+    }
     const float res = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     info_->CacheItemHeight(idx, res);
     return res;
@@ -699,7 +709,8 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            const bool isCache = item.idx < info_->startIndex_ || item.idx > info_->endIndex_;
+            const bool isCache = !props_->GetShowCachedItemsValue(false) &&
+                                 (item.idx < info_->startIndex_ || item.idx > info_->endIndex_);
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 mainPos += item.mainSize + mainGaps_[idx];
@@ -712,12 +723,15 @@ void WaterFlowLayoutSW::LayoutSection(
             }
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
+            mainPos += item.mainSize + mainGaps_[idx];
+            if (isCache) {
+                continue;
+            }
             if (child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
-            mainPos += item.mainSize + mainGaps_[idx];
         }
         if (!rtl) {
             crossPos += itemsCrossSize_[idx][i] + crossGaps_[idx];

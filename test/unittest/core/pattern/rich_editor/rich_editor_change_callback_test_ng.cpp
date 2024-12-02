@@ -19,11 +19,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-int32_t testOnReadyEvent = 0;
-int32_t testAboutToIMEInput = 0;
-int32_t testOnIMEInputComplete = 0;
-int32_t testAboutToDelete = 0;
-int32_t testOnDeleteComplete = 0;
 int32_t testOnSelect = 0;
 } // namespace
 
@@ -32,6 +27,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
     void ResetContentChangeCallbackState();
     void InitContentChangeCallback(RichEditorModelNG& richEditorModel);
     void InitDeleteCallback(RichEditorModelNG& richEditorModel);
@@ -58,11 +54,6 @@ void RichEditorChangeCallbackTestNg::SetUp()
 void RichEditorChangeCallbackTestNg::TearDown()
 {
     richEditorNode_ = nullptr;
-    testOnReadyEvent = 0;
-    testAboutToIMEInput = 0;
-    testOnIMEInputComplete = 0;
-    testAboutToDelete = 0;
-    testOnDeleteComplete = 0;
     MockParagraph::TearDown();
 }
 
@@ -74,8 +65,8 @@ void RichEditorChangeCallbackTestNg::TearDownTestSuite()
 
 void RichEditorChangeCallbackTestNg::ResetContentChangeCallbackState()
 {
-    g_isOnWillChangeCalled = false;
-    g_isOnDidChangeCalled = false;
+    isOnWillChangeCalled = false;
+    isOnDidChangeCalled = false;
     onWillChangeValue.reset();
     onDidChangeValue.reset();
 }
@@ -84,14 +75,14 @@ void RichEditorChangeCallbackTestNg::InitContentChangeCallback(RichEditorModelNG
 {
     ResetContentChangeCallbackState();
     auto onWillChange = [](const RichEditorChangeValue& changeValue) {
-        g_isOnWillChangeCalled = true;
+        isOnWillChangeCalled = true;
         onWillChangeValue = changeValue;
         return true;
     };
     richEditorModel.SetOnWillChange(std::move(onWillChange));
 
     auto onDidChange = [](const RichEditorChangeValue& changeValue) {
-        g_isOnDidChangeCalled = true;
+        isOnDidChangeCalled = true;
         onDidChangeValue = changeValue;
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
@@ -606,8 +597,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest009, TestSize.Lev
     InitContentChangeCallback(richEditorModel);
 
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
-    EXPECT_EQ(g_isOnWillChangeCalled, true);
-    EXPECT_EQ(g_isOnDidChangeCalled, true);
+    EXPECT_EQ(isOnWillChangeCalled, true);
+    EXPECT_EQ(isOnDidChangeCalled, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 0);

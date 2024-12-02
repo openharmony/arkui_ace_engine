@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
-#include "base/image/utils.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
@@ -39,7 +38,6 @@ constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
-constexpr int32_t DEGREE_ALL = 360;
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -112,6 +110,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -132,6 +131,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -152,6 +152,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -502,18 +503,23 @@ void ImagePattern::UpdateOrientation()
 {
     auto imageObj = loadingCtx_->GetImageObject();
     CHECK_NULL_VOID(imageObj);
-    imageObj->SetUserOrientation(userOrientation_);
-    if (userOrientation_ == ImageRotateOrientation::UP) {
-        finalOrientation_ = ImageRotateOrientation::UP;
+    if (imageObj->GetFrameCount() > 1) {
+        imageObj->SetOrientation(ImageRotateOrientation::UP);
         return;
     }
-    auto orientation = imageObj->GetOrientation();
-    auto userDegree = ConvertOrientationToDegree(userOrientation_);
-    auto selfDegree = ConvertOrientationToDegree(orientation);
-    auto degree = (userDegree + selfDegree) % DEGREE_ALL;
-    finalOrientation_ = ConvertDegreeToOrientation(degree);
+    imageObj->SetUserOrientation(userOrientation_);
+    auto selfOrientation_ = imageObj->GetOrientation();
+    if (userOrientation_ == ImageRotateOrientation::UP) {
+        joinOrientation_ = ImageRotateOrientation::UP;
+        return;
+    }
+    if (userOrientation_ == ImageRotateOrientation::AUTO) {
+        joinOrientation_ = selfOrientation_;
+    } else {
+        joinOrientation_ = userOrientation_;
+    }
     // update image object orientation before decoding
-    imageObj->SetOrientation(finalOrientation_);
+    imageObj->SetOrientation(joinOrientation_);
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -525,6 +531,22 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     CHECK_NULL_VOID(imageEventHub);
     LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
+}
+
+void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (externalDecodeFormat_ != externalDecodeFormat);
+    switch (externalDecodeFormat) {
+        case PixelFormat::NV21:
+        case PixelFormat::RGBA_8888:
+        case PixelFormat::RGBA_1010102:
+        case PixelFormat::YCBCR_P010:
+        case PixelFormat::YCRCB_P010:
+            externalDecodeFormat_ = externalDecodeFormat;
+            break;
+        default:
+            externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    }
 }
 
 void ImagePattern::StartDecoding(const SizeF& dstSize)
@@ -553,14 +575,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
+        loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
+        altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }
@@ -585,7 +607,7 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.orientation_ = finalOrientation_;
+    config.orientation_ = joinOrientation_;
     canvasImage->SetPaintConfig(config);
 }
 
@@ -723,7 +745,7 @@ void ImagePattern::LoadImage(
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{public}s", imageDfxConfig_.ToStringWithSrc().c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{private}s", imageDfxConfig_.ToStringWithSrc().c_str());
     }
 
     if (onProgressCallback_) {
@@ -735,6 +757,8 @@ void ImagePattern::LoadImage(
     }
     // Before loading new image data, reset the render success status to `false`.
     renderedImageInfo_.renderSuccess = false;
+    // Reset the reload flag before loading the image to ensure a fresh state.
+    isImageReloadNeeded_ = false;
     loadingCtx_->LoadImageData();
 }
 
@@ -765,7 +789,7 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
             imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
@@ -1141,8 +1165,8 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageQualityChange_ = %{public}d",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageQualityChange_);
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
     isShow_ = true;
     LoadImageDataIfNeed();
 }
@@ -1624,7 +1648,7 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("userOrientation: ").append(ConvertOrientationToString(userOrientation_)));
     DumpLog::GetInstance().AddDesc(
-        std::string("finalOrientation: ").append(ConvertOrientationToString(finalOrientation_)));
+        std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
 }
 
@@ -1696,6 +1720,8 @@ void ImagePattern::OnIconConfigurationUpdate()
 
 void ImagePattern::OnConfigurationUpdate()
 {
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnConfigurationUpdate, %{public}s-%{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), loadingCtx_ ? 1 : 0);
     CHECK_NULL_VOID(loadingCtx_);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -2286,7 +2312,7 @@ void ImagePattern::ResetImage()
 {
     image_ = nullptr;
     imageQuality_ = AIImageQuality::NONE;
-    isImageQualityChange_ = false;
+    isImageReloadNeeded_ = false;
     loadingCtx_.Reset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

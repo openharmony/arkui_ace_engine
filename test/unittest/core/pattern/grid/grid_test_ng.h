@@ -28,17 +28,18 @@ namespace OHOS::Ace::NG {
 namespace {
 using namespace testing;
 using namespace testing::ext;
-constexpr float GRID_WIDTH = 480.f;
-constexpr float GRID_HEIGHT = 800.f;
-constexpr int32_t VIEW_LINE_NUMBER = 4;
-constexpr float ITEM_WIDTH = 120.f;
-constexpr float ITEM_HEIGHT = 200.f;
+constexpr float GRID_WIDTH = 240.f;
+constexpr float GRID_HEIGHT = 400.f;
+constexpr float ITEM_MAIN_SIZE = 100.f;
+constexpr float CONTENT_MAIN_SIZE = 1000.f;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - GRID_HEIGHT;
+constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - GRID_WIDTH;
 constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr float COL_GAP = 10.f;
 constexpr float ROW_GAP = 5.f;
 constexpr float BIG_ROW_GAP = 700.f;
-constexpr float MEDIUM_ROW_GAP = 75.f;
+constexpr float MEDIUM_ROW_GAP = 35.f;
 constexpr int32_t FILL_VALUE = -2;
 } // namespace
 
@@ -51,6 +52,7 @@ public:
     void GetGrid();
     GridModelNG CreateGrid();
     GridModelNG CreateRepeatGrid(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
+    void CreateLazyForEachItems(int32_t itemNumber, std::function<float(uint32_t)>&& getSize);
 
     /**
      * @param height -2 corresponds to 100% height
@@ -74,6 +76,7 @@ public:
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
 
     void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
+    RefPtr<FrameNode> GetItem(int32_t idx, bool asCache);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;

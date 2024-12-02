@@ -575,7 +575,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
         listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
-    if (!isInitialized_ && !jumpIndex_) {
+    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
+        !isInitialized_ && !jumpIndex_ : !isInitialized_;
+    if (needUseInitialIndex) {
         jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
         if (NeedScrollSnapAlignEffect()) {
             scrollAlign_ = GetScrollAlignByScrollSnapAlign();
@@ -857,7 +859,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
         auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
-        currentDelta_ = currentDelta_ * friction;
+        offset = offset * friction;
+        currentDelta_ = lastDelta - offset;
     }
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
@@ -2212,7 +2215,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             if (!selectedZone.IsIntersectWith(itemGroupRect)) {
                 continue;
             }
-            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.Top());
+            HandleCardModeSelectedEvent(selectedZone, item, itemGroupRect.GetOffset());
             continue;
         }
         auto itemPattern = item->GetPattern<ListItemPattern>();
@@ -2236,7 +2239,7 @@ void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 }
 
 void ListPattern::HandleCardModeSelectedEvent(
-    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop)
+    const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset)
 {
     CHECK_NULL_VOID(itemGroupNode);
     std::list<RefPtr<FrameNode>> childrens;
@@ -2254,7 +2257,8 @@ void ListPattern::HandleCardModeSelectedEvent(
         auto context = item->GetRenderContext();
         CHECK_NULL_VOID(context);
         auto itemRect = itemGeometry->GetFrameRect();
-        RectF itemRectInGroup(itemRect.GetX(), itemRect.GetY() + itemGroupTop, itemRect.Width(), itemRect.Height());
+        RectF itemRectInGroup(itemRect.GetX() + groupOffset.GetX(),
+            itemRect.GetY() + groupOffset.GetY(), itemRect.Width(), itemRect.Height());
         if (!selectedZone.IsIntersectWith(itemRectInGroup)) {
             itemPattern->MarkIsSelected(false);
         } else {

@@ -46,6 +46,7 @@ public:
         value->propBarWidth_ = CloneBarWidth();
         value->propBarHeight_ = CloneBarHeight();
         value->propIndex_ = CloneIndex();
+        value->propIndexSetByUser_ = CloneIndexSetByUser();
         value->propBarOverlap_ = CloneBarOverlap();
         value->propWidthAuto_ = CloneWidthAuto();
         value->propHeightAuto_ = CloneHeightAuto();
@@ -62,6 +63,7 @@ public:
         ResetBarWidth();
         ResetBarHeight();
         ResetIndex();
+        ResetIndexSetByUser();
         ResetBarOverlap();
     }
 
@@ -127,6 +129,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndexSetByUser, int32_t, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarOverlap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeightAuto, bool, PROPERTY_UPDATE_MEASURE);

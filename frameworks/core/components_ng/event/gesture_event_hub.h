@@ -40,6 +40,7 @@
 namespace OHOS::Ace {
 struct DragNotifyMsg;
 class UnifiedData;
+class Subwindow;
 }
 
 namespace OHOS::Ace::NG {
@@ -77,6 +78,16 @@ struct BindMenuStatus {
     {
         return (isBindCustomMenu && isShow) || isBindLongPressMenu;
     }
+};
+
+struct PreparedInfoForDrag {
+    bool isMenuShow = false;
+    int32_t badgeNumber = 0;
+    float defaultScale = 1.0f;
+    OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
+    OffsetF dragMovePosition = { 0.0f, 0.0f };
+    RefPtr<PixelMap> pixelMap;
+    RefPtr<FrameNode> imageNode;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -212,7 +223,7 @@ public:
     bool GetTouchable() const;
     void SetTouchable(bool touchable);
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
-    bool IsDragForbidden();
+    bool IsDragForbidden() const;
     void SetDragForbiddenForcely(bool isDragForbidden);
     bool GetTextDraggable() const;
     void SetTextDraggable(bool draggable);
@@ -236,6 +247,10 @@ public:
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
+    OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
+    int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
+    bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
+        const GestureEvent& info, PreparedInfoForDrag& data);
     float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
@@ -245,7 +260,7 @@ public:
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void StartDragTaskForWeb();
     void ResetDragActionForWeb();
@@ -319,6 +334,8 @@ private:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
+    void ProcessMenuPreviewScale(
+        const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale);
 
     template<typename T>
     const RefPtr<T> GetAccessibilityRecognizer();

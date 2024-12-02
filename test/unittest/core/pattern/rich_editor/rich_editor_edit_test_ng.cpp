@@ -614,17 +614,15 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
     TextInsertValueInfo info;
     richEditorPattern->UpdateSpanPosition();
 
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 0);
-
-    richEditorPattern->caretPosition_ = 3;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 0);
-
-    richEditorPattern->caretPosition_ = 5;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 1);
+    std::vector<std::pair<int, int>> testPairs;
+    testPairs.push_back(std::make_pair(0, 0));
+    testPairs.push_back(std::make_pair(3, 0));
+    testPairs.push_back(std::make_pair(5, 1));
+    for (const auto& testCase : testPairs) {
+        richEditorPattern->caretPosition_ = testCase.first;
+        richEditorPattern->CalcInsertValueObj(info);
+        EXPECT_EQ(info.spanIndex_, testCase.second);
+    }
 }
 
 /**

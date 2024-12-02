@@ -34,6 +34,8 @@ public:
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
     void EnableContainerModalGesture(bool isEnable) override;
+    void CallContainerModalNative(const std::string& name, const std::string& value) override;
+    void OnContainerModalEvent(const std::string& name, const std::string& value) override;
     void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
     RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
     /* event */
@@ -61,12 +63,13 @@ public:
     void InitButtonsLayoutProperty() override;
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
-
+    bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
+    void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
+        uint32_t closeButtonRightMargin, int32_t colorMode) override;
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();
-    void AddPointLight();
-
+    void CallMenuWidthChange(int32_t resId);
 private:
     RefPtr<FrameNode> GetButtonRowByInspectorId()
     {
@@ -91,24 +94,17 @@ private:
     void ChangeFloatingTitle(bool isFocus) override;
     void ChangeCustomTitle(bool isFocus) override;
     void ChangeControlButtons(bool isFocus) override;
-    
-    void SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
-        RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn);
-    void UpdateLightColor();
-    void UpdateLightIntensity();
+
     RefPtr<FrameNode> ShowMaxMenu(RefPtr<FrameNode>& container, const RefPtr<FrameNode>& targetNode);
     void ResetHoverTimer();
     Dimension GetMenuWidth();
     void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
-    void UpdateLightOffDelay(double timeStamp);
     void BuildMenuList();
 
     void SetColorConfigurationUpdate();
     void SetMaximizeIconIsRecover();
 
     VisibleType controlButtonVisibleBeforeAnim_;
-    RefPtr<RenderContext> closeBtnRenderContext_;
-    bool isTitleRowHovered_;
     RefPtr<FrameNode> menuList_;
     OffsetF menuOffset_;
     float textWidth_ = 0.0f;
@@ -116,9 +112,7 @@ private:
     bool isForbidMenuEvent_ = false;
     bool enableSplit_ = true;
     CancelableCallback<void()> contextTimer_;
-    CancelableCallback<void()> lightOffCallback_;
-    bool isLightOn_;
-    double lightOffDelayUpdateTime_;
+    bool enableContainerModalGesture_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

@@ -850,7 +850,7 @@ void ViewAbstract::DisableOnKeyEvent()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover()
@@ -915,14 +915,14 @@ void ViewAbstract::DisableOnFocus()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur()
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
 }
 
 void ViewAbstract::DisableOnClick(FrameNode* frameNode)
@@ -991,7 +991,7 @@ void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnKey();
+    focusHub->ClearOnKeyCallback();
 }
 
 void ViewAbstract::DisableOnHover(FrameNode* frameNode)
@@ -1048,14 +1048,14 @@ void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnFocus();
+    focusHub->ClearOnFocusCallback();
 }
 
 void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->ClearUserOnBlur();
+    focusHub->ClearOnBlurCallback();
 }
 
 void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
@@ -4446,7 +4446,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    Dimension value = Dimension(0.0f);
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -4463,7 +4463,7 @@ Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 
 Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(0.0f);
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -5139,13 +5139,13 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 
-void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->AddCustomProperty(key, value);
 }
 
-void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& key)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->RemoveCustomProperty(key);

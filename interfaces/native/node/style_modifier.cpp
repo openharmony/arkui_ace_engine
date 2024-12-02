@@ -4442,8 +4442,13 @@ int32_t SetTextInputCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeIte
         return ERROR_CODE_PARAM_INVALID;
     }
     struct ArkUISizeType size = { -1.0f, GetDefaultUnit(node, UNIT_VP) };
+    auto* fullImpl = GetFullImpl();
     if (item->size > NUM_1) {
         size.value = item->value[NUM_1].f32;
+    } else {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCancelSymbolIcon(node->uiNodeHandle,
+        item->value[NUM_0].i32, nullptr);
+        return ERROR_CODE_NO_ERROR;
     }
     uint32_t color = DEFAULT_COLOR;
     if (item->size > NUM_2) {
@@ -4453,7 +4458,7 @@ int32_t SetTextInputCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     if (item->string) {
         str.assign(item->string);
     }
-    auto* fullImpl = GetFullImpl();
+    
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCancelButton(node->uiNodeHandle,
         item->value[NUM_0].i32, &size, color, str.c_str());
     return ERROR_CODE_NO_ERROR;
@@ -9594,7 +9599,6 @@ const ArkUI_AttributeItem* GetLineSpacing(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_TEXT) {
         g_numberValues[NUM_0].f32 =
             fullImpl->getNodeModifiers()->getTextModifier()->getTextLineSpacing(node->uiNodeHandle);
-        g_numberValues[NUM_0].i32 = static_cast<int32_t>(node->lengthMetricUnit);
         g_attributeItem.size = REQUIRED_ONE_PARAM;
     }
     return &g_attributeItem;
