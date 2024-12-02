@@ -56,7 +56,7 @@ export struct ExceptionPrompt {
       .Center }) {
       Row() {
         Image(this.options.icon ?? $r('sys.media.ohos_ic_public_fail'))
-          .width("24vp")
+          .width('24vp')
           .height('24vp')
           .fillColor($r('sys.color.ohos_id_color_warning'))
         Text(this.options.tip)
@@ -78,7 +78,7 @@ export struct ExceptionPrompt {
       })
 
       if (this.options.actionText) {
-        Button({ stateEffect: false, type: ButtonType.Normal }) {
+        Button({ stateEffect: true, type: ButtonType.Normal }) {
           Row() {
             Text(this.options.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -102,16 +102,9 @@ export struct ExceptionPrompt {
           right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
           left: $r('sys.float.ohos_id_elements_margin_vertical_l')
         })
-        .onTouch((event) => {
-
-          if (event.type === TouchType.Down) {
-            this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-            this.onActionTextClick() //Click the icon button on the right for the callback
-          } else if (event.type === TouchType.Up) {
-            this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-          }
+        .onClick(() => {
+          this.onActionTextClick();
         })
-
       }
     }
     .padding({
@@ -149,7 +142,7 @@ export struct ExceptionPrompt {
       .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .position({ y: this.options.marginTop })
+    .margin({ top: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }
 
