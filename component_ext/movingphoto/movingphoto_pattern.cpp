@@ -320,15 +320,37 @@ void MovingPhotoPattern::UpdateImageNode()
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         auto imagePattern = image->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(imagePattern);
-        if (movingPhotoFormat_ == MovingPhotoFormat::RGBA_8888) {
-            imagePattern->SetExternalDecodeFormat(PixelFormat::RGBA_8888);
-        } else if (movingPhotoFormat_ == MovingPhotoFormat::NV21) {
-            imagePattern->SetExternalDecodeFormat(PixelFormat::NV21);
-        }
+        MovingPhotoFormatConvert(movingPhotoFormat_);
+        imagePattern->SetExternalDecodeFormat(imageFormat_);
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
     RegisterImageEvent();
+}
+
+void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoFormatConvert %{public}d.", format);
+    switch (format) {
+        case MovingPhotoFormat::RGBA_8888:
+            imageFormat_ = PixelFormat::RGBA_8888;
+            break;
+        case MovingPhotoFormat::NV21:
+            imageFormat_ = PixelFormat::NV21;
+            break;
+        case MovingPhotoFormat::RGBA_1010102:
+            imageFormat_ = PixelFormat::RGBA_1010102;
+            break;
+        case MovingPhotoFormat::YCBCR_P010:
+            imageFormat_ = PixelFormat::YCBCR_P010;
+            break;
+        case MovingPhotoFormat::YCRCB_P010:
+            imageFormat_ = PixelFormat::YCRCB_P010;
+            break;
+        default:
+            imageFormat_ = PixelFormat::UNKNOWN;
+            break;
+    }
 }
 
 void MovingPhotoPattern::RegisterImageEvent()

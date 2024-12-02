@@ -82,7 +82,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
 
     napi_value jsMovingPhotoFormat = nullptr;
     napi_get_named_property(env, argv[0], "movingPhotoFormat", &jsMovingPhotoFormat);
-    auto format = MovingPhotoFormat::NONE;
+    auto format = MovingPhotoFormat::UNKNOWN;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, jsMovingPhotoFormat, napi_number)) {
         format = static_cast<MovingPhotoFormat>(ExtNapiUtils::GetCInt32(env, jsMovingPhotoFormat));
         NG::MovingPhotoModelNG::GetInstance()->SetMovingPhotoFormat(format);

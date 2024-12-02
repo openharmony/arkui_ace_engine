@@ -16,8 +16,12 @@
 const __MovingPhotoView__ = requireInternal("multimedia.movingphotoview");
 var PixelMapFormat;
 (function (PixelMapFormat) {
-    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 0] = "RGBA_8888";
+    PixelMapFormat[PixelMapFormat["UNKNOWN"] = 0] = "UNKNOWN";
     PixelMapFormat[PixelMapFormat["NV21"] = 1] = "NV21";
+    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 2] = "RGBA_8888";
+    PixelMapFormat[PixelMapFormat["NV21"] = 3] = "NV21";
+    PixelMapFormat[PixelMapFormat["RGBA_8888"] = 4] = "RGBA_8888";
+    PixelMapFormat[PixelMapFormat["NV21"] = 5] = "NV21";
 })(PixelMapFormat || (PixelMapFormat = {}));
 
 class MovingPhotoView extends JSViewAbstract {
