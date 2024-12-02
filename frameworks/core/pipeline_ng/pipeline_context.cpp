@@ -659,8 +659,11 @@ void PipelineContext::InspectDrew()
         auto needRenderNode = std::move(needRenderNode_);
         for (auto&& nodeWeak : needRenderNode) {
             auto node = nodeWeak.Upgrade();
-            if (node) {
+            if (node && node->GetInspectorId().has_value()) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
+            }
+            if (node) {
+                node->FireDrawCompletedNDKCallback();
             }
         }
     }

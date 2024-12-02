@@ -7456,6 +7456,22 @@ typedef enum {
     NODE_CONTENT_EVENT_ON_DETACH_FROM_WINDOW = 1,
 } ArkUI_NodeContentEventType;
 
+
+/**
+ * @brief Enumerates the inspector error codes.
+ * @since 16
+ */
+typedef enum {
+    /**
+     * @error Success.
+     */
+    ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL = 0,
+    /**
+     * @error Invalid parameter.
+     */
+    ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER = -1,
+} ArkUI_InspectorErrorCode;
+
 /**
  * @brief Defines the general structure of a node content event.
  *
@@ -7771,6 +7787,58 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyle
  * @since 12
  */
 float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event);
+
+/**
+ * @brief Registers a callback for node when layout is completed.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data used in onLayoutCompleted callback function.
+ * @param onLayoutCompleted Indicates the function when layout completed is callback.
+ * @return error code
+           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 16
+ */
+int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node,
+    void* userData, void (*onLayoutCompleted)(void* userData));
+
+
+/**
+ * @brief Registers a callback for node when draw is completed.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data used in onDrawCompleted callback function.
+ * @param onDrawCompleted Indicates the function when draw completed is callback.
+ * @return error code
+           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 16
+ */
+int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node,
+    void* userData, void (*onDrawCompleted)(void* userData));
+    
+/**
+ * @brief Unregisters the layout completed callback for node.
+ *
+ * @param node Indicates the target node.
+ * @return error code
+           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 16
+ */
+int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
+
+/**
+ * @brief Unregisters the draw completed callback for node.
+ *
+ * @param node Indicates the target node.
+ * @return error code
+           {@link ARKUI_INSPECTOR_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         {@link ARKUI_INSPECTOR_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 16
+ */
+int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
+
 
 #ifdef __cplusplus
 };
