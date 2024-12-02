@@ -45,6 +45,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/ime/input_method_manager.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_connection.h"
@@ -1641,6 +1642,7 @@ void TextFieldPattern::HandleOnCameraInput()
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "HandleOnCameraInput, inputMethod is null");
         return;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -2625,7 +2627,7 @@ bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
 bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool isNewPassWord)
 {
     if (!CheckAutoFill(isFromKeyBoard)) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No need to auto fill.");
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "don't need to auto fill.");
         return false;
     }
     auto host = GetHost();
@@ -3900,6 +3902,7 @@ void TextFieldPattern::FreeMouseStyleHoldNode(const Offset location)
         auto frameId = tmpHost->GetId();
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FreeMouseStyleHoldNode, id:%{public}d", frameId);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
 }
@@ -3989,7 +3992,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "inputMethod is null");
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "RequestKeyboard, inputMethod is null");
         return false;
     }
     auto optionalTextConfig = GetMiscTextConfig();
@@ -4195,6 +4198,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
 #if defined(ENABLE_STANDARD_INPUT)
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "CloseKeyboard, inputMethod is null");
             return false;
         }
         inputMethod->Close();
@@ -4219,6 +4223,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "RequestCustomKeyboard, inputMethod is null");
         inputMethod->RequestHideInput();
         inputMethod->Close();
     }
@@ -4415,6 +4420,10 @@ void TextFieldPattern::InsertValue(const std::u16string& insertValue, bool isIME
     CHECK_NULL_VOID(host);
     if (!HasFocus()) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", host->GetId());
+        auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
+        auto curFocusNode = currentFocusNode.Upgrade();
+        CHECK_NULL_VOID(curFocusNode);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
         return;
     }
     if (!isEdit_) {
@@ -7438,7 +7447,7 @@ bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map)
 {
     if (!jsonObject->IsValid() || jsonObject->IsArray() || !jsonObject->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
+        TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent format is not right");
         return false;
     }
     auto child = jsonObject->GetChild();
@@ -7453,7 +7462,7 @@ bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue
             if (map.size() < 5) {
                 map.insert(std::pair<std::string, std::variant<std::string, bool, int32_t> >(strKey, strVal));
             } else {
-                TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
+                TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "fillContent is more than 5");
                 break;
             }
         }
@@ -7464,7 +7473,7 @@ bool TextFieldPattern::ParseFillContentJsonValue(const std::unique_ptr<JsonValue
 
 void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "errCode:%{public}d", errCode);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "NotifyFillRequestFailed errCode:%{public}d", errCode);
     SetFillRequestFinish(true);
 
 #if defined(ENABLE_STANDARD_INPUT)

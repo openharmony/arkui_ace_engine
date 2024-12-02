@@ -1673,7 +1673,7 @@ private:
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
     const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative, int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "RequestAutoSave called");
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
@@ -2475,7 +2475,7 @@ void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (!parsedConfig.fontScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
         if (fontSizeScale != pipelineContext_->GetFontScale()) {
@@ -2484,8 +2484,7 @@ void AceContainer::SetFontScaleAndWeightScale(
         }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
-            parsedConfig.fontWeightScale.c_str());
+        TAG_LOGD(AceLogTag::ACE_FONT, "parsedConfig fontWeightScale: %{public}s", parsedConfig.fontWeightScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
         float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
         if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
