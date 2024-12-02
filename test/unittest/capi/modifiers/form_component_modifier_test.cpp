@@ -99,10 +99,10 @@ std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormOnAcquire
 };
 
 std::vector<std::tuple<std::int64_t, std::string, std::int32_t>> testFixtureFormOnErrorCallbackTestValues = {
-    { 1, "error message 100", 1 },
-    { -1, "error another 200", -1 },
-    { 151, "error message -100", 151 },
-    { -1050, "error invalid code -200", -1050 },
+    { 1, "error message 1", 1 },
+    { -1, "error another -1", -1 },
+    { 151, "error message 151", 151 },
+    { -1050, "error invalid code -1050", -1050 },
     { 2147483647, "error message 2147483647", 2147483647 },
     { -2147483648, "error message -2147483647", -2147483648 },
     { 4294967295, "error message  4294967295", -1 },

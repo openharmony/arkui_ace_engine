@@ -178,6 +178,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
     };
     LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
         "for implementation of int64_t functionality.");
+    FormModelNG::SetOnAcquired(frameNode, onAcquired);
 #endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -207,8 +208,9 @@ void OnErrorImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnErrorImpl - Ark_Number width of int32_t is not enough "
         "for implementation of int64_t functionality.");
+    FormModelNG::SetOnError(frameNode, onError);
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
@@ -251,6 +253,7 @@ void OnUninstallImpl(Ark_NativePointer node,
     };
     LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
         "for implementation of int64_t functionality.");
+    FormModelNG::SetOnUninstall(frameNode, onUninstall);
 #endif // FORM_SUPPORTED
 }
 void OnLoadImpl(Ark_NativePointer node,
