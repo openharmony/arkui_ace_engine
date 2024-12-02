@@ -59,6 +59,7 @@ export struct FlexBootcamp {
   @State compOpacity: number = 1;
   @State enableCompVisibility: boolean = false;
   @State compVisibility: Visibility = Visibility.Visible;
+  @State enableFlexComp: boolean = false;
 
   build() {
     NavDestination() {
@@ -79,38 +80,43 @@ export struct FlexBootcamp {
 
   @Builder
   Content() {
-    Column() {
-      Column({ space: 5 }) {
-        Flex({
-          direction: useEnabled(this.enableFlexDirection, this.flexDirection),
-          wrap: useEnabled(this.enableWrap, this.wrap),
-          justifyContent: useEnabled(this.enableJustifyContent, this.justifyContent),
-          alignItems: useEnabled(this.enableAlignItems, this.alignItems),
-          alignContent: useEnabled(this.enableAlignContent, this.alignContent),
-          space: {
-            main: LengthMetrics.px(useEnabled(this.enableSpaceMainLengthMetricsPx, this.spaceMainLengthMetricsPx)),
-            cross: LengthMetrics.px(useEnabled(this.enableSpaceCrossLengthMetricsPx, this.spaceCrossLengthMetricsPx))
-          }
-        }) {
-          Text('1').width('30%').height(50).backgroundColor(0xF5DEB3)
-          Text('2').width('30%').height(50).backgroundColor(0xD2B48C)
-          Text('3').width('30%').height(50).backgroundColor(0xF5DEB3)
-          Text('4').width('30%').height(50).backgroundColor(0xD2B48C)
-          Text('5').width('30%').height(50).backgroundColor(0xF5DEB3)
+    Column({ space: 5 }) {
+      Flex({
+        direction: useEnabled(this.enableFlexDirection, this.flexDirection),
+        wrap: useEnabled(this.enableWrap, this.wrap),
+        justifyContent: useEnabled(this.enableJustifyContent, this.justifyContent),
+        alignItems: useEnabled(this.enableAlignItems, this.alignItems),
+        alignContent: useEnabled(this.enableAlignContent, this.alignContent),
+        space: {
+          main: useEnabled(this.enableSpaceMainLengthMetricsPx, LengthMetrics.px(this.spaceMainLengthMetricsPx)),
+          cross: useEnabled(this.enableSpaceCrossLengthMetricsPx, LengthMetrics.px(this.spaceCrossLengthMetricsPx))
         }
-        .width(useEnabled(this.enableCompWidth, this.compWidth))
-        .height(useEnabled(this.enableCompHeight, this.compHeight))
-        .padding(useEnabled(this.enableCompPadding, this.compPadding))
-        .margin(useEnabled(this.enableCompMargin, this.compMargin))
-        .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
-        .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
-        .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
-        .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
-        .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
-        .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-        .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
-        .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
-      }.width('100%').margin({ top: 5 })
+      }) {
+        Text('1').width('30%').height(50).backgroundColor(0xF5DEB3)
+          .flexBasis(useEnabled(this.enableFlexComp, 50))
+          .flexGrow(useEnabled(this.enableFlexComp, 0))
+          .flexShrink(useEnabled(this.enableFlexComp, 1))
+          .alignSelf(useEnabled(this.enableFlexComp, ItemAlign.Auto))
+          .onClick(() => {
+            this.enableFlexComp = !this.enableFlexComp
+          })
+        Text('2').width('30%').height(50).backgroundColor(0xD2B48C)
+        Text('3').width('30%').height(50).backgroundColor(0xF5DEB3)
+        Text('4').width('30%').height(50).backgroundColor(0xD2B48C)
+        Text('5').width('30%').height(50).backgroundColor(0xF5DEB3)
+      }
+      .width(useEnabled(this.enableCompWidth, this.compWidth))
+      .height(useEnabled(this.enableCompHeight, this.compHeight))
+      .padding(useEnabled(this.enableCompPadding, this.compPadding))
+      .margin(useEnabled(this.enableCompMargin, this.compMargin))
+      .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+      .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+      .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+      .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+      .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+      .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+      .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+      .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
     }.width('100%')
   }
 
