@@ -118,16 +118,20 @@ export struct AlphabetIndexerBootcamp {
         .selectedBackgroundColor(this.alphabetIndexerSelectedBackgroundColor)
         .popupBackground(this.alphabetIndexerPopupBackground)
         .usingPopup(this.alphabetIndexerUsingPopup)
-        .selectedFont({ size: this.alphabetIndexerSelectedFontSize, style: this.alphabetIndexerSelectedFontStyle, weight: this.alphabetIndexerSelectedFontWeight })
-        .popupFont({ size: this.alphabetIndexerPopupFontSize, style: this.alphabetIndexerPopupFontStyle, weight: this.alphabetIndexerPopupFontWeight })
-        .font({ size: this.alphabetIndexerFontSize, style: this.alphabetIndexerFontStyle, weight: this.alphabetIndexerFontWeight })
+        .selectedFont({ size: this.alphabetIndexerSelectedFontSize,
+          style: this.alphabetIndexerSelectedFontStyle, weight: this.alphabetIndexerSelectedFontWeight })
+        .popupFont({ size: this.alphabetIndexerPopupFontSize,
+          style: this.alphabetIndexerPopupFontStyle, weight: this.alphabetIndexerPopupFontWeight })
+        .font({ size: this.alphabetIndexerFontSize,
+          style: this.alphabetIndexerFontStyle, weight: this.alphabetIndexerFontWeight })
         .itemSize(this.alphabetIndexerItemSize)
         .alignStyle(this.alphabetIndexerAlignStyleIndexerAlign, this.alphabetIndexerAlignStyleLength)
         .selected(this.alphabetIndexerSelected)
         .popupPosition({x: this.alphabetIndexerPopupPositionX, y: this.alphabetIndexerPopupPositionY})
         .popupSelectedColor(this.alphabetIndexerPopupSelectedColor)
         .popupUnselectedColor(this.alphabetIndexerPopupUnselectedColor)
-        .popupItemFont({size: this.alphabetIndexerPopupItemFontSize, style: this.alphabetIndexerPopupItemFontStyle,
+        .popupItemFont({size: this.alphabetIndexerPopupItemFontSize,
+          style: this.alphabetIndexerPopupItemFontStyle,
           weight: this.alphabetIndexerPopupItemFontWeight})
         .popupItemBackgroundColor(this.alphabetIndexerPopupItemBackgroundColor)
         .autoCollapse(this.alphabetIndexerAutoCollapse)
