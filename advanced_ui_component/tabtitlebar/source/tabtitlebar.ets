@@ -47,7 +47,7 @@ const MIN_DIALOG = '216vp'
 export struct TabTitleBar {
   tabItems: Array<TabTitleBarTabItem> = [];
   menuItems: Array<TabTitleBarMenuItem> = [];
-  @BuilderParam swiperContent : () => void;
+  @BuilderParam swiperContent: () => void;
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
