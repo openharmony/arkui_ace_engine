@@ -43,7 +43,7 @@ constexpr auto ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE = "false";
 struct ScrollBarOptions {
     Ark_ScrollBarOptions value;
 
-    ScrollBarOptions(const RefPtr<ScrollProxy>& proxy,
+    explicit ScrollBarOptions(const RefPtr<ScrollProxy>& proxy,
         const std::optional<Ark_ScrollBarDirection>& direction = std::nullopt,
         const std::optional<Ark_BarState>& state = std::nullopt)
     {
