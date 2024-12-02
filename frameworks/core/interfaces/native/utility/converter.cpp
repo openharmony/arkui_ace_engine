@@ -821,6 +821,15 @@ GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
 }
 
 template<>
+Header Convert(const Ark_Header& src)
+{
+    Header header;
+    header.headerKey = Converter::Convert<std::string>(src.headerKey);
+    header.headerValue = Converter::Convert<std::string>(src.headerValue);
+    return header;
+}
+
+template<>
 std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     std::pair<Color, Dimension> gradientColor;

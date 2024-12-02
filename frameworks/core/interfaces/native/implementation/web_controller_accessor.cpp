@@ -19,24 +19,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
-namespace {
-struct Header {
-    std::string headerKey;
-    std::string headerValue;
-};
-}
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-Header Convert(const Ark_Header& src)
-{
-    Header header;
-    header.headerKey = Converter::Convert<std::string>(src.headerKey);
-    header.headerValue = Converter::Convert<std::string>(src.headerValue);
-    return header;
-}
-} // OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
 static void DestroyPeer(WebControllerPeerImpl *peerImpl)
@@ -125,7 +107,7 @@ void LoadUrlImpl(WebControllerPeer* peer,
     CHECK_NULL_VOID(options);
     std::string url = Converter::OptConvert<std::string>(options->url).value_or("");
     std::map<std::string, std::string> httpHeaders;
-    auto headersOpt = Converter::OptConvert<std::vector<Header>>(options->headers);
+    auto headersOpt = Converter::OptConvert<std::vector<Converter::Header>>(options->headers);
     if (headersOpt) {
         for (auto header : headersOpt.value()) {
             httpHeaders[header.headerKey] = header.headerValue;

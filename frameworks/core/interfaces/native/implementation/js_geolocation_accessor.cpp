@@ -32,7 +32,7 @@ static void DestroyPeer(JsGeolocationPeer *peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void InvokeImpl(JsGeolocationPeer* peer,
                 const Ark_String* origin,

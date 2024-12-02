@@ -34,7 +34,7 @@ static void DestroyPeer(CalendarControllerPeer* peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void BackToTodayImpl(CalendarControllerPeer* peer)
 {

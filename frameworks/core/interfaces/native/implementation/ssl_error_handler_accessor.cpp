@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,17 +22,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SslErrorHandlerAccessor {
 SslErrorHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new SslErrorHandlerPeer();
+}
+static void DestroyPeer(SslErrorHandlerPeer *peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
+    delete peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void HandleConfirmImpl(SslErrorHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->HandleConfirm();
 }
 void HandleCancelImpl(SslErrorHandlerPeer* peer)
 {
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->HandleCancel();
 }
 } // SslErrorHandlerAccessor
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()

@@ -33,7 +33,7 @@ static void DestroyPeer(WebContextMenuParamPeer *peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 Ark_Int32 XImpl(WebContextMenuParamPeer* peer)
 {

@@ -32,7 +32,7 @@ static void DestroyPeer(WebResourceErrorPeer *peer)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void GetErrorInfoImpl(WebResourceErrorPeer* peer)
 {
