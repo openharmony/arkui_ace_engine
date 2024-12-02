@@ -413,7 +413,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     SessionViewportConfig sessionViewportConfig;
     sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
     sessionViewportConfig.density_ = context->GetCurrentDensity();
-    sessionViewportConfig.displayId_ = container->GetDisplayId();
+    sessionViewportConfig.displayId_ = container->GetCurrentDisplayId();
     sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
     sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
