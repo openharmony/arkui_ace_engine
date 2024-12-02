@@ -696,7 +696,7 @@ HWTEST_F(GridLayoutRangeTest, Cache003, TestSize.Level1)
     model.SetRowsGap(Dimension(5));
     model.SetCachedCount(1);
     model.SetLayoutOptions({});
-    CreateLazyForEachItems(50, [](uint32_t idx) { return 50.0f; });
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
     frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
