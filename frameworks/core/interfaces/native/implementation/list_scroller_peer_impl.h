@@ -17,16 +17,13 @@
 
 #include "scroller_peer_impl.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-
-class ListScrollerPeerImpl : public ScrollerPeerImpl {
+struct ListScrollerPeer : public OHOS::Ace::NG::GeneratedModifier::ScrollerPeerImpl {
 public:
-    ListScrollerPeerImpl() = default;
-    ~ListScrollerPeerImpl() = default;
+    ListScrollerPeer() = default;
+    ~ListScrollerPeer() = default;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(ListScrollerPeerImpl);
+    ACE_DISALLOW_COPY_AND_MOVE(ListScrollerPeer);
 };
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_LIST_SCROLLER_PEER_IMPL_H

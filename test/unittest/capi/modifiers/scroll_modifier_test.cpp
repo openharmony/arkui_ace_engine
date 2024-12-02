@@ -761,9 +761,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -772,7 +770,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
     modifier_->setScrollOptions(node_, &scroller);
 
@@ -787,7 +785,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /**
@@ -797,9 +795,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -808,7 +804,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     ASSERT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     modifier_->setScrollOptions(node_, &scroller);
 
@@ -823,7 +819,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /**

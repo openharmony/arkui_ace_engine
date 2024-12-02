@@ -19,18 +19,18 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
 
-static void DestroyPeer(ScrollerPeerImpl *peerImpl)
+static void DestroyPeer(ScrollerPeer *peer)
 {
-    if (peerImpl) {
-        peerImpl->DecRefCount();
+    if (peer) {
+        peer->DecRefCount();
     }
 }
 
 ScrollerPeer* CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<ScrollerPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<ScrollerPeer *>(Referenced::RawPtr(peerImpl));
+    auto peer = Referenced::MakeRefPtr<ScrollerPeer>();
+    peer->IncRefCount();
+    return Referenced::RawPtr(peer);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,44 +39,38 @@ Ark_NativePointer GetFinalizerImpl()
 void ScrollToImpl(ScrollerPeer* peer,
                   const Ark_ScrollOptions* options)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollTo(options);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollTo(options);
 }
 void ScrollEdgeImpl(ScrollerPeer* peer,
                     enum Ark_Edge value,
                     const Opt_ScrollEdgeOptions* options)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollEdge(value, options);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollEdge(value, options);
 }
 void FlingImpl(ScrollerPeer* peer,
                const Ark_Number* velocity)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerFling(velocity);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerFling(velocity);
 }
 void ScrollPage0Impl(ScrollerPeer* peer,
                      const Ark_Literal_Boolean_next* value)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollPage0(value);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollPage0(value);
 }
 void ScrollPage1Impl(ScrollerPeer* peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollPage1(value);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollPage1(value);
 }
 Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr); // need to fix default value
-    return peerImpl->TriggerCurrentOffset();
+    CHECK_NULL_RETURN(peer, nullptr); // need to fix default value
+    return peer->TriggerCurrentOffset();
 }
 void ScrollToIndexImpl(ScrollerPeer* peer,
                        const Ark_Number* value,
@@ -84,38 +78,33 @@ void ScrollToIndexImpl(ScrollerPeer* peer,
                        const Opt_ScrollAlign* align,
                        const Opt_ScrollToIndexOptions* options)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollToIndex(value, smooth, align, options);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollToIndex(value, smooth, align, options);
 }
 void ScrollByImpl(ScrollerPeer* peer,
                   const Ark_Length* dx,
                   const Ark_Length* dy)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollBy(dx, dy);
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollBy(dx, dy);
 }
 Ark_Boolean IsAtEndImpl(ScrollerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, false); // need to fix default value
-    return peerImpl->TriggerIsAtEnd();
+    CHECK_NULL_RETURN(peer, false); // need to fix default value
+    return peer->TriggerIsAtEnd();
 }
 Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
                                   const Ark_Number* index)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr); // need to fix default value
-    return peerImpl->TriggerGetItemRect(index);
+    CHECK_NULL_RETURN(peer, nullptr); // need to fix default value
+    return peer->TriggerGetItemRect(index);
 }
 Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
                            const Ark_Number* x,
                            const Ark_Number* y)
 {
-    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, -1); // need to fix default value
-    return peerImpl->TriggerGetItemIndex(x, y);
+    CHECK_NULL_RETURN(peer, -1); // need to fix default value
+    return peer->TriggerGetItemIndex(x, y);
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()

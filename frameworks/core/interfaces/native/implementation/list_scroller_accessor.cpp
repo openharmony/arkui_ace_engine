@@ -20,17 +20,17 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
-static void DestroyPeer(ListScrollerPeerImpl* peerImpl)
+static void DestroyPeer(ListScrollerPeer* peer)
 {
-    if (peerImpl) {
-        peerImpl->DecRefCount();
+    if (peer) {
+        peer->DecRefCount();
     }
 }
 ListScrollerPeer* CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<ListScrollerPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<ListScrollerPeer *>(Referenced::RawPtr(peerImpl));
+    auto peer = Referenced::MakeRefPtr<ListScrollerPeer>();
+    peer->IncRefCount();
+    return Referenced::RawPtr(peer);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,12 +42,11 @@ Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
 {
     LOGE("ListScrollerAccessor::GetItemRectInGroupImpl is not implemented.");
     // wait for Ark_NativePointer change to another type which is acceptable to "Rect" data
-    auto peerImpl = reinterpret_cast<ListScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0); // need to fix a return value
+    CHECK_NULL_RETURN(peer, 0); // need to fix a return value
     CHECK_NULL_RETURN(index, 0); // need to fix a return value
     CHECK_NULL_RETURN(indexInGroup, 0); // need to fix a return value
 
-    auto scrollController = peerImpl->GetController().Upgrade();
+    auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::GetItemRectInGroupImpl. Controller isn't bound to a component.");
         return 0; // need to fix a return value
@@ -65,12 +64,11 @@ void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
                              const Opt_Boolean* smooth,
                              const Opt_ScrollAlign* align)
 {
-    auto peerImpl = reinterpret_cast<ListScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(index);
     CHECK_NULL_VOID(indexInGroup);
 
-    auto scrollController = peerImpl->GetController().Upgrade();
+    auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerAccessor::ScrollToItemInGroupImpl. Controller isn't bound to a component.");
         return;
@@ -86,8 +84,7 @@ void ScrollToItemInGroupImpl(ListScrollerPeer* peer,
 void CloseAllSwipeActionsImpl(ListScrollerPeer* peer,
                               const Opt_CloseSwipeActionOptions* options)
 {
-    auto peerImpl = reinterpret_cast<ListScrollerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peer);
     LOGE("ListScrollerAccessor::CloseAllSwipeActionsImpl. Callback isn't implemented yet.");
 }
 Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
@@ -96,12 +93,11 @@ Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
 {
     LOGE("ListScrollerAccessor::GetVisibleListContentInfoImpl is not implemented.");
     // wait for Ark_NativePointer change to another type which is acceptable to "ListItemGroupIndex" data
-    auto peerImpl = reinterpret_cast<ListScrollerPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, 0); // need to fix a return value
+    CHECK_NULL_RETURN(peer, 0); // need to fix a return value
     CHECK_NULL_RETURN(x, 0); // need to fix a return value
     CHECK_NULL_RETURN(y, 0); // need to fix a return value
 
-    auto scrollController = peerImpl->GetController().Upgrade();
+    auto scrollController = peer->GetController().Upgrade();
     if (!scrollController) {
         LOGE("ListScrollerPeerAccessor::GetVisibleListContentInfoImpl. Controller isn't bound to a component.");
         return 0; // need to fix a return value

@@ -1111,6 +1111,16 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
 }
 
 template<>
+void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
+{
+    switch (src) {
+        case ARK_SCROLL_BAR_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
+        case ARK_SCROLL_BAR_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollBarDirection: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
 {
     switch (src) {
