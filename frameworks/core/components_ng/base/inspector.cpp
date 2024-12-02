@@ -345,6 +345,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     std::string jsonNodeStr = jsonNode->ToString();
     ConvertIllegalStr(jsonNodeStr);
     auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
+    if (jsonNodeNew == nullptr || !jsonNodeNew->IsValid()) {
+        LOGW("inspector info of %{public}s-%{public}d is illegal", parent->GetTag().c_str(), parent->GetId());
+        return;
+    }
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, inspectorParameters.pageId, inspectorParameters.isLayoutInspector);
