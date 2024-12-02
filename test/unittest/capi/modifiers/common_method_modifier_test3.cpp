@@ -53,6 +53,11 @@ class CommonMethodModifierTest3 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
+
+    void *CreateNodeImpl() override
+    {
+        return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
 };
 
 /*

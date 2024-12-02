@@ -97,7 +97,10 @@ namespace TextModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = TextModelNG::CreateFrameNode(id, u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TextModifier
 namespace TextInterfaceModifier {

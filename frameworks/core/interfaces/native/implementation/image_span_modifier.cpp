@@ -25,7 +25,10 @@ namespace ImageSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto imageSpanNode = ImageSpanView::CreateFrameNode(id);
+    CHECK_NULL_RETURN(imageSpanNode, nullptr);
+    imageSpanNode->IncRefCount();
+    return AceType::RawPtr(imageSpanNode);
 }
 } // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {

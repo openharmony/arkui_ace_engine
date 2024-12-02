@@ -53,7 +53,11 @@ namespace ImageModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    RefPtr<PixelMap> pixmap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(id, "", pixmap, "", "", false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ImageModifier
 namespace ImageInterfaceModifier {

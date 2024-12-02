@@ -194,7 +194,14 @@ namespace WebModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = WebModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // WEB_SUPPORTED
 }
 } // WebModifier
 namespace WebInterfaceModifier {

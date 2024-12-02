@@ -48,7 +48,10 @@ namespace ColumnSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ColumnSplitModifier
 namespace ColumnSplitInterfaceModifier {

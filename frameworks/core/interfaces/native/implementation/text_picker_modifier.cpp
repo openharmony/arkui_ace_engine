@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
+
 namespace OHOS::Ace::NG {
 using PickerRangeType = std::variant<
     std::pair<bool, std::vector<NG::RangeContent>>,
@@ -377,7 +378,10 @@ namespace TextPickerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = TextPickerModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TextPickerModifier
 namespace TextPickerInterfaceModifier {

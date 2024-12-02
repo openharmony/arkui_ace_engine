@@ -209,7 +209,9 @@ namespace TabContentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = TabContentModelNG::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // TabContentModifier
 namespace TabContentInterfaceModifier {

@@ -87,7 +87,9 @@ namespace ImageAnimatorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = ImageAnimatorModelNG::CreateFrameNode(id);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // ImageAnimatorModifier
 namespace ImageAnimatorInterfaceModifier {

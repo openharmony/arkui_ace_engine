@@ -25,7 +25,10 @@ namespace BaseSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = SpanModelNG::CreateSpanNode(id, "");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 void TextBackgroundStyleImpl(Ark_NativePointer node,
                              const Ark_TextBackgroundStyle* value)

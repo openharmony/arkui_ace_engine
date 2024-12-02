@@ -424,7 +424,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> swit
  */
 HWTEST_F(ToggleModifierTest, setSwitchPointColorTestValidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -521,7 +521,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::strin
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusValidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -563,7 +563,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestUnselectedColorValidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -605,7 +605,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointColorValidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -643,7 +643,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::strin
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusValidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -680,7 +680,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchSty
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusInvalidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -788,7 +788,7 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchSty
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, TestSize.Level1)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(GENERATED_ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(GetId(), ToggleType::SWITCH, false);
     Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
 
     std::unique_ptr<JsonValue> jsonValue;

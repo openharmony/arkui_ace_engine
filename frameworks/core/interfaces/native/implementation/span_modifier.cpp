@@ -24,7 +24,10 @@ namespace SpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto spanNode = SpanModelNG::CreateSpanNode(id, "");
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
 }
 } // SpanModifier
 namespace SpanInterfaceModifier {
