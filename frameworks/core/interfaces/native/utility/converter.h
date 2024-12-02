@@ -373,6 +373,7 @@ namespace Converter {
     template<> FontFamilies Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
+    template<> Header Convert(const Ark_Header& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
@@ -397,6 +398,7 @@ namespace Converter {
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
+    template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
@@ -428,7 +430,6 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> Ark_NativePointer Convert(const Ark_Materialized& src);
-    template<> ShadowType Convert(const Ark_ShadowType& src);
     template<> ShadowColorStrategy Convert(const Ark_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
@@ -440,6 +441,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
 
     // SORTED_SECTION: Enums specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src);
@@ -471,6 +473,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
@@ -493,6 +496,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
     template<> void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src);
     template<> void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src);
+    template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
@@ -503,6 +507,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
+    template<> void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src);
     template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
     template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
@@ -534,7 +539,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
-    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
 
     template<>

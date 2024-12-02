@@ -40,6 +40,8 @@ const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_TEXT_STYLE_FONT_NAME = "font";
 const auto ATTRIBUTE_FONT_SIZE_NAME = "size";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "weight";
+const auto ATTRIBUTE_HINT_RADIUS_NAME = "hintRadius";
+const auto ATTRIBUTE_SELECTED_NAME = "selected";
 
 const auto RES_COLOR_ID = IntResourceId{102001, NodeModifier::ResourceType::COLOR};
 const auto RES_COLOR_ID_VALUE = Color(0xFF654321);
@@ -281,6 +283,85 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleFontSizeTest, TestSize.Level1)
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkWeight, weightStr);
     }
+}
+
+typedef std::pair<Ark_Union_Number_Resource, PickerDate> OptionsArgsStepTest;
+typedef std::pair<std::string, std::string> PickerOptionsStringStepTest;
+typedef std::pair<OptionsArgsStepTest, PickerOptionsStringStepTest> PickerDateOptionsStepTest;
+const std::vector<PickerDateOptionsStepTest> OPTIONS_TEST_PLAN = {
+    { { {.selector = 0, .value0 = Converter::ArkValue<Ark_Number>(0.7) }, PickerDate(2023, 7, 21) },
+        { "0.7", "2023-7-21" } }
+};
+
+/*
+ * @tc.name: setDatePickerOptionsTest
+ * @tc.desc: Check the functionality of CalendarPickerModifier.SetCalendarPickerOptionsImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setCalendarPickerOptionsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setCalendarPickerOptions, nullptr);
+
+    for (const auto& [actual, expected] : OPTIONS_TEST_PLAN) {
+        Ark_CalendarOptions arkOptions = {
+            .hintRadius = Converter::ArkValue<Opt_Union_Number_Resource>(std::get<0>(actual)),
+            .selected = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
+        };
+        auto optOptions = Converter::ArkValue<Opt_CalendarOptions>(arkOptions);
+        modifier_->setCalendarPickerOptions(node_, &optOptions);
+        auto fullJson = GetJsonValue(node_);
+        auto checkHintRadius = GetAttrValue<std::string>(fullJson, ATTRIBUTE_HINT_RADIUS_NAME);
+        auto checkSelected = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SELECTED_NAME);
+        EXPECT_EQ(checkHintRadius, std::get<0>(expected));
+        EXPECT_EQ(checkSelected, std::get<1>(expected));
+    }
+}
+
+typedef std::pair<PickerDate, PickerDate> PickerDateTest;
+const std::vector<PickerDateTest> CHANGE_EVENT_TEST_PLAN = {
+    { PickerDate(1970, 1, 1), PickerDate(1970, 1, 1) },
+    { PickerDate(2020, 12, 10), PickerDate(2020, 12, 10) },
+    { PickerDate(2200, 12, 31), PickerDate(1970, 1, 1) },
+    { PickerDate(0, -1, -5), PickerDate(1970, 1, 1) },
+    { PickerDate(-1, 24, 64), PickerDate(1970, 1, 1) },
+};
+
+/*
+ * @tc.name: setOnChangeTest
+ * @tc.desc: Check the functionality of CalendarPickerModifier.SetOnChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<PickerDate> expected = std::nullopt;
+    auto onChange = [](const Ark_Int32 resourceId, const Ark_Date parameter) {
+        expected = Converter::OptConvert<PickerDate>(parameter);
+    };
+    Callback_Date_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onChange
+    };
+    modifier_->setOnChange(node_, &func);
+
+    for (const auto& testValue : CHANGE_EVENT_TEST_PLAN) {
+        std::string testStr = testValue.first.ToString(true);
+        eventHub->UpdateOnChangeEvent(testStr);
+
+        EXPECT_TRUE(expected.has_value());
+        EXPECT_EQ(expected->GetYear(), testValue.second.GetYear());
+        EXPECT_EQ(expected->GetMonth(), testValue.second.GetMonth());
+        EXPECT_EQ(expected->GetDay(), testValue.second.GetDay());
+    };
 }
 
 } // namespace OHOS::Ace::NG

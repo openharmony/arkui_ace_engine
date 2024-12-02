@@ -347,6 +347,11 @@ void WebPattern::SetWebSrc(const std::string &webSrc)
 {
 }
 
+void WebPattern::SetWebData(const std::string& webData)
+{
+    webData_ = webData;
+}
+
 void WebPattern::SetIncognitoMode(bool incognitoMode)
 {
 }

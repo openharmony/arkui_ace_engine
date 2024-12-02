@@ -14,7 +14,7 @@
 # WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 declare_args() {
-  include_generated_sources = false
+  include_generated_sources = true
 }
 generated_sources = [
   "implementation/ability_component_modifier.cpp",

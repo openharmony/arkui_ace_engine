@@ -21,21 +21,6 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
-namespace OHOS::Ace::NG {
-namespace Converter {
-
-template<>
-void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src)
-{
-    switch (src) {
-        case ARK_NAV_DESTINATION_MODE_STANDARD: dst = NavDestinationMode::STANDARD; break;
-        case ARK_NAV_DESTINATION_MODE_DIALOG: dst = NavDestinationMode::DIALOG; break;
-        default: LOGE("Unexpected enum value in Ark_NavDestinationMode: %{public}d", src);
-    }
-}
-} // namespace Converter
-} // namespace OHOS::Ace::NG
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationModifier {
 Ark_NativePointer ConstructImpl()

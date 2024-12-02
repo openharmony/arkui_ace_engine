@@ -32,16 +32,6 @@ constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 
 namespace Converter {
 template<>
-Ark_ImageError ArkValue(const LoadImageFailEvent& event)
-{
-    Ark_ImageError arkEvent;
-    arkEvent.componentWidth = Converter::ArkValue<Ark_Number>(event.GetComponentWidth());
-    arkEvent.componentHeight = Converter::ArkValue<Ark_Number>(event.GetComponentHeight());
-    arkEvent.message = Converter::ArkValue<Ark_String>(event.GetErrorMessage());
-    return arkEvent;
-}
-
-template<>
 void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
     const Ark_ImageSourceSize& src)
 {

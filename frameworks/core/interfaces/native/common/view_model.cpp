@@ -107,6 +107,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/richtext_model_ng.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
@@ -376,7 +377,7 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    auto frameNode = CalendarPickerModelNG::CreateEmptyFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -859,7 +860,14 @@ void* createRichEditorNode(ArkUI_Int32 nodeId)
 
 void* createRichTextNode(ArkUI_Int32 nodeId)
 {
+#ifdef WEB_SUPPORTED
+    auto frameNode = RichTextModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+#else
     return nullptr;
+#endif // WEB_SUPPORTED
 }
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)

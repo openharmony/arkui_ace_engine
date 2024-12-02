@@ -22,8 +22,10 @@ ace_unittest("capi_all_accessors_test") {
     "canvas_renderer_accessor_test.cpp",
     "canvas_rendering_context2d_accessor_test.cpp",
     "children_main_size_accessor_test.cpp",
+    "clent_authentication_handler_accessor_test.cpp",
     "console_message_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
+    "data_resubmission_handler_accessor_test.cpp",
     "drawing_rendering_context_accessor_test.cpp",
     "event_result_accessor_test.cpp",
     "file_selector_param_accessor_test.cpp",
@@ -36,12 +38,14 @@ ace_unittest("capi_all_accessors_test") {
     "js_geolocation_accessor_test.cpp",
     "js_result_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
+    "navigation_transition_proxy_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "permission_request_accessor_test.cpp",
     "richeditor_controller_accessor_test.cpp",
     "screen_capture_handler_accessor_test.cpp",
     "scroller_accessor_test.cpp",
     "search_controller_test.cpp",
+    "ssl_error_handler_accessor_test.cpp",
     "swiper_content_transition_proxy_accessor_test.cpp",
     "swiper_controller_accessor_test.cpp",
     "tabs_controller_accessor_test.cpp",
@@ -54,6 +58,7 @@ ace_unittest("capi_all_accessors_test") {
     "web_keyboard_controller_accessor_test.cpp",
     "web_resource_error_accessor_test.cpp",
     "web_resource_request_accessor_test.cpp",
+    "web_resource_response_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [

@@ -52,6 +52,7 @@ template("ace_core_interfaces_native_node") {
       "implementation/canvas_rendering_context2d_peer_impl.cpp",
       "implementation/custom_dialog_controller_peer_impl.cpp",
       "implementation/drawing_rendering_context_peer_impl.cpp",
+      "implementation/image_bitmap_peer_impl.cpp",
       "implementation/scroller_peer_impl.cpp",
       "implementation/search_controller_accessor_peer_impl.cpp",
       "implementation/video_controller_peer_impl.cpp",
@@ -159,6 +160,7 @@ template("ace_core_interfaces_native_node") {
       "node/water_flow_modifier.cpp",
       "utility/converter_enums.cpp",
       "utility/reverse_converter_enums.cpp",
+      "utility/validators.cpp",
     ]
     if (defined(config.web_components_support) &&
         config.web_components_support && !is_arkui_x) {
@@ -266,6 +268,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/richtext_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_model_static_ng.cpp",
     "common/view_model.cpp",
     "common/view_model2.cpp",

@@ -25,6 +25,7 @@ namespace {
     constexpr int32_t NUM_2 = 2;
     constexpr int32_t NUM_3 = 3;
     constexpr int32_t NUM_4 = 4;
+    constexpr int32_t STD_TM_START_YEAR = 1900;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -212,11 +213,31 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
         date = start;
     }
     std::tm tm {};
-    tm.tm_year = date.GetYear();
-    tm.tm_mon = date.GetMonth() - 1;
+    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
     dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+}
+
+void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
+{
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
+}
+
+void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
+{
+    dst.width = Converter::ArkValue<Ark_Number>(src.GetWidth());
+    dst.height = Converter::ArkValue<Ark_Number>(src.GetHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.loadingStatus = Converter::ArkValue<Ark_Number>(src.GetLoadingStatus());
+    dst.contentWidth = Converter::ArkValue<Ark_Number>(src.GetContentWidth());
+    dst.contentHeight = Converter::ArkValue<Ark_Number>(src.GetContentHeight());
+    dst.contentOffsetX = Converter::ArkValue<Ark_Number>(src.GetContentOffsetX());
+    dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
 }
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
@@ -476,6 +497,13 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+std::u16string Convert(const Ark_String& src)
+{
+    auto str8 =  Converter::Convert<std::string>(src);
+    return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
 std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 {
     return { Convert<Shadow>(src) };
@@ -681,12 +709,6 @@ Ark_NativePointer Convert(const Ark_Materialized& src)
 }
 
 template<>
-ShadowType Convert(const Ark_ShadowType& src)
-{
-    return static_cast<ShadowType>(src);
-}
-
-template<>
 ShadowColorStrategy Convert(const Ark_Color& src)
 {
     return ShadowColorStrategy::NONE;
@@ -797,6 +819,15 @@ GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
     gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
 
     return gradientColor;
+}
+
+template<>
+Header Convert(const Ark_Header& src)
+{
+    Header header;
+    header.headerKey = Converter::Convert<std::string>(src.headerKey);
+    header.headerValue = Converter::Convert<std::string>(src.headerValue);
+    return header;
 }
 
 template<>
@@ -938,6 +969,15 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
     double result;
     if (StringUtils::StringToDouble(value, result)) {
         dst = result;
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
+{
+    auto str8 = OptConvert<std::string>(src);
+    if (str8) {
+        dst = UtfUtils::Str8ToStr16(str8.value());
     }
 }
 
@@ -1285,7 +1325,9 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
     auto timestamp = reinterpret_cast<int64_t>(src);
     time_t time = static_cast<time_t>(timestamp / SEC_TO_MILLISEC);
     auto local = std::localtime(&time);
-    dst = PickerDate(local->tm_year, local->tm_mon + 1, local->tm_mday);
+    // tm_year is years since 1900
+    // tm_mon from 0 to 11
+    dst = PickerDate(local->tm_year + STD_TM_START_YEAR, local->tm_mon + 1, local->tm_mday);
     auto maxDay = PickerDate::GetMaxDay(dst->GetYear(), dst->GetMonth());
     if (dst->GetYear() < DATE_MIN.GetYear() || dst->GetYear() > DATE_MAX.GetYear()) {
         dst = DATE_MIN;

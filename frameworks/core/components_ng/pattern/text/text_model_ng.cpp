@@ -215,9 +215,13 @@ void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, const std::optiona
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, variableFontWeight, frameNode);
 }
 
-void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, const std::optional<bool>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, frameNode);
+    }
 }
 
 void TextModelNG::SetMinFontScale(const float value)
@@ -517,7 +521,7 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
+void TextModelNG::InitText(FrameNode* frameNode, const std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
@@ -600,14 +604,22 @@ void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::v
     }
 }
 
-void TextModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
+void TextModelNG::SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption, frameNode);
+    if (copyOption) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, frameNode);
+    }
 }
 
-void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
+void TextModelNG::SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, frameNode);
+    }
 }
 
 void TextModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, const std::optional<TextHeightAdaptivePolicy>& value)
@@ -639,19 +651,11 @@ void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const std::optional<Di
 
 void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
 {
-    if (value.fontSize.has_value()) {
-        SetFontSize(frameNode, value.fontSize.value());
-    }
-    if (value.fontWeight.has_value()) {
-        SetFontWeight(frameNode, value.fontWeight.value());
-    }
-    if (!value.fontFamilies.empty()) {
-        SetFontFamily(frameNode, value.fontFamilies);
-    }
-    if (value.fontStyle.has_value()) {
-        SetItalicFontStyle(frameNode, value.fontStyle.value());
-    }
-    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
+    SetFontSize(frameNode, value.fontSize);
+    SetFontWeight(frameNode, value.fontWeight);
+    SetFontFamily(frameNode, value.fontFamilies.empty() ? std::nullopt : std::make_optional(value.fontFamilies));
+    SetItalicFontStyle(frameNode, value.fontStyle);
+    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight);
 }
 
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& value)

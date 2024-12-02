@@ -85,6 +85,14 @@ const auto ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE = "400";
 const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME = "enableVariableFontWeight";
 const auto ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_TEXT_SHADOW_NAME = "textShadow";
+const auto ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME = "radius";
+const auto ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME = "type";
+const auto ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME = "color";
+const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME = "offsetX";
+const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
+const auto ATTRIBUTE_CONTENT_NAME = "content";
+const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
 
     struct EventsTracker {
         static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
@@ -105,6 +113,11 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<TextTheme>();
+
+        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
 
         AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
         AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
@@ -958,5 +971,100 @@ HWTEST_F(TextModifierTest, setFontWeight1TestVariableFontWeightInvalidValues, Te
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setTextShadowTestArrayValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
+{
+    std::string resultStr;
+    Ark_ShadowOptions shadow1 = {
+        .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB01"),
+        .offsetX = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(50.f) },
+        .offsetY = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(55.f) },
+        .radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(12),
+        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_COLOR }
+    };
+    Ark_ShadowOptions shadow2 = {
+        .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB22"),
+        .offsetX = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(70.f) },
+        .offsetY = { .tag = ARK_TAG_OBJECT, .value = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(75.f) },
+        .radius = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(20),
+        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_BLUR }
+    };
+    std::vector<Ark_ShadowOptions> vec = { shadow1, shadow2 };
+    Array_ShadowOptions array = { .array = vec.data(), .length = vec.size() };
+    auto inputValueTextShadow = ArkUnion<Ark_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(array);
+    modifier_->setTextShadow(node_, &inputValueTextShadow);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultTextShadow =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
+    ASSERT_NE(resultTextShadow, nullptr);
+    ASSERT_EQ(resultTextShadow->GetArraySize(), vec.size());
+
+    std::unique_ptr<JsonValue> item;
+    auto get = [&item](const std::string& attrName) {
+        return GetAttrValue<std::string>(item, attrName);
+    };
+
+    item = resultTextShadow->GetArrayItem(0);
+    ASSERT_NE(item, nullptr);
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME), "#FFAABB01");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME), "50.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME), "55.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME), "12.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME), "0");
+
+    item = resultTextShadow->GetArrayItem(1);
+    ASSERT_NE(item, nullptr);
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_COLOR_NAME), "#FFAABB22");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME), "70.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME), "75.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME), "20.000000");
+    EXPECT_EQ(get(ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME), "1");
+}
+
+/*
+ * @tc.name: setTextOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+}
+
+/*
+ * @tc.name: setTextOptionsTestContentValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setTextOptionsTestContentValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_String_Resource& value) {
+        auto textOptions = Converter::ArkValue<Opt_TextOptions>(Ark_Empty());
+
+        modifier_->setTextOptions(node_, &value, &textOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setTextOptions, attribute: content";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
+    }
 }
 }

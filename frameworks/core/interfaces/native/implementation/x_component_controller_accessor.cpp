@@ -165,7 +165,7 @@ void StartImageAnalyzerImpl(XComponentControllerPeer* peer,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer && peer->controller, 0);
+    CHECK_NULL_VOID(peer && peer->controller);
     LOGE("XComponentControllerAccessor::StartImageAnalyzerImpl - return promise need to be supported");
 #endif //XCOMPONENT_SUPPORTED
 }

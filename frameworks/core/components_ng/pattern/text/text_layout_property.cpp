@@ -15,6 +15,7 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -105,6 +106,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("textBaseline",
         TEXT_BASE_LINE_TO_STRING.at(static_cast<int32_t>(GetTextBaseline().value_or(TextBaseline::ALPHABETIC)))
             .c_str(), filter);
@@ -116,6 +118,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
     json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("fontFeature",
+        UnParseFontFeatureSetting(GetFontFeature().value_or(FONT_FEATURES_LIST())).c_str(), filter);
 
     ToJsonValueForOption(json, filter);
     ToJsonValueForSymbol(json, filter);

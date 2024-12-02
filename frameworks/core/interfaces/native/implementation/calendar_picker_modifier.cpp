@@ -15,9 +15,11 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
@@ -31,6 +33,19 @@ void AssignCast(std::optional<CalendarEdgeAlign>& dst, const Ark_CalendarAlign& 
         default: LOGE("Unexpected enum value in Ark_CalendarAlign: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptions& src)
+{
+    CalendarSettingData options;
+    options.dayRadius = Converter::OptConvert<Dimension>(src.hintRadius);
+    auto selected = Converter::OptConvert<PickerDate>(src.selected);
+    if (selected) {
+        options.selectedDate = selected.value();
+    }
+    dst = options;
+}
+
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -48,7 +63,8 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    LOGE("ARKOALA CalendarPickerInterface::SetCalendarPickerOptionsImpl is not implemented yet");
+    auto data = Converter::OptConvert<CalendarSettingData>(*options);
+    CalendarPickerModelNG::SetCalendarData(frameNode, data);
 }
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
@@ -67,11 +83,31 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CalendarPickerInterface::OnChangeImpl is not implemented yet");
-    auto onChange = [frameNode](const std::string& param) {
-        Ark_Date eventInfo{};
-        GetFullAPI()->getEventsAPI()->getCalendarPickerEventsReceiver()->
-                      onChange(frameNode->GetId(), eventInfo);
+
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& selectedStr) {
+        auto json = JsonUtil::ParseJsonString(selectedStr);
+
+        Ark_Date result {0};
+        if (json && !json->IsNull()) {
+            uint32_t year = 0;
+            auto yearJson = json->GetValue("year");
+            if (yearJson && yearJson->IsNumber()) {
+                year = yearJson->GetUInt();
+            }
+            uint32_t month = 0;
+            auto monthJson = json->GetValue("month");
+            if (monthJson && monthJson->IsNumber()) {
+                month = monthJson->GetUInt();
+            }
+            uint32_t day = 0;
+            auto dayJson = json->GetValue("day");
+            if (dayJson && dayJson->IsNumber()) {
+                day = dayJson->GetUInt();
+            }
+            auto pickerDate = PickerDate(year, month, day);
+            result = Converter::ArkValue<Ark_Date>(pickerDate);
+        }
+        arkCallback.Invoke(result);
     };
     CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onChange));
 }

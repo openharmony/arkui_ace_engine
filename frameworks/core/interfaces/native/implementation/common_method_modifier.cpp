@@ -105,6 +105,48 @@ void ValidateAnimationOption(AnimationOption& opt, bool isForm)
         }
     }
 }
+void ValidateNonNegative(std::optional<InvertVariant>& value)
+{
+    if (!value.has_value()) {
+        return;
+    }
+    auto& invertVariant = value.value();
+    if (auto optionPtr = std::get_if<InvertOption>(&invertVariant)) {
+        const InvertOption& option = *optionPtr;
+        if (Negative(option.low_) || Negative(option.high_) ||
+            Negative(option.threshold_) || Negative(option.thresholdRange_)) {
+            value.reset();
+            return;
+        }
+    }
+    if (auto floatPtr = std::get_if<float>(&invertVariant)) {
+        if (Negative(*floatPtr)) {
+            value.reset();
+        }
+    }
+}
+void ValidateByRange(std::optional<InvertVariant>& value, const float& left, const float& right)
+{
+    if (!value.has_value()) {
+        return;
+    }
+    auto& invertVariant = value.value();
+    if (auto optionPtr = std::get_if<InvertOption>(&invertVariant)) {
+        const InvertOption& option = *optionPtr;
+        if (LessNotEqual(option.low_, left) || LessNotEqual(option.high_, left) ||
+            LessNotEqual(option.threshold_, left) || LessNotEqual(option.thresholdRange_, left) ||
+            GreatNotEqual(option.low_, right) || GreatNotEqual(option.high_, right) ||
+            GreatNotEqual(option.threshold_, right) || GreatNotEqual(option.thresholdRange_, right)) {
+            value.reset();
+            return;
+        }
+    }
+    if (auto floatPtr = std::get_if<float>(&invertVariant)) {
+        if (LessNotEqual(*floatPtr, left) || GreatNotEqual(*floatPtr, right)) {
+            value.reset();
+        }
+    }
+}
 } // namespace Validator
 
 namespace Converter {
@@ -613,6 +655,63 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
     dst.styleBottom = OptConvert<BorderStyle>(src.bottom);
     dst.multiValued = true;
     return dst;
+}
+template<>
+InvertVariant Convert(const Ark_Number& value)
+{
+    float fDst = Converter::Convert<float>(value);
+    return std::variant<float, InvertOption>(fDst);
+}
+template<>
+InvertVariant Convert(const Ark_InvertOptions& value)
+{
+    InvertOption invertOption = {
+        .low_ = Converter::Convert<float>(value.low),
+        .high_ = Converter::Convert<float>(value.high),
+        .threshold_ = Converter::Convert<float>(value.threshold),
+        .thresholdRange_ = Converter::Convert<float>(value.thresholdRange)};
+    return std::variant<float, InvertOption>(invertOption);
+}
+template<>
+float Convert(const Ark_InvertOptions& value)
+{
+    auto low = Converter::Convert<float>(value.low);
+    auto high = Converter::Convert<float>(value.high);
+    auto threshold = Converter::Convert<float>(value.threshold);
+    auto thresholdRange = Converter::Convert<float>(value.thresholdRange);
+    if (NearEqual(low, high) && NearEqual(low, threshold) && NearEqual(low, thresholdRange)) {
+        return low;
+    }
+    float invalidValue = -1.0;
+    return invalidValue;
+}
+template<>
+void AssignCast(std::optional<float>& dst, const Ark_InvertOptions& src)
+{
+    auto low = Converter::Convert<float>(src.low);
+    auto high = Converter::Convert<float>(src.high);
+    auto threshold = Converter::Convert<float>(src.threshold);
+    auto thresholdRange = Converter::Convert<float>(src.thresholdRange);
+    if (NearEqual(low, high) && NearEqual(low, threshold) && NearEqual(low, thresholdRange)) {
+        dst = low;
+        return;
+    }
+    dst.reset();
+}
+template<>
+void AssignCast(std::optional<PixStretchEffectOption>& dst, const Ark_PixelStretchEffectOptions& src)
+{
+    auto invalidValue = 0.0_vp;
+    auto top = OptConvert<Dimension>(src.top);
+    auto bottom = OptConvert<Dimension>(src.bottom);
+    auto left = OptConvert<Dimension>(src.left);
+    auto right = OptConvert<Dimension>(src.right);
+    if (!top.has_value() && !bottom.has_value() && !left.has_value() && !right.has_value()) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = {.left = left.value_or(invalidValue), .top = top.value_or(invalidValue),
+        .right = right.value_or(invalidValue), .bottom = bottom.value_or(invalidValue)};
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -1606,9 +1705,8 @@ void ColorBlendImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetColorBlend(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    ViewAbstract::SetColorBlend(frameNode, convValue);
 }
 void SaturateImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -1635,18 +1733,19 @@ void InvertImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetInvert(frameNode, convValue);
+    const float minValue = 0.0;
+    const float maxValue = 100.0;
+    auto convValue = value ? Converter::OptConvert<InvertVariant>(*value) : std::nullopt;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
+    ViewAbstract::SetInvert(frameNode, convValue);
 }
 void HueRotateImpl(Ark_NativePointer node,
                    const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetHueRotate(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    ViewAbstract::SetHueRotate(frameNode, convValue);
 }
 void UseShadowBatchingImpl(Ark_NativePointer node,
                            Ark_Boolean value)
@@ -1687,8 +1786,8 @@ void FreezeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // ViewAbstract::SetFreeze(frameNode, convValue);
+    auto convValue = Converter::Convert<bool>(value);
+    ViewAbstract::SetFreeze(frameNode, convValue);
 }
 void TranslateImpl(Ark_NativePointer node,
                    const Ark_TranslateOptions* value)
@@ -1726,18 +1825,20 @@ void GridSpanImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetGridSpan(frameNode, convValue);
+    auto convValue = value
+        ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetGrid(frameNode, convValue, std::nullopt, GridSizeType::UNDEFINED);
 }
 void GridOffsetImpl(Ark_NativePointer node,
                     const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetGridOffset(frameNode, convValue);
+    auto convValue = value
+        ? Converter::OptConvert<ArkUI_Int32>(*value) : std::nullopt;
+    Validator::ValidateNonNegative(convValue);
+    ViewAbstract::SetGrid(frameNode, std::nullopt, convValue, GridSizeType::UNDEFINED);
 }
 void RotateImpl(Ark_NativePointer node,
                 const Ark_RotateOptions* value)
@@ -2358,27 +2459,33 @@ void SphericalEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSphericalEffect(frameNode, convValue);
+    auto convValue = value
+        ? Converter::OptConvert<float>(*value) : std::nullopt;
+    const float minValue = 0.0;
+    const float maxValue = 1.0;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
+    ViewAbstract::SetSphericalEffect(frameNode, convValue);
 }
 void LightUpEffectImpl(Ark_NativePointer node,
                        const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetLightUpEffect(frameNode, convValue);
+    auto convValue = value
+        ? Converter::OptConvert<float>(*value) : std::nullopt;
+    const float minValue = 0.0;
+    const float maxValue = 1.0;
+    Validator::ValidateByRange(convValue, minValue, maxValue);
+    ViewAbstract::SetLightUpEffect(frameNode, convValue);
 }
 void PixelStretchEffectImpl(Ark_NativePointer node,
                             const Ark_PixelStretchEffectOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetPixelStretchEffect(frameNode, convValue);
+    auto convValue = value
+        ? Converter::OptConvert<PixStretchEffectOption>(*value) : std::nullopt;
+    ViewAbstract::SetPixelStretchEffect(frameNode, convValue);
 }
 void AccessibilityGroup0Impl(Ark_NativePointer node,
                              Ark_Boolean value)

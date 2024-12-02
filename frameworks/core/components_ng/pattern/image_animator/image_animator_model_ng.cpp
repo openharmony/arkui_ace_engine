@@ -271,7 +271,7 @@ void ImageAnimatorModelNG::SetOnStart(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetStartEvent(onStart);
+    eventHub->SetStartEvent(std::move(onStart));
 }
 
 void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause)
@@ -279,7 +279,7 @@ void ImageAnimatorModelNG::SetOnPause(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetPauseEvent(onPause);
+    eventHub->SetPauseEvent(std::move(onPause));
 }
 
 void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat)
@@ -287,7 +287,7 @@ void ImageAnimatorModelNG::SetOnRepeat(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetRepeatEvent(onRepeat);
+    eventHub->SetRepeatEvent(std::move(onRepeat));
 }
 
 void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void()>&& onCancel)
@@ -295,7 +295,7 @@ void ImageAnimatorModelNG::SetOnCancel(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetCancelEvent(onCancel);
+    eventHub->SetCancelEvent(std::move(onCancel));
 }
 
 void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& onFinish)
@@ -303,7 +303,7 @@ void ImageAnimatorModelNG::SetOnFinish(FrameNode* frameNode, std::function<void(
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetStopEvent(onFinish);
+    eventHub->SetStopEvent(std::move(onFinish));
 }
 
 } // namespace OHOS::Ace::NG

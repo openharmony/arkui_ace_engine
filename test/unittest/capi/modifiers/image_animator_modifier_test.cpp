@@ -19,6 +19,8 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/pattern/image_animator/image_animator_event_hub.h"
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 using namespace testing;
@@ -238,47 +240,142 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: DISABLED_setOnStartTest
+ * @tc.name: setOnStartTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnStartTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setOnStartTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnStart(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->GetStartEvent()();
+    ASSERT_TRUE(isCalled);
 }
 
 /*
- * @tc.name: DISABLED_setOnPauseTest
+ * @tc.name: setOnPauseTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnPauseTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setOnPauseTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnPause, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnPause(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->GetPauseEvent()();
+    ASSERT_TRUE(isCalled);
 }
 
 /*
- * @tc.name: DISABLED_setOnRepeatTest
+ * @tc.name: setOnRepeatTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnRepeatTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setOnRepeatTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnRepeat, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnRepeat(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->GetRepeatEvent()();
+    ASSERT_TRUE(isCalled);
 }
 
 /*
- * @tc.name: DISABLED_setOnCancelTest
+ * @tc.name: setOnCancelTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnCancelTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setOnCancelTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnCancel, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnCancel(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->GetCancelEvent()();
+    ASSERT_TRUE(isCalled);
 }
 
 /*
- * @tc.name: DISABLED_setOnFinishTest
+ * @tc.name: setOnFinishTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAnimatorModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
+HWTEST_F(ImageAnimatorModifierTest, setOnFinishTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOnFinish, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ImageAnimatorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId) {
+        isCalled = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    // setup the callback object via C-API
+    Callback_Void arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnFinish(node_, &arkCallback);
+
+    isCalled = false;
+    eventHub->GetStopEvent()();
+    ASSERT_TRUE(isCalled);
 }
 } // namespace OHOS::Ace::NG
