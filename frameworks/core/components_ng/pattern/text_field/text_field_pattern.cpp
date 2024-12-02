@@ -4684,40 +4684,29 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     int32_t offset = 0;
     int32_t strIndex = directionMove == 0 ? (originCaretPosition - 1) : originCaretPosition;
     auto wideTextValue = contentController_->GetTextUtf16Value();
-    if (wideTextValue[strIndex] == u' ') {
-        int32_t wordStart = 0;
-        int32_t wordEnd = 0;
-        if (!paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
-            return 0;
-        }
-        if (directionMove == 1) {
-            offset += (wordEnd - strIndex);
-            return offset;
-        } else {
-            offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
-            strIndex = (wordStart - 1);           // when move left, actual index should minus 1
-        }
-    }
-    bool hasJumpBlank = false;
-    for (; directionMove == 0 ? strIndex >= 0 : strIndex <= textLength;) {
+    int32_t wordStart = 0;
+    int32_t wordEnd = 0;
+    while (directionMove == 0 ? strIndex >= 0 : strIndex <= textLength) {
         auto chr = wideTextValue[strIndex];
-        if (StringUtils::IsLetterOrNumberForChar16(chr) || (chr == u' ' && directionMove == 1)) {
-            if (directionMove == 1 && hasJumpBlank && chr != u' ') {
-                return offset;
-            } else if (directionMove == 1 && !hasJumpBlank && chr == u' ') {
-                hasJumpBlank = true;
+        // skip the special character
+        if (chr == L' ' || chr == L'\n') {
+            if (directionMove == 0) {
+                strIndex--;
+            } else {
+                strIndex++;
             }
             offset++;
-        } else {
-            if (offset <= 0) {
-                offset = 1;
+            continue;
+        }
+        // cal word length
+        if (paragraph_->GetWordBoundary(strIndex, wordStart, wordEnd)) {
+            if (directionMove == 1) {
+                offset += (wordEnd - strIndex);
+                return offset;
+            } else {
+                offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
             }
             break;
-        }
-        if (directionMove == 0) {
-            strIndex--;
-        } else {
-            strIndex++;
         }
     }
     return offset;
