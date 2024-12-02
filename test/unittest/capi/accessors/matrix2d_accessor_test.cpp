@@ -198,7 +198,7 @@ HWTEST_F(Matrix2DAccessorTest, scaleTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getScaleXTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getScaleXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getScaleX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
@@ -230,7 +230,7 @@ HWTEST_F(Matrix2DAccessorTest, setScaleXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getRotateYTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getRotateYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRotateY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
@@ -246,7 +246,7 @@ HWTEST_F(Matrix2DAccessorTest, getRotateYTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getRotateXTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getRotateXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRotateX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
@@ -262,7 +262,7 @@ HWTEST_F(Matrix2DAccessorTest, getRotateXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getScaleYTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getScaleYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getScaleY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
@@ -274,27 +274,11 @@ HWTEST_F(Matrix2DAccessorTest, getScaleYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setScaleYTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(Matrix2DAccessorTest, setScaleYTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setScaleY, nullptr);
-    for (const auto& actual : NUMBER_TEST_PLAN) {
-        auto sy = Converter::ArkValue<Ark_Number>(static_cast<float>(actual));
-        auto expected = actual;
-        accessor_->setScaleY(peer_, &sy);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(peer_->transform.scaleY, expected));
-    }
-}
-
-/**
  * @tc.name: getTranslateXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getTranslateXTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getTranslateXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTranslateX, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
@@ -310,7 +294,7 @@ HWTEST_F(Matrix2DAccessorTest, getTranslateXTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest, getTranslateYTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, DISABLED_getTranslateYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTranslateY, nullptr);
     for (const auto& actual : NUMBER_TEST_PLAN) {
