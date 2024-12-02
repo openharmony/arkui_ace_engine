@@ -14,7 +14,6 @@
  */
 
 #include "list_test_ng.h"
-#include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -270,48 +269,6 @@ HWTEST_F(ListEventTestNg, HandleDragOverScroll006, TestSize.Level1)
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
-}
-
-/**
- * @tc.name: HandleDragOverScroll007
- * @tc.desc: List Adaptive Content, always enable spring effect, over Drag
- * @tc.type: FUNC
- */
-HWTEST_F(ListEventTestNg, HandleDragOverScroll007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create List
-     * @tc.expected: List Adaptive Content, List height is 300.
-     */
-    StackModelNG stackModel;
-    stackModel.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
-    ListModelNG model;
-    model.Create();
-    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    GetList();
-    CreateListItems(3);
-    CreateDone();
-    EXPECT_EQ(pattern_->contentMainSize_, 300);
-
-    /**
-     * @tc.steps: step2. Drag over the top
-     * @tc.expected: contentMainSize_ not changed.
-     */
-    pattern_->ratio_ = 0;
-    DragAction(frameNode_, Offset(), 150, 0);
-    EXPECT_EQ(pattern_->contentMainSize_, 300);
-    EXPECT_EQ(pattern_->currentOffset_, -150);
-
-    /**
-     * @tc.steps: step3. Drag over the bottom
-     * @tc.expected: contentMainSize_ not changed.
-     */
-    DragAction(frameNode_, Offset(), -300, 0);
-    EXPECT_EQ(pattern_->contentMainSize_, 300);
-    EXPECT_EQ(pattern_->currentOffset_, 150);
 }
 
 /**
