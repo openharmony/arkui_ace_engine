@@ -139,13 +139,6 @@ void OnDidScrollImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
-namespace {
-    template<typename T>
-    std::optional<T> ValidateArkEnum(T value, int marker = -1)
-    {
-        return value == static_cast<T>(marker) ? std::nullopt : std::optional<T>(value);
-    }
-}
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
 {
