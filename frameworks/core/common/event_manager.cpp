@@ -153,8 +153,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(std::to_string(item.first))
             .append(", tag: ")
             .append(item.second.tag)
-            .append(", frameRect: ")
-            .append(item.second.frameRect)
             .append(", depth: ")
             .append(std::to_string(item.second.depth))
             .append(".");

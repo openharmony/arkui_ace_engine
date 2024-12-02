@@ -35,10 +35,6 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     oss << "monopolizeEvents: " << monopolizeEvents << ", "
         << "isHit: " << isHit << ", "
         << "hitTestMode: " << hitTestMode << ", ";
-    oss << "responseRegion: ";
-    for (const auto& rect : responseRegionList) {
-        oss << rect.ToString().c_str();
-    }
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
@@ -55,8 +51,6 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
 {
     std::stringstream oss;
     oss << "id: " << id << ", "
-        << "point: " << point.ToString() << ", "
-        << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp);
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
