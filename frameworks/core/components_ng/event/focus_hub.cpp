@@ -258,24 +258,6 @@ bool FocusHub::HandleFocusTravel(const FocusEvent& event)
         return false;
     }
     ACE_DCHECK(IsCurrentFocus());
-    if (focusType_ == FocusType::DISABLE) {
-        return false;
-    }
-    if (focusType_ == FocusType::NODE) {
-        switch (event.intension) {
-            case FocusIntension::ESC:
-                return RequestNextFocusOfKeyEsc();
-            case FocusIntension::SELECT:
-                return RequestNextFocusOfKeyEnter();
-            default:
-                return false;
-        }
-    }
-    
-    if (focusType_ != FocusType::SCOPE) {
-        return false;
-    }
-
     auto node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
     auto* pipeline = node->GetContext();
@@ -283,14 +265,8 @@ bool FocusHub::HandleFocusTravel(const FocusEvent& event)
     if (!pipeline->GetIsFocusActive()) {
         return false;
     }
-    if (event.intension == FocusIntension::TAB && IsInFocusGroup()) {
-        return false;
-    }
-    if (event.intension == FocusIntension::TAB && pipeline->IsTabJustTriggerOnKeyEvent()) {
+    if (pipeline->IsTabJustTriggerOnKeyEvent()) {
         ScrollToLastFocusIndex();
-        return false;
-    }
-    if (!CalculatePosition()) {
         return false;
     }
     return RequestNextFocusByKey(event);
@@ -854,22 +830,25 @@ bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
 bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 {
     switch (event.intension) {
-        case FocusIntension::UP:
-            return RequestNextFocus(FocusStep::UP, GetRect());
-        case FocusIntension::DOWN:
-            return RequestNextFocus(FocusStep::DOWN, GetRect());
-        case FocusIntension::LEFT:
-            return RequestNextFocus(FocusStep::LEFT, GetRect());
-        case FocusIntension::RIGHT:
-            return RequestNextFocus(FocusStep::RIGHT, GetRect());
         case FocusIntension::TAB:
         case FocusIntension::SHIFT_TAB:
             return RequestNextFocusOfKeyTab(event);
+        case FocusIntension::UP:
+            return RequestNextFocus(FocusStep::UP);
+        case FocusIntension::DOWN:
+            return RequestNextFocus(FocusStep::DOWN);
+        case FocusIntension::LEFT:
+            return RequestNextFocus(FocusStep::LEFT);
+        case FocusIntension::RIGHT:
+            return RequestNextFocus(FocusStep::RIGHT);
+        case FocusIntension::SELECT:
+            return RequestNextFocusOfKeyEnter();
+        case FocusIntension::ESC:
+            return RequestNextFocusOfKeyEsc();
         case FocusIntension::HOME:
-            return RequestNextFocus(FocusStep::LEFT_END, GetRect()) || RequestNextFocus(FocusStep::UP_END, GetRect());
+            return RequestNextFocus(FocusStep::LEFT_END) || RequestNextFocus(FocusStep::UP_END);
         case FocusIntension::END:
-            return RequestNextFocus(FocusStep::RIGHT_END, GetRect()) ||
-                   RequestNextFocus(FocusStep::DOWN_END, GetRect());
+            return RequestNextFocus(FocusStep::RIGHT_END) || RequestNextFocus(FocusStep::DOWN_END);
         default:
             return false;
     }
@@ -877,6 +856,9 @@ bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 
 bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
 {
+    if (IsInFocusGroup()) {
+        return false;
+    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto* context = frameNode->GetContext();
@@ -890,7 +872,7 @@ bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
     bool ret = false;
     if (event.intension == FocusIntension::TAB) {
         context->SetIsFocusingByTab(true);
-        ret = RequestNextFocus(FocusStep::TAB, GetRect());
+        ret = RequestNextFocus(FocusStep::TAB);
         if (!ret && isCurrentHandledByFocusView) {
             auto container = Container::GetContainer(context->GetInstanceId());
             auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
@@ -919,7 +901,7 @@ bool FocusHub::RequestNextFocusOfKeyTab(const FocusEvent& event)
         context->SetIsFocusingByTab(false);
     } else if ((event.intension == FocusIntension::SHIFT_TAB)) {
         context->SetIsFocusingByTab(true);
-        ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
+        ret = RequestNextFocus(FocusStep::SHIFT_TAB);
         if (!ret && isCurrentHandledByFocusView) {
             auto container = Container::GetContainer(context->GetInstanceId());
             auto isDynamicRender = container == nullptr ? false : container->IsDynamicRender();
@@ -1003,16 +985,19 @@ void FocusHub::RequestFocus() const
     context->AddDirtyFocus(GetFrameNode());
 }
 
-bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
+bool FocusHub::RequestNextFocus(FocusStep moveStep)
 {
+    if (!CalculatePosition()) {
+        return false;
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus on node: %{public}s/" SEC_PLD(%{public}d)
         " by step: %{public}d.",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()), moveStep);
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
-        return RequestNextFocusByDefaultAlgorithm(moveStep, rect);
+        return RequestNextFocusByDefaultAlgorithm(moveStep, GetRect());
     }
-    return RequestNextFocusByCustomAlgorithm(moveStep, rect);
+    return RequestNextFocusByCustomAlgorithm(moveStep, GetRect());
 }
 
 bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
