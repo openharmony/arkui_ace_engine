@@ -4223,7 +4223,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
-        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "RequestCustomKeyboard, inputMethod is null");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextField Request CustomKeyboard, Close keyboard Successfully.");
         inputMethod->RequestHideInput();
         inputMethod->Close();
     }
