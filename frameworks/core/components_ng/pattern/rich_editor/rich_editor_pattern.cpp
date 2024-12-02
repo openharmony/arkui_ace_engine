@@ -2535,17 +2535,17 @@ void RichEditorPattern::ScheduleCaretTwinkling()
 void RichEditorPattern::StartTwinkling()
 {
     caretTwinklingTask_.Cancel();
+    caretVisible_ = true;
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ScheduleCaretTwinkling();
     // Fire on selecion change when caret invisible -> visible
     if (!caretTwinkling_) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "StartTwinkling");
         caretTwinkling_ = true;
         FireOnSelectionChange(caretPosition_, caretPosition_);
     }
-    caretVisible_ = true;
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    ScheduleCaretTwinkling();
 }
 
 void RichEditorPattern::ShowCaretWithoutTwinkling()
