@@ -18,35 +18,35 @@
 
 namespace OHOS::Ace::NG {
 
-static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle, struct UpdateSpanStyle updateOpt)
+static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle, struct UpdateSpanStyle opt)
 {
     std::stringstream ss;
     /* text style */
     ss << "te={";
-    IF_TRUE(updateOpt.updateTextColor, ss << style.GetTextColor().ToString() << ",");
-    IF_TRUE(updateOpt.updateFontSize, ss << "FS" << style.GetFontSize().ConvertToFp() << ",");
-    IF_TRUE(updateOpt.updateItalicFontStyle, ss << StringUtils::ToString(style.GetFontStyle()) << ",");
-    IF_TRUE(updateOpt.updateFontWeight, ss << StringUtils::ToString(style.GetFontWeight()) << ",");
-    IF_TRUE(updateOpt.updateTextDecoration, ss << StringUtils::ToString(style.GetTextDecoration()) << ",");
-    IF_TRUE(updateOpt.updateLineHeight, ss << "LH" << style.GetLineHeight().ConvertToFp() << ",");
-    IF_TRUE(updateOpt.updateLetterSpacing, ss << "LS" << style.GetLetterSpacing().ConvertToFp() << ",");
+    IF_TRUE(opt.updateTextColor, ss << style.GetTextColor().ToString() << ",");
+    IF_TRUE(opt.updateFontSize, ss << "FS" << style.GetFontSize().ConvertToFp() << ",");
+    IF_TRUE(opt.updateItalicFontStyle, ss << StringUtils::ToString(style.GetFontStyle()) << ",");
+    IF_TRUE(opt.updateFontWeight, ss << StringUtils::ToString(style.GetFontWeight()) << ",");
+    IF_TRUE(opt.updateTextDecoration, ss << StringUtils::ToString(style.GetTextDecoration()) << ",");
+    IF_TRUE(opt.updateLineHeight, ss << "LH" << style.GetLineHeight().ConvertToFp() << ",");
+    IF_TRUE(opt.updateLetterSpacing, ss << "LS" << style.GetLetterSpacing().ConvertToFp() << ",");
     ss << "},";
 
     /* symbol style */
     ss << "sb={";
-    IF_TRUE(updateOpt.updateSymbolFontSize, ss << updateOpt.updateSymbolFontSize->ConvertToFp() << ",");
-    IF_TRUE(updateOpt.updateSymbolFontWeight, ss  << StringUtils::ToString(*updateOpt.updateSymbolFontWeight) << ",");
-    IF_TRUE(updateOpt.updateSymbolRenderingStrategy, ss << "RS" << *updateOpt.updateSymbolRenderingStrategy  << ",");
-    IF_TRUE(updateOpt.updateSymbolEffectStrategy, ss << "ES" << *updateOpt.updateSymbolEffectStrategy  << ",");
+    IF_TRUE(opt.updateSymbolFontSize, ss << opt.updateSymbolFontSize->ConvertToFp() << ",");
+    IF_TRUE(opt.updateSymbolFontWeight, ss  << StringUtils::ToString(*opt.updateSymbolFontWeight) << ",");
+    IF_TRUE(opt.updateSymbolRenderingStrategy, ss << "RS" << *opt.updateSymbolRenderingStrategy  << ",");
+    IF_TRUE(opt.updateSymbolEffectStrategy, ss << "ES" << *opt.updateSymbolEffectStrategy  << ",");
     ss << "},";
 
     /* image style */
     ss << "im={[";
-    IF_TRUE(updateOpt.updateImageWidth, ss << updateOpt.updateImageWidth->ToString() << ",");
-    IF_TRUE(updateOpt.updateImageHeight, ss << updateOpt.updateImageHeight->ToString());
+    IF_TRUE(opt.updateImageWidth, ss << opt.updateImageWidth->ToString() << ",");
+    IF_TRUE(opt.updateImageHeight, ss << opt.updateImageHeight->ToString());
     ss << "],";
-    IF_TRUE(updateOpt.updateImageFit, ss << StringUtils::ToString(*updateOpt.updateImageFit) << ",");
-    IF_TRUE(updateOpt.updateImageVerticalAlign, ss << StringUtils::ToString(*updateOpt.updateImageVerticalAlign) << ",");
+    IF_TRUE(opt.updateImageFit, ss << StringUtils::ToString(*opt.updateImageFit) << ",");
+    IF_TRUE(opt.updateImageVerticalAlign, ss << StringUtils::ToString(*opt.updateImageVerticalAlign) << ",");
     ss << "}";
     return ss.str();
 }
