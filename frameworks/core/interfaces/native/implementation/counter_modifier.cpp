@@ -19,6 +19,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CounterModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CounterModifier
 namespace CounterInterfaceModifier {
 void SetCounterOptionsImpl(Ark_NativePointer node)
 {
@@ -66,6 +72,7 @@ void EnableIncImpl(Ark_NativePointer node,
 const GENERATED_ArkUICounterModifier* GetCounterModifier()
 {
     static const GENERATED_ArkUICounterModifier ArkUICounterModifierImpl {
+        CounterModifier::ConstructImpl,
         CounterInterfaceModifier::SetCounterOptionsImpl,
         CounterAttributeModifier::OnIncImpl,
         CounterAttributeModifier::OnDecImpl,

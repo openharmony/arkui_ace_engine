@@ -277,7 +277,7 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
         [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
             g_isEditChangeTest = isEditChange;
         },
-    .onSubmit =
+    .onSubmit0 =
         [](Ark_Int32 nodeId, const Ark_EnterKeyType enterKey) {
             g_EventTestString = std::to_string(enterKey);
         },
@@ -648,7 +648,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_EnterKeyType_Void func{};
-    modifier_->setOnSubmit(node_, &func);
+    modifier_->setOnSubmit0(node_, &func);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(eventHub, nullptr);

@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct SslErrorHandlerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SslErrorHandlerAccessor {
+void DestroyPeerImpl(SslErrorHandlerPeer* peer)
+{
+}
 SslErrorHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new SslErrorHandlerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void HandleConfirmImpl(SslErrorHandlerPeer* peer)
 {
@@ -37,6 +42,7 @@ void HandleCancelImpl(SslErrorHandlerPeer* peer)
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
 {
     static const GENERATED_ArkUISslErrorHandlerAccessor SslErrorHandlerAccessorImpl {
+        SslErrorHandlerAccessor::DestroyPeerImpl,
         SslErrorHandlerAccessor::CtorImpl,
         SslErrorHandlerAccessor::GetFinalizerImpl,
         SslErrorHandlerAccessor::HandleConfirmImpl,

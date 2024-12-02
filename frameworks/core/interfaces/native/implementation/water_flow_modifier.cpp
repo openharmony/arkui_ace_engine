@@ -22,6 +22,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace WaterFlowModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // WaterFlowModifier
 namespace WaterFlowInterfaceModifier {
 void SetWaterFlowOptionsImpl(Ark_NativePointer node,
                              const Opt_WaterFlowOptions* options)
@@ -139,8 +145,8 @@ void FrictionImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(convValue);
     WaterFlowModelNG::SetFriction(frameNode, convValue);
 }
-void CachedCountImpl(Ark_NativePointer node,
-                     const Ark_Number* value)
+void CachedCount0Impl(Ark_NativePointer node,
+                      const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -148,6 +154,16 @@ void CachedCountImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<int32_t>(*value);
     Validator::ValidateNonNegative(convValue);
     WaterFlowModelNG::SetCachedCount(frameNode, convValue);
+}
+void CachedCount1Impl(Ark_NativePointer node,
+                      const Ark_Number* count,
+                      Ark_Boolean show)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //WaterFlowModelNG::SetCachedCount1(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
@@ -197,6 +213,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
     static const GENERATED_ArkUIWaterFlowModifier ArkUIWaterFlowModifierImpl {
+        WaterFlowModifier::ConstructImpl,
         WaterFlowInterfaceModifier::SetWaterFlowOptionsImpl,
         WaterFlowAttributeModifier::ColumnsTemplateImpl,
         WaterFlowAttributeModifier::ItemConstraintSizeImpl,
@@ -207,7 +224,8 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::NestedScrollImpl,
         WaterFlowAttributeModifier::EnableScrollInteractionImpl,
         WaterFlowAttributeModifier::FrictionImpl,
-        WaterFlowAttributeModifier::CachedCountImpl,
+        WaterFlowAttributeModifier::CachedCount0Impl,
+        WaterFlowAttributeModifier::CachedCount1Impl,
         WaterFlowAttributeModifier::OnReachStartImpl,
         WaterFlowAttributeModifier::OnReachEndImpl,
         WaterFlowAttributeModifier::OnScrollFrameBeginImpl,

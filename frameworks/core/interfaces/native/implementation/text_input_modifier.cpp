@@ -74,6 +74,12 @@ PasswordIcon Convert(const Ark_PasswordIcon& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TextInputModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TextInputModifier
 namespace TextInputInterfaceModifier {
 void SetTextInputOptionsImpl(Ark_NativePointer node,
                              const Opt_TextInputOptions* value)
@@ -189,7 +195,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnEditChange(frameNode, onEditChange);
 }
 void OnSubmitImpl(Ark_NativePointer node,
-                  const Callback_EnterKeyType_SubmitEvent_Void* value)
+                  const OnSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -213,7 +219,7 @@ void OnChangeImpl(Ark_NativePointer node,
     LOGE("TextInputInterfaceModifier::OnChangeImpl not implemented");
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const Callback_Number_Number_Void* value)
+                               const OnTextSelectionChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -224,7 +230,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, onTextSelectionChange);
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         const Callback_Number_Number_Void* value)
+                         const OnContentScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -315,7 +321,7 @@ void OnCutImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnCut(frameNode, onCut);
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 const Callback_String_PasteEvent_Void* value)
+                 const OnPasteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -407,16 +413,11 @@ void PasswordIconImpl(Ark_NativePointer node,
     TextFieldModelNG::SetPasswordIcon(frameNode, convValue);
 }
 void ShowErrorImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceStr_Undefined* value)
+                   const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> convTextValue;
-    Converter::VisitUnion(
-        *value,
-        [&convTextValue](const Ark_ResourceStr& str) { convTextValue = Converter::OptConvert<std::string>(str); },
-        [](const Ark_Undefined& undefined) {},
-        []() {});
+    std::optional<std::string> convTextValue = Converter::OptConvert<std::string>(*value);
     auto convBoolValue = convTextValue.has_value() && !convTextValue->empty();
     TextFieldModelNG::SetShowError(frameNode, convTextValue, convBoolValue);
 }
@@ -437,7 +438,7 @@ void ShowUnderlineImpl(Ark_NativePointer node,
     TextFieldModelNG::SetShowUnderline(frameNode, convValue);
 }
 void UnderlineColorImpl(Ark_NativePointer node,
-                        const Ark_Union_ResourceColor_UnderlineColor_Undefined* value)
+                        const Opt_Union_ResourceColor_UnderlineColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -502,8 +503,8 @@ void LineBreakStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<LineBreakStrategy>(value); // for enums
     TextFieldModelNG::SetLineBreakStrategy(frameNode, convValue);
 }
-void CancelButtonImpl(Ark_NativePointer node,
-                      const Ark_Literal_CancelButtonStyle_style_IconOptions_icon* value)
+void CancelButton0Impl(Ark_NativePointer node,
+                       const Ark_CancelButtonOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -519,6 +520,15 @@ void CancelButtonImpl(Ark_NativePointer node,
         TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
         TextFieldModelNG::SetCanacelIconSrc(frameNode, Converter::OptConvert<std::string>(optIconOptions->src));
     }
+}
+void CancelButton1Impl(Ark_NativePointer node,
+                       const Ark_CancelButtonSymbolOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextInputModelNG::SetCancelButton1(frameNode, convValue);
 }
 void SelectAllImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -686,7 +696,7 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, onDidDelete);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -755,6 +765,7 @@ void ShowCounterImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
 {
     static const GENERATED_ArkUITextInputModifier ArkUITextInputModifierImpl {
+        TextInputModifier::ConstructImpl,
         TextInputInterfaceModifier::SetTextInputOptionsImpl,
         TextInputAttributeModifier::TypeImpl,
         TextInputAttributeModifier::ContentTypeImpl,
@@ -797,7 +808,8 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::MaxLinesImpl,
         TextInputAttributeModifier::WordBreakImpl,
         TextInputAttributeModifier::LineBreakStrategyImpl,
-        TextInputAttributeModifier::CancelButtonImpl,
+        TextInputAttributeModifier::CancelButton0Impl,
+        TextInputAttributeModifier::CancelButton1Impl,
         TextInputAttributeModifier::SelectAllImpl,
         TextInputAttributeModifier::MinFontSizeImpl,
         TextInputAttributeModifier::MaxFontSizeImpl,

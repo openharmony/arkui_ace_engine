@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ClientAuthenticationHandlerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClientAuthenticationHandlerAccessor {
+void DestroyPeerImpl(ClientAuthenticationHandlerPeer* peer)
+{
+}
 ClientAuthenticationHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new ClientAuthenticationHandlerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void Confirm0Impl(ClientAuthenticationHandlerPeer* peer,
                   const Ark_String* priKeyFile,
@@ -46,6 +51,7 @@ void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
 const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()
 {
     static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
+        ClientAuthenticationHandlerAccessor::DestroyPeerImpl,
         ClientAuthenticationHandlerAccessor::CtorImpl,
         ClientAuthenticationHandlerAccessor::GetFinalizerImpl,
         ClientAuthenticationHandlerAccessor::Confirm0Impl,

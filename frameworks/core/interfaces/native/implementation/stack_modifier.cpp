@@ -39,8 +39,13 @@ StackOptions Convert(const Ark_StackOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace StackModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // StackModifier
 namespace StackInterfaceModifier {
-
 void SetStackOptionsImpl(Ark_NativePointer node,
                          const Opt_StackOptions* options)
 {
@@ -62,10 +67,10 @@ void AlignContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+#ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
     auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
@@ -100,6 +105,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIStackModifier* GetStackModifier()
 {
     static const GENERATED_ArkUIStackModifier ArkUIStackModifierImpl {
+        StackModifier::ConstructImpl,
         StackInterfaceModifier::SetStackOptionsImpl,
         StackAttributeModifier::AlignContentImpl,
         StackAttributeModifier::PointLightImpl,

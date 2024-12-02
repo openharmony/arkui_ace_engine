@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct MutableStyledStringPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
+void DestroyPeerImpl(MutableStyledStringPeer* peer)
+{
+}
 MutableStyledStringPeer* CtorImpl()
 {
-    return nullptr;
+    return new MutableStyledStringPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ReplaceStringImpl(MutableStyledStringPeer* peer,
                        const Ark_Number* start,
@@ -68,22 +73,23 @@ void ClearStylesImpl(MutableStyledStringPeer* peer)
 void ReplaceStyledStringImpl(MutableStyledStringPeer* peer,
                              const Ark_Number* start,
                              const Ark_Number* length,
-                             const Ark_Materialized* other)
+                             const Ark_StyledString* other)
 {
 }
 void InsertStyledStringImpl(MutableStyledStringPeer* peer,
                             const Ark_Number* start,
-                            const Ark_Materialized* other)
+                            const Ark_StyledString* other)
 {
 }
 void AppendStyledStringImpl(MutableStyledStringPeer* peer,
-                            const Ark_Materialized* other)
+                            const Ark_StyledString* other)
 {
 }
 } // MutableStyledStringAccessor
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor()
 {
     static const GENERATED_ArkUIMutableStyledStringAccessor MutableStyledStringAccessorImpl {
+        MutableStyledStringAccessor::DestroyPeerImpl,
         MutableStyledStringAccessor::CtorImpl,
         MutableStyledStringAccessor::GetFinalizerImpl,
         MutableStyledStringAccessor::ReplaceStringImpl,

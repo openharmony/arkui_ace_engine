@@ -52,6 +52,12 @@ void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ColumnModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ColumnModifier
 namespace ColumnInterfaceModifier {
 void SetColumnOptionsImpl(Ark_NativePointer node,
                           const Opt_ColumnOptions* options)
@@ -83,10 +89,10 @@ void JustifyContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+#ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
     auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
@@ -118,7 +124,7 @@ void PointLightImpl(Ark_NativePointer node,
 #endif
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Ark_Union_Boolean_Undefined* value)
+                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -133,6 +139,7 @@ void ReverseImpl(Ark_NativePointer node,
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
+        ColumnModifier::ConstructImpl,
         ColumnInterfaceModifier::SetColumnOptionsImpl,
         ColumnAttributeModifier::AlignItemsImpl,
         ColumnAttributeModifier::JustifyContentImpl,

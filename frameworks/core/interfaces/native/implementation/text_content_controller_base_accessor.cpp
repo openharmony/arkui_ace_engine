@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TextContentControllerBasePeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
+void DestroyPeerImpl(TextContentControllerBasePeer* peer)
+{
+}
 TextContentControllerBasePeer* CtorImpl()
 {
-    return nullptr;
+    return new TextContentControllerBasePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
 {
@@ -43,6 +48,7 @@ Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
 {
     static const GENERATED_ArkUITextContentControllerBaseAccessor TextContentControllerBaseAccessorImpl {
+        TextContentControllerBaseAccessor::DestroyPeerImpl,
         TextContentControllerBaseAccessor::CtorImpl,
         TextContentControllerBaseAccessor::GetFinalizerImpl,
         TextContentControllerBaseAccessor::GetCaretOffsetImpl,

@@ -49,6 +49,8 @@ extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureEnumColorInval
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>>
     testFixtureEnumColoringStrategyValidValues;
 extern std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ContentClipMode, std::string>> testFixtureEnumContentClipModeValidValues;
+extern std::vector<std::tuple<std::string, Ark_ContentClipMode>> testFixtureEnumContentClipModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ControlSize>> testFixtureEnumControlSizeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CopyOptions, std::string>> testFixtureEnumCopyOptionsValidValues;
@@ -89,6 +91,10 @@ extern std::vector<std::tuple<std::string, Ark_ImageRenderMode, std::string>> te
 extern std::vector<std::tuple<std::string, Ark_ImageRenderMode>> testFixtureEnumImageRenderModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFixtureEnumImageRepeatValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
+    testFixtureEnumImageRotateOrientationValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>>
+    testFixtureEnumImageRotateOrientationInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_InputType>> testFixtureEnumInputTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ItemAlign, std::string>> testFixtureEnumItemAlignValidValues;

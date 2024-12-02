@@ -220,6 +220,12 @@ void AssignCast(std::optional<PlaceholderOptions>& dst, const Ark_PlaceholderSty
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RichEditorModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RichEditorModifier
 namespace RichEditorInterfaceModifier {
 void SetRichEditorOptions0Impl(Ark_NativePointer node,
                                const Ark_RichEditorOptions* value)
@@ -509,7 +515,7 @@ void OnCopyImpl(Ark_NativePointer node,
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCallback));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -584,7 +590,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     }
 
     std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content)]() {
-        Callback_CustomObject_void continuation;
+        Callback_Any_Void continuation;
         arkCallback.Invoke(continuation);
     };
 
@@ -606,7 +612,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     std::function<void()> callback = []() {};
     if (value) {
         callback = [arkCallback = CallbackHelper(*value)]() -> void {
-            Callback_CustomObject_void continuation;
+            Callback_Any_Void continuation;
             arkCallback.Invoke(continuation);
         };
     }
@@ -631,6 +637,7 @@ void PlaceholderImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const GENERATED_ArkUIRichEditorModifier ArkUIRichEditorModifierImpl {
+        RichEditorModifier::ConstructImpl,
         RichEditorInterfaceModifier::SetRichEditorOptions0Impl,
         RichEditorInterfaceModifier::SetRichEditorOptions1Impl,
         RichEditorAttributeModifier::OnReadyImpl,

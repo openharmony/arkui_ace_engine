@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ISinglePropertyChangeSubscriberPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ISinglePropertyChangeSubscriberAccessor {
+void DestroyPeerImpl(ISinglePropertyChangeSubscriberPeer* peer)
+{
+}
 ISinglePropertyChangeSubscriberPeer* CtorImpl()
 {
-    return nullptr;
+    return new ISinglePropertyChangeSubscriberPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void HasChangedImpl(ISinglePropertyChangeSubscriberPeer* peer,
                     const Ark_CustomObject* newValue)
@@ -35,6 +40,7 @@ void HasChangedImpl(ISinglePropertyChangeSubscriberPeer* peer,
 const GENERATED_ArkUIISinglePropertyChangeSubscriberAccessor* GetISinglePropertyChangeSubscriberAccessor()
 {
     static const GENERATED_ArkUIISinglePropertyChangeSubscriberAccessor ISinglePropertyChangeSubscriberAccessorImpl {
+        ISinglePropertyChangeSubscriberAccessor::DestroyPeerImpl,
         ISinglePropertyChangeSubscriberAccessor::CtorImpl,
         ISinglePropertyChangeSubscriberAccessor::GetFinalizerImpl,
         ISinglePropertyChangeSubscriberAccessor::HasChangedImpl,

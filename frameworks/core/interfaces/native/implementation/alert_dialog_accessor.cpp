@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct AlertDialogPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
+void DestroyPeerImpl(AlertDialogPeer* peer)
+{
+}
 AlertDialogPeer* CtorImpl()
 {
-    return nullptr;
+    return new AlertDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
 {
     static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
+        AlertDialogAccessor::DestroyPeerImpl,
         AlertDialogAccessor::CtorImpl,
         AlertDialogAccessor::GetFinalizerImpl,
         AlertDialogAccessor::ShowImpl,

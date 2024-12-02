@@ -14,7 +14,7 @@
 # WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 declare_args() {
-  include_generated_sources = true
+  include_generated_sources = false
 }
 generated_sources = [
   "implementation/ability_component_modifier.cpp",
@@ -92,15 +92,15 @@ generated_sources = [
   "implementation/http_auth_handler_accessor.cpp",
   "implementation/hyperlink_modifier.cpp",
   "implementation/i_curve_accessor.cpp",
-  "implementation/i_monitor_accessor.cpp",
   "implementation/i_property_subscriber_accessor.cpp",
   "implementation/i_single_property_change_subscriber_accessor.cpp",
   "implementation/image_analyzer_controller_accessor.cpp",
   "implementation/image_animator_modifier.cpp",
   "implementation/image_bitmap_accessor.cpp",
-  "implementation/image_bitmap_peer_impl.cpp",
   "implementation/image_modifier.cpp",
   "implementation/image_span_modifier.cpp",
+  "implementation/indicator_component_controller_accessor.cpp",
+  "implementation/indicator_component_modifier.cpp",
   "implementation/js_geolocation_accessor.cpp",
   "implementation/js_result_accessor.cpp",
   "implementation/layout_manager_accessor.cpp",
@@ -115,7 +115,6 @@ generated_sources = [
   "implementation/location_button_modifier.cpp",
   "implementation/marquee_modifier.cpp",
   "implementation/matrix2d_accessor.cpp",
-  "implementation/measurable_accessor.cpp",
   "implementation/media_cached_image_modifier.cpp",
   "implementation/menu_item_group_modifier.cpp",
   "implementation/menu_item_modifier.cpp",
@@ -201,6 +200,7 @@ generated_sources = [
   "implementation/text_edit_controller_ex_accessor.cpp",
   "implementation/text_input_controller_accessor.cpp",
   "implementation/text_input_modifier.cpp",
+  "implementation/text_menu_item_id_accessor.cpp",
   "implementation/text_modifier.cpp",
   "implementation/text_picker_dialog_accessor.cpp",
   "implementation/text_picker_modifier.cpp",
@@ -231,5 +231,4 @@ generated_sources = [
   "implementation/x_component_controller_accessor.cpp",
   "implementation/x_component_modifier.cpp",
   "utility/converter.cpp",
-  "utility/validators.cpp",
 ]

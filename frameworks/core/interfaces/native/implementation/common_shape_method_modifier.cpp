@@ -31,6 +31,10 @@ namespace {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
 void StrokeImpl(Ark_NativePointer node,
                 const Ark_ResourceColor* value)
 {
@@ -138,6 +142,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
 {
     static const GENERATED_ArkUICommonShapeMethodModifier ArkUICommonShapeMethodModifierImpl {
+        CommonShapeMethodModifier::ConstructImpl,
         CommonShapeMethodModifier::StrokeImpl,
         CommonShapeMethodModifier::FillImpl,
         CommonShapeMethodModifier::StrokeDashOffsetImpl,

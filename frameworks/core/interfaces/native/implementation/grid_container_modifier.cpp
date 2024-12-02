@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GridContainerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GridContainerModifier
 namespace GridContainerInterfaceModifier {
 void SetGridContainerOptionsImpl(Ark_NativePointer node,
                                  const Opt_GridContainerOptions* value)
@@ -31,6 +37,7 @@ void SetGridContainerOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridContainerModifier* GetGridContainerModifier()
 {
     static const GENERATED_ArkUIGridContainerModifier ArkUIGridContainerModifierImpl {
+        GridContainerModifier::ConstructImpl,
         GridContainerInterfaceModifier::SetGridContainerOptionsImpl,
     };
     return &ArkUIGridContainerModifierImpl;

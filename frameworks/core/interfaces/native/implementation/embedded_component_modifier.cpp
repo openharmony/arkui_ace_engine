@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace EmbeddedComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // EmbeddedComponentModifier
 namespace EmbeddedComponentInterfaceModifier {
 void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      const Ark_Want* loader,
@@ -53,6 +59,7 @@ void OnErrorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier()
 {
     static const GENERATED_ArkUIEmbeddedComponentModifier ArkUIEmbeddedComponentModifierImpl {
+        EmbeddedComponentModifier::ConstructImpl,
         EmbeddedComponentInterfaceModifier::SetEmbeddedComponentOptionsImpl,
         EmbeddedComponentAttributeModifier::OnTerminatedImpl,
         EmbeddedComponentAttributeModifier::OnErrorImpl,

@@ -123,7 +123,7 @@ HWTEST_F(ColumnSplitModifierTest, DISABLED_setDividerTestDefaultValues, TestSize
  */
 HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleStartMarginValidValues, TestSize.Level1)
 {
-    Ark_Union_ColumnSplitDividerStyle_Undefined initValueDivider;
+    Ark_Union_ColumnSplitDividerStyle_Null initValueDivider;
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
@@ -133,7 +133,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleSt
 
     auto checkValue = [this, &initValueDivider](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
+        Ark_Union_ColumnSplitDividerStyle_Null inputValueDivider = initValueDivider;
 
         WriteToUnion<Ark_ColumnSplitDividerStyle>(inputValueDivider).startMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
@@ -157,7 +157,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleSt
  */
 HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleStartMarginInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ColumnSplitDividerStyle_Undefined initValueDivider;
+    Ark_Union_ColumnSplitDividerStyle_Null initValueDivider;
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
@@ -166,7 +166,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleSt
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
-        Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
+        Ark_Union_ColumnSplitDividerStyle_Null inputValueDivider = initValueDivider;
 
         modifier_->setDivider(node_, &inputValueDivider);
         WriteToUnion<Ark_ColumnSplitDividerStyle>(inputValueDivider).startMargin = value;
@@ -190,7 +190,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleSt
  */
 HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleEndMarginValidValues, TestSize.Level1)
 {
-    Ark_Union_ColumnSplitDividerStyle_Undefined initValueDivider;
+    Ark_Union_ColumnSplitDividerStyle_Null initValueDivider;
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
@@ -200,7 +200,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleEn
 
     auto checkValue = [this, &initValueDivider](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
+        Ark_Union_ColumnSplitDividerStyle_Null inputValueDivider = initValueDivider;
 
         WriteToUnion<Ark_ColumnSplitDividerStyle>(inputValueDivider).endMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
@@ -224,7 +224,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleEn
  */
 HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleEndMarginInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ColumnSplitDividerStyle_Undefined initValueDivider;
+    Ark_Union_ColumnSplitDividerStyle_Null initValueDivider;
 
     // Initial setup
     WriteToUnion<Ark_ColumnSplitDividerStyle>(initValueDivider).startMargin =
@@ -233,7 +233,7 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerColumnSplitDividerStyleEn
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthAnyValidValues[0]));
 
     auto checkValue = [this, &initValueDivider](const std::string& input, const Opt_Length& value) {
-        Ark_Union_ColumnSplitDividerStyle_Undefined inputValueDivider = initValueDivider;
+        Ark_Union_ColumnSplitDividerStyle_Null inputValueDivider = initValueDivider;
 
         modifier_->setDivider(node_, &inputValueDivider);
         WriteToUnion<Ark_ColumnSplitDividerStyle>(inputValueDivider).endMargin = value;

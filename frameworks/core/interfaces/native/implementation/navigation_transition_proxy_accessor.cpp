@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct NavigationTransitionProxyPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
+void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
+{
+}
 NavigationTransitionProxyPeer* CtorImpl()
 {
-    return nullptr;
+    return new NavigationTransitionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
 {
@@ -57,6 +62,7 @@ void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer,
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor()
 {
     static const GENERATED_ArkUINavigationTransitionProxyAccessor NavigationTransitionProxyAccessorImpl {
+        NavigationTransitionProxyAccessor::DestroyPeerImpl,
         NavigationTransitionProxyAccessor::CtorImpl,
         NavigationTransitionProxyAccessor::GetFinalizerImpl,
         NavigationTransitionProxyAccessor::FinishTransitionImpl,

@@ -19,8 +19,13 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG {
-namespace GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SymbolGlyphModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SymbolGlyphModifier
 namespace SymbolGlyphInterfaceModifier {
 void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
                                const Opt_Resource* value)
@@ -107,6 +112,7 @@ void SymbolEffect1Impl(Ark_NativePointer node,
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
     static const GENERATED_ArkUISymbolGlyphModifier ArkUISymbolGlyphModifierImpl {
+        SymbolGlyphModifier::ConstructImpl,
         SymbolGlyphInterfaceModifier::SetSymbolGlyphOptionsImpl,
         SymbolGlyphAttributeModifier::FontSizeImpl,
         SymbolGlyphAttributeModifier::FontColorImpl,
@@ -118,5 +124,5 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
     };
     return &ArkUISymbolGlyphModifierImpl;
 }
-}
+
 }

@@ -168,6 +168,12 @@ namespace OHOS::Ace::NG::Validator {
     }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GridRowModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GridRowModifier
 namespace GridRowInterfaceModifier {
 void SetGridRowOptionsImpl(Ark_NativePointer node,
                            const Opt_GridRowOptions* option)
@@ -232,6 +238,7 @@ void AlignItemsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()
 {
     static const GENERATED_ArkUIGridRowModifier ArkUIGridRowModifierImpl {
+        GridRowModifier::ConstructImpl,
         GridRowInterfaceModifier::SetGridRowOptionsImpl,
         GridRowAttributeModifier::OnBreakpointChangeImpl,
         GridRowAttributeModifier::AlignItemsImpl,

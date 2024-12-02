@@ -21,19 +21,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HttpAuthHandlerAccessor {
-HttpAuthHandlerPeer* CtorImpl()
-{
-    return new HttpAuthHandlerPeer();
-}
-static void DestroyPeer(HttpAuthHandlerPeer *peer)
+void DestroyPeerImpl(HttpAuthHandlerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+HttpAuthHandlerPeer* CtorImpl()
+{
+    return new HttpAuthHandlerPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean ConfirmImpl(HttpAuthHandlerPeer* peer,
                         const Ark_String* userName,
@@ -60,6 +60,7 @@ Ark_Boolean IsHttpAuthInfoSavedImpl(HttpAuthHandlerPeer* peer)
 const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
 {
     static const GENERATED_ArkUIHttpAuthHandlerAccessor HttpAuthHandlerAccessorImpl {
+        HttpAuthHandlerAccessor::DestroyPeerImpl,
         HttpAuthHandlerAccessor::CtorImpl,
         HttpAuthHandlerAccessor::GetFinalizerImpl,
         HttpAuthHandlerAccessor::ConfirmImpl,

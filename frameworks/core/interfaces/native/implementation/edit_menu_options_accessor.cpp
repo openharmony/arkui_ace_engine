@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct EditMenuOptionsPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EditMenuOptionsAccessor {
+void DestroyPeerImpl(EditMenuOptionsPeer* peer)
+{
+}
 EditMenuOptionsPeer* CtorImpl()
 {
-    return nullptr;
+    return new EditMenuOptionsPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void OnCreateMenuImpl(EditMenuOptionsPeer* peer,
                       const Array_TextMenuItem* menuItems)
@@ -41,6 +46,7 @@ Ark_Boolean OnMenuItemClickImpl(EditMenuOptionsPeer* peer,
 const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
 {
     static const GENERATED_ArkUIEditMenuOptionsAccessor EditMenuOptionsAccessorImpl {
+        EditMenuOptionsAccessor::DestroyPeerImpl,
         EditMenuOptionsAccessor::CtorImpl,
         EditMenuOptionsAccessor::GetFinalizerImpl,
         EditMenuOptionsAccessor::OnCreateMenuImpl,

@@ -21,7 +21,12 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
+namespace CheckboxGroupModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CheckboxGroupModifier
 namespace CheckboxGroupInterfaceModifier {
 void SetCheckboxGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_CheckboxGroupOptions* options)
@@ -108,6 +113,7 @@ void CheckboxShapeImpl(Ark_NativePointer node,
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
     static const GENERATED_ArkUICheckboxGroupModifier ArkUICheckboxGroupModifierImpl {
+        CheckboxGroupModifier::ConstructImpl,
         CheckboxGroupInterfaceModifier::SetCheckboxGroupOptionsImpl,
         CheckboxGroupAttributeModifier::SelectAllImpl,
         CheckboxGroupAttributeModifier::SelectedColorImpl,

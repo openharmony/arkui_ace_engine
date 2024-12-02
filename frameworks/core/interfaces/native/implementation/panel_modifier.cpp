@@ -64,6 +64,12 @@ void AssignCast(std::optional<CalcDimension>& dst, const Ark_PanelHeight& src)
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PanelModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PanelModifier
 namespace PanelInterfaceModifier {
 void SetPanelOptionsImpl(Ark_NativePointer node,
                          Ark_Boolean show)
@@ -100,9 +106,9 @@ void DragBarImpl(Ark_NativePointer node,
 void CustomHeightImpl(Ark_NativePointer node,
                       const Ark_Union_Dimension_PanelHeight* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto customHeight = Converter::OptConvert<CalcDimension>(*value);
     Validator::ValidateNonNegative(customHeight);
     Validator::ValidateNonPercent(customHeight);
@@ -112,9 +118,9 @@ void CustomHeightImpl(Ark_NativePointer node,
 void FullHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto fullHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(fullHeight);
     Validator::ValidateNonPercent(fullHeight);
@@ -123,9 +129,9 @@ void FullHeightImpl(Ark_NativePointer node,
 void HalfHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto halfHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(halfHeight);
     Validator::ValidateNonPercent(halfHeight);
@@ -134,9 +140,9 @@ void HalfHeightImpl(Ark_NativePointer node,
 void MiniHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto miniHeight = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(miniHeight);
     Validator::ValidateNonPercent(miniHeight);
@@ -197,6 +203,7 @@ void OnHeightChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()
 {
     static const GENERATED_ArkUIPanelModifier ArkUIPanelModifierImpl {
+        PanelModifier::ConstructImpl,
         PanelInterfaceModifier::SetPanelOptionsImpl,
         PanelAttributeModifier::ModeImpl,
         PanelAttributeModifier::TypeImpl,

@@ -28,14 +28,13 @@ inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
-
-static void DestroyPeer(SwiperControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(SwiperControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-
 SwiperControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
@@ -44,7 +43,7 @@ SwiperControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowNextImpl(SwiperControllerPeer* peer)
 {
@@ -70,11 +69,11 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_Callback_Void* callback)
+                         const Opt_VoidCallback* callback)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto arkCallbackOpt = callback ? Converter::OptConvert<Callback_Void>(*callback) : std::nullopt;
+    auto arkCallbackOpt = callback ? Converter::OptConvert<VoidCallback>(*callback) : std::nullopt;
     if (arkCallbackOpt) {
         auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
             arkCallback.Invoke();
@@ -87,6 +86,7 @@ void FinishAnimationImpl(SwiperControllerPeer* peer,
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
 {
     static const GENERATED_ArkUISwiperControllerAccessor SwiperControllerAccessorImpl {
+        SwiperControllerAccessor::DestroyPeerImpl,
         SwiperControllerAccessor::CtorImpl,
         SwiperControllerAccessor::GetFinalizerImpl,
         SwiperControllerAccessor::ShowNextImpl,
@@ -96,4 +96,5 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
     };
     return &SwiperControllerAccessorImpl;
 }
+
 }

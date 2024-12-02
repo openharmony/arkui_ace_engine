@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TextPickerDialogPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
+void DestroyPeerImpl(TextPickerDialogPeer* peer)
+{
+}
 TextPickerDialogPeer* CtorImpl()
 {
-    return nullptr;
+    return new TextPickerDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
+        TextPickerDialogAccessor::DestroyPeerImpl,
         TextPickerDialogAccessor::CtorImpl,
         TextPickerDialogAccessor::GetFinalizerImpl,
         TextPickerDialogAccessor::ShowImpl,

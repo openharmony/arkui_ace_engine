@@ -991,6 +991,11 @@ void* createCustomNodeNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
+void* createIndicatorComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);

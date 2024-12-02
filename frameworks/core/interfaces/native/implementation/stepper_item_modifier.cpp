@@ -31,6 +31,12 @@ void AssignCast(std::optional<StepperItemModelNG::ItemState>& dst, const Ark_Ite
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace StepperItemModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // StepperItemModifier
 namespace StepperItemInterfaceModifier {
 void SetStepperItemOptionsImpl(Ark_NativePointer node)
 {
@@ -72,6 +78,7 @@ void StatusImpl(Ark_NativePointer node,
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()
 {
     static const GENERATED_ArkUIStepperItemModifier ArkUIStepperItemModifierImpl {
+        StepperItemModifier::ConstructImpl,
         StepperItemInterfaceModifier::SetStepperItemOptionsImpl,
         StepperItemAttributeModifier::PrevLabelImpl,
         StepperItemAttributeModifier::NextLabelImpl,

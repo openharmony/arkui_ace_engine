@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct LayoutManagerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LayoutManagerAccessor {
+void DestroyPeerImpl(LayoutManagerPeer* peer)
+{
+}
 LayoutManagerPeer* CtorImpl()
 {
-    return nullptr;
+    return new LayoutManagerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 GetLineCountImpl(LayoutManagerPeer* peer)
 {
@@ -44,14 +49,15 @@ Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
 }
 void GetRectsForRangeImpl(LayoutManagerPeer* peer,
                           const Ark_TextRange* range,
-                          const Ark_CustomObject* widthStyle,
-                          const Ark_CustomObject* heightStyle)
+                          Ark_RectWidthStyle widthStyle,
+                          Ark_RectHeightStyle heightStyle)
 {
 }
 } // LayoutManagerAccessor
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
 {
     static const GENERATED_ArkUILayoutManagerAccessor LayoutManagerAccessorImpl {
+        LayoutManagerAccessor::DestroyPeerImpl,
         LayoutManagerAccessor::CtorImpl,
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,

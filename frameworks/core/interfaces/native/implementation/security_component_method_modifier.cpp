@@ -86,6 +86,10 @@ void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
@@ -285,6 +289,7 @@ void ConstraintSizeImpl(Ark_NativePointer node,
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
 {
     static const GENERATED_ArkUISecurityComponentMethodModifier ArkUISecurityComponentMethodModifierImpl {
+        SecurityComponentMethodModifier::ConstructImpl,
         SecurityComponentMethodModifier::IconSizeImpl,
         SecurityComponentMethodModifier::LayoutDirectionImpl,
         SecurityComponentMethodModifier::PositionImpl,

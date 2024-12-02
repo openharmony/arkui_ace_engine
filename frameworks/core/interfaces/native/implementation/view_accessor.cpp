@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ViewPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ViewAccessor {
+void DestroyPeerImpl(ViewPeer* peer)
+{
+}
 ViewPeer* CtorImpl()
 {
-    return nullptr;
+    return new ViewPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CreateImpl(ViewPeer* peer,
                 const Ark_CustomObject* value)
@@ -35,6 +40,7 @@ void CreateImpl(ViewPeer* peer,
 const GENERATED_ArkUIViewAccessor* GetViewAccessor()
 {
     static const GENERATED_ArkUIViewAccessor ViewAccessorImpl {
+        ViewAccessor::DestroyPeerImpl,
         ViewAccessor::CtorImpl,
         ViewAccessor::GetFinalizerImpl,
         ViewAccessor::CreateImpl,

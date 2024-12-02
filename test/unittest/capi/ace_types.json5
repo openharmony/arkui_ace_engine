@@ -1842,7 +1842,10 @@
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
-                "setMaxLinesTestDefaultValues"
+                "setMaxLinesTestDefaultValues",
+
+                // New override in API 105?
+                "setCancelButton1TestCancelButtonStyleValidValues",
             ]
         },
         {
@@ -2234,6 +2237,12 @@
                 "setRecoverableTestDefaultValues",
                 "setRecoverableTestValidValues",
                 "setRecoverableTestRecoverableInvalidValues",
+
+                // New attr in API 105?
+                "setEnableDragBarTestDefaultValues",
+                "setEnableDragBarTestEnableDragBarValidValues",
+                "setEnableDragBarTestEnableDragBarInvalidValues",
+
             ],
             "attributes": [
                 {
@@ -2518,6 +2527,11 @@
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
 
                 "setDraggableTestDraggableValidValues", // Failed after upmerge, need to check
+
+                // New attr in API 105?
+                "setOrientationTestDefaultValues",
+                "setOrientationTestOrientationValidValues",
+                "setOrientationTestOrientationInvalidValues",
             ]
         },
         {
@@ -2562,6 +2576,9 @@
             "includes": ["core/components/progress/progress_theme.h"],
             "themes": ["ProgressTheme"],
             "remove": [
+                "setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues", // wrong generator
+                "setStyleTestStyleLinearStyleOptionsStrokeWidthInvalidValues", // wrong generator
+                "setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues", // wrong generator
                 "setStyleTestStyleLinearStyleOptionsStrokeRadiusValidValues",
                 "setStyleTestDefaultValues",
             ],
@@ -2704,6 +2721,11 @@
                 "setScrollBarTestScrollBarInvalidValues",
 
                 "setFrictionTestDefaultValues", // Failed after upmerge. Need to check
+
+                // New attr in API 105?
+                "setClipContentTestDefaultValues",
+                "setClipContentTestClipContentValidValues",
+                "setClipContentTestClipContentInvalidValues",
             ]
         },
         {
@@ -3184,7 +3206,12 @@
                 },
                 {
                     "name": "textOverflow",
-                    "default": "TextOverflow.Clip",
+                    "attributes": [
+                        {
+                            "name": "overflow",
+                            "default": "TextOverflow.Clip",
+                        },
+                    ],
                 },
                 {
                     "name": "wordBreak",
@@ -3263,6 +3290,14 @@
                 "setSelectionTestDefaultValues",
                 "setSelectionTestSelectionSelectionEndValidValues",
                 "setSelectionTestSelectionSelectionStartValidValues",
+
+                // New attr in API 105?
+                "setCaretColorTestDefaultValues",
+                "setCaretColorTestCaretColorValidValues",
+                "setCaretColorTestCaretColorInvalidValues",
+                "setSelectedBackgroundColorTestDefaultValues",
+                "setSelectedBackgroundColorTestSelectedBackgroundColorValidValues",
+                "setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
@@ -3666,6 +3701,11 @@
                 "setLayoutDirectionTestDefaultValues", // wrong name in json!
                 "setLayoutDirectionTestLayoutDirectionValidValues", // wrong name in json!
                 "setLayoutDirectionTestLayoutDirectionInvalidValues", // wrong name in json!
+
+                // New override in API 105?
+                "setCachedCount1TestDefaultValues",
+                "setCachedCount1TestCachedCountCountValidValues",
+                "setCachedCount1TestCachedCountShowValidValues",
             ],
             "attributes": [
                 {

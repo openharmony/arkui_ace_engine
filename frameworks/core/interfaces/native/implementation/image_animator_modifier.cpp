@@ -82,6 +82,12 @@ ImageProperties Convert(const Ark_ImageFrameInfo& src)
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ImageAnimatorModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ImageAnimatorModifier
 namespace ImageAnimatorInterfaceModifier {
 void SetImageAnimatorOptionsImpl(Ark_NativePointer node)
 {
@@ -210,6 +216,7 @@ void OnFinishImpl(Ark_NativePointer node,
 const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
 {
     static const GENERATED_ArkUIImageAnimatorModifier ArkUIImageAnimatorModifierImpl {
+        ImageAnimatorModifier::ConstructImpl,
         ImageAnimatorInterfaceModifier::SetImageAnimatorOptionsImpl,
         ImageAnimatorAttributeModifier::ImagesImpl,
         ImageAnimatorAttributeModifier::StateImpl,

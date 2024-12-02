@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct LinearIndicatorControllerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LinearIndicatorControllerAccessor {
+void DestroyPeerImpl(LinearIndicatorControllerPeer* peer)
+{
+}
 LinearIndicatorControllerPeer* CtorImpl()
 {
-    return nullptr;
+    return new LinearIndicatorControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetProgressImpl(LinearIndicatorControllerPeer* peer,
                      const Ark_Number* index,
@@ -46,6 +51,7 @@ void StopImpl(LinearIndicatorControllerPeer* peer)
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor()
 {
     static const GENERATED_ArkUILinearIndicatorControllerAccessor LinearIndicatorControllerAccessorImpl {
+        LinearIndicatorControllerAccessor::DestroyPeerImpl,
         LinearIndicatorControllerAccessor::CtorImpl,
         LinearIndicatorControllerAccessor::GetFinalizerImpl,
         LinearIndicatorControllerAccessor::SetProgressImpl,

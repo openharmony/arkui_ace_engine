@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
-static void DestroyPeer(CanvasPatternPeer* peer)
+void DestroyPeerImpl(CanvasPatternPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -33,7 +33,7 @@ CanvasPatternPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetTransformImpl(CanvasPatternPeer* peer,
                       const Opt_Matrix2D* transform)
@@ -43,6 +43,7 @@ void SetTransformImpl(CanvasPatternPeer* peer,
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
 {
     static const GENERATED_ArkUICanvasPatternAccessor CanvasPatternAccessorImpl {
+        CanvasPatternAccessor::DestroyPeerImpl,
         CanvasPatternAccessor::CtorImpl,
         CanvasPatternAccessor::GetFinalizerImpl,
         CanvasPatternAccessor::SetTransformImpl,

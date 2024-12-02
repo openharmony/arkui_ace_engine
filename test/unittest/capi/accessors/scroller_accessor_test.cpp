@@ -207,9 +207,9 @@ HWTEST_F(ScrollerAccessorTest, scrollPage0Test, TestSize.Level1)
     constexpr bool nextFalse = false;
     constexpr bool smooth = false;
 
-    Ark_Literal_Boolean_next options1;
+    Ark_ScrollPageOptions options1;
     options1.next = ArkValue<Ark_Boolean>(nextTrue);
-    Ark_Literal_Boolean_next options2;
+    Ark_ScrollPageOptions options2;
     options2.next = ArkValue<Ark_Boolean>(nextFalse);
 
     ASSERT_NE(accessor_->scrollPage0, nullptr);

@@ -20,14 +20,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerAccessor {
-
-static void DestroyPeer(TabsControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(TabsControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-
 TabsControllerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
@@ -36,7 +35,7 @@ TabsControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ChangeIndexImpl(TabsControllerPeer* peer,
                      const Ark_Number* value)
@@ -47,27 +46,38 @@ void ChangeIndexImpl(TabsControllerPeer* peer,
     auto index = Converter::Convert<Ark_Int32>(*value);
     peerImpl->TriggerChangeIndex(index);
 }
-Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
-                                   const Ark_Union_Array_Number_Undefined* indices)
+void PreloadItemsImpl(TabsControllerPeer* peer,
+                      const Opt_Array_Number* indices,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(indices, nullptr);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(indices);
     auto indexVectOpt = Converter::OptConvert<std::vector<int32_t>>(*indices);
     if (indexVectOpt) {
         std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
         peerImpl->TriggerPreloadItems(indexSet);
     }
-    return nullptr;
+}
+void SetTabBarTranslateImpl(TabsControllerPeer* peer,
+                            const Ark_TranslateOptions* translate)
+{
+}
+void SetTabBarOpacityImpl(TabsControllerPeer* peer,
+                          const Ark_Number* opacity)
+{
 }
 } // TabsControllerAccessor
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
 {
     static const GENERATED_ArkUITabsControllerAccessor TabsControllerAccessorImpl {
+        TabsControllerAccessor::DestroyPeerImpl,
         TabsControllerAccessor::CtorImpl,
         TabsControllerAccessor::GetFinalizerImpl,
         TabsControllerAccessor::ChangeIndexImpl,
         TabsControllerAccessor::PreloadItemsImpl,
+        TabsControllerAccessor::SetTabBarTranslateImpl,
+        TabsControllerAccessor::SetTabBarOpacityImpl,
     };
     return &TabsControllerAccessorImpl;
 }

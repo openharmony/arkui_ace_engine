@@ -94,13 +94,13 @@ HWTEST_F(EllipseModifierTest, setEllipseOptionsTestDefaultValues, TestSize.Level
 HWTEST_F(EllipseModifierTest, setEllipseOptionsTestValidWidthValues, TestSize.Level1)
 {
     std::string strResult;
-    Opt_Literal_Union_String_Number_height_width optionsOpt;
-    Ark_Literal_Union_String_Number_height_width options;
+    Opt_EllipseOptions optionsOpt;
+    Ark_EllipseOptions options;
     options.height = Converter::ArkValue<Opt_Union_String_Number>(Ark_Empty());
 
     for (const auto &[width, expected]: VALID_VALUE_TEST_PLAN) {
         options.width = width;
-        optionsOpt = Converter::ArkValue<Opt_Literal_Union_String_Number_height_width>(options);
+        optionsOpt = Converter::ArkValue<Opt_EllipseOptions>(options);
         modifier_->setEllipseOptions(node_, &optionsOpt);
 
         strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
@@ -118,13 +118,13 @@ HWTEST_F(EllipseModifierTest, setEllipseOptionsTestValidWidthValues, TestSize.Le
 HWTEST_F(EllipseModifierTest, setEllipseOptionsTestValidHeightValues, TestSize.Level1)
 {
     std::string strResult;
-    Opt_Literal_Union_String_Number_height_width optionsOpt;
-    Ark_Literal_Union_String_Number_height_width options;
+    Opt_EllipseOptions optionsOpt;
+    Ark_EllipseOptions options;
     options.width = Converter::ArkValue<Opt_Union_String_Number>(Ark_Empty());
 
     for (const auto &[height, expected]: VALID_VALUE_TEST_PLAN) {
         options.height = height;
-        optionsOpt = Converter::ArkValue<Opt_Literal_Union_String_Number_height_width>(options);
+        optionsOpt = Converter::ArkValue<Opt_EllipseOptions>(options);
         modifier_->setEllipseOptions(node_, &optionsOpt);
 
         strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
@@ -142,13 +142,13 @@ HWTEST_F(EllipseModifierTest, setEllipseOptionsTestValidHeightValues, TestSize.L
 HWTEST_F(EllipseModifierTest, setEllipseOptionsTestInvalidWidthValues, TestSize.Level1)
 {
     std::string strResult;
-    Opt_Literal_Union_String_Number_height_width optionsOpt;
-    Ark_Literal_Union_String_Number_height_width options;
+    Opt_EllipseOptions optionsOpt;
+    Ark_EllipseOptions options;
     options.height = Converter::ArkValue<Opt_Union_String_Number>(Ark_Empty());
 
     for (const auto &[width, expected]: INVALID_VALUE_TEST_PLAN) {
         options.width = width;
-        optionsOpt = Converter::ArkValue<Opt_Literal_Union_String_Number_height_width>(options);
+        optionsOpt = Converter::ArkValue<Opt_EllipseOptions>(options);
         modifier_->setEllipseOptions(node_, &optionsOpt);
 
         strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
@@ -166,13 +166,13 @@ HWTEST_F(EllipseModifierTest, setEllipseOptionsTestInvalidWidthValues, TestSize.
 HWTEST_F(EllipseModifierTest, setEllipseOptionsTestInvalidHeightValues, TestSize.Level1)
 {
     std::string strResult;
-    Opt_Literal_Union_String_Number_height_width optionsOpt;
-    Ark_Literal_Union_String_Number_height_width options;
+    Opt_EllipseOptions optionsOpt;
+    Ark_EllipseOptions options;
     options.width = Converter::ArkValue<Opt_Union_String_Number>(Ark_Empty());
 
     for (const auto &[height, expected]: INVALID_VALUE_TEST_PLAN) {
         options.height = height;
-        optionsOpt = Converter::ArkValue<Opt_Literal_Union_String_Number_height_width>(options);
+        optionsOpt = Converter::ArkValue<Opt_EllipseOptions>(options);
         modifier_->setEllipseOptions(node_, &optionsOpt);
 
         strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);

@@ -499,7 +499,7 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     // Prepare callbacks
-    auto onBuiltCallback = [](const Ark_Int32 resourceId, const Callback_CustomObject_void continuation) {
+    auto onBuiltCallback = [](const Ark_Int32 resourceId, const Callback_Any_Void continuation) {
         g_onBuilt = true;
     };
     auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
@@ -556,7 +556,7 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE);
 
-    auto onCallback = [](const Ark_Int32 resourceId, const Callback_CustomObject_void continuation) {
+    auto onCallback = [](const Ark_Int32 resourceId, const Callback_Any_Void continuation) {
         g_keyboardCallbackCalled = true;
     };
     auto keyboardBuilderCallback = Converter::ArkValue<Callback_Any>(onCallback, TEST_RESOURCE_ID);

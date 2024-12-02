@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct IPropertySubscriberPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IPropertySubscriberAccessor {
+void DestroyPeerImpl(IPropertySubscriberPeer* peer)
+{
+}
 IPropertySubscriberPeer* CtorImpl()
 {
-    return nullptr;
+    return new IPropertySubscriberPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 IdImpl(IPropertySubscriberPeer* peer)
 {
@@ -39,6 +44,7 @@ void AboutToBeDeletedImpl(IPropertySubscriberPeer* peer,
 const GENERATED_ArkUIIPropertySubscriberAccessor* GetIPropertySubscriberAccessor()
 {
     static const GENERATED_ArkUIIPropertySubscriberAccessor IPropertySubscriberAccessorImpl {
+        IPropertySubscriberAccessor::DestroyPeerImpl,
         IPropertySubscriberAccessor::CtorImpl,
         IPropertySubscriberAccessor::GetFinalizerImpl,
         IPropertySubscriberAccessor::IdImpl,

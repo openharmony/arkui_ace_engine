@@ -26,6 +26,9 @@
 #include "node_api.h"
 #include "arkoala_api_generated.h"
 
+using Ark_Type_TextPickerOptions_range =
+    Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -1760,7 +1763,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Undefined unionOptions;
+    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_STROKE_WIDTH_TEST_PLAN) {
@@ -1788,7 +1791,7 @@ HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Undefined unionOptions;
+    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
     Opt_ResourceColor resColor;
 
@@ -1818,7 +1821,7 @@ HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Undefined unionOptions;
+    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
@@ -1846,7 +1849,7 @@ HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Undefined unionOptions;
+    Ark_Union_DividerOptions_Null unionOptions;
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
@@ -1874,7 +1877,7 @@ HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
-    Ark_Union_DividerOptions_Undefined unionOptions = {
+    Ark_Union_DividerOptions_Null unionOptions = {
         .selector = 1,
         .value1 = Ark_Undefined()
     };

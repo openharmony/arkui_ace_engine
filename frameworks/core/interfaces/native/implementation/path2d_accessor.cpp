@@ -17,18 +17,23 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct Path2DPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
+void DestroyPeerImpl(Path2DPeer* peer)
+{
+}
 Path2DPeer* CtorImpl()
 {
-    return nullptr;
+    return new Path2DPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void AddPathImpl(Path2DPeer* peer,
-                 const Ark_Materialized* path,
+                 const Ark_Path2D* path,
                  const Opt_Matrix2D* transform)
 {
 }
@@ -36,6 +41,7 @@ void AddPathImpl(Path2DPeer* peer,
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
 {
     static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
+        Path2DAccessor::DestroyPeerImpl,
         Path2DAccessor::CtorImpl,
         Path2DAccessor::GetFinalizerImpl,
         Path2DAccessor::AddPathImpl,

@@ -111,7 +111,8 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
     };
 
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
-    accessor_->startImageAnalyzer(peer_, &arkConfig);
+    Callback_Opt_Array_String_Void cont{};
+    accessor_->startImageAnalyzer(peer_, &arkConfig, &cont);
 
     std::vector<ImageAnalyzerType>* config = reinterpret_cast<std::vector<ImageAnalyzerType>*>(holder->config);
     std::vector<ImageAnalyzerType> vector = *config;
@@ -125,7 +126,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 
     // check callback
     holder->SetUp();
-    accessor_->startImageAnalyzer(peer_, &arkConfig);
+    accessor_->startImageAnalyzer(peer_, &arkConfig, &cont);
     EXPECT_FALSE(holder->isCalled);
 
     EXPECT_EQ(holder->config, nullptr);
@@ -134,7 +135,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 
     holder->SetUp();
     (onAnalyzed.value())(ImageAnalyzerState::FINISHED);
-    accessor_->startImageAnalyzer(peer_, &arkConfig);
+    accessor_->startImageAnalyzer(peer_, &arkConfig, &cont);
     EXPECT_TRUE(holder->isCalled);
     EXPECT_NE(holder->config, nullptr);
     EXPECT_NE(holder->onAnalyzed, nullptr);

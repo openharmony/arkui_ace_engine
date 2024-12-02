@@ -31,7 +31,7 @@ namespace {
         Ark_String,
         Ark_Resource,
         Callback_Any,
-        Ark_Literal_Union_String_Resource_icon_text
+        Ark_TabBarOptions
     >;
 } // namespace
 
@@ -145,7 +145,7 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
 
 namespace Converter {
 template<>
-TabBarOptions Convert(const Ark_Literal_Union_String_Resource_icon_text& src)
+TabBarOptions Convert(const Ark_TabBarOptions& src)
 {
     TabBarOptions options;
     options.text = OptConvert<std::string>(src.text);
@@ -204,6 +204,12 @@ void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TabContentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TabContentModifier
 namespace TabContentInterfaceModifier {
 void SetTabContentOptionsImpl(Ark_NativePointer node)
 {
@@ -212,12 +218,11 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void TabBar0Impl(Ark_NativePointer node,
-                 const Ark_Type_TabContentAttribute_tabBar_value* value)
+                 const Ark_Union_String_Resource_CustomBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     std::optional<std::string> label = std::nullopt;
     std::optional<std::string> icon = std::nullopt;
     TabBarBuilderFunc builder = nullptr;
@@ -231,7 +236,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else if (auto arkText = std::get_if<Callback_Any>(&options.value());
         arkText != nullptr) {
         LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
-    } else if (auto iconLabel = std::get_if<Ark_Literal_Union_String_Resource_icon_text>(&options.value());
+    } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value());
         iconLabel != nullptr) {
         auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel);
         if (tabBarOptions) {
@@ -281,6 +286,7 @@ void OnWillHideImpl(Ark_NativePointer node,
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
 {
     static const GENERATED_ArkUITabContentModifier ArkUITabContentModifierImpl {
+        TabContentModifier::ConstructImpl,
         TabContentInterfaceModifier::SetTabContentOptionsImpl,
         TabContentAttributeModifier::TabBar0Impl,
         TabContentAttributeModifier::TabBar1Impl,

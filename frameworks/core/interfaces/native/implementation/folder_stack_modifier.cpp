@@ -21,6 +21,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace FolderStackModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // FolderStackModifier
 namespace FolderStackInterfaceModifier {
 void SetFolderStackOptionsImpl(Ark_NativePointer node,
                                const Opt_FolderStackOptions* options)
@@ -93,6 +99,7 @@ void AutoHalfFoldImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier()
 {
     static const GENERATED_ArkUIFolderStackModifier ArkUIFolderStackModifierImpl {
+        FolderStackModifier::ConstructImpl,
         FolderStackInterfaceModifier::SetFolderStackOptionsImpl,
         FolderStackAttributeModifier::AlignContentImpl,
         FolderStackAttributeModifier::OnFolderStateChangeImpl,

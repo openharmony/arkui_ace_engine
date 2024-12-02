@@ -199,11 +199,9 @@ void ScrollerPeerImpl::TriggerFling(const Ark_Number* velocity)
     scrollController->Fling(flingVelocity);
 }
 
-void ScrollerPeerImpl::TriggerScrollPage0(const Ark_Literal_Boolean_next* value)
+void ScrollerPeerImpl::TriggerScrollPage0(bool next)
 {
-    CHECK_NULL_VOID(value);
     bool smooth = false;
-    bool next = Converter::Convert<bool>(value->next);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage0 Controller not bound to component.");
@@ -213,14 +211,11 @@ void ScrollerPeerImpl::TriggerScrollPage0(const Ark_Literal_Boolean_next* value)
     scrollController->ScrollPage(!next, smooth);
 }
 
-void ScrollerPeerImpl::TriggerScrollPage1(const Ark_Literal_Boolean_next_Axis_direction* value)
+void ScrollerPeerImpl::TriggerScrollPage1(bool next)
 {
     // deprecated since 9
-    CHECK_NULL_VOID(value);
     LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage1 Deprecated method.");
-    Ark_Literal_Boolean_next tempValue;
-    tempValue.next = value->next;
-    TriggerScrollPage0(&tempValue);
+    TriggerScrollPage0(next);
 }
 
 Ark_NativePointer ScrollerPeerImpl::TriggerCurrentOffset()

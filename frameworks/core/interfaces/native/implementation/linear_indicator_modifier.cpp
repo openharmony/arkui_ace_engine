@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace LinearIndicatorModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // LinearIndicatorModifier
 namespace LinearIndicatorInterfaceModifier {
 void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
                                    const Opt_Number* count,
@@ -32,36 +38,34 @@ void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
 } // LinearIndicatorInterfaceModifier
 namespace LinearIndicatorAttributeModifier {
 void IndicatorStyleImpl(Ark_NativePointer node,
-                        const Ark_Union_LinearIndicatorStyle_Undefined* value)
+                        const Opt_LinearIndicatorStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void IndicatorLoopImpl(Ark_NativePointer node,
-                       const Ark_Union_Boolean_Undefined* value)
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Ark_Union_OnLinearIndicatorChangeCallback_Undefined* value)
+                  const Opt_OnLinearIndicatorChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
 {
     static const GENERATED_ArkUILinearIndicatorModifier ArkUILinearIndicatorModifierImpl {
+        LinearIndicatorModifier::ConstructImpl,
         LinearIndicatorInterfaceModifier::SetLinearIndicatorOptionsImpl,
         LinearIndicatorAttributeModifier::IndicatorStyleImpl,
         LinearIndicatorAttributeModifier::IndicatorLoopImpl,

@@ -2183,16 +2183,15 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
 {
-    Opt_Union_ResourceStr_Undefined initValueShowError;
+    Opt_ResourceStr initValueShowError;
 
     // Initial setup
-    initValueShowError =
-        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
-            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
 
-    auto checkValue = [this, &initValueShowError](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceStr_Undefined& value) {
-        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
+    auto checkValue = [this, &initValueShowError](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
 
         inputValueShowError = value;
         modifier_->setShowError(node_, &inputValueShowError);
@@ -2203,20 +2202,16 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.L
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
     }
 }
 

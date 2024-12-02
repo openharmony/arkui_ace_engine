@@ -34,6 +34,12 @@ Converter::ListItemGroupOptions Convert(const Ark_ListItemGroupOptions& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ListItemGroupModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ListItemGroupModifier
 namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_ListItemGroupOptions* options)
@@ -52,7 +58,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_ListDividerOptions_Undefined* value)
+                 const Ark_Union_ListDividerOptions_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -61,7 +67,7 @@ void DividerImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_Materialized* value)
+                          const Ark_ChildrenMainSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -75,6 +81,7 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
     static const GENERATED_ArkUIListItemGroupModifier ArkUIListItemGroupModifierImpl {
+        ListItemGroupModifier::ConstructImpl,
         ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
         ListItemGroupAttributeModifier::DividerImpl,
         ListItemGroupAttributeModifier::ChildrenMainSizeImpl,

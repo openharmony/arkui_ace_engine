@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct WebResourceResponsePeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceResponseAccessor {
+void DestroyPeerImpl(WebResourceResponsePeer* peer)
+{
+}
 WebResourceResponsePeer* CtorImpl()
 {
-    return nullptr;
+    return new WebResourceResponsePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetResponseDataImpl(WebResourceResponsePeer* peer)
 {
@@ -51,7 +56,7 @@ Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
     return 0;
 }
 void SetResponseDataImpl(WebResourceResponsePeer* peer,
-                         const Ark_Union_String_Number_Resource_ArrayBuffer* data)
+                         const Ark_Union_String_Number_Resource_Buffer* data)
 {
 }
 void SetResponseEncodingImpl(WebResourceResponsePeer* peer,
@@ -86,6 +91,7 @@ Ark_Boolean GetResponseIsReadyImpl(WebResourceResponsePeer* peer)
 const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
 {
     static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
+        WebResourceResponseAccessor::DestroyPeerImpl,
         WebResourceResponseAccessor::CtorImpl,
         WebResourceResponseAccessor::GetFinalizerImpl,
         WebResourceResponseAccessor::GetResponseDataImpl,

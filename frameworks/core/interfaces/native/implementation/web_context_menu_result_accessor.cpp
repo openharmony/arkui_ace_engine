@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
-WebContextMenuResultPeer* CtorImpl()
-{
-    return new WebContextMenuResultPeer();
-}
-static void DestroyPeer(WebContextMenuResultPeer *peer)
+void DestroyPeerImpl(WebContextMenuResultPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+WebContextMenuResultPeer* CtorImpl()
+{
+    return new WebContextMenuResultPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CloseContextMenuImpl(WebContextMenuResultPeer* peer)
 {
@@ -68,6 +68,7 @@ void SelectAllImpl(WebContextMenuResultPeer* peer)
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
 {
     static const GENERATED_ArkUIWebContextMenuResultAccessor WebContextMenuResultAccessorImpl {
+        WebContextMenuResultAccessor::DestroyPeerImpl,
         WebContextMenuResultAccessor::CtorImpl,
         WebContextMenuResultAccessor::GetFinalizerImpl,
         WebContextMenuResultAccessor::CloseContextMenuImpl,

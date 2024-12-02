@@ -25,7 +25,7 @@ struct EllipseOptions {
 };
 
 template<>
-inline EllipseOptions Convert(const Ark_Literal_Union_String_Number_height_width& src)
+inline EllipseOptions Convert(const Ark_EllipseOptions& src)
 {
     EllipseOptions ellipseOptions;
     ellipseOptions.width = Converter::OptConvert<Dimension>(src.width);
@@ -35,25 +35,32 @@ inline EllipseOptions Convert(const Ark_Literal_Union_String_Number_height_width
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace EllipseModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // EllipseModifier
 namespace EllipseInterfaceModifier {
 void SetEllipseOptionsImpl(Ark_NativePointer node,
-                           const Opt_Literal_Union_String_Number_height_width* value)
+                           const Opt_EllipseOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = value ? Converter::OptConvert<Converter::EllipseOptions>(*value) : std::nullopt;
-    
-    if (options && options->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, *options->width);
+    auto opt = options ? Converter::OptConvert<Converter::EllipseOptions>(*options) : std::nullopt;
+
+    if (opt && opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, *opt->width);
     }
-    if (options && options->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, *options->height);
+    if (opt && opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, *opt->height);
     }
 }
 } // EllipseInterfaceModifier
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier()
 {
     static const GENERATED_ArkUIEllipseModifier ArkUIEllipseModifierImpl {
+        EllipseModifier::ConstructImpl,
         EllipseInterfaceModifier::SetEllipseOptionsImpl,
     };
     return &ArkUIEllipseModifierImpl;

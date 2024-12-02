@@ -69,6 +69,7 @@ namespace ViewModel {
     Ark_NodeHandle createImageNode(Ark_Int32 nodeId);
     Ark_NodeHandle createImageAnimatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createImageSpanNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createIndicatorComponentNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLineNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLinearIndicatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createListNode(Ark_Int32 nodeId);
@@ -148,6 +149,8 @@ using FrameNodeCreator = Ark_NodeHandle(Ark_Int32 nodeId);
 namespace Bridge {
     Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags)
     {
+        LOGI("Arkoala: Bridge::CreateNode: type=%{public}d, id=%{public}d", type, id);
+
         if (id == GENERATED_ARKUI_AUTO_GENERATE_NODE_ID) {
             id = ElementRegister::GetInstance()->MakeUniqueId();
         }
@@ -198,6 +201,7 @@ namespace Bridge {
             case GENERATED_ARKUI_IMAGE: return ViewModel::createImageNode(id);
             case GENERATED_ARKUI_IMAGE_ANIMATOR: return ViewModel::createImageAnimatorNode(id);
             case GENERATED_ARKUI_IMAGE_SPAN: return ViewModel::createImageSpanNode(id);
+            case GENERATED_ARKUI_INDICATOR_COMPONENT: return ViewModel::createIndicatorComponentNode(id);
             case GENERATED_ARKUI_LINE: return ViewModel::createLineNode(id);
             case GENERATED_ARKUI_LINEAR_INDICATOR: return ViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return ViewModel::createListNode(id);

@@ -20,6 +20,12 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RowSplitModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RowSplitModifier
 namespace RowSplitInterfaceModifier {
 void SetRowSplitOptionsImpl(Ark_NativePointer node)
 {
@@ -38,6 +44,7 @@ void ResizeableImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()
 {
     static const GENERATED_ArkUIRowSplitModifier ArkUIRowSplitModifierImpl {
+        RowSplitModifier::ConstructImpl,
         RowSplitInterfaceModifier::SetRowSplitOptionsImpl,
         RowSplitAttributeModifier::ResizeableImpl,
     };

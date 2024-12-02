@@ -21,6 +21,12 @@
 #include "frameworks/core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SymbolSpanModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SymbolSpanModifier
 namespace SymbolSpanInterfaceModifier {
 void SetSymbolSpanOptionsImpl(Ark_NativePointer node,
                               const Ark_Resource* value)
@@ -90,6 +96,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 {
     static const GENERATED_ArkUISymbolSpanModifier ArkUISymbolSpanModifierImpl {
+        SymbolSpanModifier::ConstructImpl,
         SymbolSpanInterfaceModifier::SetSymbolSpanOptionsImpl,
         SymbolSpanAttributeModifier::FontSizeImpl,
         SymbolSpanAttributeModifier::FontColorImpl,

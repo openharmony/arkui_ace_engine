@@ -190,6 +190,12 @@ MenuOptionsParam Convert(const Ark_ExpandedMenuItemOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace WebModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // WebModifier
 namespace WebInterfaceModifier {
 void SetWebOptionsImpl(Ark_NativePointer node,
                        const Ark_WebOptions* value)
@@ -1340,7 +1346,7 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1372,10 +1378,23 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
     WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
 #endif // WEB_SUPPORTED
 }
+void BindSelectionMenuImpl(Ark_NativePointer node,
+                           Ark_WebElementType elementType,
+                           const Callback_Any* content,
+                           Ark_WebResponseType responseType,
+                           const Opt_SelectionMenuOptionsExt* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(elementType);
+    //auto convValue = Converter::OptConvert<type>(elementType); // for enums
+    //WebModelNG::SetBindSelectionMenu(frameNode, convValue);
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
     static const GENERATED_ArkUIWebModifier ArkUIWebModifierImpl {
+        WebModifier::ConstructImpl,
         WebInterfaceModifier::SetWebOptionsImpl,
         WebAttributeModifier::JavaScriptAccessImpl,
         WebAttributeModifier::FileAccessImpl,
@@ -1497,6 +1516,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::EditMenuOptionsImpl,
         WebAttributeModifier::EnableHapticFeedbackImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
+        WebAttributeModifier::BindSelectionMenuImpl,
     };
     return &ArkUIWebModifierImpl;
 }

@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RootSceneModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RootSceneModifier
 namespace RootSceneInterfaceModifier {
 void SetRootSceneOptionsImpl(Ark_NativePointer node,
                              const Ark_RootSceneSession* session)
@@ -32,6 +38,7 @@ void SetRootSceneOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRootSceneModifier* GetRootSceneModifier()
 {
     static const GENERATED_ArkUIRootSceneModifier ArkUIRootSceneModifierImpl {
+        RootSceneModifier::ConstructImpl,
         RootSceneInterfaceModifier::SetRootSceneOptionsImpl,
     };
     return &ArkUIRootSceneModifierImpl;

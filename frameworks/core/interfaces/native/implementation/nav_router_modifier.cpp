@@ -21,6 +21,12 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace NavRouterModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // NavRouterModifier
 namespace NavRouterInterfaceModifier {
 void SetNavRouterOptions0Impl(Ark_NativePointer node)
 {
@@ -62,6 +68,7 @@ void ModeImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()
 {
     static const GENERATED_ArkUINavRouterModifier ArkUINavRouterModifierImpl {
+        NavRouterModifier::ConstructImpl,
         NavRouterInterfaceModifier::SetNavRouterOptions0Impl,
         NavRouterInterfaceModifier::SetNavRouterOptions1Impl,
         NavRouterAttributeModifier::OnStateChangeImpl,

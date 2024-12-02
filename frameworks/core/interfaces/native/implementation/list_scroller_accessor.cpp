@@ -20,8 +20,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListScrollerAccessor {
-static void DestroyPeer(ListScrollerPeerImpl* peerImpl)
+void DestroyPeerImpl(ListScrollerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<ListScrollerPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -34,7 +35,7 @@ ListScrollerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer GetItemRectInGroupImpl(ListScrollerPeer* peer,
                                          const Ark_Number* index,
@@ -117,6 +118,7 @@ Ark_NativePointer GetVisibleListContentInfoImpl(ListScrollerPeer* peer,
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
 {
     static const GENERATED_ArkUIListScrollerAccessor ListScrollerAccessorImpl {
+        ListScrollerAccessor::DestroyPeerImpl,
         ListScrollerAccessor::CtorImpl,
         ListScrollerAccessor::GetFinalizerImpl,
         ListScrollerAccessor::GetItemRectInGroupImpl,

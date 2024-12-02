@@ -20,6 +20,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ContainerSpanModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ContainerSpanModifier
 namespace ContainerSpanInterfaceModifier {
 void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 {
@@ -40,6 +46,7 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
 {
     static const GENERATED_ArkUIContainerSpanModifier ArkUIContainerSpanModifierImpl {
+        ContainerSpanModifier::ConstructImpl,
         ContainerSpanInterfaceModifier::SetContainerSpanOptionsImpl,
         ContainerSpanAttributeModifier::TextBackgroundStyleImpl,
     };

@@ -35,6 +35,12 @@ void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TimePickerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TimePickerModifier
 namespace TimePickerInterfaceModifier {
 void SetTimePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TimePickerOptions* options)
@@ -147,6 +153,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
 {
     static const GENERATED_ArkUITimePickerModifier ArkUITimePickerModifierImpl {
+        TimePickerModifier::ConstructImpl,
         TimePickerInterfaceModifier::SetTimePickerOptionsImpl,
         TimePickerAttributeModifier::UseMilitaryTimeImpl,
         TimePickerAttributeModifier::LoopImpl,

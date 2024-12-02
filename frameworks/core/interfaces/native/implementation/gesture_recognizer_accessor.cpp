@@ -20,11 +20,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureRecognizerAccessor {
-
-static void DestroyPeer(GestureRecognizerPeer *peerImpl)
+void DestroyPeerImpl(GestureRecognizerPeer* peer)
 {
-    if (peerImpl) {
-        delete peerImpl;
+    if (peer) {
+        delete peer;
     }
 }
 GestureRecognizerPeer* CtorImpl()
@@ -33,7 +32,7 @@ GestureRecognizerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetTagImpl(GestureRecognizerPeer* peer)
 {
@@ -88,6 +87,7 @@ Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
     static const GENERATED_ArkUIGestureRecognizerAccessor GestureRecognizerAccessorImpl {
+        GestureRecognizerAccessor::DestroyPeerImpl,
         GestureRecognizerAccessor::CtorImpl,
         GestureRecognizerAccessor::GetFinalizerImpl,
         GestureRecognizerAccessor::GetTagImpl,

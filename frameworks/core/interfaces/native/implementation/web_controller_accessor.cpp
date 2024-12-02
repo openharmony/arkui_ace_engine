@@ -39,8 +39,9 @@ Header Convert(const Ark_Header& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
-static void DestroyPeer(WebControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(WebControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -55,7 +56,7 @@ WebControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void OnInactiveImpl(WebControllerPeer* peer)
 {
@@ -233,6 +234,7 @@ Ark_NativePointer GetCookieManagerImpl(WebControllerPeer* peer)
 const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()
 {
     static const GENERATED_ArkUIWebControllerAccessor WebControllerAccessorImpl {
+        WebControllerAccessor::DestroyPeerImpl,
         WebControllerAccessor::CtorImpl,
         WebControllerAccessor::GetFinalizerImpl,
         WebControllerAccessor::OnInactiveImpl,

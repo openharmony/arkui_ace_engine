@@ -38,6 +38,12 @@ inline void AssignCast(std::optional<GridItemStyle>& dst, const Ark_GridItemOpti
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GridItemModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GridItemModifier
 namespace GridItemInterfaceModifier {
 void SetGridItemOptionsImpl(Ark_NativePointer node,
                             const Opt_GridItemOptions* value)
@@ -120,6 +126,7 @@ void OnSelectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
 {
     static const GENERATED_ArkUIGridItemModifier ArkUIGridItemModifierImpl {
+        GridItemModifier::ConstructImpl,
         GridItemInterfaceModifier::SetGridItemOptionsImpl,
         GridItemAttributeModifier::RowStartImpl,
         GridItemAttributeModifier::RowEndImpl,

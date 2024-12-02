@@ -34,6 +34,8 @@ const auto ATTRIBUTE_TITLE_I_OPTIONS_NAME = "options";
 const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_NAME = "toolbarConfiguration";
 const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_NAME = "options";
 const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_NAME = "ignoreLayoutSafeArea";
+const auto ATTRIBUTE_PATH_INFOS_NAME = "pathInfos";
+const auto ATTRIBUTE_PATH_INFOS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_NAV_BAR_WIDTH_NAME = "navBarWidth";
 const auto ATTRIBUTE_NAV_BAR_WIDTH_DEFAULT_VALUE = "240.00vp";
 const auto ATTRIBUTE_NAV_BAR_POSITION_NAME = "navBarPosition";
@@ -70,10 +72,10 @@ const auto ATTRIBUTE_HIDE_TOOL_BAR_I_HIDE_NAME = "hide";
 const auto ATTRIBUTE_HIDE_TOOL_BAR_I_HIDE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_HIDE_TOOL_BAR_I_ANIMATED_NAME = "animated";
 const auto ATTRIBUTE_HIDE_TOOL_BAR_I_ANIMATED_DEFAULT_VALUE = "!NOT-DEFINED!";
-const auto ATTRIBUTE_SYSTEM_BAR_STYLE_NAME = "systemBarStyle";
-const auto ATTRIBUTE_SYSTEM_BAR_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_RECOVERABLE_NAME = "recoverable";
 const auto ATTRIBUTE_RECOVERABLE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_ENABLE_DRAG_BAR_NAME = "enableDragBar";
+const auto ATTRIBUTE_ENABLE_DRAG_BAR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TITLE_I_VALUE_I_MAIN_NAME = "main";
 const auto ATTRIBUTE_TITLE_I_VALUE_I_MAIN_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TITLE_I_VALUE_I_SUB_NAME = "sub";
@@ -102,6 +104,8 @@ const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_COLOR_NAME = "
 const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_BLUR_STYLE_NAME = "backgroundBlurStyle";
 const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BAR_STYLE_NAME = "barStyle";
+const auto ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BAR_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_NAME = "types";
 const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_TYPES_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_I_EDGES_NAME = "edges";
@@ -121,6 +125,30 @@ public:
         }
     }
 };
+
+/*
+ * @tc.name: setNavigationOptions1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setNavigationOptions1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PATH_INFOS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_PATH_INFOS_DEFAULT_VALUE) << "Default value for attribute 'pathInfos'";
+}
+
+/*
+ * @tc.name: setNavigationOptions1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setNavigationOptions1TestValidValues, TestSize.Level1)
+{
+    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+}
 
 /*
  * @tc.name: setNavBarWidthTestDefaultValues
@@ -1082,30 +1110,6 @@ HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestHideToolBarAnimated
 }
 
 /*
- * @tc.name: setSystemBarStyleTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationModifierTest, DISABLED_setSystemBarStyleTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SYSTEM_BAR_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SYSTEM_BAR_STYLE_DEFAULT_VALUE) << "Default value for attribute 'systemBarStyle'";
-}
-
-/*
- * @tc.name: setSystemBarStyleTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationModifierTest, DISABLED_setSystemBarStyleTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
-}
-
-/*
  * @tc.name: setRecoverableTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1126,15 +1130,14 @@ HWTEST_F(NavigationModifierTest, DISABLED_setRecoverableTestDefaultValues, TestS
  */
 HWTEST_F(NavigationModifierTest, setRecoverableTestRecoverableValidValues, TestSize.Level1)
 {
-    Ark_Union_Boolean_Undefined initValueRecoverable;
+    Opt_Boolean initValueRecoverable;
 
     // Initial setup
-    initValueRecoverable =
-        ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValueRecoverable = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueRecoverable](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Boolean_Undefined& value) {
-        Ark_Union_Boolean_Undefined inputValueRecoverable = initValueRecoverable;
+    auto checkValue = [this, &initValueRecoverable](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueRecoverable = initValueRecoverable;
 
         inputValueRecoverable = value;
         modifier_->setRecoverable(node_, &inputValueRecoverable);
@@ -1145,7 +1148,7 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestRecoverableValidValues, TestS
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(value));
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -1156,15 +1159,13 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestRecoverableValidValues, TestS
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setRecoverableTestRecoverableInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Boolean_Undefined initValueRecoverable;
+    Opt_Boolean initValueRecoverable;
 
     // Initial setup
-    initValueRecoverable =
-        ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValueRecoverable = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValueRecoverable](
-                          const std::string& input, const Ark_Union_Boolean_Undefined& value) {
-        Ark_Union_Boolean_Undefined inputValueRecoverable = initValueRecoverable;
+    auto checkValue = [this, &initValueRecoverable](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueRecoverable = initValueRecoverable;
 
         modifier_->setRecoverable(node_, &inputValueRecoverable);
         inputValueRecoverable = value;
@@ -1175,9 +1176,79 @@ HWTEST_F(NavigationModifierTest, DISABLED_setRecoverableTestRecoverableInvalidVa
             "Input value is: " << input << ", method: setRecoverable, attribute: recoverable";
     };
 
-    checkValue("undefined", ArkUnion<Ark_Union_Boolean_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Boolean_Undefined, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setEnableDragBarTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setEnableDragBarTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DRAG_BAR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DRAG_BAR_DEFAULT_VALUE) << "Default value for attribute 'enableDragBar'";
+}
+
+/*
+ * @tc.name: setEnableDragBarTestEnableDragBarValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setEnableDragBarTestEnableDragBarValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableDragBar;
+
+    // Initial setup
+    initValueEnableDragBar = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableDragBar](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableDragBar = initValueEnableDragBar;
+
+        inputValueEnableDragBar = value;
+        modifier_->setEnableDragBar(node_, &inputValueEnableDragBar);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DRAG_BAR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableDragBar, attribute: enableDragBar";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setEnableDragBarTestEnableDragBarInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, DISABLED_setEnableDragBarTestEnableDragBarInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueEnableDragBar;
+
+    // Initial setup
+    initValueEnableDragBar = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueEnableDragBar](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueEnableDragBar = initValueEnableDragBar;
+
+        modifier_->setEnableDragBar(node_, &inputValueEnableDragBar);
+        inputValueEnableDragBar = value;
+        modifier_->setEnableDragBar(node_, &inputValueEnableDragBar);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DRAG_BAR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DRAG_BAR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEnableDragBar, attribute: enableDragBar";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*
@@ -1277,6 +1348,10 @@ HWTEST_F(NavigationModifierTest, DISABLED_setToolbarConfigurationTestDefaultValu
         resultOptions, ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_BLUR_STYLE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE) <<
         "Default value for attribute 'toolbarConfiguration.options.backgroundBlurStyle'";
+
+    resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BAR_STYLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TOOLBAR_CONFIGURATION_I_OPTIONS_I_BAR_STYLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'toolbarConfiguration.options.barStyle'";
 }
 
 /*

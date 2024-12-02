@@ -32,9 +32,9 @@ void AssignCast(std::optional<V2::PatternLockChallengeResult>& dst, const Ark_Pa
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockControllerAccessor {
-
-static void DestroyPeer(PatternLockControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(PatternLockControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<PatternLockControllerPeerImpl *>(peer);
     if (peerImpl) {
         if (peerImpl->handler) {
             peerImpl->handler = nullptr;
@@ -42,14 +42,13 @@ static void DestroyPeer(PatternLockControllerPeerImpl *peerImpl)
         delete peerImpl;
     }
 }
-
 PatternLockControllerPeer* CtorImpl()
 {
     return reinterpret_cast<PatternLockControllerPeer *>(new PatternLockControllerPeerImpl());
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ResetImpl(PatternLockControllerPeer* peer)
 {
@@ -71,6 +70,7 @@ void SetChallengeResultImpl(PatternLockControllerPeer* peer,
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor()
 {
     static const GENERATED_ArkUIPatternLockControllerAccessor PatternLockControllerAccessorImpl {
+        PatternLockControllerAccessor::DestroyPeerImpl,
         PatternLockControllerAccessor::CtorImpl,
         PatternLockControllerAccessor::GetFinalizerImpl,
         PatternLockControllerAccessor::ResetImpl,

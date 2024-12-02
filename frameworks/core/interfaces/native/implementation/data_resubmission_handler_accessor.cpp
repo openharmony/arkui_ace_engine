@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct DataResubmissionHandlerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataResubmissionHandlerAccessor {
+void DestroyPeerImpl(DataResubmissionHandlerPeer* peer)
+{
+}
 DataResubmissionHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new DataResubmissionHandlerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ResendImpl(DataResubmissionHandlerPeer* peer)
 {
@@ -37,6 +42,7 @@ void CancelImpl(DataResubmissionHandlerPeer* peer)
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
 {
     static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
+        DataResubmissionHandlerAccessor::DestroyPeerImpl,
         DataResubmissionHandlerAccessor::CtorImpl,
         DataResubmissionHandlerAccessor::GetFinalizerImpl,
         DataResubmissionHandlerAccessor::ResendImpl,

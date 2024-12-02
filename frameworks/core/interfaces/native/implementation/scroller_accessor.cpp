@@ -18,14 +18,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
-
-static void DestroyPeer(ScrollerPeerImpl *peerImpl)
+void DestroyPeerImpl(ScrollerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
 }
-
 ScrollerPeer* CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<ScrollerPeerImpl>();
@@ -34,7 +33,7 @@ ScrollerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ScrollToImpl(ScrollerPeer* peer,
                   const Ark_ScrollOptions* options)
@@ -59,18 +58,22 @@ void FlingImpl(ScrollerPeer* peer,
     peerImpl->TriggerFling(velocity);
 }
 void ScrollPage0Impl(ScrollerPeer* peer,
-                     const Ark_Literal_Boolean_next* value)
+                     const Ark_ScrollPageOptions* value)
 {
     auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollPage0(value);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peerImpl->TriggerScrollPage0(next);
 }
 void ScrollPage1Impl(ScrollerPeer* peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
     auto peerImpl = reinterpret_cast<ScrollerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerScrollPage1(value);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peerImpl->TriggerScrollPage1(next);
 }
 Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
 {
@@ -121,6 +124,7 @@ Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
     static const GENERATED_ArkUIScrollerAccessor ScrollerAccessorImpl {
+        ScrollerAccessor::DestroyPeerImpl,
         ScrollerAccessor::CtorImpl,
         ScrollerAccessor::GetFinalizerImpl,
         ScrollerAccessor::ScrollToImpl,

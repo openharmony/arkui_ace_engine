@@ -21,19 +21,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuParamAccessor {
-WebContextMenuParamPeer* CtorImpl()
-{
-    return new WebContextMenuParamPeer();
-}
-static void DestroyPeer(WebContextMenuParamPeer *peer)
+void DestroyPeerImpl(WebContextMenuParamPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+WebContextMenuParamPeer* CtorImpl()
+{
+    return new WebContextMenuParamPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 XImpl(WebContextMenuParamPeer* peer)
 {
@@ -112,10 +112,19 @@ Ark_Int32 GetEditStateFlagsImpl(WebContextMenuParamPeer* peer)
     CHECK_NULL_RETURN(peer && peer->handler, 0);
     return static_cast<Ark_Int32>(peer->handler->GetEditStateFlags());
 }
+Ark_Int32 GetPreviewWidthImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
+Ark_Int32 GetPreviewHeightImpl(WebContextMenuParamPeer* peer)
+{
+    return 0;
+}
 } // WebContextMenuParamAccessor
 const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor()
 {
     static const GENERATED_ArkUIWebContextMenuParamAccessor WebContextMenuParamAccessorImpl {
+        WebContextMenuParamAccessor::DestroyPeerImpl,
         WebContextMenuParamAccessor::CtorImpl,
         WebContextMenuParamAccessor::GetFinalizerImpl,
         WebContextMenuParamAccessor::XImpl,
@@ -130,6 +139,8 @@ const GENERATED_ArkUIWebContextMenuParamAccessor* GetWebContextMenuParamAccessor
         WebContextMenuParamAccessor::GetInputFieldTypeImpl,
         WebContextMenuParamAccessor::IsEditableImpl,
         WebContextMenuParamAccessor::GetEditStateFlagsImpl,
+        WebContextMenuParamAccessor::GetPreviewWidthImpl,
+        WebContextMenuParamAccessor::GetPreviewHeightImpl,
     };
     return &WebContextMenuParamAccessorImpl;
 }

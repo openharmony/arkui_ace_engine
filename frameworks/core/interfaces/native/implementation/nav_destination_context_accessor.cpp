@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct NavDestinationContextPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
+void DestroyPeerImpl(NavDestinationContextPeer* peer)
+{
+}
 NavDestinationContextPeer* CtorImpl()
 {
-    return nullptr;
+    return new NavDestinationContextPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer GetConfigInRouteMapImpl(NavDestinationContextPeer* peer)
 {
@@ -36,7 +41,7 @@ void SetPathInfoImpl(NavDestinationContextPeer* peer,
 {
 }
 void SetPathStackImpl(NavDestinationContextPeer* peer,
-                      const Ark_Materialized* pathStack)
+                      const Ark_NavPathStack* pathStack)
 {
 }
 void GetNavDestinationIdImpl(NavDestinationContextPeer* peer)
@@ -50,6 +55,7 @@ void SetNavDestinationIdImpl(NavDestinationContextPeer* peer,
 const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor()
 {
     static const GENERATED_ArkUINavDestinationContextAccessor NavDestinationContextAccessorImpl {
+        NavDestinationContextAccessor::DestroyPeerImpl,
         NavDestinationContextAccessor::CtorImpl,
         NavDestinationContextAccessor::GetFinalizerImpl,
         NavDestinationContextAccessor::GetConfigInRouteMapImpl,

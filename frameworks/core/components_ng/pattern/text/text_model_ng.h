@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
-    static const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
+    inline static const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 public:
     void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;

@@ -145,6 +145,12 @@ GaugeIndicatorOptions Convert(const Ark_GaugeIndicatorOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GaugeModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GaugeModifier
 namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
                          const Ark_GaugeOptions* options)
@@ -232,6 +238,7 @@ void TrackShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     const auto shadow = value ? Converter::Convert<GaugeShadowOptions>(*value)
         : GaugeShadowOptions { .isShadowVisible = false };
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
@@ -258,7 +265,7 @@ void IndicatorImpl(Ark_NativePointer node,
     }
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Ark_Union_Boolean_Undefined* value)
+                          const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -278,6 +285,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
 {
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
+        GaugeModifier::ConstructImpl,
         GaugeInterfaceModifier::SetGaugeOptionsImpl,
         GaugeAttributeModifier::ValueImpl,
         GaugeAttributeModifier::StartAngleImpl,
@@ -292,4 +300,5 @@ const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
     };
     return &ArkUIGaugeModifierImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

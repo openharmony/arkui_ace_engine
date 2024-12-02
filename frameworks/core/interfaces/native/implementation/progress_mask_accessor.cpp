@@ -17,17 +17,22 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ProgressMaskPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ProgressMaskAccessor {
+void DestroyPeerImpl(ProgressMaskPeer* peer)
+{
+}
 ProgressMaskPeer* CtorImpl(const Ark_Number* value,
                            const Ark_Number* total,
                            const Ark_ResourceColor* color)
 {
-    return nullptr;
+    return new ProgressMaskPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void UpdateProgressImpl(ProgressMaskPeer* peer,
                         const Ark_Number* value)
@@ -45,6 +50,7 @@ void EnableBreathingAnimationImpl(ProgressMaskPeer* peer,
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor()
 {
     static const GENERATED_ArkUIProgressMaskAccessor ProgressMaskAccessorImpl {
+        ProgressMaskAccessor::DestroyPeerImpl,
         ProgressMaskAccessor::CtorImpl,
         ProgressMaskAccessor::GetFinalizerImpl,
         ProgressMaskAccessor::UpdateProgressImpl,

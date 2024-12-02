@@ -36,8 +36,9 @@ inline void AssignCast(std::optional<SeekMode>& dst, const Ark_SeekMode& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace VideoControllerAccessor {
-static void DestroyPeer(VideoControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(VideoControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     if (peerImpl) {
         const auto& controller = peerImpl->GetController();
         peerImpl->DecRefCount();
@@ -56,7 +57,7 @@ VideoControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void StartImpl(VideoControllerPeer* peer)
 {
@@ -117,6 +118,7 @@ void ResetImpl(VideoControllerPeer* peer)
 const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
 {
     static const GENERATED_ArkUIVideoControllerAccessor VideoControllerAccessorImpl {
+        VideoControllerAccessor::DestroyPeerImpl,
         VideoControllerAccessor::CtorImpl,
         VideoControllerAccessor::GetFinalizerImpl,
         VideoControllerAccessor::StartImpl,

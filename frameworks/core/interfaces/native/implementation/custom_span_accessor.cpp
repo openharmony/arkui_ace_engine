@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct CustomSpanPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomSpanAccessor {
+void DestroyPeerImpl(CustomSpanPeer* peer)
+{
+}
 CustomSpanPeer* CtorImpl()
 {
-    return nullptr;
+    return new CustomSpanPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer OnMeasureImpl(CustomSpanPeer* peer,
                                 const Ark_CustomSpanMeasureInfo* measureInfo)
@@ -44,6 +49,7 @@ void InvalidateImpl(CustomSpanPeer* peer)
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
 {
     static const GENERATED_ArkUICustomSpanAccessor CustomSpanAccessorImpl {
+        CustomSpanAccessor::DestroyPeerImpl,
         CustomSpanAccessor::CtorImpl,
         CustomSpanAccessor::GetFinalizerImpl,
         CustomSpanAccessor::OnMeasureImpl,

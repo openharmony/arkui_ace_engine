@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct PanGestureOptionsPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureOptionsAccessor {
+void DestroyPeerImpl(PanGestureOptionsPeer* peer)
+{
+}
 PanGestureOptionsPeer* CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
 {
-    return nullptr;
+    return new PanGestureOptionsPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetDirectionImpl(PanGestureOptionsPeer* peer,
                       Ark_PanDirection value)
@@ -47,6 +52,7 @@ Ark_NativePointer GetDirectionImpl(PanGestureOptionsPeer* peer)
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
 {
     static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
+        PanGestureOptionsAccessor::DestroyPeerImpl,
         PanGestureOptionsAccessor::CtorImpl,
         PanGestureOptionsAccessor::GetFinalizerImpl,
         PanGestureOptionsAccessor::SetDirectionImpl,

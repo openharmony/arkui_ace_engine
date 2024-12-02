@@ -126,6 +126,12 @@ namespace OHOS::Ace::NG::Converter {
     }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ListModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ListModifier
 namespace ListInterfaceModifier {
 void SetListOptionsImpl(Ark_NativePointer node,
                         const Opt_ListOptions* options)
@@ -195,7 +201,7 @@ void ContentEndOffsetImpl(Ark_NativePointer node,
     ListModelNG::SetContentEndOffset(frameNode, Converter::Convert<float>(*value));
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_ListDividerOptions_Undefined* value)
+                 const Ark_Union_ListDividerOptions_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -217,13 +223,23 @@ void MultiSelectableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetMultiSelectable(frameNode, Converter::Convert<bool>(value));
 }
-void CachedCountImpl(Ark_NativePointer node,
-                     const Ark_Number* value)
+void CachedCount0Impl(Ark_NativePointer node,
+                      const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     ListModelNG::SetCachedCount(frameNode, Converter::Convert<int>(*value));
+}
+void CachedCount1Impl(Ark_NativePointer node,
+                      const Ark_Number* count,
+                      Ark_Boolean show)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //ListModelNG::SetCachedCount1(frameNode, convValue);
 }
 void ChainAnimationImpl(Ark_NativePointer node,
                         Ark_Boolean value)
@@ -262,7 +278,6 @@ void NestedScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     auto options = Converter::Convert<Converter::NestedScrollModeOptions>(*value);
     ListModelNG::SetListNestedScroll(frameNode, options.forward, options.backward);
 }
@@ -282,12 +297,11 @@ void FrictionImpl(Ark_NativePointer node,
     ListModelNG::SetListFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
-                          const Ark_Materialized* value)
+                          const Ark_ChildrenMainSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     auto peer = reinterpret_cast<ChildrenMainSizePeer *>(value->ptr);
     CHECK_NULL_VOID(peer);
     RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
@@ -556,6 +570,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIListModifier* GetListModifier()
 {
     static const GENERATED_ArkUIListModifier ArkUIListModifierImpl {
+        ListModifier::ConstructImpl,
         ListInterfaceModifier::SetListOptionsImpl,
         ListAttributeModifier::AlignListItemImpl,
         ListAttributeModifier::ListDirectionImpl,
@@ -565,7 +580,8 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::DividerImpl,
         ListAttributeModifier::EditModeImpl,
         ListAttributeModifier::MultiSelectableImpl,
-        ListAttributeModifier::CachedCountImpl,
+        ListAttributeModifier::CachedCount0Impl,
+        ListAttributeModifier::CachedCount1Impl,
         ListAttributeModifier::ChainAnimationImpl,
         ListAttributeModifier::ChainAnimationOptionsImpl,
         ListAttributeModifier::StickyImpl,

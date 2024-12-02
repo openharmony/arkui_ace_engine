@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace NodeContainerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // NodeContainerModifier
 namespace NodeContainerInterfaceModifier {
 void SetNodeContainerOptionsImpl(Ark_NativePointer node,
                                  const Ark_NodeController* controller)
@@ -32,6 +38,7 @@ void SetNodeContainerOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
     static const GENERATED_ArkUINodeContainerModifier ArkUINodeContainerModifierImpl {
+        NodeContainerModifier::ConstructImpl,
         NodeContainerInterfaceModifier::SetNodeContainerOptionsImpl,
     };
     return &ArkUINodeContainerModifierImpl;

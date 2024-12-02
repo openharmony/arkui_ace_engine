@@ -23,7 +23,7 @@ namespace ChildrenMainSizeAccessor {
 
 constexpr float DEFAULT_SIZE = -1.0f;
 
-static void DestroyPeer(ChildrenMainSizePeer* peer)
+void DestroyPeerImpl(ChildrenMainSizePeer* peer)
 {
     delete peer;
 }
@@ -35,7 +35,7 @@ ChildrenMainSizePeer* CtorImpl(const Ark_Number* childDefaultSize)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SpliceImpl(ChildrenMainSizePeer* peer,
                 const Ark_Number* start,
@@ -100,6 +100,7 @@ Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
 {
     static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
+        ChildrenMainSizeAccessor::DestroyPeerImpl,
         ChildrenMainSizeAccessor::CtorImpl,
         ChildrenMainSizeAccessor::GetFinalizerImpl,
         ChildrenMainSizeAccessor::SpliceImpl,

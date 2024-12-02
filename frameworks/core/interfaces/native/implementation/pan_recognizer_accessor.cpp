@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct PanRecognizerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanRecognizerAccessor {
+void DestroyPeerImpl(PanRecognizerPeer* peer)
+{
+}
 PanRecognizerPeer* CtorImpl()
 {
-    return nullptr;
+    return new PanRecognizerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer GetPanGestureOptionsImpl(PanRecognizerPeer* peer)
 {
@@ -35,6 +40,7 @@ Ark_NativePointer GetPanGestureOptionsImpl(PanRecognizerPeer* peer)
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
 {
     static const GENERATED_ArkUIPanRecognizerAccessor PanRecognizerAccessorImpl {
+        PanRecognizerAccessor::DestroyPeerImpl,
         PanRecognizerAccessor::CtorImpl,
         PanRecognizerAccessor::GetFinalizerImpl,
         PanRecognizerAccessor::GetPanGestureOptionsImpl,

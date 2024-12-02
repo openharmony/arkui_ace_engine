@@ -55,6 +55,12 @@ SelectIconType Convert(const Ark_CustomObject& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace MenuItemModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // MenuItemModifier
 namespace MenuItemInterfaceModifier {
 void SetMenuItemOptionsImpl(Ark_NativePointer node,
                             const Opt_Union_MenuItemOptions_CustomBuilder* value)
@@ -161,6 +167,7 @@ void LabelFontColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()
 {
     static const GENERATED_ArkUIMenuItemModifier ArkUIMenuItemModifierImpl {
+        MenuItemModifier::ConstructImpl,
         MenuItemInterfaceModifier::SetMenuItemOptionsImpl,
         MenuItemAttributeModifier::SelectedImpl,
         MenuItemAttributeModifier::SelectIconImpl,

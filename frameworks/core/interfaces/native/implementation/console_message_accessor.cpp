@@ -21,6 +21,12 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr int MESSAGE_LEVEL_INFO = 2;
 namespace ConsoleMessageAccessor {
+void DestroyPeerImpl(ConsoleMessagePeer* peer)
+{
+    CHECK_NULL_VOID(peer);
+    peer->webConsoleLog = nullptr;
+    delete peer;
+}
 ConsoleMessagePeer* CtorImpl(const Ark_String* message,
                              const Ark_String* sourceId,
                              const Ark_Number* lineNumber,
@@ -40,15 +46,9 @@ ConsoleMessagePeer* CtorImpl(const Ark_String* message,
         )
     };
 }
-static void DestroyPeer(ConsoleMessagePeer *peer)
-{
-    CHECK_NULL_VOID(peer);
-    peer->webConsoleLog = nullptr;
-    delete peer;
-}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetMessageImpl(ConsoleMessagePeer* peer)
 {
@@ -81,6 +81,7 @@ Ark_NativePointer GetMessageLevelImpl(ConsoleMessagePeer* peer)
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor()
 {
     static const GENERATED_ArkUIConsoleMessageAccessor ConsoleMessageAccessorImpl {
+        ConsoleMessageAccessor::DestroyPeerImpl,
         ConsoleMessageAccessor::CtorImpl,
         ConsoleMessageAccessor::GetFinalizerImpl,
         ConsoleMessageAccessor::GetMessageImpl,

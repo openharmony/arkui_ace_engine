@@ -51,6 +51,12 @@ V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace MenuModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // MenuModifier
 namespace MenuInterfaceModifier {
 void SetMenuOptionsImpl(Ark_NativePointer node)
 {
@@ -113,7 +119,7 @@ void RadiusImpl(Ark_NativePointer node,
     }
 }
 void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Ark_Union_DividerStyleOptions_Undefined* value)
+                         const Opt_DividerStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -123,7 +129,7 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     LOGE("MenuModifier::MenuItemDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Ark_Union_DividerStyleOptions_Undefined* value)
+                              const Opt_DividerStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,6 +149,7 @@ void SubMenuExpandingModeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()
 {
     static const GENERATED_ArkUIMenuModifier ArkUIMenuModifierImpl {
+        MenuModifier::ConstructImpl,
         MenuInterfaceModifier::SetMenuOptionsImpl,
         MenuAttributeModifier::FontSizeImpl,
         MenuAttributeModifier::FontImpl,

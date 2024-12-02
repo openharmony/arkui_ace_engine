@@ -17,16 +17,21 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct StyledStringPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StyledStringAccessor {
+void DestroyPeerImpl(StyledStringPeer* peer)
+{
+}
 StyledStringPeer* CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
                            const Opt_Array_StyleOptions* styles)
 {
-    return nullptr;
+    return new StyledStringPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetStringImpl(StyledStringPeer* peer)
 {
@@ -38,7 +43,7 @@ void GetStylesImpl(StyledStringPeer* peer,
 {
 }
 Ark_Boolean EqualsImpl(StyledStringPeer* peer,
-                       const Ark_Materialized* other)
+                       const Ark_StyledString* other)
 {
     return 0;
 }
@@ -48,17 +53,19 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
 {
     return 0;
 }
-Ark_NativePointer FromHtmlImpl(const Ark_String* html)
+void FromHtmlImpl(const Ark_String* html,
+                  const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return 0;
 }
-Ark_NativePointer MarshallingImpl(const Ark_Materialized* styledString)
+void ToHtmlImpl(const Ark_StyledString* styledString)
 {
-    return 0;
 }
-Ark_NativePointer UnmarshallingImpl(const Ark_ArrayBuffer* buffer)
+void MarshallingImpl(const Ark_StyledString* styledString)
 {
-    return 0;
+}
+void UnmarshallingImpl(Ark_Buffer buffer,
+                       const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
 }
 Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
 {
@@ -68,6 +75,7 @@ Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
     static const GENERATED_ArkUIStyledStringAccessor StyledStringAccessorImpl {
+        StyledStringAccessor::DestroyPeerImpl,
         StyledStringAccessor::CtorImpl,
         StyledStringAccessor::GetFinalizerImpl,
         StyledStringAccessor::GetStringImpl,
@@ -75,6 +83,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::EqualsImpl,
         StyledStringAccessor::SubStyledStringImpl,
         StyledStringAccessor::FromHtmlImpl,
+        StyledStringAccessor::ToHtmlImpl,
         StyledStringAccessor::MarshallingImpl,
         StyledStringAccessor::UnmarshallingImpl,
         StyledStringAccessor::GetLengthImpl,

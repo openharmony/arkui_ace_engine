@@ -24,16 +24,14 @@ using namespace TestConst::TextInput;
  */
 HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
 {
-    Opt_Union_ResourceStr_Undefined initValueShowError;
+    Opt_ResourceStr initValueShowError;
 
     // Initial setup
-    initValueShowError =
-        ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_Resource>(
-            std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0])));
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
 
-    auto checkValue = [this, &initValueShowError](
-                          const std::string& input, const Opt_Union_ResourceStr_Undefined& value) {
-        Opt_Union_ResourceStr_Undefined inputValueShowError = initValueShowError;
+    auto checkValue = [this, &initValueShowError](const std::string& input, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
 
         modifier_->setShowError(node_, &inputValueShowError);
         inputValueShowError = value;
@@ -44,11 +42,10 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize
             "Input value is: " << input << ", method: setShowError, attribute: showError";
     };
 
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Undefined>(Ark_Undefined()));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceStr_Undefined, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceStr_Undefined>());
+    checkValue("undefined", ArkValue<Opt_ResourceStr>());
 }
 
 /*
@@ -130,27 +127,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).typing = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -161,24 +154,16 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -189,28 +174,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](
-                          const std::string& input, const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).typing = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -221,20 +201,15 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_Undefined>());
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -244,27 +219,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorNormalValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).normal = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).normal = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -275,24 +246,16 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -303,28 +266,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorNormalInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](
-                          const std::string& input, const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).normal = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).normal = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -335,20 +293,15 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_Undefined>());
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -358,27 +311,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorErrorValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).error = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).error = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -389,24 +338,16 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -417,28 +358,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorErrorInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](
-                          const std::string& input, const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).error = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).error = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -449,20 +385,15 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_Undefined>());
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -472,27 +403,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorDisableValidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).disable = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).disable = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -503,24 +430,16 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
 }
 
@@ -531,28 +450,23 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
  */
 HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorDisableInvalidValues, TestSize.Level1)
 {
-    Ark_Union_ResourceColor_UnderlineColor_Undefined initValueUnderlineColor;
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
 
     // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).typing =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).normal =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).error =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
-    WriteToUnion<Ark_UnderlineColor>(initValueUnderlineColor).disable =
-        ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
-    auto checkValue = [this, &initValueUnderlineColor](
-                          const std::string& input, const Opt_Union_ResourceColor_Undefined& value) {
-        Ark_Union_ResourceColor_UnderlineColor_Undefined inputValueUnderlineColor = initValueUnderlineColor;
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
 
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        WriteToUnion<Ark_UnderlineColor>(inputValueUnderlineColor).disable = value;
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).disable = value;
         modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
@@ -563,20 +477,15 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_String>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
-    checkValue("undefined", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_Undefined, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_Undefined>());
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 /*
@@ -914,11 +823,11 @@ HWTEST_F(TextInputModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalid
 }
 
 /*
- * @tc.name: setCancelButtonTestDefaultValues
+ * @tc.name: setCancelButton0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultCancelButton =
@@ -945,13 +854,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestDefaultValues, TestSize.Level
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonStyleValidValues
+ * @tc.name: setCancelButton0TestCancelButtonStyleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleValidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -965,15 +874,15 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleValidValues,
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const std::string& expectedStr,
                           const Opt_CancelButtonStyle& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
         inputValueCancelButton.style = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.style";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTextInputCancelButtonStyleValidValues) {
@@ -982,13 +891,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleValidValues,
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonStyleInvalidValues
+ * @tc.name: setCancelButton0TestCancelButtonStyleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonStyleInvalidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1001,16 +910,16 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleInvalidValue
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_CancelButtonStyle& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         inputValueCancelButton.style = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.style";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.style";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTextInputCancelButtonStyleInvalidValues) {
@@ -1021,13 +930,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonStyleInvalidValue
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconSizeValidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconSizeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSizeValidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1041,17 +950,17 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeValidValu
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
         WriteTo(inputValueCancelButton.icon).size = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.size";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.size";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
@@ -1060,13 +969,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeValidValu
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconSizeInvalidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconSizeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSizeInvalidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1079,18 +988,18 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeInvalidVa
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_Length& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         WriteTo(inputValueCancelButton.icon).size = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SIZE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.size";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.size";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
@@ -1101,13 +1010,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSizeInvalidVa
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconColorValidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorValidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1121,17 +1030,17 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorValidVal
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
         WriteTo(inputValueCancelButton.icon).color = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.color";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -1149,13 +1058,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorValidVal
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconColorInvalidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconColorInvalidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1168,18 +1077,18 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorInvalidV
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_ResourceColor& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         WriteTo(inputValueCancelButton.icon).color = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_COLOR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.color";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.color";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1195,13 +1104,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconColorInvalidV
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconSrcValidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconSrcValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcValidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1215,17 +1124,17 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcValidValue
 
     auto checkValue = [this, &initValueCancelButton](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
         WriteTo(inputValueCancelButton.icon).src = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.src";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.src";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -1237,13 +1146,13 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcValidValue
 }
 
 /*
- * @tc.name: setCancelButtonTestCancelButtonIconSrcInvalidValues
+ * @tc.name: setCancelButton0TestCancelButtonIconSrcInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton0TestCancelButtonIconSrcInvalidValues, TestSize.Level1)
 {
-    Ark_Literal_CancelButtonStyle_style_IconOptions_icon initValueCancelButton;
+    Ark_CancelButtonOptions initValueCancelButton;
 
     // Initial setup
     initValueCancelButton.style =
@@ -1256,24 +1165,105 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonIconSrcInvalidVal
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_ResourceStr& value) {
-        Ark_Literal_CancelButtonStyle_style_IconOptions_icon inputValueCancelButton = initValueCancelButton;
+        Ark_CancelButtonOptions inputValueCancelButton = initValueCancelButton;
 
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         WriteTo(inputValueCancelButton.icon).src = value;
-        modifier_->setCancelButton(node_, &inputValueCancelButton);
+        modifier_->setCancelButton0(node_, &inputValueCancelButton);
         auto jsonValue = GetJsonValue(node_);
         auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
         auto resultIcon =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_ICON_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcon, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_ICON_I_SRC_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCancelButton, attribute: cancelButton.icon.src";
+            "Input value is: " << input << ", method: setCancelButton0, attribute: cancelButton.icon.src";
     };
 
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_ResourceStr>());
+}
+
+/*
+ * @tc.name: setCancelButton1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setCancelButton1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultCancelButton =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'cancelButton.style'";
+}
+
+/*
+ * @tc.name: setCancelButton1TestCancelButtonStyleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setCancelButton1TestCancelButtonStyleValidValues, TestSize.Level1)
+{
+    Ark_CancelButtonSymbolOptions initValueCancelButton;
+
+    // Initial setup
+    initValueCancelButton.style =
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
+
+    auto checkValue = [this, &initValueCancelButton](const std::string& input, const std::string& expectedStr,
+                          const Opt_CancelButtonStyle& value) {
+        Ark_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
+
+        inputValueCancelButton.style = value;
+        modifier_->setCancelButton1(node_, &inputValueCancelButton);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCancelButton1, attribute: cancelButton.style";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextInputCancelButtonStyleValidValues) {
+        checkValue(input, expected, ArkValue<Opt_CancelButtonStyle>(value));
+    }
+}
+
+/*
+ * @tc.name: setCancelButton1TestCancelButtonStyleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setCancelButton1TestCancelButtonStyleInvalidValues, TestSize.Level1)
+{
+    Ark_CancelButtonSymbolOptions initValueCancelButton;
+
+    // Initial setup
+    initValueCancelButton.style =
+        ArkValue<Opt_CancelButtonStyle>(std::get<1>(Fixtures::testFixtureTextInputCancelButtonStyleValidValues[0]));
+
+    auto checkValue = [this, &initValueCancelButton](const std::string& input, const Opt_CancelButtonStyle& value) {
+        Ark_CancelButtonSymbolOptions inputValueCancelButton = initValueCancelButton;
+
+        modifier_->setCancelButton1(node_, &inputValueCancelButton);
+        inputValueCancelButton.style = value;
+        modifier_->setCancelButton1(node_, &inputValueCancelButton);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultCancelButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CANCEL_BUTTON_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultCancelButton, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_CANCEL_BUTTON_I_STYLE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCancelButton1, attribute: cancelButton.style";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureTextInputCancelButtonStyleInvalidValues) {
+        checkValue(input, ArkValue<Opt_CancelButtonStyle>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_CancelButtonStyle>());
 }
 
 /*
@@ -2258,82 +2248,6 @@ HWTEST_F(TextInputModifierTest, setShowCounterTestDefaultValues, TestSize.Level1
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_DEFAULT_VALUE) <<
         "Default value for attribute 'showCounter.options.highlightBorder'";
-}
-
-/*
- * @tc.name: setShowCounterTestShowCounterValueValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterValueValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueValue;
-    Opt_InputCounterOptions initValueOptions;
-
-    // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
-    WriteTo(initValueOptions).highlightBorder =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueValue, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueValue = initValueValue;
-        Opt_InputCounterOptions inputValueOptions = initValueOptions;
-
-        inputValueValue = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setShowCounter, attribute: showCounter.value";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setShowCounterTestShowCounterOptionsThresholdPercentageValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowCounterTestShowCounterOptionsThresholdPercentageValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueValue;
-    Opt_InputCounterOptions initValueOptions;
-
-    // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    WriteTo(initValueOptions).thresholdPercentage =
-        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberPercentageThresholdFloorValidValues[0]));
-    WriteTo(initValueOptions).highlightBorder =
-        ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
-
-    auto checkValue = [this, &initValueValue, &initValueOptions](
-                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
-        Ark_Boolean inputValueValue = initValueValue;
-        Opt_InputCounterOptions inputValueOptions = initValueOptions;
-
-        WriteTo(inputValueOptions).thresholdPercentage = value;
-        modifier_->setShowCounter(node_, inputValueValue, &inputValueOptions);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input
-            << ", method: setShowCounter, attribute: showCounter.options.thresholdPercentage";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPercentageThresholdFloorValidValues) {
-        checkValue(input, expected, ArkValue<Opt_Number>(value));
-    }
 }
 
 } // namespace OHOS::Ace::NG

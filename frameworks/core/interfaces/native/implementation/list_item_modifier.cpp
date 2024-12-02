@@ -58,6 +58,12 @@ inline ListItemEditableType Convert(const Ark_EditMode& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ListItemModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ListItemModifier
 namespace ListItemInterfaceModifier {
 void SetListItemOptions0Impl(Ark_NativePointer node,
                              const Opt_ListItemOptions* value)
@@ -150,6 +156,7 @@ void OnSelectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()
 {
     static const GENERATED_ArkUIListItemModifier ArkUIListItemModifierImpl {
+        ListItemModifier::ConstructImpl,
         ListItemInterfaceModifier::SetListItemOptions0Impl,
         ListItemInterfaceModifier::SetListItemOptions1Impl,
         ListItemAttributeModifier::StickyImpl,

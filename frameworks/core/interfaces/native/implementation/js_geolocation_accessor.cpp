@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsGeolocationAccessor {
-JsGeolocationPeer* CtorImpl()
-{
-    return new JsGeolocationPeer();
-}
-static void DestroyPeer(JsGeolocationPeer *peer)
+void DestroyPeerImpl(JsGeolocationPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->webGeolocation = nullptr;
     delete peer;
 }
+JsGeolocationPeer* CtorImpl()
+{
+    return new JsGeolocationPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void InvokeImpl(JsGeolocationPeer* peer,
                 const Ark_String* origin,
@@ -51,6 +51,7 @@ void InvokeImpl(JsGeolocationPeer* peer,
 const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
 {
     static const GENERATED_ArkUIJsGeolocationAccessor JsGeolocationAccessorImpl {
+        JsGeolocationAccessor::DestroyPeerImpl,
         JsGeolocationAccessor::CtorImpl,
         JsGeolocationAccessor::GetFinalizerImpl,
         JsGeolocationAccessor::InvokeImpl,

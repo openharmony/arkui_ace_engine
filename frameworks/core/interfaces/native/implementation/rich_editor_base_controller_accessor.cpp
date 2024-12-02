@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct RichEditorBaseControllerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorBaseControllerAccessor {
+void DestroyPeerImpl(RichEditorBaseControllerPeer* peer)
+{
+}
 RichEditorBaseControllerPeer* CtorImpl()
 {
-    return nullptr;
+    return new RichEditorBaseControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 GetCaretOffsetImpl(RichEditorBaseControllerPeer* peer)
 {
@@ -72,6 +77,7 @@ Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
     static const GENERATED_ArkUIRichEditorBaseControllerAccessor RichEditorBaseControllerAccessorImpl {
+        RichEditorBaseControllerAccessor::DestroyPeerImpl,
         RichEditorBaseControllerAccessor::CtorImpl,
         RichEditorBaseControllerAccessor::GetFinalizerImpl,
         RichEditorBaseControllerAccessor::GetCaretOffsetImpl,

@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace XComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // XComponentModifier
 namespace XComponentInterfaceModifier {
 void SetXComponentOptions0Impl(Ark_NativePointer node,
                                const Ark_Type_XComponentInterface_value* value)
@@ -49,7 +55,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                const Callback_Object_Void* value)
+                const OnNativeLoadCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -58,7 +64,7 @@ void OnLoadImpl(Ark_NativePointer node,
     //XComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 void OnDestroyImpl(Ark_NativePointer node,
-                   const Callback_Void* value)
+                   const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,6 +92,7 @@ void EnableSecureImpl(Ark_NativePointer node,
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
+        XComponentModifier::ConstructImpl,
         XComponentInterfaceModifier::SetXComponentOptions0Impl,
         XComponentInterfaceModifier::SetXComponentOptions1Impl,
         XComponentInterfaceModifier::SetXComponentOptions2Impl,

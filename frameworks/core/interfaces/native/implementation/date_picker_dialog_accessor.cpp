@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct DatePickerDialogPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
+void DestroyPeerImpl(DatePickerDialogPeer* peer)
+{
+}
 DatePickerDialogPeer* CtorImpl()
 {
-    return nullptr;
+    return new DatePickerDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
+        DatePickerDialogAccessor::DestroyPeerImpl,
         DatePickerDialogAccessor::CtorImpl,
         DatePickerDialogAccessor::GetFinalizerImpl,
         DatePickerDialogAccessor::ShowImpl,

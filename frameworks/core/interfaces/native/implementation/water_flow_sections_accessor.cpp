@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct WaterFlowSectionsPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowSectionsAccessor {
+void DestroyPeerImpl(WaterFlowSectionsPeer* peer)
+{
+}
 WaterFlowSectionsPeer* CtorImpl()
 {
-    return nullptr;
+    return new WaterFlowSectionsPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
                        const Ark_Number* start,
@@ -56,6 +61,7 @@ Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer)
 const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsAccessor()
 {
     static const GENERATED_ArkUIWaterFlowSectionsAccessor WaterFlowSectionsAccessorImpl {
+        WaterFlowSectionsAccessor::DestroyPeerImpl,
         WaterFlowSectionsAccessor::CtorImpl,
         WaterFlowSectionsAccessor::GetFinalizerImpl,
         WaterFlowSectionsAccessor::SpliceImpl,

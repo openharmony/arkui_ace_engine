@@ -293,8 +293,9 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
-static void DestroyPeer(RichEditorControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(RichEditorControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -308,7 +309,7 @@ RichEditorControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer,
                           const Ark_String* value,
@@ -442,7 +443,7 @@ Ark_NativePointer GetSelectionImpl(RichEditorControllerPeer* peer)
     return peerImpl->GetSelectionImpl();
 }
 void FromStyledStringImpl(RichEditorControllerPeer* peer,
-                          const Ark_Materialized* value)
+                          const Ark_StyledString* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -456,7 +457,8 @@ void FromStyledStringImpl(RichEditorControllerPeer* peer,
         peerImpl->FromStyledStringImpl(updateSpanStyle);
     }
 }
-Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const Ark_RichEditorRange* value)
+Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer,
+                                     const Ark_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
@@ -469,6 +471,7 @@ Ark_NativePointer ToStyledStringImpl(RichEditorControllerPeer* peer, const Ark_R
 const GENERATED_ArkUIRichEditorControllerAccessor* GetRichEditorControllerAccessor()
 {
     static const GENERATED_ArkUIRichEditorControllerAccessor RichEditorControllerAccessorImpl {
+        RichEditorControllerAccessor::DestroyPeerImpl,
         RichEditorControllerAccessor::CtorImpl,
         RichEditorControllerAccessor::GetFinalizerImpl,
         RichEditorControllerAccessor::AddTextSpanImpl,

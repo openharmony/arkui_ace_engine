@@ -20,35 +20,42 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventResultAccessor {
-EventResultPeer* CtorImpl()
-{
-    return new EventResultPeer();
-}
-static void DestroyPeer(EventResultPeer *peer)
+void DestroyPeerImpl(EventResultPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+EventResultPeer* CtorImpl()
+{
+    return new EventResultPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetGestureEventResultImpl(EventResultPeer* peer,
-                               Ark_Boolean result)
+void SetGestureEventResult0Impl(EventResultPeer* peer,
+                                Ark_Boolean result)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SetGestureEventResult(
         Converter::Convert<bool>(result)
     );
 }
+void SetGestureEventResult1Impl(EventResultPeer* peer,
+                                Ark_Boolean result,
+                                Ark_Boolean stopPropagation)
+{
+}
 } // EventResultAccessor
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
 {
     static const GENERATED_ArkUIEventResultAccessor EventResultAccessorImpl {
+        EventResultAccessor::DestroyPeerImpl,
         EventResultAccessor::CtorImpl,
         EventResultAccessor::GetFinalizerImpl,
-        EventResultAccessor::SetGestureEventResultImpl,
+        EventResultAccessor::SetGestureEventResult0Impl,
+        EventResultAccessor::SetGestureEventResult1Impl,
     };
     return &EventResultAccessorImpl;
 }

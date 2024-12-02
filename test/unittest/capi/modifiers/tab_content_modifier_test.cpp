@@ -28,7 +28,7 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace {
-using TestBaseUnionType = Ark_Type_TabContentAttribute_tabBar_value;
+using TestBaseUnionType = Ark_Union_String_Resource_CustomBuilder_TabBarOptions;
 using TabBarLabelResourceTest = std::tuple<Ark_Resource, std::string>;
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
@@ -111,10 +111,10 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
 
     ASSERT_NE(modifier_->setTabBar0, nullptr);
-    Ark_Literal_Union_String_Resource_icon_text labelIcon;
+    Ark_TabBarOptions labelIcon;
     labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
     labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_String>(TEXT_VALUE);
-    auto args = ArkUnion<TestBaseUnionType, Ark_Literal_Union_String_Resource_icon_text>(labelIcon);
+    auto args = ArkUnion<TestBaseUnionType, Ark_TabBarOptions>(labelIcon);
     modifier_->setTabBar0(node_, &args);
     jsonValue = GetJsonValue(node_);
     auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);
@@ -123,10 +123,10 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
     EXPECT_EQ(checkIcon, TEXT_VALUE);
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
-        Ark_Literal_Union_String_Resource_icon_text labelIcon;
+        Ark_TabBarOptions labelIcon;
         labelIcon.icon = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(label);
         labelIcon.text = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(label);
-        auto args = ArkUnion<TestBaseUnionType, Ark_Literal_Union_String_Resource_icon_text>(labelIcon);
+        auto args = ArkUnion<TestBaseUnionType, Ark_TabBarOptions>(labelIcon);
         modifier_->setTabBar0(node_, &args);
         jsonValue = GetJsonValue(node_);
         auto checkLabel = GetAttrValue<std::string>(jsonValue, PROP_LABEL_NAME);

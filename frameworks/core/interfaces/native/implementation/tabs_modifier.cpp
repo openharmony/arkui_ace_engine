@@ -95,7 +95,7 @@ GeneratedModifier::TabsControllerPeerImpl* Convert(const Ark_Materialized &src)
 }
 
 template<>
-TabsOptions Convert(const Ark_Type_TabsInterface_value &src)
+TabsOptions Convert(const Ark_TabsOptions& src)
 {
     return {
         .barPosOpt = OptConvert<BarPosition>(src.barPosition),
@@ -106,14 +106,20 @@ TabsOptions Convert(const Ark_Type_TabsInterface_value &src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TabsModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TabsModifier
 namespace TabsInterfaceModifier {
 void SetTabsOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_TabsInterface_value* value)
+                        const Opt_TabsOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*value);
+    CHECK_NULL_VOID(options);
+    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
     CHECK_NULL_VOID(tabsOptionsOpt);
 
     TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
@@ -214,7 +220,7 @@ void AnimationDurationImpl(Ark_NativePointer node,
     TabsModelNG::SetAnimationDuration(frameNode, Converter::Convert<float>(*value));
 }
 void AnimationModeImpl(Ark_NativePointer node,
-                       const Ark_Union_AnimationMode_Undefined* value)
+                       const Opt_AnimationMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -222,7 +228,7 @@ void AnimationModeImpl(Ark_NativePointer node,
     TabsModelNG::SetAnimateMode(frameNode, Converter::OptConvert<TabAnimateMode>(*value));
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    const Ark_Union_EdgeEffect_Undefined* value)
+                    const Opt_EdgeEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -265,7 +271,7 @@ void OnTabBarClickImpl(Ark_NativePointer node,
     TabsModelNG::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
-                          const Callback_Number_Number_TabsAnimationEvent_Void* value)
+                          const OnTabsAnimationStartCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -284,7 +290,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     TabsModelNG::SetOnAnimationStart(frameNode, std::move(onAnimationStart));
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
-                        const Callback_Number_TabsAnimationEvent_Void* value)
+                        const OnTabsAnimationEndCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -302,7 +308,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     TabsModelNG::SetOnAnimationEnd(frameNode, std::move(onAnimationEnd));
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
-                        const Callback_Number_TabsAnimationEvent_Void* value)
+                        const OnTabsGestureSwipeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -327,7 +333,7 @@ void FadingEdgeImpl(Ark_NativePointer node,
     TabsModelNG::SetFadingEdge(frameNode, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerStyle_Undefined* value)
+                 const Ark_Union_DividerStyle_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -359,7 +365,7 @@ void BarGridAlignImpl(Ark_NativePointer node,
     TabsModelNG::SetBarGridAlign(frameNode, Converter::Convert<BarGridColumnOptions>(*value));
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 const Type_TabsAttribute_customContentTransition_delegate* value)
+                                 const TabsCustomContentTransitionCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -374,8 +380,8 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     TabsModelNG::SetIsCustomAnimation(frameNode, true); //Set 'true' to any cases. It is wrong behavior.
     TabsModelNG::SetOnCustomAnimation(frameNode, std::move(onCustomAnimation));
 }
-void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                Ark_BlurStyle value)
+void BarBackgroundBlurStyle0Impl(Ark_NativePointer node,
+                                 Ark_BlurStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -386,8 +392,27 @@ void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
     }
     TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
+void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
+                                 Ark_BlurStyle style,
+                                 const Ark_BackgroundBlurStyleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(style);
+    //auto convValue = Converter::OptConvert<type>(style); // for enums
+    //TabsModelNG::SetBarBackgroundBlurStyle1(frameNode, convValue);
+}
+void BarBackgroundEffectImpl(Ark_NativePointer node,
+                             const Ark_BackgroundEffectOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabsModelNG::SetBarBackgroundEffect(frameNode, convValue);
+}
 void OnContentWillChangeImpl(Ark_NativePointer node,
-                             const Callback_Number_Number_Boolean* value)
+                             const OnTabsContentWillChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -405,6 +430,7 @@ void BarModeBarMode_SCROLLABLEImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     if (options) {
         auto optOptions = Converter::ArkValue<Opt_ScrollableBarModeOptions>(*options);
         BarMode1Impl(node, ARK_BAR_MODE_SCROLLABLE, &optOptions);
@@ -416,6 +442,7 @@ void BarModeBarMode_SCROLLABLEImpl(Ark_NativePointer node,
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
     static const GENERATED_ArkUITabsModifier ArkUITabsModifierImpl {
+        TabsModifier::ConstructImpl,
         TabsInterfaceModifier::SetTabsOptionsImpl,
         TabsAttributeModifier::VerticalImpl,
         TabsAttributeModifier::BarPositionImpl,
@@ -438,7 +465,9 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarBackgroundColorImpl,
         TabsAttributeModifier::BarGridAlignImpl,
         TabsAttributeModifier::CustomContentTransitionImpl,
-        TabsAttributeModifier::BarBackgroundBlurStyleImpl,
+        TabsAttributeModifier::BarBackgroundBlurStyle0Impl,
+        TabsAttributeModifier::BarBackgroundBlurStyle1Impl,
+        TabsAttributeModifier::BarBackgroundEffectImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeBarMode_SCROLLABLEImpl,
     };

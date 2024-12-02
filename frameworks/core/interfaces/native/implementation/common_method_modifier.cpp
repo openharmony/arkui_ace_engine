@@ -451,16 +451,6 @@ void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleAc
 }
 
 template<>
-void AssignCast(std::optional<BlurType>& dst, const Ark_BlurType& src)
-{
-    switch (src) {
-        case ARK_BLUR_TYPE_WITHIN_WINDOW: dst = BlurType::WITHIN_WINDOW; break;
-        case ARK_BLUR_TYPE_BEHIND_WINDOW: dst = BlurType::BEHIND_WINDOW; break;
-        default: LOGE("Unexpected enum value in Ark_BlurType: %{public}d", src);
-    }
-}
-
-template<>
 EffectOption Convert(const Ark_BackgroundEffectOptions& src)
 {
     EffectOption dst;
@@ -471,7 +461,6 @@ EffectOption Convert(const Ark_BackgroundEffectOptions& src)
     dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
     dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
     return dst;
 }
@@ -493,7 +482,6 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
     }
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.blurType = OptConvert<BlurType>(src.type).value_or(dst.blurType);
     dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
     return dst;
 }
@@ -635,12 +623,15 @@ constexpr int32_t CASE_1 = 1;
 constexpr int32_t CASE_2 = 2;
 
 namespace CommonMethodModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
     CHECK_NULL_RETURN(pipelineContext, 0);
     return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
 }
-
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
@@ -682,12 +673,11 @@ void HeightImpl(Ark_NativePointer node,
     }
 }
 void DrawModifierImpl(Ark_NativePointer node,
-                      const Ark_Union_DrawModifier_Undefined* value)
+                      const Opt_DrawModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetDrawModifier(frameNode, convValue);
 }
 void ResponseRegionImpl(Ark_NativePointer node,
@@ -787,6 +777,15 @@ void LayoutWeightImpl(Ark_NativePointer node,
         ViewAbstract::SetLayoutWeight(frameNode, weight.value());
     }
 }
+void ChainWeightImpl(Ark_NativePointer node,
+                     const Ark_ChainWeightOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetChainWeight(frameNode, convValue);
+}
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Length_LocalizedPadding* value)
 {
@@ -794,6 +793,15 @@ void PaddingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
+}
+void SafeAreaPaddingImpl(Ark_NativePointer node,
+                         const Ark_Union_Padding_LengthMetrics_LocalizedPadding* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetSafeAreaPadding(frameNode, convValue);
 }
 void MarginImpl(Ark_NativePointer node,
                 const Ark_Union_Margin_Length_LocalizedMargin* value)
@@ -1416,6 +1424,14 @@ void FocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, static_cast<bool>(value));
 }
+void TabStopImpl(Ark_NativePointer node,
+                 Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonMethodModelNG::SetTabStop(frameNode, convValue);
+}
 void OnFocusImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
@@ -1536,8 +1552,8 @@ void Transition0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetTransition0(frameNode, convValue);
 }
 void Transition1Impl(Ark_NativePointer node,
-                     const Ark_Materialized* effect,
-                     const Ark_Union_TransitionFinishCallback_Undefined* onFinish)
+                     const Ark_TransitionEffect* effect,
+                     const Opt_TransitionFinishCallback* onFinish)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1640,13 +1656,23 @@ void UseShadowBatchingImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     ViewAbstract::SetUseShadowBatching(frameNode, convValue);
 }
-void UseEffectImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+void UseEffect0Impl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
     ViewAbstract::SetUseEffect(frameNode, convValue);
+}
+void UseEffect1Impl(Ark_NativePointer node,
+                    Ark_Boolean useEffect,
+                    Ark_EffectType effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(useEffect);
+    //auto convValue = Converter::OptConvert<type>(useEffect); // for enums
+    //CommonMethodModelNG::SetUseEffect1(frameNode, convValue);
 }
 void RenderGroupImpl(Ark_NativePointer node,
                      Ark_Boolean value)
@@ -2025,7 +2051,7 @@ void AspectRatioImpl(Ark_NativePointer node,
     }
 }
 void ClickEffectImpl(Ark_NativePointer node,
-                     const Ark_Union_ClickEffect_Undefined* value)
+                     const Ark_Union_ClickEffect_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2088,7 +2114,7 @@ void OnDragEndImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnDragEnd(frameNode, convValue);
 }
 void AllowDropImpl(Ark_NativePointer node,
-                   const Ark_Union_Array_UniformDataType_Undefined* value)
+                   const Ark_Union_Array_UniformDataType_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2243,7 +2269,7 @@ void ClipShapeImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClipShape(frameNode, convValue);
 }
 void Mask0Impl(Ark_NativePointer node,
-               const Ark_Materialized* value)
+               const Ark_ProgressMask* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2354,13 +2380,23 @@ void PixelStretchEffectImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetPixelStretchEffect(frameNode, convValue);
 }
-void AccessibilityGroupImpl(Ark_NativePointer node,
-                            Ark_Boolean value)
+void AccessibilityGroup0Impl(Ark_NativePointer node,
+                             Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetAccessibilityGroup(frameNode, convValue);
+    //CommonMethodModelNG::SetAccessibilityGroup0(frameNode, convValue);
+}
+void AccessibilityGroup1Impl(Ark_NativePointer node,
+                             Ark_Boolean isGroup,
+                             const Ark_AccessibilityOptions* accessibilityOptions)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(isGroup);
+    //auto convValue = Converter::OptConvert<type>(isGroup); // for enums
+    //CommonMethodModelNG::SetAccessibilityGroup1(frameNode, convValue);
 }
 void AccessibilityText0Impl(Ark_NativePointer node,
                             const Ark_String* value)
@@ -2425,6 +2461,22 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAccessibilityVirtualNode(frameNode, convValue);
 }
+void AccessibilityCheckedImpl(Ark_NativePointer node,
+                              Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonMethodModelNG::SetAccessibilityChecked(frameNode, convValue);
+}
+void AccessibilitySelectedImpl(Ark_NativePointer node,
+                               Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonMethodModelNG::SetAccessibilitySelected(frameNode, convValue);
+}
 void ObscuredImpl(Ark_NativePointer node,
                   const Array_ObscuredReasons* value)
 {
@@ -2453,7 +2505,7 @@ void RenderFitImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetRenderFit(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_GestureModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2480,14 +2532,24 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnGestureJudgeBegin(frameNode, convValue);
 }
-void OnGestureRecognizerJudgeBeginImpl(Ark_NativePointer node,
-                                       const GestureRecognizerJudgeBeginCallback* value)
+void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
+                                        const GestureRecognizerJudgeBeginCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin(frameNode, convValue);
+    //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin0(frameNode, convValue);
+}
+void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
+                                        const GestureRecognizerJudgeBeginCallback* callback,
+                                        Ark_Boolean exposeInnerGesture)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(callback);
+    //auto convValue = Converter::OptConvert<type>(callback); // for enums
+    //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin1(frameNode, convValue);
 }
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
                                              const ShouldBuiltInRecognizerParallelWithCallback* value)
@@ -2526,7 +2588,7 @@ void OnSizeChangeImpl(Ark_NativePointer node,
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Ark_String* name,
-                        const Ark_Union_Object_Undefined* value)
+                        const Opt_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2603,15 +2665,26 @@ void ForegroundBlurStyleImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, convValue);
 }
-void FocusScopeIdImpl(Ark_NativePointer node,
-                      const Ark_String* id,
-                      const Opt_Boolean* isGroup)
+void FocusScopeId0Impl(Ark_NativePointer node,
+                       const Ark_String* id,
+                       const Opt_Boolean* isGroup)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(id);
     //auto convValue = Converter::OptConvert<type>(id); // for enums
-    //CommonMethodModelNG::SetFocusScopeId(frameNode, convValue);
+    //CommonMethodModelNG::SetFocusScopeId0(frameNode, convValue);
+}
+void FocusScopeId1Impl(Ark_NativePointer node,
+                       const Ark_String* id,
+                       const Opt_Boolean* isGroup,
+                       const Opt_Boolean* arrowStepOut)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(id);
+    //auto convValue = Converter::OptConvert<type>(id); // for enums
+    //CommonMethodModelNG::SetFocusScopeId1(frameNode, convValue);
 }
 void FocusScopePriorityImpl(Ark_NativePointer node,
                             const Ark_String* scopeId,
@@ -2826,7 +2899,7 @@ void BindContextMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContextMenu1(frameNode, convValue);
 }
 void BindContentCover0Impl(Ark_NativePointer node,
-                           const Ark_Union_Boolean_Undefined* isShow,
+                           const Opt_Boolean* isShow,
                            const Callback_Any* builder,
                            const Opt_ModalTransition* type)
 {
@@ -2837,7 +2910,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContentCover0(frameNode, convValue);
 }
 void BindContentCover1Impl(Ark_NativePointer node,
-                           const Ark_Union_Boolean_Undefined* isShow,
+                           const Opt_Boolean* isShow,
                            const Callback_Any* builder,
                            const Opt_ContentCoverOptions* options)
 {
@@ -2848,7 +2921,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContentCover1(frameNode, convValue);
 }
 void BindSheetImpl(Ark_NativePointer node,
-                   const Ark_Union_Boolean_Undefined* isShow,
+                   const Opt_Boolean* isShow,
                    const Callback_Any* builder,
                    const Opt_SheetOptions* options)
 {
@@ -2906,6 +2979,7 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
     static const GENERATED_ArkUICommonMethodModifier ArkUICommonMethodModifierImpl {
+        CommonMethodModifier::ConstructImpl,
         CommonMethodModifier::WidthImpl,
         CommonMethodModifier::HeightImpl,
         CommonMethodModifier::DrawModifierImpl,
@@ -2917,7 +2991,9 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::HitTestBehaviorImpl,
         CommonMethodModifier::OnChildTouchTestImpl,
         CommonMethodModifier::LayoutWeightImpl,
+        CommonMethodModifier::ChainWeightImpl,
         CommonMethodModifier::PaddingImpl,
+        CommonMethodModifier::SafeAreaPaddingImpl,
         CommonMethodModifier::MarginImpl,
         CommonMethodModifier::BackgroundColorImpl,
         CommonMethodModifier::PixelRoundImpl,
@@ -2953,6 +3029,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnKeyEventImpl,
         CommonMethodModifier::OnKeyPreImeImpl,
         CommonMethodModifier::FocusableImpl,
+        CommonMethodModifier::TabStopImpl,
         CommonMethodModifier::OnFocusImpl,
         CommonMethodModifier::OnBlurImpl,
         CommonMethodModifier::TabIndexImpl,
@@ -2973,7 +3050,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::InvertImpl,
         CommonMethodModifier::HueRotateImpl,
         CommonMethodModifier::UseShadowBatchingImpl,
-        CommonMethodModifier::UseEffectImpl,
+        CommonMethodModifier::UseEffect0Impl,
+        CommonMethodModifier::UseEffect1Impl,
         CommonMethodModifier::RenderGroupImpl,
         CommonMethodModifier::FreezeImpl,
         CommonMethodModifier::TranslateImpl,
@@ -3035,7 +3113,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SphericalEffectImpl,
         CommonMethodModifier::LightUpEffectImpl,
         CommonMethodModifier::PixelStretchEffectImpl,
-        CommonMethodModifier::AccessibilityGroupImpl,
+        CommonMethodModifier::AccessibilityGroup0Impl,
+        CommonMethodModifier::AccessibilityGroup1Impl,
         CommonMethodModifier::AccessibilityText0Impl,
         CommonMethodModifier::AccessibilityText1Impl,
         CommonMethodModifier::AccessibilityTextHintImpl,
@@ -3043,13 +3122,16 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::AccessibilityDescription1Impl,
         CommonMethodModifier::AccessibilityLevelImpl,
         CommonMethodModifier::AccessibilityVirtualNodeImpl,
+        CommonMethodModifier::AccessibilityCheckedImpl,
+        CommonMethodModifier::AccessibilitySelectedImpl,
         CommonMethodModifier::ObscuredImpl,
         CommonMethodModifier::ReuseIdImpl,
         CommonMethodModifier::RenderFitImpl,
         CommonMethodModifier::GestureModifierImpl,
         CommonMethodModifier::BackgroundBrightnessImpl,
         CommonMethodModifier::OnGestureJudgeBeginImpl,
-        CommonMethodModifier::OnGestureRecognizerJudgeBeginImpl,
+        CommonMethodModifier::OnGestureRecognizerJudgeBegin0Impl,
+        CommonMethodModifier::OnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::ShouldBuiltInRecognizerParallelWithImpl,
         CommonMethodModifier::MonopolizeEventsImpl,
         CommonMethodModifier::OnTouchInterceptImpl,
@@ -3060,7 +3142,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::BackgroundImageImpl,
         CommonMethodModifier::BackgroundBlurStyleImpl,
         CommonMethodModifier::ForegroundBlurStyleImpl,
-        CommonMethodModifier::FocusScopeIdImpl,
+        CommonMethodModifier::FocusScopeId0Impl,
+        CommonMethodModifier::FocusScopeId1Impl,
         CommonMethodModifier::FocusScopePriorityImpl,
         CommonMethodModifier::GestureImpl,
         CommonMethodModifier::PriorityGestureImpl,

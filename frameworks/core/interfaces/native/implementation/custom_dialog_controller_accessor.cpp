@@ -20,8 +20,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
-static void DestroyPeer(CustomDialogControllerPeerImpl *peerImpl)
+void DestroyPeerImpl(CustomDialogControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CustomDialogControllerPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -64,7 +65,7 @@ CustomDialogControllerPeer* CtorImpl(const Ark_CustomDialogControllerOptions* va
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void OpenImpl(CustomDialogControllerPeer* peer)
 {
@@ -78,6 +79,7 @@ void CloseImpl(CustomDialogControllerPeer* peer)
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
 {
     static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
+        CustomDialogControllerAccessor::DestroyPeerImpl,
         CustomDialogControllerAccessor::CtorImpl,
         CustomDialogControllerAccessor::GetFinalizerImpl,
         CustomDialogControllerAccessor::OpenImpl,

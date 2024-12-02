@@ -21,6 +21,12 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace StepperModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // StepperModifier
 namespace StepperInterfaceModifier {
 void SetStepperOptionsImpl(Ark_NativePointer node,
                            const Opt_Literal_Number_index* value)
@@ -92,6 +98,7 @@ void OnPreviousImpl(Ark_NativePointer node,
 const GENERATED_ArkUIStepperModifier* GetStepperModifier()
 {
     static const GENERATED_ArkUIStepperModifier ArkUIStepperModifierImpl {
+        StepperModifier::ConstructImpl,
         StepperInterfaceModifier::SetStepperOptionsImpl,
         StepperAttributeModifier::OnFinishImpl,
         StepperAttributeModifier::OnSkipImpl,

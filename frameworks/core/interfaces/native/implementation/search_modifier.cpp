@@ -60,7 +60,7 @@ using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_CustomObject>;
 
 namespace Converter {
 template<>
-SearchOptions Convert(const Ark_Type_SearchInterface_options& src)
+SearchOptions Convert(const Ark_SearchOptions& src)
 {
     SearchOptions options;
     options.value = Converter::OptConvert<std::string>(src.value);
@@ -121,9 +121,15 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SearchModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SearchModifier
 namespace SearchInterfaceModifier {
 void SetSearchOptionsImpl(Ark_NativePointer node,
-                          const Opt_Type_SearchInterface_options* options)
+                          const Opt_SearchOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -264,17 +270,26 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(value));
 }
-void OnSubmitImpl(Ark_NativePointer node,
-                  const Callback_String_Void* value)
+void OnSubmit0Impl(Ark_NativePointer node,
+                   const Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onSubmit = [frameNode](const std::string& value, NG::TextFieldCommonEvent&) {
         auto arkStringValue = Converter::ArkValue<Ark_String>(value);
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit(frameNode->GetId(), arkStringValue);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit0(frameNode->GetId(), arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
+}
+void OnSubmit1Impl(Ark_NativePointer node,
+                   const SearchSubmitCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SearchModelNG::SetOnSubmit1(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const EditableTextOnChangeCallback* value)
@@ -291,7 +306,7 @@ void OnChangeImpl(Ark_NativePointer node,
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const Callback_Number_Number_Void* value)
+                               const OnTextSelectionChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -305,7 +320,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         const Callback_Number_Number_Void* value)
+                         const OnContentScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -344,7 +359,7 @@ void OnCutImpl(Ark_NativePointer node,
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 const Callback_String_PasteEvent_Void* value)
+                 const OnPasteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -532,7 +547,7 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -602,6 +617,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
     static const GENERATED_ArkUISearchModifier ArkUISearchModifierImpl {
+        SearchModifier::ConstructImpl,
         SearchInterfaceModifier::SetSearchOptionsImpl,
         SearchAttributeModifier::FontColorImpl,
         SearchAttributeModifier::SearchIconImpl,
@@ -614,7 +630,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::PlaceholderFontImpl,
         SearchAttributeModifier::TextFontImpl,
         SearchAttributeModifier::EnterKeyTypeImpl,
-        SearchAttributeModifier::OnSubmitImpl,
+        SearchAttributeModifier::OnSubmit0Impl,
+        SearchAttributeModifier::OnSubmit1Impl,
         SearchAttributeModifier::OnChangeImpl,
         SearchAttributeModifier::OnTextSelectionChangeImpl,
         SearchAttributeModifier::OnContentScrollImpl,

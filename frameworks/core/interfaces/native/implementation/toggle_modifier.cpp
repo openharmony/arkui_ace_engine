@@ -56,6 +56,12 @@ SwitchStyle Convert(const Ark_SwitchStyle& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ToggleModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ToggleModifier
 namespace ToggleInterfaceModifier {
 void SetToggleOptionsImpl(Ark_NativePointer node,
                           const Ark_ToggleOptions* options)
@@ -74,7 +80,7 @@ namespace ToggleAttributeModifier {
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Boolean_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange = [frameNode](bool isOn) {
@@ -89,6 +95,8 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ToggleModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -129,6 +137,7 @@ void SwitchStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
+        ToggleModifier::ConstructImpl,
         ToggleInterfaceModifier::SetToggleOptionsImpl,
         ToggleAttributeModifier::OnChangeImpl,
         ToggleAttributeModifier::ContentModifierImpl,

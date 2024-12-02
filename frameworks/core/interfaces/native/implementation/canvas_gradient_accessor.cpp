@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasGradientAccessor {
-static void DestroyPeer(CanvasGradientPeer* peer)
+void DestroyPeerImpl(CanvasGradientPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -33,7 +33,7 @@ CanvasGradientPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void AddColorStopImpl(CanvasGradientPeer* peer,
                       const Ark_Number* offset,
@@ -44,6 +44,7 @@ void AddColorStopImpl(CanvasGradientPeer* peer,
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
 {
     static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
+        CanvasGradientAccessor::DestroyPeerImpl,
         CanvasGradientAccessor::CtorImpl,
         CanvasGradientAccessor::GetFinalizerImpl,
         CanvasGradientAccessor::AddColorStopImpl,

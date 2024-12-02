@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace UIExtensionComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
 void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
                                         const Ark_Want* want,
@@ -41,7 +47,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Callback_Literal_Empty_Void* value)
+                   const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -89,6 +95,7 @@ void OnTerminatedImpl(Ark_NativePointer node,
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()
 {
     static const GENERATED_ArkUIUIExtensionComponentModifier ArkUIUIExtensionComponentModifierImpl {
+        UIExtensionComponentModifier::ConstructImpl,
         UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl,
         UIExtensionComponentAttributeModifier::OnRemoteReadyImpl,
         UIExtensionComponentAttributeModifier::OnReceiveImpl,

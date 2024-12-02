@@ -18,9 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
-namespace OHOS::Ace::NG {
-
-namespace Converter {
+namespace OHOS::Ace::NG::Converter {
     template<>
     void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
     {
@@ -31,7 +29,14 @@ namespace Converter {
         }
     }
 }
-namespace GeneratedModifier {
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CheckboxModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CheckboxModifier
 namespace CheckboxInterfaceModifier {
 void SetCheckboxOptionsImpl(Ark_NativePointer node,
                             const Opt_CheckboxOptions* options)
@@ -140,6 +145,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
 {
     static const GENERATED_ArkUICheckboxModifier ArkUICheckboxModifierImpl {
+        CheckboxModifier::ConstructImpl,
         CheckboxInterfaceModifier::SetCheckboxOptionsImpl,
         CheckboxAttributeModifier::SelectImpl,
         CheckboxAttributeModifier::SelectedColorImpl,
@@ -151,5 +157,5 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
     };
     return &ArkUICheckboxModifierImpl;
 }
-}
+
 }

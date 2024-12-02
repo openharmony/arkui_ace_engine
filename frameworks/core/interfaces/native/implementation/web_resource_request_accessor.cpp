@@ -21,19 +21,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceRequestAccessor {
-WebResourceRequestPeer* CtorImpl()
-{
-    return new WebResourceRequestPeer();
-}
-static void DestroyPeer(WebResourceRequestPeer *peer)
+void DestroyPeerImpl(WebResourceRequestPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->webRequest = nullptr;
     delete peer;
 }
+WebResourceRequestPeer* CtorImpl()
+{
+    return new WebResourceRequestPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetRequestHeaderImpl(WebResourceRequestPeer* peer)
 {
@@ -75,6 +75,7 @@ void GetRequestMethodImpl(WebResourceRequestPeer* peer)
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()
 {
     static const GENERATED_ArkUIWebResourceRequestAccessor WebResourceRequestAccessorImpl {
+        WebResourceRequestAccessor::DestroyPeerImpl,
         WebResourceRequestAccessor::CtorImpl,
         WebResourceRequestAccessor::GetFinalizerImpl,
         WebResourceRequestAccessor::GetRequestHeaderImpl,

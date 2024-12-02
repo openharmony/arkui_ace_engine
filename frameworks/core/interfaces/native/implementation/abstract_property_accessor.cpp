@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct AbstractPropertyPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AbstractPropertyAccessor {
+void DestroyPeerImpl(AbstractPropertyPeer* peer)
+{
+}
 AbstractPropertyPeer* CtorImpl()
 {
-    return nullptr;
+    return new AbstractPropertyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetImpl(AbstractPropertyPeer* peer)
 {
@@ -41,6 +46,7 @@ void InfoImpl(AbstractPropertyPeer* peer)
 const GENERATED_ArkUIAbstractPropertyAccessor* GetAbstractPropertyAccessor()
 {
     static const GENERATED_ArkUIAbstractPropertyAccessor AbstractPropertyAccessorImpl {
+        AbstractPropertyAccessor::DestroyPeerImpl,
         AbstractPropertyAccessor::CtorImpl,
         AbstractPropertyAccessor::GetFinalizerImpl,
         AbstractPropertyAccessor::GetImpl,

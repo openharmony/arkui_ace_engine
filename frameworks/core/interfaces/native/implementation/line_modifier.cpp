@@ -31,7 +31,7 @@ struct LineOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-LineOptions Convert(const Ark_Literal_Union_String_Number_height_width& src)
+LineOptions Convert(const Ark_LineOptions& src)
 {
     LineOptions options;
     options.width = Converter::OptConvert<Dimension>(src.width);
@@ -41,22 +41,28 @@ LineOptions Convert(const Ark_Literal_Union_String_Number_height_width& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace LineModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // LineModifier
 namespace LineInterfaceModifier {
 
 void SetLineOptionsImpl(Ark_NativePointer node,
-                        const Opt_Literal_Union_String_Number_height_width* value)
+                        const Opt_LineOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<LineOptions>(*value);
     CHECK_NULL_VOID(options);
-    if (options->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, options->width.value());
+    auto opt = Converter::OptConvert<LineOptions>(*options);
+    CHECK_NULL_VOID(opt);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
     }
 
-    if (options->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, options->height.value());
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
     }
 }
 } // LineInterfaceModifier
@@ -83,6 +89,7 @@ void EndPointImpl(Ark_NativePointer node,
 const GENERATED_ArkUILineModifier* GetLineModifier()
 {
     static const GENERATED_ArkUILineModifier ArkUILineModifierImpl {
+        LineModifier::ConstructImpl,
         LineInterfaceModifier::SetLineOptionsImpl,
         LineAttributeModifier::StartPointImpl,
         LineAttributeModifier::EndPointImpl,

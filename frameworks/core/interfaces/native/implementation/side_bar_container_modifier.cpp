@@ -100,6 +100,12 @@ DividerOptions Convert(const Ark_DividerStyle& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SideBarContainerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SideBarContainerModifier
 namespace SideBarContainerInterfaceModifier {
 void SetSideBarContainerOptionsImpl(Ark_NativePointer node,
                                     const Opt_SideBarContainerType* type)
@@ -170,7 +176,7 @@ void SideBarWidth0Impl(Ark_NativePointer node,
 void SideBarWidth1Impl(Ark_NativePointer node,
                        const Ark_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
@@ -180,7 +186,7 @@ void SideBarWidth1Impl(Ark_NativePointer node,
 void MinSideBarWidth0Impl(Ark_NativePointer node,
                           const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
@@ -190,7 +196,7 @@ void MinSideBarWidth0Impl(Ark_NativePointer node,
 void MinSideBarWidth1Impl(Ark_NativePointer node,
                           const Ark_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto width = Converter::OptConvert<Dimension>(*value);
@@ -233,7 +239,7 @@ void SideBarPositionImpl(Ark_NativePointer node,
     SideBarContainerModelNG::SetSideBarPosition(frameNode, pos);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerStyle_Undefined* value)
+                 const Ark_Union_DividerStyle_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -267,6 +273,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
     static const GENERATED_ArkUISideBarContainerModifier ArkUISideBarContainerModifierImpl {
+        SideBarContainerModifier::ConstructImpl,
         SideBarContainerInterfaceModifier::SetSideBarContainerOptionsImpl,
         SideBarContainerAttributeModifier::ShowSideBarImpl,
         SideBarContainerAttributeModifier::ControlButtonImpl,

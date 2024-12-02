@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct SubscribaleAbstractPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubscribaleAbstractAccessor {
+void DestroyPeerImpl(SubscribaleAbstractPeer* peer)
+{
+}
 SubscribaleAbstractPeer* CtorImpl()
 {
-    return nullptr;
+    return new SubscribaleAbstractPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void NotifyPropertyHasChangedImpl(SubscribaleAbstractPeer* peer,
                                   const Ark_String* propName,
@@ -33,11 +38,11 @@ void NotifyPropertyHasChangedImpl(SubscribaleAbstractPeer* peer,
 {
 }
 void AddOwningPropertyImpl(SubscribaleAbstractPeer* peer,
-                           const Ark_Materialized* subscriber)
+                           const Ark_IPropertySubscriber* subscriber)
 {
 }
 void RemoveOwningPropertyImpl(SubscribaleAbstractPeer* peer,
-                              const Ark_Materialized* property)
+                              const Ark_IPropertySubscriber* property)
 {
 }
 void RemoveOwningPropertyByIdImpl(SubscribaleAbstractPeer* peer,
@@ -48,6 +53,7 @@ void RemoveOwningPropertyByIdImpl(SubscribaleAbstractPeer* peer,
 const GENERATED_ArkUISubscribaleAbstractAccessor* GetSubscribaleAbstractAccessor()
 {
     static const GENERATED_ArkUISubscribaleAbstractAccessor SubscribaleAbstractAccessorImpl {
+        SubscribaleAbstractAccessor::DestroyPeerImpl,
         SubscribaleAbstractAccessor::CtorImpl,
         SubscribaleAbstractAccessor::GetFinalizerImpl,
         SubscribaleAbstractAccessor::NotifyPropertyHasChangedImpl,

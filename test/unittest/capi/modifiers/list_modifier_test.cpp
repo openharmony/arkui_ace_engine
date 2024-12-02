@@ -119,22 +119,22 @@ HWTEST_F(ListModifierTest, setEnableScrollInteractionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setCachedCountTest
- * @tc.desc: Check the functionality of ListModifier.setCachedCount
+ * @tc.name: setCachedCount0Test
+ * @tc.desc: Check the functionality of ListModifier.setCachedCount0
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, setCachedCountTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setCachedCount0Test, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "cachedCount");
     EXPECT_EQ(checkValue, "0");
 
     auto arg = Converter::ArkValue<Ark_Number>(10);
-    modifier_->setCachedCount(node_, &arg);
+    modifier_->setCachedCount0(node_, &arg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
     EXPECT_EQ(checkValue, "10");
 
     arg = Converter::ArkValue<Ark_Number>(-10);
-    modifier_->setCachedCount(node_, &arg);
+    modifier_->setCachedCount0(node_, &arg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
     EXPECT_EQ(checkValue, "0");
 }
@@ -593,7 +593,7 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Null, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -613,7 +613,7 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Null, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -641,7 +641,7 @@ HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
         .color = Converter::ArkValue<Opt_ResourceColor>(
             Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(DIVIDER_COLOR_RESOURCE))
     };
-    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Null, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -663,7 +663,7 @@ HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Null, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -691,7 +691,7 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Undefined, Ark_ListDividerOptions>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_ListDividerOptions_Null, Ark_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");

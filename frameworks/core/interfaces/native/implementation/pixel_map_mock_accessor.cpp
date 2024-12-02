@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct PixelMapMockPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapMockAccessor {
+void DestroyPeerImpl(PixelMapMockPeer* peer)
+{
+}
 PixelMapMockPeer* CtorImpl()
 {
-    return nullptr;
+    return new PixelMapMockPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ReleaseImpl(PixelMapMockPeer* peer)
 {
@@ -34,6 +39,7 @@ void ReleaseImpl(PixelMapMockPeer* peer)
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor()
 {
     static const GENERATED_ArkUIPixelMapMockAccessor PixelMapMockAccessorImpl {
+        PixelMapMockAccessor::DestroyPeerImpl,
         PixelMapMockAccessor::CtorImpl,
         PixelMapMockAccessor::GetFinalizerImpl,
         PixelMapMockAccessor::ReleaseImpl,

@@ -19,9 +19,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
-
-static void DestroyPeer(SearchControllerPeerImpl* peerImpl)
+void DestroyPeerImpl(SearchControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -34,7 +34,7 @@ SearchControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CaretPositionImpl(SearchControllerPeer* peer,
                        const Ark_Number* value)
@@ -80,6 +80,7 @@ void SetTextSelectionImpl(SearchControllerPeer* peer,
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
 {
     static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
+        SearchControllerAccessor::DestroyPeerImpl,
         SearchControllerAccessor::CtorImpl,
         SearchControllerAccessor::GetFinalizerImpl,
         SearchControllerAccessor::CaretPositionImpl,

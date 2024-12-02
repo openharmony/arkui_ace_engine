@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
-static void DestroyPeer(TextAreaControllerPeer* peer)
+void DestroyPeerImpl(TextAreaControllerPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -32,7 +32,7 @@ TextAreaControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CaretPositionImpl(TextAreaControllerPeer* peer,
                        const Ark_Number* value)
@@ -70,6 +70,7 @@ void StopEditingImpl(TextAreaControllerPeer* peer)
 const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
 {
     static const GENERATED_ArkUITextAreaControllerAccessor TextAreaControllerAccessorImpl {
+        TextAreaControllerAccessor::DestroyPeerImpl,
         TextAreaControllerAccessor::CtorImpl,
         TextAreaControllerAccessor::GetFinalizerImpl,
         TextAreaControllerAccessor::CaretPositionImpl,

@@ -289,7 +289,7 @@ HWTEST_F(ProgressModifierTest, setLinearStyleValidValues, TestSize.Level1)
     Ark_LinearStyleOptions linerStyle;
     linerStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(
         std::optional<bool>(Converter::ArkValue<Ark_Boolean>(true)));
-    linerStyle.strokeRadius = Converter::ArkValue<Opt_Union_PX_VP_LPX_Resource>(Ark_Empty());
+    linerStyle.strokeRadius = Converter::ArkValue<Opt_Union_String_Number_Resource>(Ark_Empty());
     linerStyle.strokeWidth = Converter::ArkValue<Opt_Length>(
         std::optional<Ark_Length>(Converter::ArkValue<Ark_Length>(3)));
     options =

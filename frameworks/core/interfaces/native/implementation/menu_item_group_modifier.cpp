@@ -63,6 +63,12 @@ MenuItemGroupOptions Convert(const Ark_MenuItemGroupOptions& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace MenuItemGroupModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // MenuItemGroupModifier
 namespace MenuItemGroupInterfaceModifier {
 void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_MenuItemGroupOptions* value)
@@ -88,6 +94,7 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier()
 {
     static const GENERATED_ArkUIMenuItemGroupModifier ArkUIMenuItemGroupModifierImpl {
+        MenuItemGroupModifier::ConstructImpl,
         MenuItemGroupInterfaceModifier::SetMenuItemGroupOptionsImpl,
     };
     return &ArkUIMenuItemGroupModifierImpl;

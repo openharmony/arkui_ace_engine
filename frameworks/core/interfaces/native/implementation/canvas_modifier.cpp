@@ -36,6 +36,12 @@ GeneratedModifier::CanvasRenderingContext2DPeerImpl* Convert(const Ark_Materiali
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CanvasModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CanvasModifier
 namespace CanvasInterfaceModifier {
 
 template<typename T>
@@ -93,10 +99,9 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
     LOGE("CanvasInterfaceModifier::SetCanvasOptions1Impl - Ark_ImageAIOptions is not supported.");
 }
 } // CanvasInterfaceModifier
-
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,6 +123,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()
 {
     static const GENERATED_ArkUICanvasModifier ArkUICanvasModifierImpl {
+        CanvasModifier::ConstructImpl,
         CanvasInterfaceModifier::SetCanvasOptions0Impl,
         CanvasInterfaceModifier::SetCanvasOptions1Impl,
         CanvasAttributeModifier::OnReadyImpl,

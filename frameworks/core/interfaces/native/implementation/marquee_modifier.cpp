@@ -61,6 +61,12 @@ MarqueeOptions Convert(const Ark_MarqueeOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace MarqueeModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // MarqueeModifier
 namespace MarqueeInterfaceModifier {
 void SetMarqueeOptionsImpl(Ark_NativePointer node,
                            const Ark_MarqueeOptions* options)
@@ -176,6 +182,7 @@ void OnFinishImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
 {
     static const GENERATED_ArkUIMarqueeModifier ArkUIMarqueeModifierImpl {
+        MarqueeModifier::ConstructImpl,
         MarqueeInterfaceModifier::SetMarqueeOptionsImpl,
         MarqueeAttributeModifier::FontColorImpl,
         MarqueeAttributeModifier::FontSizeImpl,
