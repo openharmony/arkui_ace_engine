@@ -1256,7 +1256,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 
     ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
     eventHub->GetScrollEdgeEvent()(ScrollEdge::BOTTOM);
-    EXPECT_TRUE(result.has_value());
+    ASSERT_TRUE(result.has_value());
     EXPECT_EQ(Ark_Edge::ARK_EDGE_BOTTOM, result.value().side);
     EXPECT_EQ(id, result.value().resourceId);
 }
