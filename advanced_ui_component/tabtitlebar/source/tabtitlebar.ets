@@ -43,11 +43,13 @@ const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
 const MIN_DIALOG = '216vp'
 
+@Builder function MySwiperContent() : void {}
+
 @Component
 export struct TabTitleBar {
   tabItems: Array<TabTitleBarTabItem> = [];
   menuItems: Array<TabTitleBarMenuItem> = [];
-  @BuilderParam swiperContent : VoidCallback;
+  @BuilderParam swiperContent : () => void = MySwiperContent;
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
@@ -672,13 +674,14 @@ struct ImageMenuItem {
           .draggable(false)
           .focusable(this.item?.isEnabled)
           .key(ImageMenuItem.focusablePrefix + this.index)
+      } else {
+        Image(this.item.value)
+          .width(ImageMenuItem.imageSize)
+          .height(ImageMenuItem.imageSize)
+          .focusable(this.item.isEnabled)
+          .key(ImageMenuItem.focusablePrefix + this.index)
+          .draggable(false)
       }
-      Image(this.item.value)
-        .width(ImageMenuItem.imageSize)
-        .height(ImageMenuItem.imageSize)
-        .focusable(this.item.isEnabled)
-        .key(ImageMenuItem.focusablePrefix + this.index)
-        .draggable(false)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -823,11 +826,12 @@ struct TabTitleBarDialog {
             .fontSize(IMAGE_SIZE)
             .draggable(false)
             .focusable(this.tabTitleDialog?.isEnabled)
+        } else {
+          Image(this.tabTitleDialog.value)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor($r('sys.color.icon_primary'))
         }
-        Image(this.tabTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
