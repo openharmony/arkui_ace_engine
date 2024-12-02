@@ -92,6 +92,9 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
     }
 }
 
+void stubCall(const Ark_Int32 _) {}
+void stubHoldRelease(Ark_Int32 _) {}
+
 void AssignArkValue(Ark_Length& dst, const std::string& src)
 {
     char *suffixPtr = nullptr;
@@ -197,6 +200,11 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
 
     onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+    onClick.preventDefault = {
+        { 0, stubHoldRelease, stubHoldRelease },
+        stubCall,
+    };
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
