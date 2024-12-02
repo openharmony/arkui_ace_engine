@@ -421,7 +421,8 @@ void XComponentModelNG::SetXComponentLibraryname(FrameNode* frameNode, const std
     xcPattern->SetLibraryName(libraryname);
 }
 
-void SetXComponentController(FrameNode* frameNode, std::shared_ptr<InnerXComponentController> controller)
+void XComponentModelNG::SetXComponentController(FrameNode* frameNode,
+    std::shared_ptr<InnerXComponentController> controller)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());

@@ -22,6 +22,7 @@
 #ifdef XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #endif // XCOMPONENT_SUPPORTED
+#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
 
@@ -64,10 +65,10 @@ void SetXComponentOptions0Impl(Ark_NativePointer node,
     auto libraryName = Converter::OptConvert<std::string>(value->libraryname);
     XComponentModelNG::SetXComponentLibraryname(frameNode, libraryName);
 
-    auto controlleOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
+    auto controllerOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     if (controller) {
-        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controlleOpt.value().ptr);
+        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controllerOpt.value().ptr);
         controller = peerPtr->controller;
     }
     XComponentModelNG::SetXComponentController(frameNode, controller);
@@ -90,10 +91,10 @@ void SetXComponentOptions1Impl(Ark_NativePointer node,
     auto libraryName = Converter::OptConvert<std::string>(value->libraryname);
     XComponentModelNG::SetXComponentLibraryname(frameNode, libraryName);
 
-    auto controlleOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
+    auto controllerOpt = Converter::OptConvert<Ark_XComponentController>(value->controller);
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     if (controller) {
-        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controlleOpt.value().ptr);
+        auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(controllerOpt.value().ptr);
         controller = peerPtr->controller;
     }
     XComponentModelNG::SetXComponentController(frameNode, controller);
@@ -113,7 +114,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 
     XComponentModelNG::SetXComponentLibraryname(frameNode, std::nullopt);
 
-    LOGE("XComponentInterfaceModifier::SetXComponentOptions1Impl - Ark_ImageAIOptions is not supported");
+    LOGE("XComponentInterfaceModifier::SetXComponentOptions2Impl - Ark_ImageAIOptions is not supported");
     XComponentModelNG::SetImageAIOptions(frameNode, nullptr);
 
     auto peerPtr = reinterpret_cast<XComponentControllerPeer*>(options->controller.ptr);
@@ -128,19 +129,7 @@ void OnLoadImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onLoad =
-        [arkCallback = CallbackHelper(*value)](const std::string& context) {
-            Ark_CustomObject object;
-            object.id = SELECTOR_ID_3;
-            object.string = Converter::ArkValue<Ark_String>(context);
-            Opt_CustomObject event;
-            event.tag = ARK_TAG_OBJECT;
-            event.value = object;
-            arkCallback.Invoke(event);
-        };
-#ifdef XCOMPONENT_SUPPORTED
-    XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));
-#endif // XCOMPONENT_SUPPORTED
+    LOGE("XComponentInterfaceModifier::OnLoadImpl - Ark_CustomObject is not supported");
 }
 void OnDestroyImpl(Ark_NativePointer node,
                    const Callback_Void* value)
