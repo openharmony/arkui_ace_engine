@@ -38,10 +38,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
-constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr Dimension COUNTER_TEXT_MARGIN_OFFSET = 8._vp;
-constexpr int32_t DEFAULT_MODE = -1;
-constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 constexpr Dimension INLINE_MIN_WITH = 16.0_vp;
 } // namespace
@@ -424,142 +420,26 @@ float TextFieldLayoutAlgorithm::CalculateContentHeight(const LayoutConstraintF& 
     return std::min(contentConstraint.maxSize.Height(), height);
 }
 
-TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layoutWrapper)
-{
-    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, TextAlign::END);
-    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(property, TextAlign::END);
-    TextDirection layoutDirection = property->GetLayoutDirection();
-    if ((layoutDirection == TextDirection::RTL && !isRTL) ||
-        (layoutDirection == TextDirection::LTR && isRTL)) {
-        return TextAlign::START;
-    }
-    return TextAlign::END;
-}
-
-void TextFieldLayoutAlgorithm::UpdateCounterNode(
-    uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
-{
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto counterNode = pattern->GetCounterNode().Upgrade();
-    CHECK_NULL_VOID(counterNode);
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(counterNode->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-
-    std::string counterText;
-    TextStyle countTextStyle = (pattern->GetShowCounterStyleValue() && pattern->HasFocus()) ?
-                                theme->GetOverCountTextStyle() :
-                                theme->GetCountTextStyle();
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
-    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-    }
-    textLayoutProperty->UpdateContent(counterText);
-    textLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
-    textLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
-    textLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment(layoutWrapper));
-    textLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
-    auto host = counterNode->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(countTextStyle.GetTextColor());
-    host->Measure(contentConstraint);
-}
-
 void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
 {
-    RefPtr<FrameNode> frameNode = layoutWrapper->GetHostNode();
+    auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
-    RefPtr<LayoutWrapper> counterNode = pattern->GetCounterNode().Upgrade();
-    bool isInlineStyle = pattern->IsNormalInlineState();
-    bool isShowPassword = pattern->IsShowPasswordIcon();
-    if (counterNode && !isShowPassword && !isInlineStyle) {
-        HandleCounterLayout(layoutWrapper, counterNode, pattern);
-    }
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto counterDecorator = pattern->GetCounterDecorator();
+    CHECK_NULL_VOID(counterDecorator);
+    counterDecorator->LayoutDecorator();
 }
 
-void TextFieldLayoutAlgorithm::HandleCounterLayout(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& counterNode, const RefPtr<TextFieldPattern>& pattern)
+void TextFieldLayoutAlgorithm::ErrorLayout(LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    RefPtr<GeometryNode> textGeometryNode = counterNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeometryNode);
-    const auto &content = layoutWrapper->GetGeometryNode()->GetContent();
-    CHECK_NULL_VOID(content);
-    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    bool isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    float countX = 0;
-    if (!pattern->IsTextArea()) {
-        HandleNonTextArea(layoutWrapper, counterNode, pattern, isRTL, countX);
-    } else {
-        HandleTextArea(layoutWrapper, counterNode, pattern, isRTL, countX);
-    }
-}
-
-void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
-    const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX)
-{
-    RectF frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-    RectF contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
-    RefPtr<GeometryNode> textGeometryNode = counterNode->GetGeometryNode();
-    CHECK_NULL_VOID(textGeometryNode);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-
-    countX = contentRect.GetX();
-    auto responseArea = pattern->GetResponseArea();
-    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
-    if (responseArea) {
-        if (isRTL) {
-            countX -= responseArea->GetAreaRect().Width();
-        } else {
-            countX += responseArea->GetAreaRect().Width();
-        }
-    }
-    if (cleanNodeResponseArea) {
-        if (isRTL) {
-            countX -= cleanNodeResponseArea->GetAreaRect().Width();
-        } else {
-            countX += cleanNodeResponseArea->GetAreaRect().Width();
-        }
-    }
-    auto curFontScale = pipeline->GetFontScale();
-    auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
-        (frameRect.Bottom() - frameRect.Top() + COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx());
-    textGeometryNode->SetFrameOffset(OffsetF(countX, countY));
-    counterNode->Layout();
-}
-
-void TextFieldLayoutAlgorithm::HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
-    const RefPtr<TextFieldPattern>& pattern, bool isRTL, float& countX)
-{
-    const std::unique_ptr<GeometryProperty> &content = layoutWrapper->GetGeometryNode()->GetContent();
-    RefPtr<GeometryNode> counterGeometryNode = counterNode->GetGeometryNode();
-    CHECK_NULL_VOID(counterGeometryNode);
-    RectF frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
-    countX = content->GetRect().GetX();
-    counterGeometryNode->SetFrameOffset(OffsetF(countX,
-        frameRect.Height() - pattern->GetPaddingBottom() - counterGeometryNode->GetFrameRect().Height()));
-    counterNode->Layout();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto errorDecorator = pattern->GetErrorDecorator();
+    CHECK_NULL_VOID(errorDecorator);
+    errorDecorator->LayoutDecorator();
 }
 
 float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper)
@@ -568,26 +448,9 @@ float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWra
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
-    auto isInlineStyle = pattern->IsNormalInlineState();
-    auto isShowPassword = pattern->IsShowPasswordIcon();
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
-        !isInlineStyle && !isShowPassword) {
-        auto counterNode = DynamicCast<UINode>(pattern->GetCounterNode().Upgrade());
-        CHECK_NULL_RETURN(counterNode, 0.0f);
-        auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(frameNode->GetChildIndex(counterNode));
-        if (counterNodeLayoutWrapper) {
-            auto textLength =
-                static_cast<uint32_t>(showPlaceHolder_ ? 0 : textContent_.length());
-            auto maxLength = static_cast<uint32_t>(textFieldLayoutProperty->GetMaxLength().value());
-            LayoutConstraintF textContentConstraint;
-            textContentConstraint.UpdateIllegalSelfIdealSizeWithCheck(OptionalSizeF(contentWidth, std::nullopt));
-            UpdateCounterNode(textLength, maxLength, textContentConstraint, layoutWrapper);
-            return counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        }
-    }
-    return 0.0f;
+    auto counterDecorator = pattern->GetCounterDecorator();
+    CHECK_NULL_RETURN(counterDecorator, 0.0f);
+    return counterDecorator->MeasureDecorator(contentWidth, textContent_, showPlaceHolder_);
 }
 
 float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
