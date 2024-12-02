@@ -392,6 +392,7 @@ ohos_source_set("ace_base") {
     "//third_party/icu/icu4c:static_icui18n",
     "//third_party/icu/icu4c:static_icuuc",
   ]
+  external_deps = [ "zlib:shared_libz" ]
   configs = [ ":ace_unittest_config" ]
 }
 
