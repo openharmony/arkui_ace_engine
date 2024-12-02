@@ -19,6 +19,8 @@
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 
 namespace OHOS::Ace::NG {
+constexpr Dimension ITEM_BOTTOM_TOP_PADDING = 8.0_vp;
+constexpr int32_t PADDING_MULTIPLE = 2;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -191,6 +193,9 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
     }
     if (!isOption_ && GreatNotEqual(rowWidth, iconContentPadding)) {
         rowWidth -= iconContentPadding;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && isOption_) {
+        rowHeight += (ITEM_BOTTOM_TOP_PADDING * PADDING_MULTIPLE).ConvertToPx();
     }
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, rowHeight));
 }
