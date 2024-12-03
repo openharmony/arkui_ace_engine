@@ -94,6 +94,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -3854,9 +3855,9 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, buttonStyle]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetContainerButtonStyle(buttonStyle.buttonBackgroundSize,
+            NG::ContainerModalPatternEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
                 buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
