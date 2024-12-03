@@ -41,7 +41,6 @@ export struct AdvancedCounterBootcamp{
   @State Year: number = 1;
   @State Month: number = 1;
   @State Day: number = 1;
-  @State Label: string = '';
 
   build() {
     NavDestination() {
@@ -128,7 +127,7 @@ export struct AdvancedCounterBootcamp{
               textWidth: useEnabled(this.enabledTextWidth,this.textWidth),
               focusable:useEnabled(this.enabledFocusable,this.Focusable),
               onChange: (value: number) => {
-                console.log("onDateChange Date: " + value.toString());
+                console.log('onDateChange Date: ' + value.toString());
               }
             }
           }
@@ -144,7 +143,7 @@ export struct AdvancedCounterBootcamp{
               day: useEnabled(this.enabledDay,this.Day),
               focusable:this.Focusable,
               onDateChange: (date: DateData) => {
-                console.log("onDateChange Date: " + date.toString());
+                console.log('onDateChange Date: ' + date.toString());
               }
             }
           }
