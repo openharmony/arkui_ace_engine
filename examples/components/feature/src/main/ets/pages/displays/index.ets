@@ -32,7 +32,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'image', label: '图片/Image' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
-    { name: 'badge', label: '信息标记/badge' }
+    { name: 'badge', label: '信息标记/Badge' }
   ]
 };
 

@@ -22,7 +22,7 @@ export struct BadgeBootcamp{
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableNumberOrString: boolean = false;
-  @State numberOrString: string = "number"
+  @State numberOrString: string = 'number'
   @State enableBadgeParamWithNumberCount: boolean = false
   @State badgeParamWithNumberCount: number = 1
   @State enableBadgeParamWithNumberMaxCount: boolean = false
@@ -79,7 +79,7 @@ export struct BadgeBootcamp{
       },
       position: useEnabled(this.enableBadgePosition, this.badgePosition),
     }){
-      Image($r("app.media.app_icon"))
+      Image($r('app.media.app_icon'))
         .width(50)
         .height(50)
     }
@@ -100,7 +100,7 @@ export struct BadgeBootcamp{
       },
       position: useEnabled(this.enableBadgePosition, this.badgePosition),
     }){
-      Image($r("app.media.app_icon"))
+      Image($r('app.media.app_icon'))
         .width(50)
         .height(50)
     }
@@ -111,7 +111,7 @@ export struct BadgeBootcamp{
   @Builder
   Content() {
     Column() {
-      if (this.numberOrString === "number"){
+      if (this.numberOrString === 'number'){
         this.badgeParamWithNumber()
       } else {
         this.badgeParamWithString()
@@ -219,5 +219,15 @@ export struct BadgeBootcamp{
       }
     }
     .height('52%')
+  }
+}
+
+@Preview
+@Component
+struct ButtonBootcampPreviewer {
+  build() {
+    BadgeBootcamp({
+      title: '信息标记/Badge'
+    })
   }
 }
