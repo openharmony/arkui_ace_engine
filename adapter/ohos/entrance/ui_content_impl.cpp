@@ -2299,7 +2299,8 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
 
 void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "[%{public}s][%{public}s][%{public}d]: SetWindowContainerColor:"
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "[%{public}s][%{public}s][%{public}d]: SetWindowContainerColor:"
         "active color %{public}u, inactive color %{public}u",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, activeColor, inactiveColor);
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -2307,13 +2308,12 @@ void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inact
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
-        [container, activeColor, inactiveColor]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetWindowContainerColor(Color(activeColor), Color(inactiveColor));
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetWindowContainerColor");
+    auto task = [container, activeColor, inactiveColor]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetWindowContainerColor(Color(activeColor), Color(inactiveColor));
+    };
+    ExecuteUITask(std::move(task), "ArkUISetWindowContainerColor");
 }
 
 void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
@@ -2822,20 +2822,19 @@ void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, "
-        "hideMinimize: %{public}d, hideClose: %{public}d",
+         "hideMinimize: %{public}d, hideClose: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, hideSplit, hideMaximize, hideMinimize, hideClose);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, hideSplit, hideMaximize, hideMinimize, hideClose]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIHideWindowTitleButton");
+    auto task = [container, hideSplit, hideMaximize, hideMinimize, hideClose]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
+    };
+    ExecuteUITask(std::move(task), "ArkUIHideWindowTitleButton");
 }
 
 void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -2848,13 +2847,12 @@ void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, isShow, height]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateTitleInTargetPos(isShow, height);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateTitleInTargetPos");
+    auto task = [container, isShow, height]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateTitleInTargetPos(isShow, height);
+    };
+    ExecuteUITask(std::move(task), "ArkUIUpdateTitleInTargetPos");
 }
 
 void UIContentImpl::NotifyRotationAnimationEnd()
@@ -4114,4 +4112,17 @@ void UIContentImpl::OnContainerModalEvent(const std::string& name, const std::st
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOnContainerModalEvent");
     }
 }
+
+void UIContentImpl::ExecuteUITask(std::function<void()> task, const std::string& name)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, name);
+    }
+}
+
 } // namespace OHOS::Ace
