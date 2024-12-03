@@ -787,6 +787,9 @@ void WaterFlowLayoutInfoSW::ClearData()
 
 float WaterFlowLayoutInfoSW::GetAverageItemHeight() const
 {
+    if (idxToHeight_.empty()) {
+        return 0.0f;
+    }
     if (NearZero(heightSum_)) {
         heightSum_ = std::accumulate(idxToHeight_.begin(), idxToHeight_.end(), 0.0f,
             [](float sum, const auto& pair) { return sum + pair.second; });
@@ -846,7 +849,11 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
     }
 
     const auto crossCnt = static_cast<float>(lanes_[curSec].size());
-    jumpIndex_ -= static_cast<int32_t>(round(offset * crossCnt / (GetAverageItemHeight() + mainGap_[curSec])));
+    const float average = GetAverageItemHeight() + mainGap_[curSec];
+    if (NearZero(average)) {
+        return false;
+    }
+    jumpIndex_ -= static_cast<int32_t>(round(offset * crossCnt / average));
 
     jumpIndex_ = min(jumpIndex_, itemCnt);
     jumpIndex_ = max(jumpIndex_, 0);
@@ -864,7 +871,7 @@ float WaterFlowLayoutInfoSW::EstimateSectionHeight(
     }
     startBound = std::max((section == 0) ? 0 : segmentTails_[section - 1] + 1, startBound);
     endBound = std::min(segmentTails_[section], endBound);
-    const size_t crossCnt = lanes_[section].size();
+    const size_t crossCnt = std::max(lanes_[section].size(), (size_t)1); // prevent division by 0
 
     float height = 0.0f;
     for (int32_t i = startBound; i <= endBound; ++i) {
