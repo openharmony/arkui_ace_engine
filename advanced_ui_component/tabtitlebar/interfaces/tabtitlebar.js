@@ -20,11 +20,11 @@ const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const MeasureText = requireNapi('measure');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
-const d1 = { "id": -1, "type": 40000, params: ['sys.symbol.dot_grid_2x2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-const f1 = '18.3fp';
-const g1 = '64vp';
-const h1 = '256vp';
-const i1 = '216vp';
+const m = { "id": -1, "type": 40000, params: ['sys.symbol.dot_grid_2x2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+const t = '18.3fp';
+const u = '64vp';
+const a1 = '256vp';
+const b1 = '216vp';
 export class TabTitleBar extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
       super(parent, __localStorage, elmtId, extraInfo);
@@ -34,9 +34,9 @@ export class TabTitleBar extends ViewPU {
       this.tabItems = [];
       this.menuItems = [];
       this.swiperContent = undefined;
-      this.j2 = new ObservedPropertySimplePU(0, this, "tabWidth");
-      this.l2 = new ObservedPropertySimplePU(0, this, "currentIndex");
-      this.u1 = new ObservedPropertySimplePU(1, this, "fontSize");
+      this.b2 = new ObservedPropertySimplePU(0, this, "tabWidth");
+      this.c2 = new ObservedPropertySimplePU(0, this, "currentIndex");
+      this.h1 = new ObservedPropertySimplePU(1, this, "fontSize");
       this.menuSectionWidth = 0;
       this.tabOffsets = [];
       this.imageWidths = [];
@@ -95,36 +95,36 @@ export class TabTitleBar extends ViewPU {
   updateStateVars(params) {
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
-      this.j2.purgeDependencyOnElmtId(rmElmtId);
-      this.l2.purgeDependencyOnElmtId(rmElmtId);
-      this.u1.purgeDependencyOnElmtId(rmElmtId);
+      this.b2.purgeDependencyOnElmtId(rmElmtId);
+      this.c2.purgeDependencyOnElmtId(rmElmtId);
+      this.h1.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
-      this.j2.aboutToBeDeleted();
-      this.l2.aboutToBeDeleted();
-      this.u1.aboutToBeDeleted();
+      this.b2.aboutToBeDeleted();
+      this.c2.aboutToBeDeleted();
+      this.h1.aboutToBeDeleted();
       SubscriberManager.Get().delete(this.id__());
       this.aboutToBeDeletedInternal();
   }
   get tabWidth() {
-      return this.j2.get();
+      return this.b2.get();
   }
   set tabWidth(newValue) {
-      this.j2.set(newValue);
+      this.b2.set(newValue);
   }
   get currentIndex() {
-      return this.l2.get();
+      return this.c2.get();
   }
   set currentIndex(newValue) {
-      this.l2.set(newValue);
+      this.c2.set(newValue);
   }
   get fontSize() {
-      return this.u1.get();
+      return this.h1.get();
   }
   set fontSize(newValue) {
-      this.u1.set(newValue);
+      this.h1.set(newValue);
   }
-  GradientMask(u2, x0, y0, x1, y1, parent = null) {
+  GradientMask(l2, x0, y0, x1, y1, parent = null) {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           Column.create();
           Column.blendMode(BlendMode.DST_OUT);
@@ -132,15 +132,15 @@ export class TabTitleBar extends ViewPU {
           Column.height(TabTitleBar.totalHeight);
       }, Column);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-          Canvas.create(u2);
+          Canvas.create(l2);
           Canvas.width(TabTitleBar.gradientMaskWidth);
           Canvas.height(TabTitleBar.totalHeight);
           Canvas.onReady(() => {
-              let v2 = u2.createLinearGradient(x0, y0, x1, y1);
-              v2.addColorStop(0.0, '#ffffffff');
-              v2.addColorStop(1, '#00ffffff');
-              u2.fillStyle = v2;
-              u2.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
+              let m2 = l2.createLinearGradient(x0, y0, x1, y1);
+              m2.addColorStop(0.0, '#ffffffff');
+              m2.addColorStop(1, '#00ffffff');
+              l2.fillStyle = m2;
+              l2.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight);
           });
       }, Canvas);
       Canvas.pop();
@@ -152,35 +152,35 @@ export class TabTitleBar extends ViewPU {
       if (!this.swiperContent) {
           this.swiperContent = this.emptyBuilder;
       }
-      this.tabItems.forEach((t2) => {
+      this.tabItems.forEach((k2) => {
           this.imageWidths.push(0);
       });
       this.loadOffsets();
   }
   loadOffsets() {
       this.tabOffsets.length = 0;
-      let r2 = 0;
-      this.tabOffsets.push(r2);
-      r2 += h2.marginFirst;
-      this.tabItems.forEach((s2, index) => {
-          if (s2.icon !== undefined || s2.symbolIcon !== undefined) {
-              if (Math.abs(this.imageWidths[index]) > h2.imageHotZoneWidth) {
-                  r2 += this.imageWidths[index];
+      let i2 = 0;
+      this.tabOffsets.push(i2);
+      i2 += z1.marginFirst;
+      this.tabItems.forEach((j2, index) => {
+          if (j2.icon !== undefined || j2.symbolIcon !== undefined) {
+              if (Math.abs(this.imageWidths[index]) > z1.imageHotZoneWidth) {
+                  i2 += this.imageWidths[index];
               }
               else {
-                  r2 += h2.imageHotZoneWidth;
+                  i2 += z1.imageHotZoneWidth;
               }
           }
           else {
-              r2 += h2.paddingLeft;
-              r2 += px2vp(MeasureText.measureText({
-                  textContent: s2.title.toString(),
+              i2 += z1.paddingLeft;
+              i2 += px2vp(MeasureText.measureText({
+                  textContent: j2.title.toString(),
                   fontSize: 18,
                   fontWeight: FontWeight.Medium,
               }));
-              r2 += h2.paddingRight;
+              i2 += z1.paddingRight;
           }
-          this.tabOffsets.push(r2);
+          this.tabOffsets.push(i2);
       });
   }
   initialRender() {
@@ -194,7 +194,7 @@ export class TabTitleBar extends ViewPU {
           });
           Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
           Flex.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
-          Flex.onAreaChange((q2, newValue) => {
+          Flex.onAreaChange((h2, newValue) => {
               this.tabWidth = Number(newValue.width) - this.menuSectionWidth;
           });
       }, Flex);
@@ -220,7 +220,7 @@ export class TabTitleBar extends ViewPU {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           ForEach.create();
           const forEachItemGenFunction = (_item, index) => {
-              const o2 = _item;
+              const g2 = _item;
               {
                   const itemCreation = (elmtId, isInitialRender) => {
                       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -238,8 +238,8 @@ export class TabTitleBar extends ViewPU {
                       {
                           this.observeComponentCreation2((elmtId, isInitialRender) => {
                               if (isInitialRender) {
-                                  let componentCall = new h2(this, {
-                                      item: o2,
+                                  let componentCall = new z1(this, {
+                                      item: g2,
                                       index: index,
                                       maxIndex: this.tabItems.length - 1,
                                       currentIndex: this.currentIndex,
@@ -248,11 +248,11 @@ export class TabTitleBar extends ViewPU {
                                           this.imageWidths[index] = width;
                                           this.loadOffsets();
                                       }
-                                  }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 143, o1: 21 });
+                                  }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 143, j1: 21 });
                                   ViewPU.create(componentCall);
                                   let paramsLambda = () => {
                                       return {
-                                          item: o2,
+                                          item: g2,
                                           index: index,
                                           maxIndex: this.tabItems.length - 1,
                                           currentIndex: this.currentIndex,
@@ -294,14 +294,14 @@ export class TabTitleBar extends ViewPU {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       __Common__.create();
                       __Common__.height(TabTitleBar.totalHeight);
-                      __Common__.onAreaChange((n2, newValue) => {
+                      __Common__.onAreaChange((f2, newValue) => {
                           this.menuSectionWidth = Number(newValue.width);
                       });
                   }, __Common__);
                   {
                       this.observeComponentCreation2((elmtId, isInitialRender) => {
                           if (isInitialRender) {
-                              let componentCall = new j1(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 173, o1: 11 });
+                              let componentCall = new c1(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 173, j1: 11 });
                               ViewPU.create(componentCall);
                               let paramsLambda = () => {
                                   return {
@@ -367,7 +367,7 @@ TabTitleBar.totalHeight = 56;
 TabTitleBar.correctionOffset = -40.0;
 TabTitleBar.gradientMaskWidth = 24;
 TabTitleBar.instanceCount = 0;
-class j1 extends ViewPU {
+class c1 extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
       super(parent, __localStorage, elmtId, extraInfo);
       if (typeof paramsLambda === "function") {
@@ -376,8 +376,8 @@ class j1 extends ViewPU {
       this.menuItems = [];
       this.index = 0;
       this.item = {
-          value: d1,
-          n1: new SymbolGlyphModifier(d1),
+          value: m,
+          i1: new SymbolGlyphModifier(m),
           label: { "id": -1, "type": 10003, params: ['sys.string.ohos_toolbar_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
       };
       this.longPressTime = 500;
@@ -386,14 +386,14 @@ class j1 extends ViewPU {
       this.maxFontScale = 1;
       this.systemFontScale = 1;
       this.firstFocusableIndex = -1;
-      this.v1 = new ObservedPropertySimplePU(false, this, "isPopupShown");
-      this.w1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
-      this.z1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
-      this.a2 = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
-      this.u1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, "fontSize");
+      this.l1 = new ObservedPropertySimplePU(false, this, "isPopupShown");
+      this.m1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
+      this.n1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
+      this.o1 = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
+      this.h1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, "fontSize");
       this.dialogController = new CustomDialogController({
           builder: () => {
-              let jsDialog = new i2(this, {
+              let jsDialog = new a2(this, {
                   cancel: () => {
                   },
                   confirm: () => {
@@ -401,7 +401,7 @@ class j1 extends ViewPU {
                   tabTitleDialog: this.item,
                   tabTitleBarDialog: this.item.label ? this.item.label : '',
                   fontSize: this.fontSize,
-              }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 243, o1: 14 });
+              }, undefined, -1, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 243, j1: 14 });
               jsDialog.setController(this.dialogController);
               ViewPU.create(jsDialog);
               let paramsLambda = () => {
@@ -465,60 +465,60 @@ class j1 extends ViewPU {
           this.isMoreIconOnClick = params.isMoreIconOnClick;
       }
       if (params.fontSize === undefined) {
-          this.u1.set(1);
+          this.h1.set(1);
       }
       if (params.dialogController !== undefined) {
           this.dialogController = params.dialogController;
       }
   }
   updateStateVars(params) {
-      this.u1.reset(params.fontSize);
+      this.h1.reset(params.fontSize);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
-      this.v1.purgeDependencyOnElmtId(rmElmtId);
-      this.w1.purgeDependencyOnElmtId(rmElmtId);
-      this.z1.purgeDependencyOnElmtId(rmElmtId);
-      this.a2.purgeDependencyOnElmtId(rmElmtId);
-      this.u1.purgeDependencyOnElmtId(rmElmtId);
+      this.l1.purgeDependencyOnElmtId(rmElmtId);
+      this.m1.purgeDependencyOnElmtId(rmElmtId);
+      this.n1.purgeDependencyOnElmtId(rmElmtId);
+      this.o1.purgeDependencyOnElmtId(rmElmtId);
+      this.h1.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
-      this.v1.aboutToBeDeleted();
-      this.w1.aboutToBeDeleted();
-      this.z1.aboutToBeDeleted();
-      this.a2.aboutToBeDeleted();
-      this.u1.aboutToBeDeleted();
+      this.l1.aboutToBeDeleted();
+      this.m1.aboutToBeDeleted();
+      this.n1.aboutToBeDeleted();
+      this.o1.aboutToBeDeleted();
+      this.h1.aboutToBeDeleted();
       SubscriberManager.Get().delete(this.id__());
       this.aboutToBeDeletedInternal();
   }
   get isPopupShown() {
-      return this.v1.get();
+      return this.l1.get();
   }
   set isPopupShown(newValue) {
-      this.v1.set(newValue);
+      this.l1.set(newValue);
   }
   get isMoreIconOnFocus() {
-      return this.w1.get();
+      return this.m1.get();
   }
   set isMoreIconOnFocus(newValue) {
-      this.w1.set(newValue);
+      this.m1.set(newValue);
   }
   get isMoreIconOnHover() {
-      return this.z1.get();
+      return this.n1.get();
   }
   set isMoreIconOnHover(newValue) {
-      this.z1.set(newValue);
+      this.n1.set(newValue);
   }
   get isMoreIconOnClick() {
-      return this.a2.get();
+      return this.o1.get();
   }
   set isMoreIconOnClick(newValue) {
-      this.a2.set(newValue);
+      this.o1.set(newValue);
   }
   get fontSize() {
-      return this.u1.get();
+      return this.h1.get();
   }
   set fontSize(newValue) {
-      this.u1.set(newValue);
+      this.h1.set(newValue);
   }
   getMoreIconFgColor() {
       return this.isMoreIconOnClick
@@ -537,25 +537,25 @@ class j1 extends ViewPU {
   }
   aboutToAppear() {
       try {
-          let m2 = this.getUIContext();
-          this.isFollowingSystemFontScale = m2.isFollowingSystemFontScale();
-          this.maxFontScale = m2.getMaxFontScale();
+          let e2 = this.getUIContext();
+          this.isFollowingSystemFontScale = e2.isFollowingSystemFontScale();
+          this.maxFontScale = e2.getMaxFontScale();
       }
-      catch (l2) {
-          let code = l2.code;
-          let message = l2.message;
+      catch (d2) {
+          let code = d2.code;
+          let message = d2.message;
           hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
       }
       this.menuItems.forEach((item, index) => {
           if (item.isEnabled && this.firstFocusableIndex === -1 &&
-              index > j1.maxCountOfVisibleItems - 2) {
+              index > c1.maxCountOfVisibleItems - 2) {
               this.firstFocusableIndex = this.index * 1000 + index + 1;
           }
       });
   }
   decideFontScale() {
-      let k2 = this.getUIContext();
-      this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+      let c2 = this.getUIContext();
+      this.systemFontScale = c2.getHostContext()?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
           return 1;
       }
@@ -572,7 +572,7 @@ class j1 extends ViewPU {
       }, Row);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           If.create();
-          if (this.menuItems.length <= j1.maxCountOfVisibleItems) {
+          if (this.menuItems.length <= c1.maxCountOfVisibleItems) {
               this.ifElseBranchUpdateFunction(0, () => {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       ForEach.create();
@@ -581,7 +581,7 @@ class j1 extends ViewPU {
                           {
                               this.observeComponentCreation2((elmtId, isInitialRender) => {
                                   if (isInitialRender) {
-                                      let componentCall = new l1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 305, o1: 13 });
+                                      let componentCall = new d1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 305, j1: 13 });
                                       ViewPU.create(componentCall);
                                       let paramsLambda = () => {
                                           return {
@@ -611,7 +611,7 @@ class j1 extends ViewPU {
                           {
                               this.observeComponentCreation2((elmtId, isInitialRender) => {
                                   if (isInitialRender) {
-                                      let componentCall = new l1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 310, o1: 15 });
+                                      let componentCall = new d1(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 310, j1: 15 });
                                       ViewPU.create(componentCall);
                                       let paramsLambda = () => {
                                           return {
@@ -627,28 +627,28 @@ class j1 extends ViewPU {
                               }, { name: "ImageMenuItem" });
                           }
                       };
-                      this.forEachUpdateFunction(elmtId, this.menuItems.slice(0, j1.maxCountOfVisibleItems - 1), forEachItemGenFunction, undefined, true, false);
+                      this.forEachUpdateFunction(elmtId, this.menuItems.slice(0, c1.maxCountOfVisibleItems - 1), forEachItemGenFunction, undefined, true, false);
                   }, ForEach);
                   ForEach.pop();
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       Row.create();
-                      Row.width(l1.imageHotZoneWidth);
-                      Row.height(l1.imageHotZoneWidth);
-                      Row.borderRadius(l1.buttonBorderRadius);
+                      Row.width(d1.imageHotZoneWidth);
+                      Row.height(d1.imageHotZoneWidth);
+                      Row.borderRadius(d1.buttonBorderRadius);
                       Row.foregroundColor(this.getMoreIconFgColor());
                       Row.backgroundColor(this.getMoreIconBgColor());
                       Row.justifyContent(FlexAlign.Center);
-                      ViewStackProcessor.visualState("focused");
-                      Row.border({
-                          radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                          width: l1.focusBorderWidth,
-                          color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                          style: BorderStyle.Solid
-                      });
                       ViewStackProcessor.visualState("normal");
                       Row.border({
                           radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                           width: 0
+                      });
+                      ViewStackProcessor.visualState("focused");
+                      Row.border({
+                          radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                          width: d1.focusBorderWidth,
+                          color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                          style: BorderStyle.Solid
                       });
                       ViewStackProcessor.visualState();
                       Row.onFocus(() => this.isMoreIconOnFocus = true);
@@ -703,8 +703,8 @@ class j1 extends ViewPU {
                       });
                   }, Row);
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
-                      SymbolGlyph.create(d1);
-                      SymbolGlyph.fontSize(h2.symbolSize);
+                      SymbolGlyph.create(m);
+                      SymbolGlyph.fontSize(z1.symbolSize);
                       SymbolGlyph.draggable(false);
                       SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
                       SymbolGlyph.focusable(true);
@@ -720,10 +720,10 @@ class j1 extends ViewPU {
   popupBuilder(parent = null) {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           Column.create();
-          Column.width(l1.imageHotZoneWidth + j1.focusPadding * j1.marginsNum);
-          Column.margin({ top: j1.focusPadding, bottom: j1.focusPadding });
+          Column.width(d1.imageHotZoneWidth + c1.focusPadding * c1.marginsNum);
+          Column.margin({ top: c1.focusPadding, bottom: c1.focusPadding });
           Column.onAppear(() => {
-              focusControl.requestFocus(l1.focusablePrefix + this.firstFocusableIndex);
+              focusControl.requestFocus(d1.focusablePrefix + this.firstFocusableIndex);
           });
       }, Column);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -733,14 +733,14 @@ class j1 extends ViewPU {
               {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       if (isInitialRender) {
-                          let componentCall = new l1(this, { item: item, index: this.index * 1000 +
-                                  j1.maxCountOfVisibleItems + index }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 402, o1: 11 });
+                          let componentCall = new d1(this, { item: item, index: this.index * 1000 +
+                                  c1.maxCountOfVisibleItems + index }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/TabTitleBar.ets", line: 402, j1: 11 });
                           ViewPU.create(componentCall);
                           let paramsLambda = () => {
                               return {
                                   item: item,
                                   index: this.index * 1000 +
-                                      j1.maxCountOfVisibleItems + index
+                                      c1.maxCountOfVisibleItems + index
                               };
                           };
                           componentCall.paramsGenerator_ = paramsLambda;
@@ -751,7 +751,7 @@ class j1 extends ViewPU {
                   }, { name: "ImageMenuItem" });
               }
           };
-          this.forEachUpdateFunction(elmtId, this.menuItems.slice(j1.maxCountOfVisibleItems - 1, this.menuItems.length), forEachItemGenFunction, undefined, true, false);
+          this.forEachUpdateFunction(elmtId, this.menuItems.slice(c1.maxCountOfVisibleItems - 1, this.menuItems.length), forEachItemGenFunction, undefined, true, false);
       }, ForEach);
       ForEach.pop();
       Column.pop();
@@ -760,10 +760,10 @@ class j1 extends ViewPU {
       this.updateDirtyElements();
   }
 }
-j1.maxCountOfVisibleItems = 1;
-j1.focusPadding = 4;
-j1.marginsNum = 2;
-class h2 extends ViewPU {
+c1.maxCountOfVisibleItems = 1;
+c1.focusPadding = 4;
+c1.marginsNum = 2;
+class z1 extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
       super(parent, __localStorage, elmtId, extraInfo);
       if (typeof paramsLambda === "function") {
@@ -774,13 +774,13 @@ class h2 extends ViewPU {
       this.maxIndex = 0;
       this.onCustomClick = undefined;
       this.onImageComplete = undefined;
-      this.l2 = new SynchedPropertySimpleOneWayPU(params.currentIndex, this, "currentIndex");
-      this.b2 = new ObservedPropertySimplePU(false, this, "isOnFocus");
-      this.c2 = new ObservedPropertySimplePU(false, this, "isOnHover");
-      this.d2 = new ObservedPropertySimplePU(false, this, "isOnClick");
-      this.j2 = new ObservedPropertySimplePU(0, this, "tabWidth");
-      this.m2 = new ObservedPropertySimplePU(24, this, "imageWidth");
-      this.n2 = new ObservedPropertySimplePU(24, this, "imageHeight");
+      this.c2 = new SynchedPropertySimpleOneWayPU(params.currentIndex, this, "currentIndex");
+      this.q1 = new ObservedPropertySimplePU(false, this, "isOnFocus");
+      this.s1 = new ObservedPropertySimplePU(false, this, "isOnHover");
+      this.t1 = new ObservedPropertySimplePU(false, this, "isOnClick");
+      this.b2 = new ObservedPropertySimplePU(0, this, "tabWidth");
+      this.d2 = new ObservedPropertySimplePU(24, this, "imageWidth");
+      this.e2 = new ObservedPropertySimplePU(24, this, "imageHeight");
       this.setInitiallyProvidedValue(params);
       this.finalizeConstruction();
   }
@@ -820,69 +820,69 @@ class h2 extends ViewPU {
       }
   }
   updateStateVars(params) {
-      this.l2.reset(params.currentIndex);
+      this.c2.reset(params.currentIndex);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
-      this.l2.purgeDependencyOnElmtId(rmElmtId);
-      this.b2.purgeDependencyOnElmtId(rmElmtId);
       this.c2.purgeDependencyOnElmtId(rmElmtId);
+      this.q1.purgeDependencyOnElmtId(rmElmtId);
+      this.s1.purgeDependencyOnElmtId(rmElmtId);
+      this.t1.purgeDependencyOnElmtId(rmElmtId);
+      this.b2.purgeDependencyOnElmtId(rmElmtId);
       this.d2.purgeDependencyOnElmtId(rmElmtId);
-      this.j2.purgeDependencyOnElmtId(rmElmtId);
-      this.m2.purgeDependencyOnElmtId(rmElmtId);
-      this.n2.purgeDependencyOnElmtId(rmElmtId);
+      this.e2.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
-      this.l2.aboutToBeDeleted();
-      this.b2.aboutToBeDeleted();
       this.c2.aboutToBeDeleted();
+      this.q1.aboutToBeDeleted();
+      this.s1.aboutToBeDeleted();
+      this.t1.aboutToBeDeleted();
+      this.b2.aboutToBeDeleted();
       this.d2.aboutToBeDeleted();
-      this.j2.aboutToBeDeleted();
-      this.m2.aboutToBeDeleted();
-      this.n2.aboutToBeDeleted();
+      this.e2.aboutToBeDeleted();
       SubscriberManager.Get().delete(this.id__());
       this.aboutToBeDeletedInternal();
   }
   get currentIndex() {
-      return this.l2.get();
-  }
-  set currentIndex(newValue) {
-      this.l2.set(newValue);
-  }
-  get isOnFocus() {
-      return this.b2.get();
-  }
-  set isOnFocus(newValue) {
-      this.b2.set(newValue);
-  }
-  get isOnHover() {
       return this.c2.get();
   }
-  set isOnHover(newValue) {
+  set currentIndex(newValue) {
       this.c2.set(newValue);
   }
+  get isOnFocus() {
+      return this.q1.get();
+  }
+  set isOnFocus(newValue) {
+      this.q1.set(newValue);
+  }
+  get isOnHover() {
+      return this.s1.get();
+  }
+  set isOnHover(newValue) {
+      this.s1.set(newValue);
+  }
   get isOnClick() {
-      return this.d2.get();
+      return this.t1.get();
   }
   set isOnClick(newValue) {
-      this.d2.set(newValue);
+      this.t1.set(newValue);
   }
   get tabWidth() {
-      return this.j2.get();
+      return this.b2.get();
   }
   set tabWidth(newValue) {
-      this.j2.set(newValue);
+      this.b2.set(newValue);
   }
   get imageWidth() {
-      return this.m2.get();
+      return this.d2.get();
   }
   set imageWidth(newValue) {
-      this.m2.set(newValue);
+      this.d2.set(newValue);
   }
   get imageHeight() {
-      return this.n2.get();
+      return this.e2.get();
   }
   set imageHeight(newValue) {
-      this.n2.set(newValue);
+      this.e2.set(newValue);
   }
   getBgColor() {
       if (this.isOnClick) {
@@ -899,7 +899,7 @@ class h2 extends ViewPU {
       if (this.isOnFocus) {
           return {
               radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              width: h2.focusBorderWidth,
+              width: z1.focusBorderWidth,
               color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
               style: BorderStyle.Solid
           };
@@ -907,16 +907,16 @@ class h2 extends ViewPU {
       return { width: 0 };
   }
   getImageScaleFactor() {
-      return this.index === this.currentIndex ? h2.imageMagnificationFactor : 1;
+      return this.index === this.currentIndex ? z1.imageMagnificationFactor : 1;
   }
   getImageLayoutWidth() {
-      return h2.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
+      return z1.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
   }
   initialRender() {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           Stack.create();
           Stack.margin({
-              left: this.index === 0 ? h2.marginFirst : 0,
+              left: this.index === 0 ? z1.marginFirst : 0,
               right: this.index === this.maxIndex ? 12 : 0
           });
       }, Stack);
@@ -925,9 +925,9 @@ class h2 extends ViewPU {
           Row.height(TabTitleBar.totalHeight);
           Row.alignItems(VerticalAlign.Center);
           Row.justifyContent(FlexAlign.Center);
-          Row.borderRadius(h2.buttonBorderRadius);
+          Row.borderRadius(z1.buttonBorderRadius);
           Row.backgroundColor(this.getBgColor());
-          Row.onAreaChange((j2, newValue) => {
+          Row.onAreaChange((b2, newValue) => {
               this.tabWidth = Number(newValue.width);
           });
       }, Row);
@@ -951,9 +951,9 @@ class h2 extends ViewPU {
                       Context.animation(null);
                       Text.padding({
                           top: this.index === this.currentIndex ? 6 : 10,
-                          left: h2.paddingLeft,
+                          left: z1.paddingLeft,
                           bottom: 2,
-                          right: h2.paddingRight
+                          right: z1.paddingRight
                       });
                       Text.onFocus(() => this.isOnFocus = true);
                       Text.onBlur(() => this.isOnFocus = false);
@@ -988,10 +988,10 @@ class h2 extends ViewPU {
                       Row.create();
                       Context.animation({ duration: 300 });
                       Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
-                          h2.paddingLeft + h2.paddingRight);
+                          z1.paddingLeft + z1.paddingRight);
                       Row.constraintSize({
-                          minWidth: h2.imageHotZoneWidth,
-                          minHeight: h2.imageHotZoneWidth
+                          minWidth: z1.imageHotZoneWidth,
+                          minHeight: z1.imageHotZoneWidth
                       });
                       Context.animation(null);
                       Row.justifyContent(FlexAlign.Center);
@@ -1028,9 +1028,9 @@ class h2 extends ViewPU {
                                   Context.animation({ duration: 300 });
                                   SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
                                   SymbolGlyph.attributeModifier.bind(this)(this.item.symbolIcon);
-                                  SymbolGlyph.fontSize(h2.symbolSize);
+                                  SymbolGlyph.fontSize(z1.symbolSize);
                                   SymbolGlyph.width(this.getImageLayoutWidth());
-                                  SymbolGlyph.height(h2.imageSize);
+                                  SymbolGlyph.height(z1.imageSize);
                                   SymbolGlyph.scale({
                                       x: this.getImageScaleFactor(),
                                       y: this.getImageScaleFactor()
@@ -1048,7 +1048,7 @@ class h2 extends ViewPU {
                                   Context.animation({ duration: 300 });
                                   Image.alt(this.item.title);
                                   Image.width(this.getImageLayoutWidth());
-                                  Image.height(h2.imageSize);
+                                  Image.height(z1.imageSize);
                                   Image.objectFit(ImageFit.Fill);
                                   Image.scale({
                                       x: this.getImageScaleFactor(),
@@ -1064,14 +1064,14 @@ class h2 extends ViewPU {
                                       this.imageWidth = px2vp(event?.width);
                                       this.imageHeight = px2vp(event?.height);
                                       this.onImageComplete(px2vp(event?.componentWidth) +
-                                          h2.paddingLeft + h2.paddingRight);
+                                          z1.paddingLeft + z1.paddingRight);
                                   });
                                   Image.onError((event) => {
                                       if (!this.onImageComplete) {
                                           return;
                                       }
                                       this.onImageComplete(px2vp(event.componentWidth) +
-                                          h2.paddingLeft + h2.paddingRight);
+                                          z1.paddingLeft + z1.paddingRight);
                                   });
                               }, Image);
                           });
@@ -1094,14 +1094,14 @@ class h2 extends ViewPU {
                       Row.width(this.tabWidth);
                       Row.height(TabTitleBar.totalHeight);
                       Row.hitTestBehavior(HitTestMode.None);
-                      Row.borderRadius(h2.buttonBorderRadius);
-                      ViewStackProcessor.visualState("focused");
-                      Row.border(this.getBorderAttr());
+                      Row.borderRadius(z1.buttonBorderRadius);
                       ViewStackProcessor.visualState("normal");
                       Row.border({
                           radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                           width: 0
                       });
+                      ViewStackProcessor.visualState("focused");
+                      Row.border(this.getBorderAttr());
                       ViewStackProcessor.visualState();
                   }, Row);
                   Row.pop();
@@ -1119,16 +1119,16 @@ class h2 extends ViewPU {
       this.updateDirtyElements();
   }
 }
-h2.imageSize = 24;
-h2.symbolSize = '24vp';
-h2.imageHotZoneWidth = 48;
-h2.imageMagnificationFactor = 1.4;
-h2.buttonBorderRadius = 8;
-h2.focusBorderWidth = 2;
-h2.paddingLeft = 8;
-h2.paddingRight = 8;
-h2.marginFirst = 16;
-class l1 extends ViewPU {
+z1.imageSize = 24;
+z1.symbolSize = '24vp';
+z1.imageHotZoneWidth = 48;
+z1.imageMagnificationFactor = 1.4;
+z1.buttonBorderRadius = 8;
+z1.focusBorderWidth = 2;
+z1.paddingLeft = 8;
+z1.paddingRight = 8;
+z1.marginFirst = 16;
+class d1 extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
       super(parent, __localStorage, elmtId, extraInfo);
       if (typeof paramsLambda === "function") {
@@ -1136,9 +1136,9 @@ class l1 extends ViewPU {
       }
       this.item = { value: '' };
       this.index = 0;
-      this.b2 = new ObservedPropertySimplePU(false, this, "isOnFocus");
-      this.c2 = new ObservedPropertySimplePU(false, this, "isOnHover");
-      this.d2 = new ObservedPropertySimplePU(false, this, "isOnClick");
+      this.q1 = new ObservedPropertySimplePU(false, this, "isOnFocus");
+      this.s1 = new ObservedPropertySimplePU(false, this, "isOnHover");
+      this.t1 = new ObservedPropertySimplePU(false, this, "isOnClick");
       this.setInitiallyProvidedValue(params);
       this.finalizeConstruction();
   }
@@ -1162,34 +1162,34 @@ class l1 extends ViewPU {
   updateStateVars(params) {
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
-      this.b2.purgeDependencyOnElmtId(rmElmtId);
-      this.c2.purgeDependencyOnElmtId(rmElmtId);
-      this.d2.purgeDependencyOnElmtId(rmElmtId);
+      this.q1.purgeDependencyOnElmtId(rmElmtId);
+      this.s1.purgeDependencyOnElmtId(rmElmtId);
+      this.t1.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
-      this.b2.aboutToBeDeleted();
-      this.c2.aboutToBeDeleted();
-      this.d2.aboutToBeDeleted();
+      this.q1.aboutToBeDeleted();
+      this.s1.aboutToBeDeleted();
+      this.t1.aboutToBeDeleted();
       SubscriberManager.Get().delete(this.id__());
       this.aboutToBeDeletedInternal();
   }
   get isOnFocus() {
-      return this.b2.get();
+      return this.q1.get();
   }
   set isOnFocus(newValue) {
-      this.b2.set(newValue);
+      this.q1.set(newValue);
   }
   get isOnHover() {
-      return this.c2.get();
+      return this.s1.get();
   }
   set isOnHover(newValue) {
-      this.c2.set(newValue);
+      this.s1.set(newValue);
   }
   get isOnClick() {
-      return this.d2.get();
+      return this.t1.get();
   }
   set isOnClick(newValue) {
-      this.d2.set(newValue);
+      this.t1.set(newValue);
   }
   getFgColor() {
       return this.isOnClick
@@ -1209,24 +1209,24 @@ class l1 extends ViewPU {
   initialRender() {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           Row.create();
-          Row.width(l1.imageHotZoneWidth);
-          Row.height(l1.imageHotZoneWidth);
-          Row.borderRadius(l1.buttonBorderRadius);
+          Row.width(d1.imageHotZoneWidth);
+          Row.height(d1.imageHotZoneWidth);
+          Row.borderRadius(d1.buttonBorderRadius);
           Row.foregroundColor(this.getFgColor());
           Row.backgroundColor(this.getBgColor());
           Row.justifyContent(FlexAlign.Center);
-          Row.opacity(this.item.isEnabled ? 1 : l1.disabledImageOpacity);
-          ViewStackProcessor.visualState("focused");
-          Row.border({
-              radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              width: l1.focusBorderWidth,
-              color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              style: BorderStyle.Solid
-          });
+          Row.opacity(this.item.isEnabled ? 1 : d1.disabledImageOpacity);
           ViewStackProcessor.visualState("normal");
           Row.border({
               radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
               width: 0
+          });
+          ViewStackProcessor.visualState("focused");
+          Row.border({
+              radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              width: d1.focusBorderWidth,
+              color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              style: BorderStyle.Solid
           });
           ViewStackProcessor.visualState();
           Row.onFocus(() => {
@@ -1271,46 +1271,46 @@ class l1 extends ViewPU {
       }, Row);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
           If.create();
-          if (this.item.n1) {
+          if (this.item.i1) {
               this.ifElseBranchUpdateFunction(0, () => {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       SymbolGlyph.create();
                       SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
-                      SymbolGlyph.attributeModifier.bind(this)(this.item.n1);
-                      SymbolGlyph.fontSize(h2.symbolSize);
+                      SymbolGlyph.attributeModifier.bind(this)(this.item.i1);
+                      SymbolGlyph.fontSize(z1.symbolSize);
                       SymbolGlyph.draggable(false);
                       SymbolGlyph.focusable(this.item?.isEnabled);
-                      SymbolGlyph.key(l1.focusablePrefix + this.index);
+                      SymbolGlyph.key(d1.focusablePrefix + this.index);
                   }, SymbolGlyph);
               });
           }
           else {
               this.ifElseBranchUpdateFunction(1, () => {
+                  this.observeComponentCreation2((elmtId, isInitialRender) => {
+                      Image.create(this.item.value);
+                      Image.width(d1.imageSize);
+                      Image.height(d1.imageSize);
+                      Image.focusable(this.item.isEnabled);
+                      Image.key(d1.focusablePrefix + this.index);
+                      Image.draggable(false);
+                  }, Image);
               });
           }
       }, If);
       If.pop();
-      this.observeComponentCreation2((elmtId, isInitialRender) => {
-          Image.create(this.item.value);
-          Image.width(l1.imageSize);
-          Image.height(l1.imageSize);
-          Image.focusable(this.item.isEnabled);
-          Image.key(l1.focusablePrefix + this.index);
-          Image.draggable(false);
-      }, Image);
       Row.pop();
   }
   rerender() {
       this.updateDirtyElements();
   }
 }
-l1.imageSize = 24;
-l1.imageHotZoneWidth = 48;
-l1.buttonBorderRadius = 8;
-l1.focusBorderWidth = 2;
-l1.disabledImageOpacity = 0.4;
-l1.focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
-class i2 extends ViewPU {
+d1.imageSize = 24;
+d1.imageHotZoneWidth = 48;
+d1.buttonBorderRadius = 8;
+d1.focusBorderWidth = 2;
+d1.disabledImageOpacity = 0.4;
+d1.focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
+class a2 extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
       super(parent, __localStorage, elmtId, extraInfo);
       if (typeof paramsLambda === "function") {
@@ -1326,10 +1326,10 @@ class i2 extends ViewPU {
       this.screenWidth = 640;
       this.verticalScreenLines = 6;
       this.horizontalsScreenLines = 1;
-      this.e2 = this.createStorageLink('mainWindow', undefined, "mainWindow");
-      this.u1 = new ObservedPropertySimplePU(1, this, "fontSize");
-      this.f2 = new ObservedPropertySimplePU(1, this, "maxLines");
-      this.g2 = this.createStorageProp('windowStandardHeight', 0, "windowStandardHeight");
+      this.u1 = this.createStorageLink('mainWindow', undefined, "mainWindow");
+      this.h1 = new ObservedPropertySimplePU(1, this, "fontSize");
+      this.v1 = new ObservedPropertySimplePU(1, this, "maxLines");
+      this.w1 = this.createStorageProp('windowStandardHeight', 0, "windowStandardHeight");
       this.cancel = () => {
       };
       this.confirm = () => {
@@ -1384,16 +1384,16 @@ class i2 extends ViewPU {
   updateStateVars(params) {
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
-      this.e2.purgeDependencyOnElmtId(rmElmtId);
       this.u1.purgeDependencyOnElmtId(rmElmtId);
-      this.f2.purgeDependencyOnElmtId(rmElmtId);
-      this.g2.purgeDependencyOnElmtId(rmElmtId);
+      this.h1.purgeDependencyOnElmtId(rmElmtId);
+      this.v1.purgeDependencyOnElmtId(rmElmtId);
+      this.w1.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
-      this.e2.aboutToBeDeleted();
       this.u1.aboutToBeDeleted();
-      this.f2.aboutToBeDeleted();
-      this.g2.aboutToBeDeleted();
+      this.h1.aboutToBeDeleted();
+      this.v1.aboutToBeDeleted();
+      this.w1.aboutToBeDeleted();
       SubscriberManager.Get().delete(this.id__());
       this.aboutToBeDeletedInternal();
   }
@@ -1401,28 +1401,28 @@ class i2 extends ViewPU {
       this.controller = ctr;
   }
   get mainWindow() {
-      return this.e2.get();
-  }
-  set mainWindow(newValue) {
-      this.e2.set(newValue);
-  }
-  get fontSize() {
       return this.u1.get();
   }
-  set fontSize(newValue) {
+  set mainWindow(newValue) {
       this.u1.set(newValue);
   }
+  get fontSize() {
+      return this.h1.get();
+  }
+  set fontSize(newValue) {
+      this.h1.set(newValue);
+  }
   get maxLines() {
-      return this.f2.get();
+      return this.v1.get();
   }
   set maxLines(newValue) {
-      this.f2.set(newValue);
+      this.v1.set(newValue);
   }
   get windowStandardHeight() {
-      return this.g2.get();
+      return this.w1.get();
   }
   set windowStandardHeight(newValue) {
-      this.g2.set(newValue);
+      this.w1.set(newValue);
   }
   initialRender() {
       this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1431,21 +1431,21 @@ class i2 extends ViewPU {
               this.ifElseBranchUpdateFunction(0, () => {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       Column.create();
-                      Column.width(this.fontSize === this.maxFontSize ? h1 : i1);
-                      Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? h1 : i1 });
+                      Column.width(this.fontSize === this.maxFontSize ? a1 : b1);
+                      Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? a1 : b1 });
                       Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                       Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                       Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                   }, Column);
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       If.create();
-                      if (this.tabTitleDialog.n1) {
+                      if (this.tabTitleDialog.i1) {
                           this.ifElseBranchUpdateFunction(0, () => {
                               this.observeComponentCreation2((elmtId, isInitialRender) => {
                                   SymbolGlyph.create();
                                   SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
-                                  SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.n1);
-                                  SymbolGlyph.fontSize(g1);
+                                  SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.i1);
+                                  SymbolGlyph.fontSize(u);
                                   SymbolGlyph.draggable(false);
                                   SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                   SymbolGlyph.margin({
@@ -1459,8 +1459,8 @@ class i2 extends ViewPU {
                           this.ifElseBranchUpdateFunction(1, () => {
                               this.observeComponentCreation2((elmtId, isInitialRender) => {
                                   Image.create(this.tabTitleDialog.value);
-                                  Image.width(g1);
-                                  Image.height(g1);
+                                  Image.width(u);
+                                  Image.height(u);
                                   Image.margin({
                                       top: { "id": -1, "type": 10002, params: ['sys.float.padding_level24'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                                       bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -1486,7 +1486,7 @@ class i2 extends ViewPU {
                   }, Column);
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       Text.create(this.tabTitleBarDialog);
-                      Text.fontSize(f1);
+                      Text.fontSize(t);
                       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                       Text.maxLines(this.maxLines);
                       Text.width('100%');
@@ -1502,8 +1502,8 @@ class i2 extends ViewPU {
               this.ifElseBranchUpdateFunction(1, () => {
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       Column.create();
-                      Column.width(this.fontSize === this.maxFontSize ? h1 : i1);
-                      Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? h1 : i1 });
+                      Column.width(this.fontSize === this.maxFontSize ? a1 : b1);
+                      Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? a1 : b1 });
                       Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                       Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                       Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -1511,13 +1511,13 @@ class i2 extends ViewPU {
                   }, Column);
                   this.observeComponentCreation2((elmtId, isInitialRender) => {
                       If.create();
-                      if (this.tabTitleDialog.n1) {
+                      if (this.tabTitleDialog.i1) {
                           this.ifElseBranchUpdateFunction(0, () => {
                               this.observeComponentCreation2((elmtId, isInitialRender) => {
                                   SymbolGlyph.create();
                                   SymbolGlyph.fontColor([{ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }]);
-                                  SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.n1);
-                                  SymbolGlyph.fontSize(g1);
+                                  SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.i1);
+                                  SymbolGlyph.fontSize(u);
                                   SymbolGlyph.draggable(false);
                                   SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                               }, SymbolGlyph);
@@ -1525,16 +1525,16 @@ class i2 extends ViewPU {
                       }
                       else {
                           this.ifElseBranchUpdateFunction(1, () => {
+                              this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                  Image.create(this.tabTitleDialog.value);
+                                  Image.width(u);
+                                  Image.height(u);
+                                  Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                              }, Image);
                           });
                       }
                   }, If);
                   If.pop();
-                  this.observeComponentCreation2((elmtId, isInitialRender) => {
-                      Image.create(this.tabTitleDialog.value);
-                      Image.width(g1);
-                      Image.height(g1);
-                      Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.icon_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                  }, Image);
                   Column.pop();
               });
           }
