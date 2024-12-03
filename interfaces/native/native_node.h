@@ -2769,6 +2769,34 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_NUMBER_OF_LINES,
+
+    /**
+     * @brief 设置该属性后，通过该属性调整textInput组件的字符间距。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 设置letterSpacing的值，默认单位fp。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 获取letterSpacing的值，默认单位fp。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_LETTER_SPACING = 7032,
+
+    /**
+     * @brief 设置textInput组件是否开启输入预上屏。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置是否开启输入预上屏。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 获取是否开启输入预上屏。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_ENABLE_PREVIEW_TEXT = 7033,
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -3055,6 +3083,35 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_NUMBER_OF_LINES,
+
+    /**
+     * @brief 设置该属性后，通过该属性调整textArea组件的字符间距。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 设置letterSpacing的值，默认单位fp。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].f32: 获取letterSpacing的值，默认单位fp。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_LETTER_SPACING = 8023,
+
+    /**
+     * @brief 设置textArea组件是否开启输入预上屏。
+     * 接口支持设置，重置以及获取该属性。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置是否开启输入预上屏。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 获取是否开启输入预上屏。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT = 8024,
+
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5227,6 +5284,20 @@ typedef struct {
 } ArkUI_StringAsyncEvent;
 
 /**
+ * @brief 定义组件事件的混合类型数据
+ *
+ * @since 16
+ */
+typedef struct {
+    /** 字符串 */
+    const char* pStr;
+    /** 字符串 */
+    const char* pExtendStr;
+    /** 数字 */
+    int32_t number;
+} ArkUI_TextChangeEvent;
+
+/**
  * @brief Enumerates the event types supported by the NativeNode component.
  *
  * @since 12
@@ -5711,6 +5782,18 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
     /**
+     * @brief 定义textInput组件在内容改变时（包含预上屏内容），触发回调的枚举值。
+     *
+     * 事件回调发生时，联合类型{@link ArkUI_NodeEvent}为{@link ArkUI_TextChangeEvent}。\n
+     * {@link ArkUI_TextChangeEvent}包含参数：\n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: textInput的内容。
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: textInput的预上屏内容。
+     * <b>ArkUI_TextChangeEvent.number</b>: textInput的预上屏起始位置。
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT = 7013,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -5838,6 +5921,18 @@ typedef enum {
      * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      */
     NODE_TEXT_AREA_ON_DID_DELETE = 8011,
+    /**
+     * @brief 定义textArea组件在内容改变时（包含预上屏内容），触发回调的枚举值。
+     *
+     * 事件回调发生时，联合类型{@link ArkUI_NodeEvent}为{@link ArkUI_TextChangeEvent}。\n
+     * {@link ArkUI_TextChangeEvent}包含参数：\n
+     * <b>ArkUI_TextChangeEvent.pStr</b>: textArea的内容。
+     * <b>ArkUI_TextChangeEvent.pExtendStr</b>: textArea的预上屏内容。
+     * <b>ArkUI_TextChangeEvent.number</b>: textArea的预上屏起始位置。
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT = 8012,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -6371,6 +6466,15 @@ ArkUI_NodeComponentEvent* OH_ArkUI_NodeEvent_GetNodeComponentEvent(ArkUI_NodeEve
  * @since 12
  */
 ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* event);
+
+/**
+ * @brief 获取ArkUI_TextChangeEvent的数据。
+ *
+ * @param event ArkUI_NodeEvent的指针，不应为空。
+ * @return 返回ArkUI_TextChangeEvent对象的指针。
+ * @since 16
+ */
+ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* event);
 
 /**
  * @brief Obtains the custom data in a component event.
