@@ -36,8 +36,8 @@ public:
         bool isDispatch = false) override;
 
 #ifdef FORM_MOUSE_AXIS_SUPPORT
-    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
-        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+    HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& axisResult) override;
 #endif
 
     static RefPtr<FormNode> GetOrCreateFormNode(
