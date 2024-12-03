@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -4697,7 +4698,7 @@ const RefPtr<LayoutAlgorithmWrapper>& FrameNode::GetLayoutAlgorithm(bool needRes
 {
     if ((!layoutAlgorithm_ || (needReset && layoutAlgorithm_->IsExpire())) && pattern_) {
         if (absPattern_) {
-            layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(absPattern_->CreateLayoutAlgorithm());
+            layoutAlgorithm_ = LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(absPattern_->CreateLayoutAlgorithm());
         } else {
             layoutAlgorithm_ = MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm());
         }

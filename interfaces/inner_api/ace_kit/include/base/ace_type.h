@@ -18,8 +18,7 @@
 
 #include "interfaces/inner_api/ace_kit/include/base/referenced.h"
 
-#include "base/log/log.h"
-#include "base/memory/type_info_base.h"
+#include "interfaces/inner_api/ace_kit/include/base/type_info_base.h"
 
 /**
  * Example:

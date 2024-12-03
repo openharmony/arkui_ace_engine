@@ -92,10 +92,14 @@ public:
         const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure = false, bool skipLayout = false)
         : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
     {}
-    explicit LayoutAlgorithmWrapper(const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
-        : absLayoutAlgorithm_(layoutAlgorithm)
-    {}
     ~LayoutAlgorithmWrapper() override = default;
+
+    static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(const RefPtr<AceKit::LayoutAlgorithm>& layoutAlgorithm)
+    {
+        auto layoutAlgorithmWrapper = MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+        layoutAlgorithmWrapper->SetAbsLayoutAlgorithm(layoutAlgorithm);
+        return layoutAlgorithmWrapper;
+    }
 
     void OnReset() override
     {
@@ -203,6 +207,11 @@ public:
     bool GetPercentWidth() const
     {
         return percentHeight_;
+    }
+
+    void SetAbsLayoutAlgorithm(const RefPtr<AceKit::LayoutAlgorithm>& absLayoutAlgorithm)
+    {
+        absLayoutAlgorithm_ = absLayoutAlgorithm;
     }
 
 private:

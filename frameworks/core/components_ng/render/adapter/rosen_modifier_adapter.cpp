@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
-#include "view/draw/modifier.h"
+#include "interfaces/inner_api/ace_kit/include/view/draw/modifier.h"
 
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 #include "core/animation/native_curve_helper.h"

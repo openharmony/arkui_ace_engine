@@ -18,8 +18,8 @@
 
 #include <atomic>
 
-#include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
+#include "interfaces/inner_api/ace_kit/include/base/macros.h"
+#include "interfaces/inner_api/ace_kit/include/base/noncopyable.h"
 
 namespace OHOS::Ace {
 
