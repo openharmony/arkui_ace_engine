@@ -424,7 +424,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 ContainerScope scope(video->instanceId_);
                 video->SetIsSeeking(false);
                 video->OnCurrentTimeChange(currentPos);
-                }, "ArkUIVideoSeekDone");
+            }, "ArkUIVideoSeekDone");
     };
     mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 
