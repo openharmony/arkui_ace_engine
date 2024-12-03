@@ -21,7 +21,9 @@ ohos_prebuilt_etc("ohos.para.dac") {
 }
 
 ohos_prebuilt_etc("ohos.timepicker.ogg") {
-  source = "//foundation/arkui/ace_engine/adapter/ohos/services/etc/timepicker.ogg"
+  source =
+      "//foundation/arkui/ace_engine/adapter/ohos/services/etc/timepicker.ogg"
   part_name = "ace_engine"
+  subsystem_name = "arkui"
   module_install_dir = "etc/arkui"
 }
