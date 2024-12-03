@@ -1239,6 +1239,7 @@ void WebPattern::ResetDragAction()
 
     isDragging_ = false;
     isReceivedArkDrag_ = false;
+    isDragStartFromWeb_ = false;
     // cancel drag action to avoid web kernel can't process other input event
     CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1334,6 +1335,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
 {
     isDragging_ = true;
     isReceivedArkDrag_ = true;
+    isDragStartFromWeb_ = true;
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
@@ -1681,6 +1683,7 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
         gestureHub->ResetDragActionForWeb();
         isDragging_ = false;
         isReceivedArkDrag_ = false;
+        isDragStartFromWeb_ = false;
         // cancel drag action to avoid web kernel can't process other input event
         CHECK_NULL_VOID(delegate_);
         delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
@@ -1768,6 +1771,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1826,6 +1830,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
+    isReceivedArkDrag_ = isDragStartFromWeb_ ? isReceivedArkDrag_ : false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
@@ -1844,6 +1849,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
 
     auto host = GetHost();
@@ -1871,6 +1877,7 @@ void WebPattern::HandleDragCancel()
     isDragging_ = false;
     isReceivedArkDrag_ = false;
     isW3cDragEvent_ = false;
+    isDragStartFromWeb_ = false;
     ClearDragData();
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
@@ -1887,6 +1894,7 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetFragmentHtml(htmlContent);
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
+        delegate_->dragData_->ClearImageFileNames();
     }
 }
 
@@ -1931,12 +1939,12 @@ void WebPattern::HandleFocusEvent()
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isReceivedArkDrag: %{public}d",
-        GetWebId(), selectPopupMenuShowing_, isReceivedArkDrag_);
+        "HandleBlurEvent webId:%{public}d, selectPopupMenuShowing: %{public}d, isDragStartFromWeb: %{public}d",
+        GetWebId(), selectPopupMenuShowing_, isDragStartFromWeb_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
 
-    if (isReceivedArkDrag_) {
+    if (isDragStartFromWeb_) {
         return;
     }
     if (!selectPopupMenuShowing_) {
