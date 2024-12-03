@@ -6623,7 +6623,7 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
-        event.keyEvent.keyCodesLength = pressedKeyCodes.size();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
         for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
             pressKeyCodeList.push_back(static_cast<int32_t>(*it));
         }
@@ -6659,7 +6659,7 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
 
         std::vector<int32_t> pressKeyCodeList;
         auto pressedKeyCodes = info.GetPressedKeyCodes();
-        event.keyEvent.keyCodesLength = pressedKeyCodes.size();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
         for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
             pressKeyCodeList.push_back(static_cast<int32_t>(*it));
         }
