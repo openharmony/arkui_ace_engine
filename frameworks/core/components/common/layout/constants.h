@@ -376,21 +376,11 @@ namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {
     static const LinearEnumMapNode<ImageFit, std::string> table[] = {
-        { ImageFit::FILL, "FILL" },
-        { ImageFit::CONTAIN, "CONTAIN" },
-        { ImageFit::COVER, "COVER" },
-        { ImageFit::FITWIDTH, "FITWIDTH" },
-        { ImageFit::FITHEIGHT, "FITHEIGHT" },
-        { ImageFit::NONE, "NONE" },
-        { ImageFit::SCALE_DOWN, "SCALE_DOWN" },
-        { ImageFit::TOP_LEFT, "TOP_LEFT" },
-        { ImageFit::TOP, "TOP" },
-        { ImageFit::TOP_END, "TOP_END" },
-        { ImageFit::START, "START" },
-        { ImageFit::CENTER, "CENTER" },
-        { ImageFit::END, "END" },
-        { ImageFit::BOTTOM_START, "BOTTOM_START" },
-        { ImageFit::BOTTOM, "BOTTOM" },
+        { ImageFit::FILL, "FILL" }, { ImageFit::CONTAIN, "CONTAIN" }, { ImageFit::COVER, "COVER" },
+        { ImageFit::FITWIDTH, "FITWIDTH" }, { ImageFit::FITHEIGHT, "FITHEIGHT" }, { ImageFit::NONE, "NONE" },
+        { ImageFit::SCALE_DOWN, "SCALE_DOWN" }, { ImageFit::TOP_LEFT, "TOP_LEFT" },  { ImageFit::TOP, "TOP" },
+        { ImageFit::TOP_END, "TOP_END" }, { ImageFit::START, "START" }, { ImageFit::CENTER, "CENTER" },
+        { ImageFit::END, "END" }, { ImageFit::BOTTOM_START, "BOTTOM_START" }, { ImageFit::BOTTOM, "BOTTOM" },
         { ImageFit::BOTTOM_END, "BOTTOM_END" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), imageFit);
