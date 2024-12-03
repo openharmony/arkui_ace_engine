@@ -70,9 +70,8 @@ public:
         mockListScrollerController_ = new MockListScrollController();
         mockListScrollerControllerKeeper_ = AceType::Claim(mockListScrollerController_);
         ASSERT_NE(mockListScrollerControllerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::ListScrollerPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetController(mockListScrollerControllerKeeper_);
+        ASSERT_NE(peer_, nullptr);
+        peer_->SetController(mockListScrollerControllerKeeper_);
         ASSERT_NE(mockListScrollerController_, nullptr);
     }
 

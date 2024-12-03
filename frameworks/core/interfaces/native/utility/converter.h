@@ -448,6 +448,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
+    template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
