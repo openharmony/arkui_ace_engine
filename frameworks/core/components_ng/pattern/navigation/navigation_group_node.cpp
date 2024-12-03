@@ -1081,9 +1081,7 @@ AnimationOption NavigationGroupNode::CreateAnimationOption(const RefPtr<Curve>& 
     option.SetCurve(curve);
     option.SetFillMode(mode);
     option.SetDuration(duration);
-    if (callback != nullptr) {
-        option.SetOnFinishEvent(callback);
-    }
+    option.SetOnFinishEvent(callback);
     return option;
 }
 
@@ -1225,8 +1223,9 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         if (shallowBuilder) {
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);
         }
-        if (navDestination->GetContentNode()) {
-            navDestination->GetContentNode()->Clean();
+        auto contentNode = navDestination->GetContentNode();
+        if (contentNode) {
+            contentNode->Clean();
         }
         parent->RemoveChild(navDestination);
     }
@@ -1248,8 +1247,9 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
     }
-    if (navDestination->GetContentNode()) {
-        navDestination->GetContentNode()->Clean();
+    auto contentNode = navDestination->GetContentNode();
+    if (contentNode) {
+        contentNode->Clean();
     }
     contentNode_->RemoveChild(navDestination, true);
 }

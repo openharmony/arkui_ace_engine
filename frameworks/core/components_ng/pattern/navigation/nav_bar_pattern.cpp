@@ -100,7 +100,7 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
 }
 
 RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG::BarItem>& menuItems,
-    RefPtr<NavBarNode> navBarNode, bool isCreateLandscapeMenu)
+    const RefPtr<NavBarNode>& navBarNode, bool isCreateLandscapeMenu)
 {
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -112,6 +112,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
+    CHECK_NULL_RETURN(navBarNode, nullptr);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
     auto mostMenuItemCount =
@@ -119,7 +120,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     mostMenuItemCount = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
                                                                                                   : mostMenuItemCount;
     navBarPattern->SetMaxMenuNum(mostMenuItemCount);
-    bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
+    bool needMoreButton = menuItems.size() > mostMenuItemCount;
 
     auto frameNode = navBarNode->GetParent();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -323,7 +324,7 @@ void NavBarPattern::MountTitleBar(
     currHideTitleBar_ = hideTitleBar;
 }
 
-OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
+OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& menuNode)
 {
     auto imageNode = barItemNode->GetChildAtIndex(0);
     CHECK_NULL_RETURN(imageNode, OffsetF(0.0f, 0.0f));
@@ -340,8 +341,6 @@ OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, 
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isRightToLeft) {
         imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
-    } else {
-        imgOffset.SetX(imgOffset.GetX());
     }
     imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
     return imgOffset;
