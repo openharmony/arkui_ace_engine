@@ -344,7 +344,7 @@ void VideoPattern::PrepareMediaPlayer()
         auto targetPattern = video->GetTargetVideoPattern();
         CHECK_NULL_VOID(targetPattern);
         targetPattern->ResetMediaPlayer();
-    }, "ArkUIVideoMediaPlayerReset");
+        }, "ArkUIVideoMediaPlayerReset");
 }
 
 bool VideoPattern::SetSourceForMediaPlayer()
@@ -374,7 +374,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
             video->StartUpdateImageAnalyzer();
-        }, "ArkUIVideoCurrentTimeChange");
+            }, "ArkUIVideoCurrentTimeChange");
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
@@ -383,7 +383,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnPlayerStatus(status);
-        }, "ArkUIVideoPlayerStatusChange");
+            }, "ArkUIVideoPlayerStatusChange");
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
@@ -392,7 +392,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnError("");
-        }, "ArkUIVideoError");
+            }, "ArkUIVideoError");
     };
 
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
@@ -401,7 +401,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnResolutionChange();
-        }, "ArkUIVideoResolutionChange");
+            }, "ArkUIVideoResolutionChange");
     };
 
     auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
@@ -410,7 +410,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnStartRenderFrameCb();
-        }, "ArkUIVideoStartRenderFrame");
+            }, "ArkUIVideoStartRenderFrame");
     };
 
     mediaPlayer_->RegisterMediaPlayerEvent(
@@ -424,8 +424,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 ContainerScope scope(video->instanceId_);
                 video->SetIsSeeking(false);
                 video->OnCurrentTimeChange(currentPos);
-            },
-            "ArkUIVideoSeekDone");
+                }, "ArkUIVideoSeekDone");
     };
     mediaPlayer_->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 
@@ -754,7 +753,7 @@ void VideoPattern::UpdateLooping()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetLooping(loop);
-        }, "ArkUIVideoUpdateLooping");
+            }, "ArkUIVideoUpdateLooping");
     }
 }
 
@@ -771,7 +770,7 @@ void VideoPattern::UpdateSpeed()
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
             mediaPlayer->SetPlaybackSpeed(static_cast<float>(progress));
-        }, "ArkUIVideoUpdateSpeed");
+            }, "ArkUIVideoUpdateSpeed");
     }
 }
 
@@ -794,7 +793,7 @@ void VideoPattern::UpdateMuted()
                 mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
                 mediaPlayer->SetVolume(1.0f, 1.0f);
             }
-        }, "ArkUIVideoUpdateMuted");
+            }, "ArkUIVideoUpdateMuted");
     }
 }
 
@@ -934,7 +933,7 @@ void VideoPattern::OnModifyDone()
             CHECK_NULL_VOID(videoPattern);
             ContainerScope scope(videoPattern->instanceId_);
             videoPattern->UpdateMediaPlayerOnBg();
-        }, "ArkUIVideoUpdateMediaPlayer");
+            }, "ArkUIVideoUpdateMediaPlayer");
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1396,7 +1395,7 @@ void VideoPattern::SetStartImpl(
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Start();
-        }, "ArkUIVideoStart");
+            }, "ArkUIVideoStart");
     });
 }
 
@@ -1411,7 +1410,7 @@ void VideoPattern::SetPausetImpl(
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Pause();
-        }, "ArkUIVideoPause");
+            }, "ArkUIVideoPause");
     });
 }
 
@@ -1426,7 +1425,7 @@ void VideoPattern::SetStopImpl(
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Stop();
-        }, "ArkUIVideoStop");
+            }, "ArkUIVideoStop");
     });
 }
 
@@ -1441,7 +1440,7 @@ void VideoPattern::SetSeekToImpl(
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->SetCurrentTime(pos, seekMode);
-        }, "ArkUIVideoSetCurrentTime");
+            }, "ArkUIVideoSetCurrentTime");
     });
 }
 
@@ -1463,7 +1462,7 @@ void VideoPattern::SetRequestFullscreenImpl(
                 CHECK_NULL_VOID(fullScreenPattern);
                 fullScreenPattern->ExitFullScreen();
             }
-        }, "ArkUIVideoFullScreen");
+            }, "ArkUIVideoFullScreen");
     });
 }
 
@@ -1491,7 +1490,7 @@ void VideoPattern::SetExitFullscreenImpl(
             auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(targetPattern);
             CHECK_NULL_VOID(fullScreenPattern);
             fullScreenPattern->ExitFullScreen();
-        }, "ArkUIVideoExitFullScreen");
+            }, "ArkUIVideoExitFullScreen");
     });
 }
 
@@ -1505,7 +1504,7 @@ void VideoPattern::SetResetImpl(
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->ResetMediaPlayer();
-        }, "ArkUIVideoReset");
+            }, "ArkUIVideoReset");
     });
 }
 
@@ -1556,7 +1555,7 @@ void VideoPattern::Start()
         CHECK_NULL_VOID(mediaPlayer);
         TAG_LOGI(AceLogTag::ACE_VIDEO, "trigger mediaPlayer play");
         mediaPlayer->Play();
-    }, "ArkUIVideoPlay");
+        }, "ArkUIVideoPlay");
 }
 
 void VideoPattern::Pause()
@@ -1597,7 +1596,7 @@ void VideoPattern::FireError()
         CHECK_NULL_VOID(videoPattern);
         ContainerScope scope(videoPattern->instanceId_);
         videoPattern->OnError("");
-    }, "ArkUIVideoError");
+        }, "ArkUIVideoError");
 }
 
 void VideoPattern::ChangePlayButtonTag()
