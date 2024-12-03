@@ -43,13 +43,11 @@ const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
 const MIN_DIALOG = '216vp'
 
-@Builder function MySwiperContent() : void {}
-
 @Component
 export struct TabTitleBar {
   tabItems: Array<TabTitleBarTabItem> = [];
   menuItems: Array<TabTitleBarMenuItem> = [];
-  @BuilderParam swiperContent : () => void = MySwiperContent;
+  @BuilderParam swiperContent : () => void;
 
   @State tabWidth: number = 0
   @State currentIndex: number = 0
