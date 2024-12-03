@@ -73,12 +73,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -523,6 +524,8 @@ public:
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(

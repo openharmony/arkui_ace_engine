@@ -2462,6 +2462,7 @@ void BuildParsedConfig(Platform::ParsedConfig& parsedConfig,
     parsedConfig.colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
     parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
     parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+    parsedConfig.fontId = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID);
     // Process system language and preferred language
     auto isPreferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE);
     if (isPreferredLanguage == IS_PREFERRED_LANGUAGE) {
@@ -2507,6 +2508,25 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+}
+
+void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+
+    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
+    if (dialogContainer) {
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;
+    Platform::ParsedConfig parsedConfig;
+    BuildParsedConfig(parsedConfig, config, formFontUseDefault);
+    container->UpdateConfigurationSyncForAll(parsedConfig, config->GetName());
+    LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfigurationSyncForAll, name:%{public}s",
+        instanceId_, bundleName_.c_str(), moduleName_.c_str(), config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
