@@ -47,6 +47,8 @@ const std::unordered_map<SpanType, std::function<void(RefPtr<RichEditorPattern>)
     { SpanType::SYMBOL, [](RefPtr<RichEditorPattern> pattern) { pattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);} },
     { SpanType::BUILDER, [](RefPtr<RichEditorPattern> pattern) { pattern->AddPlaceholderSpan(BUILDER_NODE_1, {});} }
 };
+const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
 class RichEditorSpanTest : public RichEditorCommonTestNg {
