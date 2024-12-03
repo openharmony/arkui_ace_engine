@@ -364,7 +364,10 @@ void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
-void PipelineContext::WindowFocus(bool isFocus) {}
+void PipelineContext::WindowFocus(bool isFocus)
+{
+    onFocus_ = isFocus;
+}
 
 void PipelineContext::ContainerModalUnFocus() {}
 
