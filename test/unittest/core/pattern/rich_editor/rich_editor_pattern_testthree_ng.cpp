@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_clipboard.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"

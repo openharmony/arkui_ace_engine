@@ -14,6 +14,7 @@
  */
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
+
 using namespace testing;
 using namespace testing::ext;
 
