@@ -2570,12 +2570,27 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, false);
 }
 
+std::mutex ViewAbstract::visualEffectMutex_;
+OEMVisualEffectFunc ViewAbstract::oemVisualEffectFunc = nullptr;
+void ViewAbstract::RegisterOEMVisualEffect(OEMVisualEffectFunc func)
+{
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    ViewAbstract::oemVisualEffectFunc = func;
+}
+
 void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    if (!oemVisualEffectFunc) {
+        ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+    } else {
+        Rosen::VisualEffect* graphicVisualEffect = oemVisualEffectFunc(visualEffect);
+        ACE_UPDATE_RENDER_CONTEXT(VisualEffect, graphicVisualEffect);
+    }
 }
 
 void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)

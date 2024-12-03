@@ -111,6 +111,8 @@ enum class OverlayType {
     RESET = 3,
 };
 
+typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
+
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength &width);
@@ -781,6 +783,7 @@ public:
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
+    static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
 
 private:
     static void AddDragFrameNodeToManager();
@@ -789,6 +792,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+
+    static OEMVisualEffectFunc oemVisualEffectFunc;
+    static std::mutex visualEffectMutex_;
 };
 } // namespace OHOS::Ace::NG
 

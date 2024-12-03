@@ -6019,6 +6019,28 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     }
 }
 
+void FrameNode::AddExtraCustomProperty(const std::string& key, void* extraData)
+{
+    extraCustomPropertyMap_[key] = extraData;
+}
+
+void* FrameNode::GetExtraCustomProperty(const std::string& key) const
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+void FrameNode::RemoveExtraCustomProperty(const std::string& key)
+{
+    auto iter = extraCustomPropertyMap_.find(key);
+    if (iter != extraCustomPropertyMap_.end()) {
+        extraCustomPropertyMap_.erase(iter);
+    }
+}
+
 bool FrameNode::IsDebugInspectorId()
 {
     if (!SystemProperties::GetDebugEnabled()) {

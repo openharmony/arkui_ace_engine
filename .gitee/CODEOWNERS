@@ -2341,6 +2341,7 @@ frameworks/core/components_ng/pattern/container_modal/ @arkuievent
 frameworks/core/components_ng/pattern/counter/ @arkui_image
 frameworks/core/components_ng/pattern/custom/ @arkuilayout
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkuiframework
+frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @arkui_image
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/divider/ @arkuilayout
@@ -2718,6 +2719,8 @@ frameworks/core/interfaces/native/node/node_container_span_modifier.cpp @huawei_
 frameworks/core/interfaces/native/node/node_container_span_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/node_content_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_content_modifier.h @arkuiframework
+frameworks/core/interfaces/native/node/node_custom_node_ext_modifier.h
+frameworks/core/interfaces/native/node/node_custom_node_ext_modifier.cpp
 frameworks/core/interfaces/native/node/node_date_picker_modifier.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_date_picker_modifier.h @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_drag_modifier.cpp @arkuievent

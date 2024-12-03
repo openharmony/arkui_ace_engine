@@ -213,6 +213,9 @@ RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
     DetachModifiers();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveExtraCustomProperty("RS_NODE");
 }
 
 void RosenRenderContext::DetachModifiers()
@@ -366,6 +369,9 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
 {
     RenderContext::SetHostNode(host);
     AddFrameNodeInfoToRsNode();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 }
 
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode)
@@ -4996,6 +5002,9 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     }
     rsNode_ = externalNode;
     AddFrameNodeInfoToRsNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddExtraCustomProperty("RS_NODE", rsNode_.get());
 
     ResetTransform();
     ResetTransformMatrix();
