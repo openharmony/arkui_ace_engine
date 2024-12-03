@@ -2528,6 +2528,7 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(const RefPtr<FrameNode>
     double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
     double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     textNode->MarkModifyDone();
