@@ -107,6 +107,8 @@ public:
         }
         auto hide = CloneHideTitleBar();
         json->PutExtAttr("hideTitleBar", hide.value_or(false) ? "true" : "false", filter);
+        auto isAnimatedTitleBar = CloneIsAnimatedTitleBar();
+        json->PutExtAttr("isAnimatedTitleBar", isAnimatedTitleBar.value_or(false) ? "true" : "false", filter);
         auto ignoreOpt = CloneIgnoreLayoutSafeArea();
         if (ignoreOpt.has_value()) {
             auto ignore = ignoreOpt.value();

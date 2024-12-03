@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -178,11 +179,10 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollIndex = [frameNode](const int32_t first, const int32_t last) {
+    auto onScrollIndex = [arkCallback = CallbackHelper(*value)](const int32_t first, const int32_t last) {
         auto arkFirst = Converter::ArkValue<Ark_Number>(first);
         auto arkLast = Converter::ArkValue<Ark_Number>(last);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollIndex(
-            frameNode->GetId(), arkFirst, arkLast);
+        arkCallback.Invoke(arkFirst, arkLast);
     };
     GridModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }

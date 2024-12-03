@@ -124,6 +124,42 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestNoWrapValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: SetFlexOptionsTestEmptyWrapValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexModifierTest, SetFlexOptionsTestEmptyWrapValues, TestSize.Level1)
+{
+    std::string strResult;
+    Opt_FlexOptions inputValue;
+    Ark_FlexOptions flexOptions;
+    flexOptions.direction = Converter::ArkValue<Opt_FlexDirection>(ARK_FLEX_DIRECTION_COLUMN);
+    flexOptions.wrap = Converter::ArkValue<Opt_FlexWrap>(Ark_Empty());
+    flexOptions.justifyContent = Converter::ArkValue<Opt_FlexAlign>(ARK_FLEX_ALIGN_CENTER);
+    flexOptions.alignItems =  Converter::ArkValue<Opt_ItemAlign>(ARK_ITEM_ALIGN_CENTER);
+    inputValue = Converter::ArkValue<Opt_FlexOptions>(flexOptions);
+    modifier_->setFlexOptions(node_, &inputValue);
+    auto fullJson = GetJsonValue(node_);
+
+    auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
+
+    auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);
+    EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_DEFAULT_VALUE);
+
+    auto alignItemAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_NAME);
+    EXPECT_EQ(alignItemAttr, ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_VALID_VALUE);
+
+    auto justifyContentAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_NAME);
+    EXPECT_EQ(justifyContentAttr, ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_VALID_VALUE);
+
+    auto flexDirection = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_DIRECTION_NAME);
+    EXPECT_EQ(flexDirection, ATTRIBUTE_SET_FLEX_DIRECTION_VALID_VALUE);
+
+    auto alignContent = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_ALIGN_CONTENT_NAME);
+    EXPECT_EQ(alignContent, ATTRIBUTE_SET_FLEX_ALIGN_CONTENT_DEFAULT_VALUE);
+}
+
+/*
  * @tc.name: SetFlexOptionsTestWrapValues
  * @tc.desc:
  * @tc.type: FUNC

@@ -146,9 +146,13 @@ void CheckBoxModelNG::SetSelect(FrameNode* frameNode, bool isSelected)
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected, frameNode);
 }
 
-void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
+void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, frameNode);
+    }
 }
 
 void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)

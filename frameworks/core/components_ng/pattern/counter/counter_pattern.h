@@ -101,7 +101,7 @@ public:
         if (addNode) {
             auto eventHub = addNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
-                enableInc = eventHub->GetStateEffect();
+                enableInc = eventHub->IsEnabled();
             }
         }
         json->Put("enableInc", enableInc ? "true" : "false");
@@ -112,7 +112,7 @@ public:
         if (subNode) {
             auto eventHub = subNode->GetEventHub<ButtonEventHub>();
             if (eventHub) {
-                enableDec = eventHub->GetStateEffect();
+                enableDec = eventHub->IsEnabled();
             }
         }
         json->Put("enableDec", enableDec ? "true" : "false");
