@@ -197,6 +197,11 @@ void XComponentPattern::InitSurface()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
+    // only xcomponent created by capi will set successfully, others will be set in FireExternalEvent
+    SetExpectedRateRangeInit();
+    OnFrameEventInit();
+    UnregisterOnFrameEventInit();
+
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -2042,5 +2047,14 @@ void XComponentPattern::EnableSecure(bool isSecure)
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetSecurityLayer(isSecure);
     isEnableSecure_ = isSecure;
+}
+
+void XComponentPattern::HdrBrightness(float hdrBrightness)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG

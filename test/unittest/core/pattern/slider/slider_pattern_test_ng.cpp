@@ -1590,6 +1590,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest009, TestSize.Level1
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetContentSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateShowSteps(true);
+
     if (!sliderPattern->sliderContentModifier_) {
         sliderPattern->sliderContentModifier_ =
             AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
@@ -1600,7 +1605,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest009, TestSize.Level1
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
     frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
-    sliderPattern->AccessibilityVirtualNodeRenderTask();
+    sliderPattern->InitAccessibilityVirtualNodeTask();
     ASSERT_NE(sliderPattern->parentAccessibilityNode_, nullptr);
     EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
     sliderPattern->AccessibilityVirtualNodeRenderTask();

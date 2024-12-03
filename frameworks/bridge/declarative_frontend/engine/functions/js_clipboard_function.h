@@ -31,6 +31,7 @@ public:
         ExecuteJS();
     }
     void Execute(const std::string& direction);
+    void Execute(const std::u16string& direction);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -189,11 +189,11 @@ void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& 
     if (!name_.empty()) {
         return;
     }
-
+    CHECK_NULL_VOID(hostNode);
     if (hostNode->GetInspectorId().has_value()) {
         name_ = hostNode->GetInspectorIdValue();
     } else {
-        name_ = std::to_string(GetHost()->GetId());
+        name_ = std::to_string(hostNode->GetId());
     }
     auto pathInfo = GetNavPathInfo();
     if (pathInfo) {

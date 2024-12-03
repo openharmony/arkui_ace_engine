@@ -118,6 +118,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
+    property->UpdateTextStyle(style.text);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);

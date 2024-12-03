@@ -138,7 +138,6 @@ void FormPattern::OnAttachToFrameNode()
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         auto id = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnAttachToFrameNode, cardId: %{public}" PRId64, id);
         FormManager::GetInstance().AddSubContainer(id, subContainer);
         uiTaskExecutor.PostDelayedTask(
             [id, nodeId = subContainer->GetNodeId()] {
@@ -609,7 +608,6 @@ void FormPattern::OnModifyDone()
     }
     // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnModifyDone, info.id: %{public}" PRId64, info.id);
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();

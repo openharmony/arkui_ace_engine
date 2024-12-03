@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -87,7 +88,7 @@ void SwiperTestNg::GetSwiper()
 
 RefPtr<PaintWrapper> SwiperTestNg::CreateSwiperDone()
 {
-    auto paintWrapper = CreateDone();
+    CreateDone();
     int index = pattern_->RealTotalCount();
     if (pattern_->IsShowIndicator() && pattern_->HasIndicatorNode()) {
         indicatorNode_ = GetChildFrameNode(frameNode_, index);
@@ -100,6 +101,7 @@ RefPtr<PaintWrapper> SwiperTestNg::CreateSwiperDone()
     if (pattern_->HasRightButtonNode()) {
         rightArrowNode_ = GetChildFrameNode(frameNode_, index);
     }
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     return paintWrapper;
 }
 
@@ -153,19 +155,19 @@ void SwiperTestNg::CreateWithArrow()
 void SwiperTestNg::ShowNext()
 {
     controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperTestNg::ShowPrevious()
 {
     controller_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperTestNg::ChangeIndex(int32_t index)
 {
     controller_->ChangeIndex(index, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -677,14 +679,14 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
     velocity = -780.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 0);
     pattern_->UpdateCurrentOffset(239.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 0);
     velocity = -781.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
     pattern_->SwipeToWithoutAnimation(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->UpdateCurrentOffset(-241.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
     velocity = -780.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
@@ -699,7 +701,7 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset001, TestSize.Level1)
 {
     CreateDefaultSwiper();
     pattern_->UpdateCurrentOffset(10.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 10.f);
 }
 
@@ -718,13 +720,13 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset002, TestSize.Level1)
     pattern_->isTouchPad_ = true;
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
     EXPECT_LT(GetChildX(frameNode_, 0), 10.f);
 
     float preOffset = GetChildX(frameNode_, 0);
     pattern_->UpdateCurrentOffset(-20.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_LT(GetChildX(frameNode_, 0), preOffset);
     EXPECT_GT(GetChildX(frameNode_, 0), -20.f);
 }
@@ -744,11 +746,11 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset003, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
 
     pattern_->UpdateCurrentOffset(-20.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
 }
 
@@ -767,11 +769,11 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
 
     pattern_->UpdateCurrentOffset(-20.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
 }
 
@@ -785,7 +787,7 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset005, TestSize.Level1)
     CreateSwiper();
     CreateSwiperDone();
     pattern_->UpdateCurrentOffset(10.f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
 }
 
@@ -1799,32 +1801,32 @@ HWTEST_F(SwiperTestNg, CalcCurrentPageStatus001, TestSize.Level1)
     EXPECT_EQ(currentFirstIndex, 0);
 
     pattern_->UpdateCurrentOffset(240.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.5f);
     EXPECT_EQ(currentFirstIndex, -1);
 
     pattern_->UpdateCurrentOffset(120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.25f);
     EXPECT_EQ(currentFirstIndex, -1);
 
     pattern_->ChangeIndex(3, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentFirstIndex_, 3);
 
     pattern_->UpdateCurrentOffset(-240.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.5f);
     EXPECT_EQ(currentFirstIndex, 3);
 
     pattern_->ChangeIndex(0, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentFirstIndex_, 0);
 
     pattern_->itemPosition_[-1] = { -480.0f, 0.0f };
@@ -1860,42 +1862,42 @@ HWTEST_F(SwiperTestNg, CalcCurrentPageStatus002, TestSize.Level1)
     EXPECT_EQ(currentFirstIndex, 0);
 
     pattern_->UpdateCurrentOffset(-120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.5f);
     EXPECT_EQ(currentFirstIndex, 0);
 
     pattern_->UpdateCurrentOffset(-120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, 0.0f);
     EXPECT_EQ(currentFirstIndex, 1);
 
     pattern_->UpdateCurrentOffset(-120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.5f);
     EXPECT_EQ(currentFirstIndex, 1);
 
     pattern_->UpdateCurrentOffset(480.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, -0.5f);
     EXPECT_EQ(currentFirstIndex, -1);
 
     pattern_->UpdateCurrentOffset(120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
     currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
     EXPECT_EQ(turnPageRate, 0.0f);
     EXPECT_EQ(currentFirstIndex, -1);
 
     pattern_->ChangeIndex(5, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentFirstIndex_, 5);
 
     pattern_->itemPosition_[4] = { -240.0f, 0.0f };
@@ -2294,7 +2296,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
     pattern_->OnModifyDone();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
     auto leftCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
@@ -2314,7 +2316,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
     layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
     pattern_->OnModifyDone();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
     leftCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
@@ -2336,7 +2338,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
      */
     pattern_->currentDelta_ = -itemWidth;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->leftCaptureIndex_, 2);
     leftCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));
@@ -2353,7 +2355,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
      */
     pattern_->currentDelta_ = itemWidth;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->rightCaptureIndex_, 3);
     auto rightCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetRightCaptureId())));
@@ -2373,7 +2375,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
      */
     pattern_->currentDelta_ = itemWidth;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->rightCaptureIndex_, 0);
     rightCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetRightCaptureId())));
@@ -2389,7 +2391,7 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
      */
     pattern_->currentDelta_ = -itemWidth;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->leftCaptureIndex_, 3);
     leftCaptureNode = AceType::DynamicCast<FrameNode>(
         frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(pattern_->GetLeftCaptureId())));

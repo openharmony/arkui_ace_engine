@@ -243,6 +243,7 @@ public:
     void AfterRemoveAllModalInOverlayByList();
     bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -506,6 +507,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,

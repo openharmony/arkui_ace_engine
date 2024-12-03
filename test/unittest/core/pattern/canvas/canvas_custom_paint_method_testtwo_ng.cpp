@@ -123,7 +123,7 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo004, Te
 
     Ace::Gradient gradient;
     gradient.SetType(Ace::GradientType::LINEAR);
-    EXPECT_EQ(paintMethod->MakeConicGradient(nullptr, gradient), nullptr);
+    EXPECT_EQ(paintMethod->MakeConicGradient(gradient), nullptr);
 }
 
 /**

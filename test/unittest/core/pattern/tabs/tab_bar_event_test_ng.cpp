@@ -848,7 +848,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->UpdateScrollPosition(-BARITEM_SIZE / 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -BARITEM_SIZE / 2);
 
     /**
@@ -857,7 +857,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      */
     scrollable->UpdateScrollPosition(-BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 
@@ -867,7 +867,7 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      */
     scrollable->UpdateScrollPosition(BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 }

@@ -95,7 +95,7 @@ ProgressModelNG ProgressTestNg::CreateProgress(double value, double max, NG::Pro
 HWTEST_F(ProgressTestNg, ProgressCreate001, TestSize.Level1)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
     RefPtr<ProgressLayoutAlgorithm> progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, nullptr, nullptr);
     pattern_->OnAttachToFrameNode();
@@ -124,7 +124,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of linear progress.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. create progress frameNode_ and check the progress properties with expected value .
@@ -204,7 +204,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     model.SetStrokeWidth(STROKE_WIDTH);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
     auto json = JsonUtil::Create(true);
     paintProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
@@ -267,7 +267,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator002, TestSize.Level1)
     model.SetStrokeWidth(LARG_STROKE_WIDTH);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -331,7 +331,7 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
     model.SetPaintShadow(true);
     model.SetProgressStatus(ProgressStatus::PROGRESSING);
     model.SetGradientColor(gradient);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -399,7 +399,7 @@ HWTEST_F(ProgressTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
     model.SetScaleWidth(SCALE_WIDTH);
     model.SetScaleCount(SCALE_COUNT);
     model.SetBorderColor(BORDER_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -442,7 +442,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressCreator001, TestSize.Level1)
      */
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetStrokeWidth(STROKE_WIDTH);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -549,7 +549,7 @@ HWTEST_F(ProgressTestNg, ProgressMaskPropertyTestNg001, TestSize.Level1)
 HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg001, TestSize.Level1)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
     paintProperty_->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
     paintProperty_->UpdateValue(VALUE_OF_PROGRESS);
     EXPECT_TRUE(accessibilityProperty_->HasRange());
@@ -566,7 +566,7 @@ HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg001, TestSize.Level1
 HWTEST_F(ProgressTestNg, ProgressAccessibilityPropertyTestNg002, TestSize.Level1)
 {
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
     paintProperty_->UpdateValue(VALUE_OF_PROGRESS);
     EXPECT_EQ(accessibilityProperty_->GetText(), std::to_string(VALUE_OF_PROGRESS));
 }
@@ -584,7 +584,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
      */
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetBackgroundColor(Color::BLUE);
-    CreateDone(frameNode_);
+    CreateDone();
     eventHub_->SetEnabled(false);
     pattern_->OnModifyDone();
     TouchEventInfo info("touch");
@@ -611,7 +611,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern001, TestSize.Level1)
      */
     model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     model.SetBackgroundColor(Color::BLUE);
-    CreateDone(frameNode_);
+    CreateDone();
     auto touchCallback = [](TouchEventInfo& info) {};
     pattern_->touchListener_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     pattern_->OnModifyDone();
@@ -627,7 +627,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern002, TestSize.Level1)
 {
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetBackgroundColor(Color::BLUE);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->OnModifyDone();
     TouchEventInfo info("touch");
     TouchLocationInfo touchInfo1(1);
@@ -646,7 +646,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern003, TestSize.Level1)
 {
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetBackgroundColor(Color::BLUE);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->OnModifyDone();
     TouchEventInfo info("touch");
     TouchLocationInfo touchInfo1(1);
@@ -680,7 +680,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
     model.SetPaintShadow(true);
     model.SetProgressStatus(ProgressStatus::PROGRESSING);
     model.SetGradientColor(gradient);
-    CreateDone(frameNode_);
+    CreateDone();
     auto json = JsonUtil::Create(true);
     pattern_->ToJsonValue(json, filter);
     paintProperty_->ToJsonValue(json, filter);
@@ -688,7 +688,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
 
     model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
     model.SetProgressStatus(ProgressStatus::LOADING);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
@@ -705,7 +705,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure001, TestSize.Level1)
      * @tc.expected: step1. Check the frameNode_ was created successfully.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the progressLayoutAlgorithm.
@@ -744,7 +744,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure002, TestSize.Level1)
      * @tc.expected: step1. Check the frameNode_ was created successfully.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the progressLayoutAlgorithm.
@@ -783,7 +783,7 @@ HWTEST_F(ProgressTestNg, CapsuleProgressMeasure003, TestSize.Level1)
      */
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
     model.SetStrokeWidth(STROKE_WIDTH);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -836,7 +836,7 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     model.SetStrokeWidth(LARG_STROKE_WIDTH);
     model.SetStrokeRadius(LARG_STROKE_WIDTH / 5.0);
     model.SetShowText(true);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FALSE(paintProperty_->HasColor());
     EXPECT_FALSE(paintProperty_->HasBackgroundColor());
     EXPECT_FALSE(paintProperty_->HasBorderColor());
@@ -850,7 +850,7 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     model.SetStrokeWidth(LARG_STROKE_WIDTH);
     model.SetStrokeRadius(LARG_STROKE_WIDTH / 5.0);
     model.SetShowText(true);
-    CreateDone(frameNode_);
+    CreateDone();
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     auto* stack = ViewStackProcessor::GetInstance();
@@ -890,7 +890,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level1)
     model.SetStrokeRadius(0.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. set ProgressModifier property.
@@ -927,7 +927,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm003, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of linear progress.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the progressLayoutAlgorithm.
@@ -966,7 +966,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm004, TestSize.Level1)
     int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the progressLayoutAlgorithm.
@@ -1018,7 +1018,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm005, TestSize.Level1)
     int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the progressLayoutAlgorithm.
@@ -1066,7 +1066,7 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
      * @tc.steps: step1. Init Progress node
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
     auto node = [](ProgressConfiguration config) -> RefPtr<FrameNode> {
         EXPECT_EQ(config.value_, VALUE_OF_PROGRESS);
         return nullptr;

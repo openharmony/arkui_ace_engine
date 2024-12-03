@@ -27,6 +27,9 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
 namespace OHOS::Ace::NG {
 
 constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
@@ -74,6 +77,22 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
         param = pathInfo->GetParamObj();
     }
     info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
+}
+
+void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, NavigationOperation operation)
+{
+    RefPtr<NavDestinationPattern> prePattern =
+        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    RefPtr<NavDestinationPattern> newPattern =
+        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
+        "top name: %{public}s, id: %{public}s",
+        operation, prePattern ? prePattern->GetName().c_str() : "null",
+        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
+        newPattern ? newPattern->GetName().c_str() : "null",
+        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
 }
 } // namespace
 
@@ -1659,11 +1678,7 @@ void NavigationPattern::HandleDragStart()
     }
     isInDividerDrag_ = true;
     if (!enableDragBar_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto windowId = pipeline->GetWindowId();
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+        SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
     }
 }
 
@@ -1731,11 +1746,7 @@ void NavigationPattern::HandleDragEnd()
         return;
     }
     isInDividerDrag_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    SetMouseStyle(MouseFormat::DEFAULT);
 }
 
 void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1801,13 +1812,6 @@ void NavigationPattern::OnHover(bool isHover)
     if (isInDividerDrag_) {
         return;
     }
-    MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(Dimension(0.0));
@@ -1818,9 +1822,8 @@ void NavigationPattern::OnHover(bool isHover)
         return;
     }
     isDividerDraggable_ = true;
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
-    }
+    MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
+    SetMouseStyle(format);
 }
 
 RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
@@ -2205,17 +2208,7 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
             navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
     }
-    RefPtr<NavDestinationPattern> prePattern =
-        preTopDestination ? preTopDestination->GetPattern<NavDestinationPattern>() : nullptr;
-    RefPtr<NavDestinationPattern> newPattern =
-        newTopNavDestination ? newTopNavDestination->GetPattern<NavDestinationPattern>() : nullptr;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "custom animation start: operation: %{public}d, pre name: %{public}s, id: %{public}s."
-        "top name: %{public}s, id: %{public}s",
-        operation, prePattern ? prePattern->GetName().c_str() : "null",
-        prePattern ? std::to_string(prePattern->GetNavDestinationId()).c_str() : "null",
-        newPattern ? newPattern->GetName().c_str() : "null",
-        newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
+    LogCustomAnimationStart(preTopDestination, newTopNavDestination, operation);
     return onTransition_(preInfo, topInfo, operation);
 }
 
@@ -3198,5 +3191,21 @@ void NavigationPattern::CloseLongPressDialog()
         overlayManager->CloseDialog(toolBarItemDialogNode);
         toolBarPattern->SetToolBarItemDialogNode(nullptr);
     }
+}
+
+void NavigationPattern::SetMouseStyle(MouseFormat format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNodeId = host->GetId();
+    int32_t windowId = static_cast<int32_t>(pipeline->GetFocusWindowId());
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = static_cast<int32_t>(WindowSceneHelper::GetFocusSystemWindowId(host));
+#endif
+    pipeline->SetMouseStyleHoldNode(frameNodeId);
+    pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
+    pipeline->FreeMouseStyleHoldNode(frameNodeId);
 }
 } // namespace OHOS::Ace::NG

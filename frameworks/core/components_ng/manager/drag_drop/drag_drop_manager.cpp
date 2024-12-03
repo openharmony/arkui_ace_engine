@@ -828,9 +828,9 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     }
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
         SetIsDisableDefaultDropAnimation(true);
-        OnDragEnd(DragPointerEvent(
-            touchPoint.touchEventId, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY),
-            "");
+        DragPointerEvent dragPointerEvent;
+        DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
+        OnDragEnd(dragPointerEvent, "");
     }
 }
 
@@ -2049,22 +2049,18 @@ void DragDropManager::UpdateGatherNodePosition(const RefPtr<OverlayManager>& ove
     const RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(imageNode);
-    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(imageNode);
     CHECK_NULL_VOID(overlayManager);
-    Dimension x = Dimension(0.0f);
-    Dimension y = Dimension(0.0f);
-    OffsetT<Dimension> offset(x, y);
+    auto gatherNode = overlayManager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(imageNode);
+    gatherNodeCenter -= DragDropFuncWrapper::GetCurrentWindowOffset(gatherNode->GetContextRefPtr());
+    OffsetF offset;
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
-        CHECK_NULL_VOID(imageNode);
-        auto imageContext = imageNode->GetRenderContext();
-        CHECK_NULL_VOID(imageContext);
-        x.SetValue(gatherNodeCenter.GetX() - child.halfWidth);
-        y.SetValue(gatherNodeCenter.GetY() - child.halfHeight);
-        offset.SetX(x);
-        offset.SetY(y);
-        imageContext->UpdatePosition(offset);
+        offset.SetX(gatherNodeCenter.GetX() - child.halfWidth);
+        offset.SetY(gatherNodeCenter.GetY() - child.halfHeight);
+        DragDropFuncWrapper::UpdateNodePositionToWindow(imageNode, offset);
     }
 }
 
@@ -2225,9 +2221,8 @@ RectF DragDropManager::GetMenuPreviewRect()
     CHECK_NULL_RETURN(menuWrapperPattern, RectF());
     auto menuPreview = menuWrapperPattern->GetPreview();
     CHECK_NULL_RETURN(menuPreview, RectF());
-    auto menuRenderContext = menuPreview->GetRenderContext();
-    CHECK_NULL_RETURN(menuRenderContext, RectF());
-    auto previewPaintRect = menuRenderContext->GetPaintRectWithTransform();
+    auto previewPaintRect = DragDropFuncWrapper::GetPaintRectToScreen(menuPreview);
+    previewPaintRect -= DragDropFuncWrapper::GetCurrentWindowOffset(pipelineContext);
     return previewPaintRect;
 }
 

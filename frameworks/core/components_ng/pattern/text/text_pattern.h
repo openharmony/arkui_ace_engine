@@ -354,6 +354,7 @@ public:
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
+    void ClearDragEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     virtual std::function<void(Offset)> GetThumbnailCallback();
@@ -370,7 +371,7 @@ public:
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
-    RefPtr<UINode> GetChildByIndex(int32_t index) const;
+    virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     virtual void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem);
@@ -380,7 +381,7 @@ public:
     std::string GetBindSelectionMenuInJson() const;
     virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
 
-    const std::vector<std::string>& GetDragContents() const
+    const std::vector<std::u16string>& GetDragContents() const
     {
         return dragContents_;
     }
@@ -560,7 +561,7 @@ public:
     void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
-    std::string GetSelectedText(int32_t start, int32_t end) const;
+    std::u16string GetSelectedText(int32_t start, int32_t end) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
@@ -626,6 +627,7 @@ public:
     // add for capi NODE_TEXT_CONTENT_WITH_STYLED_STRING
     void SetExternalParagraph(void* paragraph)
     {
+        ACE_TEXT_SCOPED_TRACE("SetExternalParagraph");
         externalParagraph_ = paragraph;
     }
 
@@ -797,6 +799,7 @@ protected:
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
+    void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
@@ -1016,6 +1019,7 @@ private:
     std::optional<std::function<void()>> afterLayoutCallback_;
     Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
+    bool shiftFlag_ = false;
 };
 } // namespace OHOS::Ace::NG
 

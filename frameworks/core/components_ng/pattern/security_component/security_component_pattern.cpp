@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
@@ -63,6 +64,37 @@ void SecurityComponentPattern::SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTe
     auto gestureHub = node->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(mode);
+}
+
+void SecurityComponentPattern::OnLanguageConfigurationUpdate()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetTextStyle().has_value()) {
+        auto textStyle = layoutProperty->GetTextStyle().value();
+        if (textStyle != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
+            auto pipeline = textNode->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+            CHECK_NULL_VOID(theme);
+
+            std::string text;
+            if (node->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+                text = theme->GetPasteDescriptions(textStyle);
+            } else if (node->GetTag() == V2::LOCATION_BUTTON_ETS_TAG) {
+                text = theme->GetLocationDescriptions(textStyle);
+            } else if (node->GetTag() == V2::SAVE_BUTTON_ETS_TAG) {
+                text = theme->GetSaveDescriptions(textStyle);
+            }
+
+            textLayoutProperty->UpdateContent(text);
+        }
+    }
 }
 
 bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)

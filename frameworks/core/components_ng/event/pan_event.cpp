@@ -20,14 +20,14 @@
 namespace OHOS::Ace::NG {
 
 PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction,
-    int32_t fingers, float distance, bool isOverrideDistance)
+    int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
     if (fingers_ < DEFAULT_PAN_FINGER) {
         fingers_ = DEFAULT_PAN_FINGER;
     }
 
-    if (!isOverrideDistance && LessOrEqual(distance_, DEFAULT_PAN_DISTANCE.ConvertToPx())) {
+    if (LessNotEqual(distance_, 0.0)) {
         distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
 

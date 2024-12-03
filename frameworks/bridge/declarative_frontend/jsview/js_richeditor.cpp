@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
 namespace OHOS::Ace {
@@ -221,6 +222,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<double>("letterSpacing", textStyleResult.letterSpacing);
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textStyleResult));
+    SetJsTextBackgroundStyle(textStyleObj, textStyleResult);
 
     return textStyleObj;
 }
@@ -244,6 +246,22 @@ JSRef<JSArray> JSRichEditor::CreateJsTextShadowObjectArray(const std::vector<Sha
         index++;
     }
     return textShadowArray;
+}
+
+void JSRichEditor::SetJsTextBackgroundStyle(JSRef<JSObject>& textStyleObj, const TextStyleResult& textSpanResult)
+{
+    auto textBackgroundStyle = textSpanResult.textBackgroundStyle;
+    CHECK_NULL_VOID(textBackgroundStyle.has_value());
+    textStyleObj->SetPropertyObject("textBackgroundStyle", CreateJsTextBackgroundStyle(textBackgroundStyle.value()));
+}
+
+JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    JSRef<JSObject> textBackgroundStyleObj = JSRef<JSObject>::New();
+    textBackgroundStyleObj->SetProperty<std::string>("color", style.backgroundColor->ColorToString());
+    textBackgroundStyleObj->SetProperty<std::string>(
+        "BorderRadiusProperty", style.backgroundRadius->ToString());
+    return textBackgroundStyleObj;
 }
 
 JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult)
@@ -681,6 +699,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetProperty<std::string>("fontFamily", textSpanResult.GetFontFamily());
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textSpanResult.GetTextStyle()));
+    SetJsTextBackgroundStyle(textStyleObj, textSpanResult.GetTextStyle());
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
     onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
     onIMEInputCompleteObj->SetProperty<std::string>("previewText", textSpanResult.GetPreviewText());
@@ -899,6 +918,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     textStyleObj->SetProperty<std::string>("fontFamily", spanResult.GetFontFamily());
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(spanResult.GetTextStyle()));
+    SetJsTextBackgroundStyle(textStyleObj, spanResult.GetTextStyle());
 }
 
 void JSRichEditor::CreateImageStyleObj(
@@ -998,17 +1018,15 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         func->Execute();
     };
     NG::SelectMenuParam menuParam;
-    int32_t requiredParamCount = 3;
+    const int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
         JSRef<JSObject> menuOptions = info[requiredParamCount];
         JSText::ParseMenuParam(info, menuOptions, menuParam);
         auto menuType = menuOptions->GetProperty("menuType");
         bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
-        bool bindImagePreviewMenu = isPreviewMenu
-            && responseType == NG::TextResponseType::LONG_PRESS
-            && editorType == NG::TextSpanType::IMAGE;
+        bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
         if (bindImagePreviewMenu) {
-            RichEditorModel::GetInstance()->SetImagePreviewMenuParam(buildFunc, menuParam);
+            RichEditorModel::GetInstance()->SetPreviewMenuParam(editorType, buildFunc, menuParam);
             return;
         }
     }
@@ -1252,7 +1270,7 @@ void JSRichEditor::CreateJsRichEditorCommonEvent(const JSCallbackInfo& info)
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(2);
         JSRef<JSObject> object = objectTemplate->NewInstance();
-        object->SetProperty<std::string>("text", event.GetText());
+        object->SetProperty<std::u16string>("text", event.GetText());
         object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
         object->Wrap<NG::TextFieldCommonEvent>(&event);
         JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
@@ -2325,6 +2343,7 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     }
     ParseTextDecoration(styleObject, style, updateSpanStyle);
     ParseTextShadow(styleObject, style, updateSpanStyle);
+    ParseTextBackgroundStyle(styleObject, style, updateSpanStyle);
 }
 
 void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
@@ -2438,6 +2457,17 @@ void JSRichEditorBaseController::ParseTextShadow(
     }
 }
 
+void JSRichEditorBaseController::ParseTextBackgroundStyle(
+    const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto backgroundObject = styleObject->GetProperty("textBackgroundStyle");
+    CHECK_NULL_VOID(!backgroundObject->IsNull() && !backgroundObject->IsUndefined());
+    auto textBackgroundValue = JSContainerSpan::ParseTextBackgroundStyle(backgroundObject);
+    style.SetTextBackgroundStyle(textBackgroundValue);
+    updateSpanStyle.updateTextBackgroundStyle = textBackgroundValue;
+}
+
 void JSRichEditorBaseController::GetTypingStyle(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2468,19 +2498,8 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         std::string family = V2::ConvertFontFamily(typingStyle.updateFontFamily.value());
         tyingStyleObj->SetProperty<std::string>("fontFamily", family);
     }
-    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
-    if (typingStyle.updateTextDecoration.has_value()) {
-        decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
-    }
-    if (typingStyle.updateTextDecorationColor.has_value()) {
-        decorationObj->SetProperty<std::string>("color", typingStyle.updateTextDecorationColor.value().ColorToString());
-    }
-    if (typingStyle.updateTextDecorationStyle.has_value()) {
-        decorationObj->SetProperty<int32_t>("style",
-            static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
-    }
     if (typingStyle.isInitDecoration) {
-        tyingStyleObj->SetPropertyObject("decoration", decorationObj);
+        tyingStyleObj->SetPropertyObject("decoration", CreateJsDecorationObj(typingStyle));
     }
     if (typingStyle.updateTextShadows.has_value()) {
         tyingStyleObj->SetPropertyObject("textShadows",
@@ -2496,8 +2515,29 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         tyingStyleObj->SetProperty<std::string>(
             "fontFeature", UnParseFontFeatureSetting(typingStyle.updateFontFeature.value()));
     }
+    if (typingStyle.updateTextBackgroundStyle.has_value()) {
+        tyingStyleObj->SetPropertyObject("textBackgroundStyle",
+            JSRichEditor::CreateJsTextBackgroundStyle(typingStyle.updateTextBackgroundStyle.value()));
+    }
 
     return tyingStyleObj;
+}
+
+JSRef<JSObject> JSRichEditorBaseController::CreateJsDecorationObj(const struct UpdateSpanStyle& typingStyle)
+{
+    JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
+    if (typingStyle.updateTextDecoration.has_value()) {
+        decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(typingStyle.updateTextDecoration.value()));
+    }
+    if (typingStyle.updateTextDecorationColor.has_value()) {
+        decorationObj->SetProperty<std::string>(
+            "color", typingStyle.updateTextDecorationColor.value().ColorToString());
+    }
+    if (typingStyle.updateTextDecorationStyle.has_value()) {
+        decorationObj->SetProperty<int32_t>("style",
+            static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
+    }
+    return decorationObj;
 }
 
 void JSRichEditorBaseController::CloseSelectionMenu()

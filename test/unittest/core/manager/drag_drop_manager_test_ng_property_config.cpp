@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2192,5 +2193,55 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest074, TestSize.Level1)
     auto unifiedData = dragDropManager->RequestUDMFDataWithUDKey(udKey);
     dragDropManager->DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
     EXPECT_FALSE(!udKey.empty());
+}
+
+/**
+* @tc.name: DragDropManagerTest075
+* @tc.desc: Test FindTargetDropNode with scale
+* @tc.type: FUNC
+* @tc.author:
+*/
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest075, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a frameNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    frameNode->renderContext_ = renderContext;
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->paintRect_ = RectF(0.0f, 0.0f, 15.0f, 15.0f);
+    frameNode->isActive_ = true;
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    std::string onDropInfo;
+    auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
+        onDropInfo = EXTRA_INFO;
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+
+    /**
+     * @tc.steps: step3. call FindTargetDropNode
+     */
+    constexpr float GLOBAL_X = 10.0f;
+    constexpr float GLOBAL_Y = 20.0f;
+    PointF point = { GLOBAL_X, GLOBAL_Y };
+    auto targetDropNode = dragDropManager->FindTargetDropNode(frameNode, point);
+    EXPECT_EQ(targetDropNode, nullptr);
+
+    /**
+     * @tc.steps: step4. set frameNode scale
+     */
+    frameNode->cacheMatrixInfo_.revertMatrix = Matrix4::CreateIdentity();
+    constexpr float GLOBAL_SCALE = 0.5f;
+    frameNode->cacheMatrixInfo_.revertMatrix.SetScale(GLOBAL_SCALE, GLOBAL_SCALE, 1.0f);
+    targetDropNode = dragDropManager->FindTargetDropNode(frameNode, point);
+    EXPECT_EQ(targetDropNode, frameNode);
 }
 } // namespace OHOS::Ace::NG

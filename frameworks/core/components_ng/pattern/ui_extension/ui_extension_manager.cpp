@@ -289,16 +289,25 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
         if (uiExtension == nullptr) {
             continue;
         }
+
+        uint64_t displayId = 0;
+        auto instanceId = uiExtension->GetInstanceIdFromHost();
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        if (container) {
+            displayId = container->GetDisplayId();
+        }
         SessionViewportConfig newConfig = {
             .isDensityFollowHost_ = uiExtension->GetDensityDpi(),
             .density_ = config.Density(),
-            .displayId_ = 0,
+            .displayId_ = displayId,
             .orientation_ = config.Orientation(),
             .transform_ = config.TransformHint(),
         };
         auto oldConfig = uiExtension->GetSessionViewportConfig();
-        if (oldConfig.density_ == newConfig.density_ && oldConfig.transform_ == newConfig.transform_ &&
-            oldConfig.orientation_ == newConfig.orientation_) {
+        if (oldConfig.density_ == newConfig.density_ &&
+            oldConfig.transform_ == newConfig.transform_ &&
+            oldConfig.orientation_ == newConfig.orientation_ &&
+            oldConfig.displayId_ == newConfig.displayId_) {
             continue;
         }
         uiExtension->SetSessionViewportConfig(newConfig);

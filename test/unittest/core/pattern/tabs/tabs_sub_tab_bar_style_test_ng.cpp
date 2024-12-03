@@ -111,7 +111,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     model.SetAnimationDuration(AceType::RawPtr(frameNode_), -1);
     model.SetIsVertical(AceType::RawPtr(frameNode_), false);
     model.SetBarOverlap(AceType::RawPtr(frameNode_), false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
     BlurStyleOption option;
@@ -133,7 +133,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 1.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
@@ -192,7 +192,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest004, TestSize.Leve
     indicator.borderRadius = 2.0_vp;
     indicator.marginTop = 3.0_vp;
     tabContentPattern->SetIndicatorStyle(indicator);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);
@@ -234,7 +234,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest005, TestSize.Leve
     indicator.borderRadius = 2.0_vp;
     indicator.marginTop = 3.0_vp;
     tabContentPattern->SetIndicatorStyle(indicator);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);

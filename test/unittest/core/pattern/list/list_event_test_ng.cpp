@@ -938,7 +938,43 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign013, TestSize.Level1)
      * @tc.expected: The item(index:2) align to end
      */
     SetChildrenMainSize(frameNode_, 0, { 200 });
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
+}
+
+/**
+ * @tc.name: ScrollSnapAlign014
+ * @tc.desc: Test list content is less than one screen not start snap Animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 0 offset.
+     * @tc.expected: Not start snap Animation.
+     */
+    pattern_->StartSnapAnimation(0, 0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->scrollable_->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step3. Update contentEndOffset and StartSnapAnimation with 0 offset.
+     * @tc.expected: Not start snap Animation.
+     */
+    layoutProperty_->UpdateContentEndOffset(150);
+    pattern_->StartSnapAnimation(0, 0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->scrollable_->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

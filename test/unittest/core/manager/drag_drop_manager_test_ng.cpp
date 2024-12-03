@@ -1763,4 +1763,60 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest041, TestSize.Level1)
     auto returnPoint = dragDropManager->GetDragDampStartPoint();
     EXPECT_EQ(returnPoint, point2);
 }
+
+/**
+ * @tc.name: DragDropManagerTest042
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create a frameNode, then set preTargetFrameNode_.
+     * @tc.expected: The values of preTargetFrameNode_ and frameNode are equal
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    dragDropManager->preTargetFrameNode_ = frameNode;
+    ASSERT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto instanceId = container->GetInstanceId();
+    /**
+     * @tc.steps: step3. call ResetPreTargetFrameNode in ScenceBoardWindow.
+     * @tc.expected: The value of preTargetFrameNode_ is frameNode
+     */
+    container->isUIExtensionWindow_ = false;
+    container->isScenceBoardWindow_ = true;
+    dragDropManager->ResetPreTargetFrameNode(instanceId);
+    EXPECT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
+
+    /**
+     * @tc.steps: step4. call ResetPreTargetFrameNode in UIExtensionWindow.
+     * @tc.expected: The value of preTargetFrameNode_ is frameNode
+     */
+    container->isUIExtensionWindow_ = true;
+    container->isScenceBoardWindow_ = false;
+    dragDropManager->ResetPreTargetFrameNode(instanceId);
+    EXPECT_EQ(dragDropManager->preTargetFrameNode_, frameNode);
+
+    /**
+     * @tc.steps: step5. call ResetPreTargetFrameNode.
+     * @tc.expected: The value of preTargetFrameNode_ is nullptr
+     */
+    container->isUIExtensionWindow_ = false;
+    container->isScenceBoardWindow_ = false;
+    dragDropManager->ResetPreTargetFrameNode(instanceId);
+    EXPECT_EQ(dragDropManager->preTargetFrameNode_, nullptr);
+}
 } // namespace OHOS::Ace::NG

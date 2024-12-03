@@ -962,8 +962,8 @@ const ArkUIImageModifier* GetImageModifier()
 const CJUIImageModifier* GetCJUIImageModifier()
 {
     static const CJUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
+        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
+        SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
         SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
         SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,

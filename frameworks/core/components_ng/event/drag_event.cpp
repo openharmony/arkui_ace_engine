@@ -235,6 +235,12 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
         actionStart_(gestureInfo);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        TouchEvent touchEvent;
+        eventManager->CleanRecognizersForDragBegin(touchEvent);
     }
 }
 
@@ -714,6 +720,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                     GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
+        InteractionInterface::GetInstance()->SetDraggableState(true);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
@@ -1219,7 +1226,9 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(columnNode);
     }
-    FlushSyncGeometryNodeTasks();
+    if (!isDragPixelMap) {
+        FlushSyncGeometryNodeTasks();
+    }
 }
 
 /* Retrieves a preview PixelMap for a given drag event action.
@@ -1722,7 +1731,6 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->SetHasFilter(false);
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2062,7 +2070,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
         width = pixelMap->GetWidth();
         height = pixelMap->GetHeight();
     }
-    auto offset = GetFloatImageOffset(frameNode, pixelMap);
+    auto offset = DragDropFuncWrapper::GetPaintRectCenter(frameNode) - OffsetF(width / 2.0f, height / 2.0f);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     
@@ -2090,7 +2098,9 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
+    gatherNodeChildInfo = {
+        imageNode, offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()),
+        width, height, width / 2.0f, height / 2.0f };
     return imageNode;
 }
 
@@ -2130,6 +2140,14 @@ void DragEventActuator::ResetNode(const RefPtr<FrameNode>& frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
+void DragEventActuator::InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo)
+{
+    for (auto childInfo : gatherNodeChildrenInfo) {
+        auto imageNode = childInfo.imageNode.Upgrade();
+        DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, childInfo.offset);
     }
 }
 

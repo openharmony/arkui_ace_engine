@@ -1095,26 +1095,26 @@ HWTEST_F(SheetPresentationTestNg, GetHeightBySheetStyle001, TestSize.Level1)
     EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
     EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
     EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
-    algorithm->GetHeightBySheetStyle();
+    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.sheetMode = SheetMode::MEDIUM;
     EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
     EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
-    algorithm->GetHeightBySheetStyle();
+    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.sheetMode = SheetMode::LARGE;
     algorithm->sheetStyle_.height = 100.0_vp;
     EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
     EXPECT_TRUE(algorithm->sheetStyle_.height.has_value());
     EXPECT_FALSE(algorithm->SheetInSplitWindow());
-    algorithm->GetHeightBySheetStyle();
+    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
     algorithm->sheetType_ = SheetType::SHEET_CENTER;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto windowManager = pipelineContext->windowManager_;
     windowManager->SetWindowGetModeCallBack([]() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; });
     EXPECT_TRUE(algorithm->SheetInSplitWindow());
-    algorithm->GetHeightBySheetStyle();
+    algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -2178,7 +2178,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle001, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
 
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
-    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_FALSE(sheetPattern->IsSheetBottomStyle());
 
     /**
      * @tc.steps: step6. set non-bottom style sheetType_, test "IsSheetBottomStyle".
@@ -2267,7 +2267,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle002, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
 
     sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
-    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_FALSE(sheetPattern->IsSheetBottomStyle());
 
     SheetPresentationTestNg::TearDownTestCase();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);

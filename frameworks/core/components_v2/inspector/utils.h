@@ -409,7 +409,7 @@ inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     };
 
     auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
-    return index < 0 ? "TextAlign.Start" : textOverflowTable[index].value;
+    return index < 0 ? "TextOverflow.Clip" : textOverflowTable[index].value;
 }
 
 inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)

@@ -86,7 +86,7 @@ void BindingCustomButtonFromJS(
     if (setCustomCallback->IsFunction()) {
         JSRef<JSFunc> jsSetCustomCallbackFunc = JSRef<JSFunc>::Cast(setCustomCallback);
         auto callback = [obj = object, jsFunc = jsSetCustomCallbackFunc, id, vm](
-                            const std::string& eventName, std::string param) {
+                            const std::string& eventName, const std::string& param) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(vm);
             JSRef<JSVal> jsEventName = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, eventName));

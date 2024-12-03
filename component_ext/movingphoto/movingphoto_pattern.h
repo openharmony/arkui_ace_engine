@@ -100,6 +100,11 @@ public:
         currentDateModified_ = currentDateModified;
     }
 
+    void SetMovingPhotoFormat(MovingPhotoFormat format)
+    {
+        movingPhotoFormat_ = format;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -140,6 +145,7 @@ private:
     void UpdateVideoNode();
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
+    void MovingPhotoFormatConvert(MovingPhotoFormat format);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -236,6 +242,8 @@ private:
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     int64_t currentDateModified_ = -2;
+    MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::UNKNOWN;
+    PixelFormat imageFormat_ = PixelFormat::UNKNOWN;
 
     bool isEnableAnalyzer_ = false;
     bool isContentSizeChanged_ = false;

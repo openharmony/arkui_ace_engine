@@ -134,6 +134,31 @@ RefPtr<NG::ContainerModalPatternEnhance> JSContainerModal::GetContainerModalPatt
     return containerMode->GetPattern<NG::ContainerModalPatternEnhance>();
 }
 
+void JSContainerModal::CallWindowNative(const JSCallbackInfo& info)
+{
+    if (info.Length() < EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative param error");
+        return;
+    }
+    if (!info[1]->IsString()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative value is error");
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "CallWindowNative");
+    auto pipelineContext = NG::PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_VOID(containerMode);
+    auto pattern = containerMode->GetPattern<NG::ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(pattern);
+    std::string eventName = info[0]->ToString();
+    std::string value = info[1]->ToString();
+    pattern->CallContainerModalNative(eventName, value);
+}
+
 void JSContainerModal::CallNative(const JSCallbackInfo& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "callNative");
@@ -146,12 +171,16 @@ void JSContainerModal::CallNative(const JSCallbackInfo& info)
         return;
     }
     std::string eventName = info[0]->ToString();
-    auto it = nativeFucMap_.find(eventName);
-    if (it == nativeFucMap_.end()) {
-        TAG_LOGI(AceLogTag::ACE_APPBAR, "Event not found: %{public}s", eventName.c_str());
-        return;
+    if (eventName.rfind("arkui", 0) == 0) {
+        auto it = nativeFucMap_.find(eventName);
+        if (it == nativeFucMap_.end()) {
+            TAG_LOGI(AceLogTag::ACE_APPBAR, "Event not found: %{public}s", eventName.c_str());
+            return;
+        }
+        it->second(info);
+    } else {
+        CallWindowNative(info);
     }
-    it->second(info);
 }
 
 void JSContainerModal::JSBind(BindingTarget globalObj)

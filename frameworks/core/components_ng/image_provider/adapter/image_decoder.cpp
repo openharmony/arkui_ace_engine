@@ -64,7 +64,8 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     return canvasImage;
 }
 
-RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, bool isHdrDecoderNeed)
+RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
+    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
     auto imageDfxConfig = obj_->GetImageDfxConfig();
@@ -81,11 +82,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     // Determine whether to decode the width and height of each other based on the orientation
     SwapDecodeSize(width, height);
-    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], hdr: [%d], quality: [%d]",
+    ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], [%d-%d-%d]",
         src.c_str(), sourceSize.first, sourceSize.second, width, height, static_cast<int32_t>(isHdrDecoderNeed),
-        static_cast<int32_t>(imageQuality));
+        static_cast<int32_t>(imageQuality), static_cast<int32_t>(photoDecodeFormat));
 
-    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
+    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
     if (!pixmap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
@@ -95,9 +96,10 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto image = PixelMapImage::Create(pixmap);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "Image Decode success, Info:%{public}s-%{public}s-%{public}s-%{public}d x %{public}d-%{public}d",
+            "Image Decode success, Info:%{public}s-%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
             imageDfxConfig.ToStringWithSrc().c_str(), GetResolutionQuality(imageQuality).c_str(),
-            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight(), isHdrDecoderNeed);
+            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight(), isHdrDecoderNeed,
+            static_cast<int32_t>(photoDecodeFormat));
         pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_decode_");
     }
 

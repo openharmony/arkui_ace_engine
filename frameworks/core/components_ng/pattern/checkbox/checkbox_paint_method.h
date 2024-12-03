@@ -41,6 +41,7 @@ public:
             auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
             CHECK_NULL_RETURN(checkBoxTheme, nullptr);
             auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
+            CHECK_NULL_RETURN(paintProperty, nullptr);
             auto isSelect = paintProperty->GetCheckBoxSelectValue(false);
             auto boardColor = isSelect ? paintProperty->GetCheckBoxSelectedColorValue(checkBoxTheme->GetActiveColor())
                                        : checkBoxTheme->GetInactivePointColor();
@@ -95,6 +96,7 @@ public:
         auto size = paintWrapper->GetContentSize();
         float strokePaintSize = size.Width();
         auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         if (paintProperty->GetCheckBoxSelect().has_value()) {
             checkboxModifier_->SetIsSelect(paintProperty->GetCheckBoxSelectValue());
         }

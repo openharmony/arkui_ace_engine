@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 
 void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(pointerEvent);
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
@@ -556,6 +557,9 @@ void GetPointerEventAction(int32_t action, DragPointerEvent& event)
     }
 }
 
+/**
+ * Only for UIExtension to convert drag event type and dispatch.
+ */
 void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
 {
     if (action == PointerAction::PULL_IN_WINDOW) {
@@ -563,6 +567,9 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     }
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    }
+    if (action == PointerAction::UP) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     }
 }
 

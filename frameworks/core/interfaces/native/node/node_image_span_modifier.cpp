@@ -131,7 +131,7 @@ void GetImageSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundSt
     options->topLeft = styleOptions.backgroundRadius->radiusTopLeft->Value();
     options->topRight = styleOptions.backgroundRadius->radiusTopRight->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
-    options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
+    options->bottomRight = styleOptions.backgroundRadius->radiusBottomRight->Value();
 }
 
 void SetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)

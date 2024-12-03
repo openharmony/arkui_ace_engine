@@ -127,6 +127,7 @@ public:
     std::shared_ptr<SelectOverlayInfo> info_;
     std::string ability_;
     bool endIconIsHover_ = false;
+    bool isMultiImage_ = false;
 
 private:
     static constexpr int32_t TEXT_MAX_WIDTH = 500;

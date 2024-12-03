@@ -244,6 +244,7 @@ public:
         const RefPtr<FrameNode>& frameNode, GatherNodeChildInfo& gatherNodeChildInfo);
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
+    static void InitGatherNodesPosition(const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static void GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);

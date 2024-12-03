@@ -575,7 +575,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
         listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
-    if (!isInitialized_ && !jumpIndex_) {
+    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
+        !isInitialized_ && !jumpIndex_ : !isInitialized_;
+    if (needUseInitialIndex) {
         jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
         if (NeedScrollSnapAlignEffect()) {
             scrollAlign_ = GetScrollAlignByScrollSnapAlign();
@@ -857,7 +859,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
         auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
-        currentDelta_ = currentDelta_ * friction;
+        offset = offset * friction;
+        currentDelta_ = lastDelta - offset;
     }
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);

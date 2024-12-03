@@ -1,4 +1,4 @@
-const IMAGE_SIZE: string = '28vp'
+const IMAGE_SIZE: string = '20vp'
 const BUTTON_SIZE: string = '28vp'
 const BUTTON_ELEMENT_MARGIN_HORIZONTAL: string = '12vp'
 const BUTTON_ELEMENT_MARGIN_HORIZONTAL_END: string = '8vp'
@@ -12,7 +12,9 @@ const MENU_MARGIN_V: string = '8vp'
 const MENU_MARGIN_H: string = '12vp'
 const MENU_TITLE_MARGIN_V: string = '10vp'
 const MENU_TITLE_TEXT_FONT_SIZE: string = '16fp'
-const HOVER_TIME: number = 1000
+const HOVER_TIME: number = 1000; // Hover time: 1000ms
+const MENU_AUTO_DISAPPEAR_TIME: number = 2000; // Menu auto-disappear: 2000ms
+const MENU_MOUSEOUT_DISAPPEAR_TIME: number = 1000; // Menu mouseout disappear: 1000ms
 
 const EVENT_NAME_CUSTOM_MAX_CLICK: string = 'arkui_custom_max_click'
 const EVENT_NAME_MIN_CLICK: string = 'arkui_custom_min_click'
@@ -31,6 +33,10 @@ const EVENT_NAME_CLOSE_VISIBILITY: string = 'arkui_close_visibility'
 const EVENT_NAME_CLOSE_STATUS: string = 'arkui_close_status'
 const EVENT_NAME_MAXIMIZE_IS_RECOVER: string = 'arkui_maximize_is_recover'
 const EVENT_NAME_MENU_WIDTH_CHANGE: string = 'arkui_menu_width_change'
+const EVENT_NAME_BUTTON_SIZE_CHANGE: string = 'arkui_button_size_change'
+const EVENT_NAME_BUTTON_SPACING_CHANGE: string = 'arkui_button_spacing_change'
+const EVENT_NAME_COLOR_MODE_LOCKED: string = 'arkui_color_mode_locked'
+const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset_change'
 
 const maximizeNormalResource: Resource = {
   bundleName: '',
@@ -107,9 +113,38 @@ const menuHoverColor: Resource = {
   type: 10001
 }
 
+const splitItemFillColor: Resource = {
+  bundleName: '',
+  moduleName: '',
+  params: [],
+  id: 125830991,
+  type: 10001
+}
+
+//锁定深色或者浅色模式，锁定颜色时，深浅色资源切换的时候，取固定值
+class ColorGroup {
+  public light: string = '#000000';
+  public dark: string = '#FFFFFF';
+
+  constructor(light: string, dark: string) {
+    this.dark = dark;
+    this.light = light;
+  }
+}
+const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
+  [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+  [buttonHoverBackgroundColor, new ColorGroup('#26000000', '#40FFFFFF')],
+  [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+  [closeNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+  [closeHoverBackgroundColor, new ColorGroup('#FA2A2D', '#E64548')],
+  [closeHoverIconFillColor, new ColorGroup('#ffffff', '#ffffff')],
+  [menuHoverColor, new ColorGroup('#19182431', '#19ffffff')],
+  [splitItemFillColor, new ColorGroup('#182431', '#e5ffffff')],
+]);
+
 @Entry
 @Component
-struct Index {
+struct custombutton {
   @State maximizeResource: Resource = maximizeNormalResource
   @State minimizeResource: Resource = {
     bundleName: '',
@@ -139,12 +174,12 @@ struct Index {
     id: 125830148,
     type: 20000
   }
-  @State maximizeBackgroundColor: Resource | Color = buttonNormalBackgroundColor
-  @State minimizeBackgroundColor: Resource | Color = buttonNormalBackgroundColor
-  @State closeBackgroundColor: Resource | Color = buttonNormalBackgroundColor
-  @State maximizeFillColor: Resource = buttonNormalIconFillColor
-  @State minimizeFillColor: Resource = buttonNormalIconFillColor
-  @State closeFillColor: Resource = buttonNormalIconFillColor
+  @State maximizeBackgroundColor: Resource | Color | string = buttonNormalBackgroundColor
+  @State minimizeBackgroundColor: Resource | Color | string = buttonNormalBackgroundColor
+  @State closeBackgroundColor: Resource | Color | string = buttonNormalBackgroundColor
+  @State maximizeFillColor: Resource | Color | string = this.getResourceColor(buttonNormalIconFillColor)
+  @State minimizeFillColor: Resource | Color | string = this.getResourceColor(buttonNormalIconFillColor)
+  @State closeFillColor: Resource | Color | string = this.getResourceColor(buttonNormalIconFillColor)
   @State maximizeScale: number = 1.0
   @State minimizeScale: number = 1.0
   @State closeScale: number = 1.0
@@ -168,21 +203,26 @@ struct Index {
     id: 125833962,
     type: 10003
   }
-  @State splitFillColor: Resource = {
-    bundleName: '',
-    moduleName: '',
-    params: [],
-    id: 125830991,
-    type: 10001
-  }
+
+  @State splitFillColor: Resource | Color | string = this.getResourceColor(splitItemFillColor)
   @State leftSplitBackgroundColor: ResourceColor = Color.Transparent
   @State rightSplitBackgroundColor: ResourceColor = Color.Transparent
   @State rowOpacity: number = 1.0
   @State menuWidth: string = '224vp';
+  //按鍵热区间的间距 12-28vp
+  @State buttonSpacing: number = 12;
+  //底板大小 20-28vp
+  @State buttonSize: number = 28;
+  //最后一个按钮离右侧的间距
+  @State buttonRightOffset: number = 20;
+  //锁定当前的颜色模式
+  colorConfigurationLocked: boolean = false;
+
   isFocused: boolean = true;
   isDark: boolean = false;
   isHoverShowMenu: boolean = false
   showMenuTimeoutId: number = -1
+  menuDisappearTimeoutId: number = -1
   hideSplit: boolean = false
 
   onWindowFocused() {
@@ -196,30 +236,77 @@ struct Index {
   }
 
   parseBoolean(value: string): boolean {
-    if (value == 'true') {
+    if (value === 'true') {
       return true
     }
     return false
   }
 
   setCustomCallback(eventName: string, param: string) {
-    if (eventName == EVENT_NAME_COLOR_CONFIGURATION) {
+    if (eventName === EVENT_NAME_COLOR_CONFIGURATION) {
       this.onColorConfigurationUpdate(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_HIDE_SPLIT) {
+    } else if (eventName === EVENT_NAME_HIDE_SPLIT) {
       this.setHideSplit(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_MAXIMIZE_VISIBILITY) {
+    } else if (eventName === EVENT_NAME_MAXIMIZE_VISIBILITY) {
       this.setMaximizeVisibility(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_MINIMIZE_VISIBILITY) {
+    } else if (eventName === EVENT_NAME_MINIMIZE_VISIBILITY) {
       this.setMinimizeVisibility(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_CLOSE_VISIBILITY) {
+    } else if (eventName === EVENT_NAME_CLOSE_VISIBILITY) {
       this.setCloseVisibility(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_CLOSE_STATUS) {
+    } else if (eventName === EVENT_NAME_CLOSE_STATUS) {
       this.setCloseStatus(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_MAXIMIZE_IS_RECOVER) {
+    } else if (eventName === EVENT_NAME_MAXIMIZE_IS_RECOVER) {
       this.setMaximizeIsRecover(this.parseBoolean(param))
-    } else if (eventName == EVENT_NAME_MENU_WIDTH_CHANGE) {
+    } else if (eventName === EVENT_NAME_MENU_WIDTH_CHANGE) {
       this.setMenuWidth(param)
+    } else if (eventName === EVENT_NAME_BUTTON_SPACING_CHANGE) {
+      this.setButtonSpacing(param);
+    } else if (eventName === EVENT_NAME_COLOR_MODE_LOCKED) {
+      this.setColorModeLocked(param);
+    } else if (eventName === EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE) {
+      this.setButtonRightOffset(param);
+    } else if (eventName === EVENT_NAME_BUTTON_SIZE_CHANGE) {
+      this.setButtonButtonSize(param);
     }
+  }
+
+  //设置底板的间距
+  setButtonSpacing(param:string) {
+    this.buttonSpacing = parseInt(param);
+  }
+  //设置底板的大小
+  setButtonButtonSize(param:string) {
+    this.buttonSize = parseInt(param);
+  }
+  //最后一个按键离右侧的距离
+  setButtonRightOffset(param:string) {
+    this.buttonRightOffset = parseInt(param);
+  }
+
+  // 锁定当前三键的颜色
+  setColorModeLocked(param:string) {
+    const colorMode = parseInt(param);
+    if (colorMode === -1) {
+      this.colorConfigurationLocked = false;
+      return;
+    }
+    // 是否锁定深色模式
+    this.isDark = (colorMode === 0);
+    this.colorConfigurationLocked = true;
+    this.maximizeFillColor = this.getResourceColor(buttonNormalIconFillColor)
+    this.minimizeFillColor = this.getResourceColor(buttonNormalIconFillColor)
+    this.closeFillColor = this.getResourceColor(buttonNormalIconFillColor)
+  }
+
+  //适配三键相关的颜色资源锁定深色模式
+  getResourceColor(resource: Resource) : Resource | string  {
+    if (this.colorConfigurationLocked && colorMap.has(resource)) {
+      const colorGroup = colorMap.get(resource);
+      if (colorGroup) {
+        return this.isDark ? colorGroup.dark : colorGroup.light;
+      }
+    }
+    return resource;
   }
 
   onMaximizeButtonClick() {
@@ -259,6 +346,9 @@ struct Index {
   }
 
   onColorConfigurationUpdate(isDark: boolean) {
+    if (this.colorConfigurationLocked) {
+      return;
+    }
     this.isDark = isDark;
     this.maximizeBackgroundColor = buttonNormalBackgroundColor
     this.maximizeFillColor = buttonNormalIconFillColor
@@ -298,8 +388,8 @@ struct Index {
 
 
   setRowVisibility() {
-    if (this.maximizeVisibility == Visibility.None && this.minimizeVisibility == Visibility.None &&
-      this.closeVisibility == Visibility.None) {
+    if (this.maximizeVisibility === Visibility.None && this.minimizeVisibility === Visibility.None &&
+      this.closeVisibility === Visibility.None) {
       this.rowVisibility = Visibility.None
     } else {
       this.rowVisibility = Visibility.Visible
@@ -308,31 +398,31 @@ struct Index {
 
   onHoverMaximizeButton(isHover: boolean) {
     if (isHover) {
-      this.maximizeBackgroundColor = buttonHoverBackgroundColor
-      this.maximizeFillColor = buttonHoverIconFillColor
+      this.maximizeBackgroundColor =  this.getResourceColor(buttonHoverBackgroundColor)
+      this.maximizeFillColor = this.getResourceColor(buttonHoverIconFillColor)
     } else {
       this.maximizeBackgroundColor = buttonNormalBackgroundColor
-      this.maximizeFillColor = buttonNormalIconFillColor
+      this.maximizeFillColor = this.getResourceColor(buttonNormalIconFillColor)
     }
   }
 
   onHoverMinimizeButton(isHover: boolean) {
     if (isHover) {
-      this.minimizeBackgroundColor = buttonHoverBackgroundColor
-      this.minimizeFillColor = buttonHoverIconFillColor
+      this.minimizeBackgroundColor = this.getResourceColor(buttonHoverBackgroundColor)
+      this.minimizeFillColor = this.getResourceColor(buttonHoverIconFillColor)
     } else {
       this.minimizeBackgroundColor = buttonNormalBackgroundColor
-      this.minimizeFillColor = buttonNormalIconFillColor
+      this.minimizeFillColor = this.getResourceColor(buttonHoverIconFillColor)
     }
   }
 
   onHoverCloseButton(isHover: boolean) {
     if (isHover) {
-      this.closeBackgroundColor = closeHoverBackgroundColor
-      this.closeFillColor = closeHoverIconFillColor
+      this.closeBackgroundColor = this.getResourceColor(closeHoverBackgroundColor)
+      this.closeFillColor = this.getResourceColor(closeHoverIconFillColor)
     } else {
       this.closeBackgroundColor = closeNormalBackgroundColor
-      this.closeFillColor = closeNormalIconFillColor
+      this.closeFillColor = this.getResourceColor(closeNormalIconFillColor)
     }
   }
 
@@ -340,12 +430,13 @@ struct Index {
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
+        this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
       }, HOVER_TIME)
     }
   }
 
   onCancelMenuTimer() {
-    if (this.showMenuTimeoutId != -1) {
+    if (this.showMenuTimeoutId !== -1) {
       clearTimeout(this.showMenuTimeoutId)
     }
   }
@@ -388,7 +479,7 @@ struct Index {
       })
       .onHover((isHover: boolean, event: HoverEvent) => {
         if (isHover) {
-          this.leftSplitBackgroundColor = menuHoverColor
+          this.leftSplitBackgroundColor = this.getResourceColor(menuHoverColor)
         } else {
           this.leftSplitBackgroundColor = Color.Transparent
         }
@@ -426,13 +517,34 @@ struct Index {
       })
       .onHover((isHover: boolean, event: HoverEvent) => {
         if (isHover) {
-          this.rightSplitBackgroundColor = menuHoverColor
+          this.rightSplitBackgroundColor = this.getResourceColor(menuHoverColor)
         } else {
           this.rightSplitBackgroundColor = Color.Transparent
         }
       })
     }.width(this.menuWidth)
+    .onHover((isHover: boolean, event: HoverEvent) => {
+      if (isHover) {
+        this.cancelMenuDisappearTimer()
+      } else {
+        this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
+      }
+    })
   }
+
+  menuDisappearTimer(disappearTime : number ) {
+    this.cancelMenuDisappearTimer()
+    this.menuDisappearTimeoutId = setTimeout(() => {
+      this.isShowMenu = false
+    }, disappearTime)
+  }
+
+  cancelMenuDisappearTimer() {
+    if (this.menuDisappearTimeoutId !== -1) {
+      clearTimeout(this.menuDisappearTimeoutId)
+    }
+  }
+
 
   build() {
     Row() {
@@ -448,11 +560,13 @@ struct Index {
         }
         .id('EnhanceMaximizeBtn')
         .backgroundColor(this.maximizeBackgroundColor)
-        .width(BUTTON_SIZE)
-        .height(BUTTON_SIZE)
+        // 底板可修改
+        .width(this.buttonSize + 'vp')
+        .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        // 间距可修改
+        .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -463,6 +577,7 @@ struct Index {
         .bindMenu(this.isShowMenu, this.MenuBuilder, {
           placement: Placement.BottomRight, aboutToDisappear: () => {
             this.isShowMenu = false;
+            this.cancelMenuDisappearTimer();
           }
         })
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
@@ -499,11 +614,11 @@ struct Index {
         }
         .id('EnhanceMinimizeBtn')
         .backgroundColor(this.minimizeBackgroundColor)
-        .width(BUTTON_SIZE)
-        .height(BUTTON_SIZE)
+        .width(this.buttonSize + 'vp')
+        .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -536,11 +651,12 @@ struct Index {
         }
         .id('EnhanceCloseBtn')
         .backgroundColor(this.closeBackgroundColor)
-        .width(BUTTON_SIZE)
-        .height(BUTTON_SIZE)
+        .width(this.buttonSize + 'vp')
+        .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        //右间距在父组件中体现
+        // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -563,7 +679,7 @@ struct Index {
         })
       }.id('containerModalButtonRowId')
       .height('100%')
-      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: BUTTON_ELEMENT_MARGIN_HORIZONTAL_END })
+      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
       .onAreaChange((oldValue: Area, newValue: Area) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })

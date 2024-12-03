@@ -128,7 +128,7 @@ bool FfiOHOSAceFrameworkComponentIdSendKeyEvent(CJKeyEvent cJKeyEvent)
     }
     KeyEvent keyEvent = GetKeyEventFromCJ(cJKeyEvent);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI,
+        [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); }, TaskExecutor::TaskType::UI,
         "FfiOHOSAceFrameworkComponentIdSendKeyEvent");
     return result;
 }

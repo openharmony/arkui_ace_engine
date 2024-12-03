@@ -46,6 +46,7 @@ public:
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);
         auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         ratingModifier_->SetContentSize(paintWrapper->GetContentSize());
         ratingModifier_->SetStartNum(starNum_);

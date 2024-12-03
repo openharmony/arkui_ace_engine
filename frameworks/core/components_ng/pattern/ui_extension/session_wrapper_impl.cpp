@@ -361,7 +361,8 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     ContainerScope scope(instanceId_);
-    UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    UIEXT_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -412,7 +413,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     SessionViewportConfig sessionViewportConfig;
     sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
     sessionViewportConfig.density_ = context->GetCurrentDensity();
-    sessionViewportConfig.displayId_ = 0;
+    sessionViewportConfig.displayId_ = container->GetDisplayId();
     sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
     sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
