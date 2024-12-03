@@ -18,7 +18,8 @@
 
 namespace OHOS::Ace::NG {
 
-static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle, struct UpdateSpanStyle opt)
+static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle,
+    struct UpdateSpanStyle opt)
 {
     std::stringstream ss;
     /* text style */
