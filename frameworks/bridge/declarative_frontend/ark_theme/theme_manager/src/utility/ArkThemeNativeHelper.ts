@@ -14,8 +14,40 @@
  */
 
 class ArkThemeNativeHelper {
-    static sendThemeToNative(theme: Theme, elmtId: number) {
-        const colorsArray = [
+    static sendThemeToNative(theme: ThemeInternal, elmtId: number) {
+        // @ts-ignore
+        WithTheme.sendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
+    }
+
+    static createInternal(themeScopeId: number, themeId: number, theme: CustomTheme, colorMode: ThemeColorMode,
+        onThemeScopeDestroy: () => void
+    ) {
+        // set local color mode if need
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId,
+            ArkThemeNativeHelper.convertColorsToArray(theme?.colors), colorMode, onThemeScopeDestroy);
+
+        // reset local color mode if need
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+    }
+
+    static setDefaultTheme(theme: CustomTheme) {
+        const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
+
+        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
+        getUINativeModule().theme.setDefaultTheme(colorArray, false);
+        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
+        getUINativeModule().theme.setDefaultTheme(colorArray, true);
+        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+    }
+
+    private static convertThemeToColorArray(theme: Theme): ResourceColor[] {
+        return [
             theme.colors.brand,
             theme.colors.warning,
             theme.colors.alert,
@@ -68,8 +100,18 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
         ];
+    }
 
-        // @ts-ignore
-        WithTheme.sendThemeToNative(colorsArray, elmtId);
+    private static convertColorsToArray(colors: CustomColors | undefined): ResourceColor[] {
+        const basisColors = ArkThemeScopeManager.getSystemColors();
+        if (!colors) {
+            return new Array(Object.keys(basisColors).length).fill(undefined);
+        }
+        const colorArray: ResourceColor[] = [];
+        for (let attr in basisColors) {
+            colorArray.push(colors[attr]);
+        }
+        return colorArray;
     }
 }
+

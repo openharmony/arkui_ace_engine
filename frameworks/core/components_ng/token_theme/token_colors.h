@@ -93,6 +93,7 @@ public:
     virtual ~TokenColors() = default;
 
     void SetColors(const std::vector<Color>& colors);
+    std::vector<Color>& GetColors();
 
     Color Brand() const;
     Color Warning() const;
