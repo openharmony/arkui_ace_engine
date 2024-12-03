@@ -135,7 +135,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+                SEC_PARAM(item.second.c_str()));
         }
 #endif
         eventTree_.eventTreeList.clear();
@@ -205,14 +206,15 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         int32_t dumpCount = 0;
-        for (auto& item : dumpList) {
+        for ([[maybe_unused]] auto& item : dumpList) {
             dumpCount++;
             if (dumpCount > DUMP_LIMIT_SIZE) {
                 TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                     "EventTreeDumpInfo size is over limit, the following info is dropped!");
                 break;
             }
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+                SEC_PARAM(item.second.c_str()));
         }
         RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
     }
@@ -453,8 +455,8 @@ void EventManager::CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32
 {
     for (const auto& result : currMouseTestResults_) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
-            "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: %{public}d", selectedNodeId,
-            result->GetNodeId());
+            "HandleGlobalEventNG selectedNodeId: %{public}d mouseTestResult id is: "
+            SEC_PLD(%{public}d) ".", selectedNodeId, SEC_PARAM(result->GetNodeId()));
         if (result->GetNodeId() == selectedNodeId) {
             isMousePressAtSelectedNode = true;
         }
@@ -471,8 +473,7 @@ void EventManager::GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std
             touchTestIds.emplace_back(eventTarget.value().id);
             if (eventTarget.value().id == std::to_string(selectedNodeId)) {
                 TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
-                    "HandleGlobalEventNG selectedNodeId: %{public}d eventTarget id is: %{public}s", selectedNodeId,
-                    eventTarget.value().id.c_str());
+                    "HandleGlobalEventNG selectedNodeId: %{public}d", selectedNodeId);
                 isMousePressAtSelectedNode = true;
             }
         }
@@ -495,10 +496,10 @@ void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectC
             ++iter;
             continue;
         }
-        for (const auto& rect : rectList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
-                point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
+        for ([[maybe_unused]] const auto& rect : rectList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, SEC_PLD(,
+                "Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]"),
+                SEC_PARAM(point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom()));
         }
         if (point.GetSourceType() == SourceType::TOUCH) {
             if (!rectCallback.touchCallback) {
@@ -1036,24 +1037,27 @@ void EventManager::LogPrintMouseTest()
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
     } else {
         for (const auto& result : currMouseTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     if (lastHoverTestResults_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
     } else {
         for (const auto& result : lastHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     if (currHoverTestResults_.empty()) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
     } else {
         for (const auto& result : currHoverTestResults_) {
-            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/%{public}d.",
-                result->GetNodeName().c_str(), result->GetNodeId());
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/"
+                SEC_PLD(%{public}d) ".",
+                result->GetNodeName().c_str(), SEC_PARAM(result->GetNodeId()));
         }
     }
     auto lastNode = lastHoverNode_.Upgrade();
@@ -1088,8 +1092,9 @@ void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     TAG_LOGD(AceLogTag::ACE_MOUSE,
-        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
-        event.y, event.button, event.action);
+        "Mouse test start. Event is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) "), "
+        "button: %{public}d, action: %{public}d", SEC_PARAM(event.x), SEC_PARAM(event.y),
+        event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
