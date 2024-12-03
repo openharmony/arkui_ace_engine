@@ -21,6 +21,7 @@
 #include "test/unittest/capi/modifiers/generated/type_helpers.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -34,6 +35,8 @@ const auto ATTRIBUTE_EDGE_EFFECT_DEFAULT_VALUE = "EdgeEffect.None";
 const auto ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME = "edgeEffectOptions";
 const auto ATTRIBUTE_EDGE_EFFECT_OPTIONS_ALWAYS_ENABLED_NAME = "alwaysEnabled";
 const auto ATTRIBUTE_EDGE_EFFECT_OPTIONS_ALWAYS_ENABLED_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_FRICTION_NAME = "friction";
+const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = "0.75";
 } // namespace
 
 class ScrollableCommonMethodModifierTest
@@ -45,6 +48,16 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<ScrollBarTheme>();
+        SetupTheme<ScrollableTheme>();
+    }
+
+    void OnModifyDone()
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone();
     }
 };
 
@@ -169,5 +182,20 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setEdgeEffectTestEdgeEffectOptionsA
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, value, expected);
     }
+}
+
+/*
+ * @tc.name: setFrictionTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
+{
+    OnModifyDone();
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE) << "Default value for attribute 'friction'";
 }
 } // namespace OHOS::Ace::NG

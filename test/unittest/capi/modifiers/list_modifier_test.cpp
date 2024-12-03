@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_v2/list/list_properties.h"
 
 #include "core/interfaces/native/utility/converter.h"
@@ -55,10 +56,21 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
 
+        SetupTheme<ScrollableTheme>();
+
         AddResource(FRICTION_RES_NAME, FRICTION_VALUE);
         AddResource(DIVIDER_COLOR_RES_NAME, Color::FromString(DIVIDER_COLOR));
 
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+    }
+
+    void OnModifyDone()
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone();
     }
 };
 
@@ -716,9 +728,10 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setFriction
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, DISABLED_setFrictionTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
 {
     // default values
+    OnModifyDone();
     auto frictionCheckValue = GetAttrValue<double>(node_, "friction");
     EXPECT_EQ(frictionCheckValue, 0.75);
 

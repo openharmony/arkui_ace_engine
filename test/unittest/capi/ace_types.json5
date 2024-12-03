@@ -2683,8 +2683,11 @@
         },
         {
             "name": "ScrollableCommonMethod",
-            "includes": ["core/components/scroll/scroll_bar_theme.h"],
-            "themes": ["ScrollBarTheme"],
+            "includes": [
+                "core/components/scroll/scroll_bar_theme.h",
+                "core/components_ng/pattern/scrollable/scrollable_theme.h"
+            ],
+            "themes": ["ScrollBarTheme", "ScrollableTheme"],
             "nodeTypes": ["Grid", "List", "Scroll", "WaterFlow"],
             "attributes": [
                 {
@@ -2744,7 +2747,8 @@
                 "setScrollBarTestDefaultValues",
                 "setScrollBarTestScrollBarInvalidValues",
 
-                "setFrictionTestDefaultValues", // Failed after upmerge. Need to check
+                // Specific setup is required to initialize friction value
+                "setFrictionTestDefaultValues",
             ]
         },
         {
