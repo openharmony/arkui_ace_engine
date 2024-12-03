@@ -86,9 +86,6 @@ void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
         return;
     }
     auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
-    }
     if (buttonType == ButtonType::CIRCLE) {
         layoutConstraint.maxSize = HandleLabelCircleButtonConstraint(layoutWrapper).value_or(SizeF());
         return;
@@ -175,6 +172,7 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
         // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
         // size to no less than 9sp.
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateAdaptMaxFontSize(
             buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
         textLayoutProperty->UpdateAdaptMinFontSize(
@@ -194,9 +192,6 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
-    }
     if (buttonType == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -248,9 +243,6 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
-        }
         if (buttonType == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {

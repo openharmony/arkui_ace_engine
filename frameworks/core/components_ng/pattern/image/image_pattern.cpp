@@ -533,6 +533,22 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
+void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (externalDecodeFormat_ != externalDecodeFormat);
+    switch (externalDecodeFormat) {
+        case PixelFormat::NV21:
+        case PixelFormat::RGBA_8888:
+        case PixelFormat::RGBA_1010102:
+        case PixelFormat::YCBCR_P010:
+        case PixelFormat::YCRCB_P010:
+            externalDecodeFormat_ = externalDecodeFormat;
+            break;
+        default:
+            externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    }
+}
+
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
     // if layout size has not decided yet, resize target can not be calculated
@@ -559,14 +575,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
+        loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
+        altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }
@@ -741,6 +757,8 @@ void ImagePattern::LoadImage(
     }
     // Before loading new image data, reset the render success status to `false`.
     renderedImageInfo_.renderSuccess = false;
+    // Reset the reload flag before loading the image to ensure a fresh state.
+    isImageReloadNeeded_ = false;
     loadingCtx_->LoadImageData();
 }
 
@@ -771,7 +789,7 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_ || isOrientationChange_) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
             imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
@@ -1147,8 +1165,8 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageQualityChange_ = %{public}d",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageQualityChange_);
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
     isShow_ = true;
     LoadImageDataIfNeed();
 }
@@ -2294,7 +2312,7 @@ void ImagePattern::ResetImage()
 {
     image_ = nullptr;
     imageQuality_ = AIImageQuality::NONE;
-    isImageQualityChange_ = false;
+    isImageReloadNeeded_ = false;
     loadingCtx_.Reset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

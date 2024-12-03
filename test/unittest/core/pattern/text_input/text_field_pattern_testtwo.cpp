@@ -160,7 +160,7 @@ HWTEST_F(TextFieldPatternTestTwo, InitDragDropCallBack001, TestSize.Level0)
     pattern->dragStatus_ = DragStatus::DRAGGING;
     eventHub->onDragEnd_.operator()(event);
     event->SetResult(DragRet::DRAG_DEFAULT);
-    pattern->dragValue_ = "Test";
+    pattern->dragValue_ = u"Test";
     pattern->dragStatus_ = DragStatus::DRAGGING;
     eventHub->onDragEnd_.operator()(event);
     pattern->dragValue_= pattern->contentController_->GetSelectedValue(pattern->dragTextStart_, pattern->dragTextEnd_);
@@ -322,7 +322,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleDoubleClickEvent001, TestSize.Level0)
     GestureEvent info;
     info.SetGlobalLocation(Offset(10, 10));
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->contentRect_.SetRect(0, 0, 10, 10);
 
     pattern->showKeyBoardOnFocus_ = true;
@@ -381,7 +381,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleTripleClickEvent001, TestSize.Level0)
     layoutProperty->UpdateFontSize(Dimension(10));
 
     ASSERT_NE(pattern->contentController_, nullptr);
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
@@ -389,7 +389,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleTripleClickEvent001, TestSize.Level0)
     pattern->HandleTripleClickEvent(info);
     EXPECT_EQ(pattern->selectOverlay_->IsSingleHandle(), false);
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->contentRect_.SetRect(0, 0, 10, 10);
 
     pattern->HandleTripleClickEvent(info);
@@ -452,7 +452,6 @@ HWTEST_F(TextFieldPatternTestTwo, HandleCountStyle001, TestSize.Level0)
     layoutProperty->UpdateShowCounter(true);
     layoutProperty->UpdateMaxLength(1024);
     layoutProperty->UpdateShowUnderline(true);
-    pattern->CalcCounterBoundHeight();
     pattern->CalculateBoundsRect();
     pattern->deleteForwardOperations_.emplace(10);
     pattern->deleteBackwardOperations_.emplace(10);
@@ -535,7 +534,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnModifyDone001, TestSize.Level0)
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
     pattern->OnModifyDone();
@@ -553,7 +552,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnModifyDone001, TestSize.Level0)
     pattern->OnModifyDone();
 
     pattern->isTextChangedAtCreation_ = true;
-    pattern->contentController_->content_ = "";
+    pattern->contentController_->content_ = u"";
     pattern->selectController_->UpdateHandleIndex(0, 0);
     pattern->OnModifyDone();
 
@@ -596,7 +595,7 @@ HWTEST_F(TextFieldPatternTestTwo, FireOnTextChangeEvent001, TestSize.Level0)
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>(false);
     ASSERT_NE(context->taskExecutor_, nullptr);
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
     EXPECT_EQ(pattern->FireOnTextChangeEvent(), true);
@@ -605,7 +604,7 @@ HWTEST_F(TextFieldPatternTestTwo, FireOnTextChangeEvent001, TestSize.Level0)
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    pattern->contentController_->content_ = "";
+    pattern->contentController_->content_ = u"";
     pattern->selectController_->UpdateHandleIndex(0, 0);
     EXPECT_EQ(pattern->FireOnTextChangeEvent(), true);
 }
@@ -672,7 +671,7 @@ HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
     int32_t end = 4;
 
     ASSERT_NE(pattern->contentController_, nullptr);
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     SelectionOptions options;
     options.menuPolicy = MenuPolicy::HIDE;
     ASSERT_NE(pattern->selectOverlay_, nullptr);
@@ -840,7 +839,7 @@ HWTEST_F(TextFieldPatternTestTwo, TextAreaInputRectUpdate001, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
 
     ASSERT_NE(pattern->contentController_, nullptr);
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(pattern->paragraph_, nullptr);
 
@@ -967,7 +966,7 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateErrorTextMargin001, TestSize.Level0)
 
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     layoutProperty->UpdateShowErrorText(true);
-    layoutProperty->UpdateErrorText("error");
+    layoutProperty->UpdateErrorText(u"error");
     MarginProperty margin;
     paintProperty->UpdateMarginByUser(margin);
     layoutProperty->margin_ = std::make_unique<MarginProperty>();
@@ -999,7 +998,7 @@ HWTEST_F(TextFieldPatternTestTwo, AddCounterNode001, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
 
     pattern_->AddCounterNode();
-    EXPECT_TRUE(pattern_->counterTextNode_.Upgrade());
+    EXPECT_TRUE(pattern_->counterDecorator_);
     pattern_->AddCounterNode();
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
@@ -1009,8 +1008,8 @@ HWTEST_F(TextFieldPatternTestTwo, AddCounterNode001, TestSize.Level0)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     pattern_->AddCounterNode();
     pattern_->AddCounterNode();
-    pattern_->ClearCounterNode();
-    EXPECT_TRUE(frameNode_->GetChildren().empty());
+    pattern_->CleanCounterNode();
+    EXPECT_TRUE(frameNode_->GetChildren().size() <= 1);
 }
 
 /**
@@ -1063,7 +1062,7 @@ HWTEST_F(TextFieldPatternTestTwo, GetNakedCharPosition001, TestSize.Level0)
     int32_t ret = pattern->GetNakedCharPosition();
     EXPECT_EQ(ret, nakedCharPosition);
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->GetNakedCharPosition();
 
     pattern->textObscured_ = false;
@@ -1093,7 +1092,7 @@ HWTEST_F(TextFieldPatternTestTwo, ProcBorderAndUnderlineInBlurEvent001, TestSize
     ASSERT_NE(paintProperty, nullptr);
 
     layoutProperty->UpdateShowErrorText(true);
-    layoutProperty->UpdateErrorText("ERROR");
+    layoutProperty->UpdateErrorText(u"ERROR");
 
     pattern->ProcBorderAndUnderlineInBlurEvent();
 
@@ -1217,7 +1216,7 @@ HWTEST_F(TextFieldPatternTestTwo, GetDragUpperLeftCoordinates001, TestSize.Level
     pattern->contentRect_.SetRect(100, 100, 100, 100);
 
     /* Make the IsSelected function return true */
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
     /* Create a paragraph and mock to return two rectangles with the same starting point */
@@ -1275,7 +1274,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleFocusEvent001, TestSize.Level0)
     pattern->isLongPress_ = true;
     pattern->HandleFocusEvent();
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->needSelectAll_ = false;
     pattern->HandleFocusEvent();
     EXPECT_EQ(pattern->needSelectAll_, true);
@@ -1302,7 +1301,7 @@ HWTEST_F(TextFieldPatternTestTwo, ProcessFocusStyle001, TestSize.Level0)
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     pattern->ProcessFocusStyle();
 
-    pattern->contentController_->content_ = "Test";
+    pattern->contentController_->content_ = u"Test";
     pattern->blurReason_ = BlurReason::FOCUS_SWITCH;
     pattern->ProcessFocusStyle();
     EXPECT_EQ(pattern->inlineSelectAllFlag_, true);
@@ -1311,7 +1310,7 @@ HWTEST_F(TextFieldPatternTestTwo, ProcessFocusStyle001, TestSize.Level0)
     EXPECT_EQ(pattern->inlineSelectAllFlag_, false);
 
     layoutProperty->UpdateShowErrorText(true);
-    layoutProperty->UpdateErrorText("ERROR");
+    layoutProperty->UpdateErrorText(u"ERROR");
     layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
     pattern->inlineSelectAllFlag_ = true;
     pattern->ProcessFocusStyle();
@@ -1331,11 +1330,11 @@ HWTEST_F(TextFieldPatternTestTwo, HandleOnSelectAll001, TestSize.Level0)
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->contentController_->content_ = "Test.dat";
+    pattern->contentController_->content_ = u"Test.dat";
     pattern->HandleOnSelectAll(true, true, true);
     EXPECT_EQ(pattern->selectController_->GetEndIndex(), 4);
 
-    pattern->contentController_->content_ = "Test.";
+    pattern->contentController_->content_ = u"Test.";
     pattern->HandleOnSelectAll(false, true, true);
     EXPECT_EQ(pattern->selectController_->GetEndIndex(), 0);
 
@@ -1399,7 +1398,7 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateCaretByTouchMove001, TestSize.Level0)
     auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    pattern->contentController_->SetTextValue("Test");
+    pattern->contentController_->SetTextValue(u"Test");
 
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo touchLocationInfo(0);

@@ -67,9 +67,9 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textValue = textFieldPattern->GetTextValue();
+    auto textValue = textFieldPattern->GetTextUtf16Value();
     auto isPasswordType = textFieldPattern->IsInPasswordMode();
-    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
+    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue(u"").empty();
     auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -79,7 +79,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(theme);
     auto text = TextFieldPattern::CreateDisplayText(
         textValue, textFieldPattern->GetNakedCharPosition(), needObscureText, theme->IsShowPasswordDirectly());
-    auto displayText = StringUtils::Str16ToStr8(text);
+    auto displayText = text;
     textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
 
@@ -112,7 +112,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowErrorState(
         layoutProperty->GetShowErrorTextValue(false) && !textFieldPattern->IsNormalInlineState());
-    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
+    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(u""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {

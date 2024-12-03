@@ -323,16 +323,16 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest005, TestSize
      */
     Ace::Gradient gradient;
     gradient.SetType(Ace::GradientType::CONIC);
-    EXPECT_EQ(paintMethod->MakeConicGradient(nullptr, gradient), nullptr);
+    EXPECT_EQ(paintMethod->MakeConicGradient(gradient), nullptr);
     AnimatableDimension animatableDimension(1.0);
     gradient.GetConicGradient().centerX = animatableDimension;
     EXPECT_EQ(gradient.GetConicGradient().centerX.has_value(), true);
-    auto result = paintMethod->MakeConicGradient(nullptr, gradient);
+    auto result = paintMethod->MakeConicGradient(gradient);
     EXPECT_EQ(result, nullptr);
 
     gradient.GetConicGradient().centerY = animatableDimension;
     EXPECT_EQ(gradient.GetConicGradient().centerY.has_value(), true);
-    result = paintMethod->MakeConicGradient(nullptr, gradient);
+    result = paintMethod->MakeConicGradient(gradient);
     EXPECT_EQ(result, nullptr);
 
     gradient.GetConicGradient().startAngle = animatableDimension;
@@ -343,7 +343,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest005, TestSize
     gradient.AddColor(gradientColor1);
     gradient.AddColor(gradientColor2);
     gradient.AddColor(gradientColor3);
-    result = paintMethod->MakeConicGradient(nullptr, gradient);
+    result = paintMethod->MakeConicGradient(gradient);
     EXPECT_NE(result, nullptr);
 }
 

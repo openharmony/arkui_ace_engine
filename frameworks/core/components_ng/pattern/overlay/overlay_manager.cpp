@@ -680,7 +680,7 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
             if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
                 return false;
             }
-            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenter(previewChild);
+            auto previewOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(previewChild);
             offset.SetX(previewOffset.GetX());
             offset.SetY(previewOffset.GetY());
             return true;
@@ -3316,14 +3316,23 @@ bool OverlayManager::RemoveAllModalInOverlay(bool isRouterTransition)
     if (modalStack_.empty()) {
         return true;
     }
-    if (!isRouterTransition) {
-        return true;
-    }
+
     auto topModalNode = modalStack_.top().Upgrade();
     bool isModalUiextensionNode = IsModalUiextensionNode(topModalNode);
+    if (!isRouterTransition) {
+        bool isProhibitedRemoveByNavigation = IsProhibitedRemoveByNavigation(topModalNode);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY,
+            "isNavigation: isModalUiextensionNode: %{public}d, isProhibitedRemoveByNavigation: %{public}d",
+            isModalUiextensionNode, isProhibitedRemoveByNavigation);
+        if (isModalUiextensionNode && !isProhibitedRemoveByNavigation) {
+            return RemoveAllModalInOverlayByStack();
+        }
+        return true;
+    }
+
     bool isProhibitedRemoveByRouter = IsProhibitedRemoveByRouter(topModalNode);
     TAG_LOGI(AceLogTag::ACE_OVERLAY,
-        "isModalUiextensionNode: %{public}d, isProhibitedRemoveByRouter: %{public}d,",
+        "isRouter: isModalUiextensionNode: %{public}d, isProhibitedRemoveByRouter: %{public}d,",
         isModalUiextensionNode, isProhibitedRemoveByRouter);
     if (isModalUiextensionNode && isProhibitedRemoveByRouter) {
         return RemoveAllModalInOverlayByList();
@@ -3475,6 +3484,22 @@ bool OverlayManager::IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModa
     return modalPattern->IsProhibitedRemoveByRouter();
 }
 
+bool OverlayManager::IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode)
+{
+    if (topModalNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is null,");
+        return true;
+    }
+
+    if (topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is not modalPage");
+        return true;
+    }
+
+    auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_RETURN(modalPattern, true);
+    return modalPattern->IsProhibitedRemoveByNavigation();
+}
 
 bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
@@ -3843,6 +3868,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
     modalPagePattern->UpdateUIExtensionMode(modalStyle.isUIExtension);
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
+    modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
@@ -5973,11 +5999,8 @@ int32_t OverlayManager::CreateModalUIExtension(
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
     if (!config.isAsyncModalBinding) {
-        ModalStyle modalStyle;
-        modalStyle.modalTransition = NG::ModalTransition::NONE;
-        modalStyle.isUIExtension = true;
-        modalStyle.prohibitedRemoveByRouter = config.prohibitedRemoveByRouter;
-        modalStyle.isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec;
+        ModalStyle modalStyle = OverlayManager::SetUIExtensionModalStyleAndGet(config.prohibitedRemoveByRouter,
+            config.isAllowAddChildBelowModalUec, config.prohibitedRemoveByNavigation);
         SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
@@ -5988,16 +6011,14 @@ int32_t OverlayManager::CreateModalUIExtension(
             isAllowedBeCovered = config.isAllowedBeCovered,
             prohibitedRemoveByRouter = config.prohibitedRemoveByRouter,
             isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec,
+            prohibitedRemoveByNavigation = config.prohibitedRemoveByNavigation,
             doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->SetIsAllowedBeCovered(isAllowedBeCovered);
-            ModalStyle modalStyle;
-            modalStyle.modalTransition = NG::ModalTransition::NONE;
-            modalStyle.isUIExtension = true;
-            modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
-            modalStyle.isAllowAddChildBelowModalUec = isAllowAddChildBelowModalUec;
+            ModalStyle modalStyle = OverlayManager::SetUIExtensionModalStyleAndGet(prohibitedRemoveByRouter,
+                isAllowAddChildBelowModalUec, prohibitedRemoveByNavigation);
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
@@ -6009,6 +6030,19 @@ int32_t OverlayManager::CreateModalUIExtension(
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
     }
     return sessionId;
+}
+
+ModalStyle OverlayManager::SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+    bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation)
+{
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::NONE;
+    modalStyle.isUIExtension = true;
+    modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
+    modalStyle.isAllowAddChildBelowModalUec = isAllowAddChildBelowModalUec;
+    modalStyle.prohibitedRemoveByNavigation = prohibitedRemoveByNavigation;
+
+    return modalStyle;
 }
 
 void OverlayManager::ClearUIExtensionNode()
@@ -6274,7 +6308,25 @@ void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto focusHub = node->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->LostFocusToViewRoot();
+    focusHub->LostFocus();
+
+    bool hasVisibleNode = false;
+    for (auto& child : overlayNode_->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (!(layoutProperty->GetVisibility().has_value() &&
+            layoutProperty->GetVisibilityValue() == VisibleType::GONE)) {
+            hasVisibleNode = true;
+            break;
+        }
+    }
+    if (!hasVisibleNode) {
+        auto focusView = overlayNode_->GetPattern<FocusView>();
+        CHECK_NULL_VOID(focusView);
+        focusView->FocusViewClose();
+    }
 }
 
 void OverlayManager::ShowAllNodesOnOverlay()
@@ -6502,10 +6554,9 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
             for (auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
                 CHECK_NULL_VOID(imageNode);
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, child.offset);
                 auto imageContext = imageNode->GetRenderContext();
                 CHECK_NULL_VOID(imageContext);
-                imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(child.offset.GetX()),
-                    Dimension(child.offset.GetY())));
                 imageContext->UpdateTransformScale({ 1.0f, 1.0f });
                 Vector5F rotate = Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
                 imageContext->UpdateTransformRotate(rotate);

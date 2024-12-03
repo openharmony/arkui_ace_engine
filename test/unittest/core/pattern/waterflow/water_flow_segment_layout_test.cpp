@@ -34,6 +34,7 @@ public:
     static void SetUpTestSuite()
     {
         MockPipelineContext::SetUp();
+        MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     }
     static void TearDownTestSuite()
     {
@@ -1539,11 +1540,11 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
 }
 
 /**
- * @tc.name: EstimateContentHeight001
- * @tc.desc: Test EstimateContentHeight.
+ * @tc.name: EstimateTotalHeight001
+ * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
+HWTEST_F(WaterFlowSegmentTest, EstimateTotalHeight001, TestSize.Level1)
 {
     CreateWaterFlow();
     ViewAbstract::SetWidth(CalcLength(400.0f));
@@ -1561,12 +1562,12 @@ HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 13);
 
     int32_t childCnt = static_cast<int32_t>(info->itemInfos_.size());
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
 
     UpdateCurrentOffset(-9000.0f);
     childCnt = static_cast<int32_t>(info->itemInfos_.size());
     EXPECT_EQ(info->endIndex_, 59);
-    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+    EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
 }
 
 /**
@@ -1706,7 +1707,7 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowGetChildrenExpandedSize001, TestSize.Lev
     model.SetLayoutDirection(FlexDirection::ROW);
     model.SetRowsTemplate("1fr 1fr");
     CreateWaterFlowItems(60);
-    CreateDone(frameNode_);
+    CreateDone();
 
     info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     childCnt = static_cast<int32_t>(info->itemInfos_.size());

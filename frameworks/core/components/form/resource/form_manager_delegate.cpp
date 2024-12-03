@@ -126,7 +126,6 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -957,7 +956,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJs
 
 void FormManagerDelegate::ReleaseRenderer()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseRenderer. formId: %{public}" PRId64 ", %{public}s",
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
         runningCardId_, runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;

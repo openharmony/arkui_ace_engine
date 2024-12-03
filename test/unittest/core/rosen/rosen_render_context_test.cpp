@@ -911,4 +911,49 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest036, TestSize.Level1)
     }
     rosenRenderContext->UpdateWindowBlur();
 }
+
+/**
+ * @tc.name: RosenRenderContextTest037
+ * @tc.desc: UpdateShadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest037, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    Shadow shadow;
+    shadow.SetBlurRadius(1.0);
+    shadow.SetOffsetX(1.0);
+    shadow.SetOffsetY(1.0);
+    shadow.SetIsFilled(true);
+    rosenRenderContext->OnBackShadowUpdate(shadow);
+    auto color = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowColor();
+    ASSERT_TRUE(color.AsArgbInt() == Color::BLACK.GetValue());
+    auto offsetX =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    auto offsetY =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    ASSERT_TRUE(NearEqual(1.0, offsetX));
+    ASSERT_TRUE(NearEqual(1.0, offsetY));
+    auto isFilled =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowIsFilled();
+    ASSERT_TRUE(isFilled);
+}
+
+/**
+ * @tc.name: RosenRenderContextTest38
+ * @tc.desc: UpdateClipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest038, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto rosenRenderContext = InitRosenRenderContext(frameNode);
+    if (!rosenRenderContext) {
+        return;
+    }
+    rosenRenderContext->OnClipEdgeUpdate(true);
+    auto clip = rosenRenderContext->rsNode_->GetStagingProperties().GetClipToBounds();
+    ASSERT_TRUE(clip);
+}
 } // namespace OHOS::Ace::NG

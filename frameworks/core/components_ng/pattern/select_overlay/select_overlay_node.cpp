@@ -187,7 +187,7 @@ RefPtr<FrameNode> BuildPasteButton(
             }
         });
     } else {
-        auto buttonEventHub = pasteButton->GetEventHub<OptionEventHub>();
+        auto buttonEventHub = pasteButton->GetEventHub<MenuItemEventHub>();
         CHECK_NULL_RETURN(buttonEventHub, pasteButton);
         buttonEventHub->SetEnabled(false);
     }
@@ -252,6 +252,11 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
 
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
@@ -288,7 +293,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
                 }
             });
     } else {
-        auto buttonEventHub = button->GetEventHub<OptionEventHub>();
+        auto buttonEventHub = button->GetEventHub<MenuItemEventHub>();
         CHECK_NULL_RETURN(buttonEventHub, button);
         buttonEventHub->SetEnabled(false);
     }
@@ -663,7 +668,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
 void SetOptionDisable(const RefPtr<FrameNode>& option)
 {
     CHECK_NULL_VOID(option);
-    auto optionEventHub = option->GetEventHub<OptionEventHub>();
+    auto optionEventHub = option->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(optionEventHub);
     optionEventHub->SetEnabled(false);
     option->MarkModifyDone();
@@ -1700,7 +1705,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
             if (!button) {
                 continue;
             }
-            if (remainderWidth >= buttonWidth) {
+            if (GreatOrEqual(remainderWidth, buttonWidth)) {
                 button->MountToParent(selectMenuInner_);
                 remainderWidth -= buttonWidth;
                 index++;

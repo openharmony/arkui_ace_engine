@@ -46,49 +46,44 @@ public:
     MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
     ~MenuItemPattern() override = default;
 
-    bool IsAtomicNode() const override
+    inline bool IsAtomicNode() const override
     {
         return false;
     }
 
-    FocusPattern GetFocusPattern() const override
+    inline FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
-    RefPtr<EventHub> CreateEventHub() override
+    inline RefPtr<EventHub> CreateEventHub() override
     {
-        return isOptionPattern_ ? static_cast<RefPtr<EventHub>>(MakeRefPtr<OptionEventHub>())
-            : static_cast<RefPtr<EventHub>>(MakeRefPtr<MenuItemEventHub>());
+        return MakeRefPtr<MenuItemEventHub>();
     }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    inline RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<MenuItemLayoutProperty>();
     }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    inline RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        return isOptionPattern_ ? static_cast<RefPtr<AccessibilityProperty>>(MakeRefPtr<OptionAccessibilityProperty>())
-            : static_cast<RefPtr<AccessibilityProperty>>(MakeRefPtr<MenuItemAccessibilityProperty>());
+        return MakeRefPtr<MenuItemAccessibilityProperty>(isOptionPattern_);
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    inline RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return isOptionPattern_ ? static_cast<RefPtr<LayoutAlgorithm>>(MakeRefPtr<OptionLayoutAlgorithm>())
-            : static_cast<RefPtr<LayoutAlgorithm>>(MakeRefPtr<MenuItemLayoutAlgorithm>());
+        return MakeRefPtr<MenuItemLayoutAlgorithm>(isOptionPattern_);
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    inline RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return isOptionPattern_ ? static_cast<RefPtr<NodePaintMethod>>(MakeRefPtr<OptionPaintMethod>())
-            : static_cast<RefPtr<NodePaintMethod>>(MakeRefPtr<MenuItemPaintMethod>());
+        return MakeRefPtr<MenuItemPaintMethod>(isOptionPattern_);
     }
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
+    inline RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return isOptionPattern_ ? static_cast<RefPtr<PaintProperty>>(MakeRefPtr<OptionPaintProperty>())
-            : static_cast<RefPtr<PaintProperty>>(MakeRefPtr<MenuItemPaintProperty>());
+        return MakeRefPtr<MenuItemPaintProperty>(isOptionPattern_);
     }
 
     void MarkIsSelected(bool isSelected);

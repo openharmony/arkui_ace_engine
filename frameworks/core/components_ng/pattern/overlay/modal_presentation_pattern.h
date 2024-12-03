@@ -170,6 +170,16 @@ public:
         return prohibitedRemoveByRouter_;
     }
 
+    void SetProhibitedRemoveByNavigation(bool prohibitedRemoveByNavigation)
+    {
+        prohibitedRemoveByNavigation_ = prohibitedRemoveByNavigation;
+    }
+
+    bool IsProhibitedRemoveByNavigation() const
+    {
+        return prohibitedRemoveByNavigation_;
+    }
+
     bool AvoidKeyboard() const override
     {
         // If UIExtensionComponent uses ModalPage, ModalPage will avoid KeyBoard.
@@ -196,6 +206,7 @@ private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
     bool prohibitedRemoveByRouter_ = false;
+    bool prohibitedRemoveByNavigation_ = true;
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     bool hasTransitionEffect_ = false;

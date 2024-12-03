@@ -48,28 +48,27 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
-    pagePattern->SetPageTransitionType(transitionType);
     pagePattern->SetAnimationId(stageManager->GetAnimationId());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition([weakPattern = WeakPtr<PagePattern>(pagePattern),
-            animationId = stageManager->GetAnimationId()]() {
-            auto pagePattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pagePattern);
-            pagePattern->FinishOutPage(animationId);
-        });
+            animationId = stageManager->GetAnimationId(), transitionType]() {
+                auto pagePattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pagePattern);
+                pagePattern->FinishOutPage(animationId, transitionType);
+            }, transitionType);
         return;
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId()]() {
+        [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();
             CHECK_NULL_VOID(pagePattern);
             auto page = pagePattern->GetHost();
             CHECK_NULL_VOID(page);
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "pageTransition in finish, nodeId:%{public}d", page->GetId());
-            pagePattern->FinishInPage(animationId);
-        });
+            pagePattern->FinishInPage(animationId, transitionType);
+        }, transitionType);
 }
 } // namespace
 

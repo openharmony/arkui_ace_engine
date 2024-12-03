@@ -215,8 +215,6 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by spring animation reset",
-            jumpIndex_.value_or(-1));
     }
 }
 
@@ -320,8 +318,6 @@ void SwiperPattern::ResetOnForceMeasure()
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = jumpIndex_.value_or(currentIndex_);
-    TAG_LOGI(
-        AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by force measure", jumpIndex_.value_or(-1));
     SetLazyForEachFlag();
     MarkDirtyNodeSelf();
 }
@@ -1100,14 +1096,16 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 float offset =
                     isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
                 targetPos -= offset;
-
-                context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
-                                                nextIndex = iter->first]() {
-                    auto swiper = weak.Upgrade();
-                    CHECK_NULL_VOID(swiper);
-                    swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
-                    swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
-                });
+                if (!usePropertyAnimation_ && targetIndex_ != runningTargetIndex_) {
+                    context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
+                                                    nextIndex = iter->first]() {
+                        auto swiper = weak.Upgrade();
+                        CHECK_NULL_VOID(swiper);
+                        swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
+                        swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
+                    });
+                }
+                runningTargetIndex_ = targetIndex_;
             } else {
                 PlayTranslateAnimation(
                     currentOffset_, currentOffset_ - targetPos, iter->first, false, velocity_.value_or(0.0f));
@@ -2440,7 +2438,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    HandleSwiperCustomAnimation(offset);
+    HandleSwiperCustomAnimation(-currentDelta_);
     MarkDirtyNodeSelf();
 }
 
@@ -4769,6 +4767,7 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
 void SwiperPattern::OnTranslateFinish(
     int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop, bool isInterrupt)
 {
+    runningTargetIndex_.reset();
     if (forceStop && !isFinishAnimation) {
         TriggerAnimationEndOnForceStop(isInterrupt);
     } else {

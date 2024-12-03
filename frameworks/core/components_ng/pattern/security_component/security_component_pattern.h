@@ -87,6 +87,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     std::timed_mutex regMutex_;
     int32_t scId_ = -1;

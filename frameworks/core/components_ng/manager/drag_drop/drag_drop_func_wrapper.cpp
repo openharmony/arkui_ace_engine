@@ -18,6 +18,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -474,7 +475,9 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
 
 [[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
 {
-    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, -1.0f);
+    auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, -1.0f);
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
@@ -545,4 +548,89 @@ OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNo
     }
     return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
+
+// check if expand subwindow
+bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return true;
+    }
+    auto containerId = pipeline->GetInstanceId();
+    containerId = containerId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, false);
+    return container->IsFreeMultiWindow();
+}
+
+OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)
+{
+    if (!IsExpandDisplay(context)) {
+        return OffsetF();
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, OffsetF());
+    auto windowOffset = window->GetCurrentWindowRect().GetOffset();
+    return OffsetF(windowOffset.GetX(), windowOffset.GetY());
+}
+
+OffsetF DragDropFuncWrapper::GetPaintRectCenterToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    auto offset = GetPaintRectCenter(frameNode);
+    CHECK_NULL_RETURN(frameNode, offset);
+    offset += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return offset;
+}
+
+OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto offset = frameNode->GetPositionToWindowWithTransform();
+    offset += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return offset;
+}
+
+RectF DragDropFuncWrapper::GetPaintRectToScreen(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RectF());
+    RectF rect = frameNode->GetTransformRectRelativeToWindow();
+    rect += GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    return rect;
+}
+
+void DragDropFuncWrapper::UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset)
+{
+    CHECK_NULL_VOID(frameNode);
+    offset -= GetCurrentWindowOffset(frameNode->GetContextRefPtr());
+    UpdateNodePositionToWindow(frameNode, offset);
+}
+
+void DragDropFuncWrapper::UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    RefPtr<FrameNode> parentNode = frameNode->GetAncestorNodeOfFrame(true);
+    if (parentNode) {
+        offset -= parentNode->GetPositionToWindowWithTransform();
+    }
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+}
+
+void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode,
+    const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(frameNode);
+    auto paintRectCenter = GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter - OffsetF(width / 2.0f, height / 2.0f);
+    UpdateNodePositionToScreen(targetNode, offset);
+}
+
 } // namespace OHOS::Ace

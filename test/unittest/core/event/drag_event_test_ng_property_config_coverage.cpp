@@ -234,6 +234,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest035, TestSize.Le
     auto childNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(childNode, nullptr);
     frameNode->AddChild(childNode);
+    ASSERT_NE(childNode->GetRenderContext(), nullptr);
     auto parentNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(parentNode, nullptr);
     frameNode->SetParent(parentNode);

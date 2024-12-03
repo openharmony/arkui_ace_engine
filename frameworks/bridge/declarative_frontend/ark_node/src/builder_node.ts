@@ -62,10 +62,10 @@ class BuilderNode {
   public updateConfiguration(): void {
     this._JSBuilderNode.updateConfiguration();
   }
-  public onReuseWithBindObject(param?: Object):void{
+  public onReuseWithBindObject(param?: Object): void {
     this._JSBuilderNode.onReuseWithBindObject(param);
-  } 
-  public onRecycleWithBindObject():void{
+  }
+  public onRecycleWithBindObject(): void {
     this._JSBuilderNode.onRecycleWithBindObject();
   }
 }
@@ -185,9 +185,11 @@ class JSBuilderNode extends BaseNode {
         },
         get: (target, property, receiver): Object => { return this.params_?.[property] }
       });
-      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this),
+        this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     } else {
-      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this), this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+      this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this),
+        this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {

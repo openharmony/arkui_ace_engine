@@ -419,7 +419,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor003, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowUnderline(true);
-        model.SetShowError("error", false);
+        model.SetShowError(u"error", false);
 
     /**
      * @tc.step: step1. Set UnderlineColor is null
@@ -432,7 +432,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor003, TestSize.Level1)
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     pattern_->SetShowKeyBoardOnFocus(false);
     layoutProperty_->UpdateShowUnderline(true);
-    layoutProperty_->UpdateErrorText("error");
+    layoutProperty_->UpdateErrorText(u"error");
     layoutProperty_->UpdateShowErrorText(true);
     EXPECT_EQ(pattern_->IsShowError(), true);
     
@@ -809,7 +809,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor004, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowUnderline(true);
-        model.SetShowError("error", false);
+        model.SetShowError(u"error", false);
 
     /**
      * @tc.step: step1. Set UnderlineColor is null
@@ -823,7 +823,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor004, TestSize.Level1)
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     pattern_->SetShowKeyBoardOnFocus(false);
     layoutProperty_->UpdateShowUnderline(true);
-    layoutProperty_->UpdateErrorText("error");
+    layoutProperty_->UpdateErrorText(u"error");
     layoutProperty_->UpdateShowErrorText(true);
     EXPECT_EQ(pattern_->IsShowError(), true);
     eventHub_->SetEnabled(false);
@@ -1459,7 +1459,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor006, TestSize.Level1)
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
     pattern_->SetShowKeyBoardOnFocus(false);
     layoutProperty_->UpdateShowUnderline(true);
-    layoutProperty_->UpdateErrorText("error");
+    layoutProperty_->UpdateErrorText(u"error");
     layoutProperty_->UpdateShowErrorText(true);
     EXPECT_EQ(pattern_->IsShowError(), true);
     pattern_->HandleCounterBorder();

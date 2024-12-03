@@ -1116,10 +1116,10 @@ struct ArkUIKeyEvent {
     ArkUI_CharPtr keyText;
     ArkUI_Int32 keySource;
     ArkUI_Int64 deviceId;
-    ArkUI_Int32 metaKey;
     ArkUI_Uint32 unicode;
     ArkUI_Float64 timestamp;
-    ArkUI_Uint32 getModifierKeyState;
+    ArkUI_Int32* pressedKeyCodes;
+    ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
 
     // user input.
@@ -4785,6 +4785,8 @@ struct ArkUIXComponentModifier {
     void (*initXComponent)(ArkUINodeHandle node);
     void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
+    void (*setXComponentHdrBrightness)(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness);
+    void (*resetXComponentHdrBrightness)(ArkUINodeHandle node);
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
 };

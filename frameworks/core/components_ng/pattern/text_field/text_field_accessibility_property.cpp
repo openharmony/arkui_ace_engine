@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -132,7 +133,7 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = textFieldLayoutProperty->GetValueValue("");
+    std::string text = UtfUtils::Str16ToStr8(textFieldLayoutProperty->GetValueValue(u""));
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
@@ -145,8 +146,8 @@ bool TextFieldAccessibilityProperty::IsHint() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return !(!textFieldLayoutProperty->GetValueValue("").empty() ||
-        textFieldLayoutProperty->GetPlaceholderValue("").empty());
+    return !(!textFieldLayoutProperty->GetValueValue(u"").empty() ||
+        textFieldLayoutProperty->GetPlaceholderValue(u"").empty());
 }
 
 std::string TextFieldAccessibilityProperty::GetHintText() const
@@ -155,7 +156,7 @@ std::string TextFieldAccessibilityProperty::GetHintText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, "");
-    return textFieldPattern->GetPlaceHolder();
+    return UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder());
 }
 
 std::string TextFieldAccessibilityProperty::GetErrorText() const

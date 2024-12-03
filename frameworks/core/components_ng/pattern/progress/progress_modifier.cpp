@@ -1061,14 +1061,14 @@ void ProgressModifier::PaintBeginHalf(RSCanvas& canvas, RSBrush& brush, const Ri
     brush.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #endif
+    float drawAngle = ANGLE_180 + FLOAT_ZERO_FIVE;
     beginPath.MoveTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY());
     beginPath.ArcTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY() - halfThickness,
         centerPt.GetX() + radius + halfThickness, centerPt.GetY() + halfThickness, ANGLE_180, ANGLE_180);
     beginPath.ArcTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY() - radius - halfThickness,
-        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, 0, ANGLE_180);
-    beginPath.LineTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY());
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, 0, drawAngle);
     beginPath.ArcTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY() - radius + halfThickness,
-        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, ANGLE_180, -ANGLE_180);
+        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, drawAngle, -drawAngle);
     beginPath.Close();
 
     canvas.Save();
