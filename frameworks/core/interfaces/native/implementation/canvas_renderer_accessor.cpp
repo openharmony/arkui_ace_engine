@@ -685,6 +685,24 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_Materialized* bitmap)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(bitmap);
+    auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
+    CHECK_NULL_VOID(bitmapPeer);
+    auto canvasImage = bitmapPeer->GetCanvasImage();
+    CHECK_NULL_VOID(canvasImage);
+  
+#ifdef PIXEL_MAP_SUPPORTED
+    auto pixelMap = canvasImage->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    peerImpl->TriggerTransferFromImageBitmapImpl(pixelMap);
+#else 
+    auto imageData = canvasImage->imageData;
+    CHECK_NULL_VOID(imageData);
+    peerImpl->TriggerTransferFromImageBitmapImpl(*imageData);
+#endif
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
 {

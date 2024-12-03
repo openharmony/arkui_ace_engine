@@ -30,16 +30,6 @@ public:
 
     void LoadImage(const std::string& src);
 
-    std::shared_ptr<OHOS::Ace::ImageData> GetImageData() const
-    {
-        return imageData_;
-    }
-
-    void SetImageData(const std::shared_ptr<OHOS::Ace::ImageData>& imageData)
-    {
-        imageData_ = imageData;
-    }
-
 private:
     void LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo);
 
@@ -56,5 +46,4 @@ private:
     double height;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
-    std::shared_ptr<OHOS::Ace::ImageData> imageData_;
 };
