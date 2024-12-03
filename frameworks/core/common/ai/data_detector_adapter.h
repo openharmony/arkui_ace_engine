@@ -125,6 +125,8 @@ private:
     std::optional<Color> entityDecorationColor_;
     std::optional<TextDecorationStyle> entityDecorationStyle_;
     std::string textDetectConfigStr_;
+    int64_t referenceTime_;
+    std::string detectContext_;
 };
 } // namespace OHOS::Ace
 

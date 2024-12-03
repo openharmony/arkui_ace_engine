@@ -46,9 +46,11 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime", "preciseTime",
+    "bankCardNo", "flightNo", "expressNo" };
 } // namespace
 
 ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1225,6 +1227,16 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
         arkUITextDetectConfig.onResult = reinterpret_cast<void*>(&callback);
     }
     ParseAIEntityColor(runtimeCallInfo, arkUITextDetectConfig);
+    Local<JSValueRef> referenceTimeArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    if (referenceTimeArg->IsInt()) {
+        arkUITextDetectConfig.referenceTime = referenceTimeArg->IntegerValue(vm);
+    }
+    Local<JSValueRef> detectContextArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    if (detectContextArg->IsString(vm)) {
+        arkUITextDetectConfig.detectContext = detectContextArg->ToString(vm)->ToString(vm).c_str();
+    } else {
+        arkUITextDetectConfig.detectContext = "";
+    }
     GetArkUINodeModifiers()->getTextModifier()->
         setTextDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
     return panda::JSValueRef::Undefined(vm);

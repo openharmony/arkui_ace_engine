@@ -134,7 +134,8 @@ constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime", "preciseTime",
+    "bankCardNo", "flightNo", "expressNo" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -9548,6 +9549,16 @@ bool JSViewAbstract::ParseDataDetectorConfig(const JSCallbackInfo& info, TextDet
             PipelineContext::SetCallBackNode(node);
             func->Execute(result);
         };
+    }
+
+    JSRef<JSVal> referenceTimeValue = obj->GetProperty("referenceTime");
+    if (referenceTimeValue->IsNumber()) {
+        textDetectConfig.referenceTime = referenceTimeValue->ToNumber<int64_t>();
+    }
+
+    JSRef<JSVal> detectContextValue = obj->GetProperty("detectContext");
+    if (detectContextValue->IsString()) {
+        ParseJsString(detectContextValue, textDetectConfig.detectContext);
     }
 
     return ParseAIEntityColor(obj, textDetectConfig);

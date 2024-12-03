@@ -248,6 +248,8 @@ public:
         dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
         dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
         dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+        dataDetectorAdapter_->referenceTime_ = textDetectConfig.referenceTime;
+        dataDetectorAdapter_->detectContext_ = textDetectConfig.detectContext;
         dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
         dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
         dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;

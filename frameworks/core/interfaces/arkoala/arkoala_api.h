@@ -344,6 +344,8 @@ struct ArkUITextDetectConfigStruct {
     ArkUI_Int32 entityDecorationType;
     ArkUI_Uint32 entityDecorationColor;
     ArkUI_Int32 entityDecorationStyle;
+    ArkUI_Int64 referenceTime;
+    ArkUI_CharPtr detectContext;
 };
 
 struct ArkUIImagePropertiesStruct {

@@ -65,6 +65,10 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType.EMAIL = 2] = 'EMAIL';
   TextDataDetectorType[TextDataDetectorType.ADDRESS = 3] = 'ADDRESS';
   TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
+  TextDataDetectorType[TextDataDetectorType.PRECISE_TIME = 5] = 'PRECISE_TIME';
+  TextDataDetectorType[TextDataDetectorType.BANK_CARD_NUMBER = 6] = 'BANK_CARD_NUMBER';
+  TextDataDetectorType[TextDataDetectorType.FLIGHT_NUMBER = 7] = 'FLIGHT_NUMBER';
+  TextDataDetectorType[TextDataDetectorType.EXPRESS_NUMBER = 8] = 'EXPRESS_NUMBER';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
