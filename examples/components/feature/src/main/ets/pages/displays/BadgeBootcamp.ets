@@ -125,8 +125,8 @@ export struct BadgeBootcamp{
       Column({ space: 8 }) {
         RadioBlock({
           title: 'badgeType',
-          isEnabled: this.enableNumberOrString,
-          value: this.numberOrString,
+          isEnabled: $enableNumberOrString,
+          value: $numberOrString,
           dataSource: [
             { label: 'number', value: 'number' },
             { label: 'string', value: 'string' },
@@ -134,22 +134,22 @@ export struct BadgeBootcamp{
         })
         SliderBlock({
           title: 'BadgeParamWithNumber.count',
-          isEnabled: this.enableBadgeParamWithNumberCount,
-          value: this.badgeParamWithNumberCount,
+          isEnabled: $enableBadgeParamWithNumberCount,
+          value: $badgeParamWithNumberCount,
           min: 0,
           max: 100
         })
         SliderBlock({
           title: 'BadgeParamWithNumber.maxCount',
-          isEnabled: this.enableBadgeParamWithNumberMaxCount,
-          value: this.badgeParamWithNumberMaxCount,
+          isEnabled: $enableBadgeParamWithNumberMaxCount,
+          value: $badgeParamWithNumberMaxCount,
           min: 0,
           max: 1000
         })
         RadioBlock({
           title: 'BadgeParamWithString.value',
-          isEnabled: this.enableBadgeParamWithStringValue,
-          value: this.badgeParamWithStringValue,
+          isEnabled: $enableBadgeParamWithStringValue,
+          value: $badgeParamWithStringValue,
           dataSource: [
             { label: 'new', value: 'new' },
             { label: 'text', value: 'text' },
@@ -159,32 +159,32 @@ export struct BadgeBootcamp{
         })
         ColorBlock({
           title: 'BadgeStyle.color',
-          isEnabled: this.enableBadgeStyleColor,
-          color: this.badgeStyleColor
+          isEnabled: $enableBadgeStyleColor,
+          color: $badgeStyleColor
         })
         SliderBlock({
           title: 'BadgeStyle.fontSize',
-          isEnabled: this.enableBadgeStyleFontSize,
-          value: this.badgeStyleFontSize,
+          isEnabled: $enableBadgeStyleFontSize,
+          value: $badgeStyleFontSize,
           min: 0,
           max: 20
         })
         SliderBlock({
           title: 'BadgeStyle.badgeSize',
-          isEnabled: this.enableBadgeStyleBadgeSize,
-          value: this.badgeStyleBadgeSize,
+          isEnabled: $enableBadgeStyleBadgeSize,
+          value: $badgeStyleBadgeSize,
           min: 0,
           max: 32
         })
         ColorBlock({
           title: 'BadgeStyle.badgeColor',
-          isEnabled: this.enableBadgeStyleBadgeColor,
-          color: this.badgeStyleBadgeColor
+          isEnabled: $enableBadgeStyleBadgeColor,
+          color: $badgeStyleBadgeColor
         })
         RadioBlock({
           title: 'BadgeStyle.fontWeight',
-          isEnabled: this.enableBadgeStyleFontWeight,
-          value: this.badgeStyleFontWeight,
+          isEnabled: $enableBadgeStyleFontWeight,
+          value: $badgeStyleFontWeight,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
             { label: 'Normal', value: FontWeight.Normal },
@@ -196,20 +196,20 @@ export struct BadgeBootcamp{
         })
         ColorBlock({
           title: 'BadgeStyle.borderColor',
-          isEnabled: this.enableBadgeStyleBorderColor,
-          color: this.badgeStyleBorderColor
+          isEnabled: $enableBadgeStyleBorderColor,
+          color: $badgeStyleBorderColor
         })
         SliderBlock({
           title: 'BadgeStyle.borderWidth',
-          isEnabled: this.enableBadgeStyleBorderWidth,
-          value: this.badgeStyleBorderWidth,
+          isEnabled: $enableBadgeStyleBorderWidth,
+          value: $badgeStyleBorderWidth,
           min: 0,
           max: 10
         })
         RadioBlock({
           title: 'BadgePosition',
-          isEnabled: this.enableBadgePosition,
-          value: this.badgePosition,
+          isEnabled: $enableBadgePosition,
+          value: $badgePosition,
           dataSource: [
             { label: 'RightTop', value: BadgePosition.RightTop },
             { label: 'Right', value: BadgePosition.Right },
