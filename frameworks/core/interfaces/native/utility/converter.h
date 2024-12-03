@@ -541,6 +541,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
+    template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
+
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);

@@ -19,7 +19,8 @@
 #include "modifiers_test_utils.h"
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
-
+#include "core/components_ng/pattern/form/form_event_hub.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +44,12 @@ const auto ATTRIBUTE_DIMENSION_NAME = "dimension";
 const auto ATTRIBUTE_DIMENSION_DEFAULT_VALUE = "-1";
 const auto ATTRIBUTE_VISIBILITY_NAME = "visibility";
 const auto ATTRIBUTE_VISIBILITY_DEFAULT_VALUE = "Visibility.Visible";
+const auto FORM_ON_ACQUIRED_ID_KEY = "id";
+const auto FORM_ON_ACQUIRED_ID_STRING_KEY = "idString";
+const auto FORM_ON_ERROR_CODE_KEY = "errcode";
+const auto FORM_ON_ERROR_MSG_KEY = "msg";
+const auto FORM_EMPTY_STRING = "";
+
 
 std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
     { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
@@ -77,6 +84,54 @@ std::vector<std::tuple<std::string, Ark_Visibility>> testFixtureEnumFormVisibili
     { "-1", static_cast<Ark_Visibility>(-1) },
     { "INT_MAX", static_cast<Ark_Visibility>(INT_MAX) },
 };
+
+std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormOnAcquiredCallbackTestValues = {
+    { 1, 1, "1" },
+    { -1, -1, "-1" },
+    { 151, 151, "151" },
+    { -1050, -1, "-1050" },
+    { 2147483647, 2147483647, "2147483647" },
+    { 4294967295, -1, "4294967295" },
+    { 141733920767, -1, "141733920767" },
+    { 9007199254740992, -1, "9007199254740992" },
+    { 19007199254740992, -1, "19007199254740992" },
+    { 9223372036854775807, -1, "9223372036854775807" },
+};
+
+std::vector<std::tuple<std::int64_t, std::string, std::int32_t>> testFixtureFormOnErrorCallbackTestValues = {
+    { 1, "error message 1", 1 },
+    { -1, "error another -1", -1 },
+    { 151, "error message 151", 151 },
+    { -1050, "error invalid code -1050", -1050 },
+    { 2147483647, "error message 2147483647", 2147483647 },
+    { -2147483648, "error message -2147483647", -2147483648 },
+    { 4294967295, "error message  4294967295", -1 },
+    { -4294967295, "error message  -4294967295", -1 },
+    { 141733920767, "error message 141733920767", -1 },
+    { -141733920767, "error message -141733920767", -1 },
+    { 9007199254740992, "error message 9007199254740992", -1 },
+    { -9007199254740992, "error message -9007199254740992", -1 },
+    { 19007199254740992, "error message 19007199254740992", -1 },
+    { -19007199254740992, "error message -19007199254740992", -1 },
+    { 9223372036854775807, "error message 9223372036854775807", -1 },
+    { -9223372036854775807, "error message -9223372036854775807", -1 },
+};
+
+std::string ToJson(const int64_t& id)
+{
+    auto json = JsonUtil::Create(true);
+    json->Put(FORM_ON_ACQUIRED_ID_KEY, std::to_string(id).c_str());
+    json->Put(FORM_ON_ACQUIRED_ID_STRING_KEY, std::to_string(id).c_str());
+    return json->ToString();
+}
+
+std::string ToJson(const int64_t& code, const std::string& msg)
+{
+    auto json = JsonUtil::Create(true);
+    json->Put(FORM_ON_ERROR_CODE_KEY, std::to_string(code).c_str());
+    json->Put(FORM_ON_ERROR_MSG_KEY, msg.c_str());
+    return json->ToString();
+}
 } // namespace
 class FormComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIFormComponentModifier,
     &GENERATED_ArkUINodeModifiers::getFormComponentModifier, GENERATED_ARKUI_FORM_COMPONENT> {
@@ -385,5 +440,160 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
     for (auto& [input, value] : testFixtureEnumFormVisibilityInvalidValues) {
         checkValue(input, value);
     }
+}
+
+/*
+ * @tc.name: setOnAcquiredTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnAcquired, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+        std::pair<uint32_t, std::string> info;
+        info.first = Converter::Convert<uint32_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
+    };
+    Callback_FormCallbackInfo_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onAcquired
+    };
+    modifier_->setOnAcquired(node_, &func);
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
+        formInfo = std::nullopt;
+        auto testValue = ToJson(actual);
+        eventHub->FireOnAcquired(testValue);
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
+    }
+}
+
+/*
+ * @tc.name: setOnErrorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnError, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
+    auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
+        std::pair<int32_t, std::string> info;
+        info.first = Converter::Convert<int32_t>(parameter.errcode);
+        info.second = Converter::Convert<std::string>(parameter.msg);
+        formInfo = info;
+    };
+    Callback_Literal_Number_errcode_String_msg_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onError
+    };
+    modifier_->setOnError(node_, &func);
+    for (const auto& [code, msg, expected] : testFixtureFormOnErrorCallbackTestValues) {
+        formInfo = std::nullopt;
+        auto testValue = ToJson(code, msg);
+        eventHub->FireOnError(testValue);
+
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expected);
+        EXPECT_EQ(formInfo->second, msg);
+    }
+}
+
+/*
+ * @tc.name: setOnUninstallTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnUninstall, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
+        std::pair<uint32_t, std::string> info;
+        info.first = Converter::Convert<uint32_t>(parameter.id);
+        info.second = Converter::Convert<std::string>(parameter.idString);
+        formInfo = info;
+    };
+    Callback_FormCallbackInfo_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onUninstall
+    };
+    modifier_->setOnUninstall(node_, &func);
+    for (const auto& [actual, expectedNum, expectedStr] : testFixtureFormOnAcquiredCallbackTestValues) {
+        formInfo = std::nullopt;
+        auto testValue = ToJson(actual);
+        eventHub->FireOnUninstall(testValue);
+        EXPECT_TRUE(formInfo.has_value());
+        EXPECT_EQ(formInfo->first, expectedNum);
+        EXPECT_EQ(formInfo->second, expectedStr);
+    }
+}
+
+/*
+ * @tc.name: setOnLoadTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnLoad, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static constexpr int32_t contextId = 123;
+    static std::optional<bool> formInfo = std::nullopt;
+    auto onLoad = [](const Ark_Int32 resourceId) {
+        formInfo = true;
+        EXPECT_EQ(resourceId, contextId);
+    };
+    Callback_Void func = {
+        .resource = Ark_CallbackResource {
+            .resourceId = contextId,
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onLoad
+    };
+    modifier_->setOnLoad(node_, &func);
+    formInfo = std::nullopt;
+    eventHub->FireOnLoad(FORM_EMPTY_STRING);
+    EXPECT_TRUE(formInfo.has_value());
+    EXPECT_TRUE(*formInfo);
 }
 } // namespace OHOS::Ace::NG

@@ -2617,9 +2617,6 @@
             "includes": ["core/components/progress/progress_theme.h"],
             "themes": ["ProgressTheme"],
             "remove": [
-                "setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues", // wrong generator
-                "setStyleTestStyleLinearStyleOptionsStrokeWidthInvalidValues", // wrong generator
-                "setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues", // wrong generator
                 "setStyleTestStyleLinearStyleOptionsStrokeRadiusValidValues",
                 "setStyleTestDefaultValues",
             ],

@@ -54,7 +54,7 @@ Ark_NativePointer GetXComponentContextImpl(XComponentControllerPeer* peer)
     CHECK_NULL_RETURN(peer && peer->controller, 0);
     LOGE("XComponentControllerAccessor::GetXComponentContextImpl - return context object need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return 0;
+    return nullptr;
 }
 void SetXComponentSurfaceSizeImpl(XComponentControllerPeer* peer,
                                   const Ark_Literal_Number_surfaceHeight_surfaceWidth* value)
@@ -105,7 +105,7 @@ Ark_NativePointer GetXComponentSurfaceRectImpl(XComponentControllerPeer* peer)
     peer->controller->GetSurfaceSize(width, height);
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRectImpl - return value need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return 0;
+    return nullptr;
 }
 void SetXComponentSurfaceRotationImpl(XComponentControllerPeer* peer,
                                       const Ark_SurfaceRotationOptions* rotationOptions)
@@ -124,7 +124,7 @@ Ark_NativePointer GetXComponentSurfaceRotationImpl(XComponentControllerPeer* pee
     bool lock = peer->controller->GetSurfaceRotation();
     LOGE("XComponentControllerAccessor::GetXComponentSurfaceRotationImpl - return value need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return 0;
+    return nullptr;
 }
 void OnSurfaceCreatedImpl(XComponentControllerPeer* peer,
                           const Ark_String* surfaceId)

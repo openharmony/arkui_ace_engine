@@ -49,6 +49,8 @@ const auto ATTRIBUTE_COLOR_I_REPEATING_NAME = "repeating";
 const auto ATTRIBUTE_COLOR_I_REPEATING_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME = "strokeWidth";
 const auto ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_STYLE_I_STROKE_RADIUS_NAME = "strokeRadius";
+const auto ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_SHADOW_NAME = "shadow";
 const auto ATTRIBUTE_STYLE_I_SHADOW_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_STYLE_I_STATUS_NAME = "status";
@@ -446,6 +448,115 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Leve
 HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+}
+
+/*
+ * @tc.name: setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrokeWidthValidValues, TestSize.Level1)
+{
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions initValueStyle;
+
+    // Initial setup
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueStyle](
+                          const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
+        Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
+            initValueStyle;
+
+        WriteToUnion<Ark_LinearStyleOptions>(inputValueStyle).strokeWidth = value;
+        modifier_->setStyle(node_, &inputValueStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Length>(value));
+    }
+}
+
+/*
+ * @tc.name: setStyleTestStyleLinearStyleOptionsStrokeWidthInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, setStyleTestStyleLinearStyleOptionsStrokeWidthInvalidValues, TestSize.Level1)
+{
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions initValueStyle;
+
+    // Initial setup
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
+        Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
+            initValueStyle;
+
+        modifier_->setStyle(node_, &inputValueStyle);
+        WriteToUnion<Ark_LinearStyleOptions>(inputValueStyle).strokeWidth = value;
+        modifier_->setStyle(node_, &inputValueStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
+        checkValue(input, ArkValue<Opt_Length>(value));
+    }
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Length>());
+}
+
+/*
+ * @tc.name: setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrokeRadiusInvalidValues, TestSize.Level1)
+{
+    Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions initValueStyle;
+
+    // Initial setup
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
+        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Number_Resource& value) {
+        Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
+            initValueStyle;
+
+        modifier_->setStyle(node_, &inputValueStyle);
+        WriteToUnion<Ark_LinearStyleOptions>(inputValueStyle).strokeRadius = value;
+        modifier_->setStyle(node_, &inputValueStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_RADIUS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeRadius";
+    };
+
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Number_Resource, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Union_String_Number_Resource>());
 }
 
 /*
