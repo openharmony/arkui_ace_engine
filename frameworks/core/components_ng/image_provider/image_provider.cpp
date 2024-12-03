@@ -312,7 +312,6 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     RefPtr<ImageObject> imageObject;
     if (codec.frameCount > 1) {
         auto imageObject = MakeRefPtr<AnimatedImageObject>(src, codec.imageSize, data);
-        imageObject->SetOrientation(codec.orientation);
         imageObject->SetFrameCount(codec.frameCount);
         return imageObject;
     }
