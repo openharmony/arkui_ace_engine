@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <string>
 
 #include "gtest/gtest.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_rect.h"
-#include "frameworks/core/components_ng/svg/svg_ulils.h"
 
 #define private public
 #define protected public
 
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/rosen/testing_rect.h"
+#include "frameworks/core/components_ng/svg/svg_ulils.h"
 #include "core/components_ng/svg/svg_dom.h"
 #include "core/components_ng/svg/svg_ulils.h"
 
