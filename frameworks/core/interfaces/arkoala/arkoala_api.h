@@ -4597,6 +4597,10 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockActiveCircleRadius)(ArkUINodeHandle node);
     void (*setPatternLockEnableWaveEffect)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetPatternLockEnableWaveEffect)(ArkUINodeHandle node);
+    void (*setPatternLockEnableForeground)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockEnableForeground)(ArkUINodeHandle node);
+    void (*setPatternLockSkipUnselectedPoint)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetPatternLockSkipUnselectedPoint)(ArkUINodeHandle node);
 };
 
 struct ArkUIColumnSplitModifier {

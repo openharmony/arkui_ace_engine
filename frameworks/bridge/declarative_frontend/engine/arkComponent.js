@@ -8021,6 +8021,23 @@ class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
   }
 }
 PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
+class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSkipUnselectedPoint(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSkipUnselectedPoint(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
 class ArkPatternLockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8059,6 +8076,10 @@ class ArkPatternLockComponent extends ArkComponent {
   }
   activateCircleStyle(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
+    return this;
+  }
+  skipUnselectedPoint(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
     return this;
   }
   onPatternComplete(callback) {
