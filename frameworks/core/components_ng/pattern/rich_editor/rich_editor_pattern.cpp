@@ -560,11 +560,7 @@ void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         previewLongPress_ = false;
         editingLongPress_ = false;
-        if (moveCaretState_.isMoveCaret) {
-            isCursorAlwaysDisplayed_ = false;
-            StartTwinkling();
-        }
-        moveCaretState_.Reset();
+        ResetTouchAndMoveCaretState();
         magnifierController_->RemoveMagnifierFrameNode();
     }
 }
@@ -6614,10 +6610,12 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     CHECK_NULL_VOID(!info.GetTouches().empty());
-    auto touchInfo = info.GetTouches().front();
+    auto acceptedTouchInfo = GetAcceptedTouchLocationInfo(info);
+    CHECK_NULL_VOID(acceptedTouchInfo);
+    auto touchInfo = acceptedTouchInfo.value();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(info);
+        HandleTouchDown(touchInfo);
         HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool());
         if (hasUrlSpan_) {
             HandleUrlSpanShowShadow(touchInfo.GetLocalLocation(), touchInfo.GetGlobalLocation(), GetUrlPressColor());
@@ -6629,10 +6627,23 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanForegroundClear();
         }
     } else if (touchType == TouchType::MOVE) {
-        auto originalLocaloffset = info.GetTouches().front().GetLocalLocation();
-        auto localOffset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
-        HandleTouchMove(localOffset);
+        HandleTouchMove(touchInfo);
+    } else if (touchType == TouchType::CANCEL) {
+        ResetTouchAndMoveCaretState();
     }
+}
+
+std::optional<TouchLocationInfo> RichEditorPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
+{
+    auto touchInfos = info.GetChangedTouches();
+    CHECK_NULL_RETURN(!touchInfos.empty(), std::nullopt);
+    CHECK_NULL_RETURN(moveCaretState_.touchFingerId, touchInfos.front());
+    for (auto touchInfo : touchInfos) {
+        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId.value()) {
+            return touchInfo;
+        }
+    }
+    return std::nullopt;
 }
 
 void RichEditorPattern::HandleUrlSpanForegroundClear()
@@ -6641,7 +6652,7 @@ void RichEditorPattern::HandleUrlSpanForegroundClear()
     MarkDirtySelf();
 }
 
-void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
+void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 {
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
@@ -6652,7 +6663,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
     previewLongPress_ = false;
     editingLongPress_ = false;
     CHECK_NULL_VOID(HasFocus() && sourceTool == SourceTool::FINGER);
-    auto touchDownOffset = info.GetTouches().front().GetLocalLocation();
+    auto touchDownOffset = info.GetLocalLocation();
     moveCaretState_.touchDownOffset = touchDownOffset;
     RectF lastCaretRect = GetCaretRect();
     if (RepeatClickCaret(touchDownOffset, caretPosition_, lastCaretRect)) {
@@ -6665,12 +6676,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
 void RichEditorPattern::HandleTouchUp()
 {
     HandleTouchUpAfterLongPress();
-    if (moveCaretState_.isMoveCaret) {
-        isCursorAlwaysDisplayed_ = false;
-        StartTwinkling();
-    }
-    CheckScrollable();
-    moveCaretState_.Reset();
+    ResetTouchAndMoveCaretState();
     isMoveCaretAnywhere_ = false;
     editingLongPress_ = false;
     if (magnifierController_) {
@@ -6681,6 +6687,16 @@ void RichEditorPattern::HandleTouchUp()
         isLongPress_ = false;
     }
 #endif
+}
+
+void RichEditorPattern::ResetTouchAndMoveCaretState()
+{
+    if (moveCaretState_.isMoveCaret) {
+        isCursorAlwaysDisplayed_ = false;
+        IF_TRUE(isEditing_, StartTwinkling());
+    }
+    CheckScrollable();
+    moveCaretState_.Reset();
 }
 
 void RichEditorPattern::HandleTouchUpAfterLongPress()
@@ -6699,8 +6715,10 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
 }
 
-void RichEditorPattern::HandleTouchMove(const Offset& offset)
+void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
 {
+    auto originalLocaloffset = info.GetLocalLocation();
+    auto offset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
     if (previewLongPress_ || editingLongPress_) {
         UpdateSelectionByTouchMove(offset);
         return;
@@ -6709,8 +6727,9 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
     if (!moveCaretState_.isMoveCaret) {
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
         if (GreatNotEqual(moveDistance, moveCaretState_.minDistance.ConvertToPx())) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret distance greater than minDistance");
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Move caret start id= %{public}d", info.GetFingerId());
             moveCaretState_.isMoveCaret = true;
+            moveCaretState_.touchFingerId = info.GetFingerId();
             ShowCaretWithoutTwinkling();
         }
     }

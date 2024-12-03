@@ -952,19 +952,17 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     textOverlayTheme->handleDiameter_ = 14.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
-    TouchEventInfo touchEventInfo("");
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::DOWN;
     touchLocationInfo.localLocation_ = touchOffset;
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    touchEventInfo.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->HandleTouchDown(touchEventInfo);
+    touchLocationInfo.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->HandleTouchDown(touchLocationInfo);
     EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
      * @tc.steps: step4. move caret position by touch move
      */
-    touchOffset = Offset(50, 0);
-    richEditorPattern->HandleTouchMove(touchOffset);
+    touchLocationInfo.localLocation_ = Offset(50, 0);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
 }
 
