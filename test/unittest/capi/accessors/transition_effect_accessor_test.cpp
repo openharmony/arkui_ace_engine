@@ -47,7 +47,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getRotateTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rotate, nullptr);
 
@@ -71,7 +71,7 @@ HWTEST_F(TransitionEffectAccessorTest, DISABLED_getRotateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getTranslateTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->translate, nullptr);
     Ark_TranslateOptions value;
@@ -89,7 +89,7 @@ HWTEST_F(TransitionEffectAccessorTest, DISABLED_getTranslateTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, DISABLED_getScaleTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scale, nullptr);
     Ark_ScaleOptions value;

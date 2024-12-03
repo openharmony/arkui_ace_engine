@@ -92,14 +92,20 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
+<<<<<<< HEAD
     LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
+=======
+>>>>>>> 53e09b594c3 (transition effect accessor)
     return nullptr;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
+<<<<<<< HEAD
     LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
+=======
+>>>>>>> 53e09b594c3 (transition effect accessor)
     return nullptr;
 }
 } // TransitionEffectAccessor
