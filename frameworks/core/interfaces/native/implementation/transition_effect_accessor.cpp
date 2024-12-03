@@ -66,7 +66,7 @@ Ark_NativePointer ScaleImpl(const Ark_ScaleOptions* options)
 }
 Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 {
-    CHECK_NULL_RETURN(alpha, 0);
+    CHECK_NULL_RETURN(alpha, nullptr);
     auto type = Converter::ArkValue<Ark_String>("static");
     Ark_TransitionEffects effects {
         .opacity = *alpha
@@ -75,7 +75,6 @@ Ark_NativePointer OpacityImpl(const Ark_Number* alpha)
 }
 Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
-    CHECK_NULL_RETURN(edge, 0);
     auto type = Converter::ArkValue<Ark_String>("static");
     Ark_TransitionEffects effects {
         .move = edge
@@ -92,20 +91,14 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
                                 const Ark_AnimateParam* value)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-<<<<<<< HEAD
     LOGE("TransitionEffectAccessor::AnimationImpl Return value must be TransitionEffect here.");
-=======
->>>>>>> 53e09b594c3 (transition effect accessor)
     return nullptr;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
                               const Ark_TransitionEffect* transitionEffect)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-<<<<<<< HEAD
     LOGE("ransitionEffectAccessor::CombineImpl Return value must be TransitionEffect here.");
-=======
->>>>>>> 53e09b594c3 (transition effect accessor)
     return nullptr;
 }
 } // TransitionEffectAccessor
