@@ -70,7 +70,7 @@ public:
     #ifdef PIXEL_MAP_SUPPORTED
     void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
     #else
-    void TriggerTransferFromImageBitmapImpl(const Ace::ImageData& imageData);
+    void TriggerTransferFromImageBitmapImpl(const double width, const double height);
     #endif
     void TriggerSetFillStyleImpl(const Color& color);
     void TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);

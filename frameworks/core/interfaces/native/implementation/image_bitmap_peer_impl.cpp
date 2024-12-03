@@ -20,7 +20,8 @@ using namespace OHOS::Ace;
 ImageBitmapPeer::ImageBitmapPeer()
     : width(0),
       height(0),
-      loadingCtx_(nullptr)
+      loadingCtx_(nullptr),
+      canvasImage_(nullptr)
 {
 }
 
@@ -37,6 +38,7 @@ void ImageBitmapPeer::Close()
     height = 0;
 
     loadingCtx_ = nullptr;
+    canvasImage_ = nullptr;
 }
 
 double ImageBitmapPeer::GetHeight()
@@ -67,6 +69,8 @@ void ImageBitmapPeer::LoadImage(const ImageSourceInfo& sourceInfo)
         loader->OnImageDataReady();
     };
     auto loadSuccessCallback = [loader = this](const ImageSourceInfo& sourceInfo) {
+        CHECK_NULL_VOID(loader);
+        loader->OnImageLoadSuccess();
     };
     auto loadFailCallback = [loader = this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         CHECK_NULL_VOID(loader);
@@ -82,6 +86,12 @@ void ImageBitmapPeer::OnImageDataReady()
     CHECK_NULL_VOID(loadingCtx_);
     width = loadingCtx_->GetImageSize().Width();
     height = loadingCtx_->GetImageSize().Height();
+}
+
+void ImageBitmapPeer::OnImageLoadSuccess()
+{
+    CHECK_NULL_VOID(loadingCtx_);
+    canvasImage_ = loadingCtx_->MoveCanvasImage();
 }
 
 void ImageBitmapPeer::OnImageLoadFail(const std::string& errorMsg)

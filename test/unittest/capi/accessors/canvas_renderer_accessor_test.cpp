@@ -1267,7 +1267,7 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -1284,6 +1284,11 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transferFromImageBitmapTest, TestS
             imageData->x = expectedX;
             imageData->y = expectedY;
             peer->SetImageData(imageData);
+
+            // test!!!
+            std::printf("bitmap: const x:%.2f y:%.2f", imageData->x, imageData->y)
+            // test!!!
+
 
             holder->SetUp();
             accessor_->transferFromImageBitmap(peer_, &arkBitmap);

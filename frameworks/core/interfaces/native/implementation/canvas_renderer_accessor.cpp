@@ -691,17 +691,16 @@ void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(bitmap);
     auto bitmapPeer = reinterpret_cast<ImageBitmapPeer*>(bitmap->ptr);
     CHECK_NULL_VOID(bitmapPeer);
+#ifdef PIXEL_MAP_SUPPORTED
     auto canvasImage = bitmapPeer->GetCanvasImage();
     CHECK_NULL_VOID(canvasImage);
-  
-#ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = canvasImage->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     peerImpl->TriggerTransferFromImageBitmapImpl(pixelMap);
 #else 
-    auto imageData = canvasImage->imageData;
-    CHECK_NULL_VOID(imageData);
-    peerImpl->TriggerTransferFromImageBitmapImpl(*imageData);
+    auto width = bitmapPeer->GetWidth();
+    auto height = bitmapPeer->GetHeight();
+    peerImpl->TriggerTransferFromImageBitmapImpl(width, height);
 #endif
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)

@@ -29,11 +29,16 @@ public:
     double GetWidth();
 
     void LoadImage(const std::string& src);
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage>& GetCanvasImage() const
+    {
+        return canvasImage_;
+    }
 
 private:
     void LoadImage(const OHOS::Ace::ImageSourceInfo& sourceInfo);
 
     void OnImageDataReady();
+    void OnImageLoadSuccess();
     void OnImageLoadFail(const std::string& errorMsg);
 
 protected:
@@ -46,4 +51,5 @@ private:
     double height;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasImage> canvasImage_;
 };
