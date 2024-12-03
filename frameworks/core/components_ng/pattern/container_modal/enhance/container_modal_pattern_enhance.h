@@ -64,8 +64,6 @@ public:
     CalcLength GetControlButtonRowWidth() override;
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons) override;
     bool GetContainerModalComponentRect(RectF& containerModal, RectF& buttons);
-    static void SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
-        uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode);
     void OnMaxButtonClick();
     void OnMinButtonClick();
     void OnCloseButtonClick();
