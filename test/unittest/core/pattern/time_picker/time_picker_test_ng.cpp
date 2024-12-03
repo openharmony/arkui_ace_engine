@@ -4979,8 +4979,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewGetUserSettingLimitTest004
  */
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGBackgroundColor001, TestSize.Level1)
 {
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+
+    auto theme = context->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
