@@ -31,6 +31,8 @@ namespace  {
     const auto ATTRIBUTE_MODE_DEFAULT_VALUE = "NavDestinationMode::STANDARD";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_NAME = "hideTitleBar";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME = "isAnimatedTitleBar";
+    const auto ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME = "recoverable";
     const auto ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE = "true";
     const auto ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME = "ignoreLayoutSafeAreaTypes";
@@ -123,6 +125,9 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestDefaultValues, TestSize
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE);
 }
 
 //Valid values for attribute 'hideTitleBar' of method 'hideTitleBar'
@@ -155,6 +160,49 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestValidValues, TestSize.L
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+//Valid values for attribute 'animated' of method 'hideTitleBar'
+static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> animatedHideTitleBarValidValues = {
+    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+};
+
+/*
+ * @tc.name: setHideTitleBar1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModifierTest, setHideTitleBar1TestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Boolean inputValueHideTitleBar;
+    Ark_Boolean initValueHideTitleBar;
+    Ark_Boolean inputValueAnimated;
+    Ark_Boolean initValueAnimated;
+    // Initial setup
+    initValueHideTitleBar = std::get<1>(hideTitleBarHideTitleBarValidValues[0]);
+    initValueAnimated = std::get<1>(animatedHideTitleBarValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueHideTitleBar = initValueHideTitleBar;
+    inputValueAnimated = initValueAnimated;
+    for (auto&& value: hideTitleBarHideTitleBarValidValues) {
+        inputValueHideTitleBar = std::get<1>(value);
+        for (auto&& animated: animatedHideTitleBarValidValues) {
+            inputValueAnimated = std::get<1>(animated);
+            modifier_->setHideTitleBar1(node_, inputValueHideTitleBar, inputValueAnimated);
+            jsonValue = GetJsonValue(node_);
+            resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
+            expectedStr = std::get<2>(value);
+            EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+            resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME);
+            expectedStr = std::get<2>(animated);
+            EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(animated);
+        }
     }
 }
 

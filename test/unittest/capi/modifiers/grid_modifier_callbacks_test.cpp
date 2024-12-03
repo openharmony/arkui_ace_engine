@@ -24,6 +24,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -187,7 +188,6 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollBarUpdateTestInvalid, Te
  */
 HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 {
-    Callback_Number_Number_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
@@ -197,33 +197,42 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
         int32_t last;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onScrollIndex =
-        [](Ark_Int32 nodeId, const Ark_Number first, const Ark_Number last)
-    {
+
+    static constexpr int32_t contextId = 123;
+    static bool isCalled = false;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last) {
+        isCalled = true;
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = resourceId,
             .first = Converter::Convert<int32_t>(first),
             .last = Converter::Convert<int32_t>(last)
         };
     };
 
-    modifier_->setOnScrollIndex(node_, &func);
+    Callback_Number_Number_Void arkCallback =
+        Converter::ArkValue<Callback_Number_Number_Void>(checkCallback, contextId);
+
+    modifier_->setOnScrollIndex(node_, &arkCallback);
 
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     EXPECT_NE(onScrollIndex, nullptr);
     EXPECT_EQ(checkEvent.has_value(), false);
 
     // first: 0, last: 10
+    isCalled = false;
     onScrollIndex(0, 10);
+    ASSERT_TRUE(isCalled);
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->first, 0);
     EXPECT_EQ(checkEvent->last, 10);
 
     // first: 5, last: 25
+    isCalled = false;
     onScrollIndex(5, 25);
+    ASSERT_TRUE(isCalled);
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->first, 5);
     EXPECT_EQ(checkEvent->last, 25);
 }

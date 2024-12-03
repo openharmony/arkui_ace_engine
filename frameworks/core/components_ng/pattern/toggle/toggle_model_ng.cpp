@@ -480,40 +480,24 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
 
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    Color color;
-    if (selectedColor.has_value()) {
-        color = selectedColor.value();
-    }
 
     auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
     if (checkboxPattern) {
-        if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<CheckboxTheme>();
-            CHECK_NULL_VOID(theme);
-            color = theme->GetActiveColor();
-        }
-        CheckBoxModelNG checkBoxModelNG;
-        checkBoxModelNG.SetSelectedColor(frameNode, color);
+        CheckBoxModelNG::SetSelectedColor(frameNode, selectedColor);
         return;
     }
 
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
     if (buttonPattern) {
-        if (!selectedColor.has_value()) {
-            auto theme = pipeline->GetTheme<ToggleTheme>();
-            CHECK_NULL_VOID(theme);
-            color = theme->GetCheckedColor();
-        }
-        ToggleButtonModelNG::SetSelectedColor(frameNode, color);
+        ToggleButtonModelNG::SetSelectedColor(frameNode, selectedColor);
         return;
     }
 
-    if (!selectedColor.has_value()) {
-        auto theme = pipeline->GetTheme<SwitchTheme>();
-        CHECK_NULL_VOID(theme);
-        color = theme->GetActiveColor();
+    if (selectedColor) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, selectedColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, frameNode);
     }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
 }
 
 void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor)
@@ -576,9 +560,9 @@ void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
     CHECK_NULL_VOID(pattern);
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         UpdateSwitchIsOn(refNode, isOn);
-    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+    } else if (AceType::InstanceOf<ToggleCheckBoxPattern>(pattern)) {
         UpdateCheckboxIsOn(refNode, isOn);
-    } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
+    } else if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
         UpdateToggleButtonIsOn(refNode, isOn);
     }
 }

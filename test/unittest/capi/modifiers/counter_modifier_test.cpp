@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/counter/counter_pattern.h"
 
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -81,7 +82,7 @@ HWTEST_F(CounterModifierTest, setEnableDecTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, DISABLED_setEnableDecTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setEnableDecTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Boolean inputValue;
@@ -115,7 +116,7 @@ HWTEST_F(CounterModifierTest, setEnableIncTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CounterModifierTest, DISABLED_setEnableIncTestValidValues, TestSize.Level1)
+HWTEST_F(CounterModifierTest, setEnableIncTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Boolean inputValue;
@@ -138,7 +139,6 @@ HWTEST_F(CounterModifierTest, DISABLED_setEnableIncTestValidValues, TestSize.Lev
  */
 HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
 {
-    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto pattern = frameNode->GetPattern<CounterPattern>();
     auto addId = pattern->GetAddId();
@@ -150,20 +150,23 @@ HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
         int32_t value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::counterEventsReceiver.onInc = [](Ark_Int32 nodeId)
-    {
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId) {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = resourceId,
             .value = 1
         };
     };
 
-    modifier_->setOnInc(node_, &func);
+    VoidCallback arkCallback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+
+    modifier_->setOnInc(node_, &arkCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     subGestureHub->ActClick();
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 1);
 }
 
@@ -174,7 +177,6 @@ HWTEST_F(CounterModifierTest, setOnIncTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
 {
-    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto pattern = frameNode->GetPattern<CounterPattern>();
     auto subId = pattern->GetSubId();
@@ -186,20 +188,23 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
         int32_t value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::counterEventsReceiver.onDec = [](Ark_Int32 nodeId)
-    {
+    static constexpr int32_t contextId = 123;
+
+    auto checkCallback = [](const Ark_Int32 resourceId) {
         checkEvent = {
-            .nodeId = nodeId,
+            .nodeId = resourceId,
             .value = -1
         };
     };
 
-    modifier_->setOnDec(node_, &func);
+    VoidCallback arkCallback = Converter::ArkValue<VoidCallback>(checkCallback, contextId);
+
+    modifier_->setOnDec(node_, &arkCallback);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     subGestureHub->ActClick();
     EXPECT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, -1);
 }
 

@@ -161,7 +161,7 @@ void* createImageNode(ArkUI_Int32 nodeId)
 
 void* createToggleNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, NG::ToggleType::SWITCH, false);
+    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, NG::ToggleType::CHECKBOX, false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
