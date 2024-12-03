@@ -30,7 +30,7 @@ struct Matrix2DPeer {
     }
     ~Matrix2DPeer()  = default;
 
-    double GetDensity()
+    double GetDensity() const
     {
         double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
         return ((unit == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;

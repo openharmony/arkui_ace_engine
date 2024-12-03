@@ -14,19 +14,18 @@
  */
 
 #include "core/components_ng/render/adapter/matrix2d.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 const auto TRANSFORM_UNITY_VALUE = 1.00;
-const auto TRANSFORM_ZERO_VALUE = 0.00;
 } // namespace
 
 bool Matrix2D::Invert(TransformParam& param)
 {
-    if (param.scaleX == TRANSFORM_ZERO_VALUE && param.scaleY == TRANSFORM_ZERO_VALUE &&
-        param.skewX == TRANSFORM_ZERO_VALUE && param.skewY == TRANSFORM_ZERO_VALUE &&
-        param.translateX == TRANSFORM_ZERO_VALUE && param.translateY == TRANSFORM_ZERO_VALUE) {
+    if (NearZero(param.scaleX) && NearZero(param.scaleY) && NearZero(param.skewX) && NearZero(param.skewY) &&
+        NearZero(param.translateX) && NearZero(param.translateY)) {
         return false;
     }
 

@@ -23,6 +23,7 @@
 #include "canvas_gradient_peer.h"
 #include "matrix2d_peer.h"
 #include "image_bitmap_peer_impl.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -629,7 +630,7 @@ void SetTransform1Impl(CanvasRendererPeer* peer,
     auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
     CHECK_NULL_VOID(matrixPeer);
     auto param = matrixPeer->transform;
-    if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
+    if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {
         return;
     }
     peerImpl->TriggerSetTransformImpl(param);
@@ -659,7 +660,7 @@ void TransformImpl(CanvasRendererPeer* peer,
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
         .translateX = static_cast<double>(Converter::Convert<float>(*e)),
         .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
-    if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
+    if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {
         return;
     }
     peerImpl->TriggerTransformImpl(param);
