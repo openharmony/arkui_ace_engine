@@ -1296,25 +1296,9 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
             holder->SetUp();
             accessor_->transferFromImageBitmap(peer_, &arkBitmap);
             if (expectedW <= 0 || expectedH <= 0) {
-            
-            
-                // test!!!
-                std::printf("bitmap: holder neg width: %d height: %d\n", expectedW, expectedH);
-                // test!!!
-
-
                 EXPECT_FALSE(holder->isCalled);
                 continue;
             }
-            
-
-             // test!!!
-            std::printf("bitmap: holder x:%d == %d y: %d == %d width: %d == %d height: %d == %d\n",
-                holder->imageData->x, 0, holder->imageData->y, 0, holder->imageData->dirtyWidth, expectedW,
-                holder->imageData->dirtyHeight, expectedH);
-            // test!!!
-
-
             EXPECT_TRUE(holder->isCalled);
             EXPECT_TRUE(holder->imageData->dirtyWidth, expectedW);
             EXPECT_TRUE(holder->imageData->dirtyHeight, expectedH);
