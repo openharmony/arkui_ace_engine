@@ -311,10 +311,13 @@ struct custombutton {
 
   onMaximizeButtonClick() {
     this.onCancelMenuTimer()
+    this.onHoverMaximizeButton(false)
+    this.maximizeScale = 1.0
   }
 
   onMinimizeButtonClick() {
-
+    this.onHoverMinimizeButton(false)
+    this.minimizeScale = 1.0
   }
 
   onCloseButtonClick() {
@@ -619,6 +622,7 @@ struct custombutton {
         .type(ButtonType.Normal)
         .borderRadius('4vp')
         .margin({ right: this.buttonSpacing + 'vp' })
+        .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -655,6 +659,7 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
+        .hoverEffect(HoverEffect.None)
         //右间距在父组件中体现
         // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
         .responseRegion({
