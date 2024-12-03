@@ -44,6 +44,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -835,6 +836,11 @@ public:
         return formVisibleMgr_;
     }
 
+    const RefPtr<FormEventManager>& GetFormEventManager() const
+    {
+        return formEventMgr_;
+    }
+
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
     {
         return recycleManager_;
@@ -1255,6 +1261,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;

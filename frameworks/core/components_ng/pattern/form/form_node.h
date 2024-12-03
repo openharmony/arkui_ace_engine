@@ -35,11 +35,20 @@ public:
         TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override;
 
+#ifdef FORM_MOUSE_AXIS_SUPPORT
+    HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& axisResult) override;
+#endif
+
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     void DispatchPointerEvent(const TouchEvent& touchEvent,
         SerializedGesture& serializedGesture);
+
+#ifdef FORM_MOUSE_AXIS_SUPPORT
+    void DispatchPointerEvent(const AxisEvent& axisEvent, SerializedGesture& serializedGesture);
+#endif
 
     void OnDetachFromMainTree(bool, PipelineContext* = nullptr) override;
 
