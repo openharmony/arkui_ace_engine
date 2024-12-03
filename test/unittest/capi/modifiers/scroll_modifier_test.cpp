@@ -1233,6 +1233,7 @@ HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::Tes
 HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
@@ -1252,6 +1253,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
     auto apiCall = Converter::ArkValue<OnScrollEdgeCallback>(callback, id);
     ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 
+    ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
     modifier_->setOnScrollEdge(node_, &apiCall);
 
     ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
@@ -1269,9 +1271,11 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
+    ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
     modifier_->setOnScrollEdge(node_, nullptr);
     ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 }
