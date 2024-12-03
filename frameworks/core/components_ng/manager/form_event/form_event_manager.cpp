@@ -15,7 +15,6 @@
 
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 
-
 namespace OHOS::Ace::NG {
 
 void FormEventManager::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
