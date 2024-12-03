@@ -105,6 +105,11 @@ public:
         movingPhotoFormat_ = format;
     }
 
+    void SetDynamicRangeMode(DynamicRangeMode RangeMode)
+    {
+        dynamicRangeMode_ = RangeMode;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -244,6 +249,7 @@ private:
     int64_t currentDateModified_ = -2;
     MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::UNKNOWN;
     PixelFormat imageFormat_ = PixelFormat::UNKNOWN;
+    DynamicRangeMode dynamicRangeMode_ = DynamicRangeMode::HIGH;
 
     bool isEnableAnalyzer_ = false;
     bool isContentSizeChanged_ = false;
