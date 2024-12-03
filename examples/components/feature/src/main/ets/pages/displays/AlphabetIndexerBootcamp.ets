@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, RadioBlock, SliderBlock} from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled} from 'common';
 
 @Component
 export struct AlphabetIndexerBootcamp {
@@ -113,34 +113,60 @@ export struct AlphabetIndexerBootcamp {
   Content() {
     Column() {
       AlphabetIndexer({ arrayValue: this.value, selected: 0 })
-        .color(this.alphabetIndexerColor)
-        .selectedColor(this.alphabetIndexerSelectedColor)
-        .popupColor(this.alphabetIndexerPopupColor)
-        .selectedBackgroundColor(this.alphabetIndexerSelectedBackgroundColor)
-        .popupBackground(this.alphabetIndexerPopupBackground)
-        .usingPopup(this.alphabetIndexerUsingPopup)
-        .selectedFont({ size: this.alphabetIndexerSelectedFontSize,
-          style: this.alphabetIndexerSelectedFontStyle, weight: this.alphabetIndexerSelectedFontWeight })
-        .popupFont({ size: this.alphabetIndexerPopupFontSize,
-          style: this.alphabetIndexerPopupFontStyle, weight: this.alphabetIndexerPopupFontWeight })
-        .font({ size: this.alphabetIndexerFontSize,
-          style: this.alphabetIndexerFontStyle, weight: this.alphabetIndexerFontWeight })
-        .itemSize(this.alphabetIndexerItemSize)
-        .alignStyle(this.alphabetIndexerAlignStyleIndexerAlign, this.alphabetIndexerAlignStyleLength)
-        .selected(this.alphabetIndexerSelected)
-        .popupPosition({x: this.alphabetIndexerPopupPositionX, y: this.alphabetIndexerPopupPositionY})
-        .popupSelectedColor(this.alphabetIndexerPopupSelectedColor)
-        .popupUnselectedColor(this.alphabetIndexerPopupUnselectedColor)
-        .popupItemFont({size: this.alphabetIndexerPopupItemFontSize,
-          style: this.alphabetIndexerPopupItemFontStyle,
-          weight: this.alphabetIndexerPopupItemFontWeight})
-        .popupItemBackgroundColor(this.alphabetIndexerPopupItemBackgroundColor)
-        .autoCollapse(this.alphabetIndexerAutoCollapse)
-        .popupItemBorderRadius(this.alphabetIndexerPopupItemBorderRadius)
-        .itemBorderRadius(this.alphabetIndexerItemBorderRadius)
-        .popupBackgroundBlurStyle(this.alphabetIndexerPopupBackgroundBlurStyle)
-        .popupTitleBackground(this.alphabetIndexerPopupTitleBackground)
-        .enableHapticFeedback(this.alphabetIndexerEnableHapticFeedback)
+        .color(
+          useEnabled(this.enableAlphabetIndexerColor, this.alphabetIndexerColor))
+        .selectedColor(
+          useEnabled(this.enableAlphabetIndexerSelectedColor, this.alphabetIndexerSelectedColor))
+        .popupColor(
+          useEnabled(this.enableAlphabetIndexerPopupColor, this.alphabetIndexerPopupColor))
+        .selectedBackgroundColor(
+          useEnabled(this.enableAlphabetIndexerSelectedBackgroundColor, this.alphabetIndexerSelectedBackgroundColor))
+        .popupBackground(
+          useEnabled(this.enableAlphabetIndexerPopupBackground, this.alphabetIndexerPopupBackground))
+        .usingPopup(
+          useEnabled(this.enableAlphabetIndexerUsingPopup, this.alphabetIndexerUsingPopup))
+        .selectedFont({
+          size: useEnabled(this.enableAlphabetIndexerSelectedFontSize, this.alphabetIndexerSelectedFontSize),
+          style: useEnabled(this.enableAlphabetIndexerSelectedFontStyle, this.alphabetIndexerSelectedFontStyle),
+          weight: useEnabled(this.enableAlphabetIndexerSelectedFontWeight, this.alphabetIndexerSelectedFontWeight)})
+        .popupFont({
+          size: useEnabled(this.enableAlphabetIndexerPopupFontSize, this.alphabetIndexerPopupFontSize),
+          style: useEnabled(this.enableAlphabetIndexerPopupFontStyle, this.alphabetIndexerPopupFontStyle),
+          weight: useEnabled(this.enableAlphabetIndexerPopupFontWeight, this.alphabetIndexerPopupFontWeight)})
+        .font({
+          size: useEnabled(this.enableAlphabetIndexerFontSize, this.alphabetIndexerFontSize),
+          style: useEnabled(this.enableAlphabetIndexerFontStyle, this.alphabetIndexerFontStyle),
+          weight: useEnabled(this.enableAlphabetIndexerFontWeight, this.alphabetIndexerFontWeight)})
+        .itemSize(useEnabled(this.enableAlphabetIndexerItemSize, this.alphabetIndexerItemSize))
+        .alignStyle(
+          useEnabled(this.enableAlphabetIndexerAlignStyleIndexerAlign, this.alphabetIndexerAlignStyleIndexerAlign),
+          useEnabled(this.enableAlphabetIndexerAlignStyleLength, this.alphabetIndexerAlignStyleLength))
+        .selected(useEnabled(this.enableAlphabetIndexerSelected, this.alphabetIndexerSelected))
+        .popupPosition({
+          x: useEnabled(this.enableAlphabetIndexerPopupPositionX, this.alphabetIndexerPopupPositionX),
+          y: useEnabled(this.enableAlphabetIndexerPopupPositionY, this.alphabetIndexerPopupPositionY)})
+        .popupSelectedColor(
+          useEnabled(this.enableAlphabetIndexerPopupSelectedColor, this.alphabetIndexerPopupSelectedColor))
+        .popupUnselectedColor(
+          useEnabled(this.enableAlphabetIndexerPopupUnselectedColor, this.alphabetIndexerPopupUnselectedColor))
+        .popupItemFont({
+          size: useEnabled(this.enableAlphabetIndexerPopupItemFontSize, this.alphabetIndexerPopupItemFontSize),
+          style: useEnabled(this.enableAlphabetIndexerPopupItemFontStyle, this.alphabetIndexerPopupItemFontStyle),
+          weight: useEnabled(this.enableAlphabetIndexerPopupItemFontWeight, this.alphabetIndexerPopupItemFontWeight)})
+        .popupItemBackgroundColor(
+          useEnabled(this.enableAlphabetIndexerPopupItemBackgroundColor, this.alphabetIndexerPopupItemBackgroundColor))
+        .autoCollapse(
+          useEnabled(this.enableAlphabetIndexerAutoCollapse, this.alphabetIndexerAutoCollapse))
+        .popupItemBorderRadius(
+          useEnabled(this.enableAlphabetIndexerPopupItemBorderRadius, this.alphabetIndexerPopupItemBorderRadius))
+        .itemBorderRadius(
+          useEnabled(this.enableAlphabetIndexerItemBorderRadius, this.alphabetIndexerItemBorderRadius))
+        .popupBackgroundBlurStyle(
+          useEnabled(this.enableAlphabetIndexerPopupBackgroundBlurStyle, this.alphabetIndexerPopupBackgroundBlurStyle))
+        .popupTitleBackground(
+          useEnabled(this.enableAlphabetIndexerPopupTitleBackground, this.alphabetIndexerPopupTitleBackground))
+        .enableHapticFeedback(
+          useEnabled(this.enableAlphabetIndexerEnableHapticFeedback, this.alphabetIndexerEnableHapticFeedback))
     }
   }
 
@@ -149,59 +175,59 @@ export struct AlphabetIndexerBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         ColorBlock({
-          title: '未选中项文本颜色',
-          isEnabled: this.enableAlphabetIndexerColor,
-          color: this.alphabetIndexerColor
+          title: 'color',
+          isEnabled: $enableAlphabetIndexerColor,
+          color: $alphabetIndexerColor
         })
         ColorBlock({
-          title: '选中项文本颜色',
-          isEnabled: this.enableAlphabetIndexerSelectedColor,
-          color: this.alphabetIndexerSelectedColor
+          title: 'selectedColor',
+          isEnabled: $enableAlphabetIndexerSelectedColor,
+          color: $alphabetIndexerSelectedColor
         })
         ColorBlock({
-          title: '提示弹窗一级索引项文本颜色',
-          isEnabled: this.enableAlphabetIndexerPopupColor,
-          color: this.alphabetIndexerPopupColor
+          title: 'popupColor',
+          isEnabled: $enableAlphabetIndexerPopupColor,
+          color: $alphabetIndexerPopupColor
         })
         ColorBlock({
-          title: '选中项背景颜色',
-          isEnabled: this.enableAlphabetIndexerSelectedBackgroundColor,
-          color: this.alphabetIndexerSelectedBackgroundColor
+          title: 'selectedBackgroundColor',
+          isEnabled: $enableAlphabetIndexerSelectedBackgroundColor,
+          color: $alphabetIndexerSelectedBackgroundColor
         })
         ColorBlock({
-          title: '提示弹窗背景颜色',
-          isEnabled: this.enableAlphabetIndexerPopupBackground,
-          color: this.alphabetIndexerPopupBackground
+          title: 'popupBackground',
+          isEnabled: $enableAlphabetIndexerPopupBackground,
+          color: $alphabetIndexerPopupBackground
         })
         RadioBlock({
-          title: '是否使用自定义item',
-          isEnabled: this.enableAlphabetIndexerUsingPopup,
-          value: this.alphabetIndexerUsingPopup,
+          title: 'usingPopup',
+          isEnabled: $enableAlphabetIndexerUsingPopup,
+          value: $alphabetIndexerUsingPopup,
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
           ]
         })
         SliderBlock({
-          title: '选中项文本大小',
-          isEnabled: this.enableAlphabetIndexerSelectedFontSize,
-          value: this.alphabetIndexerSelectedFontSize,
+          title: 'selectedFontSize',
+          isEnabled: $enableAlphabetIndexerSelectedFontSize,
+          value: $alphabetIndexerSelectedFontSize,
           min: 4,
           max: 16
         })
         RadioBlock({
-          title: '选中项文本样式',
-          isEnabled: this.enableAlphabetIndexerSelectedFontStyle,
-          value: this.alphabetIndexerSelectedFontStyle,
+          title: 'selectedFontStyle',
+          isEnabled: $enableAlphabetIndexerSelectedFontStyle,
+          value: $alphabetIndexerSelectedFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
           ]
         })
         RadioBlock({
-          title: '选中项文本粗细',
-          isEnabled: this.enableAlphabetIndexerSelectedFontWeight,
-          value: this.alphabetIndexerSelectedFontWeight,
+          title: 'selectedFontWeight',
+          isEnabled: $enableAlphabetIndexerSelectedFontWeight,
+          value: $alphabetIndexerSelectedFontWeight,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
             { label: 'Normal', value: FontWeight.Normal },
@@ -212,25 +238,25 @@ export struct AlphabetIndexerBootcamp {
           ]
         })
         SliderBlock({
-          title: '提示弹窗一级索引文本大小',
-          isEnabled: this.enableAlphabetIndexerPopupFontSize,
-          value: this.alphabetIndexerPopupFontSize,
+          title: 'popupFontSize',
+          isEnabled: $enableAlphabetIndexerPopupFontSize,
+          value: $alphabetIndexerPopupFontSize,
           min: 12,
           max: 32
         })
         RadioBlock({
-          title: '提示弹窗一级索引文本样式',
-          isEnabled: this.enableAlphabetIndexerPopupFontStyle,
-          value: this.alphabetIndexerPopupFontStyle,
+          title: 'popupFontStyle',
+          isEnabled: $enableAlphabetIndexerPopupFontStyle,
+          value: $alphabetIndexerPopupFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
           ]
         })
         RadioBlock({
-          title: '提示弹窗一级索引文本粗细',
-          isEnabled: this.enableAlphabetIndexerPopupFontWeight,
-          value: this.alphabetIndexerPopupFontWeight,
+          title: 'popupFontWeight',
+          isEnabled: $enableAlphabetIndexerPopupFontWeight,
+          value: $alphabetIndexerPopupFontWeight,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
             { label: 'Normal', value: FontWeight.Normal },
@@ -241,25 +267,25 @@ export struct AlphabetIndexerBootcamp {
           ]
         })
         SliderBlock({
-          title: '未选中项文本大小',
-          isEnabled: this.enableAlphabetIndexerFontSize,
-          value: this.alphabetIndexerFontSize,
+          title: 'fontSize',
+          isEnabled: $enableAlphabetIndexerFontSize,
+          value: $alphabetIndexerFontSize,
           min: 4,
           max: 16
         })
         RadioBlock({
-          title: '未选中项文本样式',
-          isEnabled: this.enableAlphabetIndexerFontStyle,
-          value: this.alphabetIndexerFontStyle,
+          title: 'fontStyle',
+          isEnabled: $enableAlphabetIndexerFontStyle,
+          value: $alphabetIndexerFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
           ]
         })
         RadioBlock({
-          title: '未选中项文本粗细',
-          isEnabled: this.enableAlphabetIndexerFontWeight,
-          value: this.alphabetIndexerFontWeight,
+          title: 'fontWeight',
+          isEnabled: $enableAlphabetIndexerFontWeight,
+          value: $alphabetIndexerFontWeight,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
             { label: 'Normal', value: FontWeight.Normal },
@@ -270,16 +296,16 @@ export struct AlphabetIndexerBootcamp {
           ]
         })
         SliderBlock({
-          title: '索引项区域大小',
-          isEnabled: this.enableAlphabetIndexerItemSize,
-          value: this.alphabetIndexerItemSize,
+          title: 'itemSize',
+          isEnabled: $enableAlphabetIndexerItemSize,
+          value: $alphabetIndexerItemSize,
           min: 12,
           max: 32
         })
         RadioBlock({
-          title: '索引条提示弹窗的对齐样式',
-          isEnabled: this.enableAlphabetIndexerAlignStyleIndexerAlign,
-          value: this.alphabetIndexerAlignStyleIndexerAlign,
+          title: 'alignStyle.value',
+          isEnabled: $enableAlphabetIndexerAlignStyleIndexerAlign,
+          value: $alphabetIndexerAlignStyleIndexerAlign,
           dataSource: [
             { label: 'Left', value: IndexerAlign.Left },
             { label: 'Right', value: IndexerAlign.Right },
@@ -288,63 +314,63 @@ export struct AlphabetIndexerBootcamp {
           ]
         })
         SliderBlock({
-          title: '索引条提示弹窗的对齐偏移',
-          isEnabled: this.enableAlphabetIndexerAlignStyleLength,
-          value: this.alphabetIndexerAlignStyleLength,
+          title: 'alignStyle.offset',
+          isEnabled: $enableAlphabetIndexerAlignStyleLength,
+          value: $alphabetIndexerAlignStyleLength,
           min: 0,
           max: 50
         })
         SliderBlock({
-          title: '选中项索引值',
-          isEnabled: this.enableAlphabetIndexerSelected,
-          value: this.alphabetIndexerSelected,
+          title: 'selected',
+          isEnabled: $enableAlphabetIndexerSelected,
+          value: $alphabetIndexerSelected,
           min: 0,
           max: this.value.length
         })
         SliderBlock({
-          title: '弹出窗口相对于索引条上边框中点的位置X',
-          isEnabled: this.enableAlphabetIndexerPopupPositionX,
-          value: this.alphabetIndexerPopupPositionX,
+          title: 'popupPosition.value.x',
+          isEnabled: $enableAlphabetIndexerPopupPositionX,
+          value: $alphabetIndexerPopupPositionX,
           min: 30,
           max: 90
         })
         SliderBlock({
-          title: '弹出窗口相对于索引条上边框中点的位置Y',
-          isEnabled: this.enableAlphabetIndexerPopupPositionY,
-          value: this.alphabetIndexerPopupPositionY,
+          title: 'popupPosition.value.y',
+          isEnabled: $enableAlphabetIndexerPopupPositionY,
+          value: $alphabetIndexerPopupPositionY,
           min: 24,
           max: 72
         })
         ColorBlock({
-          title: '提示弹窗二级索引选中项文本颜色',
-          isEnabled: this.enableAlphabetIndexerPopupSelectedColor,
-          color: this.alphabetIndexerPopupSelectedColor
+          title: 'popupSelectedColor',
+          isEnabled: $enableAlphabetIndexerPopupSelectedColor,
+          color: $alphabetIndexerPopupSelectedColor
         })
         ColorBlock({
-          title: '提示弹窗二级索引未选中项文本颜色',
-          isEnabled: this.enableAlphabetIndexerPopupUnselectedColor,
-          color: this.alphabetIndexerPopupUnselectedColor
+          title: 'popupUnselectedColor',
+          isEnabled: $enableAlphabetIndexerPopupUnselectedColor,
+          color: $alphabetIndexerPopupUnselectedColor
         })
         SliderBlock({
-          title: '提示弹窗二级索引项文本大小',
-          isEnabled: this.enableAlphabetIndexerPopupItemFontSize,
-          value: this.alphabetIndexerPopupItemFontSize,
-          min: 4,
-          max: 16
+          title: 'popupItemFont.size',
+          isEnabled: $enableAlphabetIndexerPopupItemFontSize,
+          value: $alphabetIndexerPopupItemFontSize,
+          min: 12,
+          max: 36
         })
         RadioBlock({
-          title: '提示弹窗二级索引项文本样式',
-          isEnabled: this.enableAlphabetIndexerPopupItemFontStyle,
-          value: this.alphabetIndexerPopupItemFontStyle,
+          title: 'popupItemFont.style',
+          isEnabled: $enableAlphabetIndexerPopupItemFontStyle,
+          value: $alphabetIndexerPopupItemFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic }
           ]
         })
         RadioBlock({
-          title: '提示弹窗二级索引项文本粗细',
-          isEnabled: this.enableAlphabetIndexerPopupItemFontStyle,
-          value: this.alphabetIndexerPopupItemFontStyle,
+          title: 'popupItemFont.weight',
+          isEnabled: $enableAlphabetIndexerPopupItemFontStyle,
+          value: $alphabetIndexerPopupItemFontStyle,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
             { label: 'Normal', value: FontWeight.Normal },
@@ -355,62 +381,62 @@ export struct AlphabetIndexerBootcamp {
           ]
         })
         ColorBlock({
-          title: '提示弹窗二级索引项背景颜色',
-          isEnabled: this.enableAlphabetIndexerPopupItemBackgroundColor,
-          color: this.alphabetIndexerPopupItemBackgroundColor
+          title: 'popupItemBackgroundColor',
+          isEnabled: $enableAlphabetIndexerPopupItemBackgroundColor,
+          color: $alphabetIndexerPopupItemBackgroundColor
         })
         RadioBlock({
-          title: '是否使用自适应折叠模式',
-          isEnabled: this.enableAlphabetIndexerAutoCollapse,
-          value: this.alphabetIndexerAutoCollapse,
+          title: 'autoCollapse',
+          isEnabled: $enableAlphabetIndexerAutoCollapse,
+          value: $alphabetIndexerAutoCollapse,
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
           ]
         })
         SliderBlock({
-          title: '提示弹窗索引项背板圆角半径',
-          isEnabled: this.enableAlphabetIndexerPopupItemBorderRadius,
-          value: this.alphabetIndexerPopupItemBorderRadius,
+          title: 'popupItemBorderRadius',
+          isEnabled: $enableAlphabetIndexerPopupItemBorderRadius,
+          value: $alphabetIndexerPopupItemBorderRadius,
           min: 0,
           max: 48
         })
         SliderBlock({
-          title: '索引项背板圆角半径',
-          isEnabled: this.enableAlphabetIndexerItemBorderRadius,
-          value: this.alphabetIndexerItemBorderRadius,
+          title: 'itemBorderRadius',
+          isEnabled: $enableAlphabetIndexerItemBorderRadius,
+          value: $alphabetIndexerItemBorderRadius,
           min: 0,
           max: 16
         })
         RadioBlock({
-          title: '提示弹窗的背景模糊材质',
-          isEnabled: this.enableAlphabetIndexerPopupBackgroundBlurStyle,
-          value: this.alphabetIndexerPopupBackgroundBlurStyle,
+          title: 'popupBackgroundBlurStyle',
+          isEnabled: $enableAlphabetIndexerPopupBackgroundBlurStyle,
+          value: $alphabetIndexerPopupBackgroundBlurStyle,
           dataSource: [
-            { label: '轻薄材质模糊', value: BlurStyle.Thin },
-            { label: '普通厚度材质模糊', value: BlurStyle.Regular },
-            { label: '厚材质模糊', value: BlurStyle.Thick },
-            { label: '近距景深模糊', value: BlurStyle.BACKGROUND_THIN },
-            { label: '中距景深模糊', value: BlurStyle.BACKGROUND_REGULAR },
-            { label: '远距景深模糊', value: BlurStyle.BACKGROUND_THICK },
-            { label: '超远距景深模糊', value: BlurStyle.BACKGROUND_ULTRA_THICK },
-            { label: '关闭模糊', value: BlurStyle.NONE },
-            { label: '组件超轻薄材质模糊', value: BlurStyle.COMPONENT_ULTRA_THIN },
-            { label: '组件轻薄材质模糊', value: BlurStyle.COMPONENT_THIN },
-            { label: '组件普通材质模糊', value: BlurStyle.COMPONENT_REGULAR },
-            { label: '组件厚材质模糊', value: BlurStyle.COMPONENT_THICK },
-            { label: '组件超厚材质模糊', value: BlurStyle.COMPONENT_ULTRA_THICK },
+            { label: 'Thin', value: BlurStyle.Thin },
+            { label: 'Regular', value: BlurStyle.Regular },
+            { label: 'Thick', value: BlurStyle.Thick },
+            { label: 'BACKGROUND_THIN', value: BlurStyle.BACKGROUND_THIN },
+            { label: 'BACKGROUND_REGULAR', value: BlurStyle.BACKGROUND_REGULAR },
+            { label: 'BACKGROUND_THICK', value: BlurStyle.BACKGROUND_THICK },
+            { label: 'BACKGROUND_ULTRA_THICK', value: BlurStyle.BACKGROUND_ULTRA_THICK },
+            { label: 'NONE', value: BlurStyle.NONE },
+            { label: 'COMPONENT_ULTRA_THIN', value: BlurStyle.COMPONENT_ULTRA_THIN },
+            { label: 'COMPONENT_THIN', value: BlurStyle.COMPONENT_THIN },
+            { label: 'COMPONENT_REGULAR', value: BlurStyle.COMPONENT_REGULAR },
+            { label: 'COMPONENT_THICK', value: BlurStyle.COMPONENT_THICK },
+            { label: 'COMPONENT_ULTRA_THICK', value: BlurStyle.COMPONENT_ULTRA_THICK },
           ]
         })
         ColorBlock({
-          title: '提示弹窗一级索引项背景颜色',
-          isEnabled: this.enableAlphabetIndexerPopupTitleBackground,
-          color: this.alphabetIndexerPopupTitleBackground
+          title: 'popupTitleBackground',
+          isEnabled: $enableAlphabetIndexerPopupTitleBackground,
+          color: $alphabetIndexerPopupTitleBackground
         })
         RadioBlock({
-          title: '是否使用触控反馈',
-          isEnabled: this.enableAlphabetIndexerEnableHapticFeedback,
-          value: this.alphabetIndexerEnableHapticFeedback,
+          title: 'enableHapticFeedback',
+          isEnabled: $enableAlphabetIndexerEnableHapticFeedback,
+          value: $alphabetIndexerEnableHapticFeedback,
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
