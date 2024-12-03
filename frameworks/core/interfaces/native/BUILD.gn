@@ -14,14 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-config("ace_core_interfaces_native_node_config") {
-  include_dirs =
-      [ "${ace_root}/frameworks/core/interfaces/native/generated/interface" ]
-
-  # TODO: this is for zero sized generated structs in arkoala_api.here
-  cflags_cc = [ "-Wno-extern-c-compat" ]
-}
-
 # build core sources
 template("ace_core_interfaces_native_node") {
   forward_variables_from(invoker, "*")
@@ -212,47 +204,4 @@ foreach(item, ace_platforms) {
       cflags_cc = []
     }
   }
-}
-
-web_components_support_for_test = true
-form_component_support_for_test = true
-
-ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-  defines = []
-  include_dirs = []
-
-  public_configs = [ ":ace_core_interfaces_native_node_config" ]
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  defines += [ "ARKUI_CAPI_UNITTEST " ]
-  defines += [ "INCLUDE_GENERATED_SOURCES" ]
-  if (ace_engine_feature_enable_point_light) {
-    defines += [ "POINT_LIGHT_ENABLE" ]
-  }
-
-  sources = []
-
-  #sources += generated_sources
-  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-
-  # for support securec.h and snprintf_s
-  external_deps = [ "bounds_checking_function:libsec_static" ]
-
-  if (use_hilog) {
-    external_deps += [ "hilog:libhilog" ]
-  }
-
-  if (defined(web_components_support_for_test) &&
-      web_components_support_for_test) {
-    defines += [ "WEB_SUPPORTED" ]
-  }
-
-  if (defined(form_component_support_for_test) &&
-      form_component_support_for_test) {
-    defines += [ "FORM_SUPPORTED" ]
-  }
-
-  cflags_cc = [ "-Wno-unused-variable" ]
 }
