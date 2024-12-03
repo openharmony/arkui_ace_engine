@@ -103,6 +103,6 @@ build_component("inspector_v2") {
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   } else if (is_arkui_x || use_mingw_win || use_mac || use_linux) {
-    include_dirs = [ c_utils_path ]
+    include_dirs = [ c_utils_header_path ]
   }
 }
