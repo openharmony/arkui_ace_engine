@@ -23,6 +23,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
@@ -120,10 +121,20 @@ public:
         themeStyle->SetAttr(PATTERN_FG_COLOR, { .value = THEME_SCROLLBAR_COLOR });
 
         SetupTheme<ScrollBarTheme>();
+        SetupTheme<ScrollableTheme>();
 
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_NAME, RESOURCE_OPACITY_BY_STRING);
         AddResource(RES_ID, RESOURCE_OPACITY_BY_NUMBER);
+    }
+
+    void OnModifyDone()
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone();
     }
 };
 
@@ -1550,9 +1561,13 @@ HWTEST_F(GridModifierTest, setEnableScrollInteractionTestValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, DISABLED_setFrictionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 {
     double doubleResult;
+
+    auto columnsStr = ArkValue<Ark_String>("1fr 1fr 2fr");
+    modifier_->setColumnsTemplate(node_, &columnsStr);
+    OnModifyDone();
 
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE, FLT_EPSILON);

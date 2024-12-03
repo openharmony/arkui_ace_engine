@@ -21,6 +21,7 @@
 #include "type_helpers.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -75,6 +76,7 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<ScrollBarTheme>();
+        SetupTheme<ScrollableTheme>();
 
         for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
             AddResource(id, res);
