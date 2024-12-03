@@ -18,6 +18,7 @@ import { ColorBlock, RadioBlock, SliderBlock} from 'common';
 
 @Component
 export struct AlphabetIndexerBootcamp {
+
   private value: string[] = ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
     'H', 'I', 'J', 'K', 'L', 'M', 'N',
     'O', 'P', 'Q', 'R', 'S', 'T', 'U',
