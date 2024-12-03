@@ -328,7 +328,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish0
 {
     CreateDefaultSwiper();
     auto offset = OffsetF(0.1f, 0.2f);
-    pattern_->usePropertyAnimation_ = false;
+    pattern_->propertyAnimationIsRunning_ = false;
     struct SwiperItemInfo swiperItemInfo1;
     swiperItemInfo1.startPos = -1.0f;
     swiperItemInfo1.endPos = -1.0f;
@@ -348,7 +348,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish0
      */
     for (int i = 0; i <= 1; i++) {
         pattern_->OnPropertyTranslateAnimationFinish(offset);
-        pattern_->usePropertyAnimation_ = true;
+        pattern_->propertyAnimationIsRunning_ = true;
     }
 }
 
@@ -360,7 +360,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish0
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.Level1)
 {
     CreateDefaultSwiper();
-    pattern_->usePropertyAnimation_ = false;
+    pattern_->propertyAnimationIsRunning_ = false;
     struct SwiperItemInfo swiperItemInfo1;
     swiperItemInfo1.startPos = -1.0f;
     swiperItemInfo1.endPos = -1.0f;
@@ -380,7 +380,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopPropertyTranslateAnimation001, 
      */
     for (int i = 0; i <= 1; i++) {
         pattern_->StopPropertyTranslateAnimation(false);
-        pattern_->usePropertyAnimation_ = true;
+        pattern_->propertyAnimationIsRunning_ = true;
     }
 }
 
@@ -646,7 +646,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation002, 
     float translate = 0.1f;
     int32_t nextIndex = 1;
     float velocity = 0.1f;
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->targetIndex_ = 1;
     pattern_->itemPositionInAnimation_ = pattern_->itemPosition_;
     pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
@@ -1029,7 +1029,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         pattern_->currentIndex_ = 1;
     }
 
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->SwipeTo(index);
     layoutProperty_->UpdateIsCustomAnimation(true);
     pattern_->SwipeTo(1);
@@ -1101,17 +1101,17 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      * @tc.steps: step1. ShowPrevious with animate, than forceStop animation
      */
     pattern_->ShowPrevious();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     EXPECT_EQ(GetChildX(frameNode_, 2), -480.0f);
     EXPECT_EQ(GetChildX(frameNode_, 3), -240.0f);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
     }
     pattern_->FinishAnimation();
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     // jumped to final position
     EXPECT_EQ(pattern_->currentIndex_, -2);
     EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
@@ -1121,15 +1121,15 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      * @tc.steps: step2. ShowNext with animate
      */
     pattern_->ShowNext();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
     }
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);

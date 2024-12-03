@@ -659,7 +659,7 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
     EXPECT_TRUE(pattern_->isUserFinish_);
     EXPECT_FALSE(pattern_->isFinishAnimation_);
 
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     controller_->SetFinishCallback([]() {});
     controller_->FinishAnimation();
     EXPECT_EQ(controller_->GetFinishCallback(), nullptr);

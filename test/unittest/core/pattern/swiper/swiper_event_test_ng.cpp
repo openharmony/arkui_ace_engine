@@ -764,13 +764,13 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.Level1)
 {
     CreateDefaultSwiper();
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
 
     // second child calling
     pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
@@ -782,7 +782,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
     // second child scrolling
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->OnScrollEndRecursive(std::nullopt);
 
     // self scroll
@@ -1312,7 +1312,7 @@ HWTEST_F(SwiperTestNg, AttrPageFlipModeTest001, TestSize.Level1)
     panEvent->actionUpdate_(info);
     EXPECT_FALSE(pattern_->isFirstAxisAction_);
     EXPECT_EQ(pattern_->currentIndex_, 1);
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     panEvent->actionUpdate_(info);
     EXPECT_EQ(pattern_->currentIndex_, 2);
 }
@@ -1342,11 +1342,11 @@ HWTEST_F(SwiperTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     EXPECT_FALSE(pattern_->isFirstAxisAction_);
     EXPECT_EQ(pattern_->currentIndex_, 1);
     // propertyAnimation running will block page flipping
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     panEvent->actionUpdate_(info);
     EXPECT_EQ(pattern_->currentIndex_, 1);
     // frameAnimation running will block page flipping
-    pattern_->usePropertyAnimation_ = false;
+    pattern_->propertyAnimationIsRunning_ = false;
     pattern_->translateAnimationIsRunning_ = true;
     panEvent->actionUpdate_(info);
     EXPECT_EQ(pattern_->currentIndex_, 1);
