@@ -1782,19 +1782,16 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
 void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    auto func = [this, keyboardHeight]() mutable {
-        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+    auto func = [this, keyboardHeight, id = instanceId_]() mutable {
+        ContainerScope scope(id);
+        safeAreaManager_->UpdateKeyboardSafeArea(static_cast<uint32_t>(keyboardHeight));
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += safeAreaManager_->GetSystemSafeArea().bottom_.Length();
         }
-        float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-        float height = 0.0f;
-        if (manager) {
-            height = manager->GetHeight();
-            positionY = static_cast<float>(manager->GetClickPosition().GetY());
-        }
+        float positionY = manager ? static_cast<float>(manager->GetClickPosition().GetY()) : 0.0f;
+        float height = manager ? manager->GetHeight() : 0.0f;
         SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
         float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
