@@ -33,7 +33,7 @@ using EtsCardAxisEventCallback = std::function<void(const AxisEvent&, Serialized
 
 namespace NG {
 class FormEventManager : public virtual AceType {
-DECLARE_ACE_TYPE(FormEventManager, AceType);
+    DECLARE_ACE_TYPE(FormEventManager, AceType);
 public:
     FormEventManager() = default;
 
