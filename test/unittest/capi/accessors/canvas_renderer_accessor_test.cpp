@@ -1300,8 +1300,8 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
                 continue;
             }
             EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(holder->imageData->dirtyWidth, expectedW);
-            EXPECT_TRUE(holder->imageData->dirtyHeight, expectedH);
+            EXPECT_EQ(holder->imageData->dirtyWidth, expectedW);
+            EXPECT_EQ(holder->imageData->dirtyHeight, expectedH);
         }
     }
     holder->TearDown();
