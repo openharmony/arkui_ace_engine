@@ -30,17 +30,17 @@ export struct AdvancedCounterBootcamp{
   @State enabledMonth: boolean = false;
   @State enabledDay: boolean = false;
   @State enabledStep: boolean = false;
-  @State Focusable: boolean = true;
-  @State Direction: Direction = Direction.Ltr;
-  @State Min: number = 0;
-  @State Max: number = 999;
-  @State Value: number = 0;
-  @State Step: number = 1;
-  @State textWidth: number = 0;
+  @State counterFocusable: boolean = true;
+  @State counterDirection: Direction = Direction.Ltr;
+  @State counterMin: number = 0;
+  @State counterMax: number = 999;
+  @State counterValue: number = 0;
+  @State counterStep: number = 1;
+  @State counterTextWidth: number = 0;
   @State counterType: CounterType = 0;
-  @State Year: number = 1;
-  @State Month: number = 1;
-  @State Day: number = 1;
+  @State counterYear: number = 1;
+  @State counterMonth: number = 1;
+  @State counterDay: number = 1;
 
   build() {
     NavDestination() {
@@ -66,24 +66,24 @@ export struct AdvancedCounterBootcamp{
         CounterComponent({
           options: {
             type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.Direction),
+            direction: useEnabled(this.enabledDirection,this.counterDirection),
             numberOptions: {
               label: 'Counter',
-              value: useEnabled(this.enabledValue,this.Value),
-              min: useEnabled(this.enabledMin,this.Min),
-              max: useEnabled(this.enabledMax,this.Max),
-              focusable:useEnabled(this.enabledFocusable,this.Focusable),
+              value: useEnabled(this.enabledValue,this.counterValue),
+              min: useEnabled(this.enabledMin,this.counterMin),
+              max: useEnabled(this.enabledMax,this.counterMax),
+              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
               onFocusIncrease: () => {
-                console.log("onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
               },
               onFocusDecrease: () => {
-                console.log("onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调');
               },
               onBlurIncrease: () => {
-                console.log("onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
               },
               onBlurDecrease: () => {
-                console.log("onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调');
               }
             }
           }
@@ -92,24 +92,24 @@ export struct AdvancedCounterBootcamp{
         CounterComponent({
           options: {
             type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.Direction),
+            direction: useEnabled(this.enabledDirection,this.counterDirection),
             numberOptions: {
               label: 'Counter',
-              value: useEnabled(this.enabledValue,this.Value),
-              min: useEnabled(this.enabledMin,this.Min),
-              max: useEnabled(this.enabledMax,this.Max),
-              focusable:useEnabled(this.enabledFocusable,this.Focusable),
+              value: useEnabled(this.enabledValue,this.counterValue),
+              min: useEnabled(this.enabledMin,this.counterMin),
+              max: useEnabled(this.enabledMax,this.counterMax),
+              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
               onFocusIncrease: () => {
-                console.log("onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
               },
               onFocusDecrease: () => {
-                console.log("onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调');
               },
               onBlurIncrease: () => {
-                console.log("onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
               },
               onBlurDecrease: () => {
-                console.log("onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调" );
+                console.log('onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调');
               }
             }
           }
@@ -118,14 +118,14 @@ export struct AdvancedCounterBootcamp{
         CounterComponent({
           options: {
             type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.Direction),
+            direction: useEnabled(this.enabledDirection,this.counterDirection),
             inlineOptions: {
-              value: useEnabled(this.enabledValue,this.Value),
-              min: useEnabled(this.enabledMin,this.Min),
-              max: useEnabled(this.enabledMax,this.Max),
-              step: useEnabled(this.enabledStep,this.Step),
-              textWidth: useEnabled(this.enabledTextWidth,this.textWidth),
-              focusable:useEnabled(this.enabledFocusable,this.Focusable),
+              value: useEnabled(this.enabledValue,this.counterValue),
+              min: useEnabled(this.enabledMin,this.counterMin),
+              max: useEnabled(this.enabledMax,this.counterMax),
+              step: useEnabled(this.enabledStep,this.counterStep),
+              textWidth: useEnabled(this.enabledTextWidth,this.counterTextWidth),
+              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
               onChange: (value: number) => {
                 console.log('onDateChange Date: ' + value.toString());
               }
@@ -136,12 +136,12 @@ export struct AdvancedCounterBootcamp{
         CounterComponent({
           options: {
             type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.Direction),
+            direction: useEnabled(this.enabledDirection,this.counterDirection),
             dateOptions: {
-              year: useEnabled(this.enabledYear,this.Year),
-              month: useEnabled(this.enabledMonth,this.Month),
-              day: useEnabled(this.enabledDay,this.Day),
-              focusable:this.Focusable,
+              year: useEnabled(this.enabledYear,this.counterYear),
+              month: useEnabled(this.enabledMonth,this.counterMonth),
+              day: useEnabled(this.enabledDay,this.counterDay),
+              focusable:this.counterFocusable,
               onDateChange: (date: DateData) => {
                 console.log('onDateChange Date: ' + date.toString());
               }
@@ -170,7 +170,7 @@ export struct AdvancedCounterBootcamp{
         RadioBlock({
           title: 'direction',
           isEnabled: $enabledDirection,
-          value: $Direction,
+          value: $counterDirection,
           dataSource: [
             { label: 'Ltr', value: Direction.Ltr},
             { label: 'Rtl', value: Direction.Rtl },
@@ -180,7 +180,7 @@ export struct AdvancedCounterBootcamp{
         RadioBlock({
           title: 'focusable',
           isEnabled: $enabledFocusable,
-          value: $Focusable,
+          value: $counterFocusable,
           dataSource: [
             { label: 'true', value: true},
             { label: 'false', value: false},
@@ -189,56 +189,56 @@ export struct AdvancedCounterBootcamp{
         SliderBlock({
           title: 'value',
           isEnabled: $enabledValue,
-          value: $Value,
+          value: $counterValue,
           min: 0,
           max: 999
         })
         SliderBlock({
           title: 'min',
           isEnabled: $enabledMin,
-          value: $Min,
+          value: $counterMin,
           min: 0,
           max: 999
         })
         SliderBlock({
           title: 'max',
           isEnabled: $enabledMax,
-          value: $Max,
+          value: $counterMax,
           min: 1,
           max: 999
         })
         SliderBlock({
           title: 'step',
           isEnabled: $enabledStep,
-          value: $Step,
+          value: $counterStep,
           min: 1,
           max: 100
         })
         SliderBlock({
           title: 'textWidth',
           isEnabled: $enabledTextWidth,
-          value: $textWidth,
+          value: $counterTextWidth,
           min: 1,
           max: 999
         })
         SliderBlock({
           title: 'year',
           isEnabled: $enabledYear,
-          value: $Year,
+          value: $counterYear,
           min: 1,
           max: 9999
         })
         SliderBlock({
           title: 'month',
           isEnabled: $enabledMonth,
-          value: $Month,
+          value: $counterMonth,
           min: 1,
           max: 12
         })
         SliderBlock({
           title: 'day',
           isEnabled: $enabledDay,
-          value: $Day,
+          value: $counterDay,
           min: 1,
           max: 31
         })
