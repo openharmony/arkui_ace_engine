@@ -867,10 +867,10 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
             HandleFadeEffect(offset, source, size, isNotPositiveScrollableDistance);
         }
     }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() &&
-            (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
-                source == SCROLL_FROM_ANIMATION_SPRING ||
-                (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
+    if (!(scrollEffect_ && (scrollEffect_->IsSpringEffect() && HasEdgeEffect(offset)) &&
+        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
+        source == SCROLL_FROM_ANIMATION_SPRING ||
+        (source == SCROLL_FROM_ANIMATION_CONTROLLER && animateCanOverScroll_)))) {
         if (isAtTop && Positive(offset)) {
             animateOverScroll_ = false;
             return false;
@@ -2155,11 +2155,16 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
 
 bool ScrollablePattern::HasEdgeEffect(float offset, bool isWithRefresh) const
 {
+    if (GetEdgeEffect() != EdgeEffect::NONE && GetEffectEdge() == EffectEdge::ALL) {
+        return true;
+    }
+    auto overOffsets = GetOverScrollOffset(offset);
+    auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     bool hasEdgeEffect =
-        (GetEdgeEffect() != EdgeEffect::NONE) && ((NonNegative(offset) && GetEffectEdge() != EffectEdge::END) ||
-                                                     (NonPositive(offset) && GetEffectEdge() != EffectEdge::START));
+        (GetEdgeEffect() != EdgeEffect::NONE) && ((NonNegative(overOffset) && GetEffectEdge() != EffectEdge::END) ||
+                                                     (NonPositive(overOffset) && GetEffectEdge() != EffectEdge::START));
     return isWithRefresh
-               ? (hasEdgeEffect || (offset > 0 && refreshCoordination_ && refreshCoordination_->InCoordination()))
+               ? (hasEdgeEffect || (Positive(offset) && refreshCoordination_ && refreshCoordination_->InCoordination()))
                : hasEdgeEffect;
 }
 
@@ -2335,9 +2340,9 @@ bool ScrollablePattern::CanSpringOverScroll(float velocity) const
         case EffectEdge::ALL:
             return true;
         case EffectEdge::START:
-            return IsAtTop() && Positive(velocity);
+            return IsAtTop();
         case EffectEdge::END:
-            return IsAtBottom() && Negative(velocity);
+            return IsAtBottom();
     }
     return true;
 }
