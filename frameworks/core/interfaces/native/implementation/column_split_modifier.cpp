@@ -44,6 +44,12 @@ ItemDivider Convert(const Ark_ColumnSplitDividerStyle& src)
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ColumnSplitModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ColumnSplitModifier
 namespace ColumnSplitInterfaceModifier {
 void SetColumnSplitOptionsImpl(Ark_NativePointer node)
 {
@@ -59,7 +65,7 @@ void ResizeableImpl(Ark_NativePointer node,
     LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_ColumnSplitDividerStyle_Undefined* value)
+                 const Ark_Union_ColumnSplitDividerStyle_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -71,6 +77,7 @@ void DividerImpl(Ark_NativePointer node,
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
     static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
+        ColumnSplitModifier::ConstructImpl,
         ColumnSplitInterfaceModifier::SetColumnSplitOptionsImpl,
         ColumnSplitAttributeModifier::ResizeableImpl,
         ColumnSplitAttributeModifier::DividerImpl,

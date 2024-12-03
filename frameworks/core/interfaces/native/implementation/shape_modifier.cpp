@@ -35,7 +35,7 @@ struct ShapeOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-ShapeOptions Convert(const Ark_Literal_Union_Number_String_height_width_x_y& src)
+ShapeOptions Convert(const Ark_ViewportRect& src)
 {
     ShapeOptions options;
     options.x = Converter::OptConvert<Dimension>(src.x);
@@ -47,6 +47,12 @@ ShapeOptions Convert(const Ark_Literal_Union_Number_String_height_width_x_y& src
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ShapeModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ShapeModifier
 namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
                           const Ark_PixelMap* value)
@@ -69,7 +75,7 @@ void SetShapeOptions1Impl(Ark_NativePointer node)
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
 void ViewPortImpl(Ark_NativePointer node,
-                  const Ark_Literal_Union_Number_String_height_width_x_y* value)
+                  const Ark_ViewportRect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -201,6 +207,7 @@ void MeshImpl(Ark_NativePointer node,
 const GENERATED_ArkUIShapeModifier* GetShapeModifier()
 {
     static const GENERATED_ArkUIShapeModifier ArkUIShapeModifierImpl {
+        ShapeModifier::ConstructImpl,
         ShapeInterfaceModifier::SetShapeOptions0Impl,
         ShapeInterfaceModifier::SetShapeOptions1Impl,
         ShapeAttributeModifier::ViewPortImpl,

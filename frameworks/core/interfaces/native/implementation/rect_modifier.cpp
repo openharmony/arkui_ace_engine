@@ -38,8 +38,7 @@ struct RectRadius {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-RectOptions Convert(
-    const Ark_Type_RectInterface_value_u0& src)
+RectOptions Convert(const Ark_RectOptions& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
@@ -55,7 +54,7 @@ RectOptions Convert(
 }
 
 template<>
-RectOptions Convert(const Ark_Type_RectInterface_value_u1& src)
+RectOptions Convert(const Ark_RoundedRectOptions& src)
 {
     RectOptions rectOptions;
     rectOptions.width = Converter::OptConvert<Dimension>(src.width);
@@ -100,34 +99,38 @@ Dimension Convert(const Array_CustomObject& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RectModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RectModifier
 namespace RectInterfaceModifier {
-
 void SetRectOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_RectInterface_value* value)
+                        const Opt_Union_RectOptions_RoundedRectOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<RectOptions>(*value);
     CHECK_NULL_VOID(options);
-    if (options->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, options->width.value());
+    auto opt = Converter::OptConvert<RectOptions>(*options);
+    CHECK_NULL_VOID(opt);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
     }
 
-    if (options->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, options->height.value());
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
     }
 
-    if (!options->radiusWidth || !options->radiusHeight) {
+    if (!opt->radiusWidth || !opt->radiusHeight) {
         return;
     }
-    const Dimension rx = options->radiusWidth.value();
-    const Dimension ry = options->radiusHeight.value();
+    const Dimension rx = opt->radiusWidth.value();
+    const Dimension ry = opt->radiusHeight.value();
     RectModelNG::SetRadiusWidth(frameNode, rx);
     RectModelNG::SetRadiusHeight(frameNode, ry);
 }
 } // RectInterfaceModifier
-
 namespace RectAttributeModifier {
 void RadiusWidthImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String* value)
@@ -164,6 +167,7 @@ void RadiusImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRectModifier* GetRectModifier()
 {
     static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
+        RectModifier::ConstructImpl,
         RectInterfaceModifier::SetRectOptionsImpl,
         RectAttributeModifier::RadiusWidthImpl,
         RectAttributeModifier::RadiusHeightImpl,
@@ -171,4 +175,5 @@ const GENERATED_ArkUIRectModifier* GetRectModifier()
     };
     return &ArkUIRectModifierImpl;
 }
+
 }

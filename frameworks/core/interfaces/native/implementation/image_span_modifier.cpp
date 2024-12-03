@@ -39,6 +39,12 @@ void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment&
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ImageSpanModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ImageSpanModifier
 namespace ImageSpanInterfaceModifier {
 void SetImageSpanOptionsImpl(Ark_NativePointer node,
                              const Ark_Union_ResourceStr_PixelMap* value)
@@ -113,6 +119,7 @@ void AltImpl(Ark_NativePointer node,
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()
 {
     static const GENERATED_ArkUIImageSpanModifier ArkUIImageSpanModifierImpl {
+        ImageSpanModifier::ConstructImpl,
         ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
         ImageSpanAttributeModifier::VerticalAlignImpl,
         ImageSpanAttributeModifier::ColorFilterImpl,

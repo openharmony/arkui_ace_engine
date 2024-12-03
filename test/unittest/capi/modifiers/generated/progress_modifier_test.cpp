@@ -462,8 +462,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius = ArkUnion<Opt_Union_PX_VP_LPX_Resource, Ark_VP>(
-        ArkUnion<Ark_VP, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0])));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -496,8 +497,9 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleLinearStyleOptionsStrokeWidthInv
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius = ArkUnion<Opt_Union_PX_VP_LPX_Resource, Ark_VP>(
-        ArkUnion<Ark_VP, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0])));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Length& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
@@ -532,10 +534,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
     // Initial setup
     WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeWidth =
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius = ArkUnion<Opt_Union_PX_VP_LPX_Resource, Ark_VP>(
-        ArkUnion<Ark_VP, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0])));
+    WriteToUnion<Ark_LinearStyleOptions>(initValueStyle).strokeRadius =
+        ArkUnion<Opt_Union_String_Number_Resource, Ark_Number>(
+            std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
-    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_PX_VP_LPX_Resource& value) {
+    auto checkValue = [this, &initValueStyle](const std::string& input, const Opt_Union_String_Number_Resource& value) {
         Ark_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions inputValueStyle =
             initValueStyle;
 
@@ -549,13 +552,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
             "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeRadius";
     };
 
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_PX_VP_LPX_Resource, Ark_Empty>(nullptr));
     ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_PX_VP_LPX_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Number_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_PX_VP_LPX_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_String_Number_Resource>());
 }
 
 /*
@@ -1960,15 +1961,14 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Le
  */
 HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, TestSize.Level1)
 {
-    Ark_Union_Boolean_Undefined initValuePrivacySensitive;
+    Opt_Boolean initValuePrivacySensitive;
 
     // Initial setup
-    initValuePrivacySensitive =
-        ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValuePrivacySensitive = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValuePrivacySensitive](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Boolean_Undefined& value) {
-        Ark_Union_Boolean_Undefined inputValuePrivacySensitive = initValuePrivacySensitive;
+    auto checkValue = [this, &initValuePrivacySensitive](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValuePrivacySensitive = initValuePrivacySensitive;
 
         inputValuePrivacySensitive = value;
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
@@ -1979,7 +1979,7 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValue
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(value));
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
     }
 }
 
@@ -1990,15 +1990,13 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValue
  */
 HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Boolean_Undefined initValuePrivacySensitive;
+    Opt_Boolean initValuePrivacySensitive;
 
     // Initial setup
-    initValuePrivacySensitive =
-        ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+    initValuePrivacySensitive = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
 
-    auto checkValue = [this, &initValuePrivacySensitive](
-                          const std::string& input, const Ark_Union_Boolean_Undefined& value) {
-        Ark_Union_Boolean_Undefined inputValuePrivacySensitive = initValuePrivacySensitive;
+    auto checkValue = [this, &initValuePrivacySensitive](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValuePrivacySensitive = initValuePrivacySensitive;
 
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         inputValuePrivacySensitive = value;
@@ -2009,8 +2007,7 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidVal
             "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
-    checkValue("undefined", ArkUnion<Ark_Union_Boolean_Undefined, Ark_Undefined>(Ark_Undefined()));
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Boolean_Undefined, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 } // namespace OHOS::Ace::NG

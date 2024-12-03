@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CommonModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CommonModifier
 namespace CommonInterfaceModifier {
 void SetCommonOptionsImpl(Ark_NativePointer node)
 {
@@ -31,6 +37,7 @@ void SetCommonOptionsImpl(Ark_NativePointer node)
 const GENERATED_ArkUICommonModifier* GetCommonModifier()
 {
     static const GENERATED_ArkUICommonModifier ArkUICommonModifierImpl {
+        CommonModifier::ConstructImpl,
         CommonInterfaceModifier::SetCommonOptionsImpl,
     };
     return &ArkUICommonModifierImpl;

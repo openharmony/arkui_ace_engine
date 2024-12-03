@@ -20,6 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SpanModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SpanModifier
 namespace SpanInterfaceModifier {
 void SetSpanOptionsImpl(Ark_NativePointer node,
                         const Ark_Union_String_Resource* value)
@@ -155,6 +161,7 @@ void TextShadowImpl(Ark_NativePointer node,
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
 {
     static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
+        SpanModifier::ConstructImpl,
         SpanInterfaceModifier::SetSpanOptionsImpl,
         SpanAttributeModifier::FontImpl,
         SpanAttributeModifier::FontColorImpl,

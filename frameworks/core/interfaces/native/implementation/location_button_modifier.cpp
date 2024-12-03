@@ -84,6 +84,12 @@ LocationButtonStyle Convert(const Ark_LocationButtonOptions& src)
 }
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace LocationButtonModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // LocationButtonModifier
 namespace LocationButtonInterfaceModifier {
 void SetLocationButtonOptions0Impl(Ark_NativePointer node)
 {
@@ -105,7 +111,7 @@ namespace LocationButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
                  const Callback_ClickEvent_LocationButtonOnClickResult_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](GestureEvent& info) {
@@ -132,6 +138,7 @@ void OnClickImpl(Ark_NativePointer node,
 const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()
 {
     static const GENERATED_ArkUILocationButtonModifier ArkUILocationButtonModifierImpl {
+        LocationButtonModifier::ConstructImpl,
         LocationButtonInterfaceModifier::SetLocationButtonOptions0Impl,
         LocationButtonInterfaceModifier::SetLocationButtonOptions1Impl,
         LocationButtonAttributeModifier::OnClickImpl,

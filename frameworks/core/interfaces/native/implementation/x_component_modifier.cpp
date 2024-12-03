@@ -47,6 +47,12 @@ XComponentType ConvertToXComponentType(const std::string& type)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace XComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // XComponentModifier
 namespace XComponentInterfaceModifier {
 void SetXComponentOptions0Impl(Ark_NativePointer node,
                                const Ark_Type_XComponentInterface_value* value)
@@ -80,7 +86,7 @@ void SetXComponentOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
- 
+
 #ifdef XCOMPONENT_SUPPORTED
     auto id = Converter::Convert<std::string>(value->id);
     XComponentModelNG::SetXComponentId(frameNode, id);
@@ -124,7 +130,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                const Callback_Object_Void* value)
+                const OnNativeLoadCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -132,7 +138,7 @@ void OnLoadImpl(Ark_NativePointer node,
     LOGE("XComponentInterfaceModifier::OnLoadImpl - Ark_CustomObject is not supported");
 }
 void OnDestroyImpl(Ark_NativePointer node,
-                   const Callback_Void* value)
+                   const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -169,6 +175,7 @@ void EnableSecureImpl(Ark_NativePointer node,
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
+        XComponentModifier::ConstructImpl,
         XComponentInterfaceModifier::SetXComponentOptions0Impl,
         XComponentInterfaceModifier::SetXComponentOptions1Impl,
         XComponentInterfaceModifier::SetXComponentOptions2Impl,

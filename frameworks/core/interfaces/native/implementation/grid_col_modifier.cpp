@@ -50,11 +50,17 @@ namespace Converter {
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GridColModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GridColModifier
 namespace GridColInterfaceModifier {
 void SetGridColOptionsImpl(Ark_NativePointer node,
                            const Opt_GridColOptions* option)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
     bool reset {false};
@@ -88,8 +94,9 @@ namespace GridColAttributeModifier {
 void SpanImpl(Ark_NativePointer node,
               const Ark_Union_Number_GridColColumnOption* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     std::optional<V2::GridContainerSize> gcSizeValue {std::nullopt};
     if (value) {
         gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
@@ -102,8 +109,9 @@ void SpanImpl(Ark_NativePointer node,
 void GridColOffsetImpl(Ark_NativePointer node,
                        const Ark_Union_Number_GridColColumnOption* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     if (value) {
         auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
         CHECK_NULL_VOID(gcSizeValue);
@@ -116,8 +124,9 @@ void GridColOffsetImpl(Ark_NativePointer node,
 void OrderImpl(Ark_NativePointer node,
                const Ark_Union_Number_GridColColumnOption* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     if (value) {
         auto gcSizeValue = Converter::OptConvert<V2::GridContainerSize>(*value);
         CHECK_NULL_VOID(gcSizeValue);
@@ -131,6 +140,7 @@ void OrderImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()
 {
     static const GENERATED_ArkUIGridColModifier ArkUIGridColModifierImpl {
+        GridColModifier::ConstructImpl,
         GridColInterfaceModifier::SetGridColOptionsImpl,
         GridColAttributeModifier::SpanImpl,
         GridColAttributeModifier::GridColOffsetImpl,

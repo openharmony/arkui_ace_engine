@@ -92,11 +92,17 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
 } // namespace  OHOS::Ace:NG:Converter
 } // namespace  OHOS::Ace:NG
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace DatePickerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // DatePickerModifier
 namespace DatePickerInterfaceModifier {
 void SetDatePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_DatePickerOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto opt = Converter::OptConvert<DatePickerOptions>(*options);
@@ -185,7 +191,7 @@ void OnChangeImpl(Ark_NativePointer node,
 void OnDateChangeImpl(Ark_NativePointer node,
                       const Callback_Date_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
@@ -214,6 +220,7 @@ void OnDateChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier()
 {
     static const GENERATED_ArkUIDatePickerModifier ArkUIDatePickerModifierImpl {
+        DatePickerModifier::ConstructImpl,
         DatePickerInterfaceModifier::SetDatePickerOptionsImpl,
         DatePickerAttributeModifier::LunarImpl,
         DatePickerAttributeModifier::DisappearTextStyleImpl,

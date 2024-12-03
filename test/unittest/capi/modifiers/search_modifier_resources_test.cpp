@@ -201,7 +201,7 @@ public:
  */
 HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResources, TestSize.Level1)
 {
-    Ark_Type_SearchInterface_options options = {};
+    Ark_SearchOptions options = {};
 
     const std::vector<StringResourceTest> testPlan = {
         { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
@@ -211,7 +211,7 @@ HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResources, TestSize.Level1
 
     for (const auto &[src, expected] : testPlan) {
         options.placeholder = ArkValue<Opt_ResourceStr>(src);
-        auto optOptions = ArkValue<Opt_Type_SearchInterface_options>(options);
+        auto optOptions = ArkValue<Opt_SearchOptions>(options);
         modifier_->setSearchOptions(node_, &optOptions);
         // default
         auto jsonValue = GetJsonValue(node_);

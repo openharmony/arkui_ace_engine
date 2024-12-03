@@ -32,7 +32,7 @@ struct PathOptions {
 
 namespace Converter {
 template<>
-PathOptions Convert(const Ark_Literal_Union_Number_String_height_width_String_commands& src)
+PathOptions Convert(const Ark_PathOptions& src)
 {
     return {
         .width = Converter::OptConvert<Dimension>(src.width),
@@ -44,22 +44,28 @@ PathOptions Convert(const Ark_Literal_Union_Number_String_height_width_String_co
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PathModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PathModifier
 namespace PathInterfaceModifier {
 void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_Literal_Union_Number_String_height_width_String_commands* value)
+                        const Opt_PathOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<PathOptions>(*value);
-    if (options && options->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, *(options->width));
+    CHECK_NULL_VOID(options);
+    auto opt = Converter::OptConvert<PathOptions>(*options);
+    if (opt && opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, *(opt->width));
     }
-    if (options && options->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, *(options->height));
+    if (opt && opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, *(opt->height));
     }
-    if (options && options->commands) {
-        PathModelNG::SetCommands(frameNode, *(options->commands));
+    if (opt && opt->commands) {
+        PathModelNG::SetCommands(frameNode, *(opt->commands));
     }
 }
 } // PathInterfaceModifier
@@ -76,6 +82,7 @@ void CommandsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPathModifier* GetPathModifier()
 {
     static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
+        PathModifier::ConstructImpl,
         PathInterfaceModifier::SetPathOptionsImpl,
         PathAttributeModifier::CommandsImpl,
     };

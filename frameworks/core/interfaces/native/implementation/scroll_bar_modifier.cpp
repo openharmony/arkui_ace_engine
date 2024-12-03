@@ -19,6 +19,12 @@
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ScrollBarModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ScrollBarModifier
 namespace ScrollBarInterfaceModifier {
 void SetScrollBarOptionsImpl(Ark_NativePointer node,
                              const Ark_ScrollBarOptions* value)
@@ -38,7 +44,7 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
 void EnableNestedScrollImpl(Ark_NativePointer node,
-                            const Ark_Union_Boolean_Undefined* value)
+                            const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -50,6 +56,7 @@ void EnableNestedScrollImpl(Ark_NativePointer node,
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
 {
     static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
+        ScrollBarModifier::ConstructImpl,
         ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
         ScrollBarAttributeModifier::EnableNestedScrollImpl,
     };

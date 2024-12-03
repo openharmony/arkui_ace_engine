@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TextBaseControllerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextBaseControllerAccessor {
+void DestroyPeerImpl(TextBaseControllerPeer* peer)
+{
+}
 TextBaseControllerPeer* CtorImpl()
 {
-    return nullptr;
+    return new TextBaseControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetSelectionImpl(TextBaseControllerPeer* peer,
                       const Ark_Number* selectionStart,
@@ -44,6 +49,7 @@ Ark_NativePointer GetLayoutManagerImpl(TextBaseControllerPeer* peer)
 const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
 {
     static const GENERATED_ArkUITextBaseControllerAccessor TextBaseControllerAccessorImpl {
+        TextBaseControllerAccessor::DestroyPeerImpl,
         TextBaseControllerAccessor::CtorImpl,
         TextBaseControllerAccessor::GetFinalizerImpl,
         TextBaseControllerAccessor::SetSelectionImpl,

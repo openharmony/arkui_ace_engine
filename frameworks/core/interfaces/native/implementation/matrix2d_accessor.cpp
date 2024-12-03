@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
-static void DestroyPeer(Matrix2DPeer* peer)
+void DestroyPeerImpl(Matrix2DPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -33,7 +33,7 @@ Matrix2DPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer IdentityImpl(Matrix2DPeer* peer)
 {
@@ -125,6 +125,7 @@ void SetTranslateYImpl(Matrix2DPeer* peer,
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
 {
     static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
+        Matrix2DAccessor::DestroyPeerImpl,
         Matrix2DAccessor::CtorImpl,
         Matrix2DAccessor::GetFinalizerImpl,
         Matrix2DAccessor::IdentityImpl,

@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace Component3DModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // Component3DModifier
 namespace Component3DInterfaceModifier {
 void SetComponent3DOptionsImpl(Ark_NativePointer node,
                                const Opt_SceneOptions* sceneOptions)
@@ -97,6 +103,7 @@ void CustomRenderImpl(Ark_NativePointer node,
 const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
 {
     static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
+        Component3DModifier::ConstructImpl,
         Component3DInterfaceModifier::SetComponent3DOptionsImpl,
         Component3DAttributeModifier::EnvironmentImpl,
         Component3DAttributeModifier::ShaderImpl,

@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TextEditControllerExPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
+void DestroyPeerImpl(TextEditControllerExPeer* peer)
+{
+}
 TextEditControllerExPeer* CtorImpl()
 {
-    return nullptr;
+    return new TextEditControllerExPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean IsEditingImpl(TextEditControllerExPeer* peer)
 {
@@ -51,6 +56,7 @@ Ark_NativePointer GetPreviewTextImpl(TextEditControllerExPeer* peer)
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()
 {
     static const GENERATED_ArkUITextEditControllerExAccessor TextEditControllerExAccessorImpl {
+        TextEditControllerExAccessor::DestroyPeerImpl,
         TextEditControllerExAccessor::CtorImpl,
         TextEditControllerExAccessor::GetFinalizerImpl,
         TextEditControllerExAccessor::IsEditingImpl,

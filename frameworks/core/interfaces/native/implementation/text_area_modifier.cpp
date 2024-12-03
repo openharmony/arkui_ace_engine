@@ -24,6 +24,12 @@
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TextAreaModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TextAreaModifier
 namespace TextAreaInterfaceModifier {
 void SetTextAreaOptionsImpl(Ark_NativePointer node,
                             const Opt_TextAreaOptions* value)
@@ -175,17 +181,26 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
-void OnSubmitImpl(Ark_NativePointer node,
-                  const Callback_EnterKeyType_Void* value)
+void OnSubmit0Impl(Ark_NativePointer node,
+                   const Callback_EnterKeyType_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onSubmit = [frameNode](int32_t enterKey, NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(enterKey));
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onSubmit(frameNode->GetId(), enterKeyType);
+        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onSubmit0(frameNode->GetId(), enterKeyType);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
+}
+void OnSubmit1Impl(Ark_NativePointer node,
+                   const TextAreaSubmitCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextAreaModelNG::SetOnSubmit1(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const EditableTextOnChangeCallback* value)
@@ -522,7 +537,7 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -601,6 +616,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
 {
     static const GENERATED_ArkUITextAreaModifier ArkUITextAreaModifierImpl {
+        TextAreaModifier::ConstructImpl,
         TextAreaInterfaceModifier::SetTextAreaOptionsImpl,
         TextAreaAttributeModifier::PlaceholderColorImpl,
         TextAreaAttributeModifier::PlaceholderFontImpl,
@@ -616,7 +632,8 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::TextIndentImpl,
         TextAreaAttributeModifier::CaretStyleImpl,
         TextAreaAttributeModifier::SelectedBackgroundColorImpl,
-        TextAreaAttributeModifier::OnSubmitImpl,
+        TextAreaAttributeModifier::OnSubmit0Impl,
+        TextAreaAttributeModifier::OnSubmit1Impl,
         TextAreaAttributeModifier::OnChangeImpl,
         TextAreaAttributeModifier::OnTextSelectionChangeImpl,
         TextAreaAttributeModifier::OnContentScrollImpl,

@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ScreenModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ScreenModifier
 namespace ScreenInterfaceModifier {
 void SetScreenOptionsImpl(Ark_NativePointer node,
                           const Ark_Number* screenId)
@@ -32,6 +38,7 @@ void SetScreenOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIScreenModifier* GetScreenModifier()
 {
     static const GENERATED_ArkUIScreenModifier ArkUIScreenModifierImpl {
+        ScreenModifier::ConstructImpl,
         ScreenInterfaceModifier::SetScreenOptionsImpl,
     };
     return &ArkUIScreenModifierImpl;

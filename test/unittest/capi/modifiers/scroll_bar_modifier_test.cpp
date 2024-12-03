@@ -251,15 +251,15 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestDefaultValues, TestSize
 HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestValidValues, TestSize.Level1)
 {
     ScrollBarOptions options(AceType::MakeRefPtr<NG::ScrollBarProxy>());
-    const TestCases<Ark_Union_Boolean_Undefined> valueList {
+    const TestCases<Opt_Boolean> valueList {
         {
             "true",
-            Converter::ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(Converter::ArkValue<Ark_Boolean>(true)),
+            Converter::ArkValue<Opt_Boolean>(true),
             "true"
         },
         {
             "false",
-            Converter::ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>(Converter::ArkValue<Ark_Boolean>(false)),
+            Converter::ArkValue<Opt_Boolean>(false),
             "false"
         },
     };
@@ -282,20 +282,14 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestValidValues, TestSize.L
  */
 HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestInvalidValues, TestSize.Level1)
 {
-    const auto validValue = Converter::ArkUnion<Ark_Union_Boolean_Undefined, Ark_Boolean>
-        (Converter::ArkValue<Ark_Boolean>(true));
+    const auto validValue = Converter::ArkValue<Opt_Boolean>(true);
     const auto validStr = "true";
 
     ScrollBarOptions options(AceType::MakeRefPtr<NG::ScrollBarProxy>());
-    const TestCases<Ark_Union_Boolean_Undefined> valueList {
+    const TestCases<Opt_Boolean> valueList {
         {
             "undefined",
-            Converter::ArkUnion<Ark_Union_Boolean_Undefined, Ark_Undefined>(Ark_Undefined()),
-            ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE
-        },
-        {
-            "null",
-            Converter::ArkUnion<Ark_Union_Boolean_Undefined, Ark_Empty>(nullptr),
+            Converter::ArkValue<Opt_Boolean>(),
             ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE
         },
     };

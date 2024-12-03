@@ -22,6 +22,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseSpanModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
 void TextBackgroundStyleImpl(Ark_NativePointer node,
                              const Ark_TextBackgroundStyle* value)
 {
@@ -53,6 +57,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
 const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()
 {
     static const GENERATED_ArkUIBaseSpanModifier ArkUIBaseSpanModifierImpl {
+        BaseSpanModifier::ConstructImpl,
         BaseSpanModifier::TextBackgroundStyleImpl,
         BaseSpanModifier::BaselineOffsetImpl,
     };

@@ -78,13 +78,19 @@ VideoOptions Convert(const Ark_VideoOptions& src)
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace VideoModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // VideoModifier
 namespace VideoInterfaceModifier {
 void SetVideoOptionsImpl(Ark_NativePointer node,
                          const Ark_VideoOptions* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto options = Converter::Convert<VideoOptions>(*value);
     VideoModelNG::SetSrc(frameNode, options.src, options.bundleNameSrc, options.moduleNameSrc);
     VideoModelNG::SetProgressRate(frameNode, options.currentProgressRate);
@@ -99,42 +105,42 @@ namespace VideoAttributeModifier {
 void MutedImpl(Ark_NativePointer node,
                Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetMuted(frameNode, Converter::Convert<bool>(value));
 }
 void AutoPlayImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetAutoPlay(frameNode, Converter::Convert<bool>(value));
 }
 void ControlsImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetControls(frameNode, Converter::Convert<bool>(value));
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetLoop(frameNode, Converter::Convert<bool>(value));
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::SetObjectFit(frameNode, Converter::OptConvert<ImageFit>(value));
 }
 void OnStartImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const VoidCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onStart = [frameNode](const std::string& param) {
@@ -143,9 +149,9 @@ void OnStartImpl(Ark_NativePointer node,
     VideoModelNG::SetOnStart(frameNode, onStart);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const VoidCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onPause = [frameNode](const std::string& param) {
@@ -154,9 +160,9 @@ void OnPauseImpl(Ark_NativePointer node,
     VideoModelNG::SetOnPause(frameNode, onPause);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const VoidCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onFinish = [frameNode](const std::string& param) {
@@ -165,15 +171,15 @@ void OnFinishImpl(Ark_NativePointer node,
     VideoModelNG::SetOnFinish(frameNode, onFinish);
 }
 void OnFullscreenChangeImpl(Ark_NativePointer node,
-                            const Callback_Literal_Boolean_fullscreen_Void* value)
+                            const Callback_FullscreenInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onFullscreenChange = [frameNode](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto fullscreen = data->GetValue("fullscreen")->GetBool();
-        Ark_Literal_Boolean_fullscreen event = {
+        Ark_FullscreenInfo event = {
             .fullscreen = Converter::ArkValue<Ark_Boolean>(fullscreen)
         };
         GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onFullscreenChange(frameNode->GetId(), event);
@@ -181,15 +187,15 @@ void OnFullscreenChangeImpl(Ark_NativePointer node,
     VideoModelNG::SetOnFullScreenChange(frameNode, onFullscreenChange);
 }
 void OnPreparedImpl(Ark_NativePointer node,
-                    const Callback_Literal_Number_duration_Void* value)
+                    const Callback_PreparedInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onPrepared = [frameNode](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto duration = data->GetValue("duration")->GetDouble();
-        Ark_Literal_Number_duration event = {
+        Ark_PreparedInfo event = {
             .duration = Converter::ArkValue<Ark_Number>(static_cast<float>(duration))
         };
         GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onPrepared(frameNode->GetId(), event);
@@ -197,15 +203,15 @@ void OnPreparedImpl(Ark_NativePointer node,
     VideoModelNG::SetOnPrepared(frameNode, onPrepared);
 }
 void OnSeekingImpl(Ark_NativePointer node,
-                   const Callback_Literal_Number_time_Void* value)
+                   const Callback_PlaybackInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onSeeking = [frameNode](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
-        Ark_Literal_Number_time event = {
+        Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
         GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onSeeking(frameNode->GetId(), event);
@@ -213,15 +219,15 @@ void OnSeekingImpl(Ark_NativePointer node,
     VideoModelNG::SetOnSeeking(frameNode, onSeeking);
 }
 void OnSeekedImpl(Ark_NativePointer node,
-                  const Callback_Literal_Number_time_Void* value)
+                  const Callback_PlaybackInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onSeeked = [frameNode](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
-        Ark_Literal_Number_time event = {
+        Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
         GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onSeeked(frameNode->GetId(), event);
@@ -229,15 +235,15 @@ void OnSeekedImpl(Ark_NativePointer node,
     VideoModelNG::SetOnSeeked(frameNode, onSeeked);
 }
 void OnUpdateImpl(Ark_NativePointer node,
-                  const Callback_Literal_Number_time_Void* value)
+                  const Callback_PlaybackInfo_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onUpdate = [frameNode](const std::string& param) {
         auto data = JsonUtil::ParseJsonString(param);
         auto time = data->GetValue("time")->GetDouble();
-        Ark_Literal_Number_time event = {
+        Ark_PlaybackInfo event = {
             .time = Converter::ArkValue<Ark_Number>(static_cast<float>(time))
         };
         GetFullAPI()->getEventsAPI()->getVideoEventsReceiver()->onUpdate(frameNode->GetId(), event);
@@ -247,7 +253,7 @@ void OnUpdateImpl(Ark_NativePointer node,
 void OnErrorImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onError = [frameNode](const std::string& param) {
@@ -258,7 +264,7 @@ void OnErrorImpl(Ark_NativePointer node,
 void OnStopImpl(Ark_NativePointer node,
                 const Callback_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onStop = [frameNode](const std::string& param) {
@@ -269,7 +275,7 @@ void OnStopImpl(Ark_NativePointer node,
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     VideoModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(value));
 }
@@ -279,12 +285,15 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //VideoModelNG::SetAnalyzerConfig(frameNode, convValue);
     LOGE("ARKOALA VideoInterface::AnalyzerConfigImpl -> method is not implemented.");
 }
 } // VideoAttributeModifier
 const GENERATED_ArkUIVideoModifier* GetVideoModifier()
 {
     static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
+        VideoModifier::ConstructImpl,
         VideoInterfaceModifier::SetVideoOptionsImpl,
         VideoAttributeModifier::MutedImpl,
         VideoAttributeModifier::AutoPlayImpl,

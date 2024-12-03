@@ -18,10 +18,13 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct WebCookiePeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
-static void DestroyPeer(WebCookiePeerImpl *peerImpl)
+void DestroyPeerImpl(WebCookiePeer* peer)
 {
+    auto peerImpl = reinterpret_cast<WebCookiePeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -34,7 +37,7 @@ WebCookiePeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetCookieImpl(WebCookiePeer* peer)
 {
@@ -50,6 +53,7 @@ void SaveCookieImpl(WebCookiePeer* peer)
 const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
 {
     static const GENERATED_ArkUIWebCookieAccessor WebCookieAccessorImpl {
+        WebCookieAccessor::DestroyPeerImpl,
         WebCookieAccessor::CtorImpl,
         WebCookieAccessor::GetFinalizerImpl,
         WebCookieAccessor::SetCookieImpl,

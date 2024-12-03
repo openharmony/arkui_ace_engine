@@ -73,7 +73,7 @@ class CanvasModifierTest : public ModifierTestBase<GENERATED_ArkUICanvasModifier
 HWTEST_F(CanvasModifierTest, setOnReadyTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnReady, nullptr);
-    Callback_Void func{};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<CanvasEventHub>();

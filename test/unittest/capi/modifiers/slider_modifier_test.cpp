@@ -2037,7 +2037,7 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
         std::get<1>(Fixtures::testFixtureEnumSliderBlockTypeValidValuesSlider[0]));
     initValueBlockStyle.image = Converter::ArkValue<Opt_ResourceStr>();
     initValueBlockStyle.shape =
-        Converter::ArkValue<Opt_Type_SliderBlockStyle_shape>();
+        Converter::ArkValue<Opt_Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute>();
 
     auto checkValue = [this, &initValueBlockStyle](const std::string& input, const Ark_SliderBlockType& value,
         const std::string& expectedStr) {

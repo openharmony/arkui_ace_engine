@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
-static void DestroyPeer(CanvasPathPeer* peer)
+void DestroyPeerImpl(CanvasPathPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -33,7 +33,7 @@ CanvasPathPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ArcImpl(CanvasPathPeer* peer,
              const Ark_Number* x,
@@ -103,6 +103,7 @@ void RectImpl(CanvasPathPeer* peer,
 const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
 {
     static const GENERATED_ArkUICanvasPathAccessor CanvasPathAccessorImpl {
+        CanvasPathAccessor::DestroyPeerImpl,
         CanvasPathAccessor::CtorImpl,
         CanvasPathAccessor::GetFinalizerImpl,
         CanvasPathAccessor::ArcImpl,

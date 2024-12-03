@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClientAuthenticationHandlerAccessor {
-ClientAuthenticationHandlerPeer* CtorImpl()
-{
-    return new ClientAuthenticationHandlerPeer();
-}
-static void DestroyPeer(ClientAuthenticationHandlerPeer *peer)
+void DestroyPeerImpl(ClientAuthenticationHandlerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+ClientAuthenticationHandlerPeer* CtorImpl()
+{
+    return new ClientAuthenticationHandlerPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void Confirm0Impl(ClientAuthenticationHandlerPeer* peer,
                   const Ark_String* priKeyFile,
@@ -68,6 +68,7 @@ void IgnoreImpl(ClientAuthenticationHandlerPeer* peer)
 const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticationHandlerAccessor()
 {
     static const GENERATED_ArkUIClientAuthenticationHandlerAccessor ClientAuthenticationHandlerAccessorImpl {
+        ClientAuthenticationHandlerAccessor::DestroyPeerImpl,
         ClientAuthenticationHandlerAccessor::CtorImpl,
         ClientAuthenticationHandlerAccessor::GetFinalizerImpl,
         ClientAuthenticationHandlerAccessor::Confirm0Impl,

@@ -54,6 +54,7 @@ std::vector<std::tuple<std::string, Ark_BarState>> testFixtureEnumBarStateInvali
 std::vector<std::tuple<std::string, Ark_BarStyle, std::string>> testFixtureEnumBarStyleValidValues = {
     { "ARK_BAR_STYLE_STANDARD", ARK_BAR_STYLE_STANDARD, "BarStyle.STANDARD" },
     { "ARK_BAR_STYLE_STACK", ARK_BAR_STYLE_STACK, "BarStyle.STACK" },
+    { "ARK_BAR_STYLE_SAFE_AREA_PADDING", ARK_BAR_STYLE_SAFE_AREA_PADDING, "BarStyle.SAFE_AREA_PADDING" },
 };
 
 std::vector<std::tuple<std::string, Ark_BarStyle>> testFixtureEnumBarStyleInvalidValues = {
@@ -170,6 +171,17 @@ std::vector<std::tuple<std::string, Ark_ColoringStrategy, std::string>> testFixt
 std::vector<std::tuple<std::string, Ark_ColoringStrategy>> testFixtureEnumColoringStrategyInvalidValues = {
     { "-1", static_cast<Ark_ColoringStrategy>(-1) },
     { "INT_MAX", static_cast<Ark_ColoringStrategy>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ContentClipMode, std::string>> testFixtureEnumContentClipModeValidValues = {
+    { "ARK_CONTENT_CLIP_MODE_CONTENT_ONLY", ARK_CONTENT_CLIP_MODE_CONTENT_ONLY, "ContentClipMode.CONTENT_ONLY" },
+    { "ARK_CONTENT_CLIP_MODE_BOUNDARY", ARK_CONTENT_CLIP_MODE_BOUNDARY, "ContentClipMode.BOUNDARY" },
+    { "ARK_CONTENT_CLIP_MODE_SAFE_AREA", ARK_CONTENT_CLIP_MODE_SAFE_AREA, "ContentClipMode.SAFE_AREA" },
+};
+
+std::vector<std::tuple<std::string, Ark_ContentClipMode>> testFixtureEnumContentClipModeInvalidValues = {
+    { "-1", static_cast<Ark_ContentClipMode>(-1) },
+    { "INT_MAX", static_cast<Ark_ContentClipMode>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_ControlSize, std::string>> testFixtureEnumControlSizeValidValues = {
@@ -397,6 +409,20 @@ std::vector<std::tuple<std::string, Ark_ImageRepeat, std::string>> testFixtureEn
 std::vector<std::tuple<std::string, Ark_ImageRepeat>> testFixtureEnumImageRepeatInvalidValues = {
     { "-1", static_cast<Ark_ImageRepeat>(-1) },
     { "INT_MAX", static_cast<Ark_ImageRepeat>(INT_MAX) },
+};
+
+std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
+    testFixtureEnumImageRotateOrientationValidValues = {
+        { "ARK_IMAGE_ROTATE_ORIENTATION_AUTO", ARK_IMAGE_ROTATE_ORIENTATION_AUTO, "ImageRotateOrientation.AUTO" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_UP", ARK_IMAGE_ROTATE_ORIENTATION_UP, "ImageRotateOrientation.UP" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_RIGHT", ARK_IMAGE_ROTATE_ORIENTATION_RIGHT, "ImageRotateOrientation.RIGHT" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_DOWN", ARK_IMAGE_ROTATE_ORIENTATION_DOWN, "ImageRotateOrientation.DOWN" },
+        { "ARK_IMAGE_ROTATE_ORIENTATION_LEFT", ARK_IMAGE_ROTATE_ORIENTATION_LEFT, "ImageRotateOrientation.LEFT" },
+    };
+
+std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureEnumImageRotateOrientationInvalidValues = {
+    { "-1", static_cast<Ark_ImageRotateOrientation>(-1) },
+    { "INT_MAX", static_cast<Ark_ImageRotateOrientation>(INT_MAX) },
 };
 
 std::vector<std::tuple<std::string, Ark_InputType, std::string>> testFixtureEnumInputTypeValidValues = {

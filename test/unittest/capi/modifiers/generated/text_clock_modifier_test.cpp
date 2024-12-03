@@ -61,8 +61,6 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_NAME = "fill";
 const auto ATTRIBUTE_TEXT_SHADOW_I_FILL_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_FONT_FEATURE_NAME = "fontFeature";
 const auto ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE = "";
-const auto ATTRIBUTE_DATE_TIME_OPTIONS_NAME = "dateTimeOptions";
-const auto ATTRIBUTE_DATE_TIME_OPTIONS_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
 
 class TextClockModifierTest : public ModifierTestBase<GENERATED_ArkUITextClockModifier,
@@ -1217,29 +1215,5 @@ HWTEST_F(TextClockModifierTest, setFontFeatureTestFontFeatureInvalidValues, Test
     for (auto& [input, value] : Fixtures::testFixtureFontFeatureInvalidValues) {
         checkValue(input, value);
     }
-}
-
-/*
- * @tc.name: setDateTimeOptionsTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextClockModifierTest, DISABLED_setDateTimeOptionsTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATE_TIME_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATE_TIME_OPTIONS_DEFAULT_VALUE) << "Default value for attribute 'dateTimeOptions'";
-}
-
-/*
- * @tc.name: setDateTimeOptionsTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextClockModifierTest, DISABLED_setDateTimeOptionsTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
 } // namespace OHOS::Ace::NG

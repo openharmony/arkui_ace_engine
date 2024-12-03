@@ -50,6 +50,12 @@ PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
 }
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PasteButtonModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PasteButtonModifier
 namespace PasteButtonInterfaceModifier {
 void SetPasteButtonOptions0Impl(Ark_NativePointer node)
 {
@@ -71,7 +77,7 @@ namespace PasteButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
                  const Callback_ClickEvent_PasteButtonOnClickResult_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](GestureEvent& info) {
@@ -98,6 +104,7 @@ void OnClickImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
 {
     static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
+        PasteButtonModifier::ConstructImpl,
         PasteButtonInterfaceModifier::SetPasteButtonOptions0Impl,
         PasteButtonInterfaceModifier::SetPasteButtonOptions1Impl,
         PasteButtonAttributeModifier::OnClickImpl,

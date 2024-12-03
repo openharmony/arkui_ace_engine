@@ -17,22 +17,27 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct UIExtensionProxyPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIExtensionProxyAccessor {
+void DestroyPeerImpl(UIExtensionProxyPeer* peer)
+{
+}
 UIExtensionProxyPeer* CtorImpl()
 {
-    return nullptr;
+    return new UIExtensionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SendImpl(UIExtensionProxyPeer* peer,
-              const Ark_Literal_Empty* data)
+              const Map_String_CustomObject* data)
 {
 }
 Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
-                               const Ark_Literal_Empty* data)
+                               const Map_String_CustomObject* data)
 {
     return 0;
 }
@@ -56,6 +61,7 @@ void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
 {
     static const GENERATED_ArkUIUIExtensionProxyAccessor UIExtensionProxyAccessorImpl {
+        UIExtensionProxyAccessor::DestroyPeerImpl,
         UIExtensionProxyAccessor::CtorImpl,
         UIExtensionProxyAccessor::GetFinalizerImpl,
         UIExtensionProxyAccessor::SendImpl,

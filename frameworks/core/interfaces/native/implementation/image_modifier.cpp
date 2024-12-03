@@ -49,6 +49,12 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ImageModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src)
@@ -327,10 +333,20 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
 }
+void OrientationImpl(Ark_NativePointer node,
+                     Ark_ImageRotateOrientation value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ImageModelNG::SetOrientation(frameNode, convValue);
+}
 } // ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
     static const GENERATED_ArkUIImageModifier ArkUIImageModifierImpl {
+        ImageModifier::ConstructImpl,
         ImageInterfaceModifier::SetImageOptions0Impl,
         ImageInterfaceModifier::SetImageOptions1Impl,
         ImageInterfaceModifier::SetImageOptions2Impl,
@@ -359,6 +375,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::ResizableImpl,
         ImageAttributeModifier::PrivacySensitiveImpl,
         ImageAttributeModifier::EnhancedImageQualityImpl,
+        ImageAttributeModifier::OrientationImpl,
     };
     return &ArkUIImageModifierImpl;
 }

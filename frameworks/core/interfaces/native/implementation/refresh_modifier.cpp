@@ -19,6 +19,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RefreshModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RefreshModifier
 namespace RefreshInterfaceModifier {
 void SetRefreshOptionsImpl(Ark_NativePointer node,
                            const Ark_RefreshOptions* value)
@@ -75,7 +81,7 @@ void OnOffsetChangeImpl(Ark_NativePointer node,
     LOGE("ARKOALA RefreshInterfaceModifier::OnOffsetChangeImpl is not implemented yet");
 }
 void PullDownRatioImpl(Ark_NativePointer node,
-                       const Ark_Union_Number_Undefined* value)
+                       const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -87,6 +93,7 @@ void PullDownRatioImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRefreshModifier* GetRefreshModifier()
 {
     static const GENERATED_ArkUIRefreshModifier ArkUIRefreshModifierImpl {
+        RefreshModifier::ConstructImpl,
         RefreshInterfaceModifier::SetRefreshOptionsImpl,
         RefreshAttributeModifier::OnStateChangeImpl,
         RefreshAttributeModifier::OnRefreshingImpl,

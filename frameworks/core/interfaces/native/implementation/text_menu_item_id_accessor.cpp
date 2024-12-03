@@ -17,35 +17,41 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TextMenuItemIdPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace IMonitorAccessor {
-IMonitorPeer* CtorImpl()
+namespace TextMenuItemIdAccessor {
+void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 {
-    return nullptr;
+}
+TextMenuItemIdPeer* CtorImpl()
+{
+    return new TextMenuItemIdPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_NativePointer ValueImpl(IMonitorPeer* peer,
-                            const Opt_String* path)
+Ark_NativePointer OfImpl(const Ark_ResourceStr* id)
 {
     return 0;
 }
-void SetDirtyImpl(IMonitorPeer* peer,
-                  const Array_String* dirty)
+Ark_Boolean EqualsImpl(TextMenuItemIdPeer* peer,
+                       const Ark_TextMenuItemId* id)
 {
+    return 0;
 }
-} // IMonitorAccessor
-const GENERATED_ArkUIIMonitorAccessor* GetIMonitorAccessor()
+} // TextMenuItemIdAccessor
+const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
-    static const GENERATED_ArkUIIMonitorAccessor IMonitorAccessorImpl {
-        IMonitorAccessor::CtorImpl,
-        IMonitorAccessor::GetFinalizerImpl,
-        IMonitorAccessor::ValueImpl,
-        IMonitorAccessor::SetDirtyImpl,
+    static const GENERATED_ArkUITextMenuItemIdAccessor TextMenuItemIdAccessorImpl {
+        TextMenuItemIdAccessor::DestroyPeerImpl,
+        TextMenuItemIdAccessor::CtorImpl,
+        TextMenuItemIdAccessor::GetFinalizerImpl,
+        TextMenuItemIdAccessor::OfImpl,
+        TextMenuItemIdAccessor::EqualsImpl,
     };
-    return &IMonitorAccessorImpl;
+    return &TextMenuItemIdAccessorImpl;
 }
 
 }

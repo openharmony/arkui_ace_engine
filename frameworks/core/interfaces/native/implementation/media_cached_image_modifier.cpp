@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace MediaCachedImageModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // MediaCachedImageModifier
 namespace MediaCachedImageInterfaceModifier {
 void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
                                     const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource* src)
@@ -32,6 +38,7 @@ void SetMediaCachedImageOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIMediaCachedImageModifier* GetMediaCachedImageModifier()
 {
     static const GENERATED_ArkUIMediaCachedImageModifier ArkUIMediaCachedImageModifierImpl {
+        MediaCachedImageModifier::ConstructImpl,
         MediaCachedImageInterfaceModifier::SetMediaCachedImageOptionsImpl,
     };
     return &ArkUIMediaCachedImageModifierImpl;

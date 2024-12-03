@@ -18,14 +18,12 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
-
-static void DestroyPeer(ScrollerPeer *peer)
+void DestroyPeerImpl(ScrollerPeer* peer)
 {
     if (peer) {
         peer->DecRefCount();
     }
 }
-
 ScrollerPeer* CtorImpl()
 {
     auto peer = Referenced::MakeRefPtr<ScrollerPeer>();
@@ -34,7 +32,7 @@ ScrollerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ScrollToImpl(ScrollerPeer* peer,
                   const Ark_ScrollOptions* options)
@@ -56,16 +54,20 @@ void FlingImpl(ScrollerPeer* peer,
     peer->TriggerFling(velocity);
 }
 void ScrollPage0Impl(ScrollerPeer* peer,
-                     const Ark_Literal_Boolean_next* value)
+                     const Ark_ScrollPageOptions* value)
 {
     CHECK_NULL_VOID(peer);
-    peer->TriggerScrollPage0(value);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peer->TriggerScrollPage0(next);
 }
 void ScrollPage1Impl(ScrollerPeer* peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
     CHECK_NULL_VOID(peer);
-    peer->TriggerScrollPage1(value);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peer->TriggerScrollPage1(next);
 }
 Ark_NativePointer CurrentOffsetImpl(ScrollerPeer* peer)
 {
@@ -110,6 +112,7 @@ Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
     static const GENERATED_ArkUIScrollerAccessor ScrollerAccessorImpl {
+        ScrollerAccessor::DestroyPeerImpl,
         ScrollerAccessor::CtorImpl,
         ScrollerAccessor::GetFinalizerImpl,
         ScrollerAccessor::ScrollToImpl,

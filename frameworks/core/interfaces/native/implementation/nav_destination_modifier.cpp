@@ -22,6 +22,12 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace NavDestinationModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // NavDestinationModifier
 namespace NavDestinationInterfaceModifier {
 void SetNavDestinationOptionsImpl(Ark_NativePointer node)
 {
@@ -163,17 +169,16 @@ void OnWillHideImpl(Ark_NativePointer node,
     NavDestinationModelNG::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Ark_Union_SystemBarStyle_Undefined* value)
+                        const Opt_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //NavDestinationModelNG::SetSystemBarStyle(frameNode, convValue);
     LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
 }
 void RecoverableImpl(Ark_NativePointer node,
-                     const Ark_Union_Boolean_Undefined* value)
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,6 +196,24 @@ void SystemTransitionImpl(Ark_NativePointer node,
     LOGE("ARKOALA NavDestination.SystemTransitionImpl -> Method is not implemented. "
          "No handlers for Ark_NavigationSystemTransitionType in model");
 }
+void BindToScrollableImpl(Ark_NativePointer node,
+                          const Array_Scroller* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavDestinationModelNG::SetBindToScrollable(frameNode, convValue);
+}
+void BindToNestedScrollableImpl(Ark_NativePointer node,
+                                const Array_NestedScrollInfo* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavDestinationModelNG::SetBindToNestedScrollable(frameNode, convValue);
+}
 void TitleImpl(Ark_NativePointer node,
                const Ark_Type_NavDestinationAttribute_title_value* value,
                const Opt_NavigationTitleOptions* options)
@@ -198,6 +221,26 @@ void TitleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA NavDestination.TitleImpl -> Method is not implemented. Ark_CustomObject is not supported!");
+}
+void ToolbarConfigurationImpl(Ark_NativePointer node,
+                              const Ark_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
+                              const Opt_NavigationToolbarOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(toolbarParam);
+    //auto convValue = Converter::OptConvert<type>(toolbarParam); // for enums
+    //NavDestinationModelNG::SetToolbarConfiguration(frameNode, convValue);
+}
+void HideToolBarImpl(Ark_NativePointer node,
+                     Ark_Boolean hide,
+                     const Opt_Boolean* animated)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(hide);
+    //auto convValue = Converter::OptConvert<type>(hide); // for enums
+    //NavDestinationModelNG::SetHideToolBar(frameNode, convValue);
 }
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
@@ -241,6 +284,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
     static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
+        NavDestinationModifier::ConstructImpl,
         NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
         NavDestinationAttributeModifier::HideTitleBar0Impl,
         NavDestinationAttributeModifier::HideTitleBar1Impl,
@@ -258,7 +302,11 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::SystemBarStyleImpl,
         NavDestinationAttributeModifier::RecoverableImpl,
         NavDestinationAttributeModifier::SystemTransitionImpl,
+        NavDestinationAttributeModifier::BindToScrollableImpl,
+        NavDestinationAttributeModifier::BindToNestedScrollableImpl,
         NavDestinationAttributeModifier::TitleImpl,
+        NavDestinationAttributeModifier::ToolbarConfigurationImpl,
+        NavDestinationAttributeModifier::HideToolBarImpl,
         NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
     };
     return &ArkUINavDestinationModifierImpl;

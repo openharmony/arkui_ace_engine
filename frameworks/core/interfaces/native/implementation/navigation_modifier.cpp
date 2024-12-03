@@ -91,13 +91,19 @@ BarItem Convert(const Ark_NavigationMenuItem& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace NavigationModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // NavigationModifier
 namespace NavigationInterfaceModifier {
 void SetNavigationOptions0Impl(Ark_NativePointer node)
 {
     // no need to handle method without options
 }
 void SetNavigationOptions1Impl(Ark_NativePointer node,
-                               const Ark_Materialized* pathInfos)
+                               const Ark_NavPathStack* pathInfos)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,7 +170,7 @@ void BackButtonIconImpl(Ark_NativePointer node,
     };
 
     auto parsePixelMapFunc = [&pixelMap](const Ark_PixelMap& src) {
-        LOGE("NaviagtionAttributeModifier::BackButtonIconImpl, the PixelMap support not implemented");
+        LOGE("NavigationAttributeModifier::BackButtonIconImpl, the PixelMap support not implemented");
         pixelMap = nullptr;
     };
 
@@ -174,7 +180,7 @@ void BackButtonIconImpl(Ark_NativePointer node,
     };
 
     auto parseSymbolGlyphModifierFunc = [&symbolApply](const Ark_CustomObject& src) {
-        LOGE("NaviagtionAttributeModifier::BackButtonIconImpl, the SymbolGlyphModifier support not implemented");
+        LOGE("NavigationAttributeModifier::BackButtonIconImpl, the SymbolGlyphModifier support not implemented");
         symbolApply = nullptr;
     };
 
@@ -348,21 +354,28 @@ void CustomNavContentTransitionImpl(Ark_NativePointer node,
     //NavigationModelNG::SetCustomNavContentTransition(frameNode, convValue);
 }
 void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Ark_Union_SystemBarStyle_Undefined* value)
+                        const Opt_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //NavigationModelNG::SetSystemBarStyle(frameNode, convValue);
 }
 void RecoverableImpl(Ark_NativePointer node,
-                     const Ark_Union_Boolean_Undefined* value)
+                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationModelNG::SetRecoverable(frameNode,
         value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+}
+void EnableDragBarImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetEnableDragBar(frameNode, convValue);
 }
 void TitleImpl(Ark_NativePointer node,
                const Ark_Type_NavigationAttribute_title_value* value,
@@ -411,6 +424,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
 {
     static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
+        NavigationModifier::ConstructImpl,
         NavigationInterfaceModifier::SetNavigationOptions0Impl,
         NavigationInterfaceModifier::SetNavigationOptions1Impl,
         NavigationAttributeModifier::NavBarWidthImpl,
@@ -436,6 +450,7 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::CustomNavContentTransitionImpl,
         NavigationAttributeModifier::SystemBarStyleImpl,
         NavigationAttributeModifier::RecoverableImpl,
+        NavigationAttributeModifier::EnableDragBarImpl,
         NavigationAttributeModifier::TitleImpl,
         NavigationAttributeModifier::ToolbarConfigurationImpl,
         NavigationAttributeModifier::IgnoreLayoutSafeAreaImpl,

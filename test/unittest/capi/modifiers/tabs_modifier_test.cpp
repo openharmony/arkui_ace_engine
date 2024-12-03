@@ -512,25 +512,17 @@ HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
     }
-
-    std::string defaultScrollableMode = "BarMode.Scrollable,"
-        "{\"margin\":\"0.00vp\","
-        "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}";
-
-    modifier_->setBarModeBarMode_SCROLLABLE(node_, nullptr);
-    checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, defaultScrollableMode);
 }
 
 /**
- * @tc.name: setBarBackgroundBlurStyleTest
- * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle
+ * @tc.name: setBarBackgroundBlurStyle0Test
+ * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle0
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyleTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
 {
     const std::string PROP_NAME("barBackgroundBlurStyle");
-    ASSERT_NE(modifier_->setBarBackgroundBlurStyle, nullptr);
+    ASSERT_NE(modifier_->setBarBackgroundBlurStyle0, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
     EXPECT_EQ(checkVal, "BlurStyle.NONE");
 
@@ -553,7 +545,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyleTest, TestSize.Level1)
     };
 
     for (const auto& [value, expectVal] : BlurStyleTestPlan) {
-        modifier_->setBarBackgroundBlurStyle(node_, value);
+        modifier_->setBarBackgroundBlurStyle0(node_, value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -593,7 +585,7 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Number_TabsAnimationEvent_Void func{};
+    OnTabsAnimationStartCallback func{};
     modifier_->setOnAnimationStart(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -633,7 +625,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_TabsAnimationEvent_Void func{};
+    OnTabsAnimationEndCallback func{};
     modifier_->setOnAnimationEnd(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -670,7 +662,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_TabsAnimationEvent_Void func{};
+    OnTabsGestureSwipeCallback func{};
     modifier_->setOnGestureSwipe(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -707,7 +699,7 @@ HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Type_TabsAttribute_customContentTransition_delegate func{};
+    TabsCustomContentTransitionCallback func{};
     modifier_->setCustomContentTransition(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -732,7 +724,7 @@ HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Number_Boolean func{};
+    OnTabsContentWillChangeCallback func{};
     modifier_->setOnContentWillChange(node_, &func);
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -955,7 +947,7 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Null, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -975,7 +967,7 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
+    divider = Converter::ArkUnion<Ark_Union_DividerStyle_Null, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -997,7 +989,7 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Null, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1025,7 +1017,7 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Null, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1046,7 +1038,7 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setDividerNullTest, TestSize.Level1)
 {
-    Ark_Union_DividerStyle_Undefined divider =
+    Ark_Union_DividerStyle_Null divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);

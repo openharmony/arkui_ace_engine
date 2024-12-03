@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextTimerControllerAccessor {
-static void DestroyPeer(TextTimerControllerPeer *peer)
+void DestroyPeerImpl(TextTimerControllerPeer* peer)
 {
     if (peer) {
         delete peer;
@@ -32,7 +32,7 @@ TextTimerControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void StartImpl(TextTimerControllerPeer* peer)
 {
@@ -56,6 +56,7 @@ void ResetImpl(TextTimerControllerPeer* peer)
 const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
 {
     static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
+        TextTimerControllerAccessor::DestroyPeerImpl,
         TextTimerControllerAccessor::CtorImpl,
         TextTimerControllerAccessor::GetFinalizerImpl,
         TextTimerControllerAccessor::StartImpl,

@@ -48,7 +48,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestInvalid, TestSize.Level1)
 {
     // assume nothing bad with invalid and undefined options
     modifier_->setTabsOptions(node_, nullptr);
-    auto optionsUndef = Converter::ArkValue<Opt_Type_TabsInterface_value>(Ark_Empty());
+    auto optionsUndef = Converter::ArkValue<Opt_TabsOptions>(Ark_Empty());
     modifier_->setTabsOptions(node_, &optionsUndef);
     EXPECT_TRUE(true);
 }
@@ -62,12 +62,12 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabsOptions, nullptr);
 
-    Ark_Type_TabsInterface_value options = {
+    Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
         .index = Converter::ArkValue<Opt_Number>(Ark_Empty())
     };
-    auto optionsOpt = Converter::ArkValue<Opt_Type_TabsInterface_value>(options);
+    auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
     const std::string PROP_NAME("barPosition");
     const std::string EXPECTED_DEFAULT_VALUE("BarPosition.Start");
@@ -101,12 +101,12 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabsOptions, nullptr);
 
-    Ark_Type_TabsInterface_value options = {
+    Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
         .index = Converter::ArkValue<Opt_Number>(Ark_Empty())
     };
-    auto optionsOpt = Converter::ArkValue<Opt_Type_TabsInterface_value>(options);
+    auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
     // set the invoke checker INTO the internal controller
     bool checkInvoke = false;
@@ -142,12 +142,12 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestIndex, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabsOptions, nullptr);
 
-    Ark_Type_TabsInterface_value options = {
+    Ark_TabsOptions options = {
         .barPosition = Converter::ArkValue<Opt_BarPosition>(Ark_Empty()),
         .controller = Converter::ArkValue<Opt_TabsController>(Ark_Empty()),
         .index = Converter::ArkValue<Opt_Number>(Ark_Empty())
     };
-    auto optionsOpt = Converter::ArkValue<Opt_Type_TabsInterface_value>(options);
+    auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
 
     const std::string PROP_NAME("index");
     const std::string EXPECTED_DEFAULT_VALUE("0");

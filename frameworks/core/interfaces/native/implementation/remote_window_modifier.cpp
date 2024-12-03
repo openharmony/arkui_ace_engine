@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RemoteWindowModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RemoteWindowModifier
 namespace RemoteWindowInterfaceModifier {
 void SetRemoteWindowOptionsImpl(Ark_NativePointer node,
                                 const Ark_WindowAnimationTarget* target)
@@ -32,6 +38,7 @@ void SetRemoteWindowOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRemoteWindowModifier* GetRemoteWindowModifier()
 {
     static const GENERATED_ArkUIRemoteWindowModifier ArkUIRemoteWindowModifierImpl {
+        RemoteWindowModifier::ConstructImpl,
         RemoteWindowInterfaceModifier::SetRemoteWindowOptionsImpl,
     };
     return &ArkUIRemoteWindowModifierImpl;

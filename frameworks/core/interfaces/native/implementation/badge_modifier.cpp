@@ -21,7 +21,6 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
     using UnionBadgeOptions = std::variant<Ark_BadgePosition, Ark_Position>;
 struct Position {
@@ -42,7 +41,6 @@ struct Style {
 }
 
 namespace Converter {
-
 template<>
 void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
 {
@@ -125,15 +123,17 @@ BadgeParameters Convert(const Ark_BadgeParamWithNumber& src)
     dst.badgeMaxCount = Converter::OptConvert<int>(src.maxCount);
     return dst;
 }
-
 } // namespace OHOS::Ace::NG::Converter
-
 } // namespace OHOS::Ace::NG
 
-
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace BadgeModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // BadgeModifier
 namespace BadgeInterfaceModifier {
-
 template<typename T>
 void SetBadgeParamBase(Ark_NativePointer node, const T* value)
 {
@@ -158,14 +158,15 @@ void SetBadgeOptions1Impl(Ark_NativePointer node,
 {
     SetBadgeParamBase(node, value);
 }
-} // namespace BadgeInterfaceModifier
+} // BadgeInterfaceModifier
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier()
 {
     static const GENERATED_ArkUIBadgeModifier ArkUIBadgeModifierImpl {
+        BadgeModifier::ConstructImpl,
         BadgeInterfaceModifier::SetBadgeOptions0Impl,
         BadgeInterfaceModifier::SetBadgeOptions1Impl,
     };
     return &ArkUIBadgeModifierImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

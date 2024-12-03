@@ -61,6 +61,12 @@ inline void AssignCast(std::optional<GridItemAlignment>& dst, const Ark_GridItem
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace GridModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // GridModifier
 namespace GridInterfaceModifier {
 void SetGridOptionsImpl(Ark_NativePointer node,
                         const Opt_Scroller* scroller,
@@ -186,13 +192,23 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     };
     GridModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
-void CachedCountImpl(Ark_NativePointer node,
-                     const Ark_Number* value)
+void CachedCount0Impl(Ark_NativePointer node,
+                      const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     GridModelNG::SetCachedCount(frameNode, Converter::Convert<int32_t>(*value));
+}
+void CachedCount1Impl(Ark_NativePointer node,
+                      const Ark_Number* count,
+                      Ark_Boolean show)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //GridModelNG::SetCachedCount1(frameNode, convValue);
 }
 void EditModeImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -346,7 +362,7 @@ void FrictionImpl(Ark_NativePointer node,
     GridModelNG::SetFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void AlignItemsImpl(Ark_NativePointer node,
-                    const Ark_Union_GridItemAlignment_Undefined* value)
+                    const Opt_GridItemAlignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -443,6 +459,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIGridModifier* GetGridModifier()
 {
     static const GENERATED_ArkUIGridModifier ArkUIGridModifierImpl {
+        GridModifier::ConstructImpl,
         GridInterfaceModifier::SetGridOptionsImpl,
         GridAttributeModifier::ColumnsTemplateImpl,
         GridAttributeModifier::RowsTemplateImpl,
@@ -453,7 +470,8 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::ScrollBarImpl,
         GridAttributeModifier::OnScrollBarUpdateImpl,
         GridAttributeModifier::OnScrollIndexImpl,
-        GridAttributeModifier::CachedCountImpl,
+        GridAttributeModifier::CachedCount0Impl,
+        GridAttributeModifier::CachedCount1Impl,
         GridAttributeModifier::EditModeImpl,
         GridAttributeModifier::MultiSelectableImpl,
         GridAttributeModifier::MaxCountImpl,

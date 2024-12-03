@@ -169,6 +169,12 @@ void AssignCast(std::optional<ProgressStatus>& dst, const Ark_ProgressStatus& sr
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ProgressModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ProgressModifier
 namespace ProgressInterfaceModifier {
 void SetProgressOptionsImpl(Ark_NativePointer node,
                             const Ark_ProgressOptions* options)
@@ -246,7 +252,7 @@ void StyleImpl(Ark_NativePointer node,
     );
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Ark_Union_Boolean_Undefined* value)
+                          const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,12 +266,15 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ProgressModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA ProgressInterfaceModifier::ContentModifierImpl -> Method is not implemented.");
 }
 } // ProgressAttributeModifier
 const GENERATED_ArkUIProgressModifier* GetProgressModifier()
 {
     static const GENERATED_ArkUIProgressModifier ArkUIProgressModifierImpl {
+        ProgressModifier::ConstructImpl,
         ProgressInterfaceModifier::SetProgressOptionsImpl,
         ProgressAttributeModifier::ValueImpl,
         ProgressAttributeModifier::ColorImpl,

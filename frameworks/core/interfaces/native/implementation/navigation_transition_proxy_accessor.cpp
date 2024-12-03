@@ -31,7 +31,7 @@ struct NavContentInfo {
 template<>
 inline void* Convert(const Ark_CustomObject& src)
 {
-    return nullptr;
+    return new NavigationTransitionProxyPeer();
 }
 
 template<>
@@ -49,7 +49,7 @@ NavContentInfo Convert(const Ark_NavContentInfo& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
-static void DestroyPeer(NavigationTransitionProxyPeer *peer)
+void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
@@ -61,7 +61,7 @@ NavigationTransitionProxyPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void FinishTransitionImpl(NavigationTransitionProxyPeer* peer)
 {
@@ -112,6 +112,7 @@ void SetIsInteractiveImpl(NavigationTransitionProxyPeer* peer,
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor()
 {
     static const GENERATED_ArkUINavigationTransitionProxyAccessor NavigationTransitionProxyAccessorImpl {
+        NavigationTransitionProxyAccessor::DestroyPeerImpl,
         NavigationTransitionProxyAccessor::CtorImpl,
         NavigationTransitionProxyAccessor::GetFinalizerImpl,
         NavigationTransitionProxyAccessor::FinishTransitionImpl,

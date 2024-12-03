@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TimePickerDialogPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
+void DestroyPeerImpl(TimePickerDialogPeer* peer)
+{
+}
 TimePickerDialogPeer* CtorImpl()
 {
-    return nullptr;
+    return new TimePickerDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Opt_TimePickerDialogOptions* options)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
+        TimePickerDialogAccessor::DestroyPeerImpl,
         TimePickerDialogAccessor::CtorImpl,
         TimePickerDialogAccessor::GetFinalizerImpl,
         TimePickerDialogAccessor::ShowImpl,

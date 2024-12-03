@@ -182,6 +182,7 @@ const GENERATED_ArkUIStackModifier* GetStackModifier();
 const GENERATED_ArkUIStepperModifier* GetStepperModifier();
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier();
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier();
+const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier();
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier();
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier();
 const GENERATED_ArkUITabsModifier* GetTabsModifier();
@@ -215,7 +216,6 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor();
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor();
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor();
-const GENERATED_ArkUIIMonitorAccessor* GetIMonitorAccessor();
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor();
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
@@ -223,7 +223,6 @@ const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
 const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor();
 const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor();
 const GENERATED_ArkUIContentModifierAccessor* GetContentModifierAccessor();
-const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor();
 const GENERATED_ArkUIViewAccessor* GetViewAccessor();
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor();
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
@@ -255,6 +254,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor();
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor();
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor();
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor();
+const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor();
@@ -264,6 +264,7 @@ const GENERATED_ArkUITextBaseControllerAccessor* GetTextBaseControllerAccessor()
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor();
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
+const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor();
 const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor();
 const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor();
@@ -394,6 +395,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetStepperModifier,
         GetStepperItemModifier,
         GetSwiperModifier,
+        GetIndicatorComponentModifier,
         GetSymbolGlyphModifier,
         GetSymbolSpanModifier,
         GetTabsModifier,
@@ -433,7 +435,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCanvasRendererAccessor,
         GetCanvasRenderingContext2DAccessor,
         GetDrawingRenderingContextAccessor,
-        GetIMonitorAccessor,
         GetICurveAccessor,
         GetDrawModifierAccessor,
         GetTransitionEffectAccessor,
@@ -441,7 +442,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetProgressMaskAccessor,
         GetAttributeModifierAccessor,
         GetContentModifierAccessor,
-        GetMeasurableAccessor,
         GetViewAccessor,
         GetTextContentControllerBaseAccessor,
         GetDynamicNodeAccessor,
@@ -473,6 +473,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetSearchControllerAccessor,
         GetSwiperControllerAccessor,
         GetSwiperContentTransitionProxyAccessor,
+        GetIndicatorComponentControllerAccessor,
         GetTabsControllerAccessor,
         GetTabContentTransitionProxyAccessor,
         GetTextControllerAccessor,
@@ -482,6 +483,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetTextEditControllerExAccessor,
         GetStyledStringControllerAccessor,
         GetLayoutManagerAccessor,
+        GetTextMenuItemIdAccessor,
         GetEditMenuOptionsAccessor,
         GetTextInputControllerAccessor,
         GetTextPickerDialogAccessor,
@@ -596,6 +598,7 @@ const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 
 void setLogger(const ServiceLogger* logger) {
 }
+
 
 const GenericServiceAPI* GetServiceAPI()
 {

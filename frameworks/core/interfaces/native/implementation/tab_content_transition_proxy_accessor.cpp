@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TabContentTransitionProxyPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
+void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
+{
+}
 TabContentTransitionProxyPeer* CtorImpl()
 {
-    return nullptr;
+    return new TabContentTransitionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void FinishTransitionImpl(TabContentTransitionProxyPeer* peer)
 {
@@ -50,6 +55,7 @@ void SetToImpl(TabContentTransitionProxyPeer* peer,
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor()
 {
     static const GENERATED_ArkUITabContentTransitionProxyAccessor TabContentTransitionProxyAccessorImpl {
+        TabContentTransitionProxyAccessor::DestroyPeerImpl,
         TabContentTransitionProxyAccessor::CtorImpl,
         TabContentTransitionProxyAccessor::GetFinalizerImpl,
         TabContentTransitionProxyAccessor::FinishTransitionImpl,

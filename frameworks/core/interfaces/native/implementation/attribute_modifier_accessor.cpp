@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct AttributeModifierPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AttributeModifierAccessor {
+void DestroyPeerImpl(AttributeModifierPeer* peer)
+{
+}
 AttributeModifierPeer* CtorImpl()
 {
-    return nullptr;
+    return new AttributeModifierPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ApplyNormalAttributeImpl(AttributeModifierPeer* peer,
                               const Ark_CustomObject* instance)
@@ -51,6 +56,7 @@ void ApplySelectedAttributeImpl(AttributeModifierPeer* peer,
 const GENERATED_ArkUIAttributeModifierAccessor* GetAttributeModifierAccessor()
 {
     static const GENERATED_ArkUIAttributeModifierAccessor AttributeModifierAccessorImpl {
+        AttributeModifierAccessor::DestroyPeerImpl,
         AttributeModifierAccessor::CtorImpl,
         AttributeModifierAccessor::GetFinalizerImpl,
         AttributeModifierAccessor::ApplyNormalAttributeImpl,

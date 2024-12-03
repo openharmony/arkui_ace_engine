@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FullScreenExitHandlerAccessor {
-FullScreenExitHandlerPeer* CtorImpl()
-{
-    return new FullScreenExitHandlerPeer();
-}
-static void DestroyPeer(FullScreenExitHandlerPeer *peer)
+void DestroyPeerImpl(FullScreenExitHandlerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+FullScreenExitHandlerPeer* CtorImpl()
+{
+    return new FullScreenExitHandlerPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ExitFullScreenImpl(FullScreenExitHandlerPeer* peer)
 {
@@ -43,6 +43,7 @@ void ExitFullScreenImpl(FullScreenExitHandlerPeer* peer)
 const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor()
 {
     static const GENERATED_ArkUIFullScreenExitHandlerAccessor FullScreenExitHandlerAccessorImpl {
+        FullScreenExitHandlerAccessor::DestroyPeerImpl,
         FullScreenExitHandlerAccessor::CtorImpl,
         FullScreenExitHandlerAccessor::GetFinalizerImpl,
         FullScreenExitHandlerAccessor::ExitFullScreenImpl,

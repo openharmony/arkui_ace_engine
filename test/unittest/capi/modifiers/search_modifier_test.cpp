@@ -175,7 +175,7 @@ typedef std::pair<float, float> ArkNumberFloatTest;
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
 typedef std::pair<Ark_Union_IconOptions_SymbolGlyphModifier, TripleCheckValues> SearchIconTest;
 typedef std::tuple<Ark_Boolean, bool> OneBoolStep;
-typedef std::pair<Opt_Type_SearchInterface_options, TripleCheckValues> OptionsTest;
+typedef std::pair<Opt_SearchOptions, TripleCheckValues> OptionsTest;
 typedef std::pair<Ark_Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
 typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
 typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
@@ -471,11 +471,11 @@ HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
  */
 HWTEST_F(SearchModifierTest, DISABLED_setSearchOptionsValidValues, TestSize.Level1)
 {
-    Ark_Type_SearchInterface_options options = {};
+    Ark_SearchOptions options = {};
     options.value = ArkValue<Opt_String>(TEST_STRING);
     options.placeholder = ArkUnion<Opt_ResourceStr, Ark_String>(TEST_STRING);
     options.icon = ArkValue<Opt_String>(TEST_STRING);
-    auto optOptions = ArkValue<Opt_Type_SearchInterface_options>(options);
+    auto optOptions = ArkValue<Opt_SearchOptions>(options);
     modifier_->setSearchOptions(node_, &optOptions);
     // default
     auto jsonValue = GetJsonValue(node_);

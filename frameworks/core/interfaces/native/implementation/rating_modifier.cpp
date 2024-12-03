@@ -21,6 +21,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RatingModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RatingModifier
 namespace RatingInterfaceModifier {
 void SetRatingOptionsImpl(Ark_NativePointer node,
                           const Opt_RatingOptions* options)
@@ -53,6 +59,7 @@ void StarsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto optVal = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(optVal);
     auto optdVal = FloatToDouble(optVal);
@@ -63,6 +70,7 @@ void StepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto optVal = Converter::OptConvert<float>(*value);
     static const float stepSizeMin = 0.1;
     Validator::ValidateGreatOrEqual(optVal, stepSizeMin);
@@ -91,7 +99,7 @@ void StarStyleImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Number_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange = [frameNode](const std::string& value) {
@@ -113,6 +121,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()
 {
     static const GENERATED_ArkUIRatingModifier ArkUIRatingModifierImpl {
+        RatingModifier::ConstructImpl,
         RatingInterfaceModifier::SetRatingOptionsImpl,
         RatingAttributeModifier::StarsImpl,
         RatingAttributeModifier::StepSizeImpl,

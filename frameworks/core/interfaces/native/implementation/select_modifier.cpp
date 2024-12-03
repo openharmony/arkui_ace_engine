@@ -112,6 +112,12 @@ SelectDivider Convert(const Ark_DividerOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SelectModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SelectModifier
 namespace SelectInterfaceModifier {
 void SetSelectOptionsImpl(Ark_NativePointer node,
                           const Array_SelectOption* options)
@@ -343,7 +349,7 @@ void MenuItemContentModifierImpl(Ark_NativePointer node,
     //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_Union_DividerOptions_Undefined_Undefined* value)
+                 const Ark_Union_Opt_DividerOptions_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -373,6 +379,7 @@ void MenuAlignImpl(Ark_NativePointer node,
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
 {
     static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
+        SelectModifier::ConstructImpl,
         SelectInterfaceModifier::SetSelectOptionsImpl,
         SelectAttributeModifier::SelectedImpl,
         SelectAttributeModifier::ValueImpl,

@@ -127,17 +127,17 @@ HWTEST_F(WebResourceResponseAccessorTest, getResponseCodeTest, TestSize.Level1)
  */
 HWTEST_F(WebResourceResponseAccessorTest, setResponseDataTest, TestSize.Level1)
 {
-    Ark_Union_String_Number_Resource_ArrayBuffer data;
+    Ark_Union_String_Number_Resource_Buffer data;
 
     ASSERT_NE(accessor_->setResponseData, nullptr);
 
     std::string responseData = "responseData";
-    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_ArrayBuffer, Ark_String>(responseData);
+    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_String>(responseData);
     accessor_->setResponseData(peer_, &data);
     EXPECT_EQ(responseData, peer_->handler->GetData());
 
     int32_t fd = 7;
-    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_ArrayBuffer, Ark_Number>(fd);
+    data = Converter::ArkUnion<Ark_Union_String_Number_Resource_Buffer, Ark_Number>(fd);
     accessor_->setResponseData(peer_, &data);
     EXPECT_EQ(fd, peer_->handler->GetFileHandle());
 }

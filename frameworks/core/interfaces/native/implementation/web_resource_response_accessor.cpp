@@ -25,19 +25,19 @@ constexpr int32_t BAD_REQUEST = 400;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceResponseAccessor {
-WebResourceResponsePeer* CtorImpl()
-{
-    return new WebResourceResponsePeer();
-}
-static void DestroyPeer(WebResourceResponsePeer *peer)
+void DestroyPeerImpl(WebResourceResponsePeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+WebResourceResponsePeer* CtorImpl()
+{
+    return new WebResourceResponsePeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetResponseDataImpl(WebResourceResponsePeer* peer)
 {
@@ -86,7 +86,7 @@ Ark_Int32 GetResponseCodeImpl(WebResourceResponsePeer* peer)
     return static_cast<Ark_Int32>(peer->handler->GetStatusCode());
 }
 void SetResponseDataImpl(WebResourceResponsePeer* peer,
-                         const Ark_Union_String_Number_Resource_ArrayBuffer* data)
+                         const Ark_Union_String_Number_Resource_Buffer* data)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     CHECK_NULL_VOID(data);
@@ -108,7 +108,7 @@ void SetResponseDataImpl(WebResourceResponsePeer* peer,
             }
             peer->handler->SetResourceUrl(url);
         },
-        [peer, data](const Ark_ArrayBuffer& responseData) {
+        [peer, data](const Ark_Buffer& responseData) {
             LOGE("WebResourceResponseAccessor::SetResponseDataImpl - Ark_ArrayBuffer is not fully implemented");
         },
         []() {}
@@ -174,6 +174,7 @@ Ark_Boolean GetResponseIsReadyImpl(WebResourceResponsePeer* peer)
 const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
 {
     static const GENERATED_ArkUIWebResourceResponseAccessor WebResourceResponseAccessorImpl {
+        WebResourceResponseAccessor::DestroyPeerImpl,
         WebResourceResponseAccessor::CtorImpl,
         WebResourceResponseAccessor::GetFinalizerImpl,
         WebResourceResponseAccessor::GetResponseDataImpl,

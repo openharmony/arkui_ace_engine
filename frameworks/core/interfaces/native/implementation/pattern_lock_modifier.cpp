@@ -45,6 +45,12 @@ CircleStyleOptions Convert(const Ark_CircleStyleOptions& src)
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PatternLockModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PatternLockModifier
 namespace PatternLockInterfaceModifier {
 void SetPatternLockOptionsImpl(Ark_NativePointer node,
                                const Opt_PatternLockController* controller)
@@ -168,7 +174,7 @@ void OnDotConnectImpl(Ark_NativePointer node,
         "implemented later.");
 }
 void ActivateCircleStyleImpl(Ark_NativePointer node,
-                             const Ark_Union_CircleStyleOptions_Undefined* value)
+                             const Opt_CircleStyleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -185,6 +191,7 @@ void ActivateCircleStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
 {
     static const GENERATED_ArkUIPatternLockModifier ArkUIPatternLockModifierImpl {
+        PatternLockModifier::ConstructImpl,
         PatternLockInterfaceModifier::SetPatternLockOptionsImpl,
         PatternLockAttributeModifier::SideLengthImpl,
         PatternLockAttributeModifier::CircleRadiusImpl,

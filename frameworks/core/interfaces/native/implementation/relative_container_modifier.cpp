@@ -95,12 +95,17 @@ BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RelativeContainerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RelativeContainerModifier
 namespace RelativeContainerInterfaceModifier {
 void SetRelativeContainerOptionsImpl(Ark_NativePointer node)
 {
     // keep it empty because RelativeContainer doesn`t have any options
 }
-
 } // RelativeContainerInterfaceModifier
 namespace RelativeContainerAttributeModifier {
 void GuideLineImpl(Ark_NativePointer node,
@@ -112,7 +117,6 @@ void GuideLineImpl(Ark_NativePointer node,
     auto infoVec = Converter::Convert<std::vector<GuidelineInfo>>(*value);
     RelativeContainerModelNG::SetGuideline(frameNode, infoVec);
 }
-
 void Barrier0Impl(Ark_NativePointer node,
                   const Array_BarrierStyle* value)
 {
@@ -122,7 +126,6 @@ void Barrier0Impl(Ark_NativePointer node,
     auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
     RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
 }
-
 void Barrier1Impl(Ark_NativePointer node,
                   const Array_LocalizedBarrierStyle* value)
 {
@@ -132,11 +135,11 @@ void Barrier1Impl(Ark_NativePointer node,
     auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
     RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
 }
-
 } // RelativeContainerAttributeModifier
 const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
 {
     static const GENERATED_ArkUIRelativeContainerModifier ArkUIRelativeContainerModifierImpl {
+        RelativeContainerModifier::ConstructImpl,
         RelativeContainerInterfaceModifier::SetRelativeContainerOptionsImpl,
         RelativeContainerAttributeModifier::GuideLineImpl,
         RelativeContainerAttributeModifier::Barrier0Impl,
@@ -144,4 +147,5 @@ const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
     };
     return &ArkUIRelativeContainerModifierImpl;
 }
+
 }

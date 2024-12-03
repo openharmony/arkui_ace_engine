@@ -19,6 +19,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace DividerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // DividerModifier
 namespace DividerInterfaceModifier {
 void SetDividerOptionsImpl(Ark_NativePointer node)
 {
@@ -72,6 +78,7 @@ void LineCapImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDividerModifier* GetDividerModifier()
 {
     static const GENERATED_ArkUIDividerModifier ArkUIDividerModifierImpl {
+        DividerModifier::ConstructImpl,
         DividerInterfaceModifier::SetDividerOptionsImpl,
         DividerAttributeModifier::VerticalImpl,
         DividerAttributeModifier::ColorImpl,

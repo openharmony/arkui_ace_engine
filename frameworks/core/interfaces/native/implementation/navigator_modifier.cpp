@@ -48,6 +48,12 @@ void AssignCast(std::optional<NavigatorType>& dst, const Ark_NavigationType& src
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace NavigatorModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // NavigatorModifier
 namespace NavigatorInterfaceModifier {
 void SetNavigatorOptions0Impl(Ark_NativePointer node,
                               const Opt_Literal_String_target_NavigationType_type* value)
@@ -107,6 +113,7 @@ void ParamsImpl(Ark_NativePointer node,
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()
 {
     static const GENERATED_ArkUINavigatorModifier ArkUINavigatorModifierImpl {
+        NavigatorModifier::ConstructImpl,
         NavigatorInterfaceModifier::SetNavigatorOptions0Impl,
         NavigatorInterfaceModifier::SetNavigatorOptions1Impl,
         NavigatorAttributeModifier::ActiveImpl,

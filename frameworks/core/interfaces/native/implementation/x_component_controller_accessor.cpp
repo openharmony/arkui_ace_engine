@@ -23,8 +23,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerAccessor {
-
-static void DestroyPeer(XComponentControllerPeer *peer)
+void DestroyPeerImpl(XComponentControllerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     delete peer;
@@ -39,7 +38,7 @@ XComponentControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetXComponentSurfaceIdImpl(XComponentControllerPeer* peer)
 {
@@ -161,14 +160,14 @@ void OnSurfaceDestroyedImpl(XComponentControllerPeer* peer,
     LOGE("XComponentControllerAccessor::OnSurfaceDestroyedImpl - callback need to be supported");
 #endif //XCOMPONENT_SUPPORTED
 }
-Ark_NativePointer StartImageAnalyzerImpl(XComponentControllerPeer* peer,
-                                         const Ark_ImageAnalyzerConfig* config)
+void StartImageAnalyzerImpl(XComponentControllerPeer* peer,
+                            const Ark_ImageAnalyzerConfig* config,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_RETURN(peer && peer->controller, 0);
+    CHECK_NULL_VOID(peer && peer->controller);
     LOGE("XComponentControllerAccessor::StartImageAnalyzerImpl - return promise need to be supported");
 #endif //XCOMPONENT_SUPPORTED
-    return nullptr;
 }
 void StopImageAnalyzerImpl(XComponentControllerPeer* peer)
 {
@@ -181,6 +180,7 @@ void StopImageAnalyzerImpl(XComponentControllerPeer* peer)
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()
 {
     static const GENERATED_ArkUIXComponentControllerAccessor XComponentControllerAccessorImpl {
+        XComponentControllerAccessor::DestroyPeerImpl,
         XComponentControllerAccessor::CtorImpl,
         XComponentControllerAccessor::GetFinalizerImpl,
         XComponentControllerAccessor::GetXComponentSurfaceIdImpl,

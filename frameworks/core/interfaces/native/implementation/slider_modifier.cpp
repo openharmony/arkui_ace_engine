@@ -120,6 +120,12 @@ void* Convert(const Ark_RectAttribute& src)
 }
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace SliderModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // SliderModifier
 namespace SliderInterfaceModifier {
 void SetSliderOptionsImpl(Ark_NativePointer node,
                           const Opt_SliderOptions* options)
@@ -161,6 +167,9 @@ void BlockColorImpl(Ark_NativePointer node,
 void TrackColorImpl(Ark_NativePointer node,
                     const Ark_Union_ResourceColor_LinearGradient* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("SliderModifier::TrackColorImpl is not implemented, incorrect LinearGradient passed!");
     // LinearGradient issue https://gitee.com/nikolay-igotti/idlize/issues/IAW4DU
 }
@@ -204,6 +213,7 @@ void TrackThicknessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     SliderModelNG::SetThickness(frameNode, convValue);
@@ -211,7 +221,7 @@ void TrackThicknessImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Number_SliderChangeMode_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange = [frameNode](float value, int32_t mode) {
@@ -236,6 +246,7 @@ void BlockBorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetBlockBorderWidth(frameNode, convValue);
@@ -254,6 +265,7 @@ void TrackBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetTrackBorderRadius(frameNode, convValue);
@@ -263,6 +275,7 @@ void SelectedBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetSelectedBorderRadius(frameNode, convValue);
@@ -299,6 +312,7 @@ void StepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetStepSize(frameNode, convValue);
@@ -316,6 +330,7 @@ void MinResponsiveDistanceImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     SliderModelNG::SetMinResponsiveDistance(frameNode, convValue);
@@ -353,6 +368,7 @@ void ShowTipsImpl(Ark_NativePointer node,
 const GENERATED_ArkUISliderModifier* GetSliderModifier()
 {
     static const GENERATED_ArkUISliderModifier ArkUISliderModifierImpl {
+        SliderModifier::ConstructImpl,
         SliderInterfaceModifier::SetSliderOptionsImpl,
         SliderAttributeModifier::BlockColorImpl,
         SliderAttributeModifier::TrackColorImpl,

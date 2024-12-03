@@ -114,7 +114,7 @@ public:
  */
 HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestSize.Level1)
 {
-    Ark_Type_SearchInterface_options options = {};
+    Ark_SearchOptions options = {};
     options.value = ArkValue<Opt_String>(Ark_Empty());
     options.placeholder = ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr);
     options.icon = ArkValue<Opt_String>(Ark_Empty());
@@ -130,7 +130,7 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
     Ark_SearchController arkController;
     arkController.ptr = controllerPtr;
     options.controller = Converter::ArkValue<Opt_SearchController>(arkController);
-    auto optOptions = ArkValue<Opt_Type_SearchInterface_options>(options);
+    auto optOptions = ArkValue<Opt_SearchOptions>(options);
 
     modifier_->setSearchOptions(node_, &optOptions);
 
@@ -194,7 +194,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnTextSelectionChangeTest, TestSize.Leve
         g_endValue = Convert<int32_t>(selectionEnd);
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Number_Void func{};
+    OnTextSelectionChangeCallback func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
@@ -270,7 +270,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnContentScrollTest, TestSize.Level1)
         g_scrollY = Convert<float>(totalOffsetY);
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_Number_Void func{};
+    OnContentScrollCallback func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
@@ -305,20 +305,20 @@ HWTEST_F(SearchModifierCallbackTest, setOnEditChangeTest, TestSize.Level1)
     EXPECT_EQ(g_isEditChangeTest, true);
 }
 /**
- * @tc.name: setOnSubmitTest
- * @tc.desc: Test Seacrh setOnSubmit event.
+ * @tc.name: setOnSubmit0Test
+ * @tc.desc: Test Seacrh setOnSubmit0 event.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierCallbackTest, setOnSubmitTest, TestSize.Level1)
+HWTEST_F(SearchModifierCallbackTest, setOnSubmit0Test, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnSubmit, nullptr);
-    EventsTracker::eventsReceiver.onSubmit = [](Ark_Int32 nodeId, Ark_String value) {
+    ASSERT_NE(modifier_->setOnSubmit0, nullptr);
+    EventsTracker::eventsReceiver.onSubmit0 = [](Ark_Int32 nodeId, Ark_String value) {
         g_EventTestString = Convert<std::string>(value);
     };
     g_EventTestString = EMPTY_TEXT;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_String_Void func{};
-    modifier_->setOnSubmit(node_, &func);
+    modifier_->setOnSubmit0(node_, &func);
     auto searchEventHub = frameNode->GetEventHub<SearchEventHub>();
     EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
     ASSERT_NE(searchEventHub, nullptr);

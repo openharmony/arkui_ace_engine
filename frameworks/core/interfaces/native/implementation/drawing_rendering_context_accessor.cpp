@@ -21,8 +21,9 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawingRenderingContextAccessor {
-static void DestroyPeer(DrawingRenderingContextPeerImpl* peerImpl)
+void DestroyPeerImpl(DrawingRenderingContextPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -37,7 +38,7 @@ DrawingRenderingContextPeer* CtorImpl(const Opt_CustomObject* unit)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void InvalidateImpl(DrawingRenderingContextPeer* peer)
 {
@@ -49,6 +50,7 @@ void InvalidateImpl(DrawingRenderingContextPeer* peer)
 const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
 {
     static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
+        DrawingRenderingContextAccessor::DestroyPeerImpl,
         DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,

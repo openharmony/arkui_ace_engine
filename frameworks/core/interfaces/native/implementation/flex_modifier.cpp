@@ -110,6 +110,12 @@ FlexOptions Convert(
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace FlexModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // FlexModifier
 namespace FlexInterfaceModifier {
 void SetFlexOptionsImpl(Ark_NativePointer node,
                         const Opt_FlexOptions* value)
@@ -151,15 +157,14 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
     }
 }
 } // FlexInterfaceModifier
-
 namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+#ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
     auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
@@ -194,6 +199,7 @@ void PointLightImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
 {
     static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
+        FlexModifier::ConstructImpl,
         FlexInterfaceModifier::SetFlexOptionsImpl,
         FlexAttributeModifier::PointLightImpl,
     };

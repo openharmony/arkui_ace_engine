@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ActionSheetPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
+void DestroyPeerImpl(ActionSheetPeer* peer)
+{
+}
 ActionSheetPeer* CtorImpl()
 {
-    return nullptr;
+    return new ActionSheetPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
 {
     static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
+        ActionSheetAccessor::DestroyPeerImpl,
         ActionSheetAccessor::CtorImpl,
         ActionSheetAccessor::GetFinalizerImpl,
         ActionSheetAccessor::ShowImpl,

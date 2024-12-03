@@ -20,6 +20,12 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace QRCodeModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // QRCodeModifier
 namespace QRCodeInterfaceModifier {
 void SetQRCodeOptionsImpl(Ark_NativePointer node,
                           const Ark_String* value)
@@ -64,6 +70,7 @@ void ContentOpacityImpl(Ark_NativePointer node,
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
 {
     static const GENERATED_ArkUIQRCodeModifier ArkUIQRCodeModifierImpl {
+        QRCodeModifier::ConstructImpl,
         QRCodeInterfaceModifier::SetQRCodeOptionsImpl,
         QRCodeAttributeModifier::ColorImpl,
         QRCodeAttributeModifier::BackgroundColorImpl,

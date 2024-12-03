@@ -23,6 +23,12 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RichTextModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RichTextModifier
 namespace RichTextInterfaceModifier {
 void SetRichTextOptionsImpl(Ark_NativePointer node,
                             const Ark_String* content)
@@ -67,6 +73,7 @@ void OnCompleteImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRichTextModifier* GetRichTextModifier()
 {
     static const GENERATED_ArkUIRichTextModifier ArkUIRichTextModifierImpl {
+        RichTextModifier::ConstructImpl,
         RichTextInterfaceModifier::SetRichTextOptionsImpl,
         RichTextAttributeModifier::OnStartImpl,
         RichTextAttributeModifier::OnCompleteImpl,

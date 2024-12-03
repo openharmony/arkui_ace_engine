@@ -271,7 +271,6 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundEffectTestValidValues, TestSize
         }),
         .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
         .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
-        .type = ArkValue<Opt_BlurType>(Ark_BlurType::ARK_BLUR_TYPE_WITHIN_WINDOW)
     };
     modifier_->setBackgroundEffect(node_, &inputValValid);
 }
@@ -342,7 +341,6 @@ HWTEST_F(CommonMethodModifierTest2, setBackgroundBlurStyleTestValidValues, TestS
             }),
             .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
             .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
-            .type = ArkValue<Opt_BlurType>(Ark_BlurType::ARK_BLUR_TYPE_WITHIN_WINDOW)
         }
     );
     modifier_->setBackgroundBlurStyle(node_, inputStyleValid, &inputOptionValid);

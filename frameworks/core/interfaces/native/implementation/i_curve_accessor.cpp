@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ICurvePeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ICurveAccessor {
+void DestroyPeerImpl(ICurvePeer* peer)
+{
+}
 ICurvePeer* CtorImpl()
 {
-    return nullptr;
+    return new ICurvePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Int32 InterpolateImpl(ICurvePeer* peer,
                           const Ark_Number* fraction)
@@ -36,6 +41,7 @@ Ark_Int32 InterpolateImpl(ICurvePeer* peer,
 const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
 {
     static const GENERATED_ArkUIICurveAccessor ICurveAccessorImpl {
+        ICurveAccessor::DestroyPeerImpl,
         ICurveAccessor::CtorImpl,
         ICurveAccessor::GetFinalizerImpl,
         ICurveAccessor::InterpolateImpl,

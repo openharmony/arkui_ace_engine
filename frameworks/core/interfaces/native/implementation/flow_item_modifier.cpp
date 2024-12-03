@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace FlowItemModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // FlowItemModifier
 namespace FlowItemInterfaceModifier {
 void SetFlowItemOptionsImpl(Ark_NativePointer node)
 {
@@ -31,6 +37,7 @@ void SetFlowItemOptionsImpl(Ark_NativePointer node)
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
 {
     static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
+        FlowItemModifier::ConstructImpl,
         FlowItemInterfaceModifier::SetFlowItemOptionsImpl,
     };
     return &ArkUIFlowItemModifierImpl;

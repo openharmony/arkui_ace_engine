@@ -18,20 +18,26 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PluginComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PluginComponentModifier
 namespace PluginComponentInterfaceModifier {
 void SetPluginComponentOptionsImpl(Ark_NativePointer node,
-                                   const Ark_Literal_PluginComponentTemplate_template_Any_data* value)
+                                   const Ark_PluginComponentOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
     //PluginComponentModelNG::SetSetPluginComponentOptions(frameNode, convValue);
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    const Callback_Void* value)
+                    const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +46,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //PluginComponentModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Callback_Literal_Number_errcode_String_msg_Void* value)
+                 const PluginErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -52,6 +58,7 @@ void OnErrorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
 {
     static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
+        PluginComponentModifier::ConstructImpl,
         PluginComponentInterfaceModifier::SetPluginComponentOptionsImpl,
         PluginComponentAttributeModifier::OnCompleteImpl,
         PluginComponentAttributeModifier::OnErrorImpl,

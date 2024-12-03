@@ -59,6 +59,12 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace DataPanelModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // DataPanelModifier
 namespace DataPanelInterfaceModifier {
 void SetDataPanelOptionsImpl(Ark_NativePointer node,
                              const Ark_DataPanelOptions* options)
@@ -139,6 +145,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
 {
     static const GENERATED_ArkUIDataPanelModifier ArkUIDataPanelModifierImpl {
+        DataPanelModifier::ConstructImpl,
         DataPanelInterfaceModifier::SetDataPanelOptionsImpl,
         DataPanelAttributeModifier::CloseEffectImpl,
         DataPanelAttributeModifier::ValueColorsImpl,

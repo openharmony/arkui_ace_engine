@@ -50,6 +50,12 @@ void AssignCast(std::optional<CalendarSettingData>& dst, const Ark_CalendarOptio
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CalendarPickerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CalendarPickerModifier
 namespace CalendarPickerInterfaceModifier {
 void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
                                   const Opt_CalendarOptions* options)
@@ -122,6 +128,7 @@ void EdgeAlignImpl(Ark_NativePointer node,
 const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
     static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
+        CalendarPickerModifier::ConstructImpl,
         CalendarPickerInterfaceModifier::SetCalendarPickerOptionsImpl,
         CalendarPickerAttributeModifier::TextStyleImpl,
         CalendarPickerAttributeModifier::OnChangeImpl,

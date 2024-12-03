@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct GestureModifierPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureModifierAccessor {
+void DestroyPeerImpl(GestureModifierPeer* peer)
+{
+}
 GestureModifierPeer* CtorImpl()
 {
-    return nullptr;
+    return new GestureModifierPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ApplyGestureImpl(GestureModifierPeer* peer,
                       const Ark_UIGestureEvent* event)
@@ -35,6 +40,7 @@ void ApplyGestureImpl(GestureModifierPeer* peer,
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
 {
     static const GENERATED_ArkUIGestureModifierAccessor GestureModifierAccessorImpl {
+        GestureModifierAccessor::DestroyPeerImpl,
         GestureModifierAccessor::CtorImpl,
         GestureModifierAccessor::GetFinalizerImpl,
         GestureModifierAccessor::ApplyGestureImpl,

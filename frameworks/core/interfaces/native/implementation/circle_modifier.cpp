@@ -36,6 +36,12 @@ inline CircleOptions Convert(const Ark_CircleOptions& src)
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CircleModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CircleModifier
 namespace CircleInterfaceModifier {
 void SetCircleOptionsImpl(Ark_NativePointer node,
                           const Opt_CircleOptions* value)
@@ -55,6 +61,7 @@ void SetCircleOptionsImpl(Ark_NativePointer node,
 const GENERATED_ArkUICircleModifier* GetCircleModifier()
 {
     static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
+        CircleModifier::ConstructImpl,
         CircleInterfaceModifier::SetCircleOptionsImpl,
     };
     return &ArkUICircleModifierImpl;

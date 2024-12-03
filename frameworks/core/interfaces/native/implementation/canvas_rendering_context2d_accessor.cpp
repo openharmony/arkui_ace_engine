@@ -62,8 +62,9 @@ std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
-static void DestroyPeer(CanvasRenderingContext2DPeerImpl* peerImpl)
+void DestroyPeerImpl(CanvasRenderingContext2DPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl *>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -82,7 +83,7 @@ CanvasRenderingContext2DPeer* CtorImpl(const Opt_RenderingContextSettings* setti
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
                    const Opt_String* type,
@@ -99,21 +100,38 @@ void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
     }
     LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerToDataURL Opt_CustomObject not implemented.");
 }
-Ark_NativePointer StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
-                                         const Ark_ImageAnalyzerConfig* config)
+void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
+                            const Ark_ImageAnalyzerConfig* config,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    CHECK_NULL_RETURN(config, nullptr);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(config);
 
     auto vector = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    return peerImpl->TriggerStartImageAnalyzer(vector);
+    peerImpl->TriggerStartImageAnalyzer(vector);
 }
 void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStopImageAnalyzer();
+}
+void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+                    const Callback_Void* callback)
+{
+}
+void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+                     const Opt_Callback_Void* callback)
+{
+}
+void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+                    const Callback_Void* callback)
+{
+}
+void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+                     const Opt_Callback_Void* callback)
+{
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
 {
@@ -131,11 +149,16 @@ Ark_Int32 GetWidthImpl(CanvasRenderingContext2DPeer* peer)
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
 {
     static const GENERATED_ArkUICanvasRenderingContext2DAccessor CanvasRenderingContext2DAccessorImpl {
+        CanvasRenderingContext2DAccessor::DestroyPeerImpl,
         CanvasRenderingContext2DAccessor::CtorImpl,
         CanvasRenderingContext2DAccessor::GetFinalizerImpl,
         CanvasRenderingContext2DAccessor::ToDataURLImpl,
         CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::StopImageAnalyzerImpl,
+        CanvasRenderingContext2DAccessor::OnOnAttachImpl,
+        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
+        CanvasRenderingContext2DAccessor::OnOnDetachImpl,
+        CanvasRenderingContext2DAccessor::OffOnDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
     };

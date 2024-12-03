@@ -51,6 +51,12 @@ namespace OHOS::Ace::NG::Converter {
 
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TextClockModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TextClockModifier
 namespace TextClockInterfaceModifier {
 void SetTextClockOptionsImpl(Ark_NativePointer node,
                              const Opt_TextClockOptions* options)
@@ -170,18 +176,18 @@ void ContentModifierImpl(Ark_NativePointer node,
     //TextClockModelNG::SetContentModifier(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Ark_Union_DateTimeOptions_Undefined* value)
+                         const Opt_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //TextClockModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 } // TextClockAttributeModifier
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier()
 {
     static const GENERATED_ArkUITextClockModifier ArkUITextClockModifierImpl {
+        TextClockModifier::ConstructImpl,
         TextClockInterfaceModifier::SetTextClockOptionsImpl,
         TextClockAttributeModifier::FormatImpl,
         TextClockAttributeModifier::OnDateChangeImpl,

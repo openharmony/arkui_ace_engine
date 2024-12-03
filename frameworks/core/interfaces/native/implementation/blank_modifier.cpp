@@ -20,6 +20,12 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace BlankModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // BlankModifier
 namespace BlankInterfaceModifier {
 void SetBlankOptionsImpl(Ark_NativePointer node,
                          const Opt_Union_Number_String* min)
@@ -52,6 +58,7 @@ void ColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {
+        BlankModifier::ConstructImpl,
         BlankInterfaceModifier::SetBlankOptionsImpl,
         BlankAttributeModifier::ColorImpl,
     };

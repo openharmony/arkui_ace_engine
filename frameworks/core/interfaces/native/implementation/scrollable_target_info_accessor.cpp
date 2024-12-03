@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ScrollableTargetInfoPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
+void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
+{
+}
 ScrollableTargetInfoPeer* CtorImpl()
 {
-    return nullptr;
+    return new ScrollableTargetInfoPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean IsBeginImpl(ScrollableTargetInfoPeer* peer)
 {
@@ -39,6 +44,7 @@ Ark_Boolean IsEndImpl(ScrollableTargetInfoPeer* peer)
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor()
 {
     static const GENERATED_ArkUIScrollableTargetInfoAccessor ScrollableTargetInfoAccessorImpl {
+        ScrollableTargetInfoAccessor::DestroyPeerImpl,
         ScrollableTargetInfoAccessor::CtorImpl,
         ScrollableTargetInfoAccessor::GetFinalizerImpl,
         ScrollableTargetInfoAccessor::IsBeginImpl,

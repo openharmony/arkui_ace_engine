@@ -22,6 +22,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace AlphabetIndexerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // AlphabetIndexerModifier
 namespace AlphabetIndexerInterfaceModifier {
 void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
                                    const Ark_AlphabetIndexerOptions* options)
@@ -316,6 +322,7 @@ void AlignStyleImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
     static const GENERATED_ArkUIAlphabetIndexerModifier ArkUIAlphabetIndexerModifierImpl {
+        AlphabetIndexerModifier::ConstructImpl,
         AlphabetIndexerInterfaceModifier::SetAlphabetIndexerOptionsImpl,
         AlphabetIndexerAttributeModifier::OnSelectedImpl,
         AlphabetIndexerAttributeModifier::ColorImpl,

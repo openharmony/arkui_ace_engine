@@ -19,20 +19,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
-static void DestroyPeer(SwiperContentTransitionProxyPeer *peer)
+void DestroyPeerImpl(SwiperContentTransitionProxyPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
-
 SwiperContentTransitionProxyPeer* CtorImpl()
 {
     return new SwiperContentTransitionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void FinishTransitionImpl(SwiperContentTransitionProxyPeer* peer)
 {
@@ -91,6 +90,7 @@ void SetMainAxisLengthImpl(SwiperContentTransitionProxyPeer* peer,
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor()
 {
     static const GENERATED_ArkUISwiperContentTransitionProxyAccessor SwiperContentTransitionProxyAccessorImpl {
+        SwiperContentTransitionProxyAccessor::DestroyPeerImpl,
         SwiperContentTransitionProxyAccessor::CtorImpl,
         SwiperContentTransitionProxyAccessor::GetFinalizerImpl,
         SwiperContentTransitionProxyAccessor::FinishTransitionImpl,

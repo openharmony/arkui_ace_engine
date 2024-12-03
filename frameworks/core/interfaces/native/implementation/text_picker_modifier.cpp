@@ -373,6 +373,12 @@ ItemDivider Convert(const Ark_DividerOptions& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TextPickerModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TextPickerModifier
 namespace TextPickerInterfaceModifier {
 void SetSingleRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* value)
 {
@@ -418,7 +424,7 @@ void SetMultiRange(FrameNode* frameNode, const Ark_Union_Number_Array_Number* va
 void SetTextPickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TextPickerOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
 
@@ -519,7 +525,7 @@ void OnCancelImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   const Type_TextPickerAttribute_onChange_callback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onChange =
@@ -540,6 +546,15 @@ void OnChangeImpl(Ark_NativePointer node,
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChange));
 }
+void OnScrollStopImpl(Ark_NativePointer node,
+                      const TextPickerScrollStopCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextPickerModelNG::SetOnScrollStop(frameNode, convValue);
+}
 void SelectedIndexImpl(Ark_NativePointer node,
                        const Ark_Union_Number_Array_Number* value)
 {
@@ -554,7 +569,7 @@ void SelectedIndexImpl(Ark_NativePointer node,
     }
 }
 void DividerImpl(Ark_NativePointer node,
-                 const Ark_Union_DividerOptions_Undefined* value)
+                 const Ark_Union_DividerOptions_Null* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -589,6 +604,7 @@ void GradientHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto heightDimension = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(heightDimension);
     if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
@@ -600,6 +616,7 @@ void GradientHeightImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
 {
     static const GENERATED_ArkUITextPickerModifier ArkUITextPickerModifierImpl {
+        TextPickerModifier::ConstructImpl,
         TextPickerInterfaceModifier::SetTextPickerOptionsImpl,
         TextPickerAttributeModifier::DefaultPickerItemHeightImpl,
         TextPickerAttributeModifier::CanLoopImpl,
@@ -609,6 +626,7 @@ const GENERATED_ArkUITextPickerModifier* GetTextPickerModifier()
         TextPickerAttributeModifier::OnAcceptImpl,
         TextPickerAttributeModifier::OnCancelImpl,
         TextPickerAttributeModifier::OnChangeImpl,
+        TextPickerAttributeModifier::OnScrollStopImpl,
         TextPickerAttributeModifier::SelectedIndexImpl,
         TextPickerAttributeModifier::DividerImpl,
         TextPickerAttributeModifier::GradientHeightImpl,

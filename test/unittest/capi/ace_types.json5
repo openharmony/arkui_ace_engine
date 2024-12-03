@@ -1883,7 +1883,10 @@
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
-                "setMaxLinesTestDefaultValues"
+                "setMaxLinesTestDefaultValues",
+
+                // New override in API 105?
+                "setCancelButton1TestCancelButtonStyleValidValues",
             ]
         },
         {
@@ -2275,6 +2278,12 @@
                 "setRecoverableTestDefaultValues",
                 "setRecoverableTestValidValues",
                 "setRecoverableTestRecoverableInvalidValues",
+
+                // New attr in API 105?
+                "setEnableDragBarTestDefaultValues",
+                "setEnableDragBarTestEnableDragBarValidValues",
+                "setEnableDragBarTestEnableDragBarInvalidValues",
+
             ],
             "attributes": [
                 {
@@ -2559,6 +2568,11 @@
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
 
                 "setDraggableTestDraggableValidValues", // Failed after upmerge, need to check
+
+                // New attr in API 105?
+                "setOrientationTestDefaultValues",
+                "setOrientationTestOrientationValidValues",
+                "setOrientationTestOrientationInvalidValues",
             ]
         },
         {
@@ -2749,6 +2763,11 @@
 
                 // Specific setup is required to initialize friction value
                 "setFrictionTestDefaultValues",
+
+                // New attr in API 105?
+                "setClipContentTestDefaultValues",
+                "setClipContentTestClipContentValidValues",
+                "setClipContentTestClipContentInvalidValues",
             ]
         },
         {
@@ -3301,7 +3320,12 @@
                 },
                 {
                     "name": "textOverflow",
-                    "default": "TextOverflow.Clip",
+                    "attributes": [
+                        {
+                            "name": "overflow",
+                            "default": "TextOverflow.Clip",
+                        },
+                    ],
                 },
                 {
                     "name": "wordBreak",
@@ -3348,6 +3372,14 @@
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsFillValidValues",
                 "setTextShadowTestTextShadowShadowOptionsFillInvalidValues",
+
+                // New attr in API 105?
+                "setCaretColorTestDefaultValues",
+                "setCaretColorTestCaretColorValidValues",
+                "setCaretColorTestCaretColorInvalidValues",
+                "setSelectedBackgroundColorTestDefaultValues",
+                "setSelectedBackgroundColorTestSelectedBackgroundColorValidValues",
+                "setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues",
             ],
             "remove": [
                 "setFontWeight1TestDefaultValues",
@@ -3751,6 +3783,11 @@
                 "setLayoutDirectionTestDefaultValues", // wrong name in json!
                 "setLayoutDirectionTestLayoutDirectionValidValues", // wrong name in json!
                 "setLayoutDirectionTestLayoutDirectionInvalidValues", // wrong name in json!
+
+                // New override in API 105?
+                "setCachedCount1TestDefaultValues",
+                "setCachedCount1TestCachedCountCountValidValues",
+                "setCachedCount1TestCachedCountShowValidValues",
             ],
             "attributes": [
                 {

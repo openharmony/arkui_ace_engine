@@ -41,6 +41,12 @@ RowOptions Convert(const Ark_RowOptions& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace RowModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // RowModifier
 namespace RowInterfaceModifier {
 void SetRowOptionsImpl(Ark_NativePointer node,
                        const Opt_RowOptions* options)
@@ -73,10 +79,10 @@ void JustifyContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-#ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+#ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<ArkUINodeHandle>(node);
     auto themeConstants = NodeModifier::GetThemeConstants(uiNode, "", "");
@@ -108,7 +114,7 @@ void PointLightImpl(Ark_NativePointer node,
 #endif
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Ark_Union_Boolean_Undefined* value)
+                 const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -118,6 +124,7 @@ void ReverseImpl(Ark_NativePointer node,
 const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
     static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
+        RowModifier::ConstructImpl,
         RowInterfaceModifier::SetRowOptionsImpl,
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
@@ -126,4 +133,5 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
     };
     return &ArkUIRowModifierImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
-static void DestroyPeer(ImageBitmapPeer *peer)
+void DestroyPeerImpl(ImageBitmapPeer* peer)
 {
     if (peer) {
         peer->Close();
@@ -39,7 +39,7 @@ ImageBitmapPeer* CtorImpl(const Ark_String* src)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CloseImpl(ImageBitmapPeer* peer)
 {
@@ -62,6 +62,7 @@ Ark_Int32 GetWidthImpl(ImageBitmapPeer* peer)
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
 {
     static const GENERATED_ArkUIImageBitmapAccessor ImageBitmapAccessorImpl {
+        ImageBitmapAccessor::DestroyPeerImpl,
         ImageBitmapAccessor::CtorImpl,
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,

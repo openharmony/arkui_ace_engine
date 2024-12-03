@@ -17,24 +17,30 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct DynamicNodePeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DynamicNodeAccessor {
+void DestroyPeerImpl(DynamicNodePeer* peer)
+{
+}
 DynamicNodePeer* CtorImpl()
 {
-    return nullptr;
+    return new DynamicNodePeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void OnMoveImpl(DynamicNodePeer* peer,
-                const Ark_Union_OnMoveHandler_Undefined* handler)
+                const Opt_OnMoveHandler* handler)
 {
 }
 } // DynamicNodeAccessor
 const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()
 {
     static const GENERATED_ArkUIDynamicNodeAccessor DynamicNodeAccessorImpl {
+        DynamicNodeAccessor::DestroyPeerImpl,
         DynamicNodeAccessor::CtorImpl,
         DynamicNodeAccessor::GetFinalizerImpl,
         DynamicNodeAccessor::OnMoveImpl,

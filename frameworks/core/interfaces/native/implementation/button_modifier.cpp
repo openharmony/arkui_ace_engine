@@ -79,6 +79,12 @@ ButtonParameters Convert(const Ark_LabelStyle& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ButtonModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ButtonModifier
 namespace ButtonInterfaceModifier {
 void SetButtonOptions0Impl(Ark_NativePointer node)
 {
@@ -112,14 +118,14 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,
                            const Opt_ButtonOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(label);
     if (options != nullptr) {
         if (auto buttonOptions = Converter::OptConvert<Ark_ButtonOptions>(*options); buttonOptions) {
             SetButtonOptions1Impl(node, &buttonOptions.value());
         }
     }
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(label);
     auto labelString = Converter::OptConvert<std::string>(*label);
     ButtonModelNG::SetLabel(frameNode, labelString.value_or("").c_str());
 }
@@ -226,10 +232,10 @@ void LabelStyleImpl(Ark_NativePointer node,
     ButtonModelNG::SetLabelStyle(frameNode, parameters);
 }
 } // ButtonAttributeModifier
-
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
 {
     static const GENERATED_ArkUIButtonModifier ArkUIButtonModifierImpl {
+        ButtonModifier::ConstructImpl,
         ButtonInterfaceModifier::SetButtonOptions0Impl,
         ButtonInterfaceModifier::SetButtonOptions1Impl,
         ButtonInterfaceModifier::SetButtonOptions2Impl,
@@ -248,4 +254,5 @@ const GENERATED_ArkUIButtonModifier* GetButtonModifier()
     };
     return &ArkUIButtonModifierImpl;
 }
+
 }

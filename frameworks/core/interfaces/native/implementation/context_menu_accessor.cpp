@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ContextMenuPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContextMenuAccessor {
+void DestroyPeerImpl(ContextMenuPeer* peer)
+{
+}
 ContextMenuPeer* CtorImpl()
 {
-    return nullptr;
+    return new ContextMenuPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void CloseImpl()
 {
@@ -34,6 +39,7 @@ void CloseImpl()
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
 {
     static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
+        ContextMenuAccessor::DestroyPeerImpl,
         ContextMenuAccessor::CtorImpl,
         ContextMenuAccessor::GetFinalizerImpl,
         ContextMenuAccessor::CloseImpl,

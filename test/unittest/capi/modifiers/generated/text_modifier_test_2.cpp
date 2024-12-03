@@ -1196,6 +1196,185 @@ HWTEST_F(TextModifierTest, setLineBreakStrategyTestLineBreakStrategyInvalidValue
 }
 
 /*
+ * @tc.name: setCaretColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) << "Default value for attribute 'caretColor'";
+}
+
+/*
+ * @tc.name: setCaretColorTestCaretColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueCaretColor;
+
+    // Initial setup
+    initValueCaretColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueCaretColor](
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
+
+        inputValueCaretColor = value;
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setCaretColorTestCaretColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueCaretColor;
+
+    // Initial setup
+    initValueCaretColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueCaretColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueCaretColor = initValueCaretColor;
+
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        inputValueCaretColor = value;
+        modifier_->setCaretColor(node_, &inputValueCaretColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_CARET_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setCaretColor, attribute: caretColor";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+        "Default value for attribute 'selectedBackgroundColor'";
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorValidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueSelectedBackgroundColor;
+
+    // Initial setup
+    initValueSelectedBackgroundColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueSelectedBackgroundColor](
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
+
+        inputValueSelectedBackgroundColor = value;
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgroundColorInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueSelectedBackgroundColor;
+
+    // Initial setup
+    initValueSelectedBackgroundColor =
+        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueSelectedBackgroundColor](
+                          const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueSelectedBackgroundColor = initValueSelectedBackgroundColor;
+
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        inputValueSelectedBackgroundColor = value;
+        modifier_->setSelectedBackgroundColor(node_, &inputValueSelectedBackgroundColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setSelectedBackgroundColor, attribute: selectedBackgroundColor";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Ark_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
  * @tc.name: setEllipsisModeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC

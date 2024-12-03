@@ -19,6 +19,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace HyperlinkModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // HyperlinkModifier
 namespace HyperlinkInterfaceModifier {
 void SetHyperlinkOptionsImpl(Ark_NativePointer node,
                              const Ark_Union_String_Resource* address,
@@ -48,6 +54,7 @@ void ColorImpl(Ark_NativePointer node,
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
+        HyperlinkModifier::ConstructImpl,
         HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
         HyperlinkAttributeModifier::ColorImpl,
     };

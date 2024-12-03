@@ -240,15 +240,22 @@ void onGestureJudgeBeginImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onGestureRecognizerJudgeBeginImpl(Ark_Int32 nodeId,
-                                       const Ark_BaseGestureEvent event,
-                                       const Ark_Materialized current,
-                                       const Array_GestureRecognizer recognizers)
+void onGestureRecognizerJudgeBegin0Impl(Ark_Int32 nodeId,
+                                        const Ark_BaseGestureEvent event,
+                                        const Ark_GestureRecognizer current,
+                                        const Array_GestureRecognizer recognizers)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onGestureRecognizerJudgeBegin1Impl(Ark_Int32 nodeId,
+                                        const Ark_BaseGestureEvent event,
+                                        const Ark_GestureRecognizer current,
+                                        const Array_GestureRecognizer recognizers)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void shouldBuiltInRecognizerParallelWithImpl(Ark_Int32 nodeId,
-                                             const Ark_Materialized current,
+                                             const Ark_GestureRecognizer current,
                                              const Array_GestureRecognizer others)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -636,7 +643,7 @@ void onBackPressedImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onReadyImpl(Ark_Int32 nodeId,
-                 const Ark_Materialized parameter)
+                 const Ark_NavDestinationContext parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -734,7 +741,7 @@ void onCompleteImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onErrorImpl(Ark_Int32 nodeId,
-                 const Ark_Literal_Number_errcode_String_msg info)
+                 const Ark_PluginErrorData info)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -901,8 +908,14 @@ void onEditChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_String breakpoints)
+void onSubmit0Impl(Ark_Int32 nodeId,
+                   const Ark_String breakpoints)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onSubmit1Impl(Ark_Int32 nodeId,
+                   const Ark_String searchContent,
+                   const Opt_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -913,14 +926,14 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number first,
-                               const Ark_Number last)
+                               const Ark_Number selectionStart,
+                               const Ark_Number selectionEnd)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentScrollImpl(Ark_Int32 nodeId,
-                         const Ark_Number first,
-                         const Ark_Number last)
+                         const Ark_Number totalOffsetX,
+                         const Ark_Number totalOffsetY)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -935,7 +948,7 @@ void onCutImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPasteImpl(Ark_Int32 nodeId,
-                 const Ark_String value,
+                 const Ark_String content,
                  const Ark_PasteEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -1039,6 +1052,13 @@ void onContentDidScrollImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
+namespace IndicatorComponent {
+void onChangeImpl(Ark_Int32 nodeId,
+                  const Ark_Number index)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+}
 namespace Tabs {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number index)
@@ -1053,19 +1073,19 @@ void onTabBarClickImpl(Ark_Int32 nodeId,
 void onAnimationStartImpl(Ark_Int32 nodeId,
                           const Ark_Number index,
                           const Ark_Number targetIndex,
-                          const Ark_TabsAnimationEvent event)
+                          const Ark_TabsAnimationEvent extraInfo)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onAnimationEndImpl(Ark_Int32 nodeId,
                         const Ark_Number index,
-                        const Ark_TabsAnimationEvent event)
+                        const Ark_TabsAnimationEvent extraInfo)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onGestureSwipeImpl(Ark_Int32 nodeId,
                         const Ark_Number index,
-                        const Ark_TabsAnimationEvent event)
+                        const Ark_TabsAnimationEvent extraInfo)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1076,8 +1096,8 @@ void customContentTransitionImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentWillChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Number from,
-                             const Ark_Number to)
+                             const Ark_Number currentIndex,
+                             const Ark_Number comingIndex)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1106,8 +1126,14 @@ void onTextSelectionChangeImpl(Ark_Int32 nodeId,
 }
 }
 namespace TextArea {
-void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_EnterKeyType enterKey)
+void onSubmit0Impl(Ark_Int32 nodeId,
+                   const Ark_EnterKeyType enterKey)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onSubmit1Impl(Ark_Int32 nodeId,
+                   const Ark_EnterKeyType enterKeyType,
+                   const Opt_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1202,14 +1228,14 @@ void onChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
-                               const Ark_Number first,
-                               const Ark_Number last)
+                               const Ark_Number selectionStart,
+                               const Ark_Number selectionEnd)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onContentScrollImpl(Ark_Int32 nodeId,
-                         const Ark_Number first,
-                         const Ark_Number last)
+                         const Ark_Number totalOffsetX,
+                         const Ark_Number totalOffsetY)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1224,7 +1250,7 @@ void onCutImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPasteImpl(Ark_Int32 nodeId,
-                 const Ark_String value,
+                 const Ark_String content,
                  const Ark_PasteEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -1272,6 +1298,12 @@ void onChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onScrollStopImpl(Ark_Int32 nodeId,
+                      const Ark_Union_String_Array_String value,
+                      const Ark_Union_Number_Array_Number index)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 namespace TextTimer {
 void onTimerImpl(Ark_Int32 nodeId,
@@ -1309,27 +1341,27 @@ void onFinishImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFullscreenChangeImpl(Ark_Int32 nodeId,
-                            const Ark_Literal_Boolean_fullscreen event)
+                            const Ark_FullscreenInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPreparedImpl(Ark_Int32 nodeId,
-                    const Ark_Literal_Number_duration event)
+                    const Ark_PreparedInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSeekingImpl(Ark_Int32 nodeId,
-                   const Ark_Literal_Number_time event)
+                   const Ark_PlaybackInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSeekedImpl(Ark_Int32 nodeId,
-                  const Ark_Literal_Number_time event)
+                  const Ark_PlaybackInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onUpdateImpl(Ark_Int32 nodeId,
-                  const Ark_Literal_Number_time event)
+                  const Ark_PlaybackInfo parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1623,7 +1655,7 @@ void onNativeEmbedGestureEventImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onOverrideUrlLoadingImpl(Ark_Int32 nodeId,
-                              const Ark_Materialized webResourceRequest)
+                              const Ark_WebResourceRequest webResourceRequest)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1694,12 +1726,7 @@ void onScrollIndexImpl(Ark_Int32 nodeId,
 }
 namespace UIExtensionComponent {
 void onRemoteReadyImpl(Ark_Int32 nodeId,
-                       const Ark_Materialized proxy)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onReceiveImpl(Ark_Int32 nodeId,
-                   const Ark_Literal_Empty parameter)
+                       const Ark_UIExtensionProxy parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1820,7 +1847,8 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
         CommonMethod::onGestureJudgeBeginImpl,
-        CommonMethod::onGestureRecognizerJudgeBeginImpl,
+        CommonMethod::onGestureRecognizerJudgeBegin0Impl,
+        CommonMethod::onGestureRecognizerJudgeBegin1Impl,
         CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
@@ -2163,7 +2191,8 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
 {
     static const GENERATED_ArkUISearchEventsReceiver GENERATED_ArkUISearchEventsReceiverImpl {
         Search::onEditChangeImpl,
-        Search::onSubmitImpl,
+        Search::onSubmit0Impl,
+        Search::onSubmit1Impl,
         Search::onChangeImpl,
         Search::onTextSelectionChangeImpl,
         Search::onContentScrollImpl,
@@ -2218,6 +2247,14 @@ const GENERATED_ArkUISwiperEventsReceiver* GetSwiperEventsReceiver()
 
     return &GENERATED_ArkUISwiperEventsReceiverImpl;
 }
+const GENERATED_ArkUIIndicatorComponentEventsReceiver* GetIndicatorComponentEventsReceiver()
+{
+    static const GENERATED_ArkUIIndicatorComponentEventsReceiver GENERATED_ArkUIIndicatorComponentEventsReceiverImpl {
+        IndicatorComponent::onChangeImpl,
+    };
+
+    return &GENERATED_ArkUIIndicatorComponentEventsReceiverImpl;
+}
 const GENERATED_ArkUITabsEventsReceiver* GetTabsEventsReceiver()
 {
     static const GENERATED_ArkUITabsEventsReceiver GENERATED_ArkUITabsEventsReceiverImpl {
@@ -2253,7 +2290,8 @@ const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver()
 const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
 {
     static const GENERATED_ArkUITextAreaEventsReceiver GENERATED_ArkUITextAreaEventsReceiverImpl {
-        TextArea::onSubmitImpl,
+        TextArea::onSubmit0Impl,
+        TextArea::onSubmit1Impl,
         TextArea::onChangeImpl,
         TextArea::onTextSelectionChangeImpl,
         TextArea::onContentScrollImpl,
@@ -2304,6 +2342,7 @@ const GENERATED_ArkUITextPickerEventsReceiver* GetTextPickerEventsReceiver()
         TextPicker::onAcceptImpl,
         TextPicker::onCancelImpl,
         TextPicker::onChangeImpl,
+        TextPicker::onScrollStopImpl,
     };
 
     return &GENERATED_ArkUITextPickerEventsReceiverImpl;
@@ -2451,7 +2490,6 @@ const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponent
 {
     static const GENERATED_ArkUIUIExtensionComponentEventsReceiver GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl {
         UIExtensionComponent::onRemoteReadyImpl,
-        UIExtensionComponent::onReceiveImpl,
         UIExtensionComponent::onResultImpl,
         UIExtensionComponent::onReleaseImpl,
         UIExtensionComponent::onTerminatedImpl,
@@ -2512,6 +2550,7 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetSliderEventsReceiver,
         GetStepperEventsReceiver,
         GetSwiperEventsReceiver,
+        GetIndicatorComponentEventsReceiver,
         GetTabsEventsReceiver,
         GetTabContentEventsReceiver,
         GetTextEventsReceiver,

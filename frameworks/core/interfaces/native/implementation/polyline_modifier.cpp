@@ -18,13 +18,19 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PolylineModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PolylineModifier
 namespace PolylineInterfaceModifier {
 void SetPolylineOptionsImpl(Ark_NativePointer node,
-                            const Opt_Literal_Union_String_Number_height_width* value)
+                            const Opt_PolylineOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
     //PolylineModelNG::SetSetPolylineOptions(frameNode, convValue);
 }
 } // PolylineInterfaceModifier
@@ -42,6 +48,7 @@ void PointsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()
 {
     static const GENERATED_ArkUIPolylineModifier ArkUIPolylineModifierImpl {
+        PolylineModifier::ConstructImpl,
         PolylineInterfaceModifier::SetPolylineOptionsImpl,
         PolylineAttributeModifier::PointsImpl,
     };

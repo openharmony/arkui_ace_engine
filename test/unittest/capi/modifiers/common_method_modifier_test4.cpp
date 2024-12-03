@@ -310,14 +310,14 @@ HWTEST_F(CommonMethodModifierTest4, setUseEffectDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setUseEffectValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setUseEffect, nullptr);
+    ASSERT_NE(modifier_->setUseEffect0, nullptr);
     using OneTestStep = std::tuple<Ark_Boolean, bool>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Boolean>(true), true},
         {Converter::ArkValue<Ark_Boolean>(false), false},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setUseEffect(node_, inputValue);
+        modifier_->setUseEffect0(node_, inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetBool(ATTRIBUTE_USE_EFFECT_NAME, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << (expectedValue ? "true" : "false");

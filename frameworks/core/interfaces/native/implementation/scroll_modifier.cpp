@@ -61,6 +61,12 @@ void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ScrollModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // ScrollModifier
 namespace ScrollInterfaceModifier {
 void SetScrollOptionsImpl(Ark_NativePointer node,
                           const Opt_Scroller* scroller)
@@ -123,20 +129,20 @@ void OnScrollImpl(Ark_NativePointer node,
     ScrollModelNG::SetOnScroll(frameNode, onEvent);
 }
 void OnWillScrollImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* value)
+                      const Opt_ScrollOnWillScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Ark_CustomObject* value)
+                     const Opt_ScrollOnWillScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
@@ -307,6 +313,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
 {
     static const GENERATED_ArkUIScrollModifier ArkUIScrollModifierImpl {
+        ScrollModifier::ConstructImpl,
         ScrollInterfaceModifier::SetScrollOptionsImpl,
         ScrollAttributeModifier::ScrollableImpl,
         ScrollAttributeModifier::OnScrollImpl,

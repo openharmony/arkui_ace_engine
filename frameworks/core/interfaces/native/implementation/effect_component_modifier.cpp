@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace EffectComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // EffectComponentModifier
 namespace EffectComponentInterfaceModifier {
 void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 {
@@ -31,6 +37,7 @@ void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()
 {
     static const GENERATED_ArkUIEffectComponentModifier ArkUIEffectComponentModifierImpl {
+        EffectComponentModifier::ConstructImpl,
         EffectComponentInterfaceModifier::SetEffectComponentOptionsImpl,
     };
     return &ArkUIEffectComponentModifierImpl;

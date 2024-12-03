@@ -1003,6 +1003,11 @@ void* createCustomNodeNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
+void* createIndicatorComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {

@@ -51,6 +51,8 @@ const auto ATTRIBUTE_FRICTION_NAME = "friction";
 const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = "0.75";
 const auto ATTRIBUTE_FLING_SPEED_LIMIT_NAME = "flingSpeedLimit";
 const auto ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE = "9000.00vp";
+const auto ATTRIBUTE_CLIP_CONTENT_NAME = "clipContent";
+const auto ATTRIBUTE_CLIP_CONTENT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME = "edgeEffect";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME = "alwaysEnabled";
@@ -671,6 +673,83 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLim
     for (auto& [input, value] : Fixtures::testFixtureFlingSpeedLimitInvalidValues) {
         checkValue(input, value);
     }
+}
+
+/*
+ * @tc.name: setClipContentTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setClipContentTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CLIP_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'clipContent'";
+}
+
+/*
+ * @tc.name: setClipContentTestClipContentValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setClipContentTestClipContentValidValues, TestSize.Level1)
+{
+    Ark_Union_ContentClipMode_RectShape initValueClipContent;
+
+    // Initial setup
+    initValueClipContent = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
+        std::get<1>(Fixtures::testFixtureEnumContentClipModeValidValues[0]));
+
+    auto checkValue = [this, &initValueClipContent](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_ContentClipMode_RectShape& value) {
+        Ark_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
+
+        inputValueClipContent = value;
+        modifier_->setClipContent(node_, &inputValueClipContent);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setClipContent, attribute: clipContent";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumContentClipModeValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(value));
+    }
+}
+
+/*
+ * @tc.name: setClipContentTestClipContentInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setClipContentTestClipContentInvalidValues, TestSize.Level1)
+{
+    Ark_Union_ContentClipMode_RectShape initValueClipContent;
+
+    // Initial setup
+    initValueClipContent = ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(
+        std::get<1>(Fixtures::testFixtureEnumContentClipModeValidValues[0]));
+
+    auto checkValue = [this, &initValueClipContent](
+                          const std::string& input, const Ark_Union_ContentClipMode_RectShape& value) {
+        Ark_Union_ContentClipMode_RectShape inputValueClipContent = initValueClipContent;
+
+        modifier_->setClipContent(node_, &inputValueClipContent);
+        inputValueClipContent = value;
+        modifier_->setClipContent(node_, &inputValueClipContent);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_CLIP_CONTENT_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setClipContent, attribute: clipContent";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumContentClipModeInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_ContentClipMode>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_ContentClipMode_RectShape, Ark_Empty>(nullptr));
 }
 
 /*

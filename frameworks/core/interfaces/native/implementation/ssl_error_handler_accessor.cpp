@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SslErrorHandlerAccessor {
-SslErrorHandlerPeer* CtorImpl()
-{
-    return new SslErrorHandlerPeer();
-}
-static void DestroyPeer(SslErrorHandlerPeer *peer)
+void DestroyPeerImpl(SslErrorHandlerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+SslErrorHandlerPeer* CtorImpl()
+{
+    return new SslErrorHandlerPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void HandleConfirmImpl(SslErrorHandlerPeer* peer)
 {
@@ -48,6 +48,7 @@ void HandleCancelImpl(SslErrorHandlerPeer* peer)
 const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
 {
     static const GENERATED_ArkUISslErrorHandlerAccessor SslErrorHandlerAccessorImpl {
+        SslErrorHandlerAccessor::DestroyPeerImpl,
         SslErrorHandlerAccessor::CtorImpl,
         SslErrorHandlerAccessor::GetFinalizerImpl,
         SslErrorHandlerAccessor::HandleConfirmImpl,

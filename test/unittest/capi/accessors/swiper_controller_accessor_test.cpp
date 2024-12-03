@@ -157,10 +157,10 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
     auto callbackForCheck = [](const Ark_Int32 resourceId) {
         checkInvoke = Converter::Convert<int32_t>(resourceId);
     };
-    auto callbackVoid = ArkValue<Callback_Void>(callbackForCheck, CONTEXT_ID);
+    auto callbackVoid = ArkValue<VoidCallback>(callbackForCheck, CONTEXT_ID);
 
-    Opt_Callback_Void callbackValid = ArkValue<Opt_Callback_Void>(callbackVoid);
-    Opt_Callback_Void callbackUndef = ArkValue<Opt_Callback_Void>();
+    auto callbackValid = ArkValue<Opt_VoidCallback>(callbackVoid);
+    auto callbackUndef = ArkValue<Opt_VoidCallback>();
 
     // check initial callback state in target controller
     EXPECT_FALSE(checkInvoke);

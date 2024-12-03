@@ -178,6 +178,12 @@ WorkStateStyleData Convert(const Ark_WorkStateStyle& src)
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CalendarModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // CalendarModifier
 namespace CalendarInterfaceModifier {
 void SetCalendarOptionsImpl(Ark_NativePointer node,
                             const Ark_Type_CalendarInterface_value* value)
@@ -228,6 +234,7 @@ void OffDaysImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
     auto offDays = convValue
@@ -326,6 +333,7 @@ void OnRequestDataImpl(Ark_NativePointer node,
 const GENERATED_ArkUICalendarModifier* GetCalendarModifier()
 {
     static const GENERATED_ArkUICalendarModifier ArkUICalendarModifierImpl {
+        CalendarModifier::ConstructImpl,
         CalendarInterfaceModifier::SetCalendarOptionsImpl,
         CalendarAttributeModifier::ShowLunarImpl,
         CalendarAttributeModifier::ShowHolidayImpl,

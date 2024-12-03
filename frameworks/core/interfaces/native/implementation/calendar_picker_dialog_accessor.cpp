@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct CalendarPickerDialogPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarPickerDialogAccessor {
+void DestroyPeerImpl(CalendarPickerDialogPeer* peer)
+{
+}
 CalendarPickerDialogPeer* CtorImpl()
 {
-    return nullptr;
+    return new CalendarPickerDialogPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
@@ -34,6 +39,7 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
 {
     static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
+        CalendarPickerDialogAccessor::DestroyPeerImpl,
         CalendarPickerDialogAccessor::CtorImpl,
         CalendarPickerDialogAccessor::GetFinalizerImpl,
         CalendarPickerDialogAccessor::ShowImpl,

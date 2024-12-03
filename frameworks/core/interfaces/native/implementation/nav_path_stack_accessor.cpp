@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct NavPathStackPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
+void DestroyPeerImpl(NavPathStackPeer* peer)
+{
+}
 NavPathStackPeer* CtorImpl()
 {
-    return nullptr;
+    return new NavPathStackPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void PushPath0Impl(NavPathStackPeer* peer,
                    const Ark_NavPathInfo* info,
@@ -37,17 +42,17 @@ void PushPath1Impl(NavPathStackPeer* peer,
                    const Opt_NavigationOptions* options)
 {
 }
-Ark_NativePointer PushDestination0Impl(NavPathStackPeer* peer,
-                                       const Ark_NavPathInfo* info,
-                                       const Opt_Boolean* animated)
+void PushDestination0Impl(NavPathStackPeer* peer,
+                          const Ark_NavPathInfo* info,
+                          const Opt_Boolean* animated,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return 0;
 }
-Ark_NativePointer PushDestination1Impl(NavPathStackPeer* peer,
-                                       const Ark_NavPathInfo* info,
-                                       const Opt_NavigationOptions* options)
+void PushDestination1Impl(NavPathStackPeer* peer,
+                          const Ark_NavPathInfo* info,
+                          const Opt_NavigationOptions* options,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return 0;
 }
 void PushPathByName0Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
@@ -62,20 +67,20 @@ void PushPathByName1Impl(NavPathStackPeer* peer,
                          const Opt_Boolean* animated)
 {
 }
-Ark_NativePointer PushDestinationByName0Impl(NavPathStackPeer* peer,
-                                             const Ark_String* name,
-                                             const Ark_CustomObject* param,
-                                             const Opt_Boolean* animated)
+void PushDestinationByName0Impl(NavPathStackPeer* peer,
+                                const Ark_String* name,
+                                const Ark_CustomObject* param,
+                                const Opt_Boolean* animated,
+                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return 0;
 }
-Ark_NativePointer PushDestinationByName1Impl(NavPathStackPeer* peer,
-                                             const Ark_String* name,
-                                             const Ark_CustomObject* param,
-                                             const Callback_PopInfo_Void* onPop,
-                                             const Opt_Boolean* animated)
+void PushDestinationByName1Impl(NavPathStackPeer* peer,
+                                const Ark_String* name,
+                                const Ark_CustomObject* param,
+                                const Callback_PopInfo_Void* onPop,
+                                const Opt_Boolean* animated,
+                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return 0;
 }
 void ReplacePath0Impl(NavPathStackPeer* peer,
                       const Ark_NavPathInfo* info,
@@ -85,6 +90,12 @@ void ReplacePath0Impl(NavPathStackPeer* peer,
 void ReplacePath1Impl(NavPathStackPeer* peer,
                       const Ark_NavPathInfo* info,
                       const Opt_NavigationOptions* options)
+{
+}
+void ReplaceDestinationImpl(NavPathStackPeer* peer,
+                            const Ark_NavPathInfo* info,
+                            const Opt_NavigationOptions* options,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void ReplacePathByNameImpl(NavPathStackPeer* peer,
@@ -161,10 +172,9 @@ void ClearImpl(NavPathStackPeer* peer,
 void GetAllPathNameImpl(NavPathStackPeer* peer)
 {
 }
-Ark_NativePointer GetParamByIndexImpl(NavPathStackPeer* peer,
-                                      const Ark_Number* index)
+void GetParamByIndexImpl(NavPathStackPeer* peer,
+                         const Ark_Number* index)
 {
-    return 0;
 }
 void GetParamByNameImpl(NavPathStackPeer* peer,
                         const Ark_String* name)
@@ -194,6 +204,7 @@ void SetInterceptionImpl(NavPathStackPeer* peer,
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
 {
     static const GENERATED_ArkUINavPathStackAccessor NavPathStackAccessorImpl {
+        NavPathStackAccessor::DestroyPeerImpl,
         NavPathStackAccessor::CtorImpl,
         NavPathStackAccessor::GetFinalizerImpl,
         NavPathStackAccessor::PushPath0Impl,
@@ -206,6 +217,7 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
         NavPathStackAccessor::PushDestinationByName1Impl,
         NavPathStackAccessor::ReplacePath0Impl,
         NavPathStackAccessor::ReplacePath1Impl,
+        NavPathStackAccessor::ReplaceDestinationImpl,
         NavPathStackAccessor::ReplacePathByNameImpl,
         NavPathStackAccessor::RemoveByIndexesImpl,
         NavPathStackAccessor::RemoveByNameImpl,

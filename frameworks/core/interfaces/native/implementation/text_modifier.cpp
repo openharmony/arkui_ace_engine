@@ -21,14 +21,9 @@
 #include "base/utils/macros.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 
-namespace OHOS::Ace {
-
-using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
-ACE_FORCE_EXPORT FONT_FEATURES_LIST ParseFontFeatureSettings(const std::string& fontFeatureSettings);
-
-namespace NG {
-namespace Converter {
+namespace OHOS::Ace::NG::Converter {
 namespace WeightNum {
 int32_t W100 = 100;
 int32_t W200 = 200;
@@ -83,7 +78,13 @@ std::optional<int32_t> FontWeightToInt(const FontWeight& src)
 }
 }
 
-namespace GeneratedModifier {
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TextModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // TextModifier
 namespace TextInterfaceModifier {
 void SetTextOptionsImpl(Ark_NativePointer node,
                         const Opt_Union_String_Resource* content,
@@ -406,6 +407,24 @@ void OnCopyImpl(Ark_NativePointer node,
 
     TextModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
+void CaretColorImpl(Ark_NativePointer node,
+                    const Ark_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextModelNG::SetCaretColor(frameNode, convValue);
+}
+void SelectedBackgroundColorImpl(Ark_NativePointer node,
+                                 const Ark_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextModelNG::SetSelectedBackgroundColor(frameNode, convValue);
+}
 void EllipsisModeImpl(Ark_NativePointer node,
                       Ark_EllipsisMode value)
 {
@@ -453,8 +472,8 @@ void FontFeatureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::string strValue(value->chars);
-    TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+    std::string fontFeatureSettings = Converter::Convert<std::string>(*value);
+    TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean value)
@@ -472,7 +491,7 @@ void TextSelectableImpl(Ark_NativePointer node,
     TextModelNG::SetTextSelectableMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -523,6 +542,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 const GENERATED_ArkUITextModifier* GetTextModifier()
 {
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
+        TextModifier::ConstructImpl,
         TextInterfaceModifier::SetTextOptionsImpl,
         TextAttributeModifier::Font0Impl,
         TextAttributeModifier::Font1Impl,
@@ -553,6 +573,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::WordBreakImpl,
         TextAttributeModifier::LineBreakStrategyImpl,
         TextAttributeModifier::OnCopyImpl,
+        TextAttributeModifier::CaretColorImpl,
+        TextAttributeModifier::SelectedBackgroundColorImpl,
         TextAttributeModifier::EllipsisModeImpl,
         TextAttributeModifier::EnableDataDetectorImpl,
         TextAttributeModifier::DataDetectorConfigImpl,
@@ -569,6 +591,4 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
     return &ArkUITextModifierImpl;
 }
 
-} // namespace GeneratedModifier
-} // namespace NG
-} // namespace OHOS::Ace
+}

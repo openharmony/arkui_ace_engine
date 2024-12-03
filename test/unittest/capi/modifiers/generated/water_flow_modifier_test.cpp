@@ -64,6 +64,10 @@ const auto ATTRIBUTE_FRICTION_NAME = "friction";
 const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = "0.75";
 const auto ATTRIBUTE_CACHED_COUNT_NAME = "cachedCount";
 const auto ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE = "1";
+const auto ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME = "count";
+const auto ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME = "show";
+const auto ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
 
 class WaterFlowModifierTest : public ModifierTestBase<GENERATED_ArkUIWaterFlowModifier,
@@ -1028,11 +1032,11 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setFrictionTestFrictionInvalidValues, T
 }
 
 /*
- * @tc.name: setCachedCountTestDefaultValues
+ * @tc.name: setCachedCount0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowModifierTest, setCachedCountTestDefaultValues, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -1042,11 +1046,11 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestDefaultValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setCachedCountTestCachedCountValidValues
+ * @tc.name: setCachedCount0TestCachedCountValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountValidValues, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, setCachedCount0TestCachedCountValidValues, TestSize.Level1)
 {
     Ark_Number initValueCachedCount;
 
@@ -1058,11 +1062,11 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountValidValues, TestSi
         Ark_Number inputValueCachedCount = initValueCachedCount;
 
         inputValueCachedCount = value;
-        modifier_->setCachedCount(node_, &inputValueCachedCount);
+        modifier_->setCachedCount0(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
+            "Input value is: " << input << ", method: setCachedCount0, attribute: cachedCount";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberNonNegIntFloorValidValues) {
@@ -1071,11 +1075,11 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountValidValues, TestSi
 }
 
 /*
- * @tc.name: setCachedCountTestCachedCountInvalidValues
+ * @tc.name: setCachedCount0TestCachedCountInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountInvalidValues, TestSize.Level1)
+HWTEST_F(WaterFlowModifierTest, setCachedCount0TestCachedCountInvalidValues, TestSize.Level1)
 {
     Ark_Number initValueCachedCount;
 
@@ -1085,17 +1089,104 @@ HWTEST_F(WaterFlowModifierTest, setCachedCountTestCachedCountInvalidValues, Test
     auto checkValue = [this, &initValueCachedCount](const std::string& input, const Ark_Number& value) {
         Ark_Number inputValueCachedCount = initValueCachedCount;
 
-        modifier_->setCachedCount(node_, &inputValueCachedCount);
+        modifier_->setCachedCount0(node_, &inputValueCachedCount);
         inputValueCachedCount = value;
-        modifier_->setCachedCount(node_, &inputValueCachedCount);
+        modifier_->setCachedCount0(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setCachedCount, attribute: cachedCount";
+            "Input value is: " << input << ", method: setCachedCount0, attribute: cachedCount";
     };
 
     for (auto& [input, value] : Fixtures::testFixtureNumberNonNegIntFloorInvalidValues) {
         checkValue(input, value);
+    }
+}
+
+/*
+ * @tc.name: setCachedCount1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultCachedCount =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE) <<
+        "Default value for attribute 'cachedCount.count'";
+
+    resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE) <<
+        "Default value for attribute 'cachedCount.show'";
+}
+
+/*
+ * @tc.name: setCachedCount1TestCachedCountCountValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountCountValidValues, TestSize.Level1)
+{
+    Ark_Number initValueCount;
+    Ark_Boolean initValueShow;
+
+    // Initial setup
+    initValueCount = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueShow = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueCount, &initValueShow](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_Number inputValueCount = initValueCount;
+        Ark_Boolean inputValueShow = initValueShow;
+
+        inputValueCount = value;
+        modifier_->setCachedCount1(node_, &inputValueCount, inputValueShow);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.count";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setCachedCount1TestCachedCountShowValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountShowValidValues, TestSize.Level1)
+{
+    Ark_Number initValueCount;
+    Ark_Boolean initValueShow;
+
+    // Initial setup
+    initValueCount = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
+    initValueShow = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueCount, &initValueShow](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Number inputValueCount = initValueCount;
+        Ark_Boolean inputValueShow = initValueShow;
+
+        inputValueShow = value;
+        modifier_->setCachedCount1(node_, &inputValueCount, inputValueShow);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.show";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
     }
 }
 } // namespace OHOS::Ace::NG

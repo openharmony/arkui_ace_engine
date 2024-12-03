@@ -49,9 +49,9 @@ void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyze
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnalyzerControllerAccessor {
-
-static void DestroyPeer(ImageAnalyzerControllerPeer* peerImpl)
+void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<ImageAnalyzerControllerPeer*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -64,7 +64,7 @@ ImageAnalyzerControllerPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
 {
@@ -85,6 +85,7 @@ void GetImageAnalyzerSupportTypesImpl(ImageAnalyzerControllerPeer* peer)
 const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerControllerAccessor()
 {
     static const GENERATED_ArkUIImageAnalyzerControllerAccessor ImageAnalyzerControllerAccessorImpl {
+        ImageAnalyzerControllerAccessor::DestroyPeerImpl,
         ImageAnalyzerControllerAccessor::CtorImpl,
         ImageAnalyzerControllerAccessor::GetFinalizerImpl,
         ImageAnalyzerControllerAccessor::GetImageAnalyzerSupportTypesImpl,

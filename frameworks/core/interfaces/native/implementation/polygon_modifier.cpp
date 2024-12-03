@@ -18,13 +18,19 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace PolygonModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // PolygonModifier
 namespace PolygonInterfaceModifier {
 void SetPolygonOptionsImpl(Ark_NativePointer node,
-                           const Opt_Literal_Union_String_Number_height_width* value)
+                           const Opt_PolygonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
     //PolygonModelNG::SetSetPolygonOptions(frameNode, convValue);
 }
 } // PolygonInterfaceModifier
@@ -42,6 +48,7 @@ void PointsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
 {
     static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
+        PolygonModifier::ConstructImpl,
         PolygonInterfaceModifier::SetPolygonOptionsImpl,
         PolygonAttributeModifier::PointsImpl,
     };

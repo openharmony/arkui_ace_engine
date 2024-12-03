@@ -70,14 +70,14 @@ public:
     }
 };
 
-Opt_Type_RectInterface_value BuildRectOptions(int width, int height, int radius)
+Opt_Union_RectOptions_RoundedRectOptions BuildRectOptions(int width, int height, int radius)
 {
-    Ark_Type_RectInterface_value_u0 radiusOpt;
+    Ark_RectOptions radiusOpt;
     radiusOpt.width = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(width);
     radiusOpt.height = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(height);
     radiusOpt.radius = Converter::ArkUnion<Opt_Union_Number_String_Array_Any, Ark_Number>(radius);
-    return Converter::ArkUnion<Opt_Type_RectInterface_value,
-        Ark_Type_RectInterface_value_u0>(radiusOpt);
+    return Converter::ArkUnion<Opt_Union_RectOptions_RoundedRectOptions,
+        Ark_RectOptions>(radiusOpt);
 }
 
 std::string GetStringAttribute(const RefPtr<PaintProperty>& property, const std::string& name)

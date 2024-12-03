@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct DrawModifierPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
+void DestroyPeerImpl(DrawModifierPeer* peer)
+{
+}
 DrawModifierPeer* CtorImpl()
 {
-    return nullptr;
+    return new DrawModifierPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void DrawBehindImpl(DrawModifierPeer* peer,
                     const Ark_CustomObject* drawContext)
@@ -46,6 +51,7 @@ void InvalidateImpl(DrawModifierPeer* peer)
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
 {
     static const GENERATED_ArkUIDrawModifierAccessor DrawModifierAccessorImpl {
+        DrawModifierAccessor::DestroyPeerImpl,
         DrawModifierAccessor::CtorImpl,
         DrawModifierAccessor::GetFinalizerImpl,
         DrawModifierAccessor::DrawBehindImpl,

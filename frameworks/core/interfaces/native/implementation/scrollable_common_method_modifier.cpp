@@ -29,6 +29,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
 {
@@ -103,20 +107,20 @@ void OnScrollImpl(Ark_NativePointer node,
     //ScrollableCommonMethodModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnWillScrollImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* value)
+                      const Opt_ScrollOnWillScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ScrollableCommonMethodModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Ark_CustomObject* value)
+                     const Opt_ScrollOnWillScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //ScrollableCommonMethodModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
@@ -164,6 +168,15 @@ void FlingSpeedLimitImpl(Ark_NativePointer node,
     auto dimension = Converter::Convert<Dimension>(*value);
     ScrollableModelNG::SetMaxFlingSpeed(frameNode, dimension.Value());
 }
+void ClipContentImpl(Ark_NativePointer node,
+                     const Ark_Union_ContentClipMode_RectShape* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollableCommonMethodModelNG::SetClipContent(frameNode, convValue);
+}
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
@@ -175,7 +188,7 @@ void EdgeEffectImpl(Ark_NativePointer node,
     ScrollableModelNG::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
-                    const Ark_Union_Boolean_Undefined* enabled,
+                    const Opt_Boolean* enabled,
                     const Opt_FadingEdgeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -188,6 +201,7 @@ void FadingEdgeImpl(Ark_NativePointer node,
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier()
 {
     static const GENERATED_ArkUIScrollableCommonMethodModifier ArkUIScrollableCommonMethodModifierImpl {
+        ScrollableCommonMethodModifier::ConstructImpl,
         ScrollableCommonMethodModifier::ScrollBarImpl,
         ScrollableCommonMethodModifier::ScrollBarColorImpl,
         ScrollableCommonMethodModifier::ScrollBarWidthImpl,
@@ -202,6 +216,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::OnScrollStartImpl,
         ScrollableCommonMethodModifier::OnScrollStopImpl,
         ScrollableCommonMethodModifier::FlingSpeedLimitImpl,
+        ScrollableCommonMethodModifier::ClipContentImpl,
         ScrollableCommonMethodModifier::EdgeEffectImpl,
         ScrollableCommonMethodModifier::FadingEdgeImpl,
     };

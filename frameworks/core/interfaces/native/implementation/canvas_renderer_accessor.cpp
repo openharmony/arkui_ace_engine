@@ -170,8 +170,9 @@ Rect Convert(const Ark_Custom_Rect& src)
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRendererAccessor {
-static void DestroyPeer(CanvasRendererPeerImpl* peerImpl)
+void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     if (peerImpl) {
         peerImpl->DecRefCount();
     }
@@ -184,7 +185,7 @@ CanvasRendererPeer* CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void DrawImage0Impl(CanvasRendererPeer* peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
@@ -232,7 +233,7 @@ void Clip0Impl(CanvasRendererPeer* peer,
         "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Clip1Impl(CanvasRendererPeer* peer,
-               const Ark_Materialized* path,
+               const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
     LOGE("ARKOALA CanvasRendererAccessor::Clip1Impl Opt_String parameter "
@@ -245,7 +246,7 @@ void Fill0Impl(CanvasRendererPeer* peer,
         "should be replaced with a valid ark enum for CanvasFillRule type.");
 }
 void Fill1Impl(CanvasRendererPeer* peer,
-               const Ark_Materialized* path,
+               const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
     LOGE("ARKOALA CanvasRendererAccessor::Fill1Impl Opt_String parameter "
@@ -259,7 +260,7 @@ void Stroke0Impl(CanvasRendererPeer* peer)
     peerImpl->TriggerStroke0Impl();
 }
 void Stroke1Impl(CanvasRendererPeer* peer,
-                 const Ark_Materialized* path)
+                 const Ark_Path2D* path)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -282,8 +283,8 @@ Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
     return 0;
 }
 Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
-                                    const Ark_Materialized* image,
-                                    const Ark_Union_String_Undefined* repetition)
+                                    const Ark_ImageBitmap* image,
+                                    const Ark_Union_String_Null* repetition)
 {
     LOGE("ARKOALA CanvasRendererAccessor::CreatePatternImpl return type Ark_NativePointer "
         "should be replaced with a valid ark type for CanvasPattern.");
@@ -683,7 +684,7 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
 {
 }
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
-                                 const Ark_Materialized* bitmap)
+                                 const Ark_ImageBitmap* bitmap)
 {
 }
 void SaveLayerImpl(CanvasRendererPeer* peer)
@@ -1015,6 +1016,7 @@ void SetTextBaselineImpl(CanvasRendererPeer* peer,
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
 {
     static const GENERATED_ArkUICanvasRendererAccessor CanvasRendererAccessorImpl {
+        CanvasRendererAccessor::DestroyPeerImpl,
         CanvasRendererAccessor::CtorImpl,
         CanvasRendererAccessor::GetFinalizerImpl,
         CanvasRendererAccessor::DrawImage0Impl,

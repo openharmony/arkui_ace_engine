@@ -886,11 +886,11 @@ HWTEST_F(GridModifierTest, setScrollBarTestInvalidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCachedCountTestDefaultValues
+ * @tc.name: setCachedCount0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setCachedCountTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
 {
     int intResult;
 
@@ -899,63 +899,63 @@ HWTEST_F(GridModifierTest, setCachedCountTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCachedCountTestValidValues
+ * @tc.name: setCachedCount0TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setCachedCountTestValidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
 {
     int intResult;
     Ark_Number inputValue;
 
     // check 0 value
     inputValue = Converter::ArkValue<Ark_Number>(0);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 0);
 
     // check 5 value
     inputValue = Converter::ArkValue<Ark_Number>(5);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 5);
 
     // check maximum value
     inputValue = Converter::ArkValue<Ark_Number>(INT_MAX);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, INT_MAX);
 }
 
 /*
- * @tc.name: setCachedCountTestInvalidValues
+ * @tc.name: setCachedCount0TestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setCachedCountTestInvalidValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setCachedCount0TestInvalidValues, TestSize.Level1)
 {
     int intResult;
     Ark_Number inputValue;
 
-    modifier_->setCachedCount(node_, nullptr);
+    modifier_->setCachedCount0(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check minimum value
     inputValue = Converter::ArkValue<Ark_Number>(INT_MIN);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Number>(-1);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
 
     // check float value
     inputValue = Converter::ArkValue<Ark_Number>(2.2f);
-    modifier_->setCachedCount(node_, &inputValue);
+    modifier_->setCachedCount0(node_, &inputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
     EXPECT_EQ(intResult, 2);
 }

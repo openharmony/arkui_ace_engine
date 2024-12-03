@@ -636,7 +636,7 @@ HWTEST_F(VideoModifierTest, setObjectFitTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
 {
-    Callback_Void func{};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -666,7 +666,7 @@ HWTEST_F(VideoModifierTest, setOnStartTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
 {
-    Callback_Void func{};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -696,7 +696,7 @@ HWTEST_F(VideoModifierTest, setOnPauseTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    Callback_Void func{};
+    VoidCallback func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -726,7 +726,7 @@ HWTEST_F(VideoModifierTest, setOnFinishTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
 {
-    Callback_Literal_Boolean_fullscreen_Void func{};
+    Callback_FullscreenInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -735,7 +735,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
         bool fullscreen;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onFullscreenChange = [](Ark_Int32 nodeId, Ark_Literal_Boolean_fullscreen event)
+    EventsTracker::videoEventsReceiver.onFullscreenChange = [](Ark_Int32 nodeId, Ark_FullscreenInfo event)
     {
         checkEvent = {
             .nodeId = nodeId,
@@ -769,7 +769,7 @@ HWTEST_F(VideoModifierTest, setOnFullscreenChangeTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
 {
-    Callback_Literal_Number_duration_Void func{};
+    Callback_PreparedInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -778,7 +778,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
         float duration;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onPrepared = [](Ark_Int32 nodeId, Ark_Literal_Number_duration event)
+    EventsTracker::videoEventsReceiver.onPrepared = [](Ark_Int32 nodeId, Ark_PreparedInfo event)
     {
         checkEvent = {
             .nodeId = nodeId,
@@ -812,7 +812,7 @@ HWTEST_F(VideoModifierTest, setOnPreparedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
 {
-    Callback_Literal_Number_time_Void func{};
+    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -821,7 +821,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onSeeking = [](Ark_Int32 nodeId, Ark_Literal_Number_time event)
+    EventsTracker::videoEventsReceiver.onSeeking = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
     {
         checkEvent = {
             .nodeId = nodeId,
@@ -855,7 +855,7 @@ HWTEST_F(VideoModifierTest, setOnSeekingTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
 {
-    Callback_Literal_Number_time_Void func{};
+    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -864,7 +864,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onSeeked = [](Ark_Int32 nodeId, Ark_Literal_Number_time event)
+    EventsTracker::videoEventsReceiver.onSeeked = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
     {
         checkEvent = {
             .nodeId = nodeId,
@@ -898,7 +898,7 @@ HWTEST_F(VideoModifierTest, setOnSeekedTest, TestSize.Level1)
  */
 HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
 {
-    Callback_Literal_Number_time_Void func{};
+    Callback_PlaybackInfo_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
 
@@ -907,7 +907,7 @@ HWTEST_F(VideoModifierTest, setOnUpdateTest, TestSize.Level1)
         float time;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::videoEventsReceiver.onUpdate = [](Ark_Int32 nodeId, Ark_Literal_Number_time event)
+    EventsTracker::videoEventsReceiver.onUpdate = [](Ark_Int32 nodeId, Ark_PlaybackInfo event)
     {
         checkEvent = {
             .nodeId = nodeId,

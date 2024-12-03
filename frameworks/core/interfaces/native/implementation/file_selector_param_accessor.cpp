@@ -22,19 +22,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
-FileSelectorParamPeer* CtorImpl()
-{
-    return new FileSelectorParamPeer();
-}
-static void DestroyPeer(FileSelectorParamPeer *peer)
+void DestroyPeerImpl(FileSelectorParamPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+FileSelectorParamPeer* CtorImpl()
+{
+    return new FileSelectorParamPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetTitleImpl(FileSelectorParamPeer* peer)
 {
@@ -67,6 +67,7 @@ Ark_Boolean IsCaptureImpl(FileSelectorParamPeer* peer)
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
 {
     static const GENERATED_ArkUIFileSelectorParamAccessor FileSelectorParamAccessorImpl {
+        FileSelectorParamAccessor::DestroyPeerImpl,
         FileSelectorParamAccessor::CtorImpl,
         FileSelectorParamAccessor::GetFinalizerImpl,
         FileSelectorParamAccessor::GetTitleImpl,

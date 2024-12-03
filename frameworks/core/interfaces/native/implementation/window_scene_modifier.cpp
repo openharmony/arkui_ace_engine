@@ -18,6 +18,12 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace WindowSceneModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // WindowSceneModifier
 namespace WindowSceneInterfaceModifier {
 void SetWindowSceneOptionsImpl(Ark_NativePointer node,
                                const Ark_Number* persistentId)
@@ -44,6 +50,7 @@ void AttractionEffectImpl(Ark_NativePointer node,
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier()
 {
     static const GENERATED_ArkUIWindowSceneModifier ArkUIWindowSceneModifierImpl {
+        WindowSceneModifier::ConstructImpl,
         WindowSceneInterfaceModifier::SetWindowSceneOptionsImpl,
         WindowSceneAttributeModifier::AttractionEffectImpl,
     };

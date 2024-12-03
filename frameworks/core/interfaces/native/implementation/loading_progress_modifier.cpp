@@ -20,6 +20,12 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace LoadingProgressModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // LoadingProgressModifier
 namespace LoadingProgressInterfaceModifier {
 void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
@@ -61,6 +67,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 const GENERATED_ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
     static const GENERATED_ArkUILoadingProgressModifier ArkUILoadingProgressModifierImpl {
+        LoadingProgressModifier::ConstructImpl,
         LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl,
         LoadingProgressAttributeModifier::ColorImpl,
         LoadingProgressAttributeModifier::EnableLoadingImpl,

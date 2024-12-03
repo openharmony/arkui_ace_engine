@@ -17,16 +17,21 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct TransitionEffectPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
+void DestroyPeerImpl(TransitionEffectPeer* peer)
+{
+}
 TransitionEffectPeer* CtorImpl(const Ark_String* type,
                                const Ark_TransitionEffects* effect)
 {
-    return nullptr;
+    return new TransitionEffectPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer TranslateImpl(const Ark_TranslateOptions* options)
 {
@@ -48,8 +53,8 @@ Ark_NativePointer MoveImpl(Ark_TransitionEdge edge)
 {
     return 0;
 }
-Ark_NativePointer AsymmetricImpl(const Ark_Materialized* appear,
-                                 const Ark_Materialized* disappear)
+Ark_NativePointer AsymmetricImpl(const Ark_TransitionEffect* appear,
+                                 const Ark_TransitionEffect* disappear)
 {
     return 0;
 }
@@ -59,7 +64,7 @@ Ark_NativePointer AnimationImpl(TransitionEffectPeer* peer,
     return 0;
 }
 Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
-                              const Ark_Materialized* transitionEffect)
+                              const Ark_TransitionEffect* transitionEffect)
 {
     return 0;
 }
@@ -67,6 +72,7 @@ Ark_NativePointer CombineImpl(TransitionEffectPeer* peer,
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
 {
     static const GENERATED_ArkUITransitionEffectAccessor TransitionEffectAccessorImpl {
+        TransitionEffectAccessor::DestroyPeerImpl,
         TransitionEffectAccessor::CtorImpl,
         TransitionEffectAccessor::GetFinalizerImpl,
         TransitionEffectAccessor::TranslateImpl,

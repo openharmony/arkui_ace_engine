@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataResubmissionHandlerAccessor {
-DataResubmissionHandlerPeer* CtorImpl()
-{
-    return new DataResubmissionHandlerPeer();
-}
-static void DestroyPeer(DataResubmissionHandlerPeer *peer)
+void DestroyPeerImpl(DataResubmissionHandlerPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->handler = nullptr;
     delete peer;
 }
+DataResubmissionHandlerPeer* CtorImpl()
+{
+    return new DataResubmissionHandlerPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ResendImpl(DataResubmissionHandlerPeer* peer)
 {
@@ -48,6 +48,7 @@ void CancelImpl(DataResubmissionHandlerPeer* peer)
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
 {
     static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
+        DataResubmissionHandlerAccessor::DestroyPeerImpl,
         DataResubmissionHandlerAccessor::CtorImpl,
         DataResubmissionHandlerAccessor::GetFinalizerImpl,
         DataResubmissionHandlerAccessor::ResendImpl,

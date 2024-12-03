@@ -84,6 +84,12 @@ void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace FormComponentModifier {
+Ark_NativePointer ConstructImpl()
+{
+    return 0;
+}
+} // FormComponentModifier
 namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
                                  const Ark_FormInfo* value)
@@ -273,6 +279,7 @@ void OnLoadImpl(Ark_NativePointer node,
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()
 {
     static const GENERATED_ArkUIFormComponentModifier ArkUIFormComponentModifierImpl {
+        FormComponentModifier::ConstructImpl,
         FormComponentInterfaceModifier::SetFormComponentOptionsImpl,
         FormComponentAttributeModifier::SizeImpl,
         FormComponentAttributeModifier::ModuleNameImpl,

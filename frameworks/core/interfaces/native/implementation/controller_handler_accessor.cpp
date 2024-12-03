@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ControllerHandlerPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ControllerHandlerAccessor {
+void DestroyPeerImpl(ControllerHandlerPeer* peer)
+{
+}
 ControllerHandlerPeer* CtorImpl()
 {
-    return nullptr;
+    return new ControllerHandlerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetWebControllerImpl(ControllerHandlerPeer* peer,
                           const Ark_CustomObject* controller)
@@ -35,6 +40,7 @@ void SetWebControllerImpl(ControllerHandlerPeer* peer,
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
 {
     static const GENERATED_ArkUIControllerHandlerAccessor ControllerHandlerAccessorImpl {
+        ControllerHandlerAccessor::DestroyPeerImpl,
         ControllerHandlerAccessor::CtorImpl,
         ControllerHandlerAccessor::GetFinalizerImpl,
         ControllerHandlerAccessor::SetWebControllerImpl,

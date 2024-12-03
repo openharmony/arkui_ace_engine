@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct EventTargetInfoPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventTargetInfoAccessor {
+void DestroyPeerImpl(EventTargetInfoPeer* peer)
+{
+}
 EventTargetInfoPeer* CtorImpl()
 {
-    return nullptr;
+    return new EventTargetInfoPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void GetIdImpl(EventTargetInfoPeer* peer)
 {
@@ -34,6 +39,7 @@ void GetIdImpl(EventTargetInfoPeer* peer)
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {
     static const GENERATED_ArkUIEventTargetInfoAccessor EventTargetInfoAccessorImpl {
+        EventTargetInfoAccessor::DestroyPeerImpl,
         EventTargetInfoAccessor::CtorImpl,
         EventTargetInfoAccessor::GetFinalizerImpl,
         EventTargetInfoAccessor::GetIdImpl,

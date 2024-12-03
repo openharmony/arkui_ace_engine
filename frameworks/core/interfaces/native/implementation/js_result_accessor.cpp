@@ -20,19 +20,19 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsResultAccessor {
-JsResultPeer* CtorImpl()
-{
-    return new JsResultPeer();
-}
-static void DestroyPeer(JsResultPeer *peer)
+void DestroyPeerImpl(JsResultPeer* peer)
 {
     CHECK_NULL_VOID(peer);
     peer->result = nullptr;
     delete peer;
 }
+JsResultPeer* CtorImpl()
+{
+    return new JsResultPeer();
+}
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void HandleCancelImpl(JsResultPeer* peer)
 {
@@ -57,6 +57,7 @@ void HandlePromptConfirmImpl(JsResultPeer* peer,
 const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
 {
     static const GENERATED_ArkUIJsResultAccessor JsResultAccessorImpl {
+        JsResultAccessor::DestroyPeerImpl,
         JsResultAccessor::CtorImpl,
         JsResultAccessor::GetFinalizerImpl,
         JsResultAccessor::HandleCancelImpl,

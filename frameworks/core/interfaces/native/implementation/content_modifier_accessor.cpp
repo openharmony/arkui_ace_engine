@@ -17,15 +17,20 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+struct ContentModifierPeer {};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContentModifierAccessor {
+void DestroyPeerImpl(ContentModifierPeer* peer)
+{
+}
 ContentModifierPeer* CtorImpl()
 {
-    return nullptr;
+    return new ContentModifierPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_NativePointer ApplyContentImpl(ContentModifierPeer* peer)
 {
@@ -35,6 +40,7 @@ Ark_NativePointer ApplyContentImpl(ContentModifierPeer* peer)
 const GENERATED_ArkUIContentModifierAccessor* GetContentModifierAccessor()
 {
     static const GENERATED_ArkUIContentModifierAccessor ContentModifierAccessorImpl {
+        ContentModifierAccessor::DestroyPeerImpl,
         ContentModifierAccessor::CtorImpl,
         ContentModifierAccessor::GetFinalizerImpl,
         ContentModifierAccessor::ApplyContentImpl,
