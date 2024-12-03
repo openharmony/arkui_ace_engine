@@ -2007,6 +2007,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
     };
     FlushUITasks();
+    FlushDirtyPropertyNodesWhenExist();
     SetIsLayouting(true);
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
 
@@ -2015,6 +2016,13 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::FlushDirtyPropertyNodesWhenExist()
+{
+    if ((!IsDirtyLayoutNodesEmpty() || !dirtyPropertyNodes_.empty()) && !IsLayouting()) {
+        FlushUITasks();
+    }
 }
 
 bool PipelineContext::UsingCaretAvoidMode()
