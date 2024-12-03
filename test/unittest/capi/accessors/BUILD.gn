@@ -39,6 +39,7 @@ ace_unittest("capi_all_accessors_test") {
     "js_result_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
+    "nav_destination_context_accessor_test.cpp",
     "nav_path_stack_accessor_test.cpp",
     "navigation_transition_proxy_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
