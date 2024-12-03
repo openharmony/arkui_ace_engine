@@ -24,10 +24,17 @@ class BoxLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    explicit BoxLayoutAlgorithm(const Ace::RefPtr<LayoutAlgorithmFunc>& layoutAlgorithmFunc)
-        : LayoutAlgorithm(layoutAlgorithmFunc)
+    explicit BoxLayoutAlgorithm(const Ace::WeakPtr<FrameNode>& host)
+        : LayoutAlgorithm(host)
     {}
     ~BoxLayoutAlgorithm() = default;
+
+    void Measure() override;
+
+    void Layout() override;
+
+    // TODO: unify LayoutConstraint and return size
+    void MeasureContent(const Ace::NG::LayoutConstraintT<float>& contentConstraint) override;
 
     // Called to perform measure current render node.
     static void PerformMeasureSelf(FrameNode* frameNode);
