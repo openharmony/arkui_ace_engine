@@ -849,6 +849,7 @@ private:
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     void ClearDragData();
+    void SetFakeDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
