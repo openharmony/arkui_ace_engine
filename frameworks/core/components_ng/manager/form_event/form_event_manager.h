@@ -37,7 +37,7 @@ class FormEventManager : public virtual AceType {
 public:
     FormEventManager() = default;
 
-    ~FormEventManager() = default;
+    ~FormEventManager() override = default;
 
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback &&callback);
 
