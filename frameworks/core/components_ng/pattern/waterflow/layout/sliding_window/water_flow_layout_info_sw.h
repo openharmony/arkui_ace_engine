@@ -207,6 +207,14 @@ public:
 
     struct Lane;
     /**
+     * @brief Find item's corresponding Lane
+     */
+    const Lane* GetLane(int32_t itemIdx) const;
+    Lane* GetMutableLane(int32_t itemIdx);
+
+    bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
+
+    /**
      * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
      */
@@ -234,7 +242,7 @@ private:
     inline void PrepareJump();
 
     void InitSegmentTails(const std::vector<WaterFlowSections::Section>& sections);
-    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, const int32_t start);
+    void InitLanes(const std::vector<WaterFlowSections::Section>& sections, int32_t start);
 
     /**
      * @brief prepare newStartIndex_
@@ -263,7 +271,7 @@ private:
     void SyncOnEmptyLanes();
 
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
-    
+
     /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;
