@@ -26,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/gestures/drag_event.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -48,6 +49,10 @@ public:
     void ResetDragDropInitiatingStatus();
     void UpdateDragDropInitiatingStatus(const RefPtr<FrameNode>& frameNode,
         const DragDropInitiatingStatus& dragStatus);
+    void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode);
+    const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
+    void SetPreDragStatus(PreDragStatus preDragStatus);
+    PreDragStatus GetPreDragStatus() const;
 
 private:
     DragDropGlobalController() = default;
@@ -57,6 +62,8 @@ private:
     bool isContextMenuShowing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropGlobalController);
     RefPtr<FrameNode> currentDragNode_ = nullptr;
+    WeakPtr<FrameNode> prepareDragFrameNode_;
+    PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 };
 
 } // namespace OHOS::Ace::NG
