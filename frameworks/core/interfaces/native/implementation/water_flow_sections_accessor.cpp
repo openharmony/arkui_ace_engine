@@ -69,7 +69,8 @@ Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
 {
     LOGE("ARKOALA WaterFlowSectionAccessor.SpliceImpl -> Method is not fully implemented. "
           "Synchronous method is needed for onGetItemMainSizeByIndex");
-    CHECK_NULL_RETURN(peer && peer->GetController(), false);
+    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer->GetController(), false);
     CHECK_NULL_RETURN(start, false);
     auto deleteCountOpt = Converter::OptConvert<int32_t>(*deleteCount);
     auto delCnt = deleteCountOpt ? deleteCountOpt.value() : 0;
@@ -85,7 +86,8 @@ Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
 Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer,
                      const Ark_SectionOptions* section)
 {
-    CHECK_NULL_RETURN(peer && peer->GetController(), false);
+    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer->GetController(), false);
     LOGE("ARKOALA WaterFlowSectionAccessor.PushImpl -> Method is not fully implemented. "
           "Synchronous method is needed for onGetItemMainSizeByIndex");
     auto start = peer->GetController()->GetSectionInfo().size();
@@ -101,7 +103,8 @@ Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer,
 {
     LOGE("ARKOALA WaterFlowSectionAccessor.UpdateImpl -> Method is not fully implemented. "
           "Synchronous method is needed for onGetItemMainSizeByIndex");
-    CHECK_NULL_RETURN(peer && peer->GetController(), false);
+    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer->GetController(), false);
     std::vector<WaterFlowSections::Section> sections;
     auto newSection = Converter::OptConvert<WaterFlowSections::Section>(*section);
     sections.push_back(newSection.value());
@@ -112,11 +115,13 @@ void ValuesImpl(WaterFlowSectionsPeer* peer)
 {
     LOGE("ARKOALA WaterFlowSectionAccessor.ValuesImpl -> Incorrect return value, "
          "should be Array<SectionOptions>");
-    CHECK_NULL_VOID(peer && peer->GetController());
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetController());
 }
 Ark_Int32 LengthImpl(WaterFlowSectionsPeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetController(), false);
+    CHECK_NULL_RETURN(peer, false);
+    CHECK_NULL_RETURN(peer->GetController(), false);
     return peer->GetController()->GetSectionInfo().size();
 }
 } // WaterFlowSectionsAccessor
