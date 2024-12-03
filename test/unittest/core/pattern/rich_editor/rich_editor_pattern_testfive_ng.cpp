@@ -26,7 +26,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(),
     []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 } // namespace
 
