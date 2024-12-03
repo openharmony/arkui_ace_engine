@@ -626,6 +626,7 @@ public:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
     bool BetweenSelection(const Offset& globalOffset);
+    bool InRangeRect(const Offset& globalOffset, const std::pair<int32_t, int32_t>& range);
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
