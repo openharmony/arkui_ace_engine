@@ -132,6 +132,10 @@ std::vector<int32_t> INT32_TEST_PLAN = {
     100, 0, -100, 12, -56,
 };
 
+std::vector<int32_t> SIZE_TEST_PLAN = {
+    -100, -10, 0, 10, 12, 56, 100
+};
+
 typedef std::tuple<PathCmd, double, double> Path2DTestStep;
 static const std::vector<Path2DTestStep> PATH2D_TEST_PLAN = {
     { PathCmd::MOVE_TO, 0, 0 },
@@ -205,7 +209,13 @@ public:
     MockCanvasPattern() = default;
     ~MockCanvasPattern() override = default;
 };
-
+struct MockImageBitmapPeer : public ImageBitmapPeer {
+public:
+    MockImageBitmapPeer() = default;
+    ~MockImageBitmapPeer() override = default;
+    using ImageBitmapPeer::SetHeight;
+    using ImageBitmapPeer::SetWidth;
+};
 } // namespace
 
 class CanvasRendererAccessorTest
@@ -1275,27 +1285,39 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
 
     Ark_Materialized arkBitmap;
-    auto peer = new ImageBitmapPeer();
+    auto peer = new MockImageBitmapPeer();
     arkBitmap.ptr = peer;
 
-    for (const auto& expectedX : INT32_TEST_PLAN) {
-        for (const auto& expectedY : INT32_TEST_PLAN) {
-            auto imageData = std::make_shared<OHOS::Ace::ImageData>();
-            imageData->x = expectedX;
-            imageData->y = expectedY;
-            peer->SetImageData(imageData);
-
-            // test!!!
-            std::printf("bitmap: const x:%.2f y:%.2f", imageData->x, imageData->y)
-            // test!!!
-
+    for (const auto& expectedW : INT32_TEST_PLAN) {
+        for (const auto& expectedH : INT32_TEST_PLAN) {
+            peer->SetWidth(expectedW);
+            peer->SetHeight(expectedH);
 
             holder->SetUp();
             accessor_->transferFromImageBitmap(peer_, &arkBitmap);
+            if (expectedW <= 0 || expectedH <= 0) {
+            
+            
+                // test!!!
+                std::printf("bitmap: holder neg width: %d height: %d\n", expectedW, expectedH);
+                // test!!!
+
+
+                EXPECT_FALSE(holder->isCalled);
+                continue;
+            }
+            
+
+             // test!!!
+            std::printf("bitmap: holder x:%d == %d y: %d == %d width: %d == %d height: %d == %d\n",
+                holder->imageData->x, 0, holder->imageData->y, 0, holder->imageData->dirtyWidth, expectedW,
+                holder->imageData->dirtyHeight, expectedH);
+            // test!!!
+
 
             EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->imageData->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->imageData->y, expectedY));
+            EXPECT_TRUE(holder->imageData->dirtyWidth, expectedW);
+            EXPECT_TRUE(holder->imageData->dirtyHeight, expectedH);
         }
     }
     holder->TearDown();

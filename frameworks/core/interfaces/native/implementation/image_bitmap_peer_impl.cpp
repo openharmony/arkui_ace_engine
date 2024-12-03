@@ -21,7 +21,7 @@ ImageBitmapPeer::ImageBitmapPeer()
     : width(0),
       height(0),
       loadingCtx_(nullptr),
-      canvasImage_(nullptr)
+      pixelMap_(nullptr)
 {
 }
 
@@ -38,7 +38,7 @@ void ImageBitmapPeer::Close()
     height = 0;
 
     loadingCtx_ = nullptr;
-    canvasImage_ = nullptr;
+    pixelMap_ = nullptr;
 }
 
 double ImageBitmapPeer::GetHeight()
@@ -91,11 +91,14 @@ void ImageBitmapPeer::OnImageDataReady()
 void ImageBitmapPeer::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
-    canvasImage_ = loadingCtx_->MoveCanvasImage();
+    auto canvasImage = loadingCtx_->MoveCanvasImage();
+    CHECK_NULL_VOID(canvasImage);
+    pixelMap_ = canvasImage->GetPixelMap();
 }
 
 void ImageBitmapPeer::OnImageLoadFail(const std::string& errorMsg)
 {
     width = 0;
     height = 0;
+    pixelMap_ = nullptr;
 }

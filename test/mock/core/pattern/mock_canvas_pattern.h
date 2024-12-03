@@ -74,6 +74,12 @@ public:
     void TearDown()
     {
         request = false;
+        path = nullptr;
+        gradient = nullptr;
+        pattern = nullptr;
+        imageData = nullptr;
+        pixelMap = nullptr;
+        param = nullptr;
     }
 
     void* config = nullptr;

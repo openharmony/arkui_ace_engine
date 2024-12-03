@@ -533,6 +533,14 @@ void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasIma
 
 std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double top, double width, double height)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        std::unique_ptr<Ace::ImageData> data = std::make_unique<Ace::ImageData>();
+        data->dirtyWidth = width;
+        data->dirtyHeight = height;
+        return data;
+    }
+
     if (!paintMethod_) {
         std::unique_ptr<Ace::ImageData> data = std::make_unique<Ace::ImageData>();
         data->dirtyWidth = width;
