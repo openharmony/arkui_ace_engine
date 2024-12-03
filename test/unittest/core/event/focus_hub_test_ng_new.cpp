@@ -419,16 +419,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0056, TestSize.Level1)
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    RectF childRect;
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
     focusHub->focusAlgorithm_.scopeType = ScopeType::PROJECT_AREA;
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT, childRect));
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::LEFT));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::SHIFT_TAB));
     focusHub->focusAlgorithm_.getNextFocusNode = [](FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&) {};
-    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB, childRect));
+    EXPECT_FALSE(focusHub->RequestNextFocus(FocusStep::TAB));
 }
 
 /**
