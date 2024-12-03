@@ -57,7 +57,8 @@ public:
         }
     }
 
-    bool IsValid() {
+    bool IsValid()
+    {
         return callback_.call != nullptr;
     }
 protected:

@@ -79,7 +79,8 @@ RefPtr<NavigationStack> PathStack::GetParent()
     return parentStack_;
 }
 
-void PathStack::PushName(const std::string& name, const ParamType& param) {
+void PathStack::PushName(const std::string& name, const ParamType& param)
+{
     PathInfo info(name, param);
     std::tie(info.index_, info.navDestinationId_) = FindInPopArray(name);
     pathArray_.push_back(info);
@@ -178,27 +179,25 @@ PushDestinationResultType PathStack::PushDestination(PathInfo info,
 void PathStack::ReplacePath(PathInfo info, const std::optional<Options>& optionParam)
 {
     auto [launchMode, animated] = ParseNavigationOptions(optionParam);
-    bool isRegular = true;
+    auto it = pathArray_.end();
     if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
-        auto it = FindNameInternal(info.name_);
-        if (it != pathArray_.end()) {
-            isRegular = false;
-            it->param_ = info.param_;
-            it->onPop_ = info.onPop_;
-            it->index_ = -1;
-            if (it == (pathArray_.end() - 1)) {
-                auto targetInfo = *it;
-                it = pathArray_.erase(it);
-                if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
-                    pathArray_.pop_back();
-                } else {
-                    pathArray_.erase(it, pathArray_.end());
-                }
-                pathArray_.push_back(targetInfo);
-            }
-        }
+        it = FindNameInternal(info.name_);
     }
-    if (isRegular) {
+    if (it != pathArray_.end()) { // is it singleton ?
+        it->param_ = info.param_;
+        it->onPop_ = info.onPop_;
+        it->index_ = -1;
+        if (it == (pathArray_.end() - 1)) {
+            auto targetInfo = *it;
+            it = pathArray_.erase(it);
+            if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
+                pathArray_.pop_back();
+            } else {
+                pathArray_.erase(it, pathArray_.end());
+            }
+            pathArray_.push_back(targetInfo);
+        }
+    } else {
         if (!pathArray_.empty()) {
             pathArray_.pop_back();
         }
@@ -441,7 +440,7 @@ void PathStack::DisableAnimation(bool disableAnimation)
     disableAllAnimation_ = disableAnimation;
 }
 
-void PathStack::SetInterception(Interception interception)
+void PathStack::SetInterception(InterceptionType interception)
 {
     interception_ = interception;
 }
@@ -477,16 +476,6 @@ constexpr int32_t INVALID_DESTINATION_MODE = -1;
 
 void NavigationStack::SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj)
 {
-/*
-    // clean callback from old JSNavPathStack
-    CHECK_NULL_VOID(dataSourceObj_);
-    dataSourceObj_->SetOnStateChangedCallback(nullptr);
-    dataSourceObj_ = dataSourceObj;
-    // add callback to new JSNavPathStack
-    RemoveStack();
-    CHECK_NULL_VOID(dataSourceObj_);
-    dataSourceObj_->SetOnStateChangedCallback(onStateChangedCallback_);
-*/
 }
 
 const RefPtr<PathStack>& NavigationStack::GetDataSourceObj()
@@ -501,8 +490,7 @@ void NavigationStack::SetNavDestBuilderFunc(const NavDestBuildCallback& navDestB
 
 bool NavigationStack::IsEmpty()
 {
-    return dataSourceObj_ != nullptr;
-    // return dataSourceObj_->IsEmpty();
+    return false; // this can't be empty due to PathStack is one of the base classes
 }
 
 void NavigationStack::Pop()
@@ -512,31 +500,19 @@ void NavigationStack::Pop()
 
 void NavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
 {
-    ExternalData param = nullptr;
+    ParamType param = nullptr;
     if (routeInfo) {
-        // auto jsRouteInfo = AceType::DynamicCast<JSRouteInfo>(routeInfo);
-        // param = jsRouteInfo->GetParam();
+        // the inherited from RouteInfo class required here for store the external specific type parameter
+        auto extRouteInfo = AceType::DynamicCast<RouteInfo>(routeInfo);
+        CHECK_NULL_VOID(extRouteInfo);
+        param = ParamType(); // getting of the external specific type parameter may be here
     } else {
         auto params = PathStack::GetParamByName(name);
-        param = !params.empty() ? params.front() : ExternalData();
+        param = !params.empty() ? params.front() : ParamType();
     }
     this->PathStack::PushName(name, param);
 }
 
-/*void NavigationStack::PushName(const std::string& name, const JSRef<JSVal>& param)
-{
-     // obtain param from routeInfo
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    auto pushNameFunc = dataSourceObj_->GetProperty("pushName");
-    if (pushNameFunc->IsFunction()) {
-        auto pushFunc = JSRef<JSFunc>::Cast(pushNameFunc);
-        JSRef<JSVal> params[2];
-        params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-        params[1] = param;
-        pushFunc->Call(dataSourceObj_, 2, params);
-    }
-}
-*/
 void NavigationStack::Push(const std::string& name, int32_t index)
 {
     auto param = GetParamByIndex(index);
@@ -590,17 +566,15 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     auto isEntry = pathInfo->isEntry_;
     RefPtr<NG::UINode> targetNode;
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    // NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
     // isRemove true, set destination info, false, current destination create failed
-    bool isRemove = true;// TODO RemoveDestinationIfNeeded(pathInfo, errorCode, index);
+    bool isRemove = true; // Remove of destination may be here
     if (!isRemove) {
         return false;
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
-        int32_t nodeId = 0; // TODO
-        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(nodeId));
+        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
         return true;
     }
     node = targetNode;
@@ -610,8 +584,7 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         pattern->SetName(name);
         pattern->SetIndex(index);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
-        // TODO temp stub WITHOUT `param` and `onPop` data
-        auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(name, isEntry);
+        auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(name, isEntry); // `param` and `onPop` data may be added
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -621,31 +594,28 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
 RefPtr<NG::UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
     const WeakPtr<NG::UINode>& customNode)
 {
-    // TODO the inherited class required here for store the external parameter to the route info
+    // the inherited from RouteInfo class required here for store the external specific type parameter
     auto extRouteInfo = AceType::DynamicCast<RouteInfo>(routeInfo);
     if (!extRouteInfo) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "route info is invalid");
-        int32_t nodeId = 0; // TODO
-        return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(nodeId));
+        return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
     }
     auto name = extRouteInfo->GetName();
-    ParamType param; // TODO auto param = extRouteInfo->GetParam();
+    auto param = ParamType(); // getting of the external specific type parameter may be here
     RefPtr<NG::UINode> node;
     RefPtr<NG::NavDestinationGroupNode> desNode;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
     if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
-            auto pathInfo = AceType::MakeRefPtr<NavPathInfo>(name);
-            // TODO pathInfo->setParam(param);
+            auto pathInfo = AceType::MakeRefPtr<NavPathInfo>(name); // `param`data may be added
             pattern->SetNavPathInfo(pathInfo);
             pattern->SetName(name);
             pattern->SetNavigationStack(WeakClaim(this));
         }
         return node;
     }
-    int32_t nodeId = 0; // TODO
-    return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(nodeId));
+    return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
 }
 
 std::string NavigationStack::GetNameByIndex(int32_t index) const
@@ -694,7 +664,7 @@ std::string NavigationStack::GetRouteParam() const
         return ConvertParamToString(param, true);
     }
     return "";
- }
+}
 
 int32_t NavigationStack::GetSize() const
 {
@@ -704,30 +674,6 @@ int32_t NavigationStack::GetSize() const
 std::string NavigationStack::ConvertParamToString(const ParamType& param, bool needLimit) const
 {
     return {};
-/*
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
-    if (param->IsBoolean()) {
-        bool ret = param->ToBoolean();
-        return ret ? "true" : "false";
-    } else if (param->IsNumber()) {
-        double ret = param->ToNumber<double>();
-        std::ostringstream oss;
-        oss << ret;
-        return oss.str();
-    } else if (param->IsString()) {
-        std::string ret = param->ToString();
-        if (needLimit && ret.size() > MAX_PARSE_LENGTH) {
-            return ret.substr(0, MAX_PARSE_LENGTH);
-        }
-        return ret;
-    } else if (param->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
-        auto jsonObj = JsonUtil::Create(true);
-        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH, needLimit);
-        return jsonObj->ToString();
-    }
-    return "";
-*/
 }
 bool NavigationStack::GetAnimatedValue() const
 {
@@ -779,137 +725,28 @@ std::vector<std::string> NavigationStack::DumpStackInfo() const
 void NavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
     const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
 {
-/*     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    std::string targetName = isBefore ? "willShow" : "didShow";
-    JSRef<JSFunc> targetFunc;
-    if (!CheckAndGetInterceptionFunc(targetName, targetFunc)) {
-        return;
-    }
-    const uint8_t argsNum = 4;
-    JSRef<JSVal> params[argsNum];
-    auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
-    if (!preDestination) {
-        params[0] = JSRef<JSVal>::Make(ToJSValue("navBar"));
-    } else if (preDestination->GetIsEmpty()) {
-        params[0] = JSRef<JSObject>::New();
-    } else {
-        JSRef<JSObject> preObj = JSClass<JSNavDestinationContext>::NewInstance();
-        auto preProxy = Referenced::Claim(preObj->Unwrap<JSNavDestinationContext>());
-        preProxy->SetNavDestinationContext(from);
-        params[0] = preObj;
-    }
-
-    auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
-    if (!topDestination) {
-        params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
-    } else if (topDestination->GetIsEmpty()) {
-        params[1] = JSRef<JSObject>::New();
-    } else {
-        JSRef<JSObject> topObj = JSClass<JSNavDestinationContext>::NewInstance();
-        auto topProxy = Referenced::Claim(topObj->Unwrap<JSNavDestinationContext>());
-        topProxy->SetNavDestinationContext(to);
-        params[1] = topObj;
-    }
-    const uint8_t operationIndex = 2;
-    params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
-    const uint8_t animatedIndex = 3;
-    params[animatedIndex] = JSRef<JSVal>::Make(ToJSValue(isAnimated));
-    targetFunc->Call(JSRef<JSObject>(), argsNum, params);
-*/
+    APP_LOGE("NavigationContext::NavigationStack::FireNavigationInterception - not implemented");
 }
 
 void NavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 {
-/*     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    JSRef<JSFunc> modeFunc;
-    if (!CheckAndGetInterceptionFunc("modeChange", modeFunc)) {
-        return;
-    }
-    JSRef<JSVal> params[1];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(mode)));
-    modeFunc->Call(JSRef<JSObject>(), 1, params);
-*/
+    APP_LOGE("NavigationContext::NavigationStack::FireNavigationModeChange - not implemented");
 }
-
-/* bool NavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func)
-{
-    return bool();
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
-    if (dataSourceObj_->IsEmpty()) {
-        return false;
-    }
-    JSRef<JSVal> delegateProp = dataSourceObj_->GetProperty("interception");
-    if (!delegateProp->IsObject()) {
-        return false;
-    }
-    JSRef<JSObject> delegate = JSRef<JSObject>::Cast(delegateProp);
-    JSRef<JSVal> funcProp = delegate->GetProperty(name.c_str());
-    if (!funcProp->IsFunction()) {
-        return false;
-    }
-    func = JSRef<JSFunc>::Cast(funcProp);
-    return true;
-}
- */
 
 int32_t NavigationStack::LoadDestination(const std::string& name, const ParamType& param,
     const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node,
     RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
-    // NG::ScopedViewStackProcessor scopedViewStackProcessor;
-
     // execute navdestination attribute builder
     if (LoadDestinationByBuilder(name, param, node, desNode)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load destination by buildermap");
         return ERROR_CODE_NO_ERROR;
     }
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
+        ", loading by URL not implemneted");
+    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
+        ", loading by URL not implemneted");
     return ERROR_CODE_DESTINATION_NOT_FOUND;
-/*
-    // deal route config and execute route config builder
-    auto container = Container::Current();
-    auto navigationRoute = container->GetNavigationRoute();
-    if (!navigationRoute->HasLoaded(name)) {
-        int32_t res = navigationRoute->LoadPage(name);
-        if (res != 0) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load page failed: %{public}s", name.c_str());
-            return navDestBuilderFunc_->IsEmpty() ? ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED
-                : ERROR_CODE_DESTINATION_NOT_FOUND;
-        }
-    }
-    auto parentCustomNode = AceType::DynamicCast<NG::CustomNode>(customNode.Upgrade());
-    CHECK_NULL_RETURN(parentCustomNode, ERROR_CODE_INTERNAL_ERROR);
-    auto thisObjTmp = parentCustomNode->FireThisFunc();
-    CHECK_NULL_RETURN(thisObjTmp, ERROR_CODE_INTERNAL_ERROR);
-    JSRef<JSObject> thisObj = *(JSRef<JSObject>*)(thisObjTmp);
-    auto engine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(EngineHelper::GetCurrentEngine());
-    CHECK_NULL_RETURN(engine, ERROR_CODE_INTERNAL_ERROR);
-    JSRef<JSObject> wrapBuilder = JSRef<JSObject>::Make(engine->GetNavigationBuilder(name).ToLocal());
-    if (wrapBuilder->IsEmpty()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "wrap builder is empty: %{public}s", name.c_str());
-        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
-    }
-    auto builderProp = wrapBuilder->GetProperty("builder");
-    if (!builderProp->IsFunction()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get builder failed: %{public}s", name.c_str());
-        return ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED;
-    }
-    auto builderObj = JSRef<JSObject>::Cast(builderProp);
-    const int32_t number = builderObj->GetProperty("length")->ToNumber<int32_t>();
-    JSRef<JSVal> params[number];
-    if (number >= 1) {
-        params[0] = JSRef<JSVal>::Make(ToJSValue(name));
-    }
-    if (number >= ARGC_COUNT_TWO) {
-        params[1] = param;
-    }
-    auto builder = JSRef<JSFunc>::Cast(builderProp);
-    builder->Call(thisObj, number, params);
-    node = NG::ViewStackProcessor::GetInstance()->Finish();
-    if (!GetNavDestinationNodeInUINode(node, desNode)) {
-        return ERROR_CODE_DESTINATION_NOT_FOUND;
-    }
-    return ERROR_CODE_NO_ERROR;
-*/
 }
 
 bool NavigationStack::LoadDestinationByBuilder(const std::string& name, const ParamType& param,
@@ -922,8 +759,10 @@ bool NavigationStack::LoadDestinationByBuilder(const std::string& name, const Pa
     auto arkName = Converter::ArkValue<Ark_String>(name);
     auto arkParam = Converter::ArkValue<Ark_CustomObject>(param);
     navDestBuilderFunc_.Invoke(arkName, arkParam);
-    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "No way to obtain the FrameNode in result of build func exec");
-    APP_LOGE("No way to obtain the FrameNode in result of build func exec");
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
+        ", No way to obtain the FrameNode in result of the build func execution.");
+    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
+        ", No way to obtain the FrameNode in result of the build func execution.");
     RefPtr<NG::UINode> resultNode = nullptr;
     node = resultNode;
     return GetNavDestinationNodeInUINode(node, desNode);
@@ -1008,31 +847,7 @@ void NavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
 
 void NavigationStack::RecoveryNavigationStack()
 {
-/*     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    navPathList_ = preNavPathList_;
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    JSRef<JSArray> pathArray = JSRef<JSArray>::New();
-    for (int32_t index = 0; index < static_cast<int32_t>(navPathList_.size()); index++) {
-        auto node = navPathList_[index].second;
-        auto navDestinationGroupNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
-            NG::NavigationGroupNode::GetNavDestinationNode(node));
-        if (!navDestinationGroupNode) {
-            continue;
-        }
-        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(navDestinationGroupNode->GetPattern());
-        if (!pattern) {
-            continue;
-        }
-        auto context = pattern->GetNavDestinationContext();
-        if (!context) {
-            continue;
-        }
-        JSRef<JSObject> item = CreatePathInfoWithNecessaryProperty(context);
-        pathArray->SetValueAt(index, item);
-    }
-    dataSourceObj_->SetPropertyObject("pathArray", pathArray); */
+    APP_LOGE("NavigationContext::NavigationStack::FireNavigationModeChange - not implemented");
 }
 
 bool NavigationStack::NeedBuildNewInstance(int32_t index)
@@ -1048,83 +863,15 @@ void NavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
     }
 }
 
-/*
-JSRef<JSObject> NavigationStack::CreatePathInfoWithNecessaryProperty(
-    const RefPtr<NG::NavDestinationContext>& context)
-{
-    auto pathInfo = JSRef<JSObject>::New();
-    CHECK_NULL_RETURN(context, pathInfo);
-    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(context->GetNavPathInfo());
-    CHECK_NULL_RETURN(jsPathInfo, pathInfo);
-
-    pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
-    pathInfo->SetProperty<int32_t>("index", context->GetIndex());
-    pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
-    pathInfo->SetProperty("param", jsPathInfo->GetParam());
-    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
-    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
-    return pathInfo;
-}
-*/
 std::string NavigationStack::GetStringifyParamByIndex(int32_t index) const
 {
+    APP_LOGE("NavigationContext::NavigationStack::GetStringifyParamByIndex - not implemented");
     return std::string();
-/*     auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, JS_STRINGIFIED_UNDEFINED);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, JS_STRINGIFIED_UNDEFINED);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-
-    if (dataSourceObj_->IsEmpty()) {
-        return JS_STRINGIFIED_UNDEFINED;
-    }
-    napi_value navPathStack = JsConverter::ConvertJsValToNapiValue(dataSourceObj_);
-    napi_value getParamByIndex;
-    napi_get_named_property(env, navPathStack, "getParamByIndex", &getParamByIndex);
-    napi_value napiIndex;
-    napi_create_int32(env, index, &napiIndex);
-    napi_value param;
-    napi_call_function(env, navPathStack, getParamByIndex, 1, &napiIndex, &param);
-
-    napi_value globalValue;
-    napi_get_global(env, &globalValue);
-    napi_value jsonClass;
-    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
-    napi_value stringifyFunc;
-    napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
-    napi_value stringifyParam;
-    if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
-        napi_get_and_clear_last_exception(env, &stringifyParam);
-        return JS_STRINGIFIED_UNDEFINED;
-    }
-    size_t len = 0;
-    napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
-    std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
-    napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
-    return paramChar.get();
- */}
+}
 
 void NavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
-/*     JSRef<JSArray> newPathArray = JSRef<JSArray>::New();
-    for (int32_t index = 0; index < static_cast<int32_t>(navdestinationsInfo.size()); ++index) {
-        auto infoName = navdestinationsInfo[index].name;
-        auto infoParam = navdestinationsInfo[index].param;
-        auto infoMode = navdestinationsInfo[index].mode;
-
-        JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
-        navPathInfo->SetProperty<std::string>("name", infoName);
-        if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-            navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
-        }
-        navPathInfo->SetProperty<bool>("fromRecovery", true);
-        navPathInfo->SetProperty<int32_t>("mode", infoMode);
-        newPathArray->SetValueAt(index, navPathInfo);
-    }
-    dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set navPathArray by recovery info success");
- */
+    APP_LOGE("NavigationContext::NavigationStack::SetPathArray - not implemented");
 }
 
 bool NavigationStack::IsFromRecovery(int32_t index)

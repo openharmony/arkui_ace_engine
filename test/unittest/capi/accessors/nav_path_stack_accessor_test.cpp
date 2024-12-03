@@ -256,6 +256,5 @@ HWTEST_F(NavPathStackAccessorTest, bothPushPath1Pop1ParamCallbackTest, TestSize.
     EXPECT_TRUE(wasInvoke);
 
     EXPECT_EQ(accessor_->size(peer_), 0);
-
 }
 } // namespace OHOS::Ace::NG

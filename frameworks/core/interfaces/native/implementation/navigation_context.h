@@ -34,9 +34,7 @@ public:
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
-
 using NavDestBuildCallback = CallbackHelper<Callback_String_Unknown_Void>;
-
 
 enum class LaunchMode {
     STANDARD = 0,
@@ -45,11 +43,12 @@ enum class LaunchMode {
     NEW_INSTANCE = 3,
 };
 
-// The 'interception' is external object which can contain next methods:  "modeChange", "willShow" : "didShow"
-// supported by JSNavigationStack::CheckAndGetInterceptionFunc,
-// JSNavigationStack::FireNavigationModeChange,
-// JSNavigationStack::FireNavigationInterception
-using Interception = void *;
+struct Interception {
+    CallbackHelper<InterceptionModeCallback> modeChange;
+    CallbackHelper<InterceptionShowCallback> willShow;
+    CallbackHelper<InterceptionShowCallback> didShow;
+};
+using InterceptionType = struct Interception *;
 
 using ParamType = ExternalData;
 
@@ -60,12 +59,10 @@ class PathInfo {
 public:
     explicit PathInfo(const std::string& name) : PathInfo(name, nullptr) {}
     PathInfo(std::string name, const ParamType& param, OnPopCallback onPop = OnPopCallback(),
-        bool isEntry = false) :
-        name_(name), param_(param), onPop_(onPop), index_(-1), needUpdate_(false),
+        bool isEntry = false) : name_(name), param_(param), onPop_(onPop), index_(-1), needUpdate_(false),
         needBuildNewInstance_(false), navDestinationId_(""), isEntry_(isEntry),
         fromRecovery_(false), mode_(0), needDelete_(false) {}
-    PathInfo() :
-        name_(), param_(), onPop_(OnPopCallback()), index_(-1), needUpdate_(false),
+    PathInfo() : name_(), param_(), onPop_(OnPopCallback()), index_(-1), needUpdate_(false),
         needBuildNewInstance_(false), navDestinationId_(""), isEntry_(false),
         fromRecovery_(false), mode_(0), needDelete_(false) {}
 
@@ -100,18 +97,18 @@ struct Options {
 
 class NavigationStack;
 
+constexpr bool DEFAULT_ANIMATED = true;
+constexpr LaunchMode DEFAULT_LAUNCH_MODE = LaunchMode::STANDARD;
+
 // this dublicates the functionality of JS NavPathStack class
 // (frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js)
 class PathStack : public virtual Referenced {
 public:
     enum IsReplace {
         NO_ANIM_NO_REPLACE = 0, // replace value 0: don't do anything;
-        BOTH_ANIM_AND_REPLACE = 1,// 1: replace value and do replace animation;
+        BOTH_ANIM_AND_REPLACE = 1, // 1: replace value and do replace animation;
         ANIM_NO_REPLACE = 2 // 2: don't replace value but do replace animation
     };
-
-    inline static const bool DEFAULT_ANIMATED = true;
-    inline static const LaunchMode DEFAULT_LAUNCH_MODE = LaunchMode::STANDARD;
 
     PathStack() = default;
     ~PathStack() override = default;
@@ -156,7 +153,7 @@ public:
     std::vector<size_t> GetIndexByName(const std::string& name);
     size_t Size() const;
     void DisableAnimation(bool disableAnimation);
-    void SetInterception(Interception interception);
+    void SetInterception(InterceptionType interception);
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -164,8 +161,7 @@ protected:
     bool animated_ = DEFAULT_ANIMATED; // control a single navigation transition animation.
     RefPtr<NavigationStack> parentStack_ = nullptr;
     std::vector<PathInfo> popArray_ = {};
-    Interception interception_ = nullptr;
-    // native nav path stack, implement in cpp
+    InterceptionType interception_ = nullptr;
     std::function<void()> onStateChangedCallback_;
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
     void InvokeOnStateChanged();
@@ -181,7 +177,6 @@ public:
     void SetOnStateChangedCallback(std::function<void()> callback) override
     {
         PathStack::SetOnStateChangedCallback(callback);
-        // onStateChangedCallback_ = callback;
     }
 
     void UpdateStackInfo(const RefPtr<::OHOS::Ace::NG::NavigationStack>& newStack) override
@@ -200,7 +195,6 @@ public:
     void Pop() override;
     void Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo = nullptr) override;
     void Push(const std::string& name, int32_t index) override;
-    // void PushName(const std::string& name, const JSRef<JSVal>& param);
     void RemoveName(const std::string& name) override;
     void RemoveIndex(int32_t index) override;
 
@@ -242,10 +236,10 @@ public:
 protected:
     RefPtr<PathStack> dataSourceObj_;
     NavDestBuildCallback navDestBuilderFunc_;
-    // std::function<void()> onStateChangedCallback_;
+    std::function<void()> onStateChangedCallback_;
 
 private:
-    void SetIsReplace(int value)
+    void SetIsReplace(int32_t value)
     {
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
@@ -254,27 +248,21 @@ private:
     ParamType GetParamByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);
-    // JSRef<JSObject> CreatePathInfoWithNecessaryProperty(const RefPtr<NG::NavDestinationContext>& context);
     std::string ConvertParamToString(const ParamType& param, bool needLimit = false) const;
-    // static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-    //     std::function<int32_t(JSRef<JSObject>)> checkFunc);
-
     int LoadDestination(const std::string& name, const ParamType& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool LoadDestinationByBuilder(const std::string& name, const ParamType& param, RefPtr<NG::UINode>& node,
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
-
-    // bool GetFlagByIndex(int32_t index) const;
-    // bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
-
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::ExternalData& src);
-void AssignArkValue(Ark_NavPathInfo& dst, const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
+void AssignArkValue(Ark_CustomObject& dst,
+    const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_NavPathInfo& dst,
+    const ::OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
 } // namespace OHOS::Ace::NG::GeneratedModifier::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H

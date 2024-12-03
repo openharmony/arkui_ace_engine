@@ -33,7 +33,7 @@ void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
 {
     dst.name = ArkValue<Ark_String>(src.name_);
     dst.param = ArkValue<Opt_CustomObject>(src.param_);
-    dst.onPop = ArkValue<Opt_Callback_PopInfo_Void>(); // TODO why is it need??
+    dst.onPop = ArkValue<Opt_Callback_PopInfo_Void>();
     dst.isEntry = ArkValue<Opt_Boolean>(src.isEntry_);
 }
 
@@ -98,7 +98,6 @@ void PushPath0Impl(NavPathStackPeer* peer,
                    const Ark_NavPathInfo* info,
                    const Opt_Boolean* animated)
 {
-    LOGE("NavPathStackAccessor::PushPath0Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(info);
     auto navStack = peer->GetNavPathStack();
@@ -114,7 +113,6 @@ void PushPath1Impl(NavPathStackPeer* peer,
                    const Ark_NavPathInfo* info,
                    const Opt_NavigationOptions* options)
 {
-    LOGE("NavPathStackAccessor::PushPath1Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(info);
     auto navStack = peer->GetNavPathStack();
@@ -141,22 +139,14 @@ void PushDestination0Impl(NavPathStackPeer* peer,
     }
     auto convNavInfo = Converter::Convert<Nav::PathInfo>(*info);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    auto errorCode = navStack->Nav::PathStack::PushDestination(convNavInfo, Nav::Options{std::nullopt, convAnimated});
-/*     auto errorCode = std::make_shared<std::promise<void>>();
-    if (errorCode != ERROR_CODE_NO_ERROR) {
-        promise->set_value();
-    } else {
-        promise->set_exception(std::make_exception_ptr(std::runtime_error("Internal error.")));
-    }
-    return reinterpret_cast<Ark_NativePointer>(promise.get());
- */
+    LOGE("NavPathStackAccessor::PushDestination0Impl does not return required type");
+    navStack->Nav::PathStack::PushDestination(convNavInfo, Nav::Options{std::nullopt, convAnimated});
 }
 void PushDestination1Impl(NavPathStackPeer* peer,
                           const Ark_NavPathInfo* info,
                           const Opt_NavigationOptions* options,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    LOGE("NavPathStackAccessor::PushDestination1Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(info);
     auto navStack = peer->GetNavPathStack();
@@ -173,7 +163,6 @@ void PushPathByName0Impl(NavPathStackPeer* peer,
                          const Ark_CustomObject* param,
                          const Opt_Boolean* animated)
 {
-    LOGE("NavPathStackAccessor::PushPathByName0Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(name);
     CHECK_NULL_VOID(param);
@@ -187,14 +176,13 @@ void PushPathByName0Impl(NavPathStackPeer* peer,
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushPathByName(convName, convParam, Nav::OnPopCallback(), convAnimated);
- }
+}
 void PushPathByName1Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
                          const Ark_CustomObject* param,
                          const Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* animated)
 {
-    LOGE("NavPathStackAccessor::PushPathByName1Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(name);
     CHECK_NULL_VOID(param);
@@ -261,7 +249,6 @@ void ReplacePath0Impl(NavPathStackPeer* peer,
                       const Ark_NavPathInfo* info,
                       const Opt_Boolean* animated)
 {
-    LOGE("NavPathStackAccessor::ReplacePath0Impl is not implemented yet.");
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(info);
     CHECK_NULL_VOID(animated);
@@ -315,7 +302,7 @@ Ark_NativePointer Pop0Impl(NavPathStackPeer* peer,
     CHECK_NULL_RETURN(navStack, invalid);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::Pop(Nav::PopResultType(), convAnimated);
-    // convert the result of above to Ark_NavPathInfo here
+    // convert the result of above to Ark_NavPathInfo should be here
     LOGE("NavPathStackAccessor::Pop0Impl - the result type does not match to documentation");
     return invalid;
 }
@@ -324,7 +311,6 @@ Ark_NativePointer Pop1Impl(NavPathStackPeer* peer,
                            const Opt_Boolean* animated)
 {
     Ark_NativePointer invalid = nullptr;
-    LOGE("NavPathStackAccessor::Pop1Impl is not implemented yet.");
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(result, invalid);
     auto navStack = peer->GetNavPathStack();
@@ -332,7 +318,7 @@ Ark_NativePointer Pop1Impl(NavPathStackPeer* peer,
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     auto convResult = Converter::Convert<Nav::ExternalData>(*result);
     navStack->Nav::PathStack::Pop(convResult, convAnimated);
-    // convert the result of above to Ark_NavPathInfo here
+    // convert the result of above to Ark_NavPathInfo should be here
     LOGE("NavPathStackAccessor::Pop1Impl - the result type does not match to documentation");
     return invalid;
 }
