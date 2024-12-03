@@ -21,6 +21,7 @@ import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
+import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -32,6 +33,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'image', label: '图片/Image' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
+    { name: 'counter', label: '计数器/counter'},
     { name: 'AdvancedCounter', label: '计数器/advanced.Counter'}
   ]
 };
@@ -52,6 +54,8 @@ export function DisplaysDestination(name: string, route: Route) {
     TextSpanUrlBootcamp({ title: route.label })
   }else if (name === 'displays/counter') {
     CounterBootcamp({ title: route.label})
+  }else if (name === 'displays/AdvancedCounter'){
+    AdvancedCounterBootcamp({ title: route.label})
   }
 }
 

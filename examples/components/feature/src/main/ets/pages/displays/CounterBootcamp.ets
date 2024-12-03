@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Drawer, RadioBlock } from 'common';
+import { Drawer, RadioBlock, useEnabled } from 'common';
 
 
 @Component
@@ -57,8 +57,8 @@ export struct CounterBootcamp{
       .onDec(() => {
         this.value--
       })
-      .enableDec(this.isEnableDec)
-      .enableInc(this.isEnableInc)
+      .enableDec(useEnabled(this.enableEnableDec,this.isEnableDec))
+      .enableInc(useEnabled(this.enableEnableInc,this.isEnableInc))
     }.width('100%')
   }
   @Builder
