@@ -73,6 +73,7 @@ template("ace_base_source_set") {
       "thread/background_task_executor.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
+      "utils/lifecycle_checkable.cpp",
       "utils/measure_util.cpp",
       "utils/resource_configuration.cpp",
       "utils/string_expression.cpp",

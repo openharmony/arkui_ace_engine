@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "adapter/ohos/osal/navigation_route_ohos.h"
-#include "base/error/error_code.h"
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+
+#include "base/error/error_code.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 
@@ -44,9 +46,9 @@ void NavigationRouteOhos::InitRouteMap()
     }
     AppExecFwk::BundleInfo bundleInfo;
     if (bundleManager->GetBundleInfoForSelf(
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ROUTER_MAP),
-        bundleInfo) != 0) {
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ROUTER_MAP),
+            bundleInfo) != 0) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get bundle info failed");
         return;
     }
@@ -91,8 +93,8 @@ int32_t NavigationRouteOhos::LoadPage(const std::string& name)
     if (callback_ == nullptr) {
         return -1;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load navdestination %{public}s, ohmurl: %{public}s",
-        item.bundleName.c_str(), item.moduleName.c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load navdestination %{public}s, ohmurl: %{public}s", item.bundleName.c_str(),
+        item.moduleName.c_str());
     int32_t res = callback_(item.bundleName, item.moduleName, item.ohmurl, false);
     if (res == 0) {
         names_.emplace_back(name);
