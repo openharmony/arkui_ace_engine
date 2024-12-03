@@ -42,6 +42,7 @@ public:
     void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
+    void SetImageMatrix(const Matrix4 &value) override;
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) override;
@@ -91,6 +92,7 @@ public:
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetOrientation(FrameNode *frameNode, ImageRotateOrientation orientation);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
+    static void SetImageMatrix(FrameNode *frameNode, const Matrix4 &value);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
     static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
