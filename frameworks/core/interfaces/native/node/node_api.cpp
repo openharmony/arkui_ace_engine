@@ -146,48 +146,24 @@ const CJUIStateModifier* GetCJUIStateModifier()
 } // namespace NodeModifier
 
 namespace NodeEvent {
-std::deque<ArkUINodeEvent> g_eventQueue;
-int CheckEvent(ArkUINodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 static EventReceiver globalEventReceiver = nullptr;
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
     if (globalEventReceiver) {
         globalEventReceiver(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace NodeEvent
 
 namespace CustomNodeEvent {
-std::deque<ArkUICustomNodeEvent> g_eventQueue;
-int CheckEvent(ArkUICustomNodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 void (*g_fliter)(ArkUICustomNodeEvent* event) = nullptr;
-void SendArkUIAsyncEvent(ArkUICustomNodeEvent* event)
+void SendArkUISyncEvent(ArkUICustomNodeEvent* event)
 {
     if (g_fliter) {
         g_fliter(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace CustomNodeEvent
@@ -1872,8 +1848,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
-    NodeEvent::CheckEvent,
-    NodeEvent::SendArkUIAsyncEvent, // sendEvent
+    NodeEvent::SendArkUISyncEvent, // sendEvent
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
     ShowCrash,
@@ -2293,8 +2268,7 @@ const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
         GetPipelineContext,
         SetVsyncCallback,
         UnblockVsyncWait,
-        NodeEvent::CheckEvent,
-        NodeEvent::SendArkUIAsyncEvent,
+        NodeEvent::SendArkUISyncEvent,
         nullptr, // callContinuation
         nullptr, // setChildTotalCount
         ShowCrash,
@@ -2343,14 +2317,14 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
     return &OHOS::Ace::NG::impl_full;
 }
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
-    OHOS::Ace::NG::NodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::NodeEvent::SendArkUISyncEvent(event);
 }
 
 void SendArkUIAsyncCustomEvent(ArkUICustomNodeEvent* event)
 {
-    OHOS::Ace::NG::CustomNodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::CustomNodeEvent::SendArkUISyncEvent(event);
 }
 
 ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)

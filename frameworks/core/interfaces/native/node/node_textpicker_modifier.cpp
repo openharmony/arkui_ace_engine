@@ -683,7 +683,7 @@ void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam)
         for (size_t i = 0; i < indexVector.size() && i < MAX_SIZE; i++) {
             event.componentAsyncEvent.data[i].i32 = static_cast<int32_t>(indexVector[i]);
         }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onChangeEvent));
 }
@@ -701,7 +701,7 @@ void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam)
         for (size_t i = 0; i < indexVector.size() && i < MAX_SIZE; i++) {
             event.componentAsyncEvent.data[i].i32 = static_cast<int32_t>(indexVector[i]);
         }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStopEvent));
 }

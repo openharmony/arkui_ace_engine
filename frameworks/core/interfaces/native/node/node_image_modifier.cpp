@@ -998,7 +998,7 @@ void SetImageOnComplete(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
         event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
         event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }
@@ -1013,7 +1013,7 @@ void SetImageOnError(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ERROR;
         event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
 }
@@ -1027,7 +1027,7 @@ void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_SVG_PLAY_FINISH;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
 }
@@ -1043,7 +1043,7 @@ void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_IMAGE_DOWNLOAD_PROGRESS;
         event.componentAsyncEvent.data[0].u32 = dlNow;
         event.componentAsyncEvent.data[1].u32 = dlTotal;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageModelNG::SetOnDownloadProgress(frameNode, std::move(onDownloadProgress));
 }

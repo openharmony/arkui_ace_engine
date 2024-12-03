@@ -106,7 +106,7 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
@@ -135,7 +135,7 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
 
@@ -170,7 +170,7 @@ void SetOnDragEnter(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -201,7 +201,7 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -233,7 +233,7 @@ void SetOnDragLeave(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -279,7 +279,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(info->GetDragBehavior());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDragEnd(frameNode, onDragEnd);
 }
@@ -301,7 +301,7 @@ void SetOnPreDrag(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
 }

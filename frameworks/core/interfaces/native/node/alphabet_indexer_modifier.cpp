@@ -592,7 +592,7 @@ void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_SELECTED;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
 }
@@ -607,7 +607,7 @@ void SetOnIndexerRequestPopupData(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         char** valueArray = reinterpret_cast<char**>(event.textArrayEvent.nativeStringArrayPtr);
         ArkUI_Int32 length = event.textArrayEvent.length;
         std::vector<std::string> valueVector;
@@ -633,7 +633,7 @@ void SetOnIndexerPopupSelected(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_POPUP_SELECTED;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
@@ -648,7 +648,7 @@ void SetIndexerChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CHANGE_EVENT;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
@@ -663,7 +663,7 @@ void SetIndexerCreatChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetCreatChangeEvent(frameNode, std::move(onEvent));
 }

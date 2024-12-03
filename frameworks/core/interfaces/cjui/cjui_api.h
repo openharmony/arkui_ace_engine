@@ -3398,13 +3398,6 @@ struct CJUIExtendedNodeAPI {
     void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
     /**
-     * Returns != 0 if an event was received,
-     * fills in supplied buffer in such a case.
-     * Must not block, blocking is performed by
-     * ArkoalaHostApi.waitForVsync().
-     */
-    ArkUI_Int32 (*checkEvent)(ArkUINodeEvent* event);
-    /**
      * Add an event to the event queue, so that
      * it will be picked up later by checkEvent().
      */
