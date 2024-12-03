@@ -910,7 +910,6 @@ class i1 extends ViewPU {
                         Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
                         Image.direction(this.options.direction);
                         Image.size(this.options.imageSize ?? { width: 24, height: 24 });
-                        Image.focusable(!this.options.i2);
                         Image.draggable(false);
                         Image.fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
                         e1.t1) : (this.options.fontColor ??
@@ -940,7 +939,6 @@ class i1 extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.maxLines(1);
                         Text.textAlign(TextAlign.Center);
-                        Text.focusable(true);
                         Text.padding(this.getTextPadding());
                     }, Text);
                     Text.pop();
@@ -1407,10 +1405,12 @@ class m1 extends ViewPU {
     getBorderRadius(index) {
         let borderRadius = this.buttonBorderRadius[index];
         if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
-            borderRadius.topStart = LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4);
-            borderRadius.topEnd = LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4);
-            borderRadius.bottomStart = LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4);
-            borderRadius.bottomEnd = LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4);
+            return {
+                topStart: LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4),
+                topEnd: LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4),
+                bottomStart: LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4),
+                bottomEnd: LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+            };
         }
         return borderRadius;
     }
