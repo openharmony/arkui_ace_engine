@@ -131,9 +131,8 @@ public:
         mockScrollerController_ = new MockScrollController();
         mockScrollerControllerKeeper_ = AceType::Claim(mockScrollerController_);
         ASSERT_NE(mockScrollerControllerKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetController(mockScrollerControllerKeeper_);
+        ASSERT_NE(peer_, nullptr);
+        peer_->SetController(mockScrollerControllerKeeper_);
         ASSERT_NE(mockScrollerController_, nullptr);
     }
 
@@ -285,9 +284,8 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsValidTest, TestSize.Level1)
     auto mockScrollerController2 = new MockScrollController2();
     auto mockScrollerControllerKeeper2 = AceType::Claim(mockScrollerController2);
     ASSERT_NE(mockScrollerControllerKeeper2, nullptr);
-    auto peerImpl = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(peer_);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->SetController(mockScrollerControllerKeeper2);
+    ASSERT_NE(peer_, nullptr);
+    peer_->SetController(mockScrollerControllerKeeper2);
     ASSERT_NE(mockScrollerController2, nullptr);
 
     constexpr float velocityValid = 100.45f;
@@ -302,7 +300,7 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsValidTest, TestSize.Level1)
     EXPECT_CALL(*mockScrollerController2, ScrollToEdge(ScrollEdgeType::SCROLL_TOP, velocityValid)).Times(1);
     accessor_->scrollEdge(peer_, ARK_EDGE_START, &optScrollEdgeOptions);
 
-    peerImpl->SetController(mockScrollerControllerKeeper_);
+    peer_->SetController(mockScrollerControllerKeeper_);
 }
 
 /**

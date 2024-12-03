@@ -154,7 +154,7 @@ void SetListOptionsImpl(Ark_NativePointer node,
     RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
     auto abstPeerPtrOpt = optionsOpt.value().scroller;
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ListScrollerPeerImpl *>(*abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<ListScrollerPeer *>(*abstPeerPtrOpt);
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);

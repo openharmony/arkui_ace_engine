@@ -761,9 +761,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Lev
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -772,7 +770,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
     modifier_->setScrollOptions(node_, &scroller);
 
@@ -787,7 +785,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /**
@@ -797,9 +795,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     ASSERT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -808,7 +804,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     ASSERT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller scroller = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     modifier_->setScrollOptions(node_, &scroller);
 
@@ -823,7 +819,7 @@ HWTEST_F(ScrollModifierTest, SetScrollOptions_EmptyScroller, testing::ext::TestS
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /**
@@ -1223,6 +1219,61 @@ HWTEST_F(ScrollModifierTest, EnableScrollInteraction_setValue, testing::ext::Tes
     enable = GetAttrValue<std::optional<bool>>(root, "enableScrollInteraction");
     ASSERT_TRUE(enable.has_value());
     ASSERT_FALSE(enable.value());
+}
+
+/**
+ * @tc.name: OnScrollEdge_SetCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct resultData {
+        Ark_Int32 resourceId;
+        Ark_Edge side;
+    };
+    static std::optional<resultData> result;
+
+    auto callback = [](
+        const Ark_Int32 resourceId, Ark_Edge side) {
+            result = {resourceId, side};
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<OnScrollEdgeCallback>(callback, id);
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+
+    ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
+    modifier_->setOnScrollEdge(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetScrollEdgeEvent());
+    eventHub->GetScrollEdgeEvent()(ScrollEdge::BOTTOM);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(Ark_Edge::ARK_EDGE_BOTTOM, result.value().side);
+    EXPECT_EQ(id, result.value().resourceId);
+}
+
+/**
+ * @tc.name: OnScrollEdge_SetNullCallback
+ * @tc.desc: Test OnScrollEdgeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
+    modifier_->setOnScrollEdge(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 }
 
 } // namespace OHOS::Ace::NG

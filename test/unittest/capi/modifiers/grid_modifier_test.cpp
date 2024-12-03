@@ -23,6 +23,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
@@ -120,10 +121,20 @@ public:
         themeStyle->SetAttr(PATTERN_FG_COLOR, { .value = THEME_SCROLLBAR_COLOR });
 
         SetupTheme<ScrollBarTheme>();
+        SetupTheme<ScrollableTheme>();
 
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_NAME, RESOURCE_OPACITY_BY_STRING);
         AddResource(RES_ID, RESOURCE_OPACITY_BY_NUMBER);
+    }
+
+    void OnModifyDone()
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone();
     }
 };
 
@@ -212,9 +223,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSiz
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -223,7 +232,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
     EXPECT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
@@ -239,7 +248,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /*
@@ -249,9 +258,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Level1)
 {
-    Ark_NativePointer scrollerPtr =
-        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    auto peerImplPtr = GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
     EXPECT_NE(peerImplPtr, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -260,7 +267,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
     EXPECT_NE(pattern, nullptr);
 
     Ark_Scroller arkScroller;
-    arkScroller.ptr = scrollerPtr;
+    arkScroller.ptr = peerImplPtr;
     Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
     Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
@@ -276,7 +283,7 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
     Ark_NativePointer finalizerPtr =
         GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
     auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
-    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
+    finalyzer(peerImplPtr);
 }
 
 /*
@@ -1554,9 +1561,13 @@ HWTEST_F(GridModifierTest, setEnableScrollInteractionTestValidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, DISABLED_setFrictionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 {
     double doubleResult;
+
+    auto columnsStr = ArkValue<Ark_String>("1fr 1fr 2fr");
+    modifier_->setColumnsTemplate(node_, &columnsStr);
+    OnModifyDone();
 
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE, FLT_EPSILON);

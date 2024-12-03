@@ -26,6 +26,8 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+#include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG::Converter {
 template<>
 inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
@@ -77,7 +79,7 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 
     auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl *>(*abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<ScrollerPeer *>(*abstPeerPtrOpt);
     CHECK_NULL_VOID(peerImplPtr);
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
@@ -149,8 +151,11 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
+    auto call = [arkCallback = CallbackHelper(*value)](ScrollEdge edgeIn) {
+        auto edge = Converter::ArkValue<Ark_Edge>(edgeIn);
+        arkCallback.Invoke(edge);
+    };
+    ScrollModelNG::SetOnScrollEdge(frameNode, call);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const VoidCallback* value)

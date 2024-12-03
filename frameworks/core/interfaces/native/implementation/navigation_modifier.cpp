@@ -224,10 +224,8 @@ void HideTitleBar1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(hide);
-    //auto convValue = Converter::OptConvert<type>(hide); // for enums
-    //NavigationModelNG::SetHideTitleBar1(frameNode, convValue);
-    LOGE("ARKOALA, NavigationModifier::HideTitleBar1Impl: animated API is not implemented in ace_engine");
+    NavigationModelNG::SetHideTitleBar(
+        frameNode, Converter::Convert<bool>(hide), Converter::Convert<bool>(animated));
 }
 void HideBackButtonImpl(Ark_NativePointer node,
                         Ark_Boolean value)

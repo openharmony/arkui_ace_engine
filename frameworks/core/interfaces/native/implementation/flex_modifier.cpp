@@ -94,13 +94,13 @@ FlexOptions Convert(
     FlexOptions flexOptions;
     flexOptions.direction = Converter::OptConvert<FlexDirection>(src.direction.value);
     flexOptions.wrap = Converter::OptConvert<FlexWrap>(src.wrap.value);
-    if (src.wrap.value == Ark_FlexWrap::ARK_FLEX_WRAP_NO_WRAP) {
-        flexOptions.align = Converter::OptConvert<FlexAlign>(src.justifyContent.value);
-        flexOptions.alignItems = Converter::OptConvert<FlexAlign>(src.alignItems.value);
-    } else {
+    if (src.wrap.value != Ark_FlexWrap::ARK_FLEX_WRAP_NO_WRAP) {
         flexOptions.wrapAlignment = Converter::OptConvert<WrapAlignment>(src.justifyContent.value);
         flexOptions.wrapAlignItems = Converter::OptConvert<WrapAlignment>(src.alignItems.value);
         flexOptions.alignContent = Converter::OptConvert<WrapAlignment>(src.alignContent.value);
+    } else {
+        flexOptions.align = Converter::OptConvert<FlexAlign>(src.justifyContent.value);
+        flexOptions.alignItems = Converter::OptConvert<FlexAlign>(src.alignItems.value);
     }
 
     flexOptions.crossSpace = Converter::OptConvert<Dimension>(src.space.value.cross);

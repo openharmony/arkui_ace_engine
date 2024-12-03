@@ -46,6 +46,8 @@ namespace  {
     const auto ATTRIBUTE_SUBTITLE_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_NAME = "hideTitleBar";
     const auto ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE = false;
+    const auto ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME = "isAnimatedTitleBar";
+    const auto ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE = false;
     const auto ATTRIBUTE_HIDE_BACK_BUTTON_NAME = "hideBackButton";
     const auto ATTRIBUTE_HIDE_BACK_BUTTON_DEFAULT_VALUE = false;
     const auto ATTRIBUTE_TITLE_MODE_NAME = "titleMode";
@@ -629,6 +631,8 @@ HWTEST_F(NavigationModifierTest, setHideTitleBar0TestDefaultValues, TestSize.Lev
     bool boolResult;
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
     EXPECT_EQ(boolResult, ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE);
+    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME);
+    EXPECT_EQ(boolResult, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE);
 }
 
 /*

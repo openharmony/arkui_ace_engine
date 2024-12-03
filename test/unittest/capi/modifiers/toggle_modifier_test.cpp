@@ -20,7 +20,8 @@
 #include "generated/test_fixtures.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/toggle/switch_event_hub.h"
+#include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -31,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_TYPE_NAME = "type";
-    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "ToggleType.Switch";
+    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "ToggleType.Checkbox";
     const auto ATTRIBUTE_IS_ON_NAME = "isOn";
     const auto ATTRIBUTE_IS_ON_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
@@ -91,6 +92,7 @@ public:
         AddResource("switch_point_radius", Dimension(SWITCH_RADIUS, DimensionUnit::VP));
         AddResource("track_border_radius", Dimension(SWITCH_RADIUS, DimensionUnit::VP));
         SetupTheme<SwitchTheme>();
+        SetupTheme<CheckboxTheme>();
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
@@ -265,7 +267,7 @@ HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 {
     Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -358,8 +360,8 @@ HWTEST_F(ToggleModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     selectedColorInvalidValues = {
-    { "", Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), "#FFFF0000" }, // mock resource
-    { "incorrect_color", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), "#FFFF0000" } // mock
+    { "", Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), "#FF007DFF" },
+    { "incorrect_color", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), "#FF007DFF" }
 };
 
 /*
@@ -417,11 +419,14 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> swit
 
 /*
  * @tc.name: setSwitchPointColorTestValidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchPointColorTestValidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -435,8 +440,8 @@ HWTEST_F(ToggleModifierTest, setSwitchPointColorTestValidValues, TestSize.Level1
     inputValueSwitchPointColor = initValueSwitchPointColor;
     for (auto&& value: switchPointColorValidValues) {
         inputValueSwitchPointColor = std::get<1>(value);
-        modifier_->setSwitchPointColor(node_, &inputValueSwitchPointColor);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchPointColor(node, &inputValueSwitchPointColor);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_POINT_COLOR_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -511,11 +516,14 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::strin
 
 /*
  * @tc.name: setSwitchStyleTestPointRadiusValidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusValidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -529,8 +537,8 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusValidValues, TestSize.
     inputValueSwitchStyle = initValueSwitchStyle;
     for (auto&& value: switchStylePointRadiusValidValues) {
         inputValueSwitchStyle.pointRadius = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_POINT_RADIUS_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -550,11 +558,14 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
 
 /*
  * @tc.name: setSwitchStyleTestUnselectedColorValidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestUnselectedColorValidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -568,8 +579,8 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestUnselectedColorValidValues, TestS
     inputValueSwitchStyle = initValueSwitchStyle;
     for (auto&& value: switchStyleUnselectedColorValidValues) {
         inputValueSwitchStyle.unselectedColor = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_UNSELECTED_COLOR_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -589,11 +600,14 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> swit
 
 /*
  * @tc.name: setSwitchStyleTestPointColorValidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointColorValidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -607,8 +621,8 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointColorValidValues, TestSize.L
     inputValueSwitchStyle = initValueSwitchStyle;
     for (auto&& value: switchStylePointColorValidValues) {
         inputValueSwitchStyle.pointColor = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_POINT_COLOR_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -624,11 +638,14 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::strin
 
 /*
  * @tc.name: setSwitchStyleTestTrackBorderRadiusValidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusValidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -642,8 +659,8 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusValidValues, Tes
     inputValueSwitchStyle = initValueSwitchStyle;
     for (auto&& value: switchStyleTrackBorderRadiusValidValues) {
         inputValueSwitchStyle.trackBorderRadius = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_TRACK_BORDER_RADIUS_NAME);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -658,11 +675,14 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchSty
 
 /*
  * @tc.name: setSwitchStyleTestPointRadiusInvalidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusInvalidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -675,10 +695,10 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestPointRadiusInvalidValues, TestSiz
     // Verifying attribute's 'pointRadius'  values
     for (auto&& value: switchStylePointRadiusInvalidValues) {
         inputValueSwitchStyle = initValueSwitchStyle;
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
         inputValueSwitchStyle.pointRadius = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_POINT_RADIUS_NAME);
         expectedStr = ATTRIBUTE_SWITCH_STYLE_POINT_RADIUS_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
@@ -763,11 +783,14 @@ static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> switchSty
 
 /*
  * @tc.name: setSwitchStyleTestTrackBorderRadiusInvalidValues
- * @tc.desc:
+ * @tc.desc: Test for ToggleType::SWITCH only
  * @tc.type: FUNC
  */
 HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, TestSize.Level1)
 {
+    auto frameNode = ToggleModelNG::CreateFrameNode(ARKUI_AUTO_GENERATE_NODE_ID, ToggleType::SWITCH, false);
+    Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(AceType::RawPtr(frameNode));
+
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
@@ -780,10 +803,10 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
     // Verifying attribute's 'trackBorderRadius'  values
     for (auto&& value: switchStyleTrackBorderRadiusInvalidValues) {
         inputValueSwitchStyle = initValueSwitchStyle;
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
         inputValueSwitchStyle.trackBorderRadius = std::get<1>(value);
-        modifier_->setSwitchStyle(node_, &inputValueSwitchStyle);
-        jsonValue = GetJsonValue(node_);
+        modifier_->setSwitchStyle(node, &inputValueSwitchStyle);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SWITCH_STYLE_TRACK_BORDER_RADIUS_NAME);
         expectedStr = ATTRIBUTE_SWITCH_STYLE_TRACK_BORDER_RADIUS_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
